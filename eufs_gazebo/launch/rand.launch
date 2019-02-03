@@ -12,11 +12,11 @@
   
   <!-- Vehicle pose -->
   <arg name="x" default="-45"/>
-  <arg name="y" default="-29"/>
+  <arg name="y" default="-35"/>
   <arg name="z" default="0.1"/>
   <arg name="roll" default="0.0"/>
   <arg name="pitch" default="0.0"/>
-  <arg name="yaw" default="0.0"/>
+  <arg name="yaw" default="0.940004101074"/>
   
   <!-- Control Method Argument -->
   <arg name="controlMethod" default="speed"/>
