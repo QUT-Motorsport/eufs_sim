@@ -76,7 +76,15 @@ To launch the gui, first try:
 If it does not find the plugin, try the following:
 ```rqt --force-discover```
 
-The plugin is called "eufs_launcher"
+The plugin is called "eufs_launcher" - you can find it on the drop-down menu after launching force-discover:
+
+![Force-Discover Help](https://imgur.com/hzYuVVn.png)
+
+When it works you shold have something like this:
+
+![Full Gui](https://imgur.com/OcoBFUj.png)
+
+(TODO: Add more info)
 
 ### 5. What's New? <a name="newstuff"></a>
 
