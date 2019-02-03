@@ -24,10 +24,12 @@ editing them will change the resultant track.
 
 At this time, the convertor only looks at these specific pixel types [given in RGBA]:
 
+```
 Cones: (255,0,255,255) "Magenta"
 Car: (0,255,0,255) "Green"
 Noise: (0,255,255,255) "Cyan"
 Background: (255,255,255,255) "White"
+```
 
 All colors not listed here will be treated as `Background`
 
