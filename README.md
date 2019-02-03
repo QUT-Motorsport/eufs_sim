@@ -84,7 +84,14 @@ When it works you shold have something like this:
 
 ![Full Gui](https://imgur.com/OcoBFUj.png)
 
-(TODO: Add more info)
+For the most part, this should be self explanatory - the exception being perhaps the generation, noise, and image stuff.
+
+The three buttons on the bottom are all launch buttons - the leftmost will launch whichever track you selected in the top-drop down bar.  
+The rightmost will read in the selected image and turn it into a track, launching it immediately.
+The middle will generate a random track image and then convert & launch it.  You can see the intermediate image in `eufs_gazebo/randgen_imgs`
+
+The middle and right buttons are also sensitive to a new parameter called "noise" - these are randomly placed objects to the side of the track that the
+car's sensors may pick up, mimicking real-world 'noise' from the environment.  By default this is off, but you can drag the slider to adjust it to whatever levels you desire.
 
 ### 5. What's New? <a name="newstuff"></a>
 
@@ -93,7 +100,7 @@ When it works you shold have something like this:
 3. Optionally noisy environments (only with random and from-image tracks) [100%]
 4. Random track generation [25%]
      
-     4.1. Passable random image generation [100%]
+     4.1. Functional random image generation [100%]
     
      4.2. Distinguish between yellow and blue cones [0%]
      
