@@ -70,6 +70,12 @@ Additional sensors for testing are avilable via the `ros-kinetic-robotnik-sensor
 
 ### 4. Using The Gui <a name="guiuse"></a>
 
+First, open two terminals and enter the eufs_ws workspace.  In the first terminal, type
+```roscore```
+
+We are now done with that terminal - don't close it, but you can hide it wherever you'd like.  This only needs to be done once,
+and after that you can run and close the gui as much as you'd like using the following instructions in the second terminal:
+
 To launch the gui, first try:
 ```rqt --standalone eufs_launcher```
 
