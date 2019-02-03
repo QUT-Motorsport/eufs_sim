@@ -15,7 +15,7 @@ but if you're at that point, you might as well just get in touch with the simula
 
 #### Relevant Locations
 
-Images are expected to be in the `eufs_gazebo/randgen_imgs` folder.
+Images are expected to be in the `eufs_gazebo/randgen_imgs` folder in `.png` format.
 
 When creating a track from an image, the launcher creates files based on templates found in `eufs_launcher/resource` - 
 editing them will change the resultant track.
