@@ -26,7 +26,7 @@ At this time, the convertor only looks at these specific pixel types [given in R
 
 ```
 Cones: (255,0,255,255) "Magenta"
-Car: (0,255,0,255) "Green"
+Car: (0,255,0,a) "Green"
 Noise: (0,255,255,255) "Cyan"
 Background: (255,255,255,255) "White"
 ```
@@ -48,6 +48,10 @@ self.trackouter = (255,255,0,255)	#yellow
 Future updates to the image converter may decide to make use of additional data using these colors, 
 so although they are not currently used it may be worth adding them to your `.png`s for future-proofing 
 (you can see how they are used by taking a look at `rand.png`, which is the output file for randomly generated images).
+
+The car color can have any "a" from 1 to 255 (note: NOT 0) - it is converted into an angle:
+```2*math.pi*((x-1)/254.0)```
+which will be the direction the front of the car is facing.
 
 #### The Generated Track
 
