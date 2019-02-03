@@ -4,6 +4,18 @@ ROS/Gazebo simulation packages for driverless FSAE vehicles.
 
 ![simulation](http://eufs.co/wp-content/uploads/2018/05/eufs-sim.jpg)
 
+### What's New?
+
+1. New gui launcher for quality of life [100%]
+2. Option to have torque-controlled car [100%]
+3. Optionally noisy environments (only with random and from-image tracks) [100%]
+4. Random track generation [25%]
+     4.1. Passable random image generation [100%]
+     4.2. Distinguish between yellow and blue cones [0%]
+     4.3. Have better spacing on cones [0%]
+     4.4. Actually good random image generation [0%] :(
+5. Track-From-Image [100%]
+
 ### Contents
 1. [Install Prerequisites](#requirements)
 2. [Compiling and running](#compiling)
