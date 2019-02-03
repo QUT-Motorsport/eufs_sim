@@ -10,10 +10,14 @@ ROS/Gazebo simulation packages for driverless FSAE vehicles.
 2. Option to have torque-controlled car [100%]
 3. Optionally noisy environments (only with random and from-image tracks) [100%]
 4. Random track generation [25%]
+     
      4.1. Passable random image generation [100%]
+    
      4.2. Distinguish between yellow and blue cones [0%]
+     
      4.3. Have better spacing on cones [0%]
-     4.4. Actually good random image generation [0%] :(
+     
+     4.4. Actually good random image generation [0%] :P
 5. Track-From-Image [100%]
 
 ### Contents
