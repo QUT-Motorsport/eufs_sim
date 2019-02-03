@@ -2,28 +2,14 @@
 
 ROS/Gazebo simulation packages for driverless FSAE vehicles.
 
-![simulation](http://eufs.co/wp-content/uploads/2018/05/eufs-sim.jpg)
-
-### What's New?
-
-1. New gui launcher for quality of life [100%]
-2. Option to have torque-controlled car [100%]
-3. Optionally noisy environments (only with random and from-image tracks) [100%]
-4. Random track generation [25%]
-     
-     4.1. Passable random image generation [100%]
-    
-     4.2. Distinguish between yellow and blue cones [0%]
-     
-     4.3. Have better spacing on cones [0%]
-     
-     4.4. Actually good random image generation [0%] :P
-5. Track-From-Image [100%]
+![simulation](https://eufs.eusa.ed.ac.uk/wp-content/uploads/2018/05/eufsa-sim.jpg)
 
 ### Contents
 1. [Install Prerequisites](#requirements)
 2. [Compiling and running](#compiling)
 3. [Sensors](#sensors)
+4. [Using The Gui](#guiuse)
+5. [What's New?](#newstuff)
 
 ## Setup Instructions
 ### 1. Install Prerequisites <a name="requirements"></a>
@@ -81,3 +67,29 @@ Additional sensors for testing are avilable via the `ros-kinetic-robotnik-sensor
 * IMU
 * GPS
 * odometry
+
+### 4. Using The Gui <a name="guiuse"></a>
+
+To launch the gui, first try:
+```rqt --standalone eufs_launcher```
+
+If it does not find the plugin, try the following:
+```rqt --force-discover```
+
+The plugin is called "eufs_launcher"
+
+### 5. What's New? <a name="newstuff"></a>
+
+1. New gui launcher for quality of life [100%]
+2. Option to have torque-controlled car [100%]
+3. Optionally noisy environments (only with random and from-image tracks) [100%]
+4. Random track generation [25%]
+     
+     4.1. Passable random image generation [100%]
+    
+     4.2. Distinguish between yellow and blue cones [0%]
+     
+     4.3. Have better spacing on cones [0%]
+     
+     4.4. Actually good random image generation [0%] :P
+5. Track-From-Image [100%]
