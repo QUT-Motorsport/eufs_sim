@@ -76,6 +76,9 @@ First, open two terminals and enter the eufs_ws workspace.  In the first termina
 We are now done with that terminal - don't close it, but you can hide it wherever you'd like.  This only needs to be done once,
 and after that you can run and close the gui as much as you'd like using the following instructions in the second terminal:
 
+As always, type
+```source ./devel/setup.bash```
+
 To launch the gui, first try:
 ```rqt --standalone eufs_launcher```
 
@@ -98,6 +101,12 @@ The middle will generate a random track image and then convert & launch it.  You
 
 The middle and right buttons are also sensitive to a new parameter called "noise" - these are randomly placed objects to the side of the track that the
 car's sensors may pick up, mimicking real-world 'noise' from the environment.  By default this is off, but you can drag the slider to adjust it to whatever levels you desire.
+
+**If you need to rapidly re-launch** the gui it is important that you wait a few seconds (5 should be more than enough).
+If you try and do it rapidly then you may cause the gui to launch gazebo while gazebo is still shutting itself down.  This will
+crash the program and won't give a satisfactory error message (it will say that it put errors in the log files, but the log files do not exist)
+
+More information can be found in the README in eufs_launcher
 
 ### 5. What's New? <a name="newstuff"></a>
 
