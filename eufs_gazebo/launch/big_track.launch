@@ -62,8 +62,5 @@
 
   <!-- eufs_control launch file -->
   <include file="$(find eufs_gazebo)/launch/eufs_control.launch"/>
-
-  <!-- start robot_control node -->
-  <include file="$(find robot_control)/launch/robot_control.launch"/>
   
 </launch>

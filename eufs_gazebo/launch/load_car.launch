@@ -62,7 +62,7 @@
               -R $(arg roll) -P $(arg pitch) -Y $(arg yaw)"/>
 
       <!-- load joint controllers -->
-      <node name="controller_spawner" pkg="controller_manager" type="spawner" args="$(find robot_control)/config/joint_controller.yaml"/>
+      <!--<node name="controller_spawner" pkg="controller_manager" type="spawner" args="$(find robot_control)/config/joint_controller.yaml"/>-->
 
       <group if="$(arg use_ground_truth)">
             <!-- Run ground truth pose publishing -->

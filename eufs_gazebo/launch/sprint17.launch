@@ -47,9 +47,6 @@
      <arg name="cmd_timeout" value="$(arg cmd_timeout)"/>
      <arg name="use_ground_truth" value="$(arg use_ground_truth)"/>
   </include>
-  
-  <!-- start robot_control node -->
-  <include file="$(find robot_control)/launch/robot_control.launch"/>
 
   <!-- Python script to republish ground truth -->
   <node 

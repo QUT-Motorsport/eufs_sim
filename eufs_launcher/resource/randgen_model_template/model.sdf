@@ -7,8 +7,8 @@
   </model>
 </sdf>
 $===$
-    <link name='link_0'>
-      <pose frame=''>%PLACEX% %PLACEY% 0.079001 0 -0 0</pose>
+    <link name='link_0_clone_%LINKNUM%'>
+      <pose frame=''>%PLACEX% %PLACEY% 0.15 0 -0 0</pose>
       %FILLCOLLISION%
       <visual name="visual">
         <geometry>

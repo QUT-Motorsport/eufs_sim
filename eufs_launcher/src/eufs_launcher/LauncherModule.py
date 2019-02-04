@@ -2,6 +2,8 @@ import os
 import rospy
 import rospkg
 import roslaunch
+import rosnode
+import math
 
 from qt_gui.plugin import Plugin
 from python_qt_binding import loadUi
@@ -20,6 +22,53 @@ class EufsLauncher(Plugin):
 
 	def __init__(self, context):
 		super(EufsLauncher, self).__init__(context)
+
+		#Before we do anything, check if there are any nodes other than /rosout
+		#And offer the option of shutting them down
+		#Because often nodes get left behind due to the faulty shutdown of the launcher
+		#(Not my fault, really - it's because Kinetic lacks the argument-passing feature for
+		#roslaunch, meaning I have to Popen it instead, and Popen.kill doesn't successfully kill
+		#all ros nodes)
+		"""
+		extranodes = rosnode.get_node_names()
+		extranodes.remove('/rosout')
+		try:
+			extranodes.remove('/gazebo')
+		except ValueError:
+			pass
+		try:
+			extranodes.remove('/gazebo_gui')
+		except ValueError:
+			pass
+		extranodes = [f for f in extranodes if f[:17] != '/rqt_gui_py_node_'] #remove the gui's node from list
+		if len(extranodes) > 0:
+			print("\n\n\nWarning: extraneous nodes detected:")
+			print(extranodes)
+			print("Continuing may produce errors!")
+			print("[This was likely because you shutdown the launcher incorrectly - best way is to ctrl-c in the terminal.]")
+			answer = str(raw_input("Do you want to kill all nodes? Y or y for yes, else no: "))
+			if answer.capitalize() == 'Y':
+				print("Killing nodes...")
+
+				#You would think rosnode's api would kill nodes correctly
+				#but you would be wrong
+				#rosnode.kill_nodes(extranodes)
+
+				#for badnode in extranodes:
+				#	Popen(["rosnode","kill",badnode])
+				Popen(["killall","-9","gzserver"])
+		"""
+
+		#Worst case scenario kill method: killall -9 gzserver gzclient
+		#We just have to nuke it.  I've tried so much, but gazebo is incredibly unstable
+		#whenever a single node gets set loose with respawn on.  Unfortunately this means
+		#this gui MUST be used as a start point - trying launch something else first and then
+		#loading the gui will kill it.
+		#The root of the problem, I believe, is the fact that we Popen instead of rospy.roslaunch
+		#the .launch file - but since we're using Kinetic and not a more recent version, the rospy.roslaunch
+		#command cannot pass arguments and is thus basically useless to us.
+		self.nuke_ros()
+
 		# Give QObjects reasonable names
 		self.setObjectName('EufsLauncher')
 
@@ -97,9 +146,14 @@ class EufsLauncher(Plugin):
 		self.trackinner = (255,0,0,255)		#red
 		self.trackouter = (255,255,0,255)	#yellow
 
+		#Hide close button:
+		#self._widget.setWindowFlag(Qt.)
+
+
 		print("Plugin Successfully Launched!")
 		self.hasLaunchedROS = False
 		self.launchfileoverride = None
+		self.popenprocess = None
 
 
 	def generator_button_pressed(self):
@@ -142,7 +196,21 @@ class EufsLauncher(Plugin):
 		draw.line(points,fill=self.trackouter,width=5)#track full width
 		draw.line(points,fill=self.trackinner,width=3)#track innards
 		draw.line(points,fill=self.trackcenter)#track center
-		draw.line([xys[0],xys[0]],fill=self.carcolor)#car position
+
+		#We want to calculate direction of car position -
+		sx = xys[0][0]
+		sy = xys[0][1]
+		ex = xys[1][0]
+		ey = xys[1][1]
+		angle = math.atan2(ey-sy,ex-sx)#[-pi,pi] but we want [0,2pi]
+		if angle < 0:
+			angle+=2*math.pi
+		pixelValue = int(angle/(2*math.pi)*254+1) # it is *254+1 because we never want it to be 0
+		if pixelValue > 255: pixelValue = 255
+		if pixelValue <   1: pixelValue =   1
+		colorforcar = (self.carcolor[0],self.carcolor[1],self.carcolor[2],pixelValue)
+
+		draw.line([xys[0],xys[0]],fill=colorforcar)#car position
 
 		#Now we want to make all pixels boardering the track become magenta (255,0,255) - this will be our 'cone' color
 		#To find pixel boardering track, simply find white pixel adjacent to a non-white non-magenta pixle
@@ -207,7 +275,7 @@ class EufsLauncher(Plugin):
 
 		#.launch:
 		launch_template = open(os.path.join(rospkg.RosPack().get_path('eufs_launcher'), 'resource/randgen_launch_template'),"r")
-		#params = %FILLNAME% %PLACEX% %PLACEY%
+		#params = %FILLNAME% %PLACEX% %PLACEY% %PLACEROTATION%
 		launch_merged = "".join(launch_template)
 		launch_merged = GENERATED_FILENAME.join(launch_merged.split("%FILLNAME%"))
 
@@ -215,14 +283,20 @@ class EufsLauncher(Plugin):
 			return x-50
 		def yCoordTransform(y):
 			return y-50
+		def isCarColor(x):
+			return x[:-1]==self.carcolor[:-1]
+		def rotationTransform(x):
+			return 2*math.pi*((x-1)/254.0)#we never allow alpha to equal 0
 
-		#Get PLACEX,PLACEY (look for (0,255,0,255))
+		#Get PLACEX,PLACEY (look for (0,255,0,a))
 		pixels = im.load()
 		for i in range(im.size[0]):
 			for j in range(im.size[1]):
-				if pixels[i,j] == self.carcolor:
+				p = pixels[i,j]
+				if isCarColor(p):
 					launch_merged = str(xCoordTransform(i)).join(launch_merged.split("%PLACEX%"))
 					launch_merged = str(yCoordTransform(j)).join(launch_merged.split("%PLACEY%"))
+					launch_merged = str(rotationTransform(p[3])).join(launch_merged.split("%PLACEROTATION%"))
 
 		launch_out = open(os.path.join(rospkg.RosPack().get_path('eufs_gazebo'), 'launch/'+GENERATED_FILENAME+".launch"),"w")
 		launch_out.write(launch_merged)
@@ -259,7 +333,7 @@ class EufsLauncher(Plugin):
 		#Now the real meat of this, the .sdf
 		sdf_template = open(os.path.join(rospkg.RosPack().get_path('eufs_launcher'), 'resource/randgen_model_template/model.sdf'),"r")
 		#params = %FILLNAME% %FILLDATA%
-		#ModelParams = %PLACEX% %PLACEY% %MODELNAME% %FILLCOLLISION%
+		#ModelParams = %PLACEX% %PLACEY% %MODELNAME% %FILLCOLLISION% %LINKNUM%
 		sdf_merged = "".join(sdf_template)
 		sdf_splitagain = sdf_merged.split("$===$")
 
@@ -292,8 +366,13 @@ class EufsLauncher(Plugin):
 			return "model://eufs_description/meshes/NoiseCube.dae"
 		
 		#Let's place all the models!
+		self.linknum = -1
 		def putModelAtPosition(mod,x,y):
-			return str(xCoordTransform(x)).join(str(yCoordTransform(y)).join(mod.split("%PLACEY%")).split("%PLACEX%"))
+			self.linknum+=1
+			return str(self.linknum).join( \
+				str(xCoordTransform(x)).join( \
+					str(yCoordTransform(y)).join( \
+						mod.split("%PLACEY%")).split("%PLACEX%")).split("%LINKNUM%"))
 
 		sdf_allmodels = ""
 		noiseLevel = self.getNoiseLevel()
@@ -303,7 +382,7 @@ class EufsLauncher(Plugin):
 				if p == self.conecolor:
 					sdf_allmodels = sdf_allmodels + "\n" + putModelAtPosition(sdf_blueconemodel,i,j)
 				elif p == self.noisecolor and uniform(0,1)<noiseLevel:
-					sdf_noisemodel = getRandomNoiseModel().join(sdf_model.split("%MODELNAME%"))
+					sdf_noisemodel = getRandomNoiseModel().join(sdf_model_with_collisions.split("%MODELNAME%"))
 					sdf_allmodels = sdf_allmodels + "\n" + putModelAtPosition(sdf_noisemodel,i,j)
 
 		sdf_main = sdf_allmodels.join(sdf_main.split("%FILLDATA%"))
@@ -345,7 +424,9 @@ class EufsLauncher(Plugin):
 		
 		#Ideally we would use the commented out 'launch' lines, but the ROSLaunchParent API does not allow sending arguments in Kinetic >:(
 		#So we have to settle for launching this process using Python's Popen instead of the rospy API functions.
-		p = Popen(["roslaunch",os.path.join(rospkg.RosPack().get_path('eufs_gazebo'), 'launch', trackToLaunch),controlMethod])
+		if self.popenprocess:
+			self.process.kill()
+		self.popenprocess = Popen(["roslaunch",os.path.join(rospkg.RosPack().get_path('eufs_gazebo'), 'launch', trackToLaunch),controlMethod])
 		#launch = roslaunch.parent.ROSLaunchParent(uuid, [os.path.join(rospkg.RosPack().get_path('eufs_gazebo'), 'launch', trackToLaunch)])
 		#launch.start()
 		#self.launches.append(launch)
@@ -367,7 +448,28 @@ class EufsLauncher(Plugin):
 
 		for l in self.launches:
 			l.shutdown()
-		print("Shutdown Complete!")
+
+		#Trying to kill here will make a horrible bug
+		#no idea why.  You'll want: "killall -9 gzserver gzclient" to fix it
+		#if self.popenprocess != None:
+		#	self.popenprocess.kill()
+		#	self.popenprocess = None
+
+		#NUKE IT! (seriously just nuke it)
+		self.nuke_ros()
+
+		#print("Shutdown Complete!")
+
+	def nuke_ros(self):
+		#Try to kill as much as possible
+		#Burn it all to the ground
+		Popen(["killall","-9","gzserver"])
+		Popen(["killall","-9","gzclient"])
+		extranodes = rosnode.get_node_names()
+		extranodes.remove('/rosout')
+		extranodes = [f for f in extranodes if f[:17] != '/rqt_gui_py_node_'] #remove the gui's node from kill list
+		for badnode in extranodes:
+			Popen(["rosnode","kill",badnode])
 
 
 	def save_settings(self, plugin_settings, instance_settings):
