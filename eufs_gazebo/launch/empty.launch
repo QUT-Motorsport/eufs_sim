@@ -49,12 +49,4 @@
      <arg name="use_ground_truth" value="$(arg use_ground_truth)"/>
   </include>
 
-  <!-- Python script to republish ground truth -->
-  <node 
-    name="ground_truth_republisher"
-    pkg="eufs_gazebo"
-    type="ground_truth_republisher.py"
-    output="screen"
-  />
-
 </launch>
