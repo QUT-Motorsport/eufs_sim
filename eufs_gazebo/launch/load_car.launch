@@ -65,9 +65,6 @@
       <!--<node name="controller_spawner" pkg="controller_manager" type="spawner" args="$(find robot_control)/config/joint_controller.yaml"/>-->
 
       <group if="$(arg use_ground_truth)">
-            <!-- Run ground truth pose publishing -->
-            <node name="grount_truth_republisher" pkg="eufs_gazebo" type="ground_truth_republisher.py" output="screen">
-            </node>
 
             <node name="message_to_tf" pkg="message_to_tf" type="message_to_tf" output="screen" args="/ground_truth/state">
             </node>

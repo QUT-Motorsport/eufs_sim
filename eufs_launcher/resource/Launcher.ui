@@ -147,7 +147,7 @@
     </rect>
    </property>
    <property name="text" >
-      <string>Generate Random Track</string>
+      <string>Generate Random Track</string><!--In the code we change this to "Generate Random Track\n(Experimental)" as this doesn't support \n-->
     </property>
   </widget>
   <!--Load From Image Button-->
