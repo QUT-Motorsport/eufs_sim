@@ -11,13 +11,14 @@
   <license>BSD</license>
 
   <url type="website">http://eufs.co</url>
-  <url type="repository">https://github.com/eufs/eufs_sim</url>
-  <url type="bugtracker">https://github.com/eufs/eufs_sim/issues</url>
+  <url type="repository">https://gitlab.com/eufs/eufs_sim</url>
+  <url type="bugtracker">https://gitlab.com/eufs/eufs_sim/issues</url>
 
   <buildtool_depend>catkin</buildtool_depend>
   <build_depend>gazebo_ros</build_depend>
   <build_depend>eufs_description</build_depend>
   <build_depend>robot_control</build_depend>
+  <build_depend>eufs_msgs</build_depend>
   <build_depend>roscpp</build_depend>
   <build_depend>std_msgs</build_depend>
   <build_depend>std_srvs</build_depend>

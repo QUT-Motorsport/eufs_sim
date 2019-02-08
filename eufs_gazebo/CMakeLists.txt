@@ -5,6 +5,7 @@ find_package(catkin REQUIRED COMPONENTS
   gazebo_ros
   eufs_description
   robot_control
+  eufs_msgs
   roscpp
   std_msgs
   std_srvs
