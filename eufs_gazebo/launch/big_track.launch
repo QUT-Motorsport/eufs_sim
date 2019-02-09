@@ -6,7 +6,7 @@
   <env name="GAZEBO_RESOURCE_PATH" value="$(find eufs_description)"/>
   <arg default="eufs" name="namespace"/>
   <arg default="false" name="debug"/>
-  <arg default="false" name="gui"/>
+  <arg default="true" name="gui"/>
   <arg default="0.5" name="cmd_timeout"/>
   <arg name="use_robot_control_odom" default="true"/>
 
