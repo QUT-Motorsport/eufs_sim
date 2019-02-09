@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
-<package>
+<package format="2">
   <name>eufs_gazebo</name>
-  <version>0.1.0</version>
+  <version>0.0.0</version>
   <description>The eufs_gazebo package</description>
 
   <maintainer email="ignat.m.georgiev@gmail.com">Ignat Georgiev</maintainer>
@@ -11,24 +11,18 @@
   <license>BSD</license>
 
   <url type="website">http://eufs.co</url>
-  <url type="repository">https://github.com/eufs/eufs_sim</url>
-  <url type="bugtracker">https://github.com/eufs/eufs_sim/issues</url>
+  <url type="repository">https://gitlab.com/eufs/eufs_sim</url>
+  <url type="bugtracker">https://gitlab.com/eufs/eufs_sim/issues</url>
 
   <buildtool_depend>catkin</buildtool_depend>
-  <build_depend>gazebo_ros</build_depend>
-  <build_depend>eufs_description</build_depend>
-  <build_depend>robot_control</build_depend>
-  <build_depend>roscpp</build_depend>
-  <build_depend>std_msgs</build_depend>
-  <build_depend>std_srvs</build_depend>
-  <build_depend>tf</build_depend>
-  <run_depend>gazebo_ros</run_depend>
-  <run_depend>eufs_description</run_depend>
-  <run_depend>robot_control</run_depend>
-  <run_depend>roscpp</run_depend>
-  <run_depend>std_msgs</run_depend>
-  <run_depend>std_srvs</run_depend>
-  <run_depend>tf</run_depend>
+  <depend>gazebo_ros</depend>
+  <depend>eufs_description</depend>
+  <depend>robot_control</depend>
+  <depend>eufs_msgs</depend>
+  <depend>roscpp</depend>
+  <depend>std_msgs</depend>
+  <depend>std_srvs</depend>
+  <depend>tf</depend>
 
 
   <export>

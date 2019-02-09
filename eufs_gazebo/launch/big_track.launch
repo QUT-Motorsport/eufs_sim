@@ -8,6 +8,7 @@
   <arg default="false" name="debug"/>
   <arg default="true" name="gui"/>
   <arg default="0.5" name="cmd_timeout"/>
+  <arg name="use_robot_control_odom" default="true"/>
 
   <!-- Vehicle pose -->
   <arg default="-43.0" name="x"/>
@@ -37,8 +38,43 @@
   <node args="-urdf -model eufs -param robot_description 
     -x $(arg x) -y $(arg y) -z $(arg z) -R $(arg roll) -P $(arg pitch) -Y $(arg yaw)" 
     name="urdf_spawner" output="screen" pkg="gazebo_ros" respawn="false" type="spawn_model"/>
-  
-  <!-- start robot_control node -->
-  <include file="$(find robot_control)/launch/robot_control.launch"/>
-  
+
+   <!-- start robot_control node -->
+  <include file="$(find robot_control)/launch/robot_control.launch">
+    <arg name="publish_odom_tf" value="$(arg use_robot_control_odom)"/>
+  </include>
+
+  <!-- Only launch if robot_control odom is used -->
+  <node 
+    pkg="tf" 
+    type="static_transform_publisher" 
+    name="map_broadcaster" 
+    args="$(arg x) $(arg y) 0 0 0 0 1 map odom 100" 
+    unless="$(eval arg('use_robot_control_odom') == false)"
+    />
+
+  <!-- Only launch if robot_control odom is not used -->
+  <group if="$(eval arg('use_robot_control_odom') == false)">
+    <!-- Python script to republish ground truth -->
+    <node 
+      name="ground_truth_republisher"
+      pkg="eufs_gazebo"
+      type="ground_truth_republisher.py"
+      output="screen"
+    />
+
+    <node 
+      name="message_to_tf" 
+      pkg="message_to_tf" 
+      type="message_to_tf" 
+      output="screen" 
+      args="/ground_truth/state"
+    />
+  </group>
+
+  <include file="$(find eufs_gazebo)/launch/extractor.launch">
+    <arg name ="track_name" value="big_track.csv"/>
+    <arg name ="view_distance" value="25"/>
+  </include>
+
 </launch>

@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/env python
 
 # Note that twistToAckermannDrive needs to be mapped to the robot_control/command parameter in the command line ie. rosrun eufs_robot_control twist_to_ackermannDrive.py twistToAckermannDrive:=eufs_robot_control/command
 # Publishes to twistToAckermannDrive
