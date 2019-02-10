@@ -22,6 +22,8 @@ editing them will change the resultant track.
 
 #### Creating One's Own Image
 
+[Take a look at minimalist.png for an example of an image using only the necessary colors]
+
 At this time, the convertor only looks at these specific pixel types [given in RGBA]:
 
 ```
