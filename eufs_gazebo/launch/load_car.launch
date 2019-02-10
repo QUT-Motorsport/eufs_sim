@@ -13,6 +13,10 @@
       <arg name="roll" default="0.0"/>
       <arg name="pitch" default="0.0"/>
       <arg name="yaw" default="0.0"/>
+      
+      <!-- Who knows what this does -->
+      <arg name="publish_odom_tf" default="true"/>
+      <param name="publish_odom_tf" value="$(arg publish_odom_tf)"/>
 
       <!-- Control Method Argument -->
       <arg name="controlMethod" default="speed"/>
@@ -64,10 +68,39 @@
       <!-- load joint controllers -->
       <!--<node name="controller_spawner" pkg="controller_manager" type="spawner" args="$(find robot_control)/config/joint_controller.yaml"/>-->
 
-      <group if="$(arg use_ground_truth)">
+      <!-- Only launch if robot_control odom is used -->
+      <node 
+        pkg="tf" 
+        type="static_transform_publisher" 
+        name="map_broadcaster" 
+        args="$(arg x) $(arg y) 0 0 0 0 1 map odom 100" 
+        unless="$(eval arg('use_robot_control_odom') == false)"
+      />
 
-            <node name="message_to_tf" pkg="message_to_tf" type="message_to_tf" output="screen" args="/ground_truth/state">
-            </node>
+      <!-- Only launch if robot_control odom is not used -->
+      <group if="$(eval arg('use_robot_control_odom') == false)">
+        <!-- Python script to republish ground truth -->
+        <node 
+          name="ground_truth_republisher"
+          pkg="eufs_gazebo"
+          type="ground_truth_republisher.py"
+          output="screen"
+        />
+
+        <node 
+          name="message_to_tf" 
+          pkg="message_to_tf" 
+          type="message_to_tf" 
+          output="screen" 
+          args="/ground_truth/state"
+        />
       </group>
+      
+
+    <include file="$(find eufs_gazebo)/launch/extractor.launch">
+      <arg name ="track_name" value="small_track.csv"/>
+      <arg name ="view_distance" value="15"/>
+    </include>
+
 
 </launch>
