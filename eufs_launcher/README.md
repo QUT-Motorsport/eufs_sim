@@ -25,7 +25,8 @@ editing them will change the resultant track.
 At this time, the convertor only looks at these specific pixel types [given in RGBA]:
 
 ```
-Cones: (255,0,255,255) "Magenta"
+Yellow Cones: (255,0,255,255) "Magenta" [Yellow was already taken]
+Blue Cones: (0,0,255,255) "Blue"
 Car: (0,255,0,a) "Green"
 Noise: (0,255,255,255) "Cyan"
 Background: (255,255,255,255) "White"
@@ -39,6 +40,7 @@ However the image generator also outputs images with other colors - here is a fu
 self.noisecolor = (0,255,255,255)	#cyan
 self.bgcolor = (255,255,255,255)	#white
 self.conecolor = (255,0,255,255)	#magenta
+self.conecolor2 = (0,0,255,255)     #blue
 self.carcolor = (0,255,0,255)		#green
 self.trackcenter = (0,0,0,255)		#black
 self.trackinner = (255,0,0,255)		#red
