@@ -131,7 +131,7 @@ from sensor_msgs.msg import JointState
 
 from eufs_msgs.msg import driveCommand2
 from eufs_msgs.msg import chassisState
-from autorally_msgs.msg import runstop
+from eufs_msgs.msg import runstop
 from eufs_msgs.msg import wheelSpeeds
 
 

@@ -112,7 +112,8 @@ class EufsLauncher(Plugin):
 		# Define colors for track gen and image reading
 		self.noisecolor = (0,255,255,255)	#cyan, the turquoise turqouise wishes it were
 		self.bgcolor = (255,255,255,255)	#white
-		self.conecolor = (255,0,255,255)	#magenta
+		self.conecolor  = (255,0,255,255)	#magenta
+		self.conecolor2 = (0,0,255,255)		#blue
 		self.carcolor = (0,255,0,255)		#green
 		self.trackcenter = (0,0,0,255)		#black
 		self.trackinner = (255,0,0,255)		#red
@@ -340,6 +341,8 @@ class EufsLauncher(Plugin):
 			for j in range(im.size[1]):
 				p = pixels[i,j]
 				if p == self.conecolor:
+					sdf_allmodels = sdf_allmodels + "\n" + putModelAtPosition(sdf_yellowconemodel,i,j)
+				elif p == self.conecolor2:
 					sdf_allmodels = sdf_allmodels + "\n" + putModelAtPosition(sdf_blueconemodel,i,j)
 				elif p == self.noisecolor and uniform(0,1)<noiseLevel:
 					sdf_noisemodel = getRandomNoiseModel().join(sdf_model_with_collisions.split("%MODELNAME%"))
