@@ -26,7 +26,9 @@
           <param command="$(find xacro)/xacro '$(find eufs_description)/robots/ads-dv.urdf.xacro' --inorder" name="robot_description"/>
 
           <!-- start robot_control node -->
-          <include file="$(find robot_control)/launch/robot_control.launch"/>
+          <include file="$(find robot_control)/launch/robot_control.launch">
+                <arg name="publish_odom_tf" value="$(arg use_robot_control_odom)"/>
+          <include/>
 
           <!--start twist to ackermannDrive converter for robot steering plugin -->
           <node pkg="robot_control" name="twist_to_ackermannDrive" type="twist_to_ackermannDrive.py" args="twistToAckermannDrive:=eufsa_control/teleop_vel_out"/>
