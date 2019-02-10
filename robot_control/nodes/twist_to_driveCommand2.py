@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/env python
 
 # Publishes to rqt/command
 # Subscribes to cmd_vel and rqt/cmd_vel
