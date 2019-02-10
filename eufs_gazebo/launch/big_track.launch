@@ -9,7 +9,6 @@
   <arg default="false" name="debug"/>
   <arg default="true" name="gui"/>
   <arg default="0.5" name="cmd_timeout"/>
-  <arg name="use_ground_truth" default="true"/>
 
   <!-- Vehicle pose -->
   <arg default="-43.0" name="x"/>
@@ -45,6 +44,9 @@
 
   <!-- Control Method Argument -->
   <arg name="controlMethod" default="speed"/>
+  
+  <!-- Something -->
+  <arg name="use_robot_control_odom" default="true"/>
 
   <!--Launch car & controller.-->
   <include file="$(find eufs_gazebo)/launch/load_car.launch">
@@ -57,7 +59,7 @@
      <arg name="yaw" default="$(arg yaw)"/>
      <arg name="controlMethod" default="$(arg controlMethod)"/>
      <arg name="cmd_timeout" value="$(arg cmd_timeout)"/>
-     <arg name="use_ground_truth" value="$(arg use_ground_truth)"/>
+     <arg name="use_robot_control_odom" value="$(arg use_robot_control_odom)"/>
   </include>
 
   <!-- eufs_control launch file -->
