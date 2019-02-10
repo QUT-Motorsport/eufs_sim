@@ -32,6 +32,8 @@ Or if you are lazy like my here's a one-liner
 sudo apt-get install ros-kinetic-ackermann-msgs ros-kinetic-twist-mux ros-kinetic-joy ros-kinetic-controller-manager ros-kinetic-robotnik-msgs ros-kinetic-velodyne-simulator ros-kinetic-effort-controllers ros-kinetic-velocity-controllers ros-kinetic-joint-state-controller ros-kinetic-gazebo-ros-control ros-kinetic-robotnik-msgs
 ```
 
+Other dependencies are the pandas data library and eufs_msgs:  ```https://gitlab.com/eufs/eufs_msgs``` which you can just put next to eufs_sim in the src folder
+
 
 ### 2. Compiling and running <a name="compiling"></a>
 
