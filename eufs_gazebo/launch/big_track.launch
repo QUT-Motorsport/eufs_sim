@@ -65,4 +65,9 @@
   <!-- eufs_control launch file -->
   <include file="$(find eufs_gazebo)/launch/eufs_control.launch"/>
   
+  <include file="$(find eufs_gazebo)/launch/extractor.launch">
+      <arg name ="track_name" value="big_track.csv"/>
+      <arg name ="view_distance" value="15"/>
+    </include>
+  
 </launch>
