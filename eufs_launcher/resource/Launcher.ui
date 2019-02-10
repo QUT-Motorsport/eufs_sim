@@ -220,6 +220,21 @@
    </property>
   </widget>
 
+  <!--Experimental Button-->
+  <widget class="QPushButton" name="Experimentals">
+   <property name="geometry">
+    <rect>
+     <x>500</x>
+     <y>10</y>
+     <width>100</width>
+     <height>20</height>
+    </rect>
+   </property>
+   <property name="text" >
+      <string>Experimental</string>
+    </property>
+  </widget>
+
 
  </widget>
  <resources/>

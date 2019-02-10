@@ -19,9 +19,6 @@
   
   <!-- Control Method Argument -->
   <arg name="controlMethod" default="speed"/>
-  
-  <!-- Something -->
-  <arg name="use_robot_control_odom" default="true"/>
 
   <!-- eufs_control launch file -->
   <include file="$(find eufs_gazebo)/launch/eufs_control.launch"/>
@@ -35,6 +32,9 @@
     <arg name="use_sim_time" value="true"/>
     <arg name="headless" value="false"/>
   </include>
+
+  <!-- Something -->
+  <arg name="use_robot_control_odom" default="true"/>
 
   <!--Launch car & controller.-->
   <include file="$(find eufs_gazebo)/launch/load_car.launch">
@@ -53,7 +53,6 @@
   <include file="$(find eufs_gazebo)/launch/extractor.launch">
       <arg name ="track_name" value="rand.csv"/>
       <arg name ="view_distance" value="15"/>
-    </include>
-  
+  </include>
   
 </launch>

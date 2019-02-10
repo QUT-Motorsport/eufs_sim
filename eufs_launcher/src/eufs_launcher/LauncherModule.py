@@ -100,6 +100,7 @@ class EufsLauncher(Plugin):
 		self._widget.findChild(QPushButton,"LaunchButton").clicked.connect(self.launch_button_pressed)
 		self._widget.findChild(QPushButton,"GenerateButton").clicked.connect(self.generator_button_pressed)
 		self._widget.findChild(QPushButton,"LoadFromImageButton").clicked.connect(self.track_from_image_button_pressed)
+		self._widget.findChild(QPushButton,"Experimentals").clicked.connect(self.experimental_button_pressed)
 
 		#Create array of running processes (currently unused, but if you ever do process = launch.launch(node), add process here!)
 		self.processes = []
@@ -127,8 +128,14 @@ class EufsLauncher(Plugin):
 		#Add experimental warning to generator
 		self._widget.findChild(QPushButton,"GenerateButton").setText("Generate Random Track\n(Experimental)")
 
+		#Hide generator button
+		self._widget.findChild(QPushButton,"GenerateButton").setVisible(False)
+
 		print("Plugin Successfully Launched!")
 
+	def experimental_button_pressed(self):
+		self._widget.findChild(QPushButton,"GenerateButton").setVisible(True)
+		
 
 	def generator_button_pressed(self):
 		GENERATED_FILENAME = "rand"

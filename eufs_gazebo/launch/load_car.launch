@@ -14,8 +14,8 @@
       <arg name="yaw" default="0.0"/>
       
       <!-- Who knows what this does -->
-      <arg name="publish_odom_tf" default="true"/>
-      <param name="publish_odom_tf" value="$(arg publish_odom_tf)"/>
+      <arg name="use_robot_control_odom" default="true"/>
+      <param name="publish_odom_tf" value="$(arg use_robot_control_odom)"/>
 
       <!-- Control Method Argument -->
       <arg name="controlMethod" default="speed"/>
@@ -28,7 +28,7 @@
           <!-- start robot_control node -->
           <include file="$(find robot_control)/launch/robot_control.launch">
                 <arg name="publish_odom_tf" value="$(arg use_robot_control_odom)"/>
-          <include/>
+          </include>
 
           <!--start twist to ackermannDrive converter for robot steering plugin -->
           <node pkg="robot_control" name="twist_to_ackermannDrive" type="twist_to_ackermannDrive.py" args="twistToAckermannDrive:=eufsa_control/teleop_vel_out"/>
