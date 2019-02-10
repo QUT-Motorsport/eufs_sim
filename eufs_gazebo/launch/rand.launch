@@ -50,5 +50,10 @@
      <arg name="use_robot_control_odom" value="$(arg use_robot_control_odom)"/>
   </include>
 
+  <include file="$(find eufs_gazebo)/launch/extractor.launch">
+      <arg name ="track_name" value="rand.csv"/>
+      <arg name ="view_distance" value="15"/>
+    </include>
+  
   
 </launch>
