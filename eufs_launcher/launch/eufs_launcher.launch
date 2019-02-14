@@ -1,0 +1,6 @@
+<?xml version="1.0"?>
+<launch>
+  
+ <node name="eufs_launcher" pkg="eufs_launcher" type="eufs_launcher"/>
+
+</launch>
