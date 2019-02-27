@@ -128,6 +128,9 @@ class EufsLauncher(Plugin):
 		#Add experimental warning to generator
 		self._widget.findChild(QPushButton,"GenerateButton").setText("Generate Random Track\n(Experimental)")
 
+		#Space the load track button better
+		self._widget.findChild(QPushButton,"LoadFromImageButton").setText("Load Track\nFrom Image")
+
 		#Hide generator button
 		self._widget.findChild(QPushButton,"GenerateButton").setVisible(False)
 
@@ -459,11 +462,25 @@ class EufsLauncher(Plugin):
 
 def endtangent(xys):
 	#Calculate direction of outgoing tangent of a set of points
+	#Is an angle!
 	sx = xys[-2][0]
 	sy = xys[-2][1]
 	ex = xys[-1][0]
 	ey = xys[-1][1]
 	return math.atan2((ey-sy),(ex-sx))
+
+def capangle(ang):
+	#Returns angle between 0 and 2*math.pi
+	if ang < 0:
+		return capangle(ang+2*math.pi)
+	elif ang >= 2*math.pi:
+		return capangle(ang-2*math.pi)
+	return ang
+
+def normalizevec(vec):
+	(a,b) = vec
+	mag = math.sqrt(a*a+b*b)
+	return (a/mag,b/mag)
 
 def generateAutocrossTrackdriveTrack(startpoint):
 	#The rules:
@@ -475,27 +492,140 @@ def generateAutocrossTrackdriveTrack(startpoint):
 	#	Track Length: 		<=1500 meters
 	xys = []
 	curTrackLength = 0
+	curpoint = startpoint
 
-	#Let's start with a straght
-	(generated, curpoint,deltalength) = generateStraight(startpoint,uniform(10,80),uniform(-math.pi,math.pi))
+	#Let's start with a small straght
+	(generated, curpoint, deltalength) = generateStraight(startpoint,uniform(80,80),math.pi/8)
 	curTrackLength += deltalength
 	xys.extend(generated)
 
-	#Add on a cturn
-	(generated, curpoint,deltalength) = generateConstantTurn(curpoint,uniform(10,25),endtangent(xys))
-	curTrackLength += deltalength
-	xys.extend(generated)
+	#Now we want to set checkpoints to pass through:
+	goalpoints = [(startpoint[0]+1000,startpoint[1])]#,(startpoint[0]+300,startpoint[1]+300),(startpoint[0],startpoint[1]+300),startpoint]
+	for goalpoint in goalpoints:
+		(generated, curpoint, length) = generatePathFromPointToPoint(curpoint,goalpoint,endtangent(xys),fuzzradius=20)
+		curTrackLength+= length
+		xys.extend(generated)
 
-	#Add hairpins
-	(generated, curpoint,deltalength) = generateHairpinTurn(curpoint,uniform(4.5,10),endtangent(xys))
-	curTrackLength += deltalength
-	xys.extend(generated)
-
-	#TODO: Have straights, cturns, and hairpins placed in a random order
+	
 
 	return convertPointsToAllPositive(xys)
 
-def generateHairpinTurn(startpoint,radius,intangent,switchbacknum=None,turnleft=None,wobbliness=None,straightsize=None):
+def generatePathFromPointToPoint(startpoint,endpoint,intangent,depth=20,hairpined=False,manyhairpins=False,fuzzradius=0):
+	#Here we want to get from a to b by randomly placing paths 
+	#[Note: depth parameter is just to limit recursion overflows]
+	#[And hairpined parameter prevents multiple hairpins - we should have at most
+	#one or else its hard to generate nice paths]
+	#[manyhairpins overrides this and allows an arbitrary amount]
+	#[fuzzradius is how close to the end we want to be]
+	length = 0
+	points = []
+	circleradius = uniform(25,25)
+
+
+	"""
+	#--------------------------------------------------
+	#Here lies the circle code that did not take into account the fact that the circle itself changed where the "startpoint" was	
+	#I'm keeping it here incase someone wants to modify it to take that into account.
+	#I gave up and used an approximation method, creating the function generateConstantTurnUntilFacingPoint
+	#--------------------------------------------------
+
+	#First we want to direct ourselves towards endpoint, since intangent is the current direction
+	goaltangent = endtangent([startpoint,endpoint])
+	
+	#We're going to place a cturn to point us in the right direction, but we need to calculate the percent needed
+	#We can get the angles the lines are pointing at using atan
+	#Draw a circle to see why, keep in mind tangent perpendicular to radius!
+	#I've not simplified the numbers so its easier for you to re-derive
+	inangle = math.pi-(math.pi/2-math.atan(intangent))
+	goalangle = math.pi-(math.pi/2-math.atan(goaltangent))
+	finalangle = goalangle-inangle
+	finalpercent = finalangle/(2*math.pi)
+	print("In: " + str(inangle))
+	print("Goal: " + str(goalangle))
+	#---------------------------------------------------
+	"""
+
+	#We want to know ahead of time which way the circle will turn - that way we don't get loopty-loops
+	#where the circle turns nearly all the way around when it would have been better to have the center
+	#on the other side.
+	#We'll do this by calculating the normal we want.
+	#First, we want to know the path from start to goal.
+	#And more specifically, its angle
+	directpathangle = endtangent([startpoint,endpoint])
+	
+	#Our circle code takes in "turnagainstnormal" - alternatively, this parameter is equivalent to passing in
+	#a vector pointing TOWARDS the radius.  So let's calculate that!  If we have the goal be at a "higher" angle
+	#than it, we want the radius to be up, otherwise down.  The angle of it pointing up is simply pi/2 higher than the tangent (90 degrees)
+	normalangle = capangle(math.pi/2 + intangent)
+
+	#We now calculate if we need to add an additional pi to it.
+	#If directpathangle is higher than intangent - but how do we define higher?  We say that it is higher if the
+	#counterclockwise angle difference is smaller than the clockwise difference.
+	if capangle(directpathangle-normalangle)>capangle(directpathangle-directpathangle):
+		normalangle = capangle(math.pi + normalangle)
+
+	#Also flip it if tangent heading in 'negative' direction
+	#if (intangent<3*math.pi/2 and intangent>math.pi/2):
+		#normalangle = capangle(math.pi + normalangle)
+
+	#Finally lets convert this into a normal:
+	thenormal = (1,math.tan(normalangle))
+	
+	#Now let's actually draw the circle!
+	(generated, curpoint,deltalength,_) = generateConstantTurnUntilFacingPoint(startpoint,circleradius,intangent,endpoint,turnagainstnormal = thenormal)
+		#generateConstantTurn(startpoint,circleradius,intangent,circlepercent=finalpercent)
+	length += deltalength
+	points.extend(generated)
+
+	#Check if we're within 80 of the goal:
+	(cx,cy) = points[-1]
+	(ex,ey) = endpoint
+	squaredistance = (ex-cx)*(ex-cx)+(ey-cy)*(ey-cy)
+	#print("--------------------------------")
+	#print(math.sqrt(squaredistance))
+	#print(points[-1])
+	#print(endpoint)
+	#print("++++++++++++++++++++++++++++++++")
+	if squaredistance <= 80*80+fuzzradius*fuzzradius:
+		#We'll just draw a straight to it
+		print("\n\nSUCCESS!!!\n\n")
+		print("Fuzz: " + str(squaredistance - 80*80))
+		(generated, curpoint,deltalength) = generateStraight(points[-1],min(math.sqrt(squaredistance),80),endtangent(points))
+		length += deltalength
+		points.extend(generated)
+	else:
+		#Go as far as we can (unless we're very close in which case don't, because it'll cause the next iteration to look weird)
+		straightsize = 80 if squaredistance <= 100*100 else 40
+		(generated, curpoint,deltalength) = generateStraight(points[-1],straightsize,endtangent(points))
+		length += deltalength
+		points.extend(generated)
+		#We'll either do a random cturn or a random hairpin, then continue the journey
+		cturn_or_hairpin = uniform(0,1)
+		makecturn = cturn_or_hairpin < 0.9 or True
+		if makecturn or (hairpined and not manyhairpins):#cturn
+			(generated, curpoint,deltalength,output_normal) = generateConstantTurn(curpoint,uniform(10,25),endtangent(points),circlepercent=uniform(0,0.5))
+			length += deltalength
+			points.extend(generated)
+		else:
+			#We only want an even amount of turns so that we can leave heading the same direction we entered.
+			#otherwise due to the way we head towards the path, its basically guaranteed we get a self-intersection.
+			numswitches = 2*randrange(1,5)
+			(generated, curpoint,deltalength) = generateHairpinTurn(curpoint,uniform(4.5,10),endtangent(points),switchbacknum=numswitches)
+			length += deltalength
+			points.extend(generated)
+		#Now we recurse!
+		if depth>0:
+			(generated, curpoint, length) = generatePathFromPointToPoint(curpoint,endpoint,endtangent(points),depth-1,
+											hairpined=hairpined or not makecturn,manyhairpins=manyhairpins,
+											fuzzradius=fuzzradius)
+			length += deltalength
+			points.extend(generated)
+			
+
+
+	return (points,points[-1],length)
+
+def generateHairpinTurn(startpoint,radius,intangent,switchbacknum=None,turnleft=None,wobbliness=None,straightsize=None,circlesize=None,uniformcircles=True):
 	curpoint = startpoint
 	curtangent = intangent
 	length = 0
@@ -507,17 +637,40 @@ def generateHairpinTurn(startpoint,radius,intangent,switchbacknum=None,turnleft=
 	#	"Wobbliness" (circlepercent)
 	#	Size of straightways
 	turnleft = uniform(0,1)<0.5 		if turnleft == None 		else turnleft
-	switchbacknum = randrange(2,5)		if switchbacknum == None	else switchbacknum
-	wobbliness = uniform(0.4,0.6)		if wobbliness == None		else wobbliness
+	switchbacknum = randrange(2,10)		if switchbacknum == None	else switchbacknum
+	wobbliness = uniform(0.45,0.55)		if wobbliness == None		else wobbliness
 	straightsize = uniform(10,80)		if straightsize == None		else straightsize
+	circlesize = uniform(10,25)		if circlesize == None		else circlesize
+
+	#We are interested in making sure switchbacks never intersect
+	#If you draw a diagram, this gives you a diamond with angles pi/2,pi/2,L, and pi/2-L where L is:
+	#((2*pi*(1-wobbliness))/2)
+	#Using trigonometry, we can calculate the radius to intersection in terms of the angle and circle radius:
+	#intersect_point = radius * tan(L)
+	#If intersect_point is greater than max_intersection, we're good!
+	#Otherwise we want to cap it there.  So we find the inverse-function for "wobbliness"
+	#1-atan2(intersect_point,radius)/math.pi = wobbliness
+	max_intersection = 50
+	angle_l = (2*math.pi*(1-wobbliness))/2
+	intersect_point = radius * math.tan(angle_l)
+	#print("Point of intersection: "  + str(intersect_point))
+	if intersect_point > max_intersection:
+		#print("Capping wobbliness prevent intersection!")
+		wobbliness = 1-math.atan2(max_intersection,radius)/math.pi
+		#print("New wobbliness: " + str(wobbliness))
 
 	points = []
+	lastnormal = None
 	for a in range(0,switchbacknum):
 		#Switchback starts with a circle, then a line
 		#then we repeat
+		
+		circlesize = circlesize if uniformcircles else uniform(10,25)
 
 		#cturn
-		(generated, curpoint,deltalength) = generateConstantTurn(curpoint,uniform(10,25),curtangent,circlepercent=wobbliness,turnleft=(a%2==startleftnum))
+		(generated, curpoint,deltalength,lastnormal) = generateConstantTurn(curpoint,circlesize,curtangent,
+										circlepercent=wobbliness,turnleft=turnleft,
+										turnagainstnormal=lastnormal)
 		length += deltalength
 		points.extend(generated)
 		curtangent = endtangent(points)
@@ -532,7 +685,98 @@ def generateHairpinTurn(startpoint,radius,intangent,switchbacknum=None,turnleft=
 	#Returns a list of points and the new edge of the racetrack and the change in length
 	return (points,points[-1],length)
 
-def generateConstantTurn(startpoint,radius,intangent,turnleft=None,circlepercent=None):
+def generateConstantTurnUntilFacingPoint(startpoint,radius,intangent,goalpoint,turnleft=None,turnagainstnormal=None):
+	#This is a split-off version of generateConstantTurn, where instead of taking in a percent to turn around a circle,
+	#We give it a direction we want it to stop at
+	(startx,starty) = startpoint
+
+	#cturns have a choices - turn left or turn right
+	#Then, they can choose what percent of the circle do they want to turn?
+	turnleft = uniform(0,1)<0.5 		if turnleft == None 		else turnleft
+
+	#Calculating this is fairly complicated
+	#Angle of circle normal = 90 degrees + intangent
+	#Slope of normal = -tan(90+normal) if turn left or tan(90+normal) if turn right
+	#Center is at startpoint + (r/sqrt( 1+m^2 )   ,   m*r*sqrt( 1+m^2 )) 
+	circnorm = math.pi/2 + intangent
+	slope    = math.tan(circnorm)
+	purex = radius/math.sqrt( 1+slope*slope )
+	if turnleft:
+		purex*=-1
+
+	centerx = startx + purex
+	centery = starty + slope*purex
+
+	#Now we use a rotation matrix to parameterize intermediate points:
+	#Given start S and center C, any point on the circle angle A away is:
+	#R_A[S-C] + C
+	#Let us box this up in a nice function:
+	def intermediatePoint(s,c,a):
+		(sx,sy) = s
+		(cx,cy) = c
+		cosa    = math.cos(a)
+		sina    = math.sin(a)
+		delx    = sx-cx
+		dely    = sy-cy
+		resultx = cosa*delx-sina*dely+cx
+		resulty = sina*delx+cosa*dely+cy
+		return (resultx,resulty)
+
+	def sgn(x):
+		return -1 if x < 0 else 1 if x > 0 else 0
+
+	angle = 2*math.pi
+	flipper = -1 if intangent*purex > 0 else 1 #multiply by purex because we want to re-flip here if we flipped due to "turnleft"
+
+	if turnagainstnormal != None:
+		#In this case, we want to make sure it turns away from the inputted normal vector
+		#So if normal=(a,b) we want to make sure its (-a,-b)
+		#This is the same as changing turnleft
+		#So first we want to compute the current normal to make sure we don't change anything
+		#Current normal will be:
+		#points[0][0]-centerx,points[0][1]-centery
+		#So we pre-compute the points[0][a] since we haven't yet:
+		points_0 = intermediatePoint(startpoint,(centerx,centery),0)
+		curnormal = normalizevec((points_0[0]-centerx,points_0[1]-centery))
+		turnagainstnormal = normalizevec(turnagainstnormal)
+		
+		#Due to floating point stuffs, we won't check direct equality, we'll just look at the sign!
+		#We want normals to be flipped, so its bad if curnormal has the same sign!
+		#We also only need to check both components just in the case where the normal is (0,y)
+		needtoflip = abs(curnormal[0]-turnagainstnormal[0])<0.1 or abs(curnormal[1]-turnagainstnormal[1])<0.1
+
+		if needtoflip:
+			print("Flipping!")
+			centerx-=2*purex
+			centery-=2*slope*purex
+			flipper*=-1
+	points = []
+	for t in range(0,1000):
+		points.append(intermediatePoint(startpoint,(centerx,centery),flipper*t*angle*0.001))
+		if t!=0:
+			#Check if we're pointing in the right direction
+			#This equates to checking if endpoint lies on the line at points[-1] with the appropriate tangent.
+			(sx,sy) = points[-1]
+			(ex,ey) = goalpoint
+			appropriate_angle = endtangent(points)
+			if abs(appropriate_angle - math.atan2((ey-sy),(ex-sx))) < 0.01:
+				#Would do equality checking but limited precision, we just check if close!
+				#If so, break as we've succeeded our task
+				#print("Found goal")
+				break
+
+	#Length of circle is, fortunately, easy!  It's simply radius*angle
+	length = angle*radius
+
+	#Now we want to find the normal vector, because it's useful to have to determine whether it curves inwards or outwards
+	#Normal vectors are always parallel to the vector from center to end point
+	normal = (points[-1][0]-centerx,points[-1][1]-centery)
+
+	#Returns a list of points and the new edge of the racetrack and the change in length
+	return (points,points[-1],length,normal)
+
+
+def generateConstantTurn(startpoint,radius,intangent,turnleft=None,circlepercent=None,turnagainstnormal=None):
 	(startx,starty) = startpoint
 
 	#cturns have a choices - turn left or turn right
@@ -568,16 +812,46 @@ def generateConstantTurn(startpoint,radius,intangent,turnleft=None,circlepercent
 		resulty = sina*delx+cosa*dely+cy
 		return (resultx,resulty)
 
+	def sgn(x):
+		return -1 if x < 0 else 1 if x > 0 else 0
+
 	angle = 2*math.pi*circlepercent
 	flipper = -1 if intangent*purex > 0 else 1 #multiply by purex because we want to re-flip here if we flipped due to "turnleft"
-	therange = range(0,100) if intangent > 0 else range(-99,1)
+
+	if turnagainstnormal != None:
+		#In this case, we want to make sure it turns away from the inputted normal vector
+		#So if normal=(a,b) we want to make sure its (-a,-b)
+		#This is the same as changing turnleft
+		#So first we want to compute the current normal to make sure we don't change anything
+		#Current normal will be:
+		#points[0][0]-centerx,points[0][1]-centery
+		#So we pre-compute the points[0][a] since we haven't yet:
+		points_0 = intermediatePoint(startpoint,(centerx,centery),0)
+		curnormal = normalizevec((points_0[0]-centerx,points_0[1]-centery))
+		turnagainstnormal = normalizevec(turnagainstnormal)
+		
+		#Due to floating point stuffs, we won't check direct equality, we'll just look at the sign!
+		#We want normals to be flipped, so its bad if curnormal has the same sign!
+		#We also only need to check both components just in the case where the normal is (0,y)
+		needtoflip = abs(curnormal[0]-turnagainstnormal[0])<0.1 or abs(curnormal[1]-turnagainstnormal[1])<0.1
+
+		if needtoflip:
+			print("Flipping!")
+			centerx-=2*purex
+			centery-=2*slope*purex
+			flipper*=-1
+
 	points = [intermediatePoint(startpoint,(centerx,centery),flipper*t*angle*0.01) for t in range(0,100)]
 
 	#Length of circle is, fortunately, easy!  It's simply radius*angle
 	length = angle*radius
 
+	#Now we want to find the normal vector, because it's useful to have to determine whether it curves inwards or outwards
+	#Normal vectors are always parallel to the vector from center to end point
+	normal = (points[-1][0]-centerx,points[-1][1]-centery)
+
 	#Returns a list of points and the new edge of the racetrack and the change in length
-	return (points,points[-1],length)
+	return (points,points[-1],length,normal)
 
 
 def generateStraight(startpoint,length,angle):
