@@ -577,7 +577,7 @@ def generateAutocrossTrackdriveTrack(startpoint):
 	#The rules:
 	#	Straights: 		<=80 meters
 	#	Constant Turns:		<=25 meter radius
-	#	Hairpin Turns: 		<=4.5 meter outside radius
+	#	Hairpin Turns: 		>=4.5 meter outside radius
 	#	Slalom: 		Cones in a straight line with 7.5 to 12 meter spacing [NOTE: can't be generated at this point, added later]
 	#	Track Width: 		>=3 meters
 	#	Track Length: 		<=1500 meters
