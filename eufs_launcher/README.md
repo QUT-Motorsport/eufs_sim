@@ -1,5 +1,7 @@
 # EUFS GUI Launcher
 
+The information here can be found at the [team wiki](https://gitlab.com/eufs/resources/wikis/Image-To-Track-Conversion), which will be kept up-to-date.
+
 ## How To Use
 
 Basic instructions can be found in the main repository README.  Here lie the advanced usage notes.
