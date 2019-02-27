@@ -113,8 +113,8 @@ class EufsLauncher(Plugin):
 		# Define colors for track gen and image reading
 		self.noisecolor = (0,255,255,255)	#cyan, the turquoise turqouise wishes it were
 		self.bgcolor = (255,255,255,255)	#white
-		self.conecolor  = (255,0,255,255)	#magenta
-		self.conecolor2 = (0,0,255,255)		#blue
+		self.conecolor  = (255,0,255,255)	#magenta, for yellow cones
+		self.conecolor2 = (0,0,255,255)		#blue, for blue cones
 		self.carcolor = (0,255,0,255)		#green
 		self.trackcenter = (0,0,0,255)		#black
 		self.trackinner = (255,0,0,255)		#red
@@ -126,13 +126,16 @@ class EufsLauncher(Plugin):
 		self.popenprocess = None
 
 		#Add experimental warning to generator
-		self._widget.findChild(QPushButton,"GenerateButton").setText("Generate Random Track\n(Experimental)")
+		#self._widget.findChild(QPushButton,"GenerateButton").setText("Generate Random Track\n(Experimental)")
 
 		#Space the load track button better
 		self._widget.findChild(QPushButton,"LoadFromImageButton").setText("Load Track\nFrom Image")
 
 		#Hide generator button
-		self._widget.findChild(QPushButton,"GenerateButton").setVisible(False)
+		#self._widget.findChild(QPushButton,"GenerateButton").setVisible(False)
+
+		#Hide experimental button as not currently needed
+		self._widget.findChild(QPushButton,"Experimentals").setVisible(False)
 
 		print("Plugin Successfully Launched!")
 
@@ -145,7 +148,15 @@ class EufsLauncher(Plugin):
 		print("Generating Track...")
 
 		#Generate the track as pure data
-		(xys,twidth,theight) = generateAutocrossTrackdriveTrack((0,0))
+		xys = []
+		overlapped = False
+		while overlapped or xys==[]:
+			#Re-generate if the track overlaps itself
+			(xys,twidth,theight) = generateAutocrossTrackdriveTrack((0,0))
+			xys = compactify_points(xys)
+			overlapped = check_if_overlap(xys)
+			if overlapped:
+				print("Oops!  The track intersects itself too much.  Retrying...")
 
 		#Create image to hold data
 		im = Image.new('RGBA', (twidth, theight), (0, 0, 0, 0)) 
@@ -156,6 +167,38 @@ class EufsLauncher(Plugin):
 		draw.line(xys,fill=self.trackouter,width=5)#track full width
 		draw.line(xys,fill=self.trackinner,width=3)#track innards
 		draw.line(xys,fill=self.trackcenter)#track center
+
+
+		pixels = im.load()#get reference to pixel data
+
+		"""
+		prevcone1 = None
+		for index in range(1,len(xys)):
+			#We will calculate normal vectors and put cones there
+			#Line below calculates the normal
+			(dx,dy) = normalizevec((1,endtangent([xys[index-1],xys[index]])+math.pi))
+			(x,y) = xys[index]
+			scalefactor = 7
+			(ntx,nty) = (int(x+scalefactor*dx),int(y+scalefactor*dy))
+			(nbx,nby) = (int(x-scalefactor*dx),int(y-scalefactor*dy))
+			if prevcone1 == None:
+				pixels[ntx,nty] = self.conecolor2
+				pixels[nbx,nby] = self.conecolor
+				prevcone1 = (nbx,nby)
+			else:
+				#Make sure the same colored cones go on the same side!
+				(pcx,pcy) = prevcone1
+				topcloseness = abs(ntx-pcx)+abs(nty-pcy)
+				bottomcloseness = abs(nbx-pcx)+abs(nby-pcy)
+				if bottomcloseness<topcloseness:
+					pixels[ntx,nty] = self.conecolor2
+					pixels[nbx,nby] = self.conecolor
+					prevcone1 = (nbx,nby)
+				else:
+					pixels[ntx,nty] = self.conecolor
+					pixels[nbx,nby] = self.conecolor2
+					prevcone1 = (ntx,nty)
+		"""	
 
 		#We want to calculate direction of car position -
 		sx = xys[0][0]
@@ -172,11 +215,11 @@ class EufsLauncher(Plugin):
 
 		draw.line([xys[0],xys[0]],fill=colorforcar)#car position
 
+		
+
 		#Now we want to make all pixels boardering the track become magenta (255,0,255) - this will be our 'cone' color
 		#To find pixel boardering track, simply find white pixel adjacent to a non-white non-magenta pixle
 		#We will also make sure not to put cones next to eachother	
-
-		conecolor_locations = []
 
 		pixels = im.load()#get reference to pixel data
 
@@ -206,6 +249,47 @@ class EufsLauncher(Plugin):
 						isNextToCone  = isNextToCone  or p==self.conecolor
 					if isNextToTrack and not isNextToCone:
 						pixels[i,j] = self.conecolor
+
+		
+		#We want to make the track have differing cone colors - yellow on inside, blue on outside
+		#All cones are currently yellow.  We'll do a "breadth-first-search" for any cones reachable
+		#from (0,0) and call those the 'outside' [(0,0) always blank as image is padded)]
+		def getAllowedAdjacents(explolist,curpix):
+			(i,j) = curpix
+			allowed = []
+			if i > 0:
+				if not( (i-1,j) in explolist ):
+					allowed.append((i-1,j))
+			if j > 0:
+				if not( (i,j-1) in explolist ):
+					allowed.append((i,j-1))
+			if i < twidth-1:
+				if not( (i+1,j) in explolist ):
+					allowed.append((i+1,j))
+			if j < theight-1:
+				if not( (i,j+1) in explolist ):
+					allowed.append((i,j+1))
+			return allowed
+		print("Coloring cones...")
+		exploredlist = set([])
+		frontier = set([(0,0)])
+		while len(frontier)>0:
+			newfrontier = set([])
+			for f in frontier:
+				(i,j) = f
+				pix = pixels[i,j]
+				if pix == self.conecolor:
+					pixels[i,j] = self.conecolor2
+					newfrontier.update(getAllowedAdjacents(exploredlist,(i,j)))
+				elif pix == self.bgcolor:
+					newfrontier.update(getAllowedAdjacents(exploredlist,(i,j)))
+				exploredlist.add(f)
+			frontier = newfrontier
+			#curexplored = len(exploredlist)
+			#maxexplored = twidth*theight*1.0
+			#print("Max Percent: " + str(curexplored/maxexplored))
+				
+		
 
 		#Finally, we just need to place noise.  At maximal noise, the track should be maybe 1% covered? (that's actually quite a lot!)
 
@@ -477,6 +561,13 @@ def capangle(ang):
 		return capangle(ang-2*math.pi)
 	return ang
 
+def capangle_odd(ang):
+	#Returns angle between -math.pi and math.pi
+	ang = capangle(ang)
+	if ang > math.pi:
+		ang = ang-2*math.pi
+	return ang
+
 def normalizevec(vec):
 	(a,b) = vec
 	mag = math.sqrt(a*a+b*b)
@@ -500,13 +591,20 @@ def generateAutocrossTrackdriveTrack(startpoint):
 	xys.extend(generated)
 
 	#Now we want to set checkpoints to pass through:
-	goalpoints = [(startpoint[0]+1000,startpoint[1])]#,(startpoint[0]+300,startpoint[1]+300),(startpoint[0],startpoint[1]+300),startpoint]
+	goalpoints = [(startpoint[0]+150,startpoint[1]),(startpoint[0]+200,startpoint[1]+150),(startpoint[0]-50,startpoint[1]+200)]
 	for goalpoint in goalpoints:
 		(generated, curpoint, length) = generatePathFromPointToPoint(curpoint,goalpoint,endtangent(xys),fuzzradius=20)
 		curTrackLength+= length
 		xys.extend(generated)
 
-	
+	#Now lets head back to the start:
+	(generated, curpoint, length) = generatePathFromPointToPoint(curpoint,startpoint,endtangent(xys),fuzzradius=0)
+	curTrackLength+= length
+	xys.extend(generated)
+
+	if curTrackLength > 1500:
+		print("Track gen failed - track too long, oops!  Retrying.")
+		return generateAutocrossTrackdriveTrack(startpoint)
 
 	return convertPointsToAllPositive(xys)
 
@@ -565,14 +663,14 @@ def generatePathFromPointToPoint(startpoint,endpoint,intangent,depth=20,hairpine
 		normalangle = capangle(math.pi + normalangle)
 
 	#Also flip it if tangent heading in 'negative' direction
-	#if (intangent<3*math.pi/2 and intangent>math.pi/2):
-		#normalangle = capangle(math.pi + normalangle)
+	#if (abs(capangle_odd(intangent))math.pi/2):
+	#	normalangle = capangle(math.pi + normalangle)
 
 	#Finally lets convert this into a normal:
 	thenormal = (1,math.tan(normalangle))
 	
 	#Now let's actually draw the circle!
-	(generated, curpoint,deltalength,_) = generateConstantTurnUntilFacingPoint(startpoint,circleradius,intangent,endpoint,turnagainstnormal = thenormal)
+	(generated, curpoint,deltalength,output_normal) = generateConstantTurnUntilFacingPoint(startpoint,circleradius,intangent,endpoint,turnagainstnormal = thenormal)
 		#generateConstantTurn(startpoint,circleradius,intangent,circlepercent=finalpercent)
 	length += deltalength
 	points.extend(generated)
@@ -588,8 +686,8 @@ def generatePathFromPointToPoint(startpoint,endpoint,intangent,depth=20,hairpine
 	#print("++++++++++++++++++++++++++++++++")
 	if squaredistance <= 80*80+fuzzradius*fuzzradius:
 		#We'll just draw a straight to it
-		print("\n\nSUCCESS!!!\n\n")
-		print("Fuzz: " + str(squaredistance - 80*80))
+		#print("\n\nSUCCESS!!!\n\n")
+		#print("Fuzz: " + str(squaredistance - 80*80))
 		(generated, curpoint,deltalength) = generateStraight(points[-1],min(math.sqrt(squaredistance),80),endtangent(points))
 		length += deltalength
 		points.extend(generated)
@@ -601,15 +699,20 @@ def generatePathFromPointToPoint(startpoint,endpoint,intangent,depth=20,hairpine
 		points.extend(generated)
 		#We'll either do a random cturn or a random hairpin, then continue the journey
 		cturn_or_hairpin = uniform(0,1)
-		makecturn = cturn_or_hairpin < 0.9 or True
+		makecturn = cturn_or_hairpin < 0.7
 		if makecturn or (hairpined and not manyhairpins):#cturn
-			(generated, curpoint,deltalength,output_normal) = generateConstantTurn(curpoint,uniform(10,25),endtangent(points),circlepercent=uniform(0,0.5))
+			(generated, curpoint,deltalength,output_normal) = generateConstantTurn(curpoint,uniform(10,25),endtangent(points),
+											circlepercent=uniform(0,0.25),turnagainstnormal = output_normal)
+			length += deltalength
+			points.extend(generated)
+			(generated, curpoint,deltalength,output_normal) = generateConstantTurn(curpoint,uniform(10,25),endtangent(points),
+											circlepercent=uniform(0,0.25),turnagainstnormal = output_normal)
 			length += deltalength
 			points.extend(generated)
 		else:
 			#We only want an even amount of turns so that we can leave heading the same direction we entered.
 			#otherwise due to the way we head towards the path, its basically guaranteed we get a self-intersection.
-			numswitches = 2*randrange(1,5)
+			numswitches = 2*randrange(1,3)
 			(generated, curpoint,deltalength) = generateHairpinTurn(curpoint,uniform(4.5,10),endtangent(points),switchbacknum=numswitches)
 			length += deltalength
 			points.extend(generated)
@@ -685,7 +788,7 @@ def generateHairpinTurn(startpoint,radius,intangent,switchbacknum=None,turnleft=
 	#Returns a list of points and the new edge of the racetrack and the change in length
 	return (points,points[-1],length)
 
-def generateConstantTurnUntilFacingPoint(startpoint,radius,intangent,goalpoint,turnleft=None,turnagainstnormal=None):
+def generateConstantTurnUntilFacingPoint(startpoint,radius,intangent,goalpoint,turnleft=None,turnagainstnormal=None,recursed=False):
 	#This is a split-off version of generateConstantTurn, where instead of taking in a percent to turn around a circle,
 	#We give it a direction we want it to stop at
 	(startx,starty) = startpoint
@@ -746,23 +849,30 @@ def generateConstantTurnUntilFacingPoint(startpoint,radius,intangent,goalpoint,t
 		needtoflip = abs(curnormal[0]-turnagainstnormal[0])<0.1 or abs(curnormal[1]-turnagainstnormal[1])<0.1
 
 		if needtoflip:
-			print("Flipping!")
+			#print("Flipping!")
 			centerx-=2*purex
 			centery-=2*slope*purex
 			flipper*=-1
 	points = []
-	for t in range(0,1000):
-		points.append(intermediatePoint(startpoint,(centerx,centery),flipper*t*angle*0.001))
+	rangemax = 5000
+	stepsize = 1.0/rangemax
+	for t in range(0,rangemax):
+		points.append(intermediatePoint(startpoint,(centerx,centery),flipper*t*angle*stepsize))
 		if t!=0:
 			#Check if we're pointing in the right direction
 			#This equates to checking if endpoint lies on the line at points[-1] with the appropriate tangent.
 			(sx,sy) = points[-1]
 			(ex,ey) = goalpoint
 			appropriate_angle = endtangent(points)
-			if abs(appropriate_angle - math.atan2((ey-sy),(ex-sx))) < 0.01:
+			if t > 0.5*rangemax and not recursed:
+				#Very big turn, we don't like that!  We'll just turn the other way instead
+				newturnagainstnormal = None if turnagainstnormal == None else normalizevec((-turnagainstnormal[1],turnagainstnormal[0]))
+				return generateConstantTurnUntilFacingPoint(startpoint,radius,intangent,goalpoint,turnleft=turnleft,
+											turnagainstnormal=newturnagainstnormal,recursed=True)
+			if abs(capangle(appropriate_angle) - capangle(math.atan2((ey-sy),(ex-sx)))) < 0.01:
 				#Would do equality checking but limited precision, we just check if close!
 				#If so, break as we've succeeded our task
-				#print("Found goal")
+				#print("Found goal at t=" + str(t))
 				break
 
 	#Length of circle is, fortunately, easy!  It's simply radius*angle
@@ -836,7 +946,7 @@ def generateConstantTurn(startpoint,radius,intangent,turnleft=None,circlepercent
 		needtoflip = abs(curnormal[0]-turnagainstnormal[0])<0.1 or abs(curnormal[1]-turnagainstnormal[1])<0.1
 
 		if needtoflip:
-			print("Flipping!")
+			#print("Flipping!")
 			centerx-=2*purex
 			centery-=2*slope*purex
 			flipper*=-1
@@ -872,8 +982,14 @@ def generateStraight(startpoint,length,angle):
 	
 	#Since we draw the track by placing lines, we only need the endpoints of this!
 	#(For other curves we approximate by a bunch of small lines, so we'd need full data)
-	#points = [(t+startx,slope*t+starty) for t in range(0,int(tmax))]
-	points = [startpoint,(tmax+startx,slope*tmax+starty)]
+	#However we actually don't want that because it will mess with the self-intersection-detection
+	#later on.
+	if tmax >= 0:
+		points = [(t+startx,slope*t+starty) for t in range(0,int(math.ceil(tmax)))]
+	else:
+		points = [(-t+startx,-slope*t+starty) for t in range(0,int(math.ceil(-tmax)))]
+	#points = [startpoint,(tmax+startx,slope*tmax+starty)]
+
 
 	#Returns a list of points and the new edge of the racetrack and the change in length
 	return (points,points[-1],length)
@@ -895,12 +1011,44 @@ def convertPointsToAllPositive(xys):
 		maxy    = max(y,maxy)
 
 	newxys = []
-	padding = 5
+	padding = 10
 	for point in xys:
 		(x,y) = point
 		newxys.append((int(x-maxnegx)+padding,int(y-maxnegy)+padding))
 
 	return (newxys,int(maxx-maxnegx)+2*padding,int(maxy-maxnegy)+2*padding)
+
+def compactify_points(points):
+	#Given a list of int points, if any two adjacent points are the same then remove one of them
+	removelist = []
+	prevpoint = (-10000,-10000)
+	for a in range(0,len(points)):
+		if (points[a] == prevpoint):
+			removelist.append(a)
+		prevpoint = points[a]
+	for index in sorted(removelist,reverse=True):
+		del points[index]
+	return points
+
+def check_if_overlap(points):
+	#Naive check to see if track overlaps itself
+	#(Won't catch overlaps due to track width, only if track center overlaps)
+	points = points[:-5] #remove end points as in theory that should also be the start point
+	#(I remove extra to be a little generous to it as a courtesy - I don't really care how well the
+	#start loops to the end yet)
+	
+	#Now we want to fill in the diagonally-connected points, otherwise you can imagine
+	#that two tracks moving diagonally opposite could cross eachother inbetween the pixels,
+	#fooling our test.
+	for index in range(1,len(points)):
+		(sx,sy) = points[index-1]
+		(ex,ey) = points[index]
+		manhatdist = abs(ex-sx)+abs(ey-sy)
+		if (manhatdist > 1):
+			#moved diagonally, insert an extra point for it at the end!
+			points.append( (sx+1,sy) if ex > sx else (sx-1,sy) )
+
+	return len(set(points)) != len(points)
 
 # Bezier code taken from https://stackoverflow.com/questions/246525/how-can-i-draw-a-bezier-curve-using-pythons-pil
 
