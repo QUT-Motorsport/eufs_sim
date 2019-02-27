@@ -1,6 +1,6 @@
 # EUFS GUI Launcher
 
-The information here can be found at the [team wiki](https://gitlab.com/eufs/resources/wikis/Image-To-Track-Conversion), which will be kept up-to-date.
+The information here can be found at the [team wiki](https://gitlab.com/eufs/resources/wikis/Simulator/Image-To-Track-Conversion), which will be kept up-to-date.
 
 ## How To Use
 
