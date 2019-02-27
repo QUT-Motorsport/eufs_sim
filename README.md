@@ -56,7 +56,7 @@ catkin build
 
 To enable ROS to find the EUFS packages you also need to run
 ```
-source /devel/setup.bash
+source ./devel/setup.bash
 ```
 
 _Note:_ source needs to be run on each new terminal you open. You can also include it in your `.bashrc` file.
