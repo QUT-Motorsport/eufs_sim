@@ -11,6 +11,7 @@
         <!-- controlPeriod>0.003</controlPeriod -->
         <controlPeriod>0.001</controlPeriod>
 	    <robotSimType>gazebo_ros_control/DefaultRobotHWSim</robotSimType>
+      <legacyModeNS>true</legacyModeNS>      
       </plugin>
     </gazebo>
 	</xacro:macro>
