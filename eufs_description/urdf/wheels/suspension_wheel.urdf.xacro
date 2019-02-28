@@ -1,6 +1,19 @@
 <?xml version="1.0"?>
 <robot name="wheel" xmlns:xacro="http://www.ros.org/wiki/xacro">
 
+<!-- 
+ADS-DV Specifications as given by IMechE:
+WHEELBASE         :1530mm
+FRONT TRACK       :1201mm
+REAR TRACK        :1201mm
+OVERALL WIDTH     :1430mm
+OVERALL LENGTH    :2814.6mm
+STATIC CASTER     :6 deg
+STATIC CAMBER     :2 deg
+TYRES             : SAE FORMULA STUDENT AVON 7.2/20.0-13
+DRIVEN WHEELS     :4WD
+DIFFERENTIALS     :OPEN DIFF -->
+
   <!-- hub_dia and tire_dia are the diameters of the hub and tire,
        respectively. hex_hub_depth is the distance that the hex hub is
        inset from the outer edge of the tire. It is set so that each wheel
@@ -17,8 +30,8 @@
        the shock absorbers are fully extended. axle_length is the distance
        from a U joint to the corresponding hex hub. wheel_travel is the
        vertical wheel travel. -->
-  <xacro:property name="wheelbase" value="1.2"/>
-  <xacro:property name="hex_hub_dist" value="1.360"/>  <!-- track/width of the car -->
+  <xacro:property name="wheelbase" value="1.530"/>
+  <xacro:property name="hex_hub_dist" value="1.201"/>  <!-- track/width of the car -->
   <xacro:property name="axle_length" value="0.120"/>
   <xacro:property name="wheel_travel" value="0.05"/>
   <xacro:property name="shock_z_offset" value="0.05"/>
