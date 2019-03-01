@@ -8,10 +8,11 @@
   <arg name="debug" default="false"/>
   <arg name="gui" default="true"/>
   <arg name="cmd_timeout" default="0.5"/>
+  <arg name="use_robot_control_odom" default="true"/>
 
   <!-- Vehicle pose -->
   <arg name="x" default="-43.0"/>
-  <arg name="y" default="40"/>
+  <arg name="y" default="35"/>
   <arg name="z" default="0.1"/>
   <arg name="roll" default="0.0"/>
   <arg name="pitch" default="0.0"/>

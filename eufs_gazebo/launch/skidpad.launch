@@ -8,6 +8,7 @@
   <arg name="debug" default="false"/>
   <arg name="gui" default="true"/>
   <arg name="cmd_timeout" default="0.5"/>
+  <arg name="use_robot_control_odom" default="true"/>
   
   <!-- Vehicle pose -->
   <arg name="x" default="0.0"/>
@@ -58,4 +59,27 @@
       <arg name ="view_distance" value="15"/>
     </include>
 
+  <!-- Only launch if robot_control odom is not used -->
+  <group if="$(eval arg('use_robot_control_odom') == false)">
+    <!-- Python script to republish ground truth -->
+    <node 
+      name="ground_truth_republisher"
+      pkg="eufs_gazebo"
+      type="ground_truth_republisher.py"
+      output="screen"
+    />
+
+    <node 
+      name="message_to_tf" 
+      pkg="message_to_tf" 
+      type="message_to_tf" 
+      output="screen" 
+      args="/ground_truth/state"
+    />
+  </group>
+
+  <include file="$(find eufs_gazebo)/launch/extractor.launch">
+    <arg name ="track_name" value="skidpad.csv"/>
+    <arg name ="view_distance" value="15"/>
+  </include>
 </launch>

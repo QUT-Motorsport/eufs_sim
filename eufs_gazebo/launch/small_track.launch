@@ -8,6 +8,7 @@
   <arg name="debug" default="false"/>
   <arg name="gui" default="true"/>
   <arg name="cmd_timeout" default="0.5"/>
+  <arg name="use_robot_control_odom" default="true"/>
   
   <!-- Vehicle pose -->
   <arg name="x" default="-15.0"/>
