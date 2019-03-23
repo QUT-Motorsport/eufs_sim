@@ -21,8 +21,6 @@
   <!-- eufs_control launch file -->
   <include file="$(find eufs_gazebo)/launch/eufs_control.launch" />
   
-  <!-- Something -->
-  <arg name="use_robot_control_odom" default="true"/>
   
   <!-- Launch world -->
   <include file="$(find gazebo_ros)/launch/empty_world.launch">
