@@ -45,9 +45,6 @@
 
   <!-- Control Method Argument -->
   <arg name="controlMethod" default="speed"/>
-  
-  <!-- Something -->
-  <arg name="use_robot_control_odom" default="true"/>
 
   <!--Launch car & controller.-->
   <include file="$(find eufs_gazebo)/launch/load_car.launch">
