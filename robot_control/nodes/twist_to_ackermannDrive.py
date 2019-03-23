@@ -40,7 +40,9 @@ class Convert:
         self.publisher.publish(ack_cmd)
 
     def listener(self):
+	#Sometimes it's weird and the controller wants it to subscribe to /rqt/cmd_vel ???  It flipflops
         rospy.Subscriber("/cmd_vel", Twist, self.callback)
+        rospy.Subscriber("/rqt/cmd_vel", Twist, self.callback)
         rospy.spin()
 
 if __name__ == '__main__':
