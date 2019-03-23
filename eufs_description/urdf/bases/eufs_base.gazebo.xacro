@@ -11,6 +11,7 @@
         <!-- controlPeriod>0.003</controlPeriod -->
         <controlPeriod>0.001</controlPeriod>
 	    <robotSimType>gazebo_ros_control/DefaultRobotHWSim</robotSimType>
+      <legacyModeNS>true</legacyModeNS>      
       </plugin>
     </gazebo>
 	</xacro:macro>
@@ -24,7 +25,7 @@
         <gaussianNoise>0.00</gaussianNoise>
         <frameName>world</frameName>
         <!-- origin is at spawn location -->
-        <xyzOffset>0 0 0</xyzOffset>
+        <xyzOffset>0.0 0.0 0</xyzOffset>
         <rpyOffset>0 0 0</rpyOffset>
     </plugin>
   </gazebo>

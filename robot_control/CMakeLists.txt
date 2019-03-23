@@ -11,10 +11,11 @@ find_package(catkin REQUIRED COMPONENTS
   tf
   diagnostic_msgs
   diagnostic_updater
+  #autorally_msgs #this decided to randomly disappear and prevent catkin from building...
 )
 
 catkin_package(
- CATKIN_DEPENDS ackermann_msgs
+ CATKIN_DEPENDS ackermann_msgs #autorally_msgs #see above ^^^^
 )
 
 include_directories(
@@ -26,3 +27,5 @@ add_executable(robot_control_node src/robot_control.cpp)
 target_link_libraries(robot_control_node
    ${catkin_LIBRARIES}
 )
+
+

@@ -3,7 +3,7 @@
 
   <!-- load the controllers -->
   <node name="controller_spawner" pkg="controller_manager" type="spawner" respawn="false"
-    output="screen" ns="/eufs" args="--shutdown-time 1 --namespace=/eufs
+    output="screen" ns="/eufs" args="--namespace=/eufs
 					  left_front_shock_controller
 					  left_steering_joint_controller
 					  left_front_axle_controller
