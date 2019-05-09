@@ -108,5 +108,6 @@ roslaunch robot_control rqt_robot_control.launch
 
 ### 5. Known issues <a name="issues"></a>
 * Sometimes you might end up with 2 numpy installations at the same time. To fix this simply uninstall numpy with `pip uninstall numpy` as many times as you can. Then reinstall it with `pip install numpy` and everything should work as usual!
+* The speed controlled model currently does not work due to bad dependenices. To be addressed soon.
 
 
