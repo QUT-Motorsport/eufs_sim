@@ -1,0 +1,20 @@
+<library path="src">
+  <class name="EUFS Launcher" type="eufs_launcher.LauncherModule.EufsLauncher" base_class_type="rqt_gui_py::Plugin">
+    <description>
+      The launching interface
+    </description>
+    <qtgui>
+      <!-- optional grouping...
+      <group>
+        <label>Group</label>
+      </group>
+      <group>
+        <label>Subgroup</label>
+      </group>
+      -->
+      <label>EUFS GUI Launcher</label>
+      <icon type="theme">system-help</icon>
+      <statustip>EUFS GUI Launcher.</statustip>
+    </qtgui>
+  </class>
+</library>

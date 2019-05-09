@@ -14,7 +14,7 @@ find_package(catkin REQUIRED COMPONENTS
 )
 
 catkin_package(
- CATKIN_DEPENDS ackermann_msgs
+ CATKIN_DEPENDS
 )
 
 include_directories(
@@ -26,3 +26,5 @@ add_executable(robot_control_node src/robot_control.cpp)
 target_link_libraries(robot_control_node
    ${catkin_LIBRARIES}
 )
+
+

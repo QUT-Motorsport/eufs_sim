@@ -1,0 +1,32 @@
+image: ros:kinetic-ros-core
+
+variables:
+  GIT_SUBMODULE_STRATEGY: recursive 
+
+cache:
+  paths:
+    - ccache/
+
+before_script:
+# Add eufs package dependencies here, separated by spaces
+ - export DEP_PACKAGES="eufs_msgs"
+
+ - 'which ssh-agent || ( apt-get update -y && apt-get install openssh-client -y ) >/dev/null' 
+ - eval $(ssh-agent -s)
+ - echo "$SSH_PRIVATE_KEY" | tr -d '\r' | ssh-add - > /dev/null
+ - mkdir -p ~/.ssh
+ - chmod 700 ~/.ssh
+ - '[[ -f /.dockerenv ]] && echo -e "Host *\n\tStrictHostKeyChecking no\n\n" > ~/.ssh/config'
+
+ - git config --global user.email "eufs_sim@eufs.com"
+ - git config --global user.name "eufs_sim"
+
+ - git clone --single-branch --branch gitlab_ci git@gitlab.com:eufs/resources.git
+ - source resources/gitlab-ci.bash "$DEP_PACKAGES" >/dev/null
+
+# catkin tools
+catkin_tools:
+  stage: build
+  script:
+    - catkin build --summarize --no-status --force-color
+

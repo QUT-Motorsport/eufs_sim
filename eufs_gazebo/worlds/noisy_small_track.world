@@ -3969,6 +3969,7 @@
         <robotParam>robot_description</robotParam>
         <controlPeriod>0.001</controlPeriod>
         <robotSimType>gazebo_ros_control/DefaultRobotHWSim</robotSimType>
+        <legacyModeNS>true</legacyModeNS>      
       </plugin>
       <plugin name='imu_controller' filename='libgazebo_ros_imu.so'>
         <alwaysOn>true</alwaysOn>

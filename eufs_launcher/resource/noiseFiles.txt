@@ -1,0 +1,18 @@
+Tree model grabbed from here:
+https://free3d.com/3d-model/realistic-tree-pack-3-trees-95419.html
+Cube and Monkey models I made using Blender defaults and exporting them
+
+How this file works: noise generator will generate a random number 0-99 "x"
+It will then go line-by-line on this file and select the first model that
+has a weight less than x.  Nothing sophisticated, but it does add some randomness
+to the process.  Make sure to always have the last line be weighted at least 100!
+(If not it will default to NoiseCube, no biggy, but still...)
+
+If you want to 'inactivate' a model, just set its weight to 0 or put it behind a model
+with higher weight.
+
+If gazebo refuses to load, its likely that the meshes don't exist (it halts without error message :/)
+
+$===$
+20|model://eufs_description/meshes/MonkeyNoise.dae
+100|model://eufs_description/meshes/NoiseCube.dae
