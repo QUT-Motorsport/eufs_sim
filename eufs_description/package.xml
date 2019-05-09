@@ -1,43 +1,39 @@
 <?xml version="1.0"?>
-<package>
-  <name>eufs_description</name>
-  <version>0.1.0</version>
-  <description>The eufs_description package
+<package format="2">
+    <name>eufs_description</name>
+    <version>0.1.0</version>
+    <description>The eufs_description package
     Contrains all of the 3D models and meshes for 
     simulation purposes.
-  </description>
+    </description>
 
-  <maintainer email="ignat.m.georgiev@gmail.com">Ignat Georgiev</maintainer>
-  <maintainer email="loizoustephanos@gmail.com">Stephanos Loizou</maintainer>
-  <maintainer email="olliejday@gmail.com">Oliver Day</maintainer>
+    <maintainer email="ignat.m.georgiev@gmail.com">Ignat Georgiev</maintainer>
+    <maintainer email="loizoustephanos@gmail.com">Stephanos Loizou</maintainer>
+    <maintainer email="olliejday@gmail.com">Oliver Day</maintainer>
 
-  <license>BSD</license>
+    <license>MIT</license>
 
-  <url type="website">http://eufs.co</url>
-  <url type="repository">https://github.com/eufs/eufs_sim</url>
-  <url type="bugtracker">https://github.com/eufs/eufs_sim/issues</url>
+    <url type="website">http://eufs.co</url>
+    <url type="repository">https://gitlab.com/eufs/eufs_sim</url>
+    <url type="bugtracker">https://gitlab.com/eufs/eufs_sim/issues</url>
 
-  <buildtool_depend>catkin</buildtool_depend>
-  <build_depend>urdf</build_depend>
-  <build_depend>xacro</build_depend>
+    <buildtool_depend>catkin</buildtool_depend>
 
-  <run_depend>gazebo_ros</run_depend>
-  <run_depend>urdf</run_depend>
-  <run_depend>xacro</run_depend>
-  <run_depend>hector_gazebo_plugins</run_depend>
-  <run_depend>controller-manager</run_depend>
-  <run_depend>velodyne-simulator</run_depend>
-  <run_depend>effort-controller</run_depend>
-  <run_depend>velocity-controllers</run_depend>
-  <run_depend>joint-state-controller</run_depend>
-  <run_depend>gazebo-ros-control</run_depend>
-  <run_depend>std_msgs</run_depend>
-  <run_depend>std_srvs</run_depend>
-  <run_depend>tf</run_depend>
+    <depend>gazebo_ros</depend>
+    <depend>urdf</depend>
+    <depend>xacro</depend>
+    <depend>hector_gazebo_plugins</depend>
+    <depend>controller_manager</depend>
+    <depend>velodyne_simulator</depend>
+    <depend>effort_controller</depend>
+    <depend>velocity_controllers</depend>
+    <depend>joint_state_controller</depend>
+    <depend>gazebo_ros_control</depend>
+    <depend>std_msgs</depend>
+    <depend>std_srvs</depend>
+    <depend>tf</depend>
 
-  <export>
-    <gazebo_ros                                                                 
-      gazebo_plugin_path="${prefix}/lib"
-      gazebo_model_path="${prefix}/.." /> 
+    <export>
+        <gazebo_ros gazebo_plugin_path="${prefix}/lib" gazebo_model_path="${prefix}/.." />
     </export>
-  </package>
+</package>
