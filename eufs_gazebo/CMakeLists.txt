@@ -7,6 +7,7 @@ find_package(catkin REQUIRED COMPONENTS
   robot_control
   eufs_msgs
   roscpp
+  rospy
   std_msgs
   std_srvs
   tf

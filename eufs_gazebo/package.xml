@@ -21,6 +21,7 @@
     <depend>robot_control</depend>
     <depend>eufs_msgs</depend>
     <depend>roscpp</depend>
+    <depend>rospy</depend>
     <depend>std_msgs</depend>
     <depend>std_srvs</depend>
     <depend>tf</depend>

@@ -73,7 +73,7 @@ class Extractor:
         self.big_cones      = None
         self.distance       = rospy.get_param("~view_distance", default=30.)
         self.tf_listener    = tf.TransformListener()
-        self.BASE_FOOTPRINT = "/base_footprint"
+        self.CONE_FRAME     = "/velodyne_base_link"
         self.MAP            = "/map"
 
         track_path = rospy.get_param("~track_path", default="eufs_gazebo/tracks/small_track.csv")
@@ -114,24 +114,28 @@ class Extractor:
         Returns:
             Matrix of distances from the first matrix vectors to the second.
         """
-        [M, _] = np.shape(Xtrn)
-        [N, _] = np.shape(Xtst)
-        mul = np.dot(Xtst, Xtrn.T)
+        [M, L] = np.shape(Xtrn)
+        [N, K] = np.shape(Xtst)
+        if K == L:  
+            mul = np.dot(Xtst, Xtrn.T)
+            XX = self.mul_by_transpose(Xtst, N)
+            YY = self.mul_by_transpose(Xtrn, M)
 
-        XX = self.mul_by_transpose(Xtst, N)
-        YY = self.mul_by_transpose(Xtrn, M)
-
-        return np.add(np.subtract(matlib.repmat(XX, 1, M), 2*mul), (np.matlib.repmat(YY, 1, N)).T)
-        
+            return np.add(np.subtract(matlib.repmat(XX, 1, M), 2*mul), (np.matlib.repmat(YY, 1, N)).T)
+        else:
+            return np.array([[]])
+  
     def process_cones(self, cones_list, yaw, trans):
-        """Loads a Gazebo model .SDF file and identify cones in it
-        based on their mesh tag. Store as elements of the class.
+        """Rotates the cones by the current yaw of the car
+            and filters them according to the distance provided.
 
         Args:
-            file_path (str): the path to the SDF file to load
+            cones_list (np.array): the path to the SDF file to load
+            yaw                  : current yaw of the car
+            trans (np.array)     : translation of the car in the map frame
 
         Returns:
-            Nothing
+            List of filtered cones in the base_footprint frame.
         """
         transform = np.array([[trans[0], trans[1]]])
         cones_dists = self.dists(np.array(cones_list), transform)
@@ -143,31 +147,33 @@ class Extractor:
 
         rotation_matrix = np.array([[ np.cos(yaw),  np.sin(yaw)],\
                                     [-np.sin(yaw),  np.cos(yaw)]])
-
         
-        translation = closest_cones - np.repeat(np.array(transform), np.shape(closest_cones)[0], axis=0)        
-        cones_rotated = np.dot(rotation_matrix, translation.T).T
+        if len(closest_cones) > 0:
+            translation = closest_cones - np.repeat(np.array(transform), np.shape(closest_cones)[0], axis=0)        
+            cones_rotated = np.dot(rotation_matrix, translation.T).T
                
-        cones_euler = []
-        for cone in cones_rotated:
-            #Filter cones that are in front of the car
-            if cone[0] > 0:
-                cones_euler.append([cone[0], cone[1]])       
-        return cones_euler
+            cones_euler = []
+            for cone in cones_rotated:
+                #Filter cones that are in front of the car
+                if cone[0] > 0:
+                    cones_euler.append([cone[0], cone[1]])       
+            return cones_euler
+        else:
+            return []
 
     def odom_cb(self, msg):
         """Callback function that translates the cone locations
             and publishes them.
 
         Args:
-            msg (str): subsriber message
+            msg (str): subscriber message
 
         Returns:
             Nothing
         """
         #The translation fails at the beggining, so we want to ignore these exceptions 
         try:
-            (trans, rot) = self.tf_listener.lookupTransform(self.MAP, self.BASE_FOOTPRINT, rospy.Time(0))
+            (trans, rot) = self.tf_listener.lookupTransform(self.MAP, self.CONE_FRAME, rospy.Time(0))
             yaw = tf.transformations.euler_from_quaternion(rot)[2]
             
             left_closest_cones = self.process_cones(self.left_cones, yaw, trans)
@@ -178,13 +184,13 @@ class Extractor:
             marker_id = 0
             for cone in np.reshape(left_closest_cones, (-1, 2)):
                 cone_msg.left_cones.append(Point(cone[0], cone[1], 0))
-                marker = self.get_cone_marker(False, self.BASE_FOOTPRINT, cone[0], cone[1], 0, marker_id)
+                marker = self.get_cone_marker(False, self.CONE_FRAME, cone[0], cone[1], 0, marker_id)
                 marker_id += 1
                 cone_markers.markers.append(marker)
 
             for cone in np.reshape(right_closest_cones, (-1, 2)):
                 cone_msg.right_cones.append(Point(cone[0], cone[1], 0))
-                marker = self.get_cone_marker(True, self.BASE_FOOTPRINT, cone[0], cone[1], 0, marker_id)
+                marker = self.get_cone_marker(True, self.CONE_FRAME, cone[0], cone[1], 0, marker_id)
                 marker_id += 1
                 cone_markers.markers.append(marker) 
 
@@ -226,6 +232,8 @@ class Extractor:
         m.scale.z = 1.5
         m.mesh_resource = "package://eufs_description/meshes/cone.dae"
         m.color.a = 1.0
+        #Fix for stacking cones
+        m.lifetime = rospy.Duration(0.05)
         # inner are yellow
         if is_inner:
             m.color.r = 1.0
@@ -255,8 +263,10 @@ class Extractor:
             return
         
         data = pd.read_csv(file_path, names=["tag", "x", "y"], skiprows=1)
-        self.left_cones = np.array(data[data.tag == "left"][["x", "y"]])
-        self.right_cones = np.array(data[data.tag == "right"][["x", "y"]])
+        # As the csv files contain the first cone location twice (at the beggining and the end),
+        # we need to drop it to not consider it twice.
+        self.left_cones = np.array(data[data.tag == "left"][["x", "y"]])[:-1]
+        self.right_cones = np.array(data[data.tag == "right"][["x", "y"]])[:-1]
         self.big_cones = np.array(data[data.tag == "big"][["x", "y"]])
         
     def load_sdf(self, file_path):
