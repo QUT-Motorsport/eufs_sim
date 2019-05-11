@@ -12,8 +12,8 @@
   <arg name="use_robot_control_odom" default="true"/>
 
   <!-- Vehicle pose -->
-  <arg default="-43.0" name="x"/>
-  <arg default="35" name="y"/>
+  <arg default="-40.0" name="x"/>
+  <arg default="35.5" name="y"/>
   <arg default="0.3" name="z"/>
   <arg default="0.0" name="roll"/>
   <arg default="0.0" name="pitch"/>
