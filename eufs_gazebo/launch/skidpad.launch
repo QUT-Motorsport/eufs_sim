@@ -75,8 +75,4 @@
     />
   </group>
 
-  <include file="$(find eufs_gazebo)/launch/extractor.launch">
-    <arg name ="track_name" value="skidpad.csv"/>
-    <arg name ="view_distance" value="15"/>
-  </include>
 </launch>
