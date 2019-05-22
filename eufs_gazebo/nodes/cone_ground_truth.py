@@ -212,7 +212,7 @@ class ConeGroundTruth:
             # Publish cone ground truth locations
             cone_msg = coneArray()
             cone_msg.header.frame_id = self.CONE_FRAME
-            cone_msg.header.stamp = rospy.get_time()
+            cone_msg.header.stamp = rospy.Time.now()
 
             cone_markers = MarkerArray()
             marker_id = 0  # IDs are needed for the marker to work
