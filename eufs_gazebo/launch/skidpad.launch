@@ -51,10 +51,10 @@
   <!-- start robot_control node -->
   <!--<include file="$(find robot_control)/launch/robot_control.launch"/>-->
 
-  <include file="$(find eufs_gazebo)/launch/extractor.launch">
-      <arg name ="track_name" value="skidpad.csv"/>
-      <arg name ="view_distance" value="15"/>
-    </include>
+    <node name="cone_ground_truth" pkg="eufs_gazebo" type="cone_ground_truth.py" output="screen">
+        <param name="view_distance" value="15"/>
+        <param name="track_path" value="$(find eufs_gazebo)/tracks/skidpad.csv"/>
+    </node>
 
   <!-- Only launch if robot_control odom is not used -->
   <group if="$(eval arg('use_robot_control_odom') == false)">

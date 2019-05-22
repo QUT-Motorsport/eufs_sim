@@ -48,9 +48,9 @@
      <arg name="use_robot_control_odom" value="$(arg use_robot_control_odom)"/>
   </include>
   
-  <include file="$(find eufs_gazebo)/launch/extractor.launch">
-      <arg name ="track_name" value="small_track.csv"/>
-      <arg name ="view_distance" value="15"/>
-  </include>
+    <node name="cone_ground_truth" pkg="eufs_gazebo" type="cone_ground_truth.py" output="screen">
+        <param name="view_distance" value="15"/>
+        <param name="track_path" value="$(find eufs_gazebo)/tracks/small_track.csv"/>
+    </node>
   
 </launch>
