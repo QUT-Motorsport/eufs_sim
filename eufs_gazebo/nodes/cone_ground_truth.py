@@ -51,6 +51,7 @@ THE SOFTWARE.
 import pandas as pd
 import numpy as np
 from numpy import matlib
+import math
 
 # ROS
 import tf
@@ -73,6 +74,7 @@ class ConeGroundTruth:
         self.orange_cones = None
         self.midpoints = None
         self.distance = rospy.get_param("~view_distance", default=15.)
+        self.fov = rospy.get_param("~fov", default=1.91986)
         self.CONE_FRAME = "/base_footprint"  # frame of topics to be published
 
         # Load cone locations from CSV file
@@ -152,12 +154,14 @@ class ConeGroundTruth:
             translation = closest_cones - np.repeat(np.array(transform), np.shape(closest_cones)[0], axis=0)
             cones_rotated = np.dot(rotation_matrix, translation.T).T
 
-            cones_euler = []
-            for cone in cones_rotated:
-                # Filter cones that are in front of the car
-                if cone[0] > 0:
-                    cones_euler.append([cone[0], cone[1]])
-            return cones_euler
+            cones_in_view = []
+            # get cones only in the field of view
+            for each in cones_rotated:
+                # convert to polar coordinates
+                angle = np.arctan2(each[1], each[0])
+                if np.abs(angle) < self.fov/2:
+                    cones_in_view.append(each)
+            return cones_in_view
         else:
             return []
 
