@@ -1,6 +1,9 @@
 #!/usr/bin/env python
 
-""" Cone ground truth from Gazebo simulation in the frame of the car
+""" Node that simulates cone locations as they would have been received
+by the team's cone detection stack. This reads a CSV file generated
+from the track files and then publishes the appropriate cone detections
+based on the location of the car.
 
 Subscribed Topics:
     /ground_truth/state_raw (nav_msgs/Odometry)
@@ -19,6 +22,8 @@ Published Topics:
 Parameters:
     ~view_distance (float, default: 15)
         Only the cones that are within this distance are published
+    ~fov (float, default: 1.91986)
+        Field of view in front of the car
     ~track_path (string)
         Path to the track csv file
 
@@ -74,7 +79,7 @@ class ConeGroundTruth:
         self.orange_cones = None
         self.midpoints = None
         self.distance = rospy.get_param("~view_distance", default=15.)
-        self.fov = rospy.get_param("~fov", default=1.91986)
+        self.fov = rospy.get_param("~fov", default=1.91986)  # 120 degrees
         self.CONE_FRAME = "/base_footprint"  # frame of topics to be published
 
         # Load cone locations from CSV file
