@@ -2,7 +2,7 @@
 <robot name="eufs" xmlns:xacro="http://www.ros.org/wiki/xacro">
 
 
-  <xacro:include filename="$(find eufs_description)/urdf/bases/eufs_base.gazebo.xacro" />
+  <xacro:include filename="$(find eufs_description)/urdf/eufs_base.gazebo.xacro" />
 
   <xacro:macro name="eufs_base" params="name publish_bf hq">
 
@@ -22,14 +22,6 @@
              <box size="0.001 0.001 0.001" />
           </geometry>
       </visual>
-<!--
-      <collision>
-          <origin xyz="0 0 0" rpy="0 0 0" />
-          <geometry>
-            <box size="0.001 0.001 0.001" />
-          </geometry>
-      </collision>
--->
     </link>
 
     <joint name="base_footprint_joint" type="fixed">
@@ -44,7 +36,12 @@
     <inertial>
       <mass value="125.0" />
       <origin xyz="0 0 0" />
-      <inertia  ixx="1.391" ixy="0.004"  ixz="0.0"  iyy="6.853"  iyz="0.0"  izz="6.125" />
+      <inertia  ixx="16.3"
+                ixy="0.004"
+                ixz="0.0"
+                iyy="33.6"
+                iyz="0.0"
+                izz="47.9" />
     </inertial>
     <visual>
        <origin xyz="0 0 0" rpy="0 0 0" />
