@@ -4,14 +4,11 @@
 
   <xacro:include filename="$(find eufs_description)/urdf/bases/eufs_base.gazebo.xacro" />
 
-  <xacro:macro name="eufs_base" params="name publish_bf hq">
+  <xacro:macro name="eufs_base" params="name publish_bf hq clearance">
 
   <!-- Robot mechanical and motor parameters -->
   <xacro:property name="PI" value="3.1415926535897931"/>
   <xacro:property name="wheel_width" value="0.175" />
-  <!-- <xacro:property name="clearance" value="${tire_dia/2.0}" /> -->
-  <xacro:property name="clearance" value="0.25" />
-
 
   <!-- BASE FOOTPRINT -->
   <xacro:if value="${publish_bf}">
@@ -22,14 +19,6 @@
              <box size="0.001 0.001 0.001" />
           </geometry>
       </visual>
-<!--
-      <collision>
-          <origin xyz="0 0 0" rpy="0 0 0" />
-          <geometry>
-            <box size="0.001 0.001 0.001" />
-          </geometry>
-      </collision>
--->
     </link>
 
     <joint name="base_footprint_joint" type="fixed">
