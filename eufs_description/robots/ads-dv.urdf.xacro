@@ -9,10 +9,10 @@
     <!-- First we import all posible elements defined in the urdf.xacro files. All these elements are defined as macro:xacros -->
 
     <!-- Import Robotnik CAR base elements -->
-    <xacro:include filename="$(find eufs_description)/urdf/bases/ads-dv_base.urdf.xacro" />
+    <xacro:include filename="$(find eufs_description)/urdf/ads-dv_base.urdf.xacro" />
 
     <!-- Import Robotnik CAR wheels -->
-    <xacro:include filename="$(find eufs_description)/urdf/wheels/suspension_wheel.urdf.xacro" />
+    <xacro:include filename="$(find eufs_description)/urdf/suspension_wheel.urdf.xacro" />
 
     <!-- Import all available sensors -->
     <xacro:include filename="$(find eufs_description)/sensors/all_sensors.urdf.xacro" />
