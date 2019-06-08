@@ -23,7 +23,7 @@ rosdep install -i --from-path src/
 ```
 - Install Python dependencies:
 ```bash
-pip install numpy pandas scipy matplotlib
+pip install -r eufs_gazebo/requirements.txt
 ```
 
 ## 2. Compiling <a name="compiling"></a>

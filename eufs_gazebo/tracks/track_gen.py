@@ -65,7 +65,7 @@ class Track:
         """
 
         if file_path.find(".sdf") == -1:
-            print("Please give me a .sdf file. Exitting")
+            print("Please give me a .sdf file. Exiting")
             return
 
         root = ET.parse(file_path).getroot()
@@ -104,11 +104,20 @@ class Track:
                     orange.append(pose)
 
         # convert all lists to numpy as arrays for efficiency
-        self.blue_cones = np.array(blue, dtype="float64")
-        self.yellow_cones = np.array(yellow, dtype="float64")
+        if len(blue) != 0:
+            print("WARNING: No blue cones found")
+            self.blue_cones = np.array(blue, dtype="float64")
+
+        if len(yellow) != 0:
+            print("WARNING: No yellow cones found")
+            self.yellow_cones = np.array(yellow, dtype="float64")
+
         if len(big_orange) != 0:
+            print("No big orange cones found")
             self.big_orange_cones = np.array(big_orange, dtype="float64")
+
         if len(orange) != 0:
+            print("No orange cones found")
             self.orange_cones = np.array(orange, dtype="float64")
 
     def generate_tracks(self):
@@ -127,14 +136,14 @@ class Track:
             self.blue_cones = self.order_points(self.blue_cones)
             self.blue_track = self.smoothLine(self.blue_cones)
         else:
-            print("Warning: no blue/blue cones")
+            print("Warning: no blue cones")
 
         # Deal with yellow cones
         if self.yellow_cones.size is not None:
             self.yellow_cones = self.order_points(self.yellow_cones)
             self.yellow_track = self.smoothLine(self.yellow_cones)
         else:
-            print("Warning: no yellow/yellow cones")
+            print("Warning: no yellow cones")
 
         # Deal with midline
         if self.midpoints.size is not None:
@@ -157,15 +166,15 @@ class Track:
 
         midpoints = []
 
-        for each in self.blue_cones:
-            i, d = self.find_closest(each, self.yellow_cones)
-            midpoints.append([(i[0] + each[0]) / 2, (i[1] + each[1]) / 2])
+        for blue_cone in self.blue_cones:
+            closest_cone, closest_dist = self.find_closest(blue_cone, self.yellow_cones)
+            midpoints.append([(closest_cone[0] + blue_cone[0]) / 2, (closest_cone[1] + blue_cone[1]) / 2])
 
         if _plot:
-            for each in self.blue_cones:
-                i, d = self.find_closest(each, self.yellow_cones)
-                self.plot_line(i, each)
-                plt.plot((i[0] + each[0]) / 2, (i[1] + each[1]) / 2, 'bo')
+            for blue_cone in self.blue_cones:
+                closest_cone, closest_dist = self.find_closest(blue_cone, self.yellow_cones)
+                self.plot_line(i, blue_cone)
+                plt.plot((closest_cone[0] + blue_cone[0]) / 2, (closest_cone[1] + blue_cone[1]) / 2, 'bo')
 
             plt.show()
 
@@ -230,10 +239,6 @@ class Track:
         Returns:
             Nothing
         """
-
-        # if hdr is None:
-        #     print("Please give me a header as a string. Exitting...")
-        #     return
 
         if filename.find(".csv") == -1:
             filename = filename + ".csv"
@@ -379,10 +384,10 @@ class Track:
         ordered.append(current_point)
 
         while points.shape[0] is not 0:
-            i, d = self.find_closest(current_point, points)
-            ordered.append(i)
-            points = self.remove_point(i, points)
-            current_point = i
+            closest_cone, closest_dist = self.find_closest(current_point, points)
+            ordered.append(closest_cone)
+            points = self.remove_point(closest_cone, points)
+            current_point = closest_cone
 
         ordered.append(current_point)
 

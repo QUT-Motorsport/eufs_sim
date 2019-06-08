@@ -111,19 +111,20 @@ class ConeGroundTruth:
         return np.expand_dims(np.array(result).T, axis=1)
 
     def dists(self, Xtrn, Xtst):
-        """Calculates distances from one matrix vectors to 
-            the other.
+        """Calculates the distance of multiple points (rows)
+        to another point
 
         Args:
-            Xtrn (np.array): first matrix
-            Xtrn (np.array): second matrix matrix
+            Xtrn (np.array): matrix of points (in rows)
+            Xtst (np.array): anchor point
 
         Returns:
-            Matrix of distances from the first matrix vectors to the second.
+            1D matrix of distances of each row of Xtrn to the
+            anchor point Xtst
         """
         [M, L] = np.shape(Xtrn)
         [N, K] = np.shape(Xtst)
-        if K == L:
+        if K == L:  # check if dimensions are the same
             mul = np.dot(Xtst, Xtrn.T)
             XX = self.mul_by_transpose(Xtst, N)
             YY = self.mul_by_transpose(Xtrn, M)
@@ -134,7 +135,8 @@ class ConeGroundTruth:
 
     def process_cones(self, cones_list, yaw, trans):
         """Rotates the cones by the current yaw of the car
-            and filters them according to the distance provided.
+            and filters them according to the distance provided
+            and the Field of View (FOV).
 
         Args:
             cones_list (np.array): the path to the SDF file to load
@@ -156,16 +158,16 @@ class ConeGroundTruth:
                                     [-np.sin(yaw), np.cos(yaw)]])
 
         if len(closest_cones) > 0:
-            translation = closest_cones - np.repeat(np.array(transform), np.shape(closest_cones)[0], axis=0)
-            cones_rotated = np.dot(rotation_matrix, translation.T).T
+            translated_cones = closest_cones - np.repeat(np.array(transform), np.shape(closest_cones)[0], axis=0)
+            cones_rotated = np.dot(rotation_matrix, translated_cones.T).T
 
             cones_in_view = []
             # get cones only in the field of view
-            for each in cones_rotated:
+            for cone in cones_rotated:
                 # convert to polar coordinates
-                angle = np.arctan2(each[1], each[0])
+                angle = np.arctan2(cone[1], cone[0])
                 if np.abs(angle) < self.fov/2:
-                    cones_in_view.append(each)
+                    cones_in_view.append(cone)
             return cones_in_view
         else:
             return []
@@ -199,10 +201,10 @@ class ConeGroundTruth:
         """
 
         # If no subscribers to any topics, exit
-        if self.cone_pub.get_num_connections() == 0 and \
-                self.cone_marker_pub.get_num_connections() == 0 and \
-                self.midpoints_pub.get_num_connections() == 0 and \
-                self.midpoints_marker_pub.get_num_connections() == 0:
+        if (self.cone_pub.get_num_connections() == 0 and
+                self.cone_marker_pub.get_num_connections() == 0 and
+                self.midpoints_pub.get_num_connections() == 0 and
+                self.midpoints_marker_pub.get_num_connections() == 0):
             rospy.logdebug("Nobody is listening to cone_ground_truth. Doing nothing")
             return
 
@@ -211,8 +213,8 @@ class ConeGroundTruth:
         trans = np.array([pos.x, pos.y, pos.z])
         yaw = self.yaw_from_quat(msg.pose.pose.orientation)
 
-        if self.cone_pub.get_num_connections() > 0 or \
-                self.cone_marker_pub.get_num_connections() > 0:
+        if (self.cone_pub.get_num_connections() > 0 or
+                self.cone_marker_pub.get_num_connections() > 0):
 
             # Publish cone ground truth locations
             cone_msg = coneArray()
@@ -272,9 +274,9 @@ class ConeGroundTruth:
 
         # Midpoints
         # Process only if there are midpoints and subscribers
-        if self.midpoints is not None and \
+        if (self.midpoints is not None and
                 (self.midpoints_pub.get_num_connections() > 0 or
-                 self.midpoints_marker_pub.get_num_connections() > 0):
+                 self.midpoints_marker_pub.get_num_connections() > 0)):
             try:
                 closest_midpoints = self.process_cones(self.midpoints, yaw, trans)
             except Exception as e:
