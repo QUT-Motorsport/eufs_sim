@@ -42,11 +42,14 @@
 #include <tf/transform_broadcaster.h>
 #include <nav_msgs/Odometry.h>
 #include <ackermann_msgs/AckermannDriveStamped.h>
+#include <eufs_msgs/wheelSpeeds.h>
 
 class RosCanSim {
 public:
     RosCanSim();  ///< Constructor
     ~RosCanSim();  ///< Destoyer (forgot the proper word for it)
+
+    bool spin();
 
 private:
 
@@ -68,7 +71,10 @@ private:
     ros::Publisher ref_pos_flw_;
     ros::Publisher ref_pos_frw_;
 
-// Joint states published by the joint_state_controller of the Controller Manager
+    ros::Publisher wheel_speed_pub_;
+
+
+    // Joint states published by the joint_state_controller of the Controller Manager
     ros::Subscriber joint_state_sub_;
 
 // High level robot command
@@ -93,6 +99,8 @@ private:
 // Joint names - steering - position
     std::string joint_front_right_steer;
     std::string joint_front_left_steer;
+
+    double steering_link_length_; //< lenghts from the axle of the car to the wheel
 
 // Indexes to joint_states
     int frw_vel_, flw_vel_, blw_vel_, brw_vel_;
@@ -122,7 +130,7 @@ private:
     bool read_state_; // Flag to indicate joint_state has been read
 
 // Robot configuration parameters
-    double wheel_diameter_;
+    double wheel_radius_;
     double wheelbase_;
     double max_speed_;
     double max_steering_;
@@ -143,18 +151,12 @@ private:
 // Broadcaster for odom tf
     tf::TransformBroadcaster odom_broadcaster;
 
+    unsigned int wheel_speed_sequence_;
+
     // TODO documentation
     int starting();
 
     void UpdateControl();
-
-    void UpdateOdometry();
-
-    void PublishOdometry();
-
-    void stopping();
-
-    void setCommand(const ackermann_msgs::AckermannDriveStamped &msg);
 
     void jointStateCallback(const sensor_msgs::JointStateConstPtr& msg);
 
@@ -162,11 +164,9 @@ private:
 
     double saturation(double u, double min, double max);
 
-    double radnorm( double value );
+    void publishWheelSpeeds();
 
-    double radnorm2( double value );
-
-    bool spin();
+    double angularToRPM(double angular_vel);
 
 };
 

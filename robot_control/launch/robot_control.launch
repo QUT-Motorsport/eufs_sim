@@ -11,6 +11,7 @@
     <param name="wheel_diameter" value="0.505"/>
     <param name="max_speed" value="100.0"/>
     <param name="max_steering" value="0.523599"/> <!-- 30 degs -->
+    <param name="desired_freq" value="100"/>
   </node> 
   
 </launch>

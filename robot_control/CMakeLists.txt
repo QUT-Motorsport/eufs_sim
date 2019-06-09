@@ -11,6 +11,7 @@ find_package(catkin REQUIRED COMPONENTS
   tf
   diagnostic_msgs
   diagnostic_updater
+        eufs_msgs
 )
 
 catkin_package(

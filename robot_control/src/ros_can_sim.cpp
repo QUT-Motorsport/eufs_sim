@@ -65,10 +65,16 @@ RosCanSim::RosCanSim() : nh_("~") {
 
     // car parameters
     nh_.param<double>("wheelbase", wheelbase_, 1.53);
-    nh_.param<double>("wheel_diameter", wheel_diameter_, 0.505);
+    nh_.param<double>("wheel_radius", wheel_radius_, 0.505/2);
     nh_.param<double>("max_speed", max_speed_, 20);
     nh_.param<double>("max_steering", max_steering_, 0.523599); // 27.2 degrees
 
+    // steering link lengths for the ADS-DV are 0.02534 which are derived
+    // from the vehicle specs by Ignat. Derived by inverse solving the
+    // equations from page 30 of http://www.imgeorgiev.com/files/Ignat_MInf1_project.pdf
+    nh_.param<double>("steering_link_length", steering_link_length_, 0.02534);
+
+    nh_.param<double>("desired_freq", desired_freq_, 100.0);
     nh_.param<double>("joints_state_time_window", joints_state_time_window_, 1.0);
 
     // Robot Positions
@@ -82,6 +88,8 @@ RosCanSim::RosCanSim() : nh_("~") {
     // Times
     current_time = ros::Time::now();
     last_time = current_time;
+
+    wheel_speed_sequence_ = 0;
 
     // Robot state space control references
     vel_ref_ = 0.0;
@@ -98,6 +106,8 @@ RosCanSim::RosCanSim() : nh_("~") {
     ref_vel_brw_ = nh_.advertise<std_msgs::Float64>( brw_vel_topic_, 50);
     ref_pos_frw_ = nh_.advertise<std_msgs::Float64>( frw_pos_topic_, 50);
     ref_pos_flw_ = nh_.advertise<std_msgs::Float64>( flw_pos_topic_, 50);
+
+    wheel_speed_pub_ = nh_.advertise<eufs_msgs::wheelSpeeds>("/ros_can/wheel_speeds", 50);
 
     // Flag to indicate joint_state has been read
     read_state_ = false;
@@ -127,21 +137,20 @@ RosCanSim::RosCanSim() : nh_("~") {
     void RosCanSim::UpdateControl() {
         // Compute state control actions
         // State feedback error 4 position loops / 4 velocity loops
-        // Single steering
-        double d1;
-        double alfa_ref_left = 0.0;
-        double alfa_ref_right = 0.0;
-        if (steering_ref_!=0.0) {  // div/0
-            d1 =  wheelbase_ / tan (steering_ref_);
-            alfa_ref_left = atan2( wheelbase_, d1 - 0.105);
-            alfa_ref_right = atan2( wheelbase_, d1 + 0.105);
-            if (steering_ref_<0.0) {
-                alfa_ref_left = alfa_ref_left - PI;
-                alfa_ref_right = alfa_ref_right - PI;
+        // For more details refer to page 30 of http://www.imgeorgiev.com/files/Ignat_MInf1_project.pdf
+        double R;
+        double steering_ref_left, steering_ref_right;
+        if (std::fabs(steering_ref_) > 1e06) {  // to avoid division by 0
+            R =  wheelbase_ / tan (steering_ref_);
+            steering_ref_left = atan2( wheelbase_, R - steering_link_length_);
+            steering_ref_right = atan2( wheelbase_, R + steering_link_length_);
+            if (steering_ref_ < 0.0) {
+                steering_ref_left = steering_ref_left - PI;
+                steering_ref_right = steering_ref_right - PI;
             }
         } else {
-            alfa_ref_left = 0.0;
-            alfa_ref_right = 0.0;
+            steering_ref_left = 0.0;
+            steering_ref_right = 0.0;
         }
 
         // Angular position ref publish
@@ -150,12 +159,11 @@ RosCanSim::RosCanSim() : nh_("~") {
         std_msgs::Float64 brw_ref_pos_msg;
         std_msgs::Float64 blw_ref_pos_msg;
 
-        flw_ref_pos_msg.data = alfa_ref_left;
-        frw_ref_pos_msg.data = alfa_ref_right;
+        flw_ref_pos_msg.data = steering_ref_left;
+        frw_ref_pos_msg.data = steering_ref_right;
 
-        // Linear speed ref publish (could be improved by setting correct speed to each wheel according to turning state
-        // w = v_mps / (PI * D);   w_rad = w * 2.0 * PI
-        double ref_speed_joint = 2.0 * vel_ref_ / wheel_diameter_;
+        // Linear speed ref publish
+        double ref_speed_joint = vel_ref_ / wheel_radius_;
 
         std_msgs::Float64 frw_ref_vel_msg;
         std_msgs::Float64 flw_ref_vel_msg;
@@ -175,116 +183,43 @@ RosCanSim::RosCanSim() : nh_("~") {
         ref_pos_flw_.publish( flw_ref_pos_msg );
     }
 
-    // Update robot odometry depending on kinematic configuration
-    void RosCanSim::UpdateOdometry() {
-        // Get angles
-        double a1, a2;
+    void RosCanSim::publishWheelSpeeds() {
 
         if( (ros::Time::now() - joint_state_.header.stamp).toSec() > joints_state_time_window_){
-            ROS_WARN_THROTTLE(2, "RosCanSim::UpdateOdometry: joint_states are not being received");
+            ROS_WARN_THROTTLE(2, "ros_can_sim :: joint_states are not being received");
             return;
         }
 
-        a1 = joint_state_.position[frw_pos_];
-        a2 = joint_state_.position[flw_pos_];
+        // get steering feedback
+        // warning converting doubles to floats
+        float right_steering_feedback = joint_state_.position[frw_pos_];
+        float left_steering_feedback = joint_state_.position[flw_pos_];
+        float steering_feedback = right_steering_feedback + left_steering_feedback / 2.0;
 
-        // Linear speed of each wheel [mps]
-        double v3, v4;
-        // filtering noise from the Velocity controller when the speed is 0.0 (by using an open loop with desired speed)
-        if( vel_ref_ == 0.0) {
-            v3 = 0.0;
-            v4 = 0.0;
-        } else {
-            v3 = joint_state_.velocity[blw_vel_] * (wheel_diameter_ / 2.0);
-            v4 = joint_state_.velocity[brw_vel_] * (wheel_diameter_ / 2.0);
+        if (fabs(steering_feedback) > max_steering_) {
+            ROS_DEBUG("ros_can_sim :: steering feedback exceeded limit");
+            ROS_DEBUG("ros_can_sim :: steering feedback = %f", steering_feedback);
+            ROS_DEBUG("ros_can_sim :: max steering = %f", max_steering_);
         }
-        // Turning angle front
-        double fBetaRads = (a1 + a2) / 2.0;
 
-        // Linear speed
-        double fSamplePeriod = 1.0 / desired_freq_;  // Default sample period
-        double v_mps = -(v3 + v4) / 2.0;
+        // get velocity feedback
+        auto lf_wheel_rpm = angularToRPM(-joint_state_.velocity[flw_vel_]);
+        auto rf_wheel_rpm = angularToRPM(-joint_state_.velocity[frw_vel_]);
+        auto lb_wheel_rpm = angularToRPM(-joint_state_.velocity[blw_vel_]);
+        auto rb_wheel_rpm = angularToRPM(-joint_state_.velocity[brw_vel_]);
 
-        current_time = ros::Time::now();
+        eufs_msgs::wheelSpeeds msg;
+        msg.header.stamp = joint_state_.header.stamp;
+        msg.header.seq = wheel_speed_sequence_;
+        msg.lfSpeed = lf_wheel_rpm;
+        msg.rfSpeed = rf_wheel_rpm;
+        msg.lbSpeed = lb_wheel_rpm;
+        msg.rbSpeed = rb_wheel_rpm;
+        msg.steering = steering_feedback;
 
-        x_vel_ = v_mps * cos(theta_);
-        y_vel_ = v_mps * sin(theta_);
-        theta_vel_ = (tan(fBetaRads) * v_mps) / wheelbase_;
+        wheel_speed_pub_.publish(msg);
 
-        double dt = current_time.toSec() - last_time.toSec();
-        double delta_x = x_vel_ * dt;
-        double delta_y = y_vel_ * dt;
-        double delta_th = theta_vel_ * dt;
-
-        x_pos_ += delta_x;
-        y_pos_ += delta_y;
-        theta_ += delta_th;
-
-        last_time = current_time;
-    }
-
-    // Publish robot odometry tf and topic depending
-    void RosCanSim::PublishOdometry() {
-        //first, we'll publish the transform over tf
-        // TODO change to tf_prefix
-        geometry_msgs::TransformStamped odom_trans;
-        odom_trans.header.stamp = current_time;
-        odom_trans.header.frame_id = "odom";
-        odom_trans.child_frame_id = "base_footprint";
-
-        geometry_msgs::Quaternion odom_quat = tf::createQuaternionMsgFromYaw(theta_);
-
-        odom_trans.transform.translation.x = x_pos_;
-        odom_trans.transform.translation.y = y_pos_;
-        odom_trans.transform.translation.z = 0.0;
-        odom_trans.transform.rotation = odom_quat;
-
-        // send the transform over /tf
-        // activate / deactivate with param
-        // this tf in needed when not using robot_pose_ekf
-        if (publish_odom_tf_) odom_broadcaster.sendTransform(odom_trans);
-
-        //next, we'll publish the odometry message over ROS
-        nav_msgs::Odometry odom;
-        odom.header.stamp = current_time;
-        odom.header.frame_id = "odom";
-
-        //set the position
-        // Position
-        odom.pose.pose.position.x = x_pos_;
-        odom.pose.pose.position.y = y_pos_;
-        odom.pose.pose.position.z = 0.0;
-        // Orientation
-        odom.pose.pose.orientation = odom_quat;
-        // Pose covariance
-        for(int i = 0; i < 6; i++)
-            odom.pose.covariance[i*6+i] = 0.1;  // test 0.001
-
-        //set the velocity
-        odom.child_frame_id = "base_footprint";
-        // Linear velocities
-        odom.twist.twist.linear.x = x_vel_;
-        odom.twist.twist.linear.y = y_vel_;
-        odom.twist.twist.linear.z = 0.0;
-        // Angular velocities
-        odom.twist.twist.angular.z = theta_vel_;
-        // Twist covariance
-        for(int i = 0; i < 6; i++)
-            odom.twist.covariance[6*i+i] = 0.1;  // test 0.001
-
-        //publish the message
-        odom_pub_.publish(odom);
-    }
-
-    /// Controller stopping
-    void RosCanSim::stopping()
-    {}
-
-
-    // Set the base velocity command
-    void RosCanSim::setCommand(const ackermann_msgs::AckermannDriveStamped &msg) {
-        v_ref_ = saturation(msg.drive.speed, -max_speed_, max_speed_);
-        alfa_ref_ = saturation(msg.drive.steering_angle, -max_steering_, max_steering_);
+        wheel_speed_sequence_++;
     }
 
     // Topic command
@@ -295,8 +230,8 @@ RosCanSim::RosCanSim() : nh_("~") {
 
     // Topic command
     void RosCanSim::commandCallback(const ackermann_msgs::AckermannDriveStamped::ConstPtr& msg) {
-        base_vel_msg_ = *msg;
-        this->setCommand(base_vel_msg_);
+        vel_ref_ = saturation(msg.drive.speed, -max_speed_, max_speed_);
+        steering_ref_ = saturation(msg.drive.steering_angle, -max_steering_, max_steering_);
     }
 
     double RosCanSim::saturation(double u, double min, double max) {
@@ -305,16 +240,9 @@ RosCanSim::RosCanSim() : nh_("~") {
         return u;
     }
 
-    double RosCanSim::radnorm( double value ) {
-        while (value > PI) value -= PI;
-        while (value < -PI) value += PI;
-        return value;
-    }
-
-    double RosCanSim::radnorm2( double value ) {
-        while (value > 2.0*PI) value -= 2.0*PI;
-        while (value < -2.0*PI) value += 2.0*PI;
-        return value;
+    // RPM = (60 * Omega) / 2 PI
+    double RosCanSim::angularToRPM(double angular_vel) {
+        return (60*angular_vel) / (2*PI);
     }
 
     bool RosCanSim::spin()
@@ -328,8 +256,7 @@ RosCanSim::RosCanSim() : nh_("~") {
             {
                 while(ros::ok() && nh_.ok()) {
                     UpdateControl();
-                    UpdateOdometry();
-                    PublishOdometry();
+                    publishWheelSpeeds();
                     ros::spinOnce();
                     r.sleep();
                 }
@@ -348,11 +275,11 @@ RosCanSim::RosCanSim() : nh_("~") {
 }; // Class RosCanSim
 
 int main(int argc, char** argv) {
-    ros::init(argc, argv, "robot_control");
+    ros::init(argc, argv, "ros_can_sim");
 
-    ros::NodeHandle n;
-    RosCanSim scc(n);
-    scc.spin();
+    RosCanSim node = RosCanSim();
+    node.spin();
+
 
     return (0);
 }

@@ -25,6 +25,7 @@
   <depend>tf</depend>
   <depend>diagnostic_msgs</depend>
   <depend>diagnostic_updater</depend>
+  <depend>eufs_msgs</depend>
 
   <export>
   </export>
