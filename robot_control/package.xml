@@ -26,8 +26,12 @@
   <depend>diagnostic_msgs</depend>
   <depend>diagnostic_updater</depend>
   <depend>eufs_msgs</depend>
+  <depend>rqt_gui</depend>
+  <depend>std_srvs</depend>
+  <depend>rqt_gui_py</depend>
 
   <export>
+    <rqt_gui plugin="${prefix}/plugin.xml"/>
   </export>
 
 </package>

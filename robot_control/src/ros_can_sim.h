@@ -35,6 +35,10 @@
 #ifndef ROBOT_CONTROL_ROS_CAN_SIM_H
 #define ROBOT_CONTROL_ROS_CAN_SIM_H
 
+#include <chrono>
+#include <thread>
+#include <iostream>
+
 #include <ros/ros.h>
 #include <sensor_msgs/JointState.h>
 #include <sensor_msgs/Imu.h>
@@ -43,15 +47,40 @@
 #include <nav_msgs/Odometry.h>
 #include <ackermann_msgs/AckermannDriveStamped.h>
 #include <eufs_msgs/wheelSpeeds.h>
+#include <eufs_msgs/canState.h>
+#include <std_msgs/String.h>
+#include <std_msgs/Bool.h>
+#include <std_srvs/Empty.h>
+
 
 class RosCanSim {
 public:
     RosCanSim();  ///< Constructor
-    ~RosCanSim();  ///< Destoyer (forgot the proper word for it)
+    ~RosCanSim();  ///< Destroyer (forgot the proper word for it)
 
     bool spin();
 
 private:
+
+    typedef enum e_as_state_type {
+        AS_OFF = 1,
+        AS_READY = 2,
+        AS_DRIVING = 3,
+        AS_EMERGENCY_BRAKE = 4,
+        AS_FINISHED = 5,
+    } as_state_type;
+
+
+    typedef enum e_ami_state_type {
+        AMI_NOT_SELECTED = 0,
+        AMI_ACCELERATION = 1,
+        AMI_SKIDPAD = 2,
+        AMI_AUTOCROSS = 3,
+        AMI_TRACK_DRIVE = 4,
+        AMI_BRAKE_TEST = 5,
+        AMI_INSPECTION = 6,
+        AMI_MANUAL = 7,
+    } ami_state_type;
 
     double PI = 3.14159265; ///< Value for pi
 
@@ -72,6 +101,15 @@ private:
     ros::Publisher ref_pos_frw_;
 
     ros::Publisher wheel_speed_pub_;
+    ros::Publisher state_pub_;
+    ros::Publisher state_pub_str_;
+
+    ros::ServiceServer reset_srv_;
+
+    bool driving_flag_;
+
+    as_state_type as_state_;
+    ami_state_type ami_state_;
 
 
     // Joint states published by the joint_state_controller of the Controller Manager
@@ -79,6 +117,8 @@ private:
 
 // High level robot command
     ros::Subscriber cmd_sub_;
+
+    ros::Subscriber flag_sub_;
 
 // Ackermann Topics - control action - traction - velocity
     std::string frw_vel_topic_;
@@ -167,6 +207,12 @@ private:
     void publishWheelSpeeds();
 
     double angularToRPM(double angular_vel);
+
+    void flagCallback(std_msgs::Bool msg);
+
+    bool resetState(std_srvs::Empty::Request& request, std_srvs::Empty::Response& response);
+
+    void updateState();
 
 };
 
