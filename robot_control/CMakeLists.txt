@@ -21,7 +21,7 @@ include_directories(
   ${catkin_INCLUDE_DIRS}
 )
 
-add_executable(robot_control_node src/robot_control.cpp)
+add_executable(robot_control_node src/ros_can_sim.cpp)
 
 target_link_libraries(robot_control_node
    ${catkin_LIBRARIES}
