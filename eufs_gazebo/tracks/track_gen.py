@@ -105,20 +105,24 @@ class Track:
 
         # convert all lists to numpy as arrays for efficiency
         if len(blue) != 0:
-            print("WARNING: No blue cones found")
             self.blue_cones = np.array(blue, dtype="float64")
+        else:
+            print("WARNING: No blue cones found")
 
         if len(yellow) != 0:
-            print("WARNING: No yellow cones found")
             self.yellow_cones = np.array(yellow, dtype="float64")
+        else:
+            print("WARNING: No yellow cones found")
 
         if len(big_orange) != 0:
-            print("No big orange cones found")
             self.big_orange_cones = np.array(big_orange, dtype="float64")
+        else:
+            print("No big orange cones found")
 
         if len(orange) != 0:
-            print("No orange cones found")
             self.orange_cones = np.array(orange, dtype="float64")
+        else:
+            print("No orange cones found")
 
     def generate_tracks(self):
         """Generates blue, yellow and centerline tracks for the course
