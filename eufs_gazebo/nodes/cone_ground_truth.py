@@ -139,7 +139,7 @@ class ConeGroundTruth:
             and the Field of View (FOV).
 
         Args:
-            cones_list (np.array): the path to the SDF file to load
+            cones_list (np.array): 2D list of cones where each row is a cone
             yaw                  : current yaw of the car
             trans (np.array)     : translation of the car in the map frame
 
