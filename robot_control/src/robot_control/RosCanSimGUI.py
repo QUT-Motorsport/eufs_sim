@@ -65,6 +65,8 @@ class RosCanGUI(Plugin):
             QPushButton, "ResetButton").clicked.connect(self.resetState)
         self._widget.findChild(
             QPushButton, "RequestEBS").clicked.connect(self.requestEBS)
+        self._widget.findChild(
+            QPushButton, "DriveButton").clicked.connect(self.justDrive)
 
         # Subscribers
         self.state_sub = rospy.Subscriber(
@@ -132,10 +134,20 @@ class RosCanGUI(Plugin):
         Args:
             msg (eufs_msgs/CanState): state of ros_can
         """
-        self.widget.findChild(QLabel, "StateDisplay").setText(
+        self._widget.findChild(QLabel, "StateDisplay").setText(
             self.states[msg.as_state])
-        self.widget.findChild(QLabel, "MissionDisplay").setText(
-            self.states[msg.as_state])
+        self._widget.findChild(QLabel, "MissionDisplay").setText(
+            self.missions[msg.ami_state])
+
+    def justDrive(self):
+        """overrides the state machine of the car and just makes it drive"""
+
+        # create message to be sent
+        state_msg = canState()
+        state_msg.as_state = canState.AS_DRIVING
+        state_msg.ami_state = canState.AMI_MANUAL
+
+        self.set_mission_pub.publish(state_msg)
 
     def shutdown_plugin(self):
         """stop all publisher, subscriber and services

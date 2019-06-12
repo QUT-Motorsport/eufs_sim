@@ -63,23 +63,23 @@ public:
 private:
 
     typedef enum e_as_state_type {
-        AS_OFF = 1,
-        AS_READY = 2,
-        AS_DRIVING = 3,
-        AS_EMERGENCY_BRAKE = 4,
-        AS_FINISHED = 5,
+        AS_OFF = 0,
+        AS_READY = 1,
+        AS_DRIVING = 2,
+        AS_EMERGENCY_BRAKE = 3,
+        AS_FINISHED = 4,
     } as_state_type;
 
 
     typedef enum e_ami_state_type {
-        AMI_NOT_SELECTED = 0,
-        AMI_ACCELERATION = 1,
-        AMI_SKIDPAD = 2,
-        AMI_AUTOCROSS = 3,
-        AMI_TRACK_DRIVE = 4,
-        AMI_BRAKE_TEST = 5,
-        AMI_INSPECTION = 6,
-        AMI_MANUAL = 7,
+        AMI_NOT_SELECTED = 10,
+        AMI_ACCELERATION = 11,
+        AMI_SKIDPAD = 12,
+        AMI_AUTOCROSS = 13,
+        AMI_TRACK_DRIVE = 14,
+        AMI_BRAKE_TEST = 15,
+        AMI_INSPECTION = 16,
+        AMI_MANUAL = 17,
     } ami_state_type;
 
     double PI = 3.14159265; ///< Value for pi
@@ -115,6 +115,7 @@ private:
 
     // Joint states published by the joint_state_controller of the Controller Manager
     ros::Subscriber joint_state_sub_;
+    ros::Subscriber set_mission_sub_;
 
 // High level robot command
     ros::Subscriber cmd_sub_;
@@ -215,7 +216,13 @@ private:
 
     bool requestEBS(std_srvs::Trigger::Request& request, std_srvs::Trigger::Response& response);
 
+    void setMission(eufs_msgs::canState state);
+
     void updateState();
+
+    void publishState();
+
+    std_msgs::String makeStateString(const eufs_msgs::canState &state);
 
 };
 

@@ -98,12 +98,14 @@ RosCanSim::RosCanSim() : nh_("~") {
     // init states
     as_state_ = as_state_type::AS_OFF;
     ami_state_ = ami_state_type::AMI_NOT_SELECTED;
+    driving_flag_ = false;
 
     // Subscribers
-    joint_state_sub_ = nh_.subscribe<sensor_msgs::JointState>("joint_states", 1, &RosCanSim::jointStateCallback, this);
+    joint_state_sub_ = nh_.subscribe<sensor_msgs::JointState>("/eufs/joint_states", 1, &RosCanSim::jointStateCallback, this);
     cmd_sub_ = nh_.subscribe<ackermann_msgs::AckermannDriveStamped>("/cmd_vel_out", 1, &RosCanSim::commandCallback,
                                                                     this);
     flag_sub_ = nh_.subscribe<std_msgs::Bool>("/ros_can/flag", 1, &RosCanSim::flagCallback, this);
+    set_mission_sub_ = nh_.subscribe<eufs_msgs::canState>("/ros_can/set_mission", 1, &RosCanSim::setMission, this);
 
     reset_srv_ = nh_.advertiseService("/ros_can/reset", &RosCanSim::resetState, this);
     ebs_srv_ = nh_.advertiseService("/ros_can/ebs", &RosCanSim::requestEBS, this);
@@ -205,6 +207,32 @@ void RosCanSim::UpdateControl() {
     ref_pos_flw_.publish(flw_ref_pos_msg);
 }
 
+void RosCanSim::setMission(eufs_msgs::canState state) {
+    if (state.as_state == eufs_msgs::canState::AS_DRIVING)
+        as_state_ = as_state_type::AS_DRIVING;
+
+    if (ami_state_ == ami_state_type::AMI_NOT_SELECTED) {
+        switch (state.ami_state) {
+            case eufs_msgs::canState::AMI_ACCELERATION:
+                ami_state_ = ami_state_type::AMI_ACCELERATION;
+            case eufs_msgs::canState::AMI_SKIDPAD:
+                ami_state_ = ami_state_type::AMI_SKIDPAD;
+            case eufs_msgs::canState::AMI_AUTOCROSS:
+                ami_state_ = ami_state_type::AMI_AUTOCROSS;
+            case eufs_msgs::canState::AMI_TRACK_DRIVE:
+                ami_state_ = ami_state_type::AMI_TRACK_DRIVE;
+            case eufs_msgs::canState::AMI_BRAKE_TEST:
+                ami_state_ = ami_state_type::AMI_BRAKE_TEST;
+            case eufs_msgs::canState::AMI_INSPECTION:
+                ami_state_ = ami_state_type::AMI_INSPECTION;
+            case eufs_msgs::canState::AMI_MANUAL:
+                ami_state_ = ami_state_type::AMI_MANUAL;
+        }
+    } else {
+        ROS_WARN("Failed to set mission as a mission was set previously");
+    }
+}
+
 bool RosCanSim::resetState(std_srvs::Trigger::Request& request, std_srvs::Trigger::Response& response) {
     (void)request;  // suppress unused parameter warning
     (void)response; // suppress unused parameter warning
@@ -304,6 +332,85 @@ void RosCanSim::updateState() {
     }
 }
 
+void RosCanSim::publishState() {
+    if (state_pub_.getNumSubscribers() == 0 &&
+            state_pub_str_.getNumSubscribers() == 0)
+        return; // do nothing
+
+    // create message
+    eufs_msgs::canState state_msg;
+    state_msg.as_state = as_state_;
+    state_msg.ami_state = ami_state_;
+    state_msg.mission_flag = driving_flag_;
+
+    if (state_pub_.getNumSubscribers() > 0)
+        state_pub_.publish(state_msg);
+
+    if (state_pub_str_.getNumSubscribers() > 0)
+        state_pub_str_.publish(makeStateString(state_msg));
+}
+
+std_msgs::String RosCanSim::makeStateString(const eufs_msgs::canState &state) {
+    std::string str1;
+    std::string str2;
+    std::string str3;
+
+    switch (state.as_state) {
+        case eufs_msgs::canState::AS_OFF:
+            str1 = "AS:OFF";
+            break;
+        case eufs_msgs::canState::AS_READY:
+            str1 = "AS:READY";
+            break;
+        case eufs_msgs::canState::AS_DRIVING:
+            str1 = "AS:DRIVING";
+            break;
+        case eufs_msgs::canState::AS_FINISHED:
+            str1 = "AS:FINISHED";
+            break;
+        case eufs_msgs::canState::AS_EMERGENCY_BRAKE:
+            str1 = "AS:EMERGENCY";
+            break;
+        default:
+            str1 = "NO_SUCH_MESSAGE";
+    }
+
+    switch (state.ami_state) {
+        case eufs_msgs::canState::AMI_NOT_SELECTED:
+            str2 = "AMI:NOT_SELECTED";
+            break;
+        case eufs_msgs::canState::AMI_ACCELERATION:
+            str2 = "AMI:ACCELERATION";
+            break;
+        case eufs_msgs::canState::AMI_SKIDPAD:
+            str2 = "AMI:SKIDPAD";
+            break;
+        case eufs_msgs::canState::AMI_AUTOCROSS:
+            str2 = "AMI:AUTOCROSS";
+            break;
+        case eufs_msgs::canState::AMI_TRACK_DRIVE:
+            str2 = "AMI:TRACKDRIVE";
+            break;
+        case eufs_msgs::canState::AMI_INSPECTION:
+            str2 = "AS:INSPECTION";
+            break;
+        case eufs_msgs::canState::AMI_BRAKE_TEST:
+            str2 = "AS:BRAKETEST";
+            break;
+        default:
+            str2 = "NO_SUCH_MESSAGE";
+    }
+
+    if (driving_flag_) 
+        str3 = "DRIVING:TRUE";
+    else
+        str3 = "DRIVING:FALSE";
+
+    std_msgs::String msg = std_msgs::String();
+    msg.data = str1 + " " + str2 + " " + str3;
+    return msg;
+}
+
 void RosCanSim::flagCallback(std_msgs::Bool msg) {
     driving_flag_ = msg.data;
 }
@@ -349,6 +456,7 @@ bool RosCanSim::spin() {
                 this->UpdateControl();
                 this->publishWheelSpeeds();
                 this->updateState();
+                this->publishState();
                 ros::spinOnce();
                 r.sleep();
             }
