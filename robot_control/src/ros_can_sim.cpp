@@ -106,6 +106,7 @@ RosCanSim::RosCanSim() : nh_("~") {
     flag_sub_ = nh_.subscribe<std_msgs::Bool>("/ros_can/flag", 1, &RosCanSim::flagCallback, this);
 
     reset_srv_ = nh_.advertiseService("/ros_can/reset", &RosCanSim::resetState, this);
+    ebs_srv_ = nh_.advertiseService("/ros_can/ebs", &RosCanSim::requestEBS, this);
 
     state_pub_ = nh_.advertise<eufs_msgs::canState>("/ros_can/state", 1);
     state_pub_str_ = nh_.advertise<std_msgs::String>("/ros_can/state_str", 1);
@@ -204,12 +205,22 @@ void RosCanSim::UpdateControl() {
     ref_pos_flw_.publish(flw_ref_pos_msg);
 }
 
-bool RosCanSim::resetState(std_srvs::Empty::Request& request, std_srvs::Empty::Response& response) {
+bool RosCanSim::resetState(std_srvs::Trigger::Request& request, std_srvs::Trigger::Response& response) {
     (void)request;  // suppress unused parameter warning
     (void)response; // suppress unused parameter warning
     as_state_ = as_state_type::AS_OFF;
     ami_state_ = ami_state_type::AMI_NOT_SELECTED;
-    return true;
+    response.success = true;
+    return response.success;
+}
+
+bool RosCanSim::requestEBS(std_srvs::Trigger::Request& request, std_srvs::Trigger::Response& response) {
+    (void)request;  // suppress unused parameter warning
+    (void)response; // suppress unused parameter warning
+    as_state_ = as_state_type::AS_EMERGENCY_BRAKE;
+    ami_state_ = ami_state_type::AMI_NOT_SELECTED;
+    response.success = true;
+    return response.success;
 }
 
 void RosCanSim::publishWheelSpeeds() {

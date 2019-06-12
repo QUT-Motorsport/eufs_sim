@@ -50,7 +50,7 @@
 #include <eufs_msgs/canState.h>
 #include <std_msgs/String.h>
 #include <std_msgs/Bool.h>
-#include <std_srvs/Empty.h>
+#include <std_srvs/Trigger.h>
 
 
 class RosCanSim {
@@ -105,6 +105,7 @@ private:
     ros::Publisher state_pub_str_;
 
     ros::ServiceServer reset_srv_;
+    ros::ServiceServer ebs_srv_;
 
     bool driving_flag_;
 
@@ -210,7 +211,9 @@ private:
 
     void flagCallback(std_msgs::Bool msg);
 
-    bool resetState(std_srvs::Empty::Request& request, std_srvs::Empty::Response& response);
+    bool resetState(std_srvs::Trigger::Request& request, std_srvs::Trigger::Response& response);
+
+    bool requestEBS(std_srvs::Trigger::Request& request, std_srvs::Trigger::Response& response);
 
     void updateState();
 
