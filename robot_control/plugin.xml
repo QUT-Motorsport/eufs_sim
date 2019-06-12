@@ -1,20 +1,12 @@
 <library path="src">
-    <class name="ros_can_sim_gui" type="robot_control.RosCanSimGUI.MyPlugin" base_class_type="rqt_gui_py::Plugin">
-        <description>
+  <class name="ros_can_sim_gui" type="robot_control.RosCanSimGUI.RosCanGUI" base_class_type="rqt_gui_py::Plugin">
+    <description>
             A GUI to control the state machine of ros_can_sim
-        </description>
-        <qtgui>
-            <!-- optional grouping...
-            <group>
-              <label>Group</label>
-            </group>
-            <group>
-              <label>Subgroup</label>
-            </group>
-            -->
-            <label>ros_can_sim GUI</label>
-            <icon type="theme">system-help</icon>
-            <statustip>Controls the state machine of ros_can_sim</statustip>
-        </qtgui>
-    </class>
+    </description>
+    <qtgui>
+      <label>ros_can_sim GUI</label>
+      <icon type="theme">system-help</icon>
+      <statustip>Controls the state machine of ros_can_sim</statustip>
+    </qtgui>
+  </class>
 </library>
