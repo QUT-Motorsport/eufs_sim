@@ -101,7 +101,7 @@
         </rect>
       </property>
       <property name="text">
-        <string>Request EBS</string>
+        <string>Req. EBS</string>
       </property>
       <property name="font">
         <font>
@@ -202,6 +202,26 @@
       <property name="font">
         <font>
           <pointsize>10</pointsize>
+        </font>
+      </property>
+    </widget>
+
+    <!-- Helpful info -->
+    <widget class="QLabel" name="Help">
+      <property name="geometry">
+        <rect>
+          <x>20</x>
+          <y>190</y>
+          <width>300</width>
+          <height>15</height>
+        </rect>
+      </property>
+      <property name="text">
+        <string>Will move only in the DRIVING state</string>
+      </property>
+      <property name="font">
+        <font>
+          <pointsize>8</pointsize>
         </font>
       </property>
     </widget>
