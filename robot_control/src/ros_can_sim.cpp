@@ -38,28 +38,19 @@
 RosCanSim::RosCanSim() : nh_("~") {
     ROS_INFO("ros_can_sim :: Starting ");
 
-    // Get robot model from the parameters
-    if (!nh_.getParam("model", robot_model_)) {
-        ROS_ERROR("Robot model not defined.");
-        exit(-1);
-    }
-
     // Ackermann configuration - traction - topics
-    nh_.param<std::string>("frw_vel_topic", frw_vel_topic_, robot_model_ + "/right_front_axle_controller/command");
-    nh_.param<std::string>("flw_vel_topic", flw_vel_topic_, robot_model_ + "/left_front_axle_controller/command");
-    nh_.param<std::string>("blw_vel_topic", blw_vel_topic_, robot_model_ + "/left_rear_axle_controller/command");
-    nh_.param<std::string>("brw_vel_topic", brw_vel_topic_, robot_model_ + "/right_rear_axle_controller/command");
+    nh_.param<std::string>("frw_vel_topic", frw_vel_topic_, "/eufs/right_front_axle_controller/command");
+    nh_.param<std::string>("flw_vel_topic", flw_vel_topic_, "/eufs/left_front_axle_controller/command");
+    nh_.param<std::string>("blw_vel_topic", blw_vel_topic_, "/eufs/left_rear_axle_controller/command");
+    nh_.param<std::string>("brw_vel_topic", brw_vel_topic_, "/eufs/right_rear_axle_controller/command");
+    nh_.param<std::string>("frw_pos_topic", frw_pos_topic_, "/eufs/right_steering_joint_controller/command");
+    nh_.param<std::string>("flw_pos_topic", flw_pos_topic_, "/eufs/left_steering_joint_controller/command");
 
     // Ackermann configuration - traction - joint names
     nh_.param<std::string>("joint_front_right_wheel", joint_front_right_wheel, "right_front_axle");
     nh_.param<std::string>("joint_front_left_wheel", joint_front_left_wheel, "left_front_axle");
     nh_.param<std::string>("joint_back_left_wheel", joint_back_left_wheel, "left_rear_axle");
     nh_.param<std::string>("joint_back_right_wheel", joint_back_right_wheel, "right_rear_axle");
-
-    // Ackermann configuration - direction - topics
-    nh_.param<std::string>("frw_pos_topic", frw_pos_topic_, robot_model_ + "/right_steering_joint_controller/command");
-    nh_.param<std::string>("flw_pos_topic", flw_pos_topic_, robot_model_ + "/left_steering_joint_controller/command");
-
     nh_.param<std::string>("joint_front_right_steer", joint_front_right_steer, "right_steering_joint");
     nh_.param<std::string>("joint_front_left_steer", joint_front_left_steer, "left_steering_joint");
 
@@ -85,10 +76,6 @@ RosCanSim::RosCanSim() : nh_("~") {
     y_vel_ = 0.0;
     theta_vel_ = 0.0;
 
-    // Times
-    current_time = ros::Time::now();
-    last_time = current_time;
-
     wheel_speed_sequence_ = 0;
 
     // Robot state space control references
@@ -112,7 +99,7 @@ RosCanSim::RosCanSim() : nh_("~") {
 
     state_pub_ = nh_.advertise<eufs_msgs::canState>("/ros_can/state", 1);
     state_pub_str_ = nh_.advertise<std_msgs::String>("/ros_can/state_str", 1);
-    wheel_speed_pub_ = nh_.advertise<eufs_msgs::wheelSpeeds>("ros_can/wheel_speeds", 10);
+    wheel_speed_pub_ = nh_.advertise<eufs_msgs::wheelSpeeds>("/ros_can/wheel_speeds", 10);
 
 
     // Advertise reference topics for the controllers
@@ -164,7 +151,7 @@ void RosCanSim::UpdateControl() {
     // For more details refer to page 30 of http://www.imgeorgiev.com/files/Ignat_MInf1_project.pdf
     double R;
     double steering_ref_left, steering_ref_right;
-    if (std::fabs(steering_ref_) > 1e06) {  // to avoid division by 0
+    if (std::fabs(steering_ref_) > 1e-06) {  // to avoid division by 0
         R = wheelbase_ / tan(steering_ref_);
         steering_ref_left = atan2(wheelbase_, R - steering_link_length_);
         steering_ref_right = atan2(wheelbase_, R + steering_link_length_);
@@ -205,11 +192,16 @@ void RosCanSim::UpdateControl() {
     ref_vel_brw_.publish(brw_ref_vel_msg);
     ref_pos_frw_.publish(frw_ref_pos_msg);
     ref_pos_flw_.publish(flw_ref_pos_msg);
+
+    ROS_DEBUG("Published steering angles %f rad  %f rad", steering_ref_left, steering_ref_right);
+    ROS_DEBUG("Published wheel speeds %f rad/s", -ref_speed_joint);
 }
 
 void RosCanSim::setMission(eufs_msgs::canState state) {
-    if (state.as_state == eufs_msgs::canState::AS_DRIVING)
+    if (state.as_state == eufs_msgs::canState::AS_DRIVING) {
         as_state_ = as_state_type::AS_DRIVING;
+        driving_flag_ = true;
+    }
 
     if (ami_state_ == ami_state_type::AMI_NOT_SELECTED) {
         switch (state.ami_state) {
@@ -238,6 +230,7 @@ bool RosCanSim::resetState(std_srvs::Trigger::Request& request, std_srvs::Trigge
     (void)response; // suppress unused parameter warning
     as_state_ = as_state_type::AS_OFF;
     ami_state_ = ami_state_type::AMI_NOT_SELECTED;
+    driving_flag_ = 0;
     response.success = true;
     return response.success;
 }
@@ -247,6 +240,7 @@ bool RosCanSim::requestEBS(std_srvs::Trigger::Request& request, std_srvs::Trigge
     (void)response; // suppress unused parameter warning
     as_state_ = as_state_type::AS_EMERGENCY_BRAKE;
     ami_state_ = ami_state_type::AMI_NOT_SELECTED;
+    driving_flag_ = 0;
     response.success = true;
     return response.success;
 }
@@ -418,6 +412,7 @@ void RosCanSim::flagCallback(std_msgs::Bool msg) {
 
 // Topic command
 void RosCanSim::jointStateCallback(const sensor_msgs::JointStateConstPtr &msg) {
+    ROS_DEBUG("ros_can_sim ::Joint states have been received");
     joint_state_ = *msg;
     read_state_ = true;
 }
