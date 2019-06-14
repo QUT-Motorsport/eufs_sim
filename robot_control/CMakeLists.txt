@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 2.8.3)
-project(robot_control)
+project(ros_can_sim)
 
 set(BUILD_FLAGS "-std=c++14 -Wuninitialized -Wall -Wextra -Wunused-parameter")
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${BUILD_FLAGS}")
@@ -28,9 +28,9 @@ include_directories(
 
 catkin_python_setup()
 
-add_executable(robot_control_node src/ros_can_sim.cpp)
+add_executable(ros_can_sim_node src/ros_can_sim.cpp)
 
-target_link_libraries(robot_control_node
+target_link_libraries(ros_can_sim_node
    ${catkin_LIBRARIES}
 )
 

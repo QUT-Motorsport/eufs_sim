@@ -22,7 +22,7 @@ class RosCanGUI(Plugin):
         # Create QWidget
         self._widget = QWidget()
         # Get path to UI file which is a sibling of this file
-        ui_file = os.path.join(rp.get_path('robot_control'), 'resource',
+        ui_file = os.path.join(rp.get_path('ros_can_sim'), 'resource',
                                'RosCanSimGUI.ui')
         # Extend the widget with all attributes and children from UI file
         loadUi(ui_file, self._widget)

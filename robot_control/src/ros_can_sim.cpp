@@ -441,7 +441,7 @@ double RosCanSim::angularToRPM(double angular_vel) {
 }
 
 bool RosCanSim::spin() {
-    ROS_INFO("robot_control::spin()");
+    ROS_INFO("ros_can_sim::spin()");
     ros::Rate r(desired_freq_);
 
     while (!ros::isShuttingDown()) // Using ros::isShuttingDown to avoid restarting the node during a shutdown.

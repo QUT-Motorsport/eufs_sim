@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <launch>
 
-  <node name="robot_control" pkg="robot_control" type="robot_control_node" output="screen">
+  <node name="ros_can_sim" pkg="ros_can_sim" type="ros_can_sim_node" output="screen">
     <param name="wheelbase" value="1.53"/>
     <param name="wheel_diameter" value="0.505"/>
     <param name="max_speed" value="100.0"/>

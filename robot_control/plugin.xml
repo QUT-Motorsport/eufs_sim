@@ -1,5 +1,5 @@
 <library path="src">
-  <class name="ros_can_sim_gui" type="robot_control.RosCanSimGUI.RosCanGUI" base_class_type="rqt_gui_py::Plugin">
+  <class name="ros_can_sim_gui" type="ros_can_sim.RosCanSimGUI.RosCanGUI" base_class_type="rqt_gui_py::Plugin">
     <description>
             A GUI to control the state machine of ros_can_sim
     </description>

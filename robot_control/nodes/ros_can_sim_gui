@@ -2,9 +2,9 @@
 
 import sys
 
-from robot_control import RosCanSimGUI
+from ros_can_sim import RosCanSimGUI
 from rqt_gui.main import Main
 
-plugin = 'robot_control'
+plugin = 'ros_can_sim'
 main = Main(filename=plugin)
 sys.exit(main.main(standalone=plugin))

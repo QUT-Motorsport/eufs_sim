@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <package format="2">
-  <name>robot_control</name>
+  <name>ros_can_sim</name>
   <version>1.0.0</version>
   <description>Package to control an ackermann racecar in simulation.
   Based on work of Robotnik.</description>

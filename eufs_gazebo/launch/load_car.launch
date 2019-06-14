@@ -21,11 +21,11 @@
 
           <param command="$(find xacro)/xacro '$(find eufs_description)/robots/ads-dv.urdf.xacro' --inorder" name="robot_description"/>
 
-          <!-- start robot_control node -->
-          <include file="$(find robot_control)/launch/robot_control.launch"/>
+          <!-- start ros_can_sim node -->
+          <include file="$(find ros_can_sim)/launch/ros_can_sim.launch"/>
 
           <!--start twist to ackermannDrive converter for robot steering plugin -->
-          <node pkg="robot_control" name="twist_to_ackermannDrive" type="twist_to_ackermannDrive.py" args="twistToAckermannDrive:=eufsa_control/teleop_vel_out"/>
+          <node pkg="ros_can_sim" name="twist_to_ackermannDrive" type="twist_to_ackermannDrive.py" args="twistToAckermannDrive:=eufsa_control/teleop_vel_out"/>
 
           <!-- start rqt robot steering module -->
           <node pkg="rqt_robot_steering" name="rqt_robot_steering" type="rqt_robot_steering"/>
@@ -37,18 +37,18 @@
 
 
           <!-- Control the steering, axle, and shock absorber joints. -->
-          <node name="ackermann_controller" pkg="robot_control" type="ackermann_controller.py" output="screen">
+          <node name="ackermann_controller" pkg="ros_can_sim" type="ackermann_controller.py" output="screen">
                 <param name="cmd_timeout" value="$(arg cmd_timeout)"/>
 
                 <param name="vehicle_prefix" value=""/> <!--Namespaces really need to be cleaned up, we're not consistent and it's a mess >:( -->
                 <!--<param name="vehicle_prefix" value="$(arg namespace)"/>-->
                 
-                <rosparam file="$(find robot_control)/config/ackermann_controller.yaml" command="load"/>
-                <rosparam param="driveCommandProirities" command="load" file="$(find robot_control)/config/driveCommandPriorities.yaml"/>
+                <rosparam file="$(find ros_can_sim)/config/ackermann_controller.yaml" command="load"/>
+                <rosparam param="driveCommandProirities" command="load" file="$(find ros_can_sim)/config/driveCommandPriorities.yaml"/>
           </node>
 
           <!--start twist to ackermannDrive converter for robot steering plugin -->
-          <node pkg="robot_control" name="twist_to_driveCommand2" type="twist_to_driveCommand2.py" output="screen"/>
+          <node pkg="ros_can_sim" name="twist_to_driveCommand2" type="twist_to_driveCommand2.py" output="screen"/>
 
           <!-- start rqt robot steering module -->
           <node pkg="rqt_robot_steering" name="rqt_robot_steering" type="rqt_robot_steering"/>
@@ -61,6 +61,6 @@
               -R $(arg roll) -P $(arg pitch) -Y $(arg yaw)"/>
 
       <!-- load joint controllers -->
-      <!--<node name="controller_spawner" pkg="controller_manager" type="spawner" args="$(find robot_control)/config/joint_controller.yaml"/>-->
+      <!--<node name="controller_spawner" pkg="controller_manager" type="spawner" args="$(find ros_can_sim)/config/joint_controller.yaml"/>-->
 
 </launch>
