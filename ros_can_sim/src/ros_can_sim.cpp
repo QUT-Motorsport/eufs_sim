@@ -33,7 +33,7 @@
  */
 
 
-#include "ros_can_sim.h"
+#include "ros_can_sim.hpp"
 
 RosCanSim::RosCanSim() : nh_("~") {
     ROS_INFO("ros_can_sim :: Starting ");
@@ -48,16 +48,16 @@ RosCanSim::RosCanSim() : nh_("~") {
 
     // Ackermann configuration - traction - joint names
     nh_.param<std::string>("joint_front_right_wheel", joint_front_right_wheel, "right_front_axle");
-    nh_.param<std::string>("joint_front_left_wheel", joint_front_left_wheel, "left_front_axle");
-    nh_.param<std::string>("joint_back_left_wheel", joint_back_left_wheel, "left_rear_axle");
-    nh_.param<std::string>("joint_back_right_wheel", joint_back_right_wheel, "right_rear_axle");
+    nh_.param<std::string>("joint_front_left_wheel",  joint_front_left_wheel, "left_front_axle");
+    nh_.param<std::string>("joint_back_left_wheel",   joint_back_left_wheel, "left_rear_axle");
+    nh_.param<std::string>("joint_back_right_wheel",  joint_back_right_wheel, "right_rear_axle");
     nh_.param<std::string>("joint_front_right_steer", joint_front_right_steer, "right_steering_joint");
-    nh_.param<std::string>("joint_front_left_steer", joint_front_left_steer, "left_steering_joint");
+    nh_.param<std::string>("joint_front_left_steer",  joint_front_left_steer, "left_steering_joint");
 
     // car parameters
     nh_.param<double>("wheelbase", wheelbase_, 1.53);
     nh_.param<double>("wheel_radius", wheel_radius_, 0.505/2);
-    nh_.param<double>("max_speed", max_speed_, 20);
+    nh_.param<double>("max_speed", max_speed_, 20.0);
     nh_.param<double>("max_steering", max_steering_, 0.523599); // 27.2 degrees
 
     // steering link lengths for the ADS-DV are 0.02534 which are derived
@@ -68,24 +68,17 @@ RosCanSim::RosCanSim() : nh_("~") {
     nh_.param<double>("desired_freq", desired_freq_, 100.0);
     nh_.param<double>("joints_state_time_window", joints_state_time_window_, 1.0);
 
-    // Robot Positions
-    x_pos_ = 0.0;
-    y_pos_ = 0.0;
-    theta_ = 0.0;
-    x_vel_ = 0.0;
-    y_vel_ = 0.0;
-    theta_vel_ = 0.0;
-
-    wheel_speed_sequence_ = 0;
-
-    // Robot state space control references
+    // Control signals
     vel_ref_ = 0.0;
     steering_ref_ = 0.0;
 
-    // init states
+    // init state machine state
     as_state_ = as_state_type::AS_OFF;
     ami_state_ = ami_state_type::AMI_NOT_SELECTED;
     driving_flag_ = false;
+
+    // Flag to indicate joint_state has been read
+    read_state_ = false;
 
     // Subscribers
     joint_state_sub_ = nh_.subscribe<sensor_msgs::JointState>("/eufs/joint_states", 1, &RosCanSim::jointStateCallback, this);
@@ -94,13 +87,14 @@ RosCanSim::RosCanSim() : nh_("~") {
     flag_sub_ = nh_.subscribe<std_msgs::Bool>("/ros_can/flag", 1, &RosCanSim::flagCallback, this);
     set_mission_sub_ = nh_.subscribe<eufs_msgs::canState>("/ros_can/set_mission", 1, &RosCanSim::setMission, this);
 
+    // Services
     reset_srv_ = nh_.advertiseService("/ros_can/reset", &RosCanSim::resetState, this);
     ebs_srv_ = nh_.advertiseService("/ros_can/ebs", &RosCanSim::requestEBS, this);
 
+    // Publishers
     state_pub_ = nh_.advertise<eufs_msgs::canState>("/ros_can/state", 1);
     state_pub_str_ = nh_.advertise<std_msgs::String>("/ros_can/state_str", 1);
     wheel_speed_pub_ = nh_.advertise<eufs_msgs::wheelSpeeds>("/ros_can/wheel_speeds", 10);
-
 
     // Advertise reference topics for the controllers
     ref_vel_frw_ = nh_.advertise<std_msgs::Float64>(frw_vel_topic_, 50);
@@ -109,17 +103,12 @@ RosCanSim::RosCanSim() : nh_("~") {
     ref_vel_brw_ = nh_.advertise<std_msgs::Float64>(brw_vel_topic_, 50);
     ref_pos_frw_ = nh_.advertise<std_msgs::Float64>(frw_pos_topic_, 50);
     ref_pos_flw_ = nh_.advertise<std_msgs::Float64>(flw_pos_topic_, 50);
-
-    // Flag to indicate joint_state has been read
-    read_state_ = false;
 }
 
 RosCanSim::~RosCanSim() {
 
 }
 
-/// Controller startup in realtime
-// TODO
 int RosCanSim::starting() {
     // Initialize joint indexes according to joint names
     if (read_state_) {
@@ -143,8 +132,6 @@ int RosCanSim::starting() {
     }
 }
 
-/// Controller update loop
-// TODO documentation
 void RosCanSim::UpdateControl() {
     // Compute state control actions
     // State feedback error 4 position loops / 4 velocity loops
@@ -219,6 +206,8 @@ void RosCanSim::setMission(eufs_msgs::canState state) {
                 ami_state_ = ami_state_type::AMI_INSPECTION;
             case eufs_msgs::canState::AMI_MANUAL:
                 ami_state_ = ami_state_type::AMI_MANUAL;
+            default:
+                ami_state_ = ami_state_type::AMI_NOT_SELECTED;
         }
     } else {
         ROS_WARN("Failed to set mission as a mission was set previously");
@@ -230,7 +219,7 @@ bool RosCanSim::resetState(std_srvs::Trigger::Request& request, std_srvs::Trigge
     (void)response; // suppress unused parameter warning
     as_state_ = as_state_type::AS_OFF;
     ami_state_ = ami_state_type::AMI_NOT_SELECTED;
-    driving_flag_ = 0;
+    driving_flag_ = false;
     response.success = true;
     return response.success;
 }
@@ -240,7 +229,7 @@ bool RosCanSim::requestEBS(std_srvs::Trigger::Request& request, std_srvs::Trigge
     (void)response; // suppress unused parameter warning
     as_state_ = as_state_type::AS_EMERGENCY_BRAKE;
     ami_state_ = ami_state_type::AMI_NOT_SELECTED;
-    driving_flag_ = 0;
+    driving_flag_ = false;
     response.success = true;
     return response.success;
 }
@@ -272,7 +261,6 @@ void RosCanSim::publishWheelSpeeds() {
 
     eufs_msgs::wheelSpeeds msg;
     msg.header.stamp = joint_state_.header.stamp;
-    msg.header.seq = wheel_speed_sequence_;
     msg.header.frame_id = "base_link";
     msg.lfSpeed = lf_wheel_rpm;
     msg.rfSpeed = rf_wheel_rpm;
@@ -282,7 +270,6 @@ void RosCanSim::publishWheelSpeeds() {
 
     wheel_speed_pub_.publish(msg);
 
-    wheel_speed_sequence_++;
 }
 
 void RosCanSim::updateState() {
@@ -352,19 +339,14 @@ std_msgs::String RosCanSim::makeStateString(const eufs_msgs::canState &state) {
     switch (state.as_state) {
         case eufs_msgs::canState::AS_OFF:
             str1 = "AS:OFF";
-            break;
         case eufs_msgs::canState::AS_READY:
             str1 = "AS:READY";
-            break;
         case eufs_msgs::canState::AS_DRIVING:
             str1 = "AS:DRIVING";
-            break;
         case eufs_msgs::canState::AS_FINISHED:
             str1 = "AS:FINISHED";
-            break;
         case eufs_msgs::canState::AS_EMERGENCY_BRAKE:
             str1 = "AS:EMERGENCY";
-            break;
         default:
             str1 = "NO_SUCH_MESSAGE";
     }
@@ -372,25 +354,18 @@ std_msgs::String RosCanSim::makeStateString(const eufs_msgs::canState &state) {
     switch (state.ami_state) {
         case eufs_msgs::canState::AMI_NOT_SELECTED:
             str2 = "AMI:NOT_SELECTED";
-            break;
         case eufs_msgs::canState::AMI_ACCELERATION:
             str2 = "AMI:ACCELERATION";
-            break;
         case eufs_msgs::canState::AMI_SKIDPAD:
             str2 = "AMI:SKIDPAD";
-            break;
         case eufs_msgs::canState::AMI_AUTOCROSS:
             str2 = "AMI:AUTOCROSS";
-            break;
         case eufs_msgs::canState::AMI_TRACK_DRIVE:
             str2 = "AMI:TRACKDRIVE";
-            break;
         case eufs_msgs::canState::AMI_INSPECTION:
             str2 = "AS:INSPECTION";
-            break;
         case eufs_msgs::canState::AMI_BRAKE_TEST:
             str2 = "AS:BRAKETEST";
-            break;
         default:
             str2 = "NO_SUCH_MESSAGE";
     }
@@ -406,18 +381,16 @@ std_msgs::String RosCanSim::makeStateString(const eufs_msgs::canState &state) {
 }
 
 void RosCanSim::flagCallback(std_msgs::Bool msg) {
+    ROS_DEBUG("ros_can_sim :: setting driving flag to %d", msg.data);
     driving_flag_ = msg.data;
 }
 
-
-// Topic command
 void RosCanSim::jointStateCallback(const sensor_msgs::JointStateConstPtr &msg) {
     ROS_DEBUG("ros_can_sim ::Joint states have been received");
     joint_state_ = *msg;
     read_state_ = true;
 }
 
-// Topic command
 void RosCanSim::commandCallback(const ackermann_msgs::AckermannDriveStamped::ConstPtr &msg) {
     // set commands only if in AS_DRIVING state
     if (as_state_ == as_state_type::AS_DRIVING) {
@@ -435,8 +408,8 @@ double RosCanSim::saturation(double u, double min, double max) {
     return u;
 }
 
-// RPM = (60 * Omega) / 2 PI
 double RosCanSim::angularToRPM(double angular_vel) {
+    // RPM = (60 * Omega) / 2 PI
     return (60 * angular_vel) / (2 * PI);
 }
 
