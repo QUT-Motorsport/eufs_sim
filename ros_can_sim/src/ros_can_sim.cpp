@@ -84,7 +84,7 @@ RosCanSim::RosCanSim() : nh_("~") {
     joint_state_sub_ = nh_.subscribe<sensor_msgs::JointState>("/eufs/joint_states", 1, &RosCanSim::jointStateCallback, this);
     cmd_sub_ = nh_.subscribe<ackermann_msgs::AckermannDriveStamped>("/cmd_vel_out", 1, &RosCanSim::commandCallback,
                                                                     this);
-    flag_sub_ = nh_.subscribe<std_msgs::Bool>("/ros_can/flag", 1, &RosCanSim::flagCallback, this);
+    flag_sub_ = nh_.subscribe<std_msgs::Bool>("/ros_can/mission_flag", 1, &RosCanSim::flagCallback, this);
     set_mission_sub_ = nh_.subscribe<eufs_msgs::canState>("/ros_can/set_mission", 1, &RosCanSim::setMission, this);
 
     // Services
@@ -253,7 +253,7 @@ void RosCanSim::publishWheelSpeeds() {
     // warning converting doubles to floats
     float right_steering_feedback = joint_state_.position[frw_pos_];
     float left_steering_feedback = joint_state_.position[flw_pos_];
-    float steering_feedback = right_steering_feedback + left_steering_feedback / 2.0;
+    float steering_feedback = (right_steering_feedback + left_steering_feedback) / 2.0;
 
     if (fabs(steering_feedback) > max_steering_) {
         ROS_DEBUG("ros_can_sim :: steering feedback exceeded limit");
