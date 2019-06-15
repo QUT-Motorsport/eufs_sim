@@ -14,7 +14,7 @@ from geometry_msgs.msg import Twist
 class Convert:
     def __init__(self):
         self.publisher = rospy.Publisher(
-            '/cmd_vel_out', AckermannDriveStamped, queue_size=10)
+            '/rqt/command', AckermannDriveStamped, queue_size=10)
         self.max_steering = 1
         self.min_steering = -1
         self.epsilon_steering = math.radians(0.001)
@@ -43,13 +43,13 @@ class Convert:
     def listener(self):
         # Sometimes it's weird and the controller wants it to subscribe to /rqt/cmd_vel ???  It flipflops
         rospy.Subscriber("/cmd_vel", Twist, self.callback)
-        rospy.Subscriber("/rqt/cmd_vel", Twist, self.callback)
+        # rospy.Subscriber("/rqt/cmd_vel", Twist, self.callback)
         rospy.spin()
 
 
 if __name__ == '__main__':
     try:
-        rospy.init_node("twistToAckermannDriveNode", anonymous=True)
+        rospy.init_node("command_translate", anonymous=True)
         cnv = Convert()
         cnv.listener()
     except rospy.ROSInterruptException:
