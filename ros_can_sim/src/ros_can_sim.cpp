@@ -194,20 +194,28 @@ void RosCanSim::setMission(eufs_msgs::canState state) {
         switch (state.ami_state) {
             case eufs_msgs::canState::AMI_ACCELERATION:
                 ami_state_ = ami_state_type::AMI_ACCELERATION;
+                break;
             case eufs_msgs::canState::AMI_SKIDPAD:
                 ami_state_ = ami_state_type::AMI_SKIDPAD;
+                break;
             case eufs_msgs::canState::AMI_AUTOCROSS:
                 ami_state_ = ami_state_type::AMI_AUTOCROSS;
+                break;
             case eufs_msgs::canState::AMI_TRACK_DRIVE:
                 ami_state_ = ami_state_type::AMI_TRACK_DRIVE;
+                break;
             case eufs_msgs::canState::AMI_BRAKE_TEST:
                 ami_state_ = ami_state_type::AMI_BRAKE_TEST;
+                break;
             case eufs_msgs::canState::AMI_INSPECTION:
                 ami_state_ = ami_state_type::AMI_INSPECTION;
+                break;
             case eufs_msgs::canState::AMI_MANUAL:
                 ami_state_ = ami_state_type::AMI_MANUAL;
+                break;
             default:
                 ami_state_ = ami_state_type::AMI_NOT_SELECTED;
+                break;
         }
     } else {
         ROS_WARN("Failed to set mission as a mission was set previously");
