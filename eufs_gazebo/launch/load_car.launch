@@ -12,10 +12,6 @@
       <arg name="roll" default="0.0"/>
       <arg name="pitch" default="0.0"/>
       <arg name="yaw" default="0.0"/>
-      
-      <!-- Who knows what this does -->
-      <arg name="use_robot_control_odom" default="true"/>
-      <param name="publish_odom_tf" value="$(arg use_robot_control_odom)"/>
 
       <!-- Control Method Argument -->
       <arg name="controlMethod" default="speed"/>
@@ -26,9 +22,7 @@
           <param command="$(find xacro)/xacro '$(find eufs_description)/robots/ads-dv.urdf.xacro' --inorder" name="robot_description"/>
 
           <!-- start robot_control node -->
-          <include file="$(find robot_control)/launch/robot_control.launch">
-                <arg name="publish_odom_tf" value="$(arg use_robot_control_odom)"/>
-          </include>
+          <include file="$(find robot_control)/launch/robot_control.launch"/>
 
           <!--start twist to ackermannDrive converter for robot steering plugin -->
           <node pkg="robot_control" name="twist_to_ackermannDrive" type="twist_to_ackermannDrive.py" args="twistToAckermannDrive:=eufsa_control/teleop_vel_out"/>
@@ -68,35 +62,5 @@
 
       <!-- load joint controllers -->
       <!--<node name="controller_spawner" pkg="controller_manager" type="spawner" args="$(find robot_control)/config/joint_controller.yaml"/>-->
-
-      <!-- Only launch if robot_control odom is used -->
-      <node 
-        pkg="tf" 
-        type="static_transform_publisher" 
-        name="map_broadcaster" 
-        args="$(arg x) $(arg y) 0 0 0 0 1 map odom 100" 
-        unless="$(eval arg('use_robot_control_odom') == false)"
-      />
-
-      <!-- Only launch if robot_control odom is not used -->
-      <group if="$(eval arg('use_robot_control_odom') == false)">
-        <!-- Python script to republish ground truth -->
-        <node 
-          name="ground_truth_republisher"
-          pkg="eufs_gazebo"
-          type="ground_truth_republisher.py"
-          output="screen"
-        />
-
-        <node 
-          name="message_to_tf" 
-          pkg="message_to_tf" 
-          type="message_to_tf" 
-          output="screen" 
-          args="/ground_truth/state"
-        />
-      </group>
-      
-
 
 </launch>

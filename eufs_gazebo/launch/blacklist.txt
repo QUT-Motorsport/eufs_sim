@@ -4,5 +4,4 @@ actually_load_car_torque.launch
 load_car_torque.launch
 eufs_control.launch
 load_car.launch
-extractor.launch
 sprint17.launch

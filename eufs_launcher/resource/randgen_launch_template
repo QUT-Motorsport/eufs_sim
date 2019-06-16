@@ -33,9 +33,6 @@
     <arg name="headless" value="false"/>
   </include>
 
-  <!-- Something -->
-  <arg name="use_robot_control_odom" default="true"/>
-
   <!--Launch car & controller.-->
   <include file="$(find eufs_gazebo)/launch/load_car.launch">
      <arg name="namespace" value="$(arg namespace)"/>
@@ -47,12 +44,11 @@
      <arg name="yaw" default="$(arg yaw)"/>
      <arg name="controlMethod" default="$(arg controlMethod)"/>
      <arg name="cmd_timeout" value="$(arg cmd_timeout)"/>
-     <arg name="use_robot_control_odom" value="$(arg use_robot_control_odom)"/>
   </include>
 
-  <include file="$(find eufs_gazebo)/launch/extractor.launch">
-      <arg name ="track_name" value="%FILLNAME%.csv"/>
-      <arg name ="view_distance" value="15"/>
-  </include>
+  <node name="cone_ground_truth" pkg="eufs_gazebo" type="cone_ground_truth.py" output="screen">
+      <param name="view_distance" value="15"/>
+      <param name="track_path" value="%FILLNAME%.csv"/>
+  </node>
   
 </launch>
