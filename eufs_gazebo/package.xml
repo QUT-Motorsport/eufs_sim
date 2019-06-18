@@ -18,7 +18,7 @@
 
     <depend>gazebo_ros</depend>
     <depend>eufs_description</depend>
-    <depend>robot_control</depend>
+    <depend>ros_can_sim</depend>
     <depend>eufs_msgs</depend>
     <depend>controller_manager</depend>
     <depend>velodyne_simulator</depend>

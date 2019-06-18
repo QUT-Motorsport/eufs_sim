@@ -80,7 +80,7 @@ Additional sensors for testing are avilable via the `ros-kinetic-robotnik-sensor
 
 An easy way to control the car is via
 ```
-roslaunch robot_control rqt_robot_control.launch
+roslaunch ros_can_sim rqt_ros_can_sim.launch
 ```
 
 ## 5. Known issues <a name="issues"></a>

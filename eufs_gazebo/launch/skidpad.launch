@@ -46,8 +46,8 @@
      <arg name="cmd_timeout" value="$(arg cmd_timeout)"/>
   </include>
   
-  <!-- start robot_control node -->
-  <!--<include file="$(find robot_control)/launch/robot_control.launch"/>-->
+  <!-- start ros_can_sim node -->
+  <!--<include file="$(find ros_can_sim)/launch/ros_can_sim.launch"/>-->
 
     <node name="cone_ground_truth" pkg="eufs_gazebo" type="cone_ground_truth.py" output="screen">
         <param name="view_distance" value="15"/>

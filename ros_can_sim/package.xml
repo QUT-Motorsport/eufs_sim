@@ -1,9 +1,8 @@
 <?xml version="1.0"?>
 <package format="2">
-  <name>robot_control</name>
+  <name>ros_can_sim</name>
   <version>1.0.0</version>
-  <description>Package to control an ackermann racecar in simulation.
-  Based on work of Robotnik.</description>
+  <description>Package to control an ackermann racecar in simulation.</description>
 
   <maintainer email="ignat.m.georgiev@gmail.com">Ignat Georgiev</maintainer>
   <maintainer email="loizoustephanos@gmail.com">Stephanos Loizou</maintainer>
@@ -17,16 +16,19 @@
 
   <buildtool_depend>catkin</buildtool_depend>
 
+  <depend>roscpp</depend>
+  <depend>tf</depend>
+  <depend>rqt_gui</depend>
+  <depend>rqt_gui_py</depend>
   <depend>ackermann_msgs</depend>
   <depend>geometry_msgs</depend>
-  <depend>nav_msgs</depend>
-  <depend>roscpp</depend>
   <depend>sensor_msgs</depend>
-  <depend>tf</depend>
-  <depend>diagnostic_msgs</depend>
-  <depend>diagnostic_updater</depend>
+  <depend>std_msgs</depend>
+  <depend>eufs_msgs</depend>
+  <depend>std_srvs</depend>
 
   <export>
+    <rqt_gui plugin="${prefix}/plugin.xml"/>
   </export>
 
 </package>
