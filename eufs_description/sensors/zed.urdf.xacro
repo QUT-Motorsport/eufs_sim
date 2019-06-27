@@ -24,6 +24,8 @@
       </visual>
     </link>
 
+
+    <!-- Left and right frames -->
     <link name="${prefix}_left_camera"/>
 
     <link name="${prefix}_right_camera"/>
@@ -54,6 +56,15 @@
       <origin xyz="0 0 0" rpy="0.0 0.0 0.0" />
       <parent link="${prefix}_right_camera" />
       <child link="${prefix}_right_camera_optical"/>
+    </joint>
+
+    <!-- depth frame -->
+    <link name="${prefix}_depth_camera"/>
+
+    <joint name="${prefix}_depth_camera" type="fixed">
+      <parent link="${prefix}_center"/>
+      <child link="${prefix}_depth_camera"/>
+      <origin xyz="0 0.06 0" rpy="-${0.5*pi} 0 -${0.5*pi}" />
     </joint>
 
 
@@ -108,7 +119,7 @@
           <imageTopicName>image_rect_color</imageTopicName>
           <cameraInfoTopicName>camera_info</cameraInfoTopicName>
           <frameName>${prefix}_left_camera_optical</frameName>
-          <hackBaseline>0.120</hackBaseline>      
+          <hackBaseline>0.120</hackBaseline>
           <distortionK1>0.0</distortionK1>
           <distortionK2>0.0</distortionK2>
           <distortionK3>0.0</distortionK3>
@@ -142,7 +153,7 @@
           <pointCloudTopicName>point_cloud/cloud_registered</pointCloudTopicName>
           <cameraInfoTopicName>rgb/camera_info</cameraInfoTopicName>
           <depthImageCameraInfoTopicName>depth/camera_info</depthImageCameraInfoTopicName>
-          <frameName>${prefix}_left_camera_optical</frameName>
+          <frameName>${prefix}_depth_camera</frameName>
           <baseline>0.12</baseline>
           <distortion_k1>0.0</distortion_k1>
           <distortion_k2>0.0</distortion_k2>
