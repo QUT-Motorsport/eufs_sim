@@ -253,7 +253,7 @@ void RosCanSim::publishWheelSpeeds() {
     // it's inverted in order to mimick the outputs of the real ros_can
     float right_steering_feedback = joint_state_.position[frw_pos_];
     float left_steering_feedback = joint_state_.position[flw_pos_];
-    float steering_feedback = -(right_steering_feedback + left_steering_feedback) / 2.0;
+    float steering_feedback = (right_steering_feedback + left_steering_feedback) / 2.0;
 
     if (fabs(steering_feedback) > max_steering_) {
         ROS_DEBUG("ros_can_sim :: steering feedback exceeded limit");
