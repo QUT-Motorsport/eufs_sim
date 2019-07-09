@@ -344,17 +344,25 @@ std_msgs::String RosCanSim::makeStateString(const eufs_msgs::canState &state) {
     std::string str2;
     std::string str3;
 
+    ROS_DEBUG("AS STATE: %d", state.as_state);
+    ROS_DEBUG("AMI STATE: %d", state.ami_state);
+
     switch (state.as_state) {
         case eufs_msgs::canState::AS_OFF:
             str1 = "AS:OFF";
+            break;
         case eufs_msgs::canState::AS_READY:
             str1 = "AS:READY";
+            break;
         case eufs_msgs::canState::AS_DRIVING:
             str1 = "AS:DRIVING";
+            break;
         case eufs_msgs::canState::AS_FINISHED:
             str1 = "AS:FINISHED";
+            break;
         case eufs_msgs::canState::AS_EMERGENCY_BRAKE:
             str1 = "AS:EMERGENCY";
+            break;
         default:
             str1 = "NO_SUCH_MESSAGE";
     }
@@ -362,18 +370,25 @@ std_msgs::String RosCanSim::makeStateString(const eufs_msgs::canState &state) {
     switch (state.ami_state) {
         case eufs_msgs::canState::AMI_NOT_SELECTED:
             str2 = "AMI:NOT_SELECTED";
+            break;
         case eufs_msgs::canState::AMI_ACCELERATION:
             str2 = "AMI:ACCELERATION";
+            break;
         case eufs_msgs::canState::AMI_SKIDPAD:
             str2 = "AMI:SKIDPAD";
+            break;
         case eufs_msgs::canState::AMI_AUTOCROSS:
             str2 = "AMI:AUTOCROSS";
+            break;
         case eufs_msgs::canState::AMI_TRACK_DRIVE:
             str2 = "AMI:TRACKDRIVE";
+            break;
         case eufs_msgs::canState::AMI_INSPECTION:
             str2 = "AS:INSPECTION";
+            break;
         case eufs_msgs::canState::AMI_BRAKE_TEST:
             str2 = "AS:BRAKETEST";
+            break;
         default:
             str2 = "NO_SUCH_MESSAGE";
     }
