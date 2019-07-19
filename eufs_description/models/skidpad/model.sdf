@@ -175,7 +175,7 @@
         </include>
         <include>
             <pose>-3.867 -5.382 0 0 0 0</pose>
-            <uri>model://models/yellow_cone</uri>
+            <uri>model://models/blue_cone</uri>
         </include>
         <include>
             <pose>14.632 -5.382 0 0 0 0</pose>
