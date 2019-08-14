@@ -2,7 +2,8 @@ import math
 from PIL import Image
 from PIL import ImageDraw
 from random import randrange, uniform
-from rospy import logerr as ROSLOG
+from rospy import loginfo as ROSLOG
+from rospy import logerr as ROSERR
 
 
 """
@@ -24,15 +25,75 @@ we are primarily concerned with calculating and maintaining the consistency of
 tangent lines.
 """
 
+
+
 class TrackGenerator:
+
+	#The rules for autocross:
+	#	Straights: 		<=80 meters
+	#	Constant Turns:		<=25 meter radius
+	#	Hairpin Turns: 		>=4.5 meter outside radius
+	#	Slalom: 		Cones in a straight line with 7.5 to 12 meter spacing [NOTE: can't be generated at this point, added later]
+	#	Track Width: 		>=3 meters
+	#	Track Length: 		<=1500 meters
+
+	MIN_STRAIGHT = 20
+	MAX_STRAIGHT = 80
+	MIN_CONSTANT_TURN = 10
+	MAX_CONSTANT_TURN = 25
+	MIN_HAIRPIN = 4.5
+	MAX_TRACK_LENGTH = 1500
 
 	def __init__(self):
 		pass
 
 	@staticmethod
-	def generate():
+	def getpresets():
+		return [("Contest Rules",[
+			10,#Min straight length
+			80,#Max straight length
+			10,#Min constant turn radius
+			25,#Max constant turn radius
+			4.5,#Min hairpin turn radius
+			10,#Max hairpin turn radius
+			1500#Max length
+			]),
+			("Small Straights",[
+			5,#Min straight length
+			40,#Max straight length
+			10,#Min constant turn radius
+			25,#Max constant turn radius
+			4.5,#Min hairpin turn radius
+			10,#Max hairpin turn radius
+			1500#Max length
+			])]
+
+	@staticmethod
+	def getpreset(name):
+		allPresets = TrackGenerator.getpresets()
+		for a in allPresets:
+			if a[0] == name:
+				return a[1]
+		ROSERR("No such preset: " + name)
+		ROSERR("Defaulting to Contest Rules")
+		return getpreset("Contest Rules")
+
+	@staticmethod
+	def setpreset(name):
+		values = TrackGenerator.getpreset(name)
+		TrackGenerator.MIN_STRAIGHT = values[0]
+		TrackGenerator.MAX_STRAIGHT = values[1]
+		TrackGenerator.MIN_CONSTANT_TURN = values[2]
+		TrackGenerator.MAX_CONSTANT_TURN = values[3]
+		TrackGenerator.MIN_HAIRPIN = values[4]
+		TrackGenerator.MAX_HAIRPIN = values[5]
+		TrackGenerator.MAX_TRACK_LENGTH = values[6]
+
+	@staticmethod
+	def generate(preset):
 		#Generate the track as pure data
 		#Returns a list of points to define the path of the track, along with a bounding width & height for how big the track is.
+		TrackGenerator.setpreset(preset)
 		xys = []
 		overlapped = False
 		while overlapped or xys==[]:
@@ -61,25 +122,19 @@ def endtangent(xys):
 
 
 def generateAutocrossTrackdriveTrack(startpoint):
-		#The rules:
-		#	Straights: 		<=80 meters
-		#	Constant Turns:		<=25 meter radius
-		#	Hairpin Turns: 		>=4.5 meter outside radius
-		#	Slalom: 		Cones in a straight line with 7.5 to 12 meter spacing [NOTE: can't be generated at this point, added later]
-		#	Track Width: 		>=3 meters
-		#	Track Length: 		<=1500 meters
+		
 		xys = []
 		curTrackLength = 0
 		curpoint = startpoint
 
 		#Let's start with a small straght
 		startangle = math.pi/8
-		(generated, curpoint, deltalength) = generateStraight(startpoint,uniform(80,80),startangle)
+		(generated, curpoint, deltalength) = generateStraight(startpoint,TrackGenerator.MIN_STRAIGHT,startangle)
 		curTrackLength += deltalength
 		xys.extend(generated)
 
 		#Now we want to set checkpoints to pass through:
-		goalpoints = [(startpoint[0]+150,startpoint[1]),(startpoint[0]+200,startpoint[1]+150),(startpoint[0]-50,startpoint[1]+200)]
+		goalpoints = [(startpoint[0]+120,startpoint[1]),(startpoint[0]+180,startpoint[1]+120),(startpoint[0]-50,startpoint[1]+180)]
 		for goalpoint in goalpoints:
 			(generated, curpoint, length) = generatePathFromPointToPoint(curpoint,goalpoint,endtangent(xys),fuzzradius=20)
 			curTrackLength+= length
@@ -88,7 +143,10 @@ def generateAutocrossTrackdriveTrack(startpoint):
 		#Now lets head back to the start:
 		#We're gonna set a checkpoint that is close but not exactly the start point
 		#so that we have breathing room for the final manouever:
-		(generated, curpoint, length) = generatePathFromPointToPoint(curpoint,(startpoint[0]-60,startpoint[1]+40),endtangent(xys),fuzzradius=0)
+		(generated, curpoint, length) = generatePathFromPointToPoint(curpoint,\
+										(startpoint[0]-TrackGenerator.MAX_STRAIGHT*0.5,\
+										startpoint[1]+TrackGenerator.MAX_CONSTANT_TURN*1.5),\
+										endtangent(xys),fuzzradius=0)
 		curTrackLength+= length
 		xys.extend(generated)
 
@@ -101,7 +159,7 @@ def generateAutocrossTrackdriveTrack(startpoint):
 		outerTurnAngle = math.acos(  -initialTangent[0]*goalTangent[0] - initialTangent[1]*goalTangent[1]  )
 		circleTurnAngle = math.pi - outerTurnAngle
 		circleTurnPercent = circleTurnAngle / (2*math.pi)
-		circleRadius = 20
+		circleRadius = TrackGenerator.MAX_CONSTANT_TURN
 		(generated,curpoint,length,outnormal) = generateConstantTurn(initialPoint,circleRadius,initialTangentAngle,circlepercent=circleTurnPercent,turnleft=True)
 		curTrackLength+=length
 		xys.extend(generated)
@@ -120,11 +178,14 @@ def generateAutocrossTrackdriveTrack(startpoint):
 		(generated, curpoint, deltalength) = generateStraight(curpoint, straightLength ,endtangent(xys))
 		curTrackLength += deltalength
 		xys.extend(generated)
-		
 
-		
-
-		if curTrackLength > 1500:
+		#Check if accidentally created too big of a straight
+		if straightLength + TrackGenerator.MIN_STRAIGHT > TrackGenerator.MAX_STRAIGHT:
+			#We always start each track with a minimum-length straight, which is joined up with the final straight,
+			#hence the addition of MIN_STRAIGHT here.
+			print("Track gen failed - couldn't connect ending and still follow the preset rules!  Retrying.")
+			return generateAutocrossTrackdriveTrack(startpoint)
+		elif curTrackLength > 1500:
 			print("Track gen failed - track too long, oops!  Retrying.")
 			return generateAutocrossTrackdriveTrack(startpoint)
 
@@ -140,7 +201,7 @@ def generatePathFromPointToPoint(startpoint,endpoint,intangent,depth=20,hairpine
 	#[fuzzradius is how close to the end we want to be]
 	length = 0
 	points = []
-	circleradius = uniform(25,25)
+	circleradius = uniform(TrackGenerator.MIN_CONSTANT_TURN,TrackGenerator.MAX_CONSTANT_TURN)
 
 
 
@@ -176,7 +237,7 @@ def generatePathFromPointToPoint(startpoint,endpoint,intangent,depth=20,hairpine
 	length += deltalength
 	points.extend(generated)
 
-	#Check if we're within 80 of the goal:
+	#Check if we're within MAX_STRAIGHT of the goal:
 	(cx,cy) = points[-1]
 	(ex,ey) = endpoint
 	squaredistance = (ex-cx)*(ex-cx)+(ey-cy)*(ey-cy)
@@ -185,16 +246,14 @@ def generatePathFromPointToPoint(startpoint,endpoint,intangent,depth=20,hairpine
 	#print(points[-1])
 	#print(endpoint)
 	#print("++++++++++++++++++++++++++++++++")
-	if squaredistance <= 80*80+fuzzradius*fuzzradius:
+	if squaredistance <= TrackGenerator.MAX_STRAIGHT**2+fuzzradius**2:
 		#We'll just draw a straight to it
-		#print("\n\nSUCCESS!!!\n\n")
-		#print("Fuzz: " + str(squaredistance - 80*80))
-		(generated, curpoint,deltalength) = generateStraight(points[-1],min(math.sqrt(squaredistance),80),endtangent(points))
+		(generated, curpoint,deltalength) = generateStraight(points[-1],min(math.sqrt(squaredistance),TrackGenerator.MAX_STRAIGHT),endtangent(points))
 		length += deltalength
 		points.extend(generated)
 	else:
 		#Go as far as we can (unless we're very close in which case don't, because it'll cause the next iteration to look weird)
-		straightsize = 80 if squaredistance <= 100*100 else 40
+		straightsize = TrackGenerator.MAX_STRAIGHT if squaredistance <= (TrackGenerator.MAX_STRAIGHT*1.2)**2 else TrackGenerator.MAX_STRAIGHT/2
 		(generated, curpoint,deltalength) = generateStraight(points[-1],straightsize,endtangent(points))
 		length += deltalength
 		points.extend(generated)
@@ -202,11 +261,15 @@ def generatePathFromPointToPoint(startpoint,endpoint,intangent,depth=20,hairpine
 		cturn_or_hairpin = uniform(0,1)
 		makecturn = cturn_or_hairpin < 0.7
 		if makecturn or (hairpined and not manyhairpins):#cturn
-			(generated, curpoint,deltalength,output_normal) = generateConstantTurn(curpoint,uniform(10,25),endtangent(points),
+			(generated, curpoint,deltalength,output_normal) = generateConstantTurn(curpoint,
+											uniform(TrackGenerator.MIN_CONSTANT_TURN,TrackGenerator.MAX_CONSTANT_TURN),
+											endtangent(points),
 											circlepercent=uniform(0,0.25),turnagainstnormal = output_normal)
 			length += deltalength
 			points.extend(generated)
-			(generated, curpoint,deltalength,output_normal) = generateConstantTurn(curpoint,uniform(10,25),endtangent(points),
+			(generated, curpoint,deltalength,output_normal) = generateConstantTurn(curpoint,
+											uniform(TrackGenerator.MIN_CONSTANT_TURN,TrackGenerator.MAX_CONSTANT_TURN),
+											endtangent(points),
 											circlepercent=uniform(0,0.25),turnagainstnormal = output_normal)
 			length += deltalength
 			points.extend(generated)
@@ -214,7 +277,8 @@ def generatePathFromPointToPoint(startpoint,endpoint,intangent,depth=20,hairpine
 			#We only want an even amount of turns so that we can leave heading the same direction we entered.
 			#otherwise due to the way we head towards the path, its basically guaranteed we get a self-intersection.
 			numswitches = 2*randrange(1,3)
-			(generated, curpoint,deltalength) = generateHairpinTurn(curpoint,uniform(4.5,10),endtangent(points),switchbacknum=numswitches)
+			(generated, curpoint,deltalength) = generateHairpinTurn(curpoint,uniform(TrackGenerator.MIN_HAIRPIN,TrackGenerator.MAX_HAIRPIN),
+										endtangent(points),switchbacknum=numswitches)
 			length += deltalength
 			points.extend(generated)
 		#Now we recurse!
@@ -240,11 +304,11 @@ def generateHairpinTurn(startpoint,radius,intangent,switchbacknum=None,turnleft=
 	#	Direction of first switchback
 	#	"Wobbliness" (circlepercent)
 	#	Size of straightways
-	turnleft = uniform(0,1)<0.5 		if turnleft == None 		else turnleft
-	switchbacknum = randrange(2,10)		if switchbacknum == None	else switchbacknum
-	wobbliness = uniform(0.45,0.55)		if wobbliness == None		else wobbliness
-	straightsize = uniform(10,80)		if straightsize == None		else straightsize
-	circlesize = uniform(10,25)		if circlesize == None		else circlesize
+	turnleft = uniform(0,1)<0.5 									if turnleft == None 		else turnleft
+	switchbacknum = randrange(2,10)									if switchbacknum == None	else switchbacknum
+	wobbliness = uniform(0.45,0.55)									if wobbliness == None		else wobbliness
+	straightsize = uniform(TrackGenerator.MIN_STRAIGHT,TrackGenerator.MAX_STRAIGHT)			if straightsize == None		else straightsize
+	circlesize = uniform(TrackGenerator.MIN_CONSTANT_TURN,TrackGenerator.MAX_CONSTANT_TURN)		if circlesize == None		else circlesize
 
 	#We are interested in making sure switchbacks never intersect
 	#If you draw a diagram, this gives you a diamond with angles pi/2,pi/2,L, and pi/2-L where L is:
@@ -269,7 +333,7 @@ def generateHairpinTurn(startpoint,radius,intangent,switchbacknum=None,turnleft=
 		#Switchback starts with a circle, then a line
 		#then we repeat
 	
-		circlesize = circlesize if uniformcircles else uniform(10,25)
+		circlesize = circlesize if uniformcircles else uniform(TrackGenerator.MIN_CONSTANT_TURN,TrackGenerator.MAX_CONSTANT_TURN)
 
 		#cturn
 		(generated, curpoint,deltalength,lastnormal) = generateConstantTurn(curpoint,circlesize,curtangent,

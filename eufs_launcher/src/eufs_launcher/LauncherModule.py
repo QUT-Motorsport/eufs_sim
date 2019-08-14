@@ -149,7 +149,7 @@ class EufsLauncher(Plugin):
 		GENERATED_FILENAME = "rand"
 		print("Generating Track...")
 
-		xys,twidth,theight = Generator.generate()
+		xys,twidth,theight = Generator.generate("Contest Rules")
 
 		#Create image to hold data
 		im = Image.new('RGBA', (twidth, theight), (0, 0, 0, 0)) 
