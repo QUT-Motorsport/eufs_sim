@@ -6,20 +6,20 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>400</width>
+    <width>800</width>
     <height>300</height>
    </rect>
   </property>
   <property name="windowTitle">
    <string>EUFS Launcher</string>
-  </property>s
+  </property>
 
   <!--Drop-Down Box: Options added in code, impossible in a .ui file.-->
   <!--This handles track selection.-->
   <widget class="QLabel" name="TrackLabel">
    <property name="geometry">
     <rect>
-     <x>120</x>
+     <x>60</x>
      <y>70</y>
      <width>50</width>
      <height>27</height>
@@ -37,13 +37,33 @@
   <widget class="QComboBox" name="WhichTrack">
    <property name="geometry">
     <rect>
-     <x>170</x>
+     <x>90</x>
      <y>70</y>
-     <width>300</width>
+     <width>250</width>
      <height>27</height>
     </rect>
    </property>
    <property name="font">
+       <font>
+            <pointsize>7</pointsize>
+       </font>
+   </property>
+  </widget>
+
+  <!--Actual Launch Button-->
+  <widget class="QPushButton" name="LaunchButton">
+   <property name="geometry">
+    <rect>
+     <x>100</x>
+     <y>100</y>
+     <width>170</width>
+     <height>100</height>
+    </rect>
+   </property>
+   <property name="text" >
+      <string>Launch!</string>
+    </property>
+    <property name="font">
        <font>
             <pointsize>7</pointsize>
        </font>
@@ -56,7 +76,7 @@
   <widget class="QLabel" name="NoiseLabel">
     <property name="geometry">
        <rect>
-         <x>120</x>
+         <x>500</x>
          <y>100</y>
          <width>150</width>
          <height>30</height>
@@ -74,7 +94,7 @@
   <widget class="QRadioButton" name="SpeedRadio">
     <property name="geometry">
       <rect>
-        <x>120</x>
+        <x>500</x>
         <y>120</y>
         <width>100</width>
         <height>30</height>
@@ -107,7 +127,7 @@
   <widget class="QRadioButton" name="TorqueRadio">
     <property name="geometry">
       <rect>
-        <x>120</x>
+        <x>500</x>
         <y>140</y>
         <width>100</width>
         <height>30</height>
@@ -136,7 +156,7 @@
   <widget class="QCheckBox" name="VisualisatorCheckbox">
   <property name="geometry">
       <rect>
-        <x>250</x>
+        <x>600</x>
         <y>120</y>
         <width>250</width>
         <height>30</height>
@@ -152,25 +172,7 @@
    </property>
   </widget>
 
-  <!--Actual Launch Button-->
-  <widget class="QPushButton" name="LaunchButton">
-   <property name="geometry">
-    <rect>
-     <x>10</x>
-     <y>300</y>
-     <width>170</width>
-     <height>100</height>
-    </rect>
-   </property>
-   <property name="text" >
-      <string>Launch!</string>
-    </property>
-    <property name="font">
-       <font>
-            <pointsize>7</pointsize>
-       </font>
-   </property>
-  </widget>
+ 
   <!--Generate Button-->
   <widget class="QPushButton" name="GenerateButton">
    <property name="geometry">

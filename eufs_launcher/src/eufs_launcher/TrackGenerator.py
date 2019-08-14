@@ -128,7 +128,7 @@ def generateAutocrossTrackdriveTrack(startpoint):
 		curpoint = startpoint
 
 		#Let's start with a small straght
-		startangle = math.pi/8
+		startangle = uniform(0,math.pi/8)
 		(generated, curpoint, deltalength) = generateStraight(startpoint,TrackGenerator.MIN_STRAIGHT,startangle)
 		curTrackLength += deltalength
 		xys.extend(generated)
@@ -161,7 +161,7 @@ def generateAutocrossTrackdriveTrack(startpoint):
 		outerTurnAngle = math.acos(  -initialTangent[0]*goalTangent[0] - initialTangent[1]*goalTangent[1]  )
 		circleTurnAngle = math.pi - outerTurnAngle
 		circleTurnPercent = circleTurnAngle / (2*math.pi)
-		circleRadius = TrackGenerator.MAX_CONSTANT_TURN
+		circleRadius = uniform(TrackGenerator.MIN_CONSTANT_TURN,TrackGenerator.MAX_CONSTANT_TURN)
 		(generated,curpoint,length,outnormal) = generateConstantTurn(initialPoint,circleRadius,initialTangentAngle,circlepercent=circleTurnPercent,turnleft=True)
 		curTrackLength+=length
 		xys.extend(generated)
@@ -170,8 +170,8 @@ def generateAutocrossTrackdriveTrack(startpoint):
 		#Radius is calculated by finding distance when projected along the normal
 		outnormal = normalizevec(outnormal)
 		diff = ( curpoint[0]-startpoint[0],curpoint[1]-startpoint[1] )
-		circleRadius = (diff[0]*outnormal[0]+diff[1]*outnormal[1])/2
-		(generated, curpoint, length, _) = generateConstantTurn(curpoint,circleRadius,endtangent(xys),circlepercent=0.5,turnleft=True)
+		circleRadius2 = (diff[0]*outnormal[0]+diff[1]*outnormal[1])/2
+		(generated, curpoint, length, _) = generateConstantTurn(curpoint,circleRadius2,endtangent(xys),circlepercent=0.5,turnleft=True)
 		curTrackLength+=length
 		xys.extend(generated)
 

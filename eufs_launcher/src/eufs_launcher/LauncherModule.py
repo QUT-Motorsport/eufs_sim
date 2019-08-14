@@ -7,7 +7,7 @@ import math
 
 from qt_gui.plugin import Plugin
 from python_qt_binding import loadUi
-from python_qt_binding.QtWidgets import QWidget, QComboBox, QPushButton, QSlider, QRadioButton, QCheckBox
+from python_qt_binding.QtWidgets import QWidget, QComboBox, QPushButton, QSlider, QRadioButton, QCheckBox, QMainWindow
 
 from os import listdir
 from os.path import isfile, join
@@ -73,7 +73,11 @@ class EufsLauncher(Plugin):
 		# tell from pane to pane.
 		if context.serial_number() > 1:
 			self._widget.setWindowTitle(self._widget.windowTitle() + (' (%d)' % context.serial_number()))
-        
+
+
+		#Resize correctly
+		self._widget.setFixedWidth(800)
+
 		# Get tracks from eufs_gazebo package
 		relpath = os.path.join(rospkg.RosPack().get_path('eufs_gazebo'), 'launch')
 		launchfiles = [f for f in listdir(relpath) if isfile(join(relpath, f))]
