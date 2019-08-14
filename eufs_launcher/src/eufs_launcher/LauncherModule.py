@@ -19,6 +19,7 @@ from PIL import ImageDraw
 from random import randrange, uniform
 
 from TrackGenerator import TrackGenerator as Generator
+from TrackGenerator import endtangent as getTangentAngle
 
 class EufsLauncher(Plugin):
 
@@ -105,11 +106,11 @@ class EufsLauncher(Plugin):
 		#Get presets
 		presetnames = Generator.getpresetnames()
 
-		#Add Presets to Preset Selector (always put Contest Rules first
-		if "Contest Rules" in presetnames:
-			self._widget.findChild(QComboBox,"WhichPreset").addItem("Contest Rules")
+		#Add Presets to Preset Selector (always put Computer Friendly first)
+		if "Computer Friendly" in presetnames:
+			self._widget.findChild(QComboBox,"WhichPreset").addItem("Computer Friendly")
 		for f in presetnames:
-			if f != "Contest Rules":
+			if f != "Computer Friendly":
 				self._widget.findChild(QComboBox,"WhichPreset").addItem(f)
 
 		# Hook up buttons to onclick functions
@@ -180,34 +181,6 @@ class EufsLauncher(Plugin):
 
 		pixels = im.load()#get reference to pixel data
 
-		"""
-		prevcone1 = None
-		for index in range(1,len(xys)):
-			#We will calculate normal vectors and put cones there
-			#Line below calculates the normal
-			(dx,dy) = normalizevec((1,endtangent([xys[index-1],xys[index]])+math.pi))
-			(x,y) = xys[index]
-			scalefactor = 7
-			(ntx,nty) = (int(x+scalefactor*dx),int(y+scalefactor*dy))
-			(nbx,nby) = (int(x-scalefactor*dx),int(y-scalefactor*dy))
-			if prevcone1 == None:
-				pixels[ntx,nty] = self.conecolor2
-				pixels[nbx,nby] = self.conecolor
-				prevcone1 = (nbx,nby)
-			else:
-				#Make sure the same colored cones go on the same side!
-				(pcx,pcy) = prevcone1
-				topcloseness = abs(ntx-pcx)+abs(nty-pcy)
-				bottomcloseness = abs(nbx-pcx)+abs(nby-pcy)
-				if bottomcloseness<topcloseness:
-					pixels[ntx,nty] = self.conecolor2
-					pixels[nbx,nby] = self.conecolor
-					prevcone1 = (nbx,nby)
-				else:
-					pixels[ntx,nty] = self.conecolor
-					pixels[nbx,nby] = self.conecolor2
-					prevcone1 = (ntx,nty)
-		"""	
 
 		#We want to calculate direction of car position -
 		sx = xys[0][0]
@@ -224,40 +197,28 @@ class EufsLauncher(Plugin):
 
 		draw.line([xys[0],xys[0]],fill=colorforcar)#car position
 
-		
-
-		#Now we want to make all pixels boardering the track become magenta (255,0,255) - this will be our 'cone' color
-		#To find pixel boardering track, simply find white pixel adjacent to a non-white non-magenta pixle
-		#We will also make sure not to put cones next to eachother	
-
-		pixels = im.load()#get reference to pixel data
-
 		def istrack(c):
 			return c == self.trackouter or c == self.trackinner or c == self.trackcenter
 
-		for i in range(im.size[0]):
-			for j in range(im.size[1]):
-				if pixels[i,j] == self.bgcolor:
-					isNextToTrack = False
-					isNextToCone = False
-					if i>0:
-						p=pixels[i-1,j]
-						isNextToTrack = isNextToTrack or istrack(p)
-						isNextToCone  = isNextToCone  or p==self.conecolor
-					if j>0:
-						p=pixels[i,j-1]
-						isNextToTrack = isNextToTrack or istrack(p)
-						isNextToCone  = isNextToCone  or p==self.conecolor
-					if i<twidth-1:
-						p=pixels[i+1,j]
-						isNextToTrack = isNextToTrack or istrack(p)
-						isNextToCone  = isNextToCone  or p==self.conecolor
-					if j<theight-1:
-						p=pixels[i,j+1]
-						isNextToTrack = isNextToTrack or istrack(p)
-						isNextToCone  = isNextToCone  or p==self.conecolor
-					if isNextToTrack and not isNextToCone:
-						pixels[i,j] = self.conecolor
+		#Now we want to make all pixels boardering the track become magenta (255,0,255) - this will be our 'cone' color
+		#To find pixel boardering track, simply find white pixel adjacent to a non-white non-magenta pixle
+		#We will also want to make it such that cones are about 4-6 away from eachother euclideanly	
+
+		pixels = im.load()#get reference to pixel data
+
+		for i in range(len(xys)):
+			if i%5 != 1: continue #skip first part [as hard to calculate tangent], and only do every 5th point
+			#Here we calculate the normal along the path of a track and plop points along it
+			curPoint = xys[i]
+			curTangentAngle = getTangentAngle(xys[:(i+1)])
+			curTangentNormal = (5*math.sin(curTangentAngle),-5*math.cos(curTangentAngle))
+			northPoint = ( int ( curPoint[0]+curTangentNormal[0] ) , int ( curPoint[1]+curTangentNormal[1] ) )
+			southPoint = ( int ( curPoint[0]-curTangentNormal[0] ) , int ( curPoint[1]-curTangentNormal[1] ) )
+			if not istrack(pixels[northPoint[0],northPoint[1]]):
+				pixels[northPoint[0],northPoint[1]]=self.conecolor
+			if not istrack(pixels[southPoint[0],southPoint[1]]):
+				pixels[southPoint[0],southPoint[1]]=self.conecolor
+
 
 		
 		#We want to make the track have differing cone colors - yellow on inside, blue on outside
