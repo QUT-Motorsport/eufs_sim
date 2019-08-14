@@ -101,6 +101,11 @@ class TrackGenerator:
 	@staticmethod
 	def setpreset(name):
 		values = TrackGenerator.getpreset(name)
+		TrackGenerator.setData(values)
+		
+
+	@staticmethod
+	def setdata(values):
 		TrackGenerator.MIN_STRAIGHT = values[0]
 		TrackGenerator.MAX_STRAIGHT = values[1]
 		TrackGenerator.MIN_CONSTANT_TURN = values[2]
@@ -112,10 +117,10 @@ class TrackGenerator:
 		TrackGenerator.MAX_TRACK_LENGTH = values[7]
 
 	@staticmethod
-	def generate(preset):
+	def generate(values):
 		#Generate the track as pure data
 		#Returns a list of points to define the path of the track, along with a bounding width & height for how big the track is.
-		TrackGenerator.setpreset(preset)
+		TrackGenerator.setdata(values)
 		xys = []
 		overlapped = False
 		while overlapped or xys==[]:

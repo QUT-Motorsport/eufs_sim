@@ -155,16 +155,7 @@ class EufsLauncher(Plugin):
 		self._widget.findChild(QPushButton,"Experimentals").setVisible(False)
 
 		#Set up the Generator Params
-		defaultPreset = self._widget.findChild(QComboBox,"WhichPreset").currentText()
-		presetData = Generator.getpreset(defaultPreset)
-		self.MIN_STRAIGHT  = presetData[0]
-		self.MAX_STRAIGHT  = presetData[1]
-		self.MIN_CTURN     = presetData[2]
-		self.MAX_CTURN     = presetData[3]
-		self.MIN_HAIRPIN   = presetData[4]
-		self.MAX_HAIRPIN   = presetData[5]
-		self.HAIRPIN_PAIRS = presetData[6]
-		self.MAX_LENGTH    = presetData[7]
+		self.updatePreset()
 
 		#Give sliders the correct range
 		self.setSliderRanges()
@@ -175,8 +166,35 @@ class EufsLauncher(Plugin):
 
 		#Hook up sliders to function that monitors when they've been changed
 		self.keepTrackOfSliderChanges()
+		self.keepTrackOfPresetChanges()
+
+		#While in the process of changing sliders, we don't want our monitor function to be rapidly firing
+		#So we toggle this variable when ready
+		self.ignoreSliderChanges = False
 
 		print("Plugin Successfully Launched!")
+
+	def updatePreset(self):
+		which = self._widget.findChild(QComboBox,"WhichPreset").currentText()
+		presetData = Generator.getpreset(which)
+		self.MIN_STRAIGHT  = presetData[0]
+		self.MAX_STRAIGHT  = presetData[1]
+		self.MIN_CTURN     = presetData[2]
+		self.MAX_CTURN     = presetData[3]
+		self.MIN_HAIRPIN   = presetData[4]
+		self.MAX_HAIRPIN   = presetData[5]
+		self.HAIRPIN_PAIRS = presetData[6]
+		self.MAX_LENGTH    = presetData[7]
+
+	def keepTrackOfPresetChanges(self):
+		self._widget.findChild(QComboBox,"WhichPreset") .currentTextChanged.connect(self.presetChanged)
+
+	def presetChanged(self):
+		self.ignoreSliderChanges = True
+		self.updatePreset()
+		self.keepParamsUpToDate()
+		self.keepSlidersUpToDate()
+		self.ignoreSliderChanges = False
 
 	def keepTrackOfSliderChanges(self):
 		self._widget.findChild(QSlider,"Param_MIN_STRAIGHT") .valueChanged.connect(self.sliderChanged)
@@ -189,6 +207,7 @@ class EufsLauncher(Plugin):
 		self._widget.findChild(QSlider,"Param_MAX_LENGTH")   .valueChanged.connect(self.sliderChanged)
 		
 	def sliderChanged(self):
+		if self.ignoreSliderChanges: return
 		self.keepVariablesUpToDate()
 		self.keepParamsUpToDate()
 
@@ -274,7 +293,12 @@ class EufsLauncher(Plugin):
 
 		chosenPreset = self._widget.findChild(QComboBox,"WhichPreset").currentText()
 
-		xys,twidth,theight = Generator.generate(chosenPreset)
+		xys,twidth,theight = Generator.generate([	self.MIN_STRAIGHT,self.MAX_STRAIGHT,
+								self.MIN_CTURN,self.MAX_CTURN,
+								self.MIN_HAIRPIN,self.MAX_HAIRPIN,
+								self.HAIRPIN_PAIRS,
+								self.MAX_LENGTH
+								])
 
 		#Create image to hold data
 		im = Image.new('RGBA', (twidth, theight), (0, 0, 0, 0)) 
