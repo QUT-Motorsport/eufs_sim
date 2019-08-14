@@ -5,6 +5,11 @@ from TrackGenerator import endtangent as getTangentAngle
 from random import randrange, uniform
 import os
 import rospkg
+import rospy
+import sys
+sys.path.insert(1, os.path.join(rospkg.RosPack().get_path('eufs_gazebo'),'tracks'))
+from track_gen import Track
+
 #Here are all the track formats we care about:
 #.launch (well, we actually want the model data, not the .launch, but we'll treat it as wanting the .launch)
 #.png
@@ -33,6 +38,11 @@ class ConversionTools:
 			return ConversionTools.xys_to_png(what)
 		if cfrom=="png" and cto=="launch":
 			return ConversionTools.png_to_launch(what,params)
+		if cfrom=="launch" and cto=="csv":
+			return ConversionTools.launch_to_csv(what,params)
+		if cfrom=="png" and cto=="csv":
+			ConversionTools.png_to_launch(what,params)
+			return ConversionTools.launch_to_csv(what[:-3]+"csv",params)
 			
 	#######################################################################################################################################################
 	#######################################################################################################################################################
@@ -162,7 +172,7 @@ class ConversionTools:
 	#######################################################################################################################################################
 
 	@staticmethod
-	def png_to_launch(what,params):
+	def png_to_launch(what,params=[0]):
 		#This is a fairly intensive process - we need:
 		#	to put %FILENAME%.launch in eufs_gazebo/launch
 		#	to put %FILENAME%.world in eufs_gazebo/world
@@ -293,3 +303,18 @@ class ConversionTools:
 		sdf_out = open(os.path.join(rospkg.RosPack().get_path('eufs_description'), 'models',GENERATED_FILENAME,"model.sdf"),"w")
 		sdf_out.write(sdf_main)
 		sdf_out.close()
+		
+
+
+
+	#######################################################################################################################################################
+	#######################################################################################################################################################
+	#######################################################################################################################################################
+	#######################################################################################################################################################
+	#######################################################################################################################################################
+	#######################################################################################################################################################
+
+	@staticmethod
+	def launch_to_csv(what,params=[0]):
+		filename = what.split("/")[-1].split(".")[0]
+		Track.runConverter(filename)

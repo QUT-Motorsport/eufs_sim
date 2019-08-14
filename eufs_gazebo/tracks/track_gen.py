@@ -18,6 +18,7 @@ from scipy.spatial import cKDTree
 from xml.dom import minidom
 import argparse
 import os
+import rospkg
 
 
 class Track:
@@ -407,7 +408,37 @@ class Track:
         out = np.vstack((xx, yy))
         return out.T
 
+
+    @staticmethod
+    def runConverter(track_name,midpoints=False):
+        track_path = os.path.join(rospkg.RosPack().get_path('eufs_description'), "models",
+                                  track_name, "model.sdf")
+
+        # check if eufs_description exists
+        try:
+            assert os.path.isdir(rospkg.RosPack().get_path('eufs_description'))
+        except:
+            raise(AssertionError(("Can't find eufs_description directory."
+                  "it is in the same location as eufs_gazebo!")))
+
+        # check if requested track exists
+        try:
+            assert os.path.exists(track_path)
+        except:
+            raise(AssertionError(("Can't find track called {} make sure that it is"
+                  "within eufs_description/models/".format(track_name))))
+    
+        track = Track()
+        track.load_sdf(track_path)
+        if midpoints:
+            track.generate_midpoints()
+            track.generate_tracks()
+        track.save_csv(os.path.join(rospkg.RosPack().get_path('eufs_gazebo'), "tracks",track_name))
+
 if __name__ == "__main__":
+    #Just a heads up, you can run this with a gui by running the launcher:
+    #`roslaunch eufs_launcher eufs_launcher.launch`
+    #And using the "Conversion Tools" section.
     parser = argparse.ArgumentParser(description="Generates a CSV file of cone\
                                      locations based on the SDF Gazebo models")
     parser.add_argument('track_name', metavar='track_name', type=str,
@@ -416,28 +447,4 @@ if __name__ == "__main__":
                         help="If true, midpoints will be generated and saved in the CSV")
 
     args = parser.parse_args()
-    d = os.path.abspath(__file__)
-    home = os.path.dirname(os.path.dirname(os.path.dirname(d)))
-    track_path = os.path.join(home, "eufs_description", "models",
-                              args.track_name, "model.sdf")
-
-    # check if eufs_description exists
-    try:
-        assert os.path.isdir(os.path.join(home, "eufs_description"))
-    except:
-        raise(AssertionError(("Can't find eufs_description directory."
-              "it is in the same location as eufs_gazebo!")))
-
-    # check if requested track exists
-    try:
-        assert os.path.exists(track_path)
-    except:
-        raise(AssertionError(("Can't find track called {} make sure that it is"
-              "within eufs_description/models/".format(args.track_name))))
-
-    track = Track()
-    track.load_sdf(track_path)
-    if args.midpoints:
-        track.generate_midpoints()
-        track.generate_tracks()
-    track.save_csv(args.track_name)
+    runConverter(args.track_name,args.midpoints)

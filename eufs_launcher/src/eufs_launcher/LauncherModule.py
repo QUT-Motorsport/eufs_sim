@@ -20,7 +20,7 @@ from random import randrange, uniform
 
 from TrackGenerator import TrackGenerator as Generator
 
-from ConversionTools import ConversionTools as Convertor
+from ConversionTools import ConversionTools as Converter
 
 class EufsLauncher(Plugin):
 
@@ -118,6 +118,7 @@ class EufsLauncher(Plugin):
 		self._widget.findChild(QPushButton,"LaunchButton").clicked.connect(self.launch_button_pressed)
 		self._widget.findChild(QPushButton,"GenerateButton").clicked.connect(self.generator_button_pressed)
 		self._widget.findChild(QPushButton,"LoadFromImageButton").clicked.connect(self.track_from_image_button_pressed)
+		self._widget.findChild(QPushButton,"ConvertButton").clicked.connect(self.convert_button_pressed)
 		self._widget.findChild(QPushButton,"Experimentals").clicked.connect(self.experimental_button_pressed)
 
 		#Create array of running processes (currently unused, but if you ever do process = launch.launch(node), add process here!)
@@ -337,7 +338,7 @@ class EufsLauncher(Plugin):
 								1 if isLaxGenerator else 0
 								])
 
-		im = Convertor.convert("xys","png",(xys,twidth,theight))
+		im = Converter.convert("xys","png",(xys,twidth,theight))
 
 		print("Track Gen Complete!")
 
@@ -348,7 +349,7 @@ class EufsLauncher(Plugin):
 	def track_from_image_button_pressed(self):
 		fname = self._widget.findChild(QComboBox,"WhichImage").currentText()
 		fname_full = os.path.join(rospkg.RosPack().get_path('eufs_gazebo'), 'randgen_imgs/'+fname)
-		Convertor.convert("png","launch",fname_full,params=[self.getNoiseLevel()])
+		Converter.convert("png","launch",fname_full,params=[self.getNoiseLevel()])
 		self.launchfileoverride = fname[:-4] + ".launch"
 		self.launch_button_pressed()
 
@@ -357,6 +358,12 @@ class EufsLauncher(Plugin):
 	def getNoiseLevel(self):
 		noiseLevelWidget = self._widget.findChild(QSlider,"Noisiness")
 		return (1.0*(noiseLevelWidget.value()-noiseLevelWidget.minimum()))/(noiseLevelWidget.maximum()-noiseLevelWidget.minimum())
+
+	def convert_button_pressed(self):
+		fromtype = self._widget.findChild(QComboBox,"ConvertFrom").currentText()
+		totype   = self._widget.findChild(QComboBox,"ConvertTo").currentText()
+		filename = self._widget.findChild(QComboBox,"FileForConversion").currentText()
+		Converter.convert(fromtype,totype,filename,params=[self.getNoiseLevel()])
 
 	def launch_button_pressed(self):
 		if self.hasLaunchedROS:
