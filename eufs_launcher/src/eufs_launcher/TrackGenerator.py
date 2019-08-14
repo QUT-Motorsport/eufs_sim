@@ -134,7 +134,9 @@ def generateAutocrossTrackdriveTrack(startpoint):
 		xys.extend(generated)
 
 		#Now we want to set checkpoints to pass through:
-		goalpoints = [(startpoint[0]+120,startpoint[1]),(startpoint[0]+180,startpoint[1]+120),(startpoint[0]-50,startpoint[1]+180)]
+		goalpoints = [	(startpoint[0]+TrackGenerator.MAX_TRACK_LENGTH*0.08,startpoint[1]),
+				(startpoint[0]+TrackGenerator.MAX_TRACK_LENGTH*0.12,startpoint[1]+TrackGenerator.MAX_TRACK_LENGTH*0.08),
+				(startpoint[0]-TrackGenerator.MAX_TRACK_LENGTH*0.03,startpoint[1]+TrackGenerator.MAX_TRACK_LENGTH*0.12)]
 		for goalpoint in goalpoints:
 			(generated, curpoint, length) = generatePathFromPointToPoint(curpoint,goalpoint,endtangent(xys),fuzzradius=20)
 			curTrackLength+= length
