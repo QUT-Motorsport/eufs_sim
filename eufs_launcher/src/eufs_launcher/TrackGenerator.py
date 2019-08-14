@@ -43,6 +43,7 @@ class TrackGenerator:
 	MAX_CONSTANT_TURN = 25
 	MIN_HAIRPIN = 4.5
 	MAX_TRACK_LENGTH = 1500
+	LAX_GENERATION = False
 
 	def __init__(self):
 		pass
@@ -57,7 +58,8 @@ class TrackGenerator:
 			4.5,#Min hairpin turn radius
 			10,#Max hairpin turn radius
 			3,#Max hairpin pairs amount
-			1500#Max length
+			1500,#Max length
+			0#Lax Generation (off)
 			]),
 			("Small Straights",[
 			5,#Min straight length
@@ -67,7 +69,8 @@ class TrackGenerator:
 			4.5,#Min hairpin turn radius
 			10,#Max hairpin turn radius
 			3,#Max hairpin pairs amount
-			700#Max length
+			700,#Max length
+			1#Lax Generation (on)
 			]),
 			("Computer Friendly",[
 			10,#Min straight length
@@ -77,7 +80,8 @@ class TrackGenerator:
 			4.5,#Min hairpin turn radius
 			10,#Max hairpin turn radius
 			3,#Max hairpin pairs amount
-			500#Max length
+			500,#Max length
+			1#Lax Generation (on)
 			])]
 
 	@staticmethod
@@ -115,6 +119,7 @@ class TrackGenerator:
 		TrackGenerator.MAX_HAIRPIN_NUM = values[6]
 		TrackGenerator.MIN_HAIRPIN_NUM = 1 if TrackGenerator.MAX_HAIRPIN_NUM > 0 else 0
 		TrackGenerator.MAX_TRACK_LENGTH = values[7]
+		TrackGenerator.LAX_GENERATION = values[8]==1
 
 	@staticmethod
 	def generate(values):
@@ -208,15 +213,16 @@ def generateAutocrossTrackdriveTrack(startpoint):
 		curTrackLength += deltalength
 		xys.extend(generated)
 
-		#Check if accidentally created too big of a straight
-		if straightLength + TrackGenerator.MIN_STRAIGHT > TrackGenerator.MAX_STRAIGHT:
-			#We always start each track with a minimum-length straight, which is joined up with the final straight,
-			#hence the addition of MIN_STRAIGHT here.
-			print("Track gen failed - couldn't connect ending and still follow the preset rules!  Retrying.")
-			return generateAutocrossTrackdriveTrack(startpoint)
-		elif curTrackLength > 1500:
-			print("Track gen failed - track too long, oops!  Retrying.")
-			return generateAutocrossTrackdriveTrack(startpoint)
+		if not TrackGenerator.LAX_GENERATION:
+			#Check if accidentally created too big of a straight
+			if straightLength + TrackGenerator.MIN_STRAIGHT > TrackGenerator.MAX_STRAIGHT:
+				#We always start each track with a minimum-length straight, which is joined up with the final straight,
+				#hence the addition of MIN_STRAIGHT here.
+				print("Track gen failed - couldn't connect ending and still follow the preset rules!  Retrying.")
+				return generateAutocrossTrackdriveTrack(startpoint)
+			elif curTrackLength > 1500:
+				print("Track gen failed - track too long, oops!  Retrying.")
+				return generateAutocrossTrackdriveTrack(startpoint)
 
 		return convertPointsToAllPositive(xys)
 

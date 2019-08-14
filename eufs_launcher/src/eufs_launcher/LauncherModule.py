@@ -172,19 +172,27 @@ class EufsLauncher(Plugin):
 		#So we toggle this variable when ready
 		self.ignoreSliderChanges = False
 
+		#Setup Lax Generation button
+		laxButton = self._widget.findChild(QCheckBox,"LaxCheckBox")
+		laxButton.setChecked(self.LAX_GENERATION)
+		
+			
+
 		print("Plugin Successfully Launched!")
 
 	def updatePreset(self):
 		which = self._widget.findChild(QComboBox,"WhichPreset").currentText()
 		presetData = Generator.getpreset(which)
-		self.MIN_STRAIGHT  = presetData[0]
-		self.MAX_STRAIGHT  = presetData[1]
-		self.MIN_CTURN     = presetData[2]
-		self.MAX_CTURN     = presetData[3]
-		self.MIN_HAIRPIN   = presetData[4]
-		self.MAX_HAIRPIN   = presetData[5]
-		self.HAIRPIN_PAIRS = presetData[6]
-		self.MAX_LENGTH    = presetData[7]
+		self.MIN_STRAIGHT   = presetData[0]
+		self.MAX_STRAIGHT   = presetData[1]
+		self.MIN_CTURN      = presetData[2]
+		self.MAX_CTURN      = presetData[3]
+		self.MIN_HAIRPIN    = presetData[4]
+		self.MAX_HAIRPIN    = presetData[5]
+		self.HAIRPIN_PAIRS  = presetData[6]
+		self.MAX_LENGTH     = presetData[7]
+		self.LAX_GENERATION = presetData[8]
+		self._widget.findChild(QCheckBox,"LaxCheckBox").setChecked(self.LAX_GENERATION)
 
 	def keepTrackOfPresetChanges(self):
 		self._widget.findChild(QComboBox,"WhichPreset") .currentTextChanged.connect(self.presetChanged)
@@ -291,13 +299,15 @@ class EufsLauncher(Plugin):
 		GENERATED_FILENAME = "rand"
 		print("Generating Track...")
 
-		chosenPreset = self._widget.findChild(QComboBox,"WhichPreset").currentText()
+		isLaxGenerator = self._widget.findChild(QCheckBox,"LaxCheckBox").isChecked()
+		
 
 		xys,twidth,theight = Generator.generate([	self.MIN_STRAIGHT,self.MAX_STRAIGHT,
 								self.MIN_CTURN,self.MAX_CTURN,
 								self.MIN_HAIRPIN,self.MAX_HAIRPIN,
 								self.HAIRPIN_PAIRS,
-								self.MAX_LENGTH
+								self.MAX_LENGTH,
+								1 if isLaxGenerator else 0
 								])
 
 		#Create image to hold data

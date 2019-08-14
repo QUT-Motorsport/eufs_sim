@@ -543,6 +543,27 @@
        </font>
    </property>
   </widget>
+
+  <!--Lax Generation Button -->
+  <!--Visualisator Launcher-->
+  <widget class="QCheckBox" name="LaxCheckBox">
+  <property name="geometry">
+      <rect>
+        <x>430</x>
+        <y>300</y>
+        <width>250</width>
+        <height>30</height>
+      </rect>
+    </property>
+    <property name="text" >
+      <string>Lax Generation</string>
+    </property>
+    <property name="font">
+       <font>
+            <pointsize>7</pointsize>
+       </font>
+   </property>
+  </widget>
  
 
 
