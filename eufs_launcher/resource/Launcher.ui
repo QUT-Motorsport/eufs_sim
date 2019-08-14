@@ -662,6 +662,28 @@
    </property>
   </widget>
 
+  <!-- Conversion tools! -->
+  <widget class="QLabel" name="ConversionToolsLabel">
+   <property name="geometry">
+    <rect>
+     <x>910</x>
+     <y>10</y>
+     <width>200</width>
+     <height>27</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>Conversion Tools</string>
+   </property>
+   <property name="font">
+       <font>
+            <pointsize>14</pointsize>
+       </font>
+   </property>
+  </widget>
+
+
+
   <!--Experimental Button (deprecated, doesn't appear)-->
   <widget class="QPushButton" name="Experimentals">
    <property name="geometry">
