@@ -7,7 +7,7 @@ import math
 
 from qt_gui.plugin import Plugin
 from python_qt_binding import loadUi
-from python_qt_binding.QtWidgets import QWidget, QComboBox, QPushButton, QSlider, QRadioButton, QCheckBox, QMainWindow
+from python_qt_binding.QtWidgets import QWidget, QComboBox, QPushButton, QSlider, QRadioButton, QCheckBox, QMainWindow, QLabel
 
 from os import listdir
 from os.path import isfile, join
@@ -74,7 +74,7 @@ class EufsLauncher(Plugin):
 		# tell from pane to pane.
 		if context.serial_number() > 1:
 			self._widget.setWindowTitle(self._widget.windowTitle() + (' (%d)' % context.serial_number()))
-
+		#self._widget.setWindowTitle("Eufs Launcher v1.1.0 (Serial: " +str(context.serial_number()) + ")")
 
 		#Resize correctly
 		self._widget.setFixedWidth(800)
@@ -154,7 +154,115 @@ class EufsLauncher(Plugin):
 		#Hide experimental button as not currently needed
 		self._widget.findChild(QPushButton,"Experimentals").setVisible(False)
 
+		#Set up the Generator Params
+		defaultPreset = self._widget.findChild(QComboBox,"WhichPreset").currentText()
+		presetData = Generator.getpreset(defaultPreset)
+		self.MIN_STRAIGHT  = presetData[0]
+		self.MAX_STRAIGHT  = presetData[1]
+		self.MIN_CTURN     = presetData[2]
+		self.MAX_CTURN     = presetData[3]
+		self.MIN_HAIRPIN   = presetData[4]
+		self.MAX_HAIRPIN   = presetData[5]
+		self.HAIRPIN_PAIRS = presetData[6]
+		self.MAX_LENGTH    = presetData[7]
+
+		#Give sliders the correct range
+		self.setSliderRanges()
+
+		#Relabel the params
+		self.keepParamsUpToDate()
+		self.keepSlidersUpToDate()
+
+		#Hook up sliders to function that monitors when they've been changed
+		self.keepTrackOfSliderChanges()
+
 		print("Plugin Successfully Launched!")
+
+	def keepTrackOfSliderChanges(self):
+		self._widget.findChild(QSlider,"Param_MIN_STRAIGHT") .valueChanged.connect(self.sliderChanged)
+		self._widget.findChild(QSlider,"Param_MAX_STRAIGHT") .valueChanged.connect(self.sliderChanged)
+		self._widget.findChild(QSlider,"Param_MIN_CTURN")    .valueChanged.connect(self.sliderChanged)
+		self._widget.findChild(QSlider,"Param_MAX_CTURN")    .valueChanged.connect(self.sliderChanged)
+		self._widget.findChild(QSlider,"Param_MIN_HAIRPIN")  .valueChanged.connect(self.sliderChanged)
+		self._widget.findChild(QSlider,"Param_MAX_HAIRPIN")  .valueChanged.connect(self.sliderChanged)
+		self._widget.findChild(QSlider,"Param_HAIRPIN_PAIRS").valueChanged.connect(self.sliderChanged)
+		self._widget.findChild(QSlider,"Param_MAX_LENGTH")   .valueChanged.connect(self.sliderChanged)
+		
+	def sliderChanged(self):
+		self.keepVariablesUpToDate()
+		self.keepParamsUpToDate()
+
+	def keepParamsUpToDate(self):
+		#This function keeps the labels next to the sliders up to date with the actual values
+		self._widget.findChild(QLabel,"Label_MIN_STRAIGHT") .setText("MIN_STRAIGHT: "  + str(self.MIN_STRAIGHT))
+		self._widget.findChild(QLabel,"Label_MAX_STRAIGHT") .setText("MAX_STRAIGHT: "  + str(self.MAX_STRAIGHT))
+		self._widget.findChild(QLabel,"Label_MIN_CTURN")    .setText("MIN_CTURN: "     + str(self.MIN_CTURN))
+		self._widget.findChild(QLabel,"Label_MAX_CTURN")    .setText("MAX_CTURN: "     + str(self.MAX_CTURN))
+		self._widget.findChild(QLabel,"Label_MIN_HAIRPIN")  .setText("MIN_HAIRPIN: "   + str((self.MIN_HAIRPIN/2.0)))
+		self._widget.findChild(QLabel,"Label_MAX_HAIRPIN")  .setText("MAX_HAIRPIN: "   + str((self.MAX_HAIRPIN/2.0)))
+		self._widget.findChild(QLabel,"Label_HAIRPIN_PAIRS").setText("HAIRPIN_PAIRS: " + str(self.HAIRPIN_PAIRS))
+		self._widget.findChild(QLabel,"Label_MAX_LENGTH")   .setText("MAX_LENGTH: "    + str(self.MAX_LENGTH))
+
+	def keepSlidersUpToDate(self):
+		self.setSliderValue("Param_MIN_STRAIGHT",self.MIN_STRAIGHT)
+		self.setSliderValue("Param_MAX_STRAIGHT",self.MAX_STRAIGHT)
+		self.setSliderValue("Param_MIN_CTURN",self.MIN_CTURN)
+		self.setSliderValue("Param_MAX_CTURN",self.MAX_CTURN)
+		self.setSliderValue("Param_MIN_HAIRPIN",self.MIN_HAIRPIN)
+		self.setSliderValue("Param_MAX_HAIRPIN",self.MAX_HAIRPIN)
+		self.setSliderValue("Param_HAIRPIN_PAIRS",self.HAIRPIN_PAIRS)
+		self.setSliderValue("Param_MAX_LENGTH",self.MAX_LENGTH)
+
+	def keepVariablesUpToDate(self):
+		self.MIN_STRAIGHT = self.getSliderValue("Param_MIN_STRAIGHT")
+		self.MAX_STRAIGHT = self.getSliderValue("Param_MAX_STRAIGHT")
+		self.MIN_CTURN = self.getSliderValue("Param_MIN_CTURN")
+		self.MAX_CTURN = self.getSliderValue("Param_MAX_CTURN")
+		self.MIN_HAIRPIN = self.getSliderValue("Param_MIN_HAIRPIN")
+		self.MAX_HAIRPIN = self.getSliderValue("Param_MAX_HAIRPIN")
+		self.HAIRPIN_PAIRS = self.getSliderValue("Param_HAIRPIN_PAIRS")
+		self.MAX_LENGTH = self.getSliderValue("Param_MAX_LENGTH")
+
+	def setSliderRanges(self):
+		#This function keeps slider locations up to date with the actual values
+		#Note on ranges: 
+		#		Straights are between 0 and 150
+		#		Turns are between 0 and 50
+		#		Hairpins are between 0 and 20, and have half-step rather than integer step (hence scaling by 2s)
+		#		Hairpin pairs are between 0 and 5
+		#               Max Length is between 200 and 2000
+		minstraight = 0
+		maxstraight = 150
+		minturn = 0
+		maxturn = 50
+		minhairpin = 0
+		maxhairpin = 20
+		minhairpinpairs = 0
+		maxhairpinpairs = 5
+		minmaxlength = 200
+		maxmaxlength = 2000
+		self.setSliderData("Param_MIN_STRAIGHT",minstraight,maxstraight)
+		self.setSliderData("Param_MAX_STRAIGHT",minstraight,maxstraight)
+		self.setSliderData("Param_MIN_CTURN",minturn,maxturn)
+		self.setSliderData("Param_MAX_CTURN",minturn,maxturn)
+		self.setSliderData("Param_MIN_HAIRPIN",minhairpin*2,maxhairpin*2)
+		self.setSliderData("Param_MAX_HAIRPIN",minhairpin*2,maxhairpin*2)
+		self.setSliderData("Param_HAIRPIN_PAIRS",minhairpinpairs,maxhairpinpairs)
+		self.setSliderData("Param_MAX_LENGTH",minmaxlength,maxmaxlength)
+		
+	def getSliderValue(self,slidername):
+		slider = self._widget.findChild(QSlider,slidername)
+		return slider.value()
+
+	def setSliderValue(self,slidername,sliderval):
+		slider = self._widget.findChild(QSlider,slidername)
+		slider.setValue(sliderval)
+
+	def setSliderData(self,slidername,slidermin,slidermax):
+		slider = self._widget.findChild(QSlider,slidername)
+		slider.setMinimum(slidermin)
+		slider.setMaximum(slidermax)
+		
 
 	def experimental_button_pressed(self):
 		self._widget.findChild(QPushButton,"GenerateButton").setVisible(True)

@@ -56,6 +56,7 @@ class TrackGenerator:
 			25,#Max constant turn radius
 			4.5,#Min hairpin turn radius
 			10,#Max hairpin turn radius
+			3,#Max hairpin pairs amount
 			1500#Max length
 			]),
 			("Small Straights",[
@@ -65,6 +66,7 @@ class TrackGenerator:
 			25,#Max constant turn radius
 			4.5,#Min hairpin turn radius
 			10,#Max hairpin turn radius
+			3,#Max hairpin pairs amount
 			700#Max length
 			]),
 			("Computer Friendly",[
@@ -74,6 +76,7 @@ class TrackGenerator:
 			15,#Max constant turn radius
 			4.5,#Min hairpin turn radius
 			10,#Max hairpin turn radius
+			3,#Max hairpin pairs amount
 			500#Max length
 			])]
 
@@ -104,7 +107,9 @@ class TrackGenerator:
 		TrackGenerator.MAX_CONSTANT_TURN = values[3]
 		TrackGenerator.MIN_HAIRPIN = values[4]
 		TrackGenerator.MAX_HAIRPIN = values[5]
-		TrackGenerator.MAX_TRACK_LENGTH = values[6]
+		TrackGenerator.MAX_HAIRPIN_NUM = values[6]
+		TrackGenerator.MIN_HAIRPIN_NUM = 1 if TrackGenerator.MAX_HAIRPIN_NUM > 0 else 0
+		TrackGenerator.MAX_TRACK_LENGTH = values[7]
 
 	@staticmethod
 	def generate(preset):
@@ -295,7 +300,7 @@ def generatePathFromPointToPoint(startpoint,endpoint,intangent,depth=20,hairpine
 		else:
 			#We only want an even amount of turns so that we can leave heading the same direction we entered.
 			#otherwise due to the way we head towards the path, its basically guaranteed we get a self-intersection.
-			numswitches = 2*randrange(1,3)
+			numswitches = 2*randrange(TrackGenerator.MIN_HAIRPIN_NUM,TrackGenerator.MAX_HAIRPIN_NUM)
 			(generated, curpoint,deltalength) = generateHairpinTurn(curpoint,uniform(TrackGenerator.MIN_HAIRPIN,TrackGenerator.MAX_HAIRPIN),
 										endtangent(points),switchbacknum=numswitches)
 			length += deltalength
@@ -324,7 +329,7 @@ def generateHairpinTurn(startpoint,radius,intangent,switchbacknum=None,turnleft=
 	#	"Wobbliness" (circlepercent)
 	#	Size of straightways
 	turnleft = uniform(0,1)<0.5 									if turnleft == None 		else turnleft
-	switchbacknum = randrange(2,10)									if switchbacknum == None	else switchbacknum
+	switchbacknum = 2*randrange(TrackGenerator.MIN_HAIRPIN_NUM,TrackGenerator.MAX_HAIRPIN_NUM)	if switchbacknum == None	else switchbacknum
 	wobbliness = uniform(0.45,0.55)									if wobbliness == None		else wobbliness
 	straightsize = uniform(TrackGenerator.MIN_STRAIGHT,TrackGenerator.MAX_STRAIGHT)			if straightsize == None		else straightsize
 	circlesize = uniform(TrackGenerator.MIN_CONSTANT_TURN,TrackGenerator.MAX_CONSTANT_TURN)		if circlesize == None		else circlesize
