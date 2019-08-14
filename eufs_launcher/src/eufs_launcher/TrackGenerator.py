@@ -65,7 +65,7 @@ class TrackGenerator:
 			25,#Max constant turn radius
 			4.5,#Min hairpin turn radius
 			10,#Max hairpin turn radius
-			1500#Max length
+			700#Max length
 			]),
 			("Computer Friendly",[
 			10,#Min straight length
