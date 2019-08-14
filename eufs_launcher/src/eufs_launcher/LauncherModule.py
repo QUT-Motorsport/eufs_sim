@@ -187,8 +187,8 @@ class EufsLauncher(Plugin):
 		self.MAX_STRAIGHT   = presetData[1]
 		self.MIN_CTURN      = presetData[2]
 		self.MAX_CTURN      = presetData[3]
-		self.MIN_HAIRPIN    = presetData[4]
-		self.MAX_HAIRPIN    = presetData[5]
+		self.MIN_HAIRPIN    = presetData[4]*2
+		self.MAX_HAIRPIN    = presetData[5]*2
 		self.HAIRPIN_PAIRS  = presetData[6]
 		self.MAX_LENGTH     = presetData[7]
 		self.LAX_GENERATION = presetData[8]
@@ -304,7 +304,7 @@ class EufsLauncher(Plugin):
 
 		xys,twidth,theight = Generator.generate([	self.MIN_STRAIGHT,self.MAX_STRAIGHT,
 								self.MIN_CTURN,self.MAX_CTURN,
-								self.MIN_HAIRPIN,self.MAX_HAIRPIN,
+								self.MIN_HAIRPIN/2,self.MAX_HAIRPIN/2,
 								self.HAIRPIN_PAIRS,
 								self.MAX_LENGTH,
 								1 if isLaxGenerator else 0
