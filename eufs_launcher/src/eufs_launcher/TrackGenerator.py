@@ -125,6 +125,7 @@ class TrackGenerator:
 	def generate(values):
 		#Generate the track as pure data
 		#Returns a list of points to define the path of the track, along with a bounding width & height for how big the track is.
+		#Input is a list of track parameters
 		TrackGenerator.setdata(values)
 		xys = []
 		overlapped = False

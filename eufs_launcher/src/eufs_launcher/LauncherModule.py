@@ -348,10 +348,14 @@ class EufsLauncher(Plugin):
 
 		pixels = im.load()#get reference to pixel data
 
+		prevPoint = (-10000,-10000)
 		for i in range(len(xys)):
-			if i%5 != 1: continue #skip first part [as hard to calculate tangent], and only do every 5th point
-			#Here we calculate the normal along the path of a track and plop points along it
+			if i == 0: continue #skip first part [as hard to calculate tangent]
 			curPoint = xys[i]
+			distanceVecFromPrevPoint = (curPoint[0]-prevPoint[0],curPoint[1]-prevPoint[1])
+			distanceFromPrevPoint = distanceVecFromPrevPoint[0]**2 + distanceVecFromPrevPoint[1]**2
+			if distanceFromPrevPoint < 4**2: continue#Skip if too close to previous point
+			prevPoint = curPoint
 			curTangentAngle = getTangentAngle(xys[:(i+1)])
 			curTangentNormal = (5*math.sin(curTangentAngle),-5*math.cos(curTangentAngle))
 			northPoint = ( int ( curPoint[0]+curTangentNormal[0] ) , int ( curPoint[1]+curTangentNormal[1] ) )
