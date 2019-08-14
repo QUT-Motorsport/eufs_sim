@@ -102,6 +102,16 @@ class EufsLauncher(Plugin):
 			if f != "rand.png" and f[-3:] == "png":
 				self._widget.findChild(QComboBox,"WhichImage").addItem(f)
 
+		#Get presets
+		presetnames = Generator.getpresetnames()
+
+		#Add Presets to Preset Selector (always put Contest Rules first
+		if "Contest Rules" in presetnames:
+			self._widget.findChild(QComboBox,"WhichPreset").addItem("Contest Rules")
+		for f in presetnames:
+			if f != "Contest Rules":
+				self._widget.findChild(QComboBox,"WhichPreset").addItem(f)
+
 		# Hook up buttons to onclick functions
 		self._widget.findChild(QPushButton,"LaunchButton").clicked.connect(self.launch_button_pressed)
 		self._widget.findChild(QPushButton,"GenerateButton").clicked.connect(self.generator_button_pressed)
@@ -153,7 +163,9 @@ class EufsLauncher(Plugin):
 		GENERATED_FILENAME = "rand"
 		print("Generating Track...")
 
-		xys,twidth,theight = Generator.generate("Contest Rules")
+		chosenPreset = self._widget.findChild(QComboBox,"WhichPreset").currentText()
+
+		xys,twidth,theight = Generator.generate(chosenPreset)
 
 		#Create image to hold data
 		im = Image.new('RGBA', (twidth, theight), (0, 0, 0, 0)) 

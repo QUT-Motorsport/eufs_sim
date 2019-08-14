@@ -66,7 +66,24 @@ class TrackGenerator:
 			4.5,#Min hairpin turn radius
 			10,#Max hairpin turn radius
 			1500#Max length
+			]),
+			("Computer Friendly",[
+			10,#Min straight length
+			80,#Max straight length
+			5,#Min constant turn radius
+			15,#Max constant turn radius
+			4.5,#Min hairpin turn radius
+			10,#Max hairpin turn radius
+			500#Max length
 			])]
+
+	@staticmethod
+	def getpresetnames():
+		toReturn = []
+		allPresets = TrackGenerator.getpresets()
+		for a in allPresets:
+			toReturn.append(a[0])
+		return toReturn
 
 	@staticmethod
 	def getpreset(name):
