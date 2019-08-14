@@ -167,6 +167,9 @@ class EufsLauncher(Plugin):
 		laxButton = self._widget.findChild(QCheckBox,"LaxCheckBox")
 		laxButton.setChecked(self.LAX_GENERATION)
 		
+		#Setup Conversion Tools dropdowns
+		for f in [".png",".launch",".csv"]:
+			self._widget.findChild(QComboBox,"ConvertFrom").addItem(f)
 			
 
 		print("Plugin Successfully Launched!")
