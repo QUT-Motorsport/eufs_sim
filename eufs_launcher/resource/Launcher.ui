@@ -846,6 +846,25 @@
    </property>
   </widget>
 
+  <!-- Actual Convert Button! -->
+  <widget class="QPushButton" name="ConvertButton">
+   <property name="geometry">
+    <rect>
+     <x>890</x>
+     <y>120</y>
+     <width>170</width>
+     <height>100</height>
+    </rect>
+   </property>
+   <property name="text" >
+      <string>Convert</string>
+    </property>
+    <property name="font">
+       <font>
+            <pointsize>7</pointsize>
+       </font>
+   </property>
+  </widget>
 
 
   <!--Experimental Button (deprecated, doesn't appear)-->

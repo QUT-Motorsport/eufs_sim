@@ -24,11 +24,22 @@ class ConversionTools:
 	trackinner = (255,0,0,255)	#red
 	trackouter = (255,255,0,255)	#yellow
 
+	#Other various retained parameters
+	linknum = -1
+
 	@staticmethod
-	def convert(cfrom,cto,what):
+	def convert(cfrom,cto,what,params=[]):
 		if cfrom=="xys" and cto=="png":
 			return ConversionTools.xys_to_png(what)
-
+		if cfrom=="png" and cto=="launch":
+			return ConversionTools.png_to_launch(what,params)
+			
+	#######################################################################################################################################################
+	#######################################################################################################################################################
+	#######################################################################################################################################################
+	#######################################################################################################################################################
+	#######################################################################################################################################################
+	#######################################################################################################################################################
 
 	@staticmethod
 	def xys_to_png(what):
@@ -142,3 +153,143 @@ class ConversionTools:
 
 		im.save(os.path.join(rospkg.RosPack().get_path('eufs_gazebo'), 'randgen_imgs/'+GENERATED_FILENAME+'.png'))
 		return im
+
+	#######################################################################################################################################################
+	#######################################################################################################################################################
+	#######################################################################################################################################################
+	#######################################################################################################################################################
+	#######################################################################################################################################################
+	#######################################################################################################################################################
+
+	@staticmethod
+	def png_to_launch(what,params):
+		#This is a fairly intensive process - we need:
+		#	to put %FILENAME%.launch in eufs_gazebo/launch
+		#	to put %FILENAME%.world in eufs_gazebo/world
+		#	to put %FILENAME%/model.config and %FILENAME%/model.sdf in eufs_description/models
+
+		#Our template files are stored in eufs_launcher/resource as:
+		#	randgen_launch_template
+		#       randgen_world_template
+		#	randgen_model_template/model.config
+		#	randgen_model_template/model.sdf
+		GENERATED_FILENAME = what.split('/')[-1][:-4]#[:-4] to split off .png, looks like an emoji...
+		im = Image.open(what)
+		noiseLevel = params[0]
+		#.launch:
+		launch_template = open(os.path.join(rospkg.RosPack().get_path('eufs_launcher'), 'resource/randgen_launch_template'),"r")
+		#params = %FILLNAME% %PLACEX% %PLACEY% %PLACEROTATION%
+		launch_merged = "".join(launch_template)
+		launch_merged = GENERATED_FILENAME.join(launch_merged.split("%FILLNAME%"))
+
+		def xCoordTransform(x):
+			return x-50
+		def yCoordTransform(y):
+			return y-50
+		def isCarColor(x):
+			return x[:-1]==ConversionTools.carcolor[:-1]
+		def rotationTransform(x):
+			return 2*math.pi*((x-1)/254.0)#we never allow alpha to equal 0
+
+		#Get PLACEX,PLACEY (look for (0,255,0,a))
+		pixels = im.load()
+		for i in range(im.size[0]):
+			for j in range(im.size[1]):
+				p = pixels[i,j]
+				if isCarColor(p):
+					launch_merged = str(xCoordTransform(i)).join(launch_merged.split("%PLACEX%"))
+					launch_merged = str(yCoordTransform(j)).join(launch_merged.split("%PLACEY%"))
+					launch_merged = str(rotationTransform(p[3])).join(launch_merged.split("%PLACEROTATION%"))
+
+		launch_out = open(os.path.join(rospkg.RosPack().get_path('eufs_gazebo'), 'launch/'+GENERATED_FILENAME+".launch"),"w")
+		launch_out.write(launch_merged)
+		launch_out.close()
+
+		#.world:
+		world_template = open(os.path.join(rospkg.RosPack().get_path('eufs_launcher'), 'resource/randgen_world_template'),"r")
+		#params = %FILLNAME%
+		world_merged = "".join(world_template)
+		world_merged = GENERATED_FILENAME.join(world_merged.split("%FILLNAME%"))
+
+		world_out = open(os.path.join(rospkg.RosPack().get_path('eufs_gazebo'), 'worlds',GENERATED_FILENAME+".world"),"w")
+		world_out.write(world_merged)
+		world_out.close()
+
+		#model:
+		#First we create the folder
+		folderpath = os.path.join(rospkg.RosPack().get_path('eufs_description'), 'models',GENERATED_FILENAME)
+		if not os.path.exists(folderpath):
+			os.mkdir(folderpath)
+		else:
+			print("Overwrote old " + GENERATED_FILENAME)
+
+		#Now let's do the .config as its easiest
+		config_template = open(os.path.join(rospkg.RosPack().get_path('eufs_launcher'), 'resource/randgen_model_template/model.config'),"r")
+		#params = %FILLNAME%
+		config_merged = "".join(config_template)
+		config_merged = GENERATED_FILENAME.join(config_merged.split("%FILLNAME%"))
+
+		config_out = open(os.path.join(rospkg.RosPack().get_path('eufs_description'), 'models',GENERATED_FILENAME,"model.config"),"w")
+		config_out.write(config_merged)
+		config_out.close()
+
+		#Now the real meat of this, the .sdf
+		sdf_template = open(os.path.join(rospkg.RosPack().get_path('eufs_launcher'), 'resource/randgen_model_template/model.sdf'),"r")
+		#params = %FILLNAME% %FILLDATA%
+		#ModelParams = %PLACEX% %PLACEY% %MODELNAME% %FILLCOLLISION% %LINKNUM%
+		sdf_merged = "".join(sdf_template)
+		sdf_splitagain = sdf_merged.split("$===$")
+
+		#sdf_splitagain:
+		#	0: Main body of sdf file
+		#	1: Outline of mesh visual
+		#	2: Outline of mesh collision data
+		#	3: Noisecube collision data, meant for noise as a low-complexity collision to prevent falling out the world
+		sdf_main = sdf_splitagain[0]
+		sdf_model = sdf_splitagain[3].join(sdf_splitagain[1].split("%FILLCOLLISION%"))
+		sdf_model_with_collisions = sdf_splitagain[2].join(sdf_splitagain[1].split("%FILLCOLLISION%"))
+
+		sdf_main = GENERATED_FILENAME.join(sdf_main.split("%FILLNAME%"))
+
+		sdf_blueconemodel = "model://eufs_description/meshes/cone_blue.dae".join(sdf_model_with_collisions.split("%MODELNAME%"))
+		sdf_yellowconemodel = "model://eufs_description/meshes/cone_yellow.dae".join(sdf_model_with_collisions.split("%MODELNAME%"))
+
+		#Now let's load in the noise priorities
+		noisefiles = open(os.path.join(rospkg.RosPack().get_path('eufs_launcher'), 'resource/noiseFiles.txt'),"r")
+		noisefiles = ("".join(noisefiles)).split("$===$")[1].strip().split("\n")
+		noiseweightings_ = [line.split("|") for line in noisefiles]
+		noiseweightings  = [(float(line[0]),line[1]) for line in noiseweightings_]
+
+		def getRandomNoiseModel():
+			randval = uniform(0,100)
+			for a in noiseweightings:
+				if a[0]>randval:
+					return a[1]
+			return "model://eufs_description/meshes/NoiseCube.dae"
+		
+		#Let's place all the models!
+		ConversionTools.linknum = -1
+		def putModelAtPosition(mod,x,y):
+			ConversionTools.linknum+=1
+			return str(ConversionTools.linknum).join( \
+				str(xCoordTransform(x)).join( \
+					str(yCoordTransform(y)).join( \
+						mod.split("%PLACEY%")).split("%PLACEX%")).split("%LINKNUM%"))
+
+		sdf_allmodels = ""
+		for i in range(im.size[0]):
+			for j in range(im.size[1]):
+				p = pixels[i,j]
+				if p == ConversionTools.conecolor:
+					sdf_allmodels = sdf_allmodels + "\n" + putModelAtPosition(sdf_yellowconemodel,i,j)
+				elif p == ConversionTools.conecolor2:
+					sdf_allmodels = sdf_allmodels + "\n" + putModelAtPosition(sdf_blueconemodel,i,j)
+				elif p == ConversionTools.noisecolor and uniform(0,1)<noiseLevel:
+					sdf_noisemodel = getRandomNoiseModel().join(sdf_model_with_collisions.split("%MODELNAME%"))
+					sdf_allmodels = sdf_allmodels + "\n" + putModelAtPosition(sdf_noisemodel,i,j)
+
+		sdf_main = sdf_allmodels.join(sdf_main.split("%FILLDATA%"))
+
+		sdf_out = open(os.path.join(rospkg.RosPack().get_path('eufs_description'), 'models',GENERATED_FILENAME,"model.sdf"),"w")
+		sdf_out.write(sdf_main)
+		sdf_out.close()
