@@ -94,7 +94,7 @@
   <widget class="QLabel" name="LauncherParametersLabel">
    <property name="geometry">
     <rect>
-     <x>510</x>
+     <x>520</x>
      <y>10</y>
      <width>200</width>
      <height>27</height>
@@ -117,7 +117,7 @@
     <property name="geometry">
        <rect>
          <x>500</x>
-         <y>70</y>
+         <y>50</y>
          <width>150</width>
          <height>30</height>
        </rect>
@@ -135,7 +135,7 @@
     <property name="geometry">
       <rect>
         <x>500</x>
-        <y>90</y>
+        <y>70</y>
         <width>100</width>
         <height>30</height>
       </rect>
@@ -168,7 +168,7 @@
     <property name="geometry">
       <rect>
         <x>500</x>
-        <y>110</y>
+        <y>90</y>
         <width>100</width>
         <height>30</height>
       </rect>
@@ -197,7 +197,7 @@
   <property name="geometry">
       <rect>
         <x>600</x>
-        <y>90</y>
+        <y>70</y>
         <width>250</width>
         <height>30</height>
       </rect>
@@ -726,7 +726,7 @@
   <widget class="QLabel" name="ConversionToolsLabel">
    <property name="geometry">
     <rect>
-     <x>910</x>
+     <x>890</x>
      <y>10</y>
      <width>200</width>
      <height>27</height>
@@ -766,7 +766,76 @@
     <rect>
      <x>850</x>
      <y>60</y>
-     <width>250</width>
+     <width>100</width>
+     <height>27</height>
+    </rect>
+   </property>
+   <property name="font">
+       <font>
+            <pointsize>7</pointsize>
+       </font>
+   </property>
+  </widget>
+
+  <widget class="QLabel" name="ConvertToLabel">
+   <property name="geometry">
+    <rect>
+     <x>980</x>
+     <y>60</y>
+     <width>50</width>
+     <height>27</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>To: </string>
+   </property>
+   <property name="font">
+       <font>
+            <pointsize>7</pointsize>
+       </font>
+   </property>
+  </widget>
+  <widget class="QComboBox" name="ConvertTo">
+   <property name="geometry">
+    <rect>
+     <x>1000</x>
+     <y>60</y>
+     <width>100</width>
+     <height>27</height>
+    </rect>
+   </property>
+   <property name="font">
+       <font>
+            <pointsize>7</pointsize>
+       </font>
+   </property>
+  </widget>
+
+  <!-- File select for conversion -->
+  <widget class="QLabel" name="FileForConversionLabel">
+   <property name="geometry">
+    <rect>
+     <x>820</x>
+     <y>90</y>
+     <width>50</width>
+     <height>27</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>Filename: </string>
+   </property>
+   <property name="font">
+       <font>
+            <pointsize>7</pointsize>
+       </font>
+   </property>
+  </widget>
+  <widget class="QComboBox" name="FileForConversion">
+   <property name="geometry">
+    <rect>
+     <x>860</x>
+     <y>90</y>
+     <width>230</width>
      <height>27</height>
     </rect>
    </property>

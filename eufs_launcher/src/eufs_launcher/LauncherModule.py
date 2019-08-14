@@ -168,11 +168,45 @@ class EufsLauncher(Plugin):
 		laxButton.setChecked(self.LAX_GENERATION)
 		
 		#Setup Conversion Tools dropdowns
-		for f in [".png",".launch",".csv"]:
+		for f in ["png","launch","csv"]:
 			self._widget.findChild(QComboBox,"ConvertFrom").addItem(f)
+		for f in ["ALL","png","launch","csv"]:
+			self._widget.findChild(QComboBox,"ConvertTo").addItem(f)
 			
+		self.updateConverterDropdown()
+		self._widget.findChild(QComboBox,"ConvertFrom").currentTextChanged.connect(self.updateConverterDropdown)
 
 		print("Plugin Successfully Launched!")
+
+	def updateConverterDropdown(self):
+		fromType = self._widget.findChild(QComboBox,"ConvertFrom").currentText()
+		allfiles = []
+
+		if fromType == "launch":
+			# Get tracks from eufs_gazebo package
+			relpath = os.path.join(rospkg.RosPack().get_path('eufs_gazebo'), 'launch')
+			launchfiles = [f for f in listdir(relpath) if isfile(join(relpath, f))]
+	
+			#Remove "blacklisted" files (ones that don't define tracks)
+			blacklist_ = open(os.path.join(rospkg.RosPack().get_path('eufs_gazebo'), 'launch/blacklist.txt'),"r")
+			blacklist = [f.strip() for f in blacklist_]#remove \n
+			allfiles = [f for f in launchfiles if not f in blacklist]
+		elif fromType == "png":
+			# Get images
+			relpath = os.path.join(rospkg.RosPack().get_path('eufs_gazebo'), 'randgen_imgs')
+			allfiles = [f for f in listdir(relpath) if isfile(join(relpath, f))]
+		elif fromType == "csv":
+			#Get csvs
+			relpath = os.path.join(rospkg.RosPack().get_path('eufs_gazebo'), 'tracks')
+			allfiles = [f for f in listdir(relpath) if isfile(join(relpath, f)) and f[-3:]=="csv"]
+
+		#Remove old files from selector
+		theSelector = self._widget.findChild(QComboBox,"FileForConversion")
+		theSelector.clear()
+
+		# Add files to selector
+		for f in allfiles:
+			theSelector.addItem(f)
 
 	def updatePreset(self):
 		which = self._widget.findChild(QComboBox,"WhichPreset").currentText()
