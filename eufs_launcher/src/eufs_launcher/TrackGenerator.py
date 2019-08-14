@@ -2,6 +2,7 @@ import math
 from PIL import Image
 from PIL import ImageDraw
 from random import randrange, uniform
+from rospy import logerr as ROSLOG
 
 
 """
@@ -72,7 +73,8 @@ def generateAutocrossTrackdriveTrack(startpoint):
 		curpoint = startpoint
 
 		#Let's start with a small straght
-		(generated, curpoint, deltalength) = generateStraight(startpoint,uniform(80,80),math.pi/8)
+		startangle = math.pi/8
+		(generated, curpoint, deltalength) = generateStraight(startpoint,uniform(80,80),startangle)
 		curTrackLength += deltalength
 		xys.extend(generated)
 
@@ -84,9 +86,43 @@ def generateAutocrossTrackdriveTrack(startpoint):
 			xys.extend(generated)
 
 		#Now lets head back to the start:
-		(generated, curpoint, length) = generatePathFromPointToPoint(curpoint,startpoint,endtangent(xys),fuzzradius=0)
+		#We're gonna set a checkpoint that is close but not exactly the start point
+		#so that we have breathing room for the final manouever:
+		(generated, curpoint, length) = generatePathFromPointToPoint(curpoint,(startpoint[0]-60,startpoint[1]+40),endtangent(xys),fuzzradius=0)
 		curTrackLength+= length
 		xys.extend(generated)
+
+		#Now we will add a circle to point directly away from the startpoint
+		goalTangent = (-math.cos(startangle),-math.sin(startangle))
+		goalPoint = startpoint
+		initialTangentAngle = endtangent(xys)
+		initialTangent = (math.cos(initialTangentAngle),math.sin(initialTangentAngle))
+		initialPoint = (xys[-1][0],xys[-1][1])
+		outerTurnAngle = math.acos(  -initialTangent[0]*goalTangent[0] - initialTangent[1]*goalTangent[1]  )
+		circleTurnAngle = math.pi - outerTurnAngle
+		circleTurnPercent = circleTurnAngle / (2*math.pi)
+		circleRadius = 20
+		(generated,curpoint,length,outnormal) = generateConstantTurn(initialPoint,circleRadius,initialTangentAngle,circlepercent=circleTurnPercent,turnleft=True)
+		curTrackLength+=length
+		xys.extend(generated)
+
+		#Add a circle to turn 180 degrees to face the start point directly
+		#Radius is calculated by finding distance when projected along the normal
+		outnormal = normalizevec(outnormal)
+		diff = ( curpoint[0]-startpoint[0],curpoint[1]-startpoint[1] )
+		circleRadius = (diff[0]*outnormal[0]+diff[1]*outnormal[1])/2
+		(generated, curpoint, length, _) = generateConstantTurn(curpoint,circleRadius,endtangent(xys),circlepercent=0.5,turnleft=True)
+		curTrackLength+=length
+		xys.extend(generated)
+
+		#Finally, add a straight to connect it to the start
+		straightLength = magnitude( ( xys[-1][0] - startpoint[0], xys[-1][1] - startpoint[1] ) )*1.1
+		(generated, curpoint, deltalength) = generateStraight(curpoint, straightLength ,endtangent(xys))
+		curTrackLength += deltalength
+		xys.extend(generated)
+		
+
+		
 
 		if curTrackLength > 1500:
 			print("Track gen failed - track too long, oops!  Retrying.")
@@ -107,28 +143,6 @@ def generatePathFromPointToPoint(startpoint,endpoint,intangent,depth=20,hairpine
 	circleradius = uniform(25,25)
 
 
-	"""
-	#--------------------------------------------------
-	#Here lies the circle code that did not take into account the fact that the circle itself changed where the "startpoint" was	
-	#I'm keeping it here incase someone wants to modify it to take that into account.
-	#I gave up and used an approximation method, creating the function generateConstantTurnUntilFacingPoint
-	#--------------------------------------------------
-
-	#First we want to direct ourselves towards endpoint, since intangent is the current direction
-	goaltangent = endtangent([startpoint,endpoint])
-
-	#We're going to place a cturn to point us in the right direction, but we need to calculate the percent needed
-	#We can get the angles the lines are pointing at using atan
-	#Draw a circle to see why, keep in mind tangent perpendicular to radius!
-	#I've not simplified the numbers so its easier for you to re-derive
-	inangle = math.pi-(math.pi/2-math.atan(intangent))
-	goalangle = math.pi-(math.pi/2-math.atan(goaltangent))
-	finalangle = goalangle-inangle
-	finalpercent = finalangle/(2*math.pi)
-	print("In: " + str(inangle))
-	print("Goal: " + str(goalangle))
-	#---------------------------------------------------
-	"""
 
 	#We want to know ahead of time which way the circle will turn - that way we don't get loopty-loops
 	#where the circle turns nearly all the way around when it would have been better to have the center
@@ -440,7 +454,7 @@ def generateConstantTurn(startpoint,radius,intangent,turnleft=None,circlepercent
 			centery-=2*slope*purex
 			flipper*=-1
 
-	points = [intermediatePoint(startpoint,(centerx,centery),flipper*t*angle*0.01) for t in range(0,100)]
+	points = [intermediatePoint(startpoint,(centerx,centery),flipper*t*angle*0.001) for t in range(0,1000)]
 
 	#Length of circle is, fortunately, easy!  It's simply radius*angle
 	length = angle*radius
@@ -523,7 +537,7 @@ def compactify_points(points):
 def check_if_overlap(points):
 	#Naive check to see if track overlaps itself
 	#(Won't catch overlaps due to track width, only if track center overlaps)
-	points = points[:-5] #remove end points as in theory that should also be the start point
+	points = points[:-10] #remove end points as in theory that should also be the start point
 	#(I remove extra to be a little generous to it as a courtesy - I don't really care how well the
 	#start loops to the end yet)
 
@@ -562,6 +576,10 @@ def capangle_odd(ang):
 	if ang > math.pi:
 		ang = ang-2*math.pi
 	return ang
+
+def magnitude(vec):
+	(a,b) = vec
+	return math.sqrt(a*a+b*b)
 
 def normalizevec(vec):
 	(a,b) = vec
