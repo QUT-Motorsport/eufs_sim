@@ -323,7 +323,13 @@ class ConversionTools:
 	@staticmethod
 	def launch_to_csv(what,params=[0]):
 		filename = what.split("/")[-1].split(".")[0]
-		Track.runConverter(filename)
+		cardata_reader = open(what)
+		cardata = cardata_reader.read()
+		cardata_reader.close()
+		carx   = cardata.split("<arg name=\"x\" default=\"")[1].split("\"")[0]
+		cary   = cardata.split("<arg name=\"y\" default=\"")[1].split("\"")[0]
+		caryaw = cardata.split("<arg name=\"yaw\" default=\"")[1].split("\"")[0]
+		Track.runConverter(filename,car_start_data=("car_start",carx,cary,caryaw))
 
 	#######################################################################################################################################################
 	#######################################################################################################################################################

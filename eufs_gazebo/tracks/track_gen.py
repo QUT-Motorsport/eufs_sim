@@ -19,7 +19,6 @@ from xml.dom import minidom
 import argparse
 import os
 import rospkg
-from rospy import logerr as ERR
 
 
 class Track:
