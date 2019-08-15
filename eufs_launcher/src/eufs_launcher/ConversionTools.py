@@ -45,6 +45,20 @@ class ConversionTools:
 	#This section handles Track Image metadata
 
 	@staticmethod
+	def getMetadataPixel(x,y,corner,pixels,size):
+		#Returns the metadata pixel (x,y,corner), as specified by the Track Image specification on the team wiki.
+		width = size[0]
+		height = size[1]
+		if corner == "Top Left":
+			return pixels[x,y]
+		elif corner == "Bottom Left":
+			return pixels[x,height-6+y]
+		elif corner == "Top Right":
+			return pixels[width-6+x,y]
+		elif corner == "Bottom Right":
+			return pixels[width-6+x,height-6+x]
+
+	@staticmethod
 	def getRawMetadata(pixelvalue,mode="continuous"):
 		#This function converts metadata as outlined in the specification for Track Images on the team wiki
 		#It assumes that handling of the cases (255,255,255,255) and (r,g,b,0) are done outside this function.
@@ -65,7 +79,24 @@ class ConversionTools:
 
 		metadata = getRawMetadata(primaryPixel,mode="continuous")
 		#Want to linearly transform the metadata, a range from 0 to 254**4-1, to the range 0.0001 to 100
-		return metadata/(254**4-1) * (100-0.0001) + 0.0001
+		return metadata/(254**4-1.0) * (100-0.0001) + 0.0001
+
+
+	@staticmethod
+	def deconvertScaleMetadata(data):
+		#This function converts a raw scale value into a list of metadata pixels needed to replicate it.
+		#First in list is the primary metadata pixel, second in list is the secondary (which is unused in the specification)
+		metadata = (data-0.0001)/(100-0.0001) * (254**4-1)
+		a = metadata % 254
+		metadata = (metadata - a) // 254
+		b = metadata % 254
+		metadata = (metadata - b) // 254
+		g = metadata % 254
+		r = (metadata - g) // 254
+
+		primaryPixel = (a+1,b+1,g+1,r+1)
+		secondaryPixel = (255,255,255,255)
+		return [primaryPixel,secondaryPixel]
 
 
 	#######################################################################################################################################################
@@ -154,8 +185,7 @@ class ConversionTools:
 		def istrack(c):
 			return c == ConversionTools.trackouter or c == ConversionTools.trackinner or c == ConversionTools.trackcenter
 
-		#Now we want to make all pixels bo
-rdering the track become magenta (255,0,255) - this will be our 'cone' color
+		#Now we want to make all pixels bordering the track become magenta (255,0,255) - this will be our 'cone' color
 		#To find pixel boardering track, simply find white pixel adjacent to a non-white non-magenta pixle
 		#We will also want to make it such that cones are about 4-6 away from eachother euclideanly	
 
@@ -253,6 +283,14 @@ rdering the track become magenta (255,0,255) - this will be our 'cone' color
 		GENERATED_FILENAME = what.split('/')[-1][:-4]#[:-4] to split off .png, looks like an emoji...
 		im = Image.open(what)
 		noiseLevel = params[0]
+		pixels = im.load()
+
+		#Let's get the scale metadata from the png:
+		scaledata = ConversionTools.convertScaleMetadata([
+							ConversionTools.getMetadataPixel(0,0,"Top Left",pixels,im.size),
+							ConversionTools.getMetadataPixel(1,0,"Top Left",pixels,im.size)])
+		#scaledata represents how big a pixel is.
+
 		#.launch:
 		launch_template = open(os.path.join(rospkg.RosPack().get_path('eufs_launcher'), 'resource/randgen_launch_template'),"r")
 		#params = %FILLNAME% %PLACEX% %PLACEY% %PLACEROTATION%
@@ -269,13 +307,12 @@ rdering the track become magenta (255,0,255) - this will be our 'cone' color
 			return 2*math.pi*((x-1)/254.0)#we never allow alpha to equal 0
 
 		#Get PLACEX,PLACEY (look for (0,255,0,a))
-		pixels = im.load()
 		for i in range(im.size[0]):
 			for j in range(im.size[1]):
 				p = pixels[i,j]
 				if isCarColor(p):
-					launch_merged = str(xCoordTransform(i)).join(launch_merged.split("%PLACEX%"))
-					launch_merged = str(yCoordTransform(j)).join(launch_merged.split("%PLACEY%"))
+					launch_merged = str(xCoordTransform(i*scaledata)).join(launch_merged.split("%PLACEX%"))
+					launch_merged = str(yCoordTransform(j*scaledata)).join(launch_merged.split("%PLACEY%"))
 					launch_merged = str(rotationTransform(p[3])).join(launch_merged.split("%PLACEROTATION%"))
 
 		launch_out = open(os.path.join(rospkg.RosPack().get_path('eufs_gazebo'), 'launch/'+GENERATED_FILENAME+".launch"),"w")
@@ -345,7 +382,7 @@ rdering the track become magenta (255,0,255) - this will be our 'cone' color
 				if a[0]>randval:
 					return a[1]
 			return "model://eufs_description/meshes/NoiseCube.dae"
-		
+
 		#Let's place all the models!
 		ConversionTools.linknum = -1
 		def putModelAtPosition(mod,x,y):
@@ -360,16 +397,16 @@ rdering the track become magenta (255,0,255) - this will be our 'cone' color
 			for j in range(im.size[1]):
 				p = pixels[i,j]
 				if p == ConversionTools.conecolor:
-					sdf_allmodels = sdf_allmodels + "\n" + putModelAtPosition(sdf_yellowconemodel,i,j)
+					sdf_allmodels = sdf_allmodels + "\n" + putModelAtPosition(sdf_yellowconemodel,i*scaledata,j*scaledata)
 				elif p == ConversionTools.conecolor2:
-					sdf_allmodels = sdf_allmodels + "\n" + putModelAtPosition(sdf_blueconemodel,i,j)
+					sdf_allmodels = sdf_allmodels + "\n" + putModelAtPosition(sdf_blueconemodel,i*scaledata,j*scaledata)
 				elif p == ConversionTools.conecolorOrange:
-					sdf_allmodels = sdf_allmodels + "\n" + putModelAtPosition(sdf_orangeconemodel,i,j)
+					sdf_allmodels = sdf_allmodels + "\n" + putModelAtPosition(sdf_orangeconemodel,i*scaledata,j*scaledata)
 				elif p == ConversionTools.conecolorBigOrange:
-					sdf_allmodels = sdf_allmodels + "\n" + putModelAtPosition(sdf_bigorangeconemodel,i,j)
+					sdf_allmodels = sdf_allmodels + "\n" + putModelAtPosition(sdf_bigorangeconemodel,i*scaledata,j*scaledata)
 				elif p == ConversionTools.noisecolor and uniform(0,1)<noiseLevel:
 					sdf_noisemodel = getRandomNoiseModel().join(sdf_model_with_collisions.split("%MODELNAME%"))
-					sdf_allmodels = sdf_allmodels + "\n" + putModelAtPosition(sdf_noisemodel,i,j)
+					sdf_allmodels = sdf_allmodels + "\n" + putModelAtPosition(sdf_noisemodel,i*scaledata,j*scaledata)
 
 		sdf_main = sdf_allmodels.join(sdf_main.split("%FILLDATA%"))
 
