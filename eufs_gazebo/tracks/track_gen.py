@@ -424,7 +424,7 @@ class Track:
 
 
     @staticmethod
-    def runConverter(track_name,midpoints=False,car_start_data=("car_start",0.0,0.0,0.0)):
+    def runConverter(track_name,midpoints=False,car_start_data=("car_start",0.0,0.0,0.0),conversion_suffix = ""):
         track_path = os.path.join(rospkg.RosPack().get_path('eufs_description'), "models",
                                   track_name, "model.sdf")
 
@@ -448,7 +448,7 @@ class Track:
         if midpoints:
             track.generate_midpoints()
             track.generate_tracks()
-        track.save_csv(os.path.join(rospkg.RosPack().get_path('eufs_gazebo'), "tracks",track_name))
+        track.save_csv(os.path.join(rospkg.RosPack().get_path('eufs_gazebo'), "tracks",track_name+conversion_suffix))
 
 if __name__ == "__main__":
     #Just a heads up, you can run this with a gui by running the launcher:

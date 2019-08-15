@@ -186,7 +186,8 @@ class EufsLauncher(Plugin):
 		cvto = self._widget.findChild(QComboBox,"ConvertTo").currentText()
 		#midpointBox.setVisible(cvto=="csv" or cvto=="ALL")
 		midpointBox.setChecked(True)
-
+		suffixBox = self._widget.findChild(QCheckBox,"SuffixBox")
+		suffixBox.setChecked(True)
 
 		print("Plugin Successfully Launched!")
 
@@ -386,7 +387,9 @@ class EufsLauncher(Plugin):
 			filename = os.path.join(rospkg.RosPack().get_path('eufs_gazebo'), 'launch/'+filename)
 		elif fromtype == "csv":
 			filename = os.path.join(rospkg.RosPack().get_path('eufs_gazebo'), 'tracks/'+filename)
-		Converter.convert(fromtype,totype,filename,params=[self.getNoiseLevel(),midpointWidget.isVisible() and midpointWidget.isChecked()])
+		suffix = "_CT" if self._widget.findChild(QCheckBox,"SuffixBox").isChecked() else ""
+		Converter.convert(fromtype,totype,filename,
+					params=[self.getNoiseLevel(),midpointWidget.isVisible() and midpointWidget.isChecked()],conversion_suffix=suffix)
 
 	def launch_button_pressed(self):
 		if self.hasLaunchedROS:

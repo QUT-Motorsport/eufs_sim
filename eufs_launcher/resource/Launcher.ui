@@ -886,6 +886,26 @@
    </property>
   </widget>
 
+  <!-- Suffix Button -->
+  <widget class="QCheckBox" name="SuffixBox">
+  <property name="geometry">
+      <rect>
+        <x>820</x>
+        <y>150</y>
+        <width>80</width>
+        <height>30</height>
+      </rect>
+    </property>
+    <property name="text" >
+      <string>Suffix</string>
+    </property>
+    <property name="font">
+       <font>
+            <pointsize>7</pointsize>
+       </font>
+   </property>
+  </widget>
+
 
   <!--Experimental Button (deprecated, doesn't appear)-->
   <widget class="QPushButton" name="Experimentals">

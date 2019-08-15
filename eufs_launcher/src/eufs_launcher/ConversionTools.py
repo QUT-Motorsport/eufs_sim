@@ -115,38 +115,38 @@ class ConversionTools:
 	#######################################################################################################################################################
 
 	@staticmethod
-	def convert(cfrom,cto,what,params=[]):
+	def convert(cfrom,cto,what,params=[],conversion_suffix=""):
 		if cfrom=="xys" and cto=="png":
-			return ConversionTools.xys_to_png(what,params)
+			return ConversionTools.xys_to_png(what,params,conversion_suffix)
 		if cfrom=="png" and cto=="launch":
-			return ConversionTools.png_to_launch(what,params)
+			return ConversionTools.png_to_launch(what,params,conversion_suffix)
 		if cfrom=="png" and cto=="csv":
-			ConversionTools.png_to_launch(what,params)
+			ConversionTools.png_to_launch(what,params,conversion_suffix)
 			newwhatarray = what.split("/")
 			newwhatarray[-2] = "launch"
 			what = "/".join(newwhatarray)
-			return ConversionTools.launch_to_csv(what[:-3]+"launch",params)
+			return ConversionTools.launch_to_csv(what[:-4]+conversion_suffix+".launch",params,conversion_suffix="")
 		if cfrom=="launch" and cto=="csv":
-			return ConversionTools.launch_to_csv(what,params)
+			return ConversionTools.launch_to_csv(what,params,conversion_suffix)
 		if cfrom=="launch" and cto=="png":
-			ConversionTools.launch_to_csv(what,params)
+			ConversionTools.launch_to_csv(what,params,conversion_suffix)
 			newwhatarray = what.split("/")
 			newwhatarray[-2] = "tracks"
 			what = "/".join(newwhatarray)
-			return ConversionTools.csv_to_png(what[:-6]+"csv",params)
+			return ConversionTools.csv_to_png(what[:-7]+conversion_suffix+".csv",params,conversion_suffix="")
 		if cfrom=="csv" and cto == "launch":
-			ConversionTools.csv_to_png(what,params)
+			ConversionTools.csv_to_png(what,params,conversion_suffix)
 			newwhatarray = what.split("/")
 			newwhatarray[-2] = "randgen_imgs"
 			what = "/".join(newwhatarray)
-			return ConversionTools.png_to_launch(what[:-3]+"png",params)
+			return ConversionTools.png_to_launch(what[:-4]+conversion_suffix+".png",params,conversion_suffix="")
 		if cfrom=="csv" and cto == "png":
-			return ConversionTools.csv_to_png(what,params)
+			return ConversionTools.csv_to_png(what,params,conversion_suffix)
 		if cto == "ALL":
 			#Don't worry, if something tries to convert to itself it just gets ignored
-			ConversionTools.convert(cfrom,"launch",what)
-			ConversionTools.convert(cfrom,"csv",what)
-			return ConversionTools.convert(cfrom,"png",what)
+			ConversionTools.convert(cfrom,"launch",what,params,conversion_suffix)
+			ConversionTools.convert(cfrom,"csv",what,params,conversion_suffix)
+			return ConversionTools.convert(cfrom,"png",what,params,conversion_suffix)
 		return None
 			
 	#######################################################################################################################################################
@@ -157,8 +157,8 @@ class ConversionTools:
 	#######################################################################################################################################################
 
 	@staticmethod
-	def xys_to_png(what,params):
-		GENERATED_FILENAME = "rand"
+	def xys_to_png(what,params,conversion_suffix=""):
+		GENERATED_FILENAME = "rand" + conversion_suffix
 		#Unpack
 		(xys,twidth,theight) = what
 		#Create image to hold data
@@ -277,7 +277,7 @@ class ConversionTools:
 	#######################################################################################################################################################
 
 	@staticmethod
-	def png_to_launch(what,params=[0]):
+	def png_to_launch(what,params=[0],conversion_suffix=""):
 		#This is a fairly intensive process - we need:
 		#	to put %FILENAME%.launch in eufs_gazebo/launch
 		#	to put %FILENAME%.world in eufs_gazebo/world
@@ -288,7 +288,7 @@ class ConversionTools:
 		#       randgen_world_template
 		#	randgen_model_template/model.config
 		#	randgen_model_template/model.sdf
-		GENERATED_FILENAME = what.split('/')[-1][:-4]#[:-4] to split off .png, looks like an emoji...
+		GENERATED_FILENAME = what.split('/')[-1][:-4]+conversion_suffix#[:-4] to split off .png, looks like an emoji...
 		im = Image.open(what)
 		noiseLevel = params[0]
 		pixels = im.load()
@@ -433,7 +433,7 @@ class ConversionTools:
 	#######################################################################################################################################################
 
 	@staticmethod
-	def launch_to_csv(what,params=[0]):
+	def launch_to_csv(what,params=[0],conversion_suffix=""):
 		filename = what.split("/")[-1].split(".")[0]
 		cardata_reader = open(what)
 		cardata = cardata_reader.read()
@@ -444,7 +444,7 @@ class ConversionTools:
 		midpoints=False
 		if len(params) >= 2:
 			midpoints = params[1]
-		Track.runConverter(filename,midpoints=midpoints,car_start_data=("car_start",carx,cary,caryaw))
+		Track.runConverter(filename,midpoints=midpoints,car_start_data=("car_start",carx,cary,caryaw),conversion_suffix = conversion_suffix)
 
 	#######################################################################################################################################################
 	#######################################################################################################################################################
@@ -454,8 +454,8 @@ class ConversionTools:
 	#######################################################################################################################################################
 
 	@staticmethod
-	def csv_to_png(what,params):
-		filename = what.split("/")[-1].split(".")[0]
+	def csv_to_png(what,params,conversion_suffix=""):
+		filename = what.split("/")[-1].split(".")[0]+conversion_suffix
 		#We are merely going to open up the csv, read through all the lines, and round down the point to an integer.
 		#(While preserving cone color).
 		df = pd.read_csv(what)
@@ -527,6 +527,8 @@ class ConversionTools:
 		
 		#Our scale will strive to preserve distances as small as a quarter of the average distance.
 		scaleDesired = min(totalxdistance,totalydistance)/(len(allcones)-1) * 0.25
+		if scaleDesired < 0.0001: scaleDesired = 0.0001#Clamp scale to allowed values
+		if scaleDesired > 100:    scaleDesired = 100
 		scaleMetadata = ConversionTools.deconvertScaleMetadata(scaleDesired)
 		
 		finalcones = []
