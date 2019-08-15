@@ -19,6 +19,7 @@ from xml.dom import minidom
 import argparse
 import os
 import rospkg
+import rospy
 
 
 class Track:
@@ -128,6 +129,7 @@ class Track:
             self.orange_cones = np.array(orange, dtype="float64")
         else:
             print("No orange cones found")
+
 
     def generate_tracks(self):
         """Generates blue, yellow and centerline tracks for the course
@@ -348,8 +350,13 @@ class Track:
         Returns:
             Numpy array with point p removed
         """
-        points = ps[np.all(ps != p, 1), :]
-        return points
+        #points = ps[np.all(ps != p, 1), :]#this line does not work!  It deletes more than one point, even nonequal ones.
+        #For some reason, the old code here was removing extra points.  I've added a quick-and-dirty fix for this.
+        points = []
+        for point in ps: 
+            if list(p) != list(point):
+                points.append(point)
+        return np.array(points)
 
     def find_closest(self, p, ps):
         """Find the closes point to p from points ps
@@ -403,7 +410,6 @@ class Track:
             current_point = closest_cone
 
         ordered.append(current_point)
-
         return np.array(ordered)
 
     def rotate_origin_only(self, xy, radians):
