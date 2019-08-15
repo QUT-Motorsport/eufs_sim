@@ -9,6 +9,7 @@ import rospy
 import sys
 sys.path.insert(1, os.path.join(rospkg.RosPack().get_path('eufs_gazebo'),'tracks'))
 from track_gen import Track
+import pandas as pd
 
 #Here are all the track formats we care about:
 #.launch (well, we actually want the model data, not the .launch, but we'll treat it as wanting the .launch)
@@ -343,4 +344,68 @@ class ConversionTools:
 		filename = what.split("/")[-1].split(".")[0]
 		#We are merely going to open up the csv, read through all the lines, and round down the point to an integer.
 		#(While preserving cone color).
+		df = pd.read_csv(what)
+		bluecones = df[df['tag']=="blue"]
+		yellowcones = df[df['tag']=="yellow"]
+		carloc = df[df['tag']=="car_start"]
+
+		rawblue = []
+		rawyellow = []
+		rawcarloc = (0,0,0,0)
+		for bluecone in bluecones.itertuples():
+			x = int(bluecone[2])
+			y = int(bluecone[3])
+			rawblue.append(("blue",x,y,0))
+
+		for yellowcone in yellowcones.itertuples():
+			x = int(yellowcone[2])
+			y = int(yellowcone[3])
+			rawyellow.append(("yellow",x,y,0))
+
+		for c in carloc.itertuples():
+			rawcarloc = ("car",int(c[2]),int(c[3]),int(c[4]))
+
+		allcones = rawblue + rawyellow + [rawcarloc]
+		minx = 100000
+		miny = 100000
+		maxx = -100000
+		maxy = -100000
+		for cone in allcones:
+			if cone[1]<minx:
+				minx = cone[1]
+			if cone[2]<miny:
+				miny = cone[2]
+			if cone[1]>maxx:
+				maxx = cone[1]
+			if cone[2]>maxy:
+				maxy = cone[2]
+		
+		finalcones = []
+		twidth = maxx-minx+20
+		theight = maxy-miny+20
+		carx = rawcarloc[1]-minx+10
+		cary = rawcarloc[2]-miny+10
+		for cone in allcones:
+			finalcones.append( (cone[0],cone[1]-minx+10,cone[2]-miny+10)   )
+
+		#draw the track
+		im = Image.new('RGBA', (twidth, theight), (0, 0, 0, 0)) 
+		draw = ImageDraw.Draw(im)
+
+		#Convert data to image format
+		draw.polygon([(0,0),(twidth,0),(twidth,theight),(0,theight),(0,0)],fill='white')#background
+
+		pixels = im.load()
+		#conecolor is inside, conecolor2 is outside
+		for cone in finalcones:
+			pixels[cone[1],cone[2]] = ConversionTools.conecolor if cone[0]=="yellow" else ConversionTools.conecolor2
+		pixelValue = int(rawcarloc[3]/(2*math.pi)*254+1) # it is *254+1 because we never want it to be 0
+		if pixelValue > 255: pixelValue = 255
+		if pixelValue <   1: pixelValue =   1
+		pixels[carx,cary] = (ConversionTools.carcolor[0],ConversionTools.carcolor[1],ConversionTools.carcolor[2],pixelValue)
+		
+
+		#Save it:
+		im.save(os.path.join(rospkg.RosPack().get_path('eufs_gazebo'), 'randgen_imgs/'+filename+'.png'))
+		return im
 		
