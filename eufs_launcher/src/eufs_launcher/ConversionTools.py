@@ -35,14 +35,20 @@ class ConversionTools:
 	@staticmethod
 	def convert(cfrom,cto,what,params=[]):
 		if cfrom=="xys" and cto=="png":
-			return ConversionTools.xys_to_png(what)
+			return ConversionTools.xys_to_png(what,params)
 		if cfrom=="png" and cto=="launch":
 			return ConversionTools.png_to_launch(what,params)
-		if cfrom=="launch" and cto=="csv":
-			return ConversionTools.launch_to_csv(what,params)
 		if cfrom=="png" and cto=="csv":
 			ConversionTools.png_to_launch(what,params)
 			return ConversionTools.launch_to_csv(what[:-3]+"launch",params)
+		if cfrom=="launch" and cto=="csv":
+			return ConversionTools.launch_to_csv(what,params)
+		if cfrom=="launch" and cto=="png":
+			pass
+		if cfrom=="csv" and cto == "launch":
+			pass
+		if cfrom=="csv" and cto == "png":
+			return ConversionTools.csv_to_png(what,params)
 			
 	#######################################################################################################################################################
 	#######################################################################################################################################################
@@ -52,7 +58,7 @@ class ConversionTools:
 	#######################################################################################################################################################
 
 	@staticmethod
-	def xys_to_png(what):
+	def xys_to_png(what,params):
 		GENERATED_FILENAME = "rand"
 		#Unpack
 		(xys,twidth,theight) = what
@@ -318,3 +324,17 @@ class ConversionTools:
 	def launch_to_csv(what,params=[0]):
 		filename = what.split("/")[-1].split(".")[0]
 		Track.runConverter(filename)
+
+	#######################################################################################################################################################
+	#######################################################################################################################################################
+	#######################################################################################################################################################
+	#######################################################################################################################################################
+	#######################################################################################################################################################
+	#######################################################################################################################################################
+
+	@staticmethod
+	def csv_to_png(what,params):
+		filename = what.split("/")[-1].split(".")[0]
+		#We are merely going to open up the csv, read through all the lines, and round down the point to an integer.
+		#(While preserving cone color).
+		

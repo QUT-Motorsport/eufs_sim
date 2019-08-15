@@ -19,6 +19,7 @@ from xml.dom import minidom
 import argparse
 import os
 import rospkg
+from rospy import logerr as ERR
 
 
 class Track:
@@ -31,6 +32,9 @@ class Track:
         self.yellow_track = None
         self.big_orange_cones = None
         self.orange_cones = None
+	self.car_start_data = ("car_start",0.0,0.0,0.0)#x,y,direction(yaw) - can be left at (0,0,0), only relevant when fed into track_gen through 
+                                                       #`eufs_launcher/ConversionTools`
+                                                       #as in that case it needs to preserve car data so that the conversion is fully bijective.
 
     def load_csv(self, file_path):
         """Loads CSV file of cone location data and store it in the class.
@@ -48,8 +52,9 @@ class Track:
             print("Please give me a .csv file. Exitting")
             return
 
-        data = pd.read_csv(file_path, names=["tag", "x", "y"], skiprows=1)
+        data = pd.read_csv(file_path, names=["tag", "x", "y","direction"], skiprows=1)
         self.blue_cones = np.array(data[data.tag == "blue"][["x", "y"]])
+	self.car = np.array(data[data.tag == "car_start"][["x", "y","direction"]])
         self.yellow_cones = np.array(data[data.tag == "yellow"][["x", "y"]])
         self.big_orange_cones = np.array(data[data.tag == "big_orange"][["x", "y"]])
         self.orange_cones = np.array(data[data.tag == "orange"][["x", "y"]])
@@ -248,7 +253,7 @@ class Track:
         if filename.find(".csv") == -1:
             filename = filename + ".csv"
 
-        df = pd.DataFrame(columns=["tag", "x", "y"])
+        df = pd.DataFrame(columns=["tag", "x", "y","direction"])
 
         # assuming there always are blue and yellow cones
         df["x"] = np.hstack((self.blue_cones[:, 0], self.yellow_cones[:, 0]))
@@ -277,8 +282,12 @@ class Track:
             df["y"] = np.hstack((df["y"].dropna().values, self.midpoints[:, 1]))
             df["tag"].iloc[-self.midpoints.shape[0]:] = "midpoint"
 
-        df.to_csv(filename, index=False)
+        #Add car data (always ("car_start",0,0,0) unless this file is called from ConversionTools))
+        cardf = pd.DataFrame([self.car_start_data], columns=["tag","x","y","direction"])  
+        df["direction"] = 0
+        df = df.append(cardf)
 
+        df.to_csv(filename, index=False)
         print("Succesfully saved to csv")
 
     def save_sdf(self, model_name):
@@ -410,7 +419,7 @@ class Track:
 
 
     @staticmethod
-    def runConverter(track_name,midpoints=False):
+    def runConverter(track_name,midpoints=False,car_start_data=("car_start",0.0,0.0,0.0)):
         track_path = os.path.join(rospkg.RosPack().get_path('eufs_description'), "models",
                                   track_name, "model.sdf")
 
@@ -429,6 +438,7 @@ class Track:
                   "within eufs_description/models/".format(track_name))))
     
         track = Track()
+	track.car_start_data = car_start_data
         track.load_sdf(track_path)
         if midpoints:
             track.generate_midpoints()
