@@ -36,6 +36,45 @@ class ConversionTools:
 	#Other various retained parameters
 	linknum = -1
 
+	#######################################################################################################################################################
+	#######################################################################################################################################################
+	#######################################################################################################################################################
+	#######################################################################################################################################################
+	#######################################################################################################################################################
+	#######################################################################################################################################################
+	#This section handles Track Image metadata
+
+	@staticmethod
+	def getRawMetadata(pixelvalue,mode="continuous"):
+		#This function converts metadata as outlined in the specification for Track Images on the team wiki
+		#It assumes that handling of the cases (255,255,255,255) and (r,g,b,0) are done outside this function.
+		(r,g,b,a) = pixelvalue
+		if mode == "continuous":
+			return a-1 + (b-1)*254 + (g-1)*254**2 + (r-1)*254**3
+		return None
+
+	@staticmethod
+	def convertScaleMetadata(pixelvalues):
+		#This function converts the data obtained from scale metadata pixels into actual scale information
+		#Output range is from 0.0001 to 100.
+		
+		primaryPixel = pixelvalues[0]
+		secondaryPixel = pixelvalues[1]#unused in the specification
+
+		if primaryPixel == (255,255,255,255) and secondaryPixel == (255,255,255,255): return 1 #Check for the default case
+
+		metadata = getRawMetadata(primaryPixel,mode="continuous")
+		#Want to linearly transform the metadata, a range from 0 to 254**4-1, to the range 0.0001 to 100
+		return metadata/(254**4-1) * (100-0.0001) + 0.0001
+
+
+	#######################################################################################################################################################
+	#######################################################################################################################################################
+	#######################################################################################################################################################
+	#######################################################################################################################################################
+	#######################################################################################################################################################
+	#######################################################################################################################################################
+
 	@staticmethod
 	def convert(cfrom,cto,what,params=[]):
 		if cfrom=="xys" and cto=="png":
@@ -115,7 +154,8 @@ class ConversionTools:
 		def istrack(c):
 			return c == ConversionTools.trackouter or c == ConversionTools.trackinner or c == ConversionTools.trackcenter
 
-		#Now we want to make all pixels boardering the track become magenta (255,0,255) - this will be our 'cone' color
+		#Now we want to make all pixels bo
+rdering the track become magenta (255,0,255) - this will be our 'cone' color
 		#To find pixel boardering track, simply find white pixel adjacent to a non-white non-magenta pixle
 		#We will also want to make it such that cones are about 4-6 away from eachother euclideanly	
 
