@@ -24,12 +24,14 @@ class ConversionTools:
 	# Define colors for track gen and image reading
 	noisecolor = (0,255,255,255)	#cyan, the turquoise turqouise wishes it were
 	bgcolor = (255,255,255,255)	#white
-	conecolor  = (255,0,255,255)	#magenta, for yellow cones
+	conecolor  = (255,0,255,255)	#magenta, for yellow cones (oops...)
 	conecolor2 = (0,0,255,255)	#blue, for blue cones
 	carcolor = (0,255,0,255)	#green
 	trackcenter = (0,0,0,255)	#black
 	trackinner = (255,0,0,255)	#red
 	trackouter = (255,255,0,255)	#yellow
+	conecolorOrange = (255,165,0,255) #orange, for orange cones
+	conecolorBigOrange = (127,80,0,255) #dark orange, for big orange cones	
 
 	#Other various retained parameters
 	linknum = -1
@@ -288,6 +290,8 @@ class ConversionTools:
 
 		sdf_blueconemodel = "model://eufs_description/meshes/cone_blue.dae".join(sdf_model_with_collisions.split("%MODELNAME%"))
 		sdf_yellowconemodel = "model://eufs_description/meshes/cone_yellow.dae".join(sdf_model_with_collisions.split("%MODELNAME%"))
+		sdf_orangeconemodel = "model://eufs_description/meshes/cone.dae".join(sdf_model_with_collisions.split("%MODELNAME%"))
+		sdf_bigorangeconemodel = "model://eufs_description/meshes/cone_big.dae".join(sdf_model_with_collisions.split("%MODELNAME%"))
 
 		#Now let's load in the noise priorities
 		noisefiles = open(os.path.join(rospkg.RosPack().get_path('eufs_launcher'), 'resource/noiseFiles.txt'),"r")
@@ -319,6 +323,10 @@ class ConversionTools:
 					sdf_allmodels = sdf_allmodels + "\n" + putModelAtPosition(sdf_yellowconemodel,i,j)
 				elif p == ConversionTools.conecolor2:
 					sdf_allmodels = sdf_allmodels + "\n" + putModelAtPosition(sdf_blueconemodel,i,j)
+				elif p == ConversionTools.conecolorOrange:
+					sdf_allmodels = sdf_allmodels + "\n" + putModelAtPosition(sdf_orangeconemodel,i,j)
+				elif p == ConversionTools.conecolorBigOrange:
+					sdf_allmodels = sdf_allmodels + "\n" + putModelAtPosition(sdf_bigorangeconemodel,i,j)
 				elif p == ConversionTools.noisecolor and uniform(0,1)<noiseLevel:
 					sdf_noisemodel = getRandomNoiseModel().join(sdf_model_with_collisions.split("%MODELNAME%"))
 					sdf_allmodels = sdf_allmodels + "\n" + putModelAtPosition(sdf_noisemodel,i,j)
@@ -368,10 +376,14 @@ class ConversionTools:
 		df = pd.read_csv(what)
 		bluecones = df[df['tag']=="blue"]
 		yellowcones = df[df['tag']=="yellow"]
+		orangecones = df[df['tag']=="orange"]
+		bigorangecones = df[df['tag']=="big_orange"]
 		carloc = df[df['tag']=="car_start"]
 
 		rawblue = []
 		rawyellow = []
+		raworange = []
+		rawbigorange = []
 		rawcarloc = (0,0,0,0)
 		for bluecone in bluecones.itertuples():
 			x = int(bluecone[2])
@@ -383,10 +395,20 @@ class ConversionTools:
 			y = int(yellowcone[3])
 			rawyellow.append(("yellow",x,y,0))
 
+		for orangecone in orangecones.itertuples():
+			x = int(orangecone[2])
+			y = int(orangecone[3])
+			raworange.append(("orange",x,y,0))
+
+		for bigorangecone in bigorangecones.itertuples():
+			x = int(bigorangecone[2])
+			y = int(bigorangecone[3])
+			rawbigorange.append(("big_orange",x,y,0))
+
 		for c in carloc.itertuples():
 			rawcarloc = ("car",int(c[2]),int(c[3]),int(c[4]))
 
-		allcones = rawblue + rawyellow + [rawcarloc]
+		allcones = rawblue + rawyellow + raworange + rawbigorange + [rawcarloc]
 		minx = 100000
 		miny = 100000
 		maxx = -100000
@@ -418,8 +440,14 @@ class ConversionTools:
 
 		pixels = im.load()
 		#conecolor is inside, conecolor2 is outside
+		def getConeColor(conename):
+			if  conename ==  "yellow":     return ConversionTools.conecolor
+			elif conename == "blue":       return ConversionTools.conecolor2
+			elif conename == "orange":     return ConversionTools.conecolorOrange
+			elif conename == "big_orange": return ConversionTools.conecolorBigOrange
+			return ConversionTools.conecolor
 		for cone in finalcones:
-			pixels[cone[1],cone[2]] = ConversionTools.conecolor if cone[0]=="yellow" else ConversionTools.conecolor2
+			pixels[cone[1],cone[2]] = getConeColor(cone[0])
 		pixelValue = int(rawcarloc[3]/(2*math.pi)*254+1) # it is *254+1 because we never want it to be 0
 		if pixelValue > 255: pixelValue = 255
 		if pixelValue <   1: pixelValue =   1
