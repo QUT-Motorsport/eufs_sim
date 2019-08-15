@@ -363,6 +363,12 @@ class EufsLauncher(Plugin):
 		fromtype = self._widget.findChild(QComboBox,"ConvertFrom").currentText()
 		totype   = self._widget.findChild(QComboBox,"ConvertTo").currentText()
 		filename = self._widget.findChild(QComboBox,"FileForConversion").currentText()
+		if fromtype == "png":
+			filename = os.path.join(rospkg.RosPack().get_path('eufs_gazebo'), 'randgen_imgs/'+filename)
+		elif fromtype == "launch":
+			filename = os.path.join(rospkg.RosPack().get_path('eufs_gazebo'), 'launch/'+filename)
+		elif fromtype == "csv":
+			filename = os.path.join(rospkg.RosPack().get_path('eufs_gazebo'), 'tracks/'+filename)
 		Converter.convert(fromtype,totype,filename,params=[self.getNoiseLevel()])
 
 	def launch_button_pressed(self):

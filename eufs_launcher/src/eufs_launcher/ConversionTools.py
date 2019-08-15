@@ -42,7 +42,7 @@ class ConversionTools:
 			return ConversionTools.launch_to_csv(what,params)
 		if cfrom=="png" and cto=="csv":
 			ConversionTools.png_to_launch(what,params)
-			return ConversionTools.launch_to_csv(what[:-3]+"csv",params)
+			return ConversionTools.launch_to_csv(what[:-3]+"launch",params)
 			
 	#######################################################################################################################################################
 	#######################################################################################################################################################
