@@ -47,16 +47,23 @@ class ConversionTools:
 	@staticmethod
 	def getMetadataPixel(x,y,corner,pixels,size):
 		#Returns the metadata pixel (x,y,corner), as specified by the Track Image specification on the team wiki.
+		x,y = ConversionTools.getMetadataPixelLocation(x,y,corner,size)
+		return pixels[x,y]
+
+	@staticmethod
+	def getMetadataPixelLocation(x,y,corner,size):
+		#Returns the metadata pixel (x,y,corner), as specified by the Track Image specification on the team wiki.
 		width = size[0]
 		height = size[1]
 		if corner == "Top Left":
-			return pixels[x,y]
+			return (x,y)
 		elif corner == "Bottom Left":
-			return pixels[x,height-6+y]
+			return (x,height-6+y)
 		elif corner == "Top Right":
-			return pixels[width-6+x,y]
+			return (width-6+x,y)
 		elif corner == "Bottom Right":
-			return pixels[width-6+x,height-6+x]
+			return (width-6+x,height-6+x)
+
 
 	@staticmethod
 	def getRawMetadata(pixelvalue,mode="continuous"):
@@ -77,16 +84,17 @@ class ConversionTools:
 
 		if primaryPixel == (255,255,255,255) and secondaryPixel == (255,255,255,255): return 1 #Check for the default case
 
-		metadata = getRawMetadata(primaryPixel,mode="continuous")
+		metadata = ConversionTools.getRawMetadata(primaryPixel,mode="continuous")
 		#Want to linearly transform the metadata, a range from 0 to 254**4-1, to the range 0.0001 to 100
-		return metadata/(254**4-1.0) * (100-0.0001) + 0.0001
+		toReturn = metadata/(254**4-1.0) * (100-0.0001) + 0.0001
+		return toReturn
 
 
 	@staticmethod
 	def deconvertScaleMetadata(data):
 		#This function converts a raw scale value into a list of metadata pixels needed to replicate it.
 		#First in list is the primary metadata pixel, second in list is the secondary (which is unused in the specification)
-		metadata = (data-0.0001)/(100-0.0001) * (254**4-1)
+		metadata = int((data-0.0001)/(100-0.0001) * (254**4-1))
 		a = metadata % 254
 		metadata = (metadata - a) // 254
 		b = metadata % 254
@@ -94,7 +102,7 @@ class ConversionTools:
 		g = metadata % 254
 		r = (metadata - g) // 254
 
-		primaryPixel = (a+1,b+1,g+1,r+1)
+		primaryPixel = (r+1,g+1,b+1,a+1)
 		secondaryPixel = (255,255,255,255)
 		return [primaryPixel,secondaryPixel]
 
@@ -463,29 +471,31 @@ class ConversionTools:
 		rawbigorange = []
 		rawcarloc = (0,0,0,0)
 		for bluecone in bluecones.itertuples():
-			x = int(bluecone[2])
-			y = int(bluecone[3])
+			x = (bluecone[2])
+			y = (bluecone[3])
 			rawblue.append(("blue",x,y,0))
 
 		for yellowcone in yellowcones.itertuples():
-			x = int(yellowcone[2])
-			y = int(yellowcone[3])
+			x = (yellowcone[2])
+			y = (yellowcone[3])
 			rawyellow.append(("yellow",x,y,0))
 
 		for orangecone in orangecones.itertuples():
-			x = int(orangecone[2])
-			y = int(orangecone[3])
+			x = (orangecone[2])
+			y = (orangecone[3])
 			raworange.append(("orange",x,y,0))
 
 		for bigorangecone in bigorangecones.itertuples():
-			x = int(bigorangecone[2])
-			y = int(bigorangecone[3])
+			x = (bigorangecone[2])
+			y = (bigorangecone[3])
 			rawbigorange.append(("big_orange",x,y,0))
 
 		for c in carloc.itertuples():
-			rawcarloc = ("car",int(c[2]),int(c[3]),int(c[4]))
+			rawcarloc = ("car",(c[2]),(c[3]),(c[4]))
 
 		allcones = rawblue + rawyellow + raworange + rawbigorange + [rawcarloc]
+
+		#Here we convert it all to positive
 		minx = 100000
 		miny = 100000
 		maxx = -100000
@@ -499,14 +509,33 @@ class ConversionTools:
 				maxx = cone[1]
 			if cone[2]>maxy:
 				maxy = cone[2]
+
+		#Here we figure out the track scaling by calculating the average smallest distance between cones
+		totalxdistance = 0
+		totalydistance = 0
+		for cone1 in allcones:
+			closestx = 10000
+			closesty = 10000
+			for cone2 in allcones:
+				if cone1 == cone2: continue
+				dx = abs(cone1[1]-cone2[1])
+				dy = abs(cone1[2]-cone2[2])
+				if dx < closestx: closestx = dx
+				if dy < closesty: closesty = dy
+			totalxdistance+=closestx
+			totalydistance+=closesty
+		
+		#Our scale will strive to preserve distances as small as a quarter of the average distance.
+		scaleDesired = min(totalxdistance,totalydistance)/(len(allcones)-1) * 0.25
+		scaleMetadata = ConversionTools.deconvertScaleMetadata(scaleDesired)
 		
 		finalcones = []
-		twidth = maxx-minx+20
-		theight = maxy-miny+20
-		carx = rawcarloc[1]-minx+10
-		cary = rawcarloc[2]-miny+10
+		twidth = int((maxx-minx+20)/scaleDesired)
+		theight = int((maxy-miny+20)/scaleDesired)
+		carx = int((rawcarloc[1]-minx+10)/scaleDesired)
+		cary = int((rawcarloc[2]-miny+10)/scaleDesired)
 		for cone in allcones:
-			finalcones.append( (cone[0],cone[1]-minx+10,cone[2]-miny+10)   )
+			finalcones.append( (cone[0],int((cone[1]-minx+10)/scaleDesired),int((cone[2]-miny+10)/scaleDesired))   )
 
 		#draw the track
 		im = Image.new('RGBA', (twidth, theight), (0, 0, 0, 0)) 
@@ -530,6 +559,11 @@ class ConversionTools:
 		if pixelValue <   1: pixelValue =   1
 		pixels[carx,cary] = (ConversionTools.carcolor[0],ConversionTools.carcolor[1],ConversionTools.carcolor[2],pixelValue)
 		
+		#Add metadata:
+		loc = ConversionTools.getMetadataPixelLocation(0,0,"Top Left",im.size)
+		pixels[loc[0],loc[1]] = scaleMetadata[0]
+		loc = ConversionTools.getMetadataPixelLocation(1,0,"Top Left",im.size)
+		pixels[loc[0],loc[1]] = scaleMetadata[1]
 
 		#Save it:
 		im.save(os.path.join(rospkg.RosPack().get_path('eufs_gazebo'), 'randgen_imgs/'+filename+'.png'))
