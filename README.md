@@ -51,20 +51,19 @@ roslaunch eufs_launcher eufs_launcher.launch
 
 You shold have something like this:
 
-![Full Gui](https://imgur.com/OcoBFUj.png)
+![Full Gui](https://i.imgur.com/f4RLA9t.png)
 
 <!-- For the most part, this should be self explanatory - the exception being perhaps the generation, noise, and image stuff. -->
 
-You can select different tracks from the dropdown menu. Then you can launch the simulation with the leftimost **Launch** button
+You can select different tracks from the dropdown menu. Then you can launch the simulation with the top-leftmost **Launch** button
 
-The rightmost will read in the selected image and turn it into a track, launching it immediately.
-The middle will generate a random track image to `rand.png` and then convert & launch it.  You can see the intermediate image in `eufs_gazebo/randgen_imgs`
-(Note: this button is experimental and currently hidden.  Pressing "option"/"alt" on your keyboard will make it appear)
+The bottom-left will read in the selected image and turn it into a track, launching it immediately.
+The bottom-middle will generate a random track image to `rand.png` and then convert & launch it.  You can see the intermediate image in `eufs_gazebo/randgen_imgs`
 
-The middle and right buttons are also sensitive to a new parameter called "noise" - these are randomly placed objects to the side of the track that the
+The bottom-left button is sensitive to a parameter called "noise" - these are randomly placed objects to the side of the track that the
 car's sensors may pick up, mimicking real-world 'noise' from the environment.  By default this is off, but you can drag the slider to adjust it to whatever levels you desire.
 
-** Random track generation is still experimental** and will most likely kill your CPU if you run it!
+If you don't have a good computer, stick to the Computer Friendly random generation preset.
 
 ## 4. Additional sensors <a name="sensors"></a>
 Additional sensors for testing are avilable via the `ros-kinetic-robotnik-sensor` package. Some of them are already defined in `eufs_description/robots/eufs.urdf.xarco`. You can simply commment them in and attach them appropriately to the car.
