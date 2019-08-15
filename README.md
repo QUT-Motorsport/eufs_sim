@@ -58,7 +58,7 @@ You shold have something like this:
 You can select different tracks from the dropdown menu. Then you can launch the simulation with the top-leftmost **Launch** button
 
 The bottom-left will read in the selected image and turn it into a track, launching it immediately.
-The bottom-middle will generate a random track image to `rand.png` and then convert & launch it.  You can see the intermediate image in `eufs_gazebo/randgen_imgs`
+The bottom-middle will generate a random track image to `rand.png`.  You can see the image in `eufs_gazebo/randgen_imgs`.  If you want to launch it, use the bottom-left button on `rand.png`.
 
 The bottom-left button is sensitive to a parameter called "noise" - these are randomly placed objects to the side of the track that the
 car's sensors may pick up, mimicking real-world 'noise' from the environment.  By default this is off, but you can drag the slider to adjust it to whatever levels you desire.
