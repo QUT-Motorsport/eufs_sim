@@ -169,9 +169,9 @@ class EufsLauncher(Plugin):
 		laxButton.setChecked(self.LAX_GENERATION)
 		
 		#Setup Conversion Tools dropdowns
-		for f in ["png","launch","csv"]:
+		for f in ["launch","png","csv"]:
 			self._widget.findChild(QComboBox,"ConvertFrom").addItem(f)
-		for f in ["ALL","png","launch","csv"]:
+		for f in ["csv","png","launch","ALL"]:
 			self._widget.findChild(QComboBox,"ConvertTo").addItem(f)
 			
 		self.updateConverterDropdown()

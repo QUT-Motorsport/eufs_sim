@@ -1,8 +1,8 @@
 <sdf version='1.6'>
-  <world name='default'>
+  <world name='big_track'>
     <gui fullscreen='0'>
       <camera name='user_camera'>
-        <pose frame=''>-55 55 20 0 0.667643 -1</pose>
+        <pose frame=''>-40 40 20 0 0.667643 -1</pose>
         <view_controller>orbit</view_controller>
         <projection_type>perspective</projection_type>
       </camera>
@@ -16,7 +16,7 @@
         </clouds>
       </sky>
       <ambient>1.0 1.0 1.0 1.0</ambient>
-      <shadows>true</shadows>
+      <shadows>false</shadows>
     </scene>
 
     <light name='sun' type='directional'>

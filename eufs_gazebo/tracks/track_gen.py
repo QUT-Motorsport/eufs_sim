@@ -286,7 +286,7 @@ class Track:
         df["direction"] = 0
         df = df.append(cardf)
 
-        df.to_csv(filename, index=False)
+        df.to_csv(filename, index=False,columns=["tag","x","y","direction"])
         print("Succesfully saved to csv")
 
     def save_sdf(self, model_name):

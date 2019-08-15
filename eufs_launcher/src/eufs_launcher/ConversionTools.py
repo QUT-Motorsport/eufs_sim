@@ -41,15 +41,32 @@ class ConversionTools:
 			return ConversionTools.png_to_launch(what,params)
 		if cfrom=="png" and cto=="csv":
 			ConversionTools.png_to_launch(what,params)
+			newwhatarray = what.split("/")
+			newwhatarray[-2] = "launch"
+			what = "/".join(newwhatarray)
 			return ConversionTools.launch_to_csv(what[:-3]+"launch",params)
 		if cfrom=="launch" and cto=="csv":
 			return ConversionTools.launch_to_csv(what,params)
 		if cfrom=="launch" and cto=="png":
-			pass
+			ConversionTools.launch_to_csv(what,params)
+			newwhatarray = what.split("/")
+			newwhatarray[-2] = "tracks"
+			what = "/".join(newwhatarray)
+			return ConversionTools.csv_to_png(what[:-6]+"csv",params)
 		if cfrom=="csv" and cto == "launch":
-			pass
+			ConversionTools.csv_to_png(what,params)
+			newwhatarray = what.split("/")
+			newwhatarray[-2] = "randgen_imgs"
+			what = "/".join(newwhatarray)
+			return ConversionTools.png_to_launch(what[:-3]+"png",params)
 		if cfrom=="csv" and cto == "png":
 			return ConversionTools.csv_to_png(what,params)
+		if cto == "ALL":
+			#Don't worry, if something tries to convert to itself it just gets ignored
+			ConversionTools.convert(cfrom,"launch",what)
+			ConversionTools.convert(cfrom,"csv",what)
+			return ConversionTools.convert(cfrom,"png",what)
+		return None
 			
 	#######################################################################################################################################################
 	#######################################################################################################################################################
