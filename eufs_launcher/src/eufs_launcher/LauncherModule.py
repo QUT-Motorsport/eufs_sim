@@ -184,7 +184,7 @@ class EufsLauncher(Plugin):
 		#Prep midpoints checkbox
 		midpointBox = self._widget.findChild(QCheckBox,"MidpointBox")
 		cvto = self._widget.findChild(QComboBox,"ConvertTo").currentText()
-		midpointBox.setVisible(cvto=="csv" or cvto=="ALL")
+		#midpointBox.setVisible(cvto=="csv" or cvto=="ALL")
 		midpointBox.setChecked(True)
 
 
@@ -193,7 +193,7 @@ class EufsLauncher(Plugin):
 	def updateMidpointsBox(self):
 		#Toggle checkbox
 		cvto = self._widget.findChild(QComboBox,"ConvertTo").currentText()
-		self._widget.findChild(QCheckBox,"MidpointBox").setVisible(cvto=="csv" or cvto=="ALL")
+		#self._widget.findChild(QCheckBox,"MidpointBox").setVisible(cvto=="csv" or cvto=="ALL")
 
 	def updateConverterDropdown(self):
 		fromType = self._widget.findChild(QComboBox,"ConvertFrom").currentText()
