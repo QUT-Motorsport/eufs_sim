@@ -198,7 +198,7 @@
       <rect>
         <x>600</x>
         <y>70</y>
-        <width>250</width>
+        <width>150</width>
         <height>30</height>
       </rect>
     </property>
@@ -585,13 +585,12 @@
   </widget>
 
   <!--Lax Generation Button -->
-  <!--Visualisator Launcher-->
   <widget class="QCheckBox" name="LaxCheckBox">
   <property name="geometry">
       <rect>
         <x>430</x>
         <y>300</y>
-        <width>250</width>
+        <width>100</width>
         <height>30</height>
       </rect>
     </property>
@@ -858,6 +857,27 @@
    </property>
    <property name="text" >
       <string>Convert</string>
+    </property>
+    <property name="font">
+       <font>
+            <pointsize>7</pointsize>
+       </font>
+   </property>
+  </widget>
+
+
+  <!-- Midpoints Button -->
+  <widget class="QCheckBox" name="MidpointBox">
+  <property name="geometry">
+      <rect>
+        <x>820</x>
+        <y>120</y>
+        <width>80</width>
+        <height>30</height>
+      </rect>
+    </property>
+    <property name="text" >
+      <string>Midpoints</string>
     </property>
     <property name="font">
        <font>

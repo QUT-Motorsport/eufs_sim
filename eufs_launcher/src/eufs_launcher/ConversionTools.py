@@ -13,6 +13,7 @@ import pandas as pd
 
 #Here are all the track formats we care about:
 #.launch (well, we actually want the model data, not the .launch, but we'll treat it as wanting the .launch)
+#		(since the end user shouldn't have to care about the distinction)
 #.png
 #.csv
 #raw data ("xys",this will be hidden from the user as it is only used to convert into .pngs)
@@ -347,7 +348,10 @@ class ConversionTools:
 		carx   = cardata.split("<arg name=\"x\" default=\"")[1].split("\"")[0]
 		cary   = cardata.split("<arg name=\"y\" default=\"")[1].split("\"")[0]
 		caryaw = cardata.split("<arg name=\"yaw\" default=\"")[1].split("\"")[0]
-		Track.runConverter(filename,car_start_data=("car_start",carx,cary,caryaw))
+		midpoints=False
+		if len(params) >= 2:
+			midpoints = params[1]
+		Track.runConverter(filename,midpoints=midpoints,car_start_data=("car_start",carx,cary,caryaw))
 
 	#######################################################################################################################################################
 	#######################################################################################################################################################

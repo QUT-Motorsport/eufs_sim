@@ -90,8 +90,11 @@ class EufsLauncher(Plugin):
 		launchfiles = [f for f in launchfiles if not f in blacklist]
 
 		# Add Tracks to Track Selector
+		if "small_track.launch" in launchfiles:
+			self._widget.findChild(QComboBox,"WhichTrack").addItem("small_track.launch")
 		for f in launchfiles:
-			self._widget.findChild(QComboBox,"WhichTrack").addItem(f)
+			if f != "small_track.launch":
+				self._widget.findChild(QComboBox,"WhichTrack").addItem(f)
 
 		# Get images
 		relpath = os.path.join(rospkg.RosPack().get_path('eufs_gazebo'), 'randgen_imgs')
@@ -176,8 +179,19 @@ class EufsLauncher(Plugin):
 			
 		self.updateConverterDropdown()
 		self._widget.findChild(QComboBox,"ConvertFrom").currentTextChanged.connect(self.updateConverterDropdown)
+		self._widget.findChild(QComboBox,"ConvertTo").currentTextChanged.connect(self.updateMidpointsBox)
+
+		#Prep midpoints checkbox
+		midpointBox = self._widget.findChild(QCheckBox,"MidpointBox")
+		midpointBox.setVisible(self._widget.findChild(QComboBox,"ConvertTo").currentText()=="csv")
+		midpointBox.setChecked(True)
+
 
 		print("Plugin Successfully Launched!")
+
+	def updateMidpointsBox(self):
+		#Toggle checkbox
+		self._widget.findChild(QCheckBox,"MidpointBox").setVisible(self._widget.findChild(QComboBox,"ConvertTo").currentText()=="csv")
 
 	def updateConverterDropdown(self):
 		fromType = self._widget.findChild(QComboBox,"ConvertFrom").currentText()
@@ -363,13 +377,14 @@ class EufsLauncher(Plugin):
 		fromtype = self._widget.findChild(QComboBox,"ConvertFrom").currentText()
 		totype   = self._widget.findChild(QComboBox,"ConvertTo").currentText()
 		filename = self._widget.findChild(QComboBox,"FileForConversion").currentText()
+		midpointWidget = self._widget.findChild(QCheckBox,"MidpointBox")
 		if fromtype == "png":
 			filename = os.path.join(rospkg.RosPack().get_path('eufs_gazebo'), 'randgen_imgs/'+filename)
 		elif fromtype == "launch":
 			filename = os.path.join(rospkg.RosPack().get_path('eufs_gazebo'), 'launch/'+filename)
 		elif fromtype == "csv":
 			filename = os.path.join(rospkg.RosPack().get_path('eufs_gazebo'), 'tracks/'+filename)
-		Converter.convert(fromtype,totype,filename,params=[self.getNoiseLevel()])
+		Converter.convert(fromtype,totype,filename,params=[self.getNoiseLevel(),midpointWidget.isVisible() and midpointWidget.isChecked()])
 
 	def launch_button_pressed(self):
 		if self.hasLaunchedROS:
