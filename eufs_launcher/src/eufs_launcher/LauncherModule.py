@@ -186,8 +186,18 @@ class EufsLauncher(Plugin):
 		cvto = self._widget.findChild(QComboBox,"ConvertTo").currentText()
 		#midpointBox.setVisible(cvto=="csv" or cvto=="ALL")
 		midpointBox.setChecked(True)
+
+		#Suffix checkbox
 		suffixBox = self._widget.findChild(QCheckBox,"SuffixBox")
 		suffixBox.setChecked(True)
+
+		#Track Gen full stack checkbox
+		tgFullStack = self._widget.findChild(QCheckBox,"FullStackTrackGenButton")
+		tgFullStack.setChecked(True)
+
+		#Image full stack checkbox
+		imFullStack = self._widget.findChild(QCheckBox,"FullStackImageButton")
+		imFullStack.setChecked(True)
 
 		print("Plugin Successfully Launched!")
 
@@ -357,16 +367,25 @@ class EufsLauncher(Plugin):
 
 		im = Converter.convert("xys","png",(xys,twidth,theight))
 
+		#If full stack selected, convert into csv and launch as well
+		tgFullStack = self._widget.findChild(QCheckBox,"FullStackTrackGenButton")
+		if tgFullStack.isChecked():
+			imgpath = os.path.join(rospkg.RosPack().get_path('eufs_gazebo'), 'randgen_imgs/rand.png')
+			Converter.convert("png","ALL",imgpath,params=[self.getNoiseLevel()])
+
 		print("Track Gen Complete!")
 
 		im.show()
-		#self.launchfileoverride = GENERATED_FILENAME + ".launch"
-		#self.launch_button_pressed()
 
 	def track_from_image_button_pressed(self):
 		fname = self._widget.findChild(QComboBox,"WhichImage").currentText()
 		fname_full = os.path.join(rospkg.RosPack().get_path('eufs_gazebo'), 'randgen_imgs/'+fname)
-		Converter.convert("png","launch",fname_full,params=[self.getNoiseLevel()])
+		imFullStack = self._widget.findChild(QCheckBox,"FullStackImageButton")
+		if imFullStack.isChecked():
+			Converter.convert("png","ALL",fname_full,params=[self.getNoiseLevel()])
+		else:
+			Converter.convert("png","launch",fname_full,params=[self.getNoiseLevel()])
+
 		self.launchfileoverride = fname[:-4] + ".launch"
 		self.launch_button_pressed()
 
