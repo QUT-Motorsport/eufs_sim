@@ -430,7 +430,7 @@ class EufsLauncher(Plugin):
 								self.HAIRPIN_PAIRS,
 								self.MAX_LENGTH,
 								1 if isLaxGenerator else 0,
-								1#Bezier
+								1 if self._widget.findChild(QComboBox,"WhichPreset").currentText()=="Bezier" else 0
 								])
 
 		im = Converter.convert("xys","png",(xys,twidth,theight))

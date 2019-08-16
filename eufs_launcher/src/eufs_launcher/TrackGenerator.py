@@ -123,7 +123,7 @@ class TrackGenerator:
 
 	@staticmethod
 	def getDefaultPreset():
-		return "Bezier"#"Small Straights"
+		return "Small Straights"
 
 	@staticmethod
 	def getpresetnames():
