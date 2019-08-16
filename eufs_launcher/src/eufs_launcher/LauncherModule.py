@@ -7,7 +7,7 @@ import math
 
 from qt_gui.plugin import Plugin
 from python_qt_binding import loadUi
-from python_qt_binding.QtWidgets import QWidget, QComboBox, QPushButton, QSlider, QRadioButton, QCheckBox, QMainWindow, QLabel
+from python_qt_binding.QtWidgets import QWidget, QComboBox, QPushButton, QSlider, QRadioButton, QCheckBox, QMainWindow, QLabel, QLineEdit
 
 from os import listdir
 from os.path import isfile, join
@@ -122,6 +122,7 @@ class EufsLauncher(Plugin):
 		self._widget.findChild(QPushButton,"GenerateButton").clicked.connect(self.generator_button_pressed)
 		self._widget.findChild(QPushButton,"LoadFromImageButton").clicked.connect(self.track_from_image_button_pressed)
 		self._widget.findChild(QPushButton,"ConvertButton").clicked.connect(self.convert_button_pressed)
+		self._widget.findChild(QPushButton,"RenameButton").clicked.connect(self.copy_button_pressed)
 		self._widget.findChild(QPushButton,"Experimentals").clicked.connect(self.experimental_button_pressed)
 
 		#Create array of running processes (currently unused, but if you ever do process = launch.launch(node), add process here!)
@@ -180,6 +181,7 @@ class EufsLauncher(Plugin):
 		self.updateConverterDropdown()
 		self._widget.findChild(QComboBox,"ConvertFrom").currentTextChanged.connect(self.updateConverterDropdown)
 		self._widget.findChild(QComboBox,"ConvertTo").currentTextChanged.connect(self.updateMidpointsBox)
+		self._widget.findChild(QComboBox,"FileForConversion").currentTextChanged.connect(self.updateCopier)
 
 		#Prep midpoints checkbox
 		midpointBox = self._widget.findChild(QCheckBox,"MidpointBox")
@@ -199,7 +201,69 @@ class EufsLauncher(Plugin):
 		imFullStack = self._widget.findChild(QCheckBox,"FullStackImageButton")
 		imFullStack.setChecked(True)
 
+		#Copier full stack checkbox
+		cpFullStack = self._widget.findChild(QCheckBox,"FullStackCopyButton")
+		cpFullStack.setChecked(True)
+
+		#Change label to show current selected file for the copier
+		self.updateCopier()
+
 		print("Plugin Successfully Launched!")
+
+	def copy_button_pressed(self):
+		#Copy the current file
+		isFullStack = self._widget.findChild(QCheckBox,"FullStackCopyButton").isChecked()
+		fileToCopyTo = self._widget.findChild(QLineEdit,"RenameFileTextbox").text()
+		fileToCopyFrom = self._widget.findChild(QComboBox,"FileForConversion").currentText()
+		rawName_to = fileToCopyTo.split(".")[0]
+		rawName_from = fileToCopyFrom.split(".")[0]
+		ending = fileToCopyFrom.split(".")[-1]
+
+		if len(fileToCopyTo) == 0:#Don't let them create null-named files
+			return
+
+		if ending == "launch":
+			#For launch files, we also need to move around the model folders
+			if not os.path.exists(os.path.join(rospkg.RosPack().get_path('eufs_description'), 'models',rawName_to)):
+				os.mkdir(os.path.join(rospkg.RosPack().get_path('eufs_description'), 'models',rawName_to))
+			path_from = os.path.join(rospkg.RosPack().get_path('eufs_description'), 'models',rawName_from,"model.sdf")
+			path_to   = os.path.join(rospkg.RosPack().get_path('eufs_description'), 'models',rawName_to,"model.sdf")
+			Converter.copyFile(path_from,path_to)
+
+			path_from = os.path.join(rospkg.RosPack().get_path('eufs_description'), 'models',rawName_from,"model.config")
+			path_to   = os.path.join(rospkg.RosPack().get_path('eufs_description'), 'models',rawName_to,"model.config")
+			Converter.copyFile(path_from,path_to)
+			
+			path_from = os.path.join(rospkg.RosPack().get_path('eufs_gazebo'), 'launch',fileToCopyFrom)
+			path_to   = os.path.join(rospkg.RosPack().get_path('eufs_gazebo'),'launch',rawName_to+"."+ending)
+			Converter.copyFile(path_from,path_to)
+
+			#If full stack copying, convert to all file formats
+			if self._widget.findChild(QCheckBox,"FullStackCopyButton").isChecked():
+				Converter.convert("launch","ALL",path_to,params=[self.getNoiseLevel()])
+
+		elif ending == "png":
+			path_from = os.path.join(rospkg.RosPack().get_path('eufs_gazebo'), 'randgen_imgs',fileToCopyFrom)
+			path_to   = os.path.join(rospkg.RosPack().get_path('eufs_gazebo'),'randgen_imgs',rawName_to+"."+ending)
+			Converter.copyFile(path_from,path_to)
+
+			#If full stack copying, convert to all file formats
+			if self._widget.findChild(QCheckBox,"FullStackCopyButton").isChecked():
+				Converter.convert("png","ALL",path_to,params=[self.getNoiseLevel()])
+
+		elif ending == "csv":
+			path_from = os.path.join(rospkg.RosPack().get_path('eufs_gazebo'), 'tracks',fileToCopyFrom)
+			path_to   = os.path.join(rospkg.RosPack().get_path('eufs_gazebo'),'tracks',rawName_to+"."+ending)
+			Converter.copyFile(path_from,path_to)
+
+			#If full stack copying, convert to all file formats
+			if self._widget.findChild(QCheckBox,"FullStackCopyButton").isChecked():
+				Converter.convert("csv","ALL",path_to,params=[self.getNoiseLevel()])
+
+	def updateCopier(self):
+		#Change label to show current selected file for the copier
+		copyHead = self._widget.findChild(QLabel,"RenameFileHeader")
+		copyHead.setText("Copy: "+self._widget.findChild(QComboBox,"FileForConversion").currentText())
 
 	def updateMidpointsBox(self):
 		#Toggle checkbox
@@ -235,6 +299,8 @@ class EufsLauncher(Plugin):
 		# Add files to selector
 		for f in allfiles:
 			theSelector.addItem(f)
+
+		self.updateCopier()
 
 	def updatePreset(self):
 		which = self._widget.findChild(QComboBox,"WhichPreset").currentText()

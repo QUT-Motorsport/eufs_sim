@@ -142,7 +142,7 @@ class ConversionTools:
 			return ConversionTools.png_to_launch(what[:-4]+conversion_suffix+".png",params,conversion_suffix="")
 		if cfrom=="csv" and cto == "png":
 			return ConversionTools.csv_to_png(what,params,conversion_suffix)
-		if cto == "ALL":
+		if cto == "ALL" or cto == "all":
 			#Don't worry, if something tries to convert to itself it just gets ignored
 			ConversionTools.convert(cfrom,"launch",what,params,conversion_suffix)
 			ConversionTools.convert(cfrom,"csv",what,params,conversion_suffix)
@@ -570,4 +570,22 @@ class ConversionTools:
 		#Save it:
 		im.save(os.path.join(rospkg.RosPack().get_path('eufs_gazebo'), 'randgen_imgs/'+filename+'.png'))
 		return im
+		
+
+
+	#######################################################################################################################################################
+	#######################################################################################################################################################
+	#######################################################################################################################################################
+	#######################################################################################################################################################
+	#######################################################################################################################################################
+	#######################################################################################################################################################
+	#This section handles copying
+	@staticmethod
+	def copyFile(fr,to):
+		reader = open(fr,'r')
+		writer = open(to,'w')
+		data = reader.read()
+		writer.write(data)
+		reader.close()
+		writer.close()
 		

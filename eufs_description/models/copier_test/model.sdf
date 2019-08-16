@@ -1,6 +1,6 @@
 <?xml version='1.0'?>
 <sdf version='1.6'>
-  <model name='small_track_CT'>
+  <model name='scale_tester'>
     
 
     <link name='link_0_clone_0'>
