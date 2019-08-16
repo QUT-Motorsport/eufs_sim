@@ -35,6 +35,7 @@ class ConversionTools:
 
 	#Other various retained parameters
 	linknum = -1
+	TRACKIMG_VERSION_NUM = 1
 
 	#######################################################################################################################################################
 	#######################################################################################################################################################
@@ -62,7 +63,10 @@ class ConversionTools:
 		elif corner == "Top Right":
 			return (width-6+x,y)
 		elif corner == "Bottom Right":
-			return (width-6+x,height-6+x)
+			return (width-6+x,height-6+y)
+		else: 
+			rospy.logerr("Error, not a valid corner!  Typo?: " + corner)
+			return None
 
 
 	@staticmethod
@@ -72,6 +76,20 @@ class ConversionTools:
 		(r,g,b,a) = pixelvalue
 		if mode == "continuous":
 			return a-1 + (b-1)*254 + (g-1)*254**2 + (r-1)*254**3
+		return None
+
+	@staticmethod
+	def ungetRawMetadata(metadata,mode="continuous"):
+		#Undoes the process of getRawMetadata()
+		if mode == "continuous":
+			a = metadata % 254
+			metadata = (metadata - a) // 254
+			b = metadata % 254
+			metadata = (metadata - b) // 254
+			g = metadata % 254
+			r = (metadata - g) // 254
+
+			return (r+1,g+1,b+1,a+1)
 		return None
 
 	@staticmethod
@@ -95,17 +113,24 @@ class ConversionTools:
 		#This function converts a raw scale value into a list of metadata pixels needed to replicate it.
 		#First in list is the primary metadata pixel, second in list is the secondary (which is unused in the specification)
 		metadata = int((data-0.0001)/(100-0.0001) * (254**4-1))
-		a = metadata % 254
-		metadata = (metadata - a) // 254
-		b = metadata % 254
-		metadata = (metadata - b) // 254
-		g = metadata % 254
-		r = (metadata - g) // 254
-
-		primaryPixel = (r+1,g+1,b+1,a+1)
+		primaryPixel = ConversionTools.ungetRawMetadata(metadata)
 		secondaryPixel = (255,255,255,255)
 		return [primaryPixel,secondaryPixel]
 
+	@staticmethod
+	def convertVersionMetadata(pixelvalues):
+		#This function converts the data obtained from scale metadata pixels into actual scale information
+		#Output range is from 0 to 254**4-1
+		primaryPixel = pixelvalues[0]
+		if primaryPixel == (255,255,255,255): return 0
+		metadata = ConversionTools.getRawMetadata(primaryPixel)
+		return metadata
+
+	@staticmethod
+	def deconvertVersionMetadata(data):
+		#This function is the reverse transformation as convertVersionMetadata
+		return [ConversionTools.ungetRawMetadata(data)]
+		
 
 	#######################################################################################################################################################
 	#######################################################################################################################################################
@@ -262,9 +287,14 @@ class ConversionTools:
 
 		for i in range(im.size[0]):
 			for j in range(im.size[1]):
+				if i<5 or j<5 or i>=im.size[0]-5 or j>=im.size[0]-5: continue#don't add noise in margin
 				if pixels[i,j] == ConversionTools.bgcolor:
 					if uniform(0,100) < 1:#1% covered maximal noise
 						pixels[i,j] = ConversionTools.noisecolor
+
+		#And tag it with the version number
+		loc = ConversionTools.getMetadataPixelLocation(4,4,"Bottom Right",im.size)
+		pixels[loc[0],loc[1]] = ConversionTools.deconvertVersionMetadata(ConversionTools.TRACKIMG_VERSION_NUM)[0]
 
 		im.save(os.path.join(rospkg.RosPack().get_path('eufs_gazebo'), 'randgen_imgs/'+GENERATED_FILENAME+'.png'))
 		return im
@@ -298,6 +328,11 @@ class ConversionTools:
 							ConversionTools.getMetadataPixel(0,0,"Top Left",pixels,im.size),
 							ConversionTools.getMetadataPixel(1,0,"Top Left",pixels,im.size)])
 		#scaledata represents how big a pixel is.
+
+		#Let's also get the version number - we don't need it, 
+		#but in the future if breaking changes are made to the Track Image specification then it will become important.
+		loc = ConversionTools.getMetadataPixelLocation(4,4,"Bottom Right",im.size)
+		versionNumber = ConversionTools.convertVersionMetadata([pixels[loc[0],loc[1]]])
 
 		#.launch:
 		launch_template = open(os.path.join(rospkg.RosPack().get_path('eufs_launcher'), 'resource/randgen_launch_template'),"r")
@@ -566,6 +601,8 @@ class ConversionTools:
 		pixels[loc[0],loc[1]] = scaleMetadata[0]
 		loc = ConversionTools.getMetadataPixelLocation(1,0,"Top Left",im.size)
 		pixels[loc[0],loc[1]] = scaleMetadata[1]
+		loc = ConversionTools.getMetadataPixelLocation(24,24,"Bottom Right",im.size)
+		pixels[loc[0],loc[1]] = ConversionTools.deconvertVersionMetadata(ConversionTools.TRACKIMG_VERSION_NUM)[0]
 
 		#Save it:
 		im.save(os.path.join(rospkg.RosPack().get_path('eufs_gazebo'), 'randgen_imgs/'+filename+'.png'))
