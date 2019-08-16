@@ -8,11 +8,11 @@ This branch is in active development.  It is intended to add the following featu
 
 [√] Add ways for .csv and .launch to keep track of noise pixels from .png, so that ConversionTools is 100% lossless
 
-[*] Improve cone placement in track generation.
+[√] Improve cone placement in track generation.
 
 [*] Reformat all launcher code to conform to coding standards and have a clear, sensible API
 
-[*] Have launcher auto-update file lists after using ConversionTools
+[√] Have launcher auto-update file lists after using ConversionTools
 
 It is an offshoot from the `devel-trackgen-2019-summer` branch, which already has added vast improvements to the launcher from `master`.
 
