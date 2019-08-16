@@ -4,11 +4,13 @@ This branch is in active development.  It is intended to add the following featu
 
 [*] Option to generate tracks with Bezier Curves, to improve speed at the cost of realism while maintaining variety.
 
-[*] Add new metadata pixel to track images, to keep track of Track Image specification version.
+[√] Add new metadata pixel to track images, to keep track of Track Image specification version.
 
 [*] Add ways for .csv and .launch to keep track of noise pixels from .png, so that ConversionTools is 100% lossless
 
 [*] Improve cone placement in track generation.
+
+[*] Reformat all launcher code to conform to coding standards and have a clear, sensible API
 
 It is an offshoot from the `devel-trackgen-2019-summer` branch, which already has added vast improvements to the launcher from `master`.
 
