@@ -175,8 +175,9 @@ class TrackGenerator:
 		while overlapped or xys==[]:
 			#Re-generate if the track overlaps itself
 			(xys,twidth,theight) = generateFunction((0,0))
-			xys = compactify_points(xys)
-			overlapped = check_if_overlap(xys)
+			xys2 = [(int(x[0]),int(x[1])) for x in xys]
+			xys2 = compactify_points(xys2)
+			overlapped = check_if_overlap(xys2)
 			if overlapped:
 				print("Oops!  The track intersects itself too much.  Retrying...")
 		return (xys,twidth,theight)
@@ -691,10 +692,11 @@ def generateStraight(startpoint,length,angle):
 	#(For other curves we approximate by a bunch of small lines, so we'd need full data)
 	#However we actually don't want that because it will mess with the self-intersection-detection
 	#later on.
+	scalefactor = 10.0
 	if tmax >= 0:
-		points = [(t+startx,slope*t+starty) for t in range(0,int(math.ceil(tmax)))]
+		points = [(t/scalefactor+startx,slope*t/scalefactor+starty) for t in range(0,int(scalefactor*math.ceil(tmax)))]
 	else:
-		points = [(-t+startx,-slope*t+starty) for t in range(0,int(math.ceil(-tmax)))]
+		points = [(-t/scalefactor+startx,-slope*t/scalefactor+starty) for t in range(0,int(scalefactor*math.ceil(-tmax)))]
 	#points = [startpoint,(tmax+startx,slope*tmax+starty)]
 
 
@@ -722,7 +724,7 @@ def convertPointsToAllPositive(xys):
 	padding = 10
 	for point in xys:
 		(x,y) = point
-		newxys.append((int(x-maxnegx)+padding,int(y-maxnegy)+padding))
+		newxys.append(((x-maxnegx)+padding,(y-maxnegy)+padding))
 
 	return (newxys,int(maxx-maxnegx)+2*padding,int(maxy-maxnegy)+2*padding)
 
@@ -731,8 +733,10 @@ def compactify_points(points):
 	#Given a list of int points, if any two adjacent points are the same then remove one of them
 	removelist = []
 	prevpoint = (-10000,-10000)
+	def makint(tup):
+		return (int(tup[0]),int(tup[1]))
 	for a in range(0,len(points)):
-		if (points[a] == prevpoint):
+		if (makint(points[a]) == makint(prevpoint)):
 			removelist.append(a)
 		prevpoint = points[a]
 	for index in sorted(removelist,reverse=True):

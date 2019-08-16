@@ -9,6 +9,7 @@ import rospy
 import sys
 sys.path.insert(1, os.path.join(rospkg.RosPack().get_path('eufs_gazebo'),'tracks'))
 from track_gen import Track
+from TrackGenerator import compactify_points
 import pandas as pd
 
 #Here are all the track formats we care about:
@@ -199,6 +200,7 @@ class ConversionTools:
 
 		pixels = im.load()#get reference to pixel data
 
+		compact_xys = compactify_points([(int(xy[0]),int(xy[1])) for xy in xys])
 
 		#We want to calculate direction of car position -
 		sx = xys[0][0]
@@ -224,25 +226,49 @@ class ConversionTools:
 
 		pixels = im.load()#get reference to pixel data
 
-		prevPoint = (-10000,-10000)
+		prevPointNorth = (-10000,-10000)
+		prevPointSouth = (-10000,-10000)
+		print("Placing Cones...")
 		for i in range(len(xys)):
 			if i == 0: continue #skip first part [as hard to calculate tangent]
+		
+			#The idea here is to place cones along normals to the tangent at any given point, while making sure they aren't too close.
+
+			coneNormalDistanceParameter = 8
+			coneClosenessParameter = 6
+
 			curPoint = xys[i]
-			distanceVecFromPrevPoint = (curPoint[0]-prevPoint[0],curPoint[1]-prevPoint[1])
-			distanceFromPrevPoint = distanceVecFromPrevPoint[0]**2 + distanceVecFromPrevPoint[1]**2
-			if distanceFromPrevPoint < 4**2: continue#Skip if too close to previous point
-			prevPoint = curPoint
 			curTangentAngle = getTangentAngle(xys[:(i+1)])
-			curTangentNormal = (5*math.sin(curTangentAngle),-5*math.cos(curTangentAngle))
+			curTangentNormal = (math.ceil(coneNormalDistanceParameter*math.sin(curTangentAngle)),
+						math.ceil(-coneNormalDistanceParameter*math.cos(curTangentAngle)))
 			northPoint = ( int ( curPoint[0]+curTangentNormal[0] ) , int ( curPoint[1]+curTangentNormal[1] ) )
 			southPoint = ( int ( curPoint[0]-curTangentNormal[0] ) , int ( curPoint[1]-curTangentNormal[1] ) )
-			if not istrack(pixels[northPoint[0],northPoint[1]]):
-				pixels[northPoint[0],northPoint[1]]=ConversionTools.conecolor
-			if not istrack(pixels[southPoint[0],southPoint[1]]):
-				pixels[southPoint[0],southPoint[1]]=ConversionTools.conecolor
 
+			differenceFromPrevNorth = (northPoint[0]-prevPointNorth[0])**2+(northPoint[1]-prevPointNorth[1])**2
+			differenceFromPrevSouth = (southPoint[0]-prevPointSouth[0])**2+(southPoint[1]-prevPointSouth[1])**2
+			crossDistanceNS = (northPoint[0]-prevPointSouth[0])**2+(northPoint[1]-prevPointSouth[1])**2
+			crossDistanceSN = (southPoint[0]-prevPointNorth[0])**2+(southPoint[1]-prevPointNorth[1])**2
+
+			#Here we ensure cones don't get too close to the track
+			distancePN = min([(northPoint[0]-xy[0])**2+(northPoint[1]-xy[1])**2 for xy in xys[ max([0,i-20]) : min([len(xys),i+20])  ]])
+			distancePS = min([(southPoint[0]-xy[0])**2+(southPoint[1]-xy[1])**2 for xy in xys[ max([0,i-20]) : min([len(xys),i+20])  ]])
+
+			northViable = differenceFromPrevNorth > coneClosenessParameter**2 \
+						and crossDistanceNS > coneClosenessParameter**2 \
+						and distancePN > coneClosenessParameter**2
+			southViable = differenceFromPrevSouth > coneClosenessParameter**2 \
+						and crossDistanceSN > coneClosenessParameter**2 \
+						and distancePS > coneClosenessParameter**2
+
+			if not istrack(pixels[int(northPoint[0]),int(northPoint[1])]) and northViable:
+				pixels[int(northPoint[0]),int(northPoint[1])]=ConversionTools.conecolor
+				prevPointNorth = northPoint
+			if not istrack(pixels[int(southPoint[0]),int(southPoint[1])]) and southViable:
+				pixels[int(southPoint[0]),int(southPoint[1])]=ConversionTools.conecolor
+				prevPointSouth = southPoint
 
 		
+
 		#We want to make the track have differing cone colors - yellow on inside, blue on outside
 		#All cones are currently yellow.  We'll do a "breadth-first-search" for any cones reachable
 		#from (0,0) and call those the 'outside' [(0,0) always blank as image is padded)]
