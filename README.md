@@ -2,10 +2,7 @@
 
 This branch is in active development.  It is intended to add the following features:
 
-[*] Option to generate tracks with Bezier Curves, to improve speed at the cost of realism while maintaining variety.
-
-   [*] Investigate new internal format of generator - move from list-of-points to list-of-parameterized-functions
-       to ensure C1, rather than just G1, continuity.  Good for cone placement.
+[√] Option to generate tracks with Bezier Curves, to improve speed at the cost of realism while maintaining variety.
 
 [√] Add new metadata pixel to track images, to keep track of Track Image specification version.
 
