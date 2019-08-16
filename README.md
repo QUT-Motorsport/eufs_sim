@@ -12,6 +12,8 @@ This branch is in active development.  It is intended to add the following featu
 
 [*] Reformat all launcher code to conform to coding standards and have a clear, sensible API
 
+[*] Have launcher auto-update file lists after using ConversionTools
+
 It is an offshoot from the `devel-trackgen-2019-summer` branch, which already has added vast improvements to the launcher from `master`.
 
 Once all 4 tasks are complete, this changelog section will be deleted and this will be merged into `devel-trackgen-2019-summer`, unless it has
