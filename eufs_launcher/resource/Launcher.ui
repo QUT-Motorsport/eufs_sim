@@ -946,8 +946,102 @@
    </property>
   </widget>
 
+  <widget class="QLabel" name="RenameFileHeader">
+   <property name="geometry">
+    <rect>
+     <x>890</x>
+     <y>240</y>
+     <width>200</width>
+     <height>27</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>Copy: ####</string>
+   </property>
+   <property name="font">
+       <font>
+            <pointsize>11</pointsize>
+       </font>
+   </property>
+  </widget>
 
-  <!--Experimental Button (deprecated, doesn't appear)-->
+  <!-- Rename file -->
+  <widget class="QLabel" name="RenameFileLable">
+   <property name="geometry">
+    <rect>
+     <x>820</x>
+     <y>270</y>
+     <width>90</width>
+     <height>27</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>Create copy called: </string>
+   </property>
+   <property name="font">
+       <font>
+            <pointsize>7</pointsize>
+       </font>
+   </property>
+  </widget>
+  <widget class="QLineEdit" name="RenameFileTextbox">
+   <property name="geometry">
+    <rect>
+     <x>910</x>
+     <y>270</y>
+     <width>200</width>
+     <height>27</height>
+    </rect>
+   </property>
+   <property name="font">
+       <font>
+            <pointsize>7</pointsize>
+       </font>
+   </property>
+  </widget>
+
+  <!-- Actual Rename Button! -->
+  <widget class="QPushButton" name="RenameButton">
+   <property name="geometry">
+    <rect>
+     <x>890</x>
+     <y>300</y>
+     <width>170</width>
+     <height>100</height>
+    </rect>
+   </property>
+   <property name="text" >
+      <string>Copy</string>
+    </property>
+    <property name="font">
+       <font>
+            <pointsize>7</pointsize>
+       </font>
+   </property>
+  </widget>
+
+  <!-- Full Stack Button -->
+  <widget class="QCheckBox" name="FullStackCopyButton">
+  <property name="geometry">
+      <rect>
+        <x>820</x>
+        <y>300</y>
+        <width>80</width>
+        <height>30</height>
+      </rect>
+    </property>
+    <property name="text" >
+      <string>Full Stack</string>
+    </property>
+    <property name="font">
+       <font>
+            <pointsize>7</pointsize>
+       </font>
+   </property>
+  </widget>
+
+  <!--Experimental Button (currently deprecated, doesn't appear)-->
+  <!--But I may decide to add it back in the future.-->
   <widget class="QPushButton" name="Experimentals">
    <property name="geometry">
     <rect>
