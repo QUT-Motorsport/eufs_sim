@@ -4,6 +4,9 @@ This branch is in active development.  It is intended to add the following featu
 
 [*] Option to generate tracks with Bezier Curves, to improve speed at the cost of realism while maintaining variety.
 
+   [*] Investigate new internal format of generator - move from list-of-points to list-of-parameterized-functions
+       to ensure C1, rather than just G1, continuity.  Good for cone placement.
+
 [√] Add new metadata pixel to track images, to keep track of Track Image specification version.
 
 [√] Add ways for .csv and .launch to keep track of noise pixels from .png, so that ConversionTools is 100% lossless
