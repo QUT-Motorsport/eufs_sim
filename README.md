@@ -51,7 +51,7 @@ roslaunch eufs_launcher eufs_launcher.launch
 
 You shold have something like this:
 
-![Full Gui](https://i.imgur.com/f4RLA9t.png)
+![Full Gui](https://gitlab.com/eufs/eufs_sim/wikis/uploads/933b243148108ecda8e98327fd84d137/UpdatedLauncher2.png)
 
 <!-- For the most part, this should be self explanatory - the exception being perhaps the generation, noise, and image stuff. -->
 
