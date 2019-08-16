@@ -504,12 +504,15 @@ class ConversionTools:
 		yellowcones = df[df['tag']=="yellow"]
 		orangecones = df[df['tag']=="orange"]
 		bigorangecones = df[df['tag']=="big_orange"]
+		activenoise = df[df['tag']=="active_noise"]
+		inactivenoise = df[df['tag']=="inactive_noise"]
 		carloc = df[df['tag']=="car_start"]
 
 		rawblue = []
 		rawyellow = []
 		raworange = []
 		rawbigorange = []
+		rawnoise = []
 		rawcarloc = (0,0,0,0)
 		for bluecone in bluecones.itertuples():
 			x = (bluecone[2])
@@ -531,10 +534,20 @@ class ConversionTools:
 			y = (bigorangecone[3])
 			rawbigorange.append(("big_orange",x,y,0))
 
+		for noise in activenoise.itertuples():
+			x = (noise[2])
+			y = (noise[3])
+			rawnoise.append(("noise",x,y,0))
+
+		for noise in inactivenoise.itertuples():
+			x = (noise[2])
+			y = (noise[3])
+			rawnoise.append(("noise",x,y,0))
+
 		for c in carloc.itertuples():
 			rawcarloc = ("car",(c[2]),(c[3]),(c[4]))
 
-		allcones = rawblue + rawyellow + raworange + rawbigorange + [rawcarloc]
+		allcones = rawblue + rawyellow + raworange + rawbigorange + rawnoise + [rawcarloc]
 
 		#Here we convert it all to positive
 		minx = 100000
@@ -566,8 +579,8 @@ class ConversionTools:
 			totalxdistance+=closestx
 			totalydistance+=closesty
 		
-		#Our scale will strive to preserve distances as small as a quarter of the average distance.
-		scaleDesired = min(totalxdistance,totalydistance)/(len(allcones)-1) * 0.25
+		#Our scale will strive to preserve distances when possible.
+		scaleDesired = max(totalxdistance,totalydistance)/(len(allcones)-1)
 		if scaleDesired < 0.0001: scaleDesired = 0.0001#Clamp scale to allowed values
 		if scaleDesired > 100:    scaleDesired = 100
 		scaleMetadata = ConversionTools.deconvertScaleMetadata(scaleDesired)
@@ -594,6 +607,7 @@ class ConversionTools:
 			elif conename == "blue":       return ConversionTools.conecolor2
 			elif conename == "orange":     return ConversionTools.conecolorOrange
 			elif conename == "big_orange": return ConversionTools.conecolorBigOrange
+			elif conename == "noise":      return ConversionTools.noisecolor
 			return ConversionTools.conecolor
 		for cone in finalcones:
 			pixels[cone[1],cone[2]] = getConeColor(cone[0])
