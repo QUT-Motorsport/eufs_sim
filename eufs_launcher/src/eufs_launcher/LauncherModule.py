@@ -80,32 +80,7 @@ class EufsLauncher(Plugin):
 		#Resize correctly
 		self._widget.setFixedWidth(1200)
 
-		# Get tracks from eufs_gazebo package
-		relpath = os.path.join(rospkg.RosPack().get_path('eufs_gazebo'), 'launch')
-		launchfiles = [f for f in listdir(relpath) if isfile(join(relpath, f))]
-
-		#Remove "blacklisted" files (ones that don't define tracks)
-		blacklist_ = open(os.path.join(rospkg.RosPack().get_path('eufs_gazebo'), 'launch/blacklist.txt'),"r")
-		blacklist = [f.strip() for f in blacklist_]#remove \n
-		launchfiles = [f for f in launchfiles if not f in blacklist]
-
-		# Add Tracks to Track Selector
-		if "small_track.launch" in launchfiles:
-			self._widget.findChild(QComboBox,"WhichTrack").addItem("small_track.launch")
-		for f in launchfiles:
-			if f != "small_track.launch":
-				self._widget.findChild(QComboBox,"WhichTrack").addItem(f)
-
-		# Get images
-		relpath = os.path.join(rospkg.RosPack().get_path('eufs_gazebo'), 'randgen_imgs')
-		imagefiles = [f for f in listdir(relpath) if isfile(join(relpath, f))]
-
-		# Add Images to Image Selector (always put rand.png first)
-		if "rand.png" in imagefiles:
-			self._widget.findChild(QComboBox,"WhichImage").addItem("rand.png")
-		for f in imagefiles:
-			if f != "rand.png" and f[-3:] == "png":
-				self._widget.findChild(QComboBox,"WhichImage").addItem(f)
+		self.loadTrackAndImages()
 
 		#Get presets
 		presetnames = Generator.getpresetnames()
@@ -211,6 +186,34 @@ class EufsLauncher(Plugin):
 
 		print("Plugin Successfully Launched!")
 
+	def loadTrackAndImages(self):
+		# Get tracks from eufs_gazebo package
+		relpath = os.path.join(rospkg.RosPack().get_path('eufs_gazebo'), 'launch')
+		launchfiles = [f for f in listdir(relpath) if isfile(join(relpath, f))]
+
+		#Remove "blacklisted" files (ones that don't define tracks)
+		blacklist_ = open(os.path.join(rospkg.RosPack().get_path('eufs_gazebo'), 'launch/blacklist.txt'),"r")
+		blacklist = [f.strip() for f in blacklist_]#remove \n
+		launchfiles = [f for f in launchfiles if not f in blacklist]
+
+		# Add Tracks to Track Selector
+		if "small_track.launch" in launchfiles:
+			self._widget.findChild(QComboBox,"WhichTrack").addItem("small_track.launch")
+		for f in launchfiles:
+			if f != "small_track.launch":
+				self._widget.findChild(QComboBox,"WhichTrack").addItem(f)
+
+		# Get images
+		relpath = os.path.join(rospkg.RosPack().get_path('eufs_gazebo'), 'randgen_imgs')
+		imagefiles = [f for f in listdir(relpath) if isfile(join(relpath, f))]
+
+		# Add Images to Image Selector (always put rand.png first)
+		if "rand.png" in imagefiles:
+			self._widget.findChild(QComboBox,"WhichImage").addItem("rand.png")
+		for f in imagefiles:
+			if f != "rand.png" and f[-3:] == "png":
+				self._widget.findChild(QComboBox,"WhichImage").addItem(f)
+
 	def copy_button_pressed(self):
 		#Copy the current file
 		isFullStack = self._widget.findChild(QCheckBox,"FullStackCopyButton").isChecked()
@@ -260,6 +263,7 @@ class EufsLauncher(Plugin):
 			#If full stack copying, convert to all file formats
 			if self._widget.findChild(QCheckBox,"FullStackCopyButton").isChecked():
 				Converter.convert("csv","ALL",path_to,params=[self.getNoiseLevel()])
+		self.loadTrackAndImages()
 
 	def updateCopier(self):
 		#Change label to show current selected file for the copier
@@ -445,6 +449,8 @@ class EufsLauncher(Plugin):
 
 		im.show()
 
+		self.loadTrackAndImages()
+
 	def track_from_image_button_pressed(self):
 		fname = self._widget.findChild(QComboBox,"WhichImage").currentText()
 		fname_full = os.path.join(rospkg.RosPack().get_path('eufs_gazebo'), 'randgen_imgs/'+fname)
@@ -455,6 +461,7 @@ class EufsLauncher(Plugin):
 			Converter.convert("png","launch",fname_full,params=[self.getNoiseLevel()])
 
 		self.launchfileoverride = fname[:-4] + ".launch"
+		self.loadTrackAndImages()
 		self.launch_button_pressed()
 
 	
@@ -477,6 +484,7 @@ class EufsLauncher(Plugin):
 		suffix = "_CT" if self._widget.findChild(QCheckBox,"SuffixBox").isChecked() else ""
 		Converter.convert(fromtype,totype,filename,
 					params=[self.getNoiseLevel(),midpointWidget.isVisible() and midpointWidget.isChecked()],conversion_suffix=suffix)
+		self.loadTrackAndImages()
 
 	def launch_button_pressed(self):
 		if self.hasLaunchedROS:
