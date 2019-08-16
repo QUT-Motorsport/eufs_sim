@@ -429,7 +429,8 @@ class EufsLauncher(Plugin):
 								self.MIN_HAIRPIN/2,self.MAX_HAIRPIN/2,
 								self.HAIRPIN_PAIRS,
 								self.MAX_LENGTH,
-								1 if isLaxGenerator else 0
+								1 if isLaxGenerator else 0,
+								1#Bezier
 								])
 
 		im = Converter.convert("xys","png",(xys,twidth,theight))

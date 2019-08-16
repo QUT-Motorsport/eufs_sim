@@ -4,6 +4,7 @@ from PIL import ImageDraw
 from random import randrange, uniform
 from rospy import loginfo as ROSLOG
 from rospy import logerr as ROSERR
+from scipy.special import binom
 
 
 """
@@ -44,6 +45,7 @@ class TrackGenerator:
 	MIN_HAIRPIN = 4.5
 	MAX_TRACK_LENGTH = 1500
 	LAX_GENERATION = False
+	TRACK_MODE = "Circle&Line"
 
 	def __init__(self):
 		pass
@@ -51,42 +53,77 @@ class TrackGenerator:
 	@staticmethod
 	def getpresets():
 		return [("Contest Rules",[
-			10,#Min straight length
-			80,#Max straight length
-			10,#Min constant turn radius
-			25,#Max constant turn radius
-			4.5,#Min hairpin turn radius
-			10,#Max hairpin turn radius
-			3,#Max hairpin pairs amount
-			1500,#Max length
-			0#Lax Generation (off)
+				10,#Min straight length
+				80,#Max straight length
+				10,#Min constant turn radius
+				25,#Max constant turn radius
+				4.5,#Min hairpin turn radius
+				10,#Max hairpin turn radius
+				3,#Max hairpin pairs amount
+				1500,#Max length
+				0,#Lax Generation (off)
+				0#Circle&Line mode
 			]),
 			("Small Straights",[
-			5,#Min straight length
-			40,#Max straight length
-			10,#Min constant turn radius
-			25,#Max constant turn radius
-			4.5,#Min hairpin turn radius
-			10,#Max hairpin turn radius
-			3,#Max hairpin pairs amount
-			700,#Max length
-			1#Lax Generation (on)
+				5,#Min straight length
+				40,#Max straight length
+				10,#Min constant turn radius
+				25,#Max constant turn radius
+				4.5,#Min hairpin turn radius
+				10,#Max hairpin turn radius
+				3,#Max hairpin pairs amount
+				700,#Max length
+				1,#Lax Generation (on)
+				0#Circle&Line mode
 			]),
 			("Computer Friendly",[
-			10,#Min straight length
-			80,#Max straight length
-			5,#Min constant turn radius
-			15,#Max constant turn radius
-			4.5,#Min hairpin turn radius
-			10,#Max hairpin turn radius
-			3,#Max hairpin pairs amount
-			500,#Max length
-			1#Lax Generation (on)
+				10,#Min straight length
+				80,#Max straight length
+				5,#Min constant turn radius
+				15,#Max constant turn radius
+				4.5,#Min hairpin turn radius
+				10,#Max hairpin turn radius
+				3,#Max hairpin pairs amount
+				500,#Max length
+				1,#Lax Generation (on)
+				0#Circle&Line mode
+			]),
+			("Bezier",[
+				10,#Min straight length
+				80,#Max straight length
+				5,#Min constant turn radius
+				15,#Max constant turn radius
+				4.5,#Min hairpin turn radius
+				10,#Max hairpin turn radius
+				3,#Max hairpin pairs amount
+				500,#Max length
+				1,#Lax Generation (on)
+				1#Bezier mode
 			])]
 
 	@staticmethod
+	def getDefaultModeString():
+		return "Circle&Line"
+
+	@staticmethod
+	def getDefaultModeNumber():
+		return TrackGenerator.getNumberFromMode(TrackGenerator.getDefaultModeString())
+
+	@staticmethod
+	def getModeFromNumber(num):
+		if num==0: return "Circle&Line"
+		elif num==1: return "Bezier"
+		return "Circle&Line"
+
+	@staticmethod
+	def getNumberFromMode(mode):
+		if mode=="Circle&Line": return 0
+		elif mode == "Bezier": return 1
+		return 0
+
+	@staticmethod
 	def getDefaultPreset():
-		return "Small Straights"
+		return "Bezier"#"Small Straights"
 
 	@staticmethod
 	def getpresetnames():
@@ -124,6 +161,7 @@ class TrackGenerator:
 		TrackGenerator.MIN_HAIRPIN_NUM = 1 if TrackGenerator.MAX_HAIRPIN_NUM > 0 else 0
 		TrackGenerator.MAX_TRACK_LENGTH = values[7]
 		TrackGenerator.LAX_GENERATION = values[8]==1
+		TrackGenerator.TRACK_MODE = TrackGenerator.getModeFromNumber(values[9])
 
 	@staticmethod
 	def generate(values):
@@ -133,9 +171,10 @@ class TrackGenerator:
 		TrackGenerator.setdata(values)
 		xys = []
 		overlapped = False
+		generateFunction = generateAutocrossTrackdriveTrack if TrackGenerator.TRACK_MODE == "Circle&Line" else generateBezierTrack
 		while overlapped or xys==[]:
 			#Re-generate if the track overlaps itself
-			(xys,twidth,theight) = generateAutocrossTrackdriveTrack((0,0))
+			(xys,twidth,theight) = generateFunction((0,0))
 			xys = compactify_points(xys)
 			overlapped = check_if_overlap(xys)
 			if overlapped:
@@ -157,9 +196,71 @@ def endtangent(xys):
 	ey = xys[-1][1]
 	return math.atan2((ey-sy),(ex-sx))
 
+def generateBezierTrack(startpoint):
+		#In this function we handle the quick&dirty Bezier generator
+		xys = []
+
+		goalpoints = [	(startpoint[0]+TrackGenerator.MAX_TRACK_LENGTH*0.08,startpoint[1]),
+				(startpoint[0]+TrackGenerator.MAX_TRACK_LENGTH*0.12,startpoint[1]+TrackGenerator.MAX_TRACK_LENGTH*0.08),
+				(startpoint[0]-TrackGenerator.MAX_TRACK_LENGTH*0.03,startpoint[1]+TrackGenerator.MAX_TRACK_LENGTH*0.12)]
+
+		testBezier,intangent,outtangent = getRandomBezier(startpoint,goalpoints[0])
+		xys.extend([testBezier(t*0.01) for t in range(0,101)])
+		initialTangent = intangent
+
+		prevtangent = outtangent
+		for g in range(1,len(goalpoints)):
+			testBezier,intangent,prevtangent = getRandomBezier(goalpoints[g-1],goalpoints[g],starttangent=prevtangent)
+			xys.extend([testBezier(t*0.01) for t in range(0,101)])
+
+		testBezier,intangent,prevtangent = getRandomBezier(goalpoints[-1],startpoint,starttangent=prevtangent,endtangent=initialTangent)
+		xys.extend([testBezier(t*0.01) for t in range(0,101)])
+		
+		return convertPointsToAllPositive(xys)
+
+def getRandomBezier(startpoint,endpoint,starttangent=None,endtangent=None,order=4):
+		#For the math to work out, we need Beziers to be at least quartic
+		starttangent = uniform(0,2*math.pi) if starttangent == None else starttangent
+		endtangent   = uniform(0,2*math.pi) if endtangent   == None else endtangent
+
+		#The incoming tangent is the same as the line from P0 to P1
+		#Outgoing tangent is the same as the line from P(n-1) to P(n)
+		#Where P0, P1, ..., P(n-1), P(n) are the control points
+		#All other control points are free to be selected.
+		scale = uniform(10,100)
+		p0_to_p1 = (math.cos(starttangent)*scale,math.sin(starttangent)*scale)
+		p0 = startpoint
+		p1 = (p0[0]+p0_to_p1[0],p0[1]+p0_to_p1[1])
+
+		scale = uniform(10,100)
+		pn_1_to_pn = (math.cos(endtangent)*scale,math.sin(endtangent)*scale)
+		pn = endpoint
+		pn_1 = (pn[0]-pn_1_to_pn[0],pn[1]-pn_1_to_pn[1])
+
+		controlpoints = [p0,p1,pn_1,pn]
+
+		return (getParameterizedBezier(controlpoints),starttangent,endtangent)
+
+
+def getParameterizedBezier(controlpoints):
+		#This function will itself return a function of a parameterized bezier
+		#That is, the result will be a function that takes a time parameter from 0 to 1
+		#and traveling along it results in the points on the bezier.
+		#I made this code match the Bezier curve definition on wikipedia as closely as
+		#possible (Explicit definition, not the recursive one)
+		def toReturn(cp,t):
+			thesumx = 0
+			thesumy = 0
+			n = len(cp)
+			for i in range(n):
+				coefficient = binom(n-1,i) * (1-t)**(n-i-1) * t**i
+				thesumx += coefficient * cp[i][0]
+				thesumy += coefficient * cp[i][1]
+			return (thesumx,thesumy)
+		return lambda t: toReturn(controlpoints,t)
 
 def generateAutocrossTrackdriveTrack(startpoint):
-		
+		#In this function we handle the traditional Circle&Line generator
 		xys = []
 		curTrackLength = 0
 		curpoint = startpoint
