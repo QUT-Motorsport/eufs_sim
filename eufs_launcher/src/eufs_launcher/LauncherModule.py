@@ -111,10 +111,11 @@ class EufsLauncher(Plugin):
 		presetnames = Generator.getpresetnames()
 
 		#Add Presets to Preset Selector (always put Computer Friendly first)
-		if "Computer Friendly" in presetnames:
-			self._widget.findChild(QComboBox,"WhichPreset").addItem("Computer Friendly")
+		defaultPreset = Generator.getDefaultPreset()
+		if defaultPreset in presetnames:
+			self._widget.findChild(QComboBox,"WhichPreset").addItem(defaultPreset)
 		for f in presetnames:
-			if f != "Computer Friendly":
+			if f != defaultPreset:
 				self._widget.findChild(QComboBox,"WhichPreset").addItem(f)
 
 		# Hook up buttons to onclick functions

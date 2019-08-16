@@ -85,6 +85,10 @@ class TrackGenerator:
 			])]
 
 	@staticmethod
+	def getDefaultPreset():
+		return "Small Straights"
+
+	@staticmethod
 	def getpresetnames():
 		toReturn = []
 		allPresets = TrackGenerator.getpresets()
