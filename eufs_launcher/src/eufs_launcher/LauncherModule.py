@@ -83,7 +83,7 @@ class EufsLauncher(Plugin):
 		self.loadTrackAndImages()
 
 		#Get presets
-		presetnames = Generator.getpresetnames()
+		presetnames = Generator.getPresetNames()
 
 		#Add Presets to Preset Selector (always put Computer Friendly first)
 		defaultPreset = Generator.getDefaultPreset()
@@ -309,7 +309,7 @@ class EufsLauncher(Plugin):
 
 	def updatePreset(self):
 		which = self._widget.findChild(QComboBox,"WhichPreset").currentText()
-		presetData = Generator.getpreset(which)
+		presetData = Generator.getPreset(which)
 		self.MIN_STRAIGHT   = presetData[0]
 		self.MAX_STRAIGHT   = presetData[1]
 		self.MIN_CTURN      = presetData[2]

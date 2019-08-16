@@ -26,6 +26,65 @@ we are primarily concerned with calculating and maintaining the consistency of
 tangent lines.
 """
 
+"""
+###############################################################################
+###############################################################################
+###############################################################################
+###########################Track Generator Overview############################
+###############################################################################
+###############################################################################
+###############################################################################
+###########################Functions For Public Use############################
+###############################################################################
+#									      #
+#	TrackGenerator.generate(values: List[float])                          #
+#			-> Tuple[List[Tuple[float,float]],int,int]            #
+#		Takes in a list of preset data.  Check out the getPresets()   #
+#		function for a thorough and perpetually up to date list of    #
+#		each piece of data.					      #
+#		This returns a tuple of the form (xys,width,height), where:   #
+#			xys:						      #
+#				A list of points that outline the	      #
+#				generated track.			      #
+#			width:						      #
+#				The width that is spanned by xys	      #
+#			height:						      #
+#				The height that is spanned by xys	      #
+#		There will always be a margin of at least 5 on the returned   #
+#		xys, so width and height are always at least 10 larger than   #
+#		if the range was strictly calculated.			      #
+#		This is done for the sake of ConversionTools' TrackImage      #
+#		specification, which requires the margin.		      #
+#									      #
+#	TrackGenerator.getPresets()  -> List[Tuple[str,List[float]]]          #
+#		Returns a list of all generator presets (the str in the tuple)#
+#		coupled with their preset values (the list in the tuple)      #
+#									      #
+#	TrackGenerator.getDefaultPreset() -> str			      #
+#		Returns the default preset (usually "Small Straights")        #
+#									      #
+#	TrackGenerator.getPresetNames() -> List[str]                          #
+#		Returns a list of all the generator presets.                  #
+#									      #
+#	TrackGenerator.getPreset(name: str) -> List[float]		      #
+#		Returns a list of all the preset data of the specified        #
+#		preset (the one with the matching name).                      #
+#									      #
+###############################################################################
+#                                                                             #
+#	There are other functions available (many others), but they are not   #
+#	necessarily meant for use outside this file.                          #
+#									      #
+#	That doesn't stop them from being used, of course - but depending on  #
+#	the circumstances, their use implies that they maybe should be        #
+#	factored out into a seperate library.				      #
+#									      #
+#	Since the LauncherModule/TrackGenerator/ConversionTools ecosystem is  #
+#	still in a state of flux, function signatures for all functions but   #
+#	the ones listed above are subject to change without warning.          #
+#									      #
+###############################################################################
+"""
 
 
 class TrackGenerator:
@@ -51,7 +110,7 @@ class TrackGenerator:
 		pass
 
 	@staticmethod
-	def getpresets():
+	def getPresets():
 		return [("Contest Rules",[
 				10,#Min straight length
 				80,#Max straight length
@@ -126,31 +185,31 @@ class TrackGenerator:
 		return "Small Straights"
 
 	@staticmethod
-	def getpresetnames():
+	def getPresetNames():
 		toReturn = []
-		allPresets = TrackGenerator.getpresets()
+		allPresets = TrackGenerator.getPresets()
 		for a in allPresets:
 			toReturn.append(a[0])
 		return toReturn
 
 	@staticmethod
-	def getpreset(name):
-		allPresets = TrackGenerator.getpresets()
+	def getPreset(name):
+		allPresets = TrackGenerator.getPresets()
 		for a in allPresets:
 			if a[0] == name:
 				return a[1]
 		ROSERR("No such preset: " + name)
 		ROSERR("Defaulting to Contest Rules")
-		return getpreset("Contest Rules")
+		return getPreset("Contest Rules")
 
 	@staticmethod
-	def setpreset(name):
-		values = TrackGenerator.getpreset(name)
+	def setPreset(name):
+		values = TrackGenerator.getPreset(name)
 		TrackGenerator.setData(values)
 		
 
 	@staticmethod
-	def setdata(values):
+	def setData(values):
 		TrackGenerator.MIN_STRAIGHT = values[0]
 		TrackGenerator.MAX_STRAIGHT = values[1]
 		TrackGenerator.MIN_CONSTANT_TURN = values[2]
@@ -168,7 +227,7 @@ class TrackGenerator:
 		#Generate the track as pure data
 		#Returns a list of points to define the path of the track, along with a bounding width & height for how big the track is.
 		#Input is a list of track parameters
-		TrackGenerator.setdata(values)
+		TrackGenerator.setData(values)
 		xys = []
 		overlapped = False
 		generateFunction = generateAutocrossTrackdriveTrack if TrackGenerator.TRACK_MODE == "Circle&Line" else generateBezierTrack
