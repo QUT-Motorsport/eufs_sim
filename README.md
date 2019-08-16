@@ -6,7 +6,7 @@ This branch is in active development.  It is intended to add the following featu
 
 [√] Add new metadata pixel to track images, to keep track of Track Image specification version.
 
-[*] Add ways for .csv and .launch to keep track of noise pixels from .png, so that ConversionTools is 100% lossless
+[√] Add ways for .csv and .launch to keep track of noise pixels from .png, so that ConversionTools is 100% lossless
 
 [*] Improve cone placement in track generation.
 
@@ -16,7 +16,7 @@ This branch is in active development.  It is intended to add the following featu
 
 It is an offshoot from the `devel-trackgen-2019-summer` branch, which already has added vast improvements to the launcher from `master`.
 
-Once all 4 tasks are complete, this changelog section will be deleted and this will be merged into `devel-trackgen-2019-summer`, unless it has
+Once all tasks are complete, this changelog section will be deleted and this will be merged into `devel-trackgen-2019-summer`, unless it has
 already been merged into `master`, in which case a merge request will be submitted for this branch too.
 
 # EUFS Autonomous Simulation
