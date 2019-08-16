@@ -601,7 +601,7 @@ class ConversionTools:
 		pixels[loc[0],loc[1]] = scaleMetadata[0]
 		loc = ConversionTools.getMetadataPixelLocation(1,0,"Top Left",im.size)
 		pixels[loc[0],loc[1]] = scaleMetadata[1]
-		loc = ConversionTools.getMetadataPixelLocation(24,24,"Bottom Right",im.size)
+		loc = ConversionTools.getMetadataPixelLocation(4,4,"Bottom Right",im.size)
 		pixels[loc[0],loc[1]] = ConversionTools.deconvertVersionMetadata(ConversionTools.TRACKIMG_VERSION_NUM)[0]
 
 		#Save it:
