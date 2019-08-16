@@ -4,7 +4,7 @@
     
 
     <link name='link_0_clone_0'>
-      <pose frame=''>-45 -31 0.15 0 -0 0</pose>
+      <pose frame=''>-45 -29 0.15 0 -0 0</pose>
       
       <collision name="collision">
         <geometry>
@@ -25,7 +25,7 @@
 
 
     <link name='link_0_clone_1'>
-      <pose frame=''>-45 -27 0.15 0 -0 0</pose>
+      <pose frame=''>-45 -25 0.15 0 -0 0</pose>
       
       <collision name="collision">
         <geometry>
@@ -46,7 +46,7 @@
 
 
     <link name='link_0_clone_2'>
-      <pose frame=''>-44 -35 0.15 0 -0 0</pose>
+      <pose frame=''>-45 -21 0.15 0 -0 0</pose>
       
       <collision name="collision">
         <geometry>
@@ -67,7 +67,7 @@
 
 
     <link name='link_0_clone_3'>
-      <pose frame=''>-39 -18 0.15 0 -0 0</pose>
+      <pose frame=''>-44 -17 0.15 0 -0 0</pose>
       
       <collision name="collision">
         <geometry>
@@ -87,13 +87,13 @@
     </link>
 
 
-    <link name='link_0_clone_4'>
-      <pose frame=''>-36 -43 0.15 0 -0 0</pose>
+    <ghostlink name='link_0_clone_4'>
+      <pose frame=''>-44 16 0.15 0 -0 0</pose>
       
       <collision name="collision">
         <geometry>
           <mesh>
-            <uri>model://eufs_description/meshes/cone_blue.dae</uri>
+            <uri>model://eufs_description/meshes/NoiseCube.dae</uri>
           </mesh>
         </geometry>
       </collision>
@@ -101,20 +101,20 @@
       <visual name="visual">
         <geometry>
           <mesh>
-            <uri>model://eufs_description/meshes/cone_blue.dae</uri>
+            <uri>model://eufs_description/meshes/NoiseCube.dae</uri>
           </mesh>
         </geometry>
       </visual>
-    </link>
+    </ghostlink>
 
 
-    <link name='link_0_clone_5'>
-      <pose frame=''>-36 -33 0.15 0 -0 0</pose>
+    <ghostlink name='link_0_clone_5'>
+      <pose frame=''>-44 49 0.15 0 -0 0</pose>
       
       <collision name="collision">
         <geometry>
           <mesh>
-            <uri>model://eufs_description/meshes/cone_yellow.dae</uri>
+            <uri>model://eufs_description/meshes/NoiseCube.dae</uri>
           </mesh>
         </geometry>
       </collision>
@@ -122,36 +122,15 @@
       <visual name="visual">
         <geometry>
           <mesh>
-            <uri>model://eufs_description/meshes/cone_yellow.dae</uri>
+            <uri>model://eufs_description/meshes/NoiseCube.dae</uri>
           </mesh>
         </geometry>
       </visual>
-    </link>
+    </ghostlink>
 
 
     <link name='link_0_clone_6'>
-      <pose frame=''>-36 -25 0.15 0 -0 0</pose>
-      
-      <collision name="collision">
-        <geometry>
-          <mesh>
-            <uri>model://eufs_description/meshes/cone_yellow.dae</uri>
-          </mesh>
-        </geometry>
-      </collision>
-
-      <visual name="visual">
-        <geometry>
-          <mesh>
-            <uri>model://eufs_description/meshes/cone_yellow.dae</uri>
-          </mesh>
-        </geometry>
-      </visual>
-    </link>
-
-
-    <link name='link_0_clone_7'>
-      <pose frame=''>-36 -15 0.15 0 -0 0</pose>
+      <pose frame=''>-43 -33 0.15 0 -0 0</pose>
       
       <collision name="collision">
         <geometry>
@@ -171,7 +150,238 @@
     </link>
 
 
-    <link name='link_0_clone_8'>
+    <ghostlink name='link_0_clone_7'>
+      <pose frame=''>-43 -20 0.15 0 -0 0</pose>
+      
+      <collision name="collision">
+        <geometry>
+          <mesh>
+            <uri>model://eufs_description/meshes/NoiseCube.dae</uri>
+          </mesh>
+        </geometry>
+      </collision>
+
+      <visual name="visual">
+        <geometry>
+          <mesh>
+            <uri>model://eufs_description/meshes/NoiseCube.dae</uri>
+          </mesh>
+        </geometry>
+      </visual>
+    </ghostlink>
+
+
+    <ghostlink name='link_0_clone_8'>
+      <pose frame=''>-43 -6 0.15 0 -0 0</pose>
+      
+      <collision name="collision">
+        <geometry>
+          <mesh>
+            <uri>model://eufs_description/meshes/NoiseCube.dae</uri>
+          </mesh>
+        </geometry>
+      </collision>
+
+      <visual name="visual">
+        <geometry>
+          <mesh>
+            <uri>model://eufs_description/meshes/NoiseCube.dae</uri>
+          </mesh>
+        </geometry>
+      </visual>
+    </ghostlink>
+
+
+    <ghostlink name='link_0_clone_9'>
+      <pose frame=''>-43 21 0.15 0 -0 0</pose>
+      
+      <collision name="collision">
+        <geometry>
+          <mesh>
+            <uri>model://eufs_description/meshes/MonkeyNoise.dae</uri>
+          </mesh>
+        </geometry>
+      </collision>
+
+      <visual name="visual">
+        <geometry>
+          <mesh>
+            <uri>model://eufs_description/meshes/MonkeyNoise.dae</uri>
+          </mesh>
+        </geometry>
+      </visual>
+    </ghostlink>
+
+
+    <ghostlink name='link_0_clone_10'>
+      <pose frame=''>-42 -3 0.15 0 -0 0</pose>
+      
+      <collision name="collision">
+        <geometry>
+          <mesh>
+            <uri>model://eufs_description/meshes/NoiseCube.dae</uri>
+          </mesh>
+        </geometry>
+      </collision>
+
+      <visual name="visual">
+        <geometry>
+          <mesh>
+            <uri>model://eufs_description/meshes/NoiseCube.dae</uri>
+          </mesh>
+        </geometry>
+      </visual>
+    </ghostlink>
+
+
+    <ghostlink name='link_0_clone_11'>
+      <pose frame=''>-40 32 0.15 0 -0 0</pose>
+      
+      <collision name="collision">
+        <geometry>
+          <mesh>
+            <uri>model://eufs_description/meshes/NoiseCube.dae</uri>
+          </mesh>
+        </geometry>
+      </collision>
+
+      <visual name="visual">
+        <geometry>
+          <mesh>
+            <uri>model://eufs_description/meshes/NoiseCube.dae</uri>
+          </mesh>
+        </geometry>
+      </visual>
+    </ghostlink>
+
+
+    <ghostlink name='link_0_clone_12'>
+      <pose frame=''>-38 51 0.15 0 -0 0</pose>
+      
+      <collision name="collision">
+        <geometry>
+          <mesh>
+            <uri>model://eufs_description/meshes/MonkeyNoise.dae</uri>
+          </mesh>
+        </geometry>
+      </collision>
+
+      <visual name="visual">
+        <geometry>
+          <mesh>
+            <uri>model://eufs_description/meshes/MonkeyNoise.dae</uri>
+          </mesh>
+        </geometry>
+      </visual>
+    </ghostlink>
+
+
+    <link name='link_0_clone_13'>
+      <pose frame=''>-37 -39 0.15 0 -0 0</pose>
+      
+      <collision name="collision">
+        <geometry>
+          <mesh>
+            <uri>model://eufs_description/meshes/cone_blue.dae</uri>
+          </mesh>
+        </geometry>
+      </collision>
+
+      <visual name="visual">
+        <geometry>
+          <mesh>
+            <uri>model://eufs_description/meshes/cone_blue.dae</uri>
+          </mesh>
+        </geometry>
+      </visual>
+    </link>
+
+
+    <link name='link_0_clone_14'>
+      <pose frame=''>-37 -8 0.15 0 -0 0</pose>
+      
+      <collision name="collision">
+        <geometry>
+          <mesh>
+            <uri>model://eufs_description/meshes/cone_blue.dae</uri>
+          </mesh>
+        </geometry>
+      </collision>
+
+      <visual name="visual">
+        <geometry>
+          <mesh>
+            <uri>model://eufs_description/meshes/cone_blue.dae</uri>
+          </mesh>
+        </geometry>
+      </visual>
+    </link>
+
+
+    <ghostlink name='link_0_clone_15'>
+      <pose frame=''>-37 46 0.15 0 -0 0</pose>
+      
+      <collision name="collision">
+        <geometry>
+          <mesh>
+            <uri>model://eufs_description/meshes/NoiseCube.dae</uri>
+          </mesh>
+        </geometry>
+      </collision>
+
+      <visual name="visual">
+        <geometry>
+          <mesh>
+            <uri>model://eufs_description/meshes/NoiseCube.dae</uri>
+          </mesh>
+        </geometry>
+      </visual>
+    </ghostlink>
+
+
+    <ghostlink name='link_0_clone_16'>
+      <pose frame=''>-37 68 0.15 0 -0 0</pose>
+      
+      <collision name="collision">
+        <geometry>
+          <mesh>
+            <uri>model://eufs_description/meshes/MonkeyNoise.dae</uri>
+          </mesh>
+        </geometry>
+      </collision>
+
+      <visual name="visual">
+        <geometry>
+          <mesh>
+            <uri>model://eufs_description/meshes/MonkeyNoise.dae</uri>
+          </mesh>
+        </geometry>
+      </visual>
+    </ghostlink>
+
+
+    <link name='link_0_clone_17'>
+      <pose frame=''>-35 -41 0.15 0 -0 0</pose>
+      
+      <collision name="collision">
+        <geometry>
+          <mesh>
+            <uri>model://eufs_description/meshes/cone_blue.dae</uri>
+          </mesh>
+        </geometry>
+      </collision>
+
+      <visual name="visual">
+        <geometry>
+          <mesh>
+            <uri>model://eufs_description/meshes/cone_blue.dae</uri>
+          </mesh>
+        </geometry>
+      </visual>
+    </link>
+
+
+    <link name='link_0_clone_18'>
       <pose frame=''>-35 -31 0.15 0 -0 0</pose>
       
       <collision name="collision">
@@ -192,8 +402,8 @@
     </link>
 
 
-    <link name='link_0_clone_9'>
-      <pose frame=''>-35 -27 0.15 0 -0 0</pose>
+    <link name='link_0_clone_19'>
+      <pose frame=''>-35 -29 0.15 0 -0 0</pose>
       
       <collision name="collision">
         <geometry>
@@ -213,8 +423,8 @@
     </link>
 
 
-    <link name='link_0_clone_10'>
-      <pose frame=''>-34 -35 0.15 0 -0 0</pose>
+    <link name='link_0_clone_20'>
+      <pose frame=''>-35 -25 0.15 0 -0 0</pose>
       
       <collision name="collision">
         <geometry>
@@ -234,8 +444,113 @@
     </link>
 
 
-    <link name='link_0_clone_11'>
-      <pose frame=''>-32 -45 0.15 0 -0 0</pose>
+    <link name='link_0_clone_21'>
+      <pose frame=''>-35 -21 0.15 0 -0 0</pose>
+      
+      <collision name="collision">
+        <geometry>
+          <mesh>
+            <uri>model://eufs_description/meshes/cone_yellow.dae</uri>
+          </mesh>
+        </geometry>
+      </collision>
+
+      <visual name="visual">
+        <geometry>
+          <mesh>
+            <uri>model://eufs_description/meshes/cone_yellow.dae</uri>
+          </mesh>
+        </geometry>
+      </visual>
+    </link>
+
+
+    <ghostlink name='link_0_clone_22'>
+      <pose frame=''>-35 18 0.15 0 -0 0</pose>
+      
+      <collision name="collision">
+        <geometry>
+          <mesh>
+            <uri>model://eufs_description/meshes/MonkeyNoise.dae</uri>
+          </mesh>
+        </geometry>
+      </collision>
+
+      <visual name="visual">
+        <geometry>
+          <mesh>
+            <uri>model://eufs_description/meshes/MonkeyNoise.dae</uri>
+          </mesh>
+        </geometry>
+      </visual>
+    </ghostlink>
+
+
+    <ghostlink name='link_0_clone_23'>
+      <pose frame=''>-35 42 0.15 0 -0 0</pose>
+      
+      <collision name="collision">
+        <geometry>
+          <mesh>
+            <uri>model://eufs_description/meshes/NoiseCube.dae</uri>
+          </mesh>
+        </geometry>
+      </collision>
+
+      <visual name="visual">
+        <geometry>
+          <mesh>
+            <uri>model://eufs_description/meshes/NoiseCube.dae</uri>
+          </mesh>
+        </geometry>
+      </visual>
+    </ghostlink>
+
+
+    <link name='link_0_clone_24'>
+      <pose frame=''>-34 -17 0.15 0 -0 0</pose>
+      
+      <collision name="collision">
+        <geometry>
+          <mesh>
+            <uri>model://eufs_description/meshes/cone_yellow.dae</uri>
+          </mesh>
+        </geometry>
+      </collision>
+
+      <visual name="visual">
+        <geometry>
+          <mesh>
+            <uri>model://eufs_description/meshes/cone_yellow.dae</uri>
+          </mesh>
+        </geometry>
+      </visual>
+    </link>
+
+
+    <link name='link_0_clone_25'>
+      <pose frame=''>-34 -15 0.15 0 -0 0</pose>
+      
+      <collision name="collision">
+        <geometry>
+          <mesh>
+            <uri>model://eufs_description/meshes/cone_yellow.dae</uri>
+          </mesh>
+        </geometry>
+      </collision>
+
+      <visual name="visual">
+        <geometry>
+          <mesh>
+            <uri>model://eufs_description/meshes/cone_yellow.dae</uri>
+          </mesh>
+        </geometry>
+      </visual>
+    </link>
+
+
+    <link name='link_0_clone_26'>
+      <pose frame=''>-34 -5 0.15 0 -0 0</pose>
       
       <collision name="collision">
         <geometry>
@@ -255,8 +570,8 @@
     </link>
 
 
-    <link name='link_0_clone_12'>
-      <pose frame=''>-32 -35 0.15 0 -0 0</pose>
+    <link name='link_0_clone_27'>
+      <pose frame=''>-33 -33 0.15 0 -0 0</pose>
       
       <collision name="collision">
         <geometry>
@@ -276,8 +591,92 @@
     </link>
 
 
-    <link name='link_0_clone_13'>
-      <pose frame=''>-32 -24 0.15 0 -0 0</pose>
+    <ghostlink name='link_0_clone_28'>
+      <pose frame=''>-33 59 0.15 0 -0 0</pose>
+      
+      <collision name="collision">
+        <geometry>
+          <mesh>
+            <uri>model://eufs_description/meshes/MonkeyNoise.dae</uri>
+          </mesh>
+        </geometry>
+      </collision>
+
+      <visual name="visual">
+        <geometry>
+          <mesh>
+            <uri>model://eufs_description/meshes/MonkeyNoise.dae</uri>
+          </mesh>
+        </geometry>
+      </visual>
+    </ghostlink>
+
+
+    <ghostlink name='link_0_clone_29'>
+      <pose frame=''>-32 30 0.15 0 -0 0</pose>
+      
+      <collision name="collision">
+        <geometry>
+          <mesh>
+            <uri>model://eufs_description/meshes/NoiseCube.dae</uri>
+          </mesh>
+        </geometry>
+      </collision>
+
+      <visual name="visual">
+        <geometry>
+          <mesh>
+            <uri>model://eufs_description/meshes/NoiseCube.dae</uri>
+          </mesh>
+        </geometry>
+      </visual>
+    </ghostlink>
+
+
+    <ghostlink name='link_0_clone_30'>
+      <pose frame=''>-32 58 0.15 0 -0 0</pose>
+      
+      <collision name="collision">
+        <geometry>
+          <mesh>
+            <uri>model://eufs_description/meshes/NoiseCube.dae</uri>
+          </mesh>
+        </geometry>
+      </collision>
+
+      <visual name="visual">
+        <geometry>
+          <mesh>
+            <uri>model://eufs_description/meshes/NoiseCube.dae</uri>
+          </mesh>
+        </geometry>
+      </visual>
+    </ghostlink>
+
+
+    <ghostlink name='link_0_clone_31'>
+      <pose frame=''>-31 19 0.15 0 -0 0</pose>
+      
+      <collision name="collision">
+        <geometry>
+          <mesh>
+            <uri>model://eufs_description/meshes/NoiseCube.dae</uri>
+          </mesh>
+        </geometry>
+      </collision>
+
+      <visual name="visual">
+        <geometry>
+          <mesh>
+            <uri>model://eufs_description/meshes/NoiseCube.dae</uri>
+          </mesh>
+        </geometry>
+      </visual>
+    </ghostlink>
+
+
+    <link name='link_0_clone_32'>
+      <pose frame=''>-30 -13 0.15 0 -0 0</pose>
       
       <collision name="collision">
         <geometry>
@@ -297,8 +696,8 @@
     </link>
 
 
-    <link name='link_0_clone_14'>
-      <pose frame=''>-32 -14 0.15 0 -0 0</pose>
+    <link name='link_0_clone_33'>
+      <pose frame=''>-30 -3 0.15 0 -0 0</pose>
       
       <collision name="collision">
         <geometry>
@@ -318,7 +717,70 @@
     </link>
 
 
-    <link name='link_0_clone_15'>
+    <ghostlink name='link_0_clone_34'>
+      <pose frame=''>-30 53 0.15 0 -0 0</pose>
+      
+      <collision name="collision">
+        <geometry>
+          <mesh>
+            <uri>model://eufs_description/meshes/MonkeyNoise.dae</uri>
+          </mesh>
+        </geometry>
+      </collision>
+
+      <visual name="visual">
+        <geometry>
+          <mesh>
+            <uri>model://eufs_description/meshes/MonkeyNoise.dae</uri>
+          </mesh>
+        </geometry>
+      </visual>
+    </ghostlink>
+
+
+    <ghostlink name='link_0_clone_35'>
+      <pose frame=''>-29 3 0.15 0 -0 0</pose>
+      
+      <collision name="collision">
+        <geometry>
+          <mesh>
+            <uri>model://eufs_description/meshes/NoiseCube.dae</uri>
+          </mesh>
+        </geometry>
+      </collision>
+
+      <visual name="visual">
+        <geometry>
+          <mesh>
+            <uri>model://eufs_description/meshes/NoiseCube.dae</uri>
+          </mesh>
+        </geometry>
+      </visual>
+    </ghostlink>
+
+
+    <ghostlink name='link_0_clone_36'>
+      <pose frame=''>-29 37 0.15 0 -0 0</pose>
+      
+      <collision name="collision">
+        <geometry>
+          <mesh>
+            <uri>model://eufs_description/meshes/NoiseCube.dae</uri>
+          </mesh>
+        </geometry>
+      </collision>
+
+      <visual name="visual">
+        <geometry>
+          <mesh>
+            <uri>model://eufs_description/meshes/NoiseCube.dae</uri>
+          </mesh>
+        </geometry>
+      </visual>
+    </ghostlink>
+
+
+    <link name='link_0_clone_37'>
       <pose frame=''>-28 -45 0.15 0 -0 0</pose>
       
       <collision name="collision">
@@ -339,7 +801,28 @@
     </link>
 
 
-    <link name='link_0_clone_16'>
+    <ghostlink name='link_0_clone_38'>
+      <pose frame=''>-28 -43 0.15 0 -0 0</pose>
+      
+      <collision name="collision">
+        <geometry>
+          <mesh>
+            <uri>model://eufs_description/meshes/MonkeyNoise.dae</uri>
+          </mesh>
+        </geometry>
+      </collision>
+
+      <visual name="visual">
+        <geometry>
+          <mesh>
+            <uri>model://eufs_description/meshes/MonkeyNoise.dae</uri>
+          </mesh>
+        </geometry>
+      </visual>
+    </ghostlink>
+
+
+    <link name='link_0_clone_39'>
       <pose frame=''>-28 -35 0.15 0 -0 0</pose>
       
       <collision name="collision">
@@ -360,29 +843,8 @@
     </link>
 
 
-    <link name='link_0_clone_17'>
-      <pose frame=''>-28 -23 0.15 0 -0 0</pose>
-      
-      <collision name="collision">
-        <geometry>
-          <mesh>
-            <uri>model://eufs_description/meshes/cone_yellow.dae</uri>
-          </mesh>
-        </geometry>
-      </collision>
-
-      <visual name="visual">
-        <geometry>
-          <mesh>
-            <uri>model://eufs_description/meshes/cone_yellow.dae</uri>
-          </mesh>
-        </geometry>
-      </visual>
-    </link>
-
-
-    <link name='link_0_clone_18'>
-      <pose frame=''>-28 -13 0.15 0 -0 0</pose>
+    <link name='link_0_clone_40'>
+      <pose frame=''>-28 -1 0.15 0 -0 0</pose>
       
       <collision name="collision">
         <geometry>
@@ -402,13 +864,13 @@
     </link>
 
 
-    <link name='link_0_clone_19'>
-      <pose frame=''>-26 -11 0.15 0 -0 0</pose>
+    <ghostlink name='link_0_clone_41'>
+      <pose frame=''>-28 35 0.15 0 -0 0</pose>
       
       <collision name="collision">
         <geometry>
           <mesh>
-            <uri>model://eufs_description/meshes/cone_blue.dae</uri>
+            <uri>model://eufs_description/meshes/NoiseCube.dae</uri>
           </mesh>
         </geometry>
       </collision>
@@ -416,14 +878,98 @@
       <visual name="visual">
         <geometry>
           <mesh>
-            <uri>model://eufs_description/meshes/cone_blue.dae</uri>
+            <uri>model://eufs_description/meshes/NoiseCube.dae</uri>
           </mesh>
         </geometry>
       </visual>
-    </link>
+    </ghostlink>
 
 
-    <link name='link_0_clone_20'>
+    <ghostlink name='link_0_clone_42'>
+      <pose frame=''>-26 47 0.15 0 -0 0</pose>
+      
+      <collision name="collision">
+        <geometry>
+          <mesh>
+            <uri>model://eufs_description/meshes/NoiseCube.dae</uri>
+          </mesh>
+        </geometry>
+      </collision>
+
+      <visual name="visual">
+        <geometry>
+          <mesh>
+            <uri>model://eufs_description/meshes/NoiseCube.dae</uri>
+          </mesh>
+        </geometry>
+      </visual>
+    </ghostlink>
+
+
+    <ghostlink name='link_0_clone_43'>
+      <pose frame=''>-25 -30 0.15 0 -0 0</pose>
+      
+      <collision name="collision">
+        <geometry>
+          <mesh>
+            <uri>model://eufs_description/meshes/NoiseCube.dae</uri>
+          </mesh>
+        </geometry>
+      </collision>
+
+      <visual name="visual">
+        <geometry>
+          <mesh>
+            <uri>model://eufs_description/meshes/NoiseCube.dae</uri>
+          </mesh>
+        </geometry>
+      </visual>
+    </ghostlink>
+
+
+    <ghostlink name='link_0_clone_44'>
+      <pose frame=''>-25 54 0.15 0 -0 0</pose>
+      
+      <collision name="collision">
+        <geometry>
+          <mesh>
+            <uri>model://eufs_description/meshes/MonkeyNoise.dae</uri>
+          </mesh>
+        </geometry>
+      </collision>
+
+      <visual name="visual">
+        <geometry>
+          <mesh>
+            <uri>model://eufs_description/meshes/MonkeyNoise.dae</uri>
+          </mesh>
+        </geometry>
+      </visual>
+    </ghostlink>
+
+
+    <ghostlink name='link_0_clone_45'>
+      <pose frame=''>-25 65 0.15 0 -0 0</pose>
+      
+      <collision name="collision">
+        <geometry>
+          <mesh>
+            <uri>model://eufs_description/meshes/NoiseCube.dae</uri>
+          </mesh>
+        </geometry>
+      </collision>
+
+      <visual name="visual">
+        <geometry>
+          <mesh>
+            <uri>model://eufs_description/meshes/NoiseCube.dae</uri>
+          </mesh>
+        </geometry>
+      </visual>
+    </ghostlink>
+
+
+    <link name='link_0_clone_46'>
       <pose frame=''>-24 -45 0.15 0 -0 0</pose>
       
       <collision name="collision">
@@ -444,7 +990,7 @@
     </link>
 
 
-    <link name='link_0_clone_21'>
+    <link name='link_0_clone_47'>
       <pose frame=''>-24 -35 0.15 0 -0 0</pose>
       
       <collision name="collision">
@@ -465,559 +1011,13 @@
     </link>
 
 
-    <link name='link_0_clone_22'>
-      <pose frame=''>-24 -21 0.15 0 -0 0</pose>
-      
-      <collision name="collision">
-        <geometry>
-          <mesh>
-            <uri>model://eufs_description/meshes/cone_yellow.dae</uri>
-          </mesh>
-        </geometry>
-      </collision>
-
-      <visual name="visual">
-        <geometry>
-          <mesh>
-            <uri>model://eufs_description/meshes/cone_yellow.dae</uri>
-          </mesh>
-        </geometry>
-      </visual>
-    </link>
-
-
-    <link name='link_0_clone_23'>
-      <pose frame=''>-24 -11 0.15 0 -0 0</pose>
-      
-      <collision name="collision">
-        <geometry>
-          <mesh>
-            <uri>model://eufs_description/meshes/cone_blue.dae</uri>
-          </mesh>
-        </geometry>
-      </collision>
-
-      <visual name="visual">
-        <geometry>
-          <mesh>
-            <uri>model://eufs_description/meshes/cone_blue.dae</uri>
-          </mesh>
-        </geometry>
-      </visual>
-    </link>
-
-
-    <link name='link_0_clone_24'>
-      <pose frame=''>-23 -6 0.15 0 -0 0</pose>
-      
-      <collision name="collision">
-        <geometry>
-          <mesh>
-            <uri>model://eufs_description/meshes/cone_blue.dae</uri>
-          </mesh>
-        </geometry>
-      </collision>
-
-      <visual name="visual">
-        <geometry>
-          <mesh>
-            <uri>model://eufs_description/meshes/cone_blue.dae</uri>
-          </mesh>
-        </geometry>
-      </visual>
-    </link>
-
-
-    <link name='link_0_clone_25'>
-      <pose frame=''>-20 -45 0.15 0 -0 0</pose>
-      
-      <collision name="collision">
-        <geometry>
-          <mesh>
-            <uri>model://eufs_description/meshes/cone_blue.dae</uri>
-          </mesh>
-        </geometry>
-      </collision>
-
-      <visual name="visual">
-        <geometry>
-          <mesh>
-            <uri>model://eufs_description/meshes/cone_blue.dae</uri>
-          </mesh>
-        </geometry>
-      </visual>
-    </link>
-
-
-    <link name='link_0_clone_26'>
-      <pose frame=''>-20 -35 0.15 0 -0 0</pose>
-      
-      <collision name="collision">
-        <geometry>
-          <mesh>
-            <uri>model://eufs_description/meshes/cone_yellow.dae</uri>
-          </mesh>
-        </geometry>
-      </collision>
-
-      <visual name="visual">
-        <geometry>
-          <mesh>
-            <uri>model://eufs_description/meshes/cone_yellow.dae</uri>
-          </mesh>
-        </geometry>
-      </visual>
-    </link>
-
-
-    <link name='link_0_clone_27'>
-      <pose frame=''>-20 -1 0.15 0 -0 0</pose>
-      
-      <collision name="collision">
-        <geometry>
-          <mesh>
-            <uri>model://eufs_description/meshes/cone_blue.dae</uri>
-          </mesh>
-        </geometry>
-      </collision>
-
-      <visual name="visual">
-        <geometry>
-          <mesh>
-            <uri>model://eufs_description/meshes/cone_blue.dae</uri>
-          </mesh>
-        </geometry>
-      </visual>
-    </link>
-
-
-    <link name='link_0_clone_28'>
-      <pose frame=''>-18 3 0.15 0 -0 0</pose>
-      
-      <collision name="collision">
-        <geometry>
-          <mesh>
-            <uri>model://eufs_description/meshes/cone_blue.dae</uri>
-          </mesh>
-        </geometry>
-      </collision>
-
-      <visual name="visual">
-        <geometry>
-          <mesh>
-            <uri>model://eufs_description/meshes/cone_blue.dae</uri>
-          </mesh>
-        </geometry>
-      </visual>
-    </link>
-
-
-    <link name='link_0_clone_29'>
-      <pose frame=''>-17 -16 0.15 0 -0 0</pose>
-      
-      <collision name="collision">
-        <geometry>
-          <mesh>
-            <uri>model://eufs_description/meshes/cone_yellow.dae</uri>
-          </mesh>
-        </geometry>
-      </collision>
-
-      <visual name="visual">
-        <geometry>
-          <mesh>
-            <uri>model://eufs_description/meshes/cone_yellow.dae</uri>
-          </mesh>
-        </geometry>
-      </visual>
-    </link>
-
-
-    <link name='link_0_clone_30'>
-      <pose frame=''>-16 -45 0.15 0 -0 0</pose>
-      
-      <collision name="collision">
-        <geometry>
-          <mesh>
-            <uri>model://eufs_description/meshes/cone_blue.dae</uri>
-          </mesh>
-        </geometry>
-      </collision>
-
-      <visual name="visual">
-        <geometry>
-          <mesh>
-            <uri>model://eufs_description/meshes/cone_blue.dae</uri>
-          </mesh>
-        </geometry>
-      </visual>
-    </link>
-
-
-    <link name='link_0_clone_31'>
-      <pose frame=''>-16 -35 0.15 0 -0 0</pose>
-      
-      <collision name="collision">
-        <geometry>
-          <mesh>
-            <uri>model://eufs_description/meshes/cone_yellow.dae</uri>
-          </mesh>
-        </geometry>
-      </collision>
-
-      <visual name="visual">
-        <geometry>
-          <mesh>
-            <uri>model://eufs_description/meshes/cone_yellow.dae</uri>
-          </mesh>
-        </geometry>
-      </visual>
-    </link>
-
-
-    <link name='link_0_clone_32'>
-      <pose frame=''>-15 8 0.15 0 -0 0</pose>
-      
-      <collision name="collision">
-        <geometry>
-          <mesh>
-            <uri>model://eufs_description/meshes/cone_blue.dae</uri>
-          </mesh>
-        </geometry>
-      </collision>
-
-      <visual name="visual">
-        <geometry>
-          <mesh>
-            <uri>model://eufs_description/meshes/cone_blue.dae</uri>
-          </mesh>
-        </geometry>
-      </visual>
-    </link>
-
-
-    <link name='link_0_clone_33'>
-      <pose frame=''>-14 -11 0.15 0 -0 0</pose>
-      
-      <collision name="collision">
-        <geometry>
-          <mesh>
-            <uri>model://eufs_description/meshes/cone_yellow.dae</uri>
-          </mesh>
-        </geometry>
-      </collision>
-
-      <visual name="visual">
-        <geometry>
-          <mesh>
-            <uri>model://eufs_description/meshes/cone_yellow.dae</uri>
-          </mesh>
-        </geometry>
-      </visual>
-    </link>
-
-
-    <link name='link_0_clone_34'>
-      <pose frame=''>-12 -44 0.15 0 -0 0</pose>
-      
-      <collision name="collision">
-        <geometry>
-          <mesh>
-            <uri>model://eufs_description/meshes/cone_blue.dae</uri>
-          </mesh>
-        </geometry>
-      </collision>
-
-      <visual name="visual">
-        <geometry>
-          <mesh>
-            <uri>model://eufs_description/meshes/cone_blue.dae</uri>
-          </mesh>
-        </geometry>
-      </visual>
-    </link>
-
-
-    <link name='link_0_clone_35'>
-      <pose frame=''>-12 -34 0.15 0 -0 0</pose>
-      
-      <collision name="collision">
-        <geometry>
-          <mesh>
-            <uri>model://eufs_description/meshes/cone_yellow.dae</uri>
-          </mesh>
-        </geometry>
-      </collision>
-
-      <visual name="visual">
-        <geometry>
-          <mesh>
-            <uri>model://eufs_description/meshes/cone_yellow.dae</uri>
-          </mesh>
-        </geometry>
-      </visual>
-    </link>
-
-
-    <link name='link_0_clone_36'>
-      <pose frame=''>-12 13 0.15 0 -0 0</pose>
-      
-      <collision name="collision">
-        <geometry>
-          <mesh>
-            <uri>model://eufs_description/meshes/cone_blue.dae</uri>
-          </mesh>
-        </geometry>
-      </collision>
-
-      <visual name="visual">
-        <geometry>
-          <mesh>
-            <uri>model://eufs_description/meshes/cone_blue.dae</uri>
-          </mesh>
-        </geometry>
-      </visual>
-    </link>
-
-
-    <link name='link_0_clone_37'>
-      <pose frame=''>-11 -6 0.15 0 -0 0</pose>
-      
-      <collision name="collision">
-        <geometry>
-          <mesh>
-            <uri>model://eufs_description/meshes/cone_yellow.dae</uri>
-          </mesh>
-        </geometry>
-      </collision>
-
-      <visual name="visual">
-        <geometry>
-          <mesh>
-            <uri>model://eufs_description/meshes/cone_yellow.dae</uri>
-          </mesh>
-        </geometry>
-      </visual>
-    </link>
-
-
-    <link name='link_0_clone_38'>
-      <pose frame=''>-9 -2 0.15 0 -0 0</pose>
-      
-      <collision name="collision">
-        <geometry>
-          <mesh>
-            <uri>model://eufs_description/meshes/cone_yellow.dae</uri>
-          </mesh>
-        </geometry>
-      </collision>
-
-      <visual name="visual">
-        <geometry>
-          <mesh>
-            <uri>model://eufs_description/meshes/cone_yellow.dae</uri>
-          </mesh>
-        </geometry>
-      </visual>
-    </link>
-
-
-    <link name='link_0_clone_39'>
-      <pose frame=''>-9 18 0.15 0 -0 0</pose>
-      
-      <collision name="collision">
-        <geometry>
-          <mesh>
-            <uri>model://eufs_description/meshes/cone_blue.dae</uri>
-          </mesh>
-        </geometry>
-      </collision>
-
-      <visual name="visual">
-        <geometry>
-          <mesh>
-            <uri>model://eufs_description/meshes/cone_blue.dae</uri>
-          </mesh>
-        </geometry>
-      </visual>
-    </link>
-
-
-    <link name='link_0_clone_40'>
-      <pose frame=''>-8 -44 0.15 0 -0 0</pose>
-      
-      <collision name="collision">
-        <geometry>
-          <mesh>
-            <uri>model://eufs_description/meshes/cone_blue.dae</uri>
-          </mesh>
-        </geometry>
-      </collision>
-
-      <visual name="visual">
-        <geometry>
-          <mesh>
-            <uri>model://eufs_description/meshes/cone_blue.dae</uri>
-          </mesh>
-        </geometry>
-      </visual>
-    </link>
-
-
-    <link name='link_0_clone_41'>
-      <pose frame=''>-8 -34 0.15 0 -0 0</pose>
-      
-      <collision name="collision">
-        <geometry>
-          <mesh>
-            <uri>model://eufs_description/meshes/cone_yellow.dae</uri>
-          </mesh>
-        </geometry>
-      </collision>
-
-      <visual name="visual">
-        <geometry>
-          <mesh>
-            <uri>model://eufs_description/meshes/cone_yellow.dae</uri>
-          </mesh>
-        </geometry>
-      </visual>
-    </link>
-
-
-    <link name='link_0_clone_42'>
-      <pose frame=''>-6 3 0.15 0 -0 0</pose>
-      
-      <collision name="collision">
-        <geometry>
-          <mesh>
-            <uri>model://eufs_description/meshes/cone_yellow.dae</uri>
-          </mesh>
-        </geometry>
-      </collision>
-
-      <visual name="visual">
-        <geometry>
-          <mesh>
-            <uri>model://eufs_description/meshes/cone_yellow.dae</uri>
-          </mesh>
-        </geometry>
-      </visual>
-    </link>
-
-
-    <link name='link_0_clone_43'>
-      <pose frame=''>-4 -44 0.15 0 -0 0</pose>
-      
-      <collision name="collision">
-        <geometry>
-          <mesh>
-            <uri>model://eufs_description/meshes/cone_blue.dae</uri>
-          </mesh>
-        </geometry>
-      </collision>
-
-      <visual name="visual">
-        <geometry>
-          <mesh>
-            <uri>model://eufs_description/meshes/cone_blue.dae</uri>
-          </mesh>
-        </geometry>
-      </visual>
-    </link>
-
-
-    <link name='link_0_clone_44'>
-      <pose frame=''>-4 -34 0.15 0 -0 0</pose>
-      
-      <collision name="collision">
-        <geometry>
-          <mesh>
-            <uri>model://eufs_description/meshes/cone_yellow.dae</uri>
-          </mesh>
-        </geometry>
-      </collision>
-
-      <visual name="visual">
-        <geometry>
-          <mesh>
-            <uri>model://eufs_description/meshes/cone_yellow.dae</uri>
-          </mesh>
-        </geometry>
-      </visual>
-    </link>
-
-
-    <link name='link_0_clone_45'>
-      <pose frame=''>-3 8 0.15 0 -0 0</pose>
-      
-      <collision name="collision">
-        <geometry>
-          <mesh>
-            <uri>model://eufs_description/meshes/cone_yellow.dae</uri>
-          </mesh>
-        </geometry>
-      </collision>
-
-      <visual name="visual">
-        <geometry>
-          <mesh>
-            <uri>model://eufs_description/meshes/cone_yellow.dae</uri>
-          </mesh>
-        </geometry>
-      </visual>
-    </link>
-
-
-    <link name='link_0_clone_46'>
-      <pose frame=''>-2 26 0.15 0 -0 0</pose>
-      
-      <collision name="collision">
-        <geometry>
-          <mesh>
-            <uri>model://eufs_description/meshes/cone_blue.dae</uri>
-          </mesh>
-        </geometry>
-      </collision>
-
-      <visual name="visual">
-        <geometry>
-          <mesh>
-            <uri>model://eufs_description/meshes/cone_blue.dae</uri>
-          </mesh>
-        </geometry>
-      </visual>
-    </link>
-
-
-    <link name='link_0_clone_47'>
-      <pose frame=''>0 -44 0.15 0 -0 0</pose>
-      
-      <collision name="collision">
-        <geometry>
-          <mesh>
-            <uri>model://eufs_description/meshes/cone_blue.dae</uri>
-          </mesh>
-        </geometry>
-      </collision>
-
-      <visual name="visual">
-        <geometry>
-          <mesh>
-            <uri>model://eufs_description/meshes/cone_blue.dae</uri>
-          </mesh>
-        </geometry>
-      </visual>
-    </link>
-
-
     <link name='link_0_clone_48'>
-      <pose frame=''>0 -34 0.15 0 -0 0</pose>
+      <pose frame=''>-24 4 0.15 0 -0 0</pose>
       
       <collision name="collision">
         <geometry>
           <mesh>
-            <uri>model://eufs_description/meshes/cone_yellow.dae</uri>
+            <uri>model://eufs_description/meshes/cone_blue.dae</uri>
           </mesh>
         </geometry>
       </collision>
@@ -1025,20 +1025,20 @@
       <visual name="visual">
         <geometry>
           <mesh>
-            <uri>model://eufs_description/meshes/cone_yellow.dae</uri>
+            <uri>model://eufs_description/meshes/cone_blue.dae</uri>
           </mesh>
         </geometry>
       </visual>
     </link>
 
 
-    <link name='link_0_clone_49'>
-      <pose frame=''>0 13 0.15 0 -0 0</pose>
+    <ghostlink name='link_0_clone_49'>
+      <pose frame=''>-24 43 0.15 0 -0 0</pose>
       
       <collision name="collision">
         <geometry>
           <mesh>
-            <uri>model://eufs_description/meshes/cone_yellow.dae</uri>
+            <uri>model://eufs_description/meshes/NoiseCube.dae</uri>
           </mesh>
         </geometry>
       </collision>
@@ -1046,20 +1046,20 @@
       <visual name="visual">
         <geometry>
           <mesh>
-            <uri>model://eufs_description/meshes/cone_yellow.dae</uri>
+            <uri>model://eufs_description/meshes/NoiseCube.dae</uri>
           </mesh>
         </geometry>
       </visual>
-    </link>
+    </ghostlink>
 
 
-    <link name='link_0_clone_50'>
-      <pose frame=''>2 18 0.15 0 -0 0</pose>
+    <ghostlink name='link_0_clone_50'>
+      <pose frame=''>-23 8 0.15 0 -0 0</pose>
       
       <collision name="collision">
         <geometry>
           <mesh>
-            <uri>model://eufs_description/meshes/cone_yellow.dae</uri>
+            <uri>model://eufs_description/meshes/NoiseCube.dae</uri>
           </mesh>
         </geometry>
       </collision>
@@ -1067,20 +1067,20 @@
       <visual name="visual">
         <geometry>
           <mesh>
-            <uri>model://eufs_description/meshes/cone_yellow.dae</uri>
+            <uri>model://eufs_description/meshes/NoiseCube.dae</uri>
           </mesh>
         </geometry>
       </visual>
-    </link>
+    </ghostlink>
 
 
     <link name='link_0_clone_51'>
-      <pose frame=''>2 28 0.15 0 -0 0</pose>
+      <pose frame=''>-21 -6 0.15 0 -0 0</pose>
       
       <collision name="collision">
         <geometry>
           <mesh>
-            <uri>model://eufs_description/meshes/cone_blue.dae</uri>
+            <uri>model://eufs_description/meshes/cone_yellow.dae</uri>
           </mesh>
         </geometry>
       </collision>
@@ -1088,7 +1088,7 @@
       <visual name="visual">
         <geometry>
           <mesh>
-            <uri>model://eufs_description/meshes/cone_blue.dae</uri>
+            <uri>model://eufs_description/meshes/cone_yellow.dae</uri>
           </mesh>
         </geometry>
       </visual>
@@ -1096,7 +1096,7 @@
 
 
     <link name='link_0_clone_52'>
-      <pose frame=''>4 -43 0.15 0 -0 0</pose>
+      <pose frame=''>-21 8 0.15 0 -0 0</pose>
       
       <collision name="collision">
         <geometry>
@@ -1117,12 +1117,12 @@
 
 
     <link name='link_0_clone_53'>
-      <pose frame=''>4 -33 0.15 0 -0 0</pose>
+      <pose frame=''>-20 -45 0.15 0 -0 0</pose>
       
       <collision name="collision">
         <geometry>
           <mesh>
-            <uri>model://eufs_description/meshes/cone_yellow.dae</uri>
+            <uri>model://eufs_description/meshes/cone_blue.dae</uri>
           </mesh>
         </geometry>
       </collision>
@@ -1130,7 +1130,7 @@
       <visual name="visual">
         <geometry>
           <mesh>
-            <uri>model://eufs_description/meshes/cone_yellow.dae</uri>
+            <uri>model://eufs_description/meshes/cone_blue.dae</uri>
           </mesh>
         </geometry>
       </visual>
@@ -1138,7 +1138,7 @@
 
 
     <link name='link_0_clone_54'>
-      <pose frame=''>6 18 0.15 0 -0 0</pose>
+      <pose frame=''>-20 -35 0.15 0 -0 0</pose>
       
       <collision name="collision">
         <geometry>
@@ -1159,12 +1159,12 @@
 
 
     <link name='link_0_clone_55'>
-      <pose frame=''>6 28 0.15 0 -0 0</pose>
+      <pose frame=''>-19 -6 0.15 0 -0 0</pose>
       
       <collision name="collision">
         <geometry>
           <mesh>
-            <uri>model://eufs_description/meshes/cone_blue.dae</uri>
+            <uri>model://eufs_description/meshes/cone_yellow.dae</uri>
           </mesh>
         </geometry>
       </collision>
@@ -1172,20 +1172,20 @@
       <visual name="visual">
         <geometry>
           <mesh>
-            <uri>model://eufs_description/meshes/cone_blue.dae</uri>
+            <uri>model://eufs_description/meshes/cone_yellow.dae</uri>
           </mesh>
         </geometry>
       </visual>
     </link>
 
 
-    <link name='link_0_clone_56'>
-      <pose frame=''>8 -43 0.15 0 -0 0</pose>
+    <ghostlink name='link_0_clone_56'>
+      <pose frame=''>-19 44 0.15 0 -0 0</pose>
       
       <collision name="collision">
         <geometry>
           <mesh>
-            <uri>model://eufs_description/meshes/cone_blue.dae</uri>
+            <uri>model://eufs_description/meshes/NoiseCube.dae</uri>
           </mesh>
         </geometry>
       </collision>
@@ -1193,57 +1193,15 @@
       <visual name="visual">
         <geometry>
           <mesh>
-            <uri>model://eufs_description/meshes/cone_blue.dae</uri>
+            <uri>model://eufs_description/meshes/NoiseCube.dae</uri>
           </mesh>
         </geometry>
       </visual>
-    </link>
+    </ghostlink>
 
 
     <link name='link_0_clone_57'>
-      <pose frame=''>8 -33 0.15 0 -0 0</pose>
-      
-      <collision name="collision">
-        <geometry>
-          <mesh>
-            <uri>model://eufs_description/meshes/cone_yellow.dae</uri>
-          </mesh>
-        </geometry>
-      </collision>
-
-      <visual name="visual">
-        <geometry>
-          <mesh>
-            <uri>model://eufs_description/meshes/cone_yellow.dae</uri>
-          </mesh>
-        </geometry>
-      </visual>
-    </link>
-
-
-    <link name='link_0_clone_58'>
-      <pose frame=''>10 18 0.15 0 -0 0</pose>
-      
-      <collision name="collision">
-        <geometry>
-          <mesh>
-            <uri>model://eufs_description/meshes/cone_yellow.dae</uri>
-          </mesh>
-        </geometry>
-      </collision>
-
-      <visual name="visual">
-        <geometry>
-          <mesh>
-            <uri>model://eufs_description/meshes/cone_yellow.dae</uri>
-          </mesh>
-        </geometry>
-      </visual>
-    </link>
-
-
-    <link name='link_0_clone_59'>
-      <pose frame=''>10 28 0.15 0 -0 0</pose>
+      <pose frame=''>-18 11 0.15 0 -0 0</pose>
       
       <collision name="collision">
         <geometry>
@@ -1261,31 +1219,52 @@
         </geometry>
       </visual>
     </link>
+
+
+    <ghostlink name='link_0_clone_58'>
+      <pose frame=''>-18 23 0.15 0 -0 0</pose>
+      
+      <collision name="collision">
+        <geometry>
+          <mesh>
+            <uri>model://eufs_description/meshes/NoiseCube.dae</uri>
+          </mesh>
+        </geometry>
+      </collision>
+
+      <visual name="visual">
+        <geometry>
+          <mesh>
+            <uri>model://eufs_description/meshes/NoiseCube.dae</uri>
+          </mesh>
+        </geometry>
+      </visual>
+    </ghostlink>
+
+
+    <ghostlink name='link_0_clone_59'>
+      <pose frame=''>-17 -30 0.15 0 -0 0</pose>
+      
+      <collision name="collision">
+        <geometry>
+          <mesh>
+            <uri>model://eufs_description/meshes/MonkeyNoise.dae</uri>
+          </mesh>
+        </geometry>
+      </collision>
+
+      <visual name="visual">
+        <geometry>
+          <mesh>
+            <uri>model://eufs_description/meshes/MonkeyNoise.dae</uri>
+          </mesh>
+        </geometry>
+      </visual>
+    </ghostlink>
 
 
     <link name='link_0_clone_60'>
-      <pose frame=''>12 -43 0.15 0 -0 0</pose>
-      
-      <collision name="collision">
-        <geometry>
-          <mesh>
-            <uri>model://eufs_description/meshes/cone_blue.dae</uri>
-          </mesh>
-        </geometry>
-      </collision>
-
-      <visual name="visual">
-        <geometry>
-          <mesh>
-            <uri>model://eufs_description/meshes/cone_blue.dae</uri>
-          </mesh>
-        </geometry>
-      </visual>
-    </link>
-
-
-    <link name='link_0_clone_61'>
-      <pose frame=''>12 -33 0.15 0 -0 0</pose>
+      <pose frame=''>-17 -3 0.15 0 -0 0</pose>
       
       <collision name="collision">
         <geometry>
@@ -1303,15 +1282,36 @@
         </geometry>
       </visual>
     </link>
+
+
+    <ghostlink name='link_0_clone_61'>
+      <pose frame=''>-17 43 0.15 0 -0 0</pose>
+      
+      <collision name="collision">
+        <geometry>
+          <mesh>
+            <uri>model://eufs_description/meshes/NoiseCube.dae</uri>
+          </mesh>
+        </geometry>
+      </collision>
+
+      <visual name="visual">
+        <geometry>
+          <mesh>
+            <uri>model://eufs_description/meshes/NoiseCube.dae</uri>
+          </mesh>
+        </geometry>
+      </visual>
+    </ghostlink>
 
 
     <link name='link_0_clone_62'>
-      <pose frame=''>14 18 0.15 0 -0 0</pose>
+      <pose frame=''>-17 44 0.15 0 -0 0</pose>
       
       <collision name="collision">
         <geometry>
           <mesh>
-            <uri>model://eufs_description/meshes/cone_yellow.dae</uri>
+            <uri>model://eufs_description/meshes/cone_blue.dae</uri>
           </mesh>
         </geometry>
       </collision>
@@ -1319,7 +1319,7 @@
       <visual name="visual">
         <geometry>
           <mesh>
-            <uri>model://eufs_description/meshes/cone_yellow.dae</uri>
+            <uri>model://eufs_description/meshes/cone_blue.dae</uri>
           </mesh>
         </geometry>
       </visual>
@@ -1327,7 +1327,7 @@
 
 
     <link name='link_0_clone_63'>
-      <pose frame=''>14 28 0.15 0 -0 0</pose>
+      <pose frame=''>-17 48 0.15 0 -0 0</pose>
       
       <collision name="collision">
         <geometry>
@@ -1348,7 +1348,7 @@
 
 
     <link name='link_0_clone_64'>
-      <pose frame=''>16 -43 0.15 0 -0 0</pose>
+      <pose frame=''>-16 -44 0.15 0 -0 0</pose>
       
       <collision name="collision">
         <geometry>
@@ -1369,7 +1369,7 @@
 
 
     <link name='link_0_clone_65'>
-      <pose frame=''>16 -33 0.15 0 -0 0</pose>
+      <pose frame=''>-16 -34 0.15 0 -0 0</pose>
       
       <collision name="collision">
         <geometry>
@@ -1389,13 +1389,13 @@
     </link>
 
 
-    <link name='link_0_clone_66'>
-      <pose frame=''>18 18 0.15 0 -0 0</pose>
+    <ghostlink name='link_0_clone_66'>
+      <pose frame=''>-16 -30 0.15 0 -0 0</pose>
       
       <collision name="collision">
         <geometry>
           <mesh>
-            <uri>model://eufs_description/meshes/cone_yellow.dae</uri>
+            <uri>model://eufs_description/meshes/NoiseCube.dae</uri>
           </mesh>
         </geometry>
       </collision>
@@ -1403,20 +1403,20 @@
       <visual name="visual">
         <geometry>
           <mesh>
-            <uri>model://eufs_description/meshes/cone_yellow.dae</uri>
+            <uri>model://eufs_description/meshes/NoiseCube.dae</uri>
           </mesh>
         </geometry>
       </visual>
-    </link>
+    </ghostlink>
 
 
     <link name='link_0_clone_67'>
-      <pose frame=''>18 19 0.15 0 -0 0</pose>
+      <pose frame=''>-16 40 0.15 0 -0 0</pose>
       
       <collision name="collision">
         <geometry>
           <mesh>
-            <uri>model://eufs_description/meshes/cone_yellow.dae</uri>
+            <uri>model://eufs_description/meshes/cone_blue.dae</uri>
           </mesh>
         </geometry>
       </collision>
@@ -1424,7 +1424,7 @@
       <visual name="visual">
         <geometry>
           <mesh>
-            <uri>model://eufs_description/meshes/cone_yellow.dae</uri>
+            <uri>model://eufs_description/meshes/cone_blue.dae</uri>
           </mesh>
         </geometry>
       </visual>
@@ -1432,7 +1432,7 @@
 
 
     <link name='link_0_clone_68'>
-      <pose frame=''>18 28 0.15 0 -0 0</pose>
+      <pose frame=''>-16 52 0.15 0 -0 0</pose>
       
       <collision name="collision">
         <geometry>
@@ -1452,13 +1452,13 @@
     </link>
 
 
-    <link name='link_0_clone_69'>
-      <pose frame=''>19 -42 0.15 0 -0 0</pose>
+    <ghostlink name='link_0_clone_69'>
+      <pose frame=''>-16 62 0.15 0 -0 0</pose>
       
       <collision name="collision">
         <geometry>
           <mesh>
-            <uri>model://eufs_description/meshes/cone_blue.dae</uri>
+            <uri>model://eufs_description/meshes/NoiseCube.dae</uri>
           </mesh>
         </geometry>
       </collision>
@@ -1466,36 +1466,15 @@
       <visual name="visual">
         <geometry>
           <mesh>
-            <uri>model://eufs_description/meshes/cone_blue.dae</uri>
+            <uri>model://eufs_description/meshes/NoiseCube.dae</uri>
           </mesh>
         </geometry>
       </visual>
-    </link>
+    </ghostlink>
 
 
     <link name='link_0_clone_70'>
-      <pose frame=''>19 -32 0.15 0 -0 0</pose>
-      
-      <collision name="collision">
-        <geometry>
-          <mesh>
-            <uri>model://eufs_description/meshes/cone_yellow.dae</uri>
-          </mesh>
-        </geometry>
-      </collision>
-
-      <visual name="visual">
-        <geometry>
-          <mesh>
-            <uri>model://eufs_description/meshes/cone_yellow.dae</uri>
-          </mesh>
-        </geometry>
-      </visual>
-    </link>
-
-
-    <link name='link_0_clone_71'>
-      <pose frame=''>20 -42 0.15 0 -0 0</pose>
+      <pose frame=''>-15 15 0.15 0 -0 0</pose>
       
       <collision name="collision">
         <geometry>
@@ -1513,10 +1492,31 @@
         </geometry>
       </visual>
     </link>
+
+
+    <ghostlink name='link_0_clone_71'>
+      <pose frame=''>-14 -44 0.15 0 -0 0</pose>
+      
+      <collision name="collision">
+        <geometry>
+          <mesh>
+            <uri>model://eufs_description/meshes/NoiseCube.dae</uri>
+          </mesh>
+        </geometry>
+      </collision>
+
+      <visual name="visual">
+        <geometry>
+          <mesh>
+            <uri>model://eufs_description/meshes/NoiseCube.dae</uri>
+          </mesh>
+        </geometry>
+      </visual>
+    </ghostlink>
 
 
     <link name='link_0_clone_72'>
-      <pose frame=''>20 -32 0.15 0 -0 0</pose>
+      <pose frame=''>-14 1 0.15 0 -0 0</pose>
       
       <collision name="collision">
         <geometry>
@@ -1536,13 +1536,13 @@
     </link>
 
 
-    <link name='link_0_clone_73'>
-      <pose frame=''>23 -42 0.15 0 -0 0</pose>
+    <ghostlink name='link_0_clone_73'>
+      <pose frame=''>-14 37 0.15 0 -0 0</pose>
       
       <collision name="collision">
         <geometry>
           <mesh>
-            <uri>model://eufs_description/meshes/cone_blue.dae</uri>
+            <uri>model://eufs_description/meshes/NoiseCube.dae</uri>
           </mesh>
         </geometry>
       </collision>
@@ -1550,20 +1550,20 @@
       <visual name="visual">
         <geometry>
           <mesh>
-            <uri>model://eufs_description/meshes/cone_blue.dae</uri>
+            <uri>model://eufs_description/meshes/NoiseCube.dae</uri>
           </mesh>
         </geometry>
       </visual>
-    </link>
+    </ghostlink>
 
 
-    <link name='link_0_clone_74'>
-      <pose frame=''>23 -32 0.15 0 -0 0</pose>
+    <ghostlink name='link_0_clone_74'>
+      <pose frame=''>-14 40 0.15 0 -0 0</pose>
       
       <collision name="collision">
         <geometry>
           <mesh>
-            <uri>model://eufs_description/meshes/cone_yellow.dae</uri>
+            <uri>model://eufs_description/meshes/NoiseCube.dae</uri>
           </mesh>
         </geometry>
       </collision>
@@ -1571,20 +1571,20 @@
       <visual name="visual">
         <geometry>
           <mesh>
-            <uri>model://eufs_description/meshes/cone_yellow.dae</uri>
+            <uri>model://eufs_description/meshes/NoiseCube.dae</uri>
           </mesh>
         </geometry>
       </visual>
-    </link>
+    </ghostlink>
 
 
-    <link name='link_0_clone_75'>
-      <pose frame=''>25 26 0.15 0 -0 0</pose>
+    <ghostlink name='link_0_clone_75'>
+      <pose frame=''>-14 63 0.15 0 -0 0</pose>
       
       <collision name="collision">
         <geometry>
           <mesh>
-            <uri>model://eufs_description/meshes/cone_blue.dae</uri>
+            <uri>model://eufs_description/meshes/NoiseCube.dae</uri>
           </mesh>
         </geometry>
       </collision>
@@ -1592,36 +1592,15 @@
       <visual name="visual">
         <geometry>
           <mesh>
-            <uri>model://eufs_description/meshes/cone_blue.dae</uri>
+            <uri>model://eufs_description/meshes/NoiseCube.dae</uri>
           </mesh>
         </geometry>
       </visual>
-    </link>
+    </ghostlink>
 
 
     <link name='link_0_clone_76'>
-      <pose frame=''>26 17 0.15 0 -0 0</pose>
-      
-      <collision name="collision">
-        <geometry>
-          <mesh>
-            <uri>model://eufs_description/meshes/cone_yellow.dae</uri>
-          </mesh>
-        </geometry>
-      </collision>
-
-      <visual name="visual">
-        <geometry>
-          <mesh>
-            <uri>model://eufs_description/meshes/cone_yellow.dae</uri>
-          </mesh>
-        </geometry>
-      </visual>
-    </link>
-
-
-    <link name='link_0_clone_77'>
-      <pose frame=''>26 27 0.15 0 -0 0</pose>
+      <pose frame=''>-12 18 0.15 0 -0 0</pose>
       
       <collision name="collision">
         <geometry>
@@ -1641,13 +1620,13 @@
     </link>
 
 
-    <link name='link_0_clone_78'>
-      <pose frame=''>27 -42 0.15 0 -0 0</pose>
+    <ghostlink name='link_0_clone_77'>
+      <pose frame=''>-12 55 0.15 0 -0 0</pose>
       
       <collision name="collision">
         <geometry>
           <mesh>
-            <uri>model://eufs_description/meshes/cone_blue.dae</uri>
+            <uri>model://eufs_description/meshes/MonkeyNoise.dae</uri>
           </mesh>
         </geometry>
       </collision>
@@ -1655,20 +1634,20 @@
       <visual name="visual">
         <geometry>
           <mesh>
-            <uri>model://eufs_description/meshes/cone_blue.dae</uri>
+            <uri>model://eufs_description/meshes/MonkeyNoise.dae</uri>
           </mesh>
         </geometry>
       </visual>
-    </link>
+    </ghostlink>
 
 
-    <link name='link_0_clone_79'>
-      <pose frame=''>27 -32 0.15 0 -0 0</pose>
+    <ghostlink name='link_0_clone_78'>
+      <pose frame=''>-12 63 0.15 0 -0 0</pose>
       
       <collision name="collision">
         <geometry>
           <mesh>
-            <uri>model://eufs_description/meshes/cone_yellow.dae</uri>
+            <uri>model://eufs_description/meshes/NoiseCube.dae</uri>
           </mesh>
         </geometry>
       </collision>
@@ -1676,15 +1655,36 @@
       <visual name="visual">
         <geometry>
           <mesh>
-            <uri>model://eufs_description/meshes/cone_yellow.dae</uri>
+            <uri>model://eufs_description/meshes/NoiseCube.dae</uri>
           </mesh>
         </geometry>
       </visual>
-    </link>
+    </ghostlink>
+
+
+    <ghostlink name='link_0_clone_79'>
+      <pose frame=''>-12 64 0.15 0 -0 0</pose>
+      
+      <collision name="collision">
+        <geometry>
+          <mesh>
+            <uri>model://eufs_description/meshes/NoiseCube.dae</uri>
+          </mesh>
+        </geometry>
+      </collision>
+
+      <visual name="visual">
+        <geometry>
+          <mesh>
+            <uri>model://eufs_description/meshes/NoiseCube.dae</uri>
+          </mesh>
+        </geometry>
+      </visual>
+    </ghostlink>
 
 
     <link name='link_0_clone_80'>
-      <pose frame=''>30 17 0.15 0 -0 0</pose>
+      <pose frame=''>-11 4 0.15 0 -0 0</pose>
       
       <collision name="collision">
         <geometry>
@@ -1704,13 +1704,13 @@
     </link>
 
 
-    <link name='link_0_clone_81'>
-      <pose frame=''>30 27 0.15 0 -0 0</pose>
+    <ghostlink name='link_0_clone_81'>
+      <pose frame=''>-11 8 0.15 0 -0 0</pose>
       
       <collision name="collision">
         <geometry>
           <mesh>
-            <uri>model://eufs_description/meshes/cone_blue.dae</uri>
+            <uri>model://eufs_description/meshes/MonkeyNoise.dae</uri>
           </mesh>
         </geometry>
       </collision>
@@ -1718,15 +1718,15 @@
       <visual name="visual">
         <geometry>
           <mesh>
-            <uri>model://eufs_description/meshes/cone_blue.dae</uri>
+            <uri>model://eufs_description/meshes/MonkeyNoise.dae</uri>
           </mesh>
         </geometry>
       </visual>
-    </link>
+    </ghostlink>
 
 
     <link name='link_0_clone_82'>
-      <pose frame=''>31 -42 0.15 0 -0 0</pose>
+      <pose frame=''>-9 -41 0.15 0 -0 0</pose>
       
       <collision name="collision">
         <geometry>
@@ -1747,12 +1747,12 @@
 
 
     <link name='link_0_clone_83'>
-      <pose frame=''>31 -32 0.15 0 -0 0</pose>
+      <pose frame=''>-9 22 0.15 0 -0 0</pose>
       
       <collision name="collision">
         <geometry>
           <mesh>
-            <uri>model://eufs_description/meshes/cone_yellow.dae</uri>
+            <uri>model://eufs_description/meshes/cone_blue.dae</uri>
           </mesh>
         </geometry>
       </collision>
@@ -1760,7 +1760,7 @@
       <visual name="visual">
         <geometry>
           <mesh>
-            <uri>model://eufs_description/meshes/cone_yellow.dae</uri>
+            <uri>model://eufs_description/meshes/cone_blue.dae</uri>
           </mesh>
         </geometry>
       </visual>
@@ -1768,12 +1768,12 @@
 
 
     <link name='link_0_clone_84'>
-      <pose frame=''>34 17 0.15 0 -0 0</pose>
+      <pose frame=''>-9 31 0.15 0 -0 0</pose>
       
       <collision name="collision">
         <geometry>
           <mesh>
-            <uri>model://eufs_description/meshes/cone_yellow.dae</uri>
+            <uri>model://eufs_description/meshes/cone_blue.dae</uri>
           </mesh>
         </geometry>
       </collision>
@@ -1781,7 +1781,7 @@
       <visual name="visual">
         <geometry>
           <mesh>
-            <uri>model://eufs_description/meshes/cone_yellow.dae</uri>
+            <uri>model://eufs_description/meshes/cone_blue.dae</uri>
           </mesh>
         </geometry>
       </visual>
@@ -1789,7 +1789,7 @@
 
 
     <link name='link_0_clone_85'>
-      <pose frame=''>34 27 0.15 0 -0 0</pose>
+      <pose frame=''>-8 -41 0.15 0 -0 0</pose>
       
       <collision name="collision">
         <geometry>
@@ -1810,28 +1810,7 @@
 
 
     <link name='link_0_clone_86'>
-      <pose frame=''>35 -42 0.15 0 -0 0</pose>
-      
-      <collision name="collision">
-        <geometry>
-          <mesh>
-            <uri>model://eufs_description/meshes/cone_blue.dae</uri>
-          </mesh>
-        </geometry>
-      </collision>
-
-      <visual name="visual">
-        <geometry>
-          <mesh>
-            <uri>model://eufs_description/meshes/cone_blue.dae</uri>
-          </mesh>
-        </geometry>
-      </visual>
-    </link>
-
-
-    <link name='link_0_clone_87'>
-      <pose frame=''>35 -32 0.15 0 -0 0</pose>
+      <pose frame=''>-8 -31 0.15 0 -0 0</pose>
       
       <collision name="collision">
         <geometry>
@@ -1849,10 +1828,31 @@
         </geometry>
       </visual>
     </link>
+
+
+    <ghostlink name='link_0_clone_87'>
+      <pose frame=''>-8 -15 0.15 0 -0 0</pose>
+      
+      <collision name="collision">
+        <geometry>
+          <mesh>
+            <uri>model://eufs_description/meshes/NoiseCube.dae</uri>
+          </mesh>
+        </geometry>
+      </collision>
+
+      <visual name="visual">
+        <geometry>
+          <mesh>
+            <uri>model://eufs_description/meshes/NoiseCube.dae</uri>
+          </mesh>
+        </geometry>
+      </visual>
+    </ghostlink>
 
 
     <link name='link_0_clone_88'>
-      <pose frame=''>38 17 0.15 0 -0 0</pose>
+      <pose frame=''>-8 8 0.15 0 -0 0</pose>
       
       <collision name="collision">
         <geometry>
@@ -1873,12 +1873,12 @@
 
 
     <link name='link_0_clone_89'>
-      <pose frame=''>38 27 0.15 0 -0 0</pose>
+      <pose frame=''>-8 50 0.15 0 -0 0</pose>
       
       <collision name="collision">
         <geometry>
           <mesh>
-            <uri>model://eufs_description/meshes/cone_blue.dae</uri>
+            <uri>model://eufs_description/meshes/cone_yellow.dae</uri>
           </mesh>
         </geometry>
       </collision>
@@ -1886,7 +1886,7 @@
       <visual name="visual">
         <geometry>
           <mesh>
-            <uri>model://eufs_description/meshes/cone_blue.dae</uri>
+            <uri>model://eufs_description/meshes/cone_yellow.dae</uri>
           </mesh>
         </geometry>
       </visual>
@@ -1894,7 +1894,7 @@
 
 
     <link name='link_0_clone_90'>
-      <pose frame=''>39 -42 0.15 0 -0 0</pose>
+      <pose frame=''>-8 60 0.15 0 -0 0</pose>
       
       <collision name="collision">
         <geometry>
@@ -1914,13 +1914,13 @@
     </link>
 
 
-    <link name='link_0_clone_91'>
-      <pose frame=''>39 -32 0.15 0 -0 0</pose>
+    <ghostlink name='link_0_clone_91'>
+      <pose frame=''>-7 9 0.15 0 -0 0</pose>
       
       <collision name="collision">
         <geometry>
           <mesh>
-            <uri>model://eufs_description/meshes/cone_yellow.dae</uri>
+            <uri>model://eufs_description/meshes/NoiseCube.dae</uri>
           </mesh>
         </geometry>
       </collision>
@@ -1928,20 +1928,20 @@
       <visual name="visual">
         <geometry>
           <mesh>
-            <uri>model://eufs_description/meshes/cone_yellow.dae</uri>
+            <uri>model://eufs_description/meshes/NoiseCube.dae</uri>
           </mesh>
         </geometry>
       </visual>
-    </link>
+    </ghostlink>
 
 
-    <link name='link_0_clone_92'>
-      <pose frame=''>42 17 0.15 0 -0 0</pose>
+    <ghostlink name='link_0_clone_92'>
+      <pose frame=''>-7 10 0.15 0 -0 0</pose>
       
       <collision name="collision">
         <geometry>
           <mesh>
-            <uri>model://eufs_description/meshes/cone_yellow.dae</uri>
+            <uri>model://eufs_description/meshes/NoiseCube.dae</uri>
           </mesh>
         </geometry>
       </collision>
@@ -1949,20 +1949,20 @@
       <visual name="visual">
         <geometry>
           <mesh>
-            <uri>model://eufs_description/meshes/cone_yellow.dae</uri>
+            <uri>model://eufs_description/meshes/NoiseCube.dae</uri>
           </mesh>
         </geometry>
       </visual>
-    </link>
+    </ghostlink>
 
 
-    <link name='link_0_clone_93'>
-      <pose frame=''>42 27 0.15 0 -0 0</pose>
+    <ghostlink name='link_0_clone_93'>
+      <pose frame=''>-7 23 0.15 0 -0 0</pose>
       
       <collision name="collision">
         <geometry>
           <mesh>
-            <uri>model://eufs_description/meshes/cone_blue.dae</uri>
+            <uri>model://eufs_description/meshes/NoiseCube.dae</uri>
           </mesh>
         </geometry>
       </collision>
@@ -1970,20 +1970,20 @@
       <visual name="visual">
         <geometry>
           <mesh>
-            <uri>model://eufs_description/meshes/cone_blue.dae</uri>
+            <uri>model://eufs_description/meshes/NoiseCube.dae</uri>
           </mesh>
         </geometry>
       </visual>
-    </link>
+    </ghostlink>
 
 
-    <link name='link_0_clone_94'>
-      <pose frame=''>43 -42 0.15 0 -0 0</pose>
+    <ghostlink name='link_0_clone_94'>
+      <pose frame=''>-7 32 0.15 0 -0 0</pose>
       
       <collision name="collision">
         <geometry>
           <mesh>
-            <uri>model://eufs_description/meshes/cone_blue.dae</uri>
+            <uri>model://eufs_description/meshes/NoiseCube.dae</uri>
           </mesh>
         </geometry>
       </collision>
@@ -1991,20 +1991,20 @@
       <visual name="visual">
         <geometry>
           <mesh>
-            <uri>model://eufs_description/meshes/cone_blue.dae</uri>
+            <uri>model://eufs_description/meshes/NoiseCube.dae</uri>
           </mesh>
         </geometry>
       </visual>
-    </link>
+    </ghostlink>
 
 
-    <link name='link_0_clone_95'>
-      <pose frame=''>43 -32 0.15 0 -0 0</pose>
+    <ghostlink name='link_0_clone_95'>
+      <pose frame=''>-7 41 0.15 0 -0 0</pose>
       
       <collision name="collision">
         <geometry>
           <mesh>
-            <uri>model://eufs_description/meshes/cone_yellow.dae</uri>
+            <uri>model://eufs_description/meshes/MonkeyNoise.dae</uri>
           </mesh>
         </geometry>
       </collision>
@@ -2012,15 +2012,15 @@
       <visual name="visual">
         <geometry>
           <mesh>
-            <uri>model://eufs_description/meshes/cone_yellow.dae</uri>
+            <uri>model://eufs_description/meshes/MonkeyNoise.dae</uri>
           </mesh>
         </geometry>
       </visual>
-    </link>
+    </ghostlink>
 
 
     <link name='link_0_clone_96'>
-      <pose frame=''>46 16 0.15 0 -0 0</pose>
+      <pose frame=''>-7 44 0.15 0 -0 0</pose>
       
       <collision name="collision">
         <geometry>
@@ -2041,12 +2041,12 @@
 
 
     <link name='link_0_clone_97'>
-      <pose frame=''>46 26 0.15 0 -0 0</pose>
+      <pose frame=''>-7 48 0.15 0 -0 0</pose>
       
       <collision name="collision">
         <geometry>
           <mesh>
-            <uri>model://eufs_description/meshes/cone_blue.dae</uri>
+            <uri>model://eufs_description/meshes/cone_yellow.dae</uri>
           </mesh>
         </geometry>
       </collision>
@@ -2054,20 +2054,20 @@
       <visual name="visual">
         <geometry>
           <mesh>
-            <uri>model://eufs_description/meshes/cone_blue.dae</uri>
+            <uri>model://eufs_description/meshes/cone_yellow.dae</uri>
           </mesh>
         </geometry>
       </visual>
     </link>
 
 
-    <link name='link_0_clone_98'>
-      <pose frame=''>47 -42 0.15 0 -0 0</pose>
+    <ghostlink name='link_0_clone_98'>
+      <pose frame=''>-6 -32 0.15 0 -0 0</pose>
       
       <collision name="collision">
         <geometry>
           <mesh>
-            <uri>model://eufs_description/meshes/cone_blue.dae</uri>
+            <uri>model://eufs_description/meshes/NoiseCube.dae</uri>
           </mesh>
         </geometry>
       </collision>
@@ -2075,20 +2075,20 @@
       <visual name="visual">
         <geometry>
           <mesh>
-            <uri>model://eufs_description/meshes/cone_blue.dae</uri>
+            <uri>model://eufs_description/meshes/NoiseCube.dae</uri>
           </mesh>
         </geometry>
       </visual>
-    </link>
+    </ghostlink>
 
 
     <link name='link_0_clone_99'>
-      <pose frame=''>47 -32 0.15 0 -0 0</pose>
+      <pose frame=''>-6 25 0.15 0 -0 0</pose>
       
       <collision name="collision">
         <geometry>
           <mesh>
-            <uri>model://eufs_description/meshes/cone_yellow.dae</uri>
+            <uri>model://eufs_description/meshes/cone_blue.dae</uri>
           </mesh>
         </geometry>
       </collision>
@@ -2096,7 +2096,7 @@
       <visual name="visual">
         <geometry>
           <mesh>
-            <uri>model://eufs_description/meshes/cone_yellow.dae</uri>
+            <uri>model://eufs_description/meshes/cone_blue.dae</uri>
           </mesh>
         </geometry>
       </visual>
@@ -2104,7 +2104,7 @@
 
 
     <link name='link_0_clone_100'>
-      <pose frame=''>50 16 0.15 0 -0 0</pose>
+      <pose frame=''>-6 40 0.15 0 -0 0</pose>
       
       <collision name="collision">
         <geometry>
@@ -2124,13 +2124,13 @@
     </link>
 
 
-    <link name='link_0_clone_101'>
-      <pose frame=''>50 26 0.15 0 -0 0</pose>
+    <ghostlink name='link_0_clone_101'>
+      <pose frame=''>-6 47 0.15 0 -0 0</pose>
       
       <collision name="collision">
         <geometry>
           <mesh>
-            <uri>model://eufs_description/meshes/cone_blue.dae</uri>
+            <uri>model://eufs_description/meshes/NoiseCube.dae</uri>
           </mesh>
         </geometry>
       </collision>
@@ -2138,20 +2138,20 @@
       <visual name="visual">
         <geometry>
           <mesh>
-            <uri>model://eufs_description/meshes/cone_blue.dae</uri>
+            <uri>model://eufs_description/meshes/NoiseCube.dae</uri>
           </mesh>
         </geometry>
       </visual>
-    </link>
+    </ghostlink>
 
 
     <link name='link_0_clone_102'>
-      <pose frame=''>51 -42 0.15 0 -0 0</pose>
+      <pose frame=''>-6 52 0.15 0 -0 0</pose>
       
       <collision name="collision">
         <geometry>
           <mesh>
-            <uri>model://eufs_description/meshes/cone_blue.dae</uri>
+            <uri>model://eufs_description/meshes/cone_yellow.dae</uri>
           </mesh>
         </geometry>
       </collision>
@@ -2159,7 +2159,7 @@
       <visual name="visual">
         <geometry>
           <mesh>
-            <uri>model://eufs_description/meshes/cone_blue.dae</uri>
+            <uri>model://eufs_description/meshes/cone_yellow.dae</uri>
           </mesh>
         </geometry>
       </visual>
@@ -2167,7 +2167,7 @@
 
 
     <link name='link_0_clone_103'>
-      <pose frame=''>51 -32 0.15 0 -0 0</pose>
+      <pose frame=''>-5 11 0.15 0 -0 0</pose>
       
       <collision name="collision">
         <geometry>
@@ -2188,12 +2188,12 @@
 
 
     <link name='link_0_clone_104'>
-      <pose frame=''>54 16 0.15 0 -0 0</pose>
+      <pose frame=''>-5 29 0.15 0 -0 0</pose>
       
       <collision name="collision">
         <geometry>
           <mesh>
-            <uri>model://eufs_description/meshes/cone_yellow.dae</uri>
+            <uri>model://eufs_description/meshes/cone_blue.dae</uri>
           </mesh>
         </geometry>
       </collision>
@@ -2201,7 +2201,7 @@
       <visual name="visual">
         <geometry>
           <mesh>
-            <uri>model://eufs_description/meshes/cone_yellow.dae</uri>
+            <uri>model://eufs_description/meshes/cone_blue.dae</uri>
           </mesh>
         </geometry>
       </visual>
@@ -2209,12 +2209,12 @@
 
 
     <link name='link_0_clone_105'>
-      <pose frame=''>54 26 0.15 0 -0 0</pose>
+      <pose frame=''>-5 39 0.15 0 -0 0</pose>
       
       <collision name="collision">
         <geometry>
           <mesh>
-            <uri>model://eufs_description/meshes/cone_blue.dae</uri>
+            <uri>model://eufs_description/meshes/cone_yellow.dae</uri>
           </mesh>
         </geometry>
       </collision>
@@ -2222,7 +2222,7 @@
       <visual name="visual">
         <geometry>
           <mesh>
-            <uri>model://eufs_description/meshes/cone_blue.dae</uri>
+            <uri>model://eufs_description/meshes/cone_yellow.dae</uri>
           </mesh>
         </geometry>
       </visual>
@@ -2230,12 +2230,12 @@
 
 
     <link name='link_0_clone_106'>
-      <pose frame=''>55 -42 0.15 0 -0 0</pose>
+      <pose frame=''>-5 53 0.15 0 -0 0</pose>
       
       <collision name="collision">
         <geometry>
           <mesh>
-            <uri>model://eufs_description/meshes/cone_blue.dae</uri>
+            <uri>model://eufs_description/meshes/cone_yellow.dae</uri>
           </mesh>
         </geometry>
       </collision>
@@ -2243,7 +2243,7 @@
       <visual name="visual">
         <geometry>
           <mesh>
-            <uri>model://eufs_description/meshes/cone_blue.dae</uri>
+            <uri>model://eufs_description/meshes/cone_yellow.dae</uri>
           </mesh>
         </geometry>
       </visual>
@@ -2251,49 +2251,7 @@
 
 
     <link name='link_0_clone_107'>
-      <pose frame=''>55 -32 0.15 0 -0 0</pose>
-      
-      <collision name="collision">
-        <geometry>
-          <mesh>
-            <uri>model://eufs_description/meshes/cone_yellow.dae</uri>
-          </mesh>
-        </geometry>
-      </collision>
-
-      <visual name="visual">
-        <geometry>
-          <mesh>
-            <uri>model://eufs_description/meshes/cone_yellow.dae</uri>
-          </mesh>
-        </geometry>
-      </visual>
-    </link>
-
-
-    <link name='link_0_clone_108'>
-      <pose frame=''>58 16 0.15 0 -0 0</pose>
-      
-      <collision name="collision">
-        <geometry>
-          <mesh>
-            <uri>model://eufs_description/meshes/cone_yellow.dae</uri>
-          </mesh>
-        </geometry>
-      </collision>
-
-      <visual name="visual">
-        <geometry>
-          <mesh>
-            <uri>model://eufs_description/meshes/cone_yellow.dae</uri>
-          </mesh>
-        </geometry>
-      </visual>
-    </link>
-
-
-    <link name='link_0_clone_109'>
-      <pose frame=''>58 26 0.15 0 -0 0</pose>
+      <pose frame=''>-5 63 0.15 0 -0 0</pose>
       
       <collision name="collision">
         <geometry>
@@ -2311,10 +2269,52 @@
         </geometry>
       </visual>
     </link>
+
+
+    <ghostlink name='link_0_clone_108'>
+      <pose frame=''>-4 -13 0.15 0 -0 0</pose>
+      
+      <collision name="collision">
+        <geometry>
+          <mesh>
+            <uri>model://eufs_description/meshes/NoiseCube.dae</uri>
+          </mesh>
+        </geometry>
+      </collision>
+
+      <visual name="visual">
+        <geometry>
+          <mesh>
+            <uri>model://eufs_description/meshes/NoiseCube.dae</uri>
+          </mesh>
+        </geometry>
+      </visual>
+    </ghostlink>
+
+
+    <ghostlink name='link_0_clone_109'>
+      <pose frame=''>-3 -24 0.15 0 -0 0</pose>
+      
+      <collision name="collision">
+        <geometry>
+          <mesh>
+            <uri>model://eufs_description/meshes/NoiseCube.dae</uri>
+          </mesh>
+        </geometry>
+      </collision>
+
+      <visual name="visual">
+        <geometry>
+          <mesh>
+            <uri>model://eufs_description/meshes/NoiseCube.dae</uri>
+          </mesh>
+        </geometry>
+      </visual>
+    </ghostlink>
 
 
     <link name='link_0_clone_110'>
-      <pose frame=''>59 -42 0.15 0 -0 0</pose>
+      <pose frame=''>-3 29 0.15 0 -0 0</pose>
       
       <collision name="collision">
         <geometry>
@@ -2334,13 +2334,13 @@
     </link>
 
 
-    <link name='link_0_clone_111'>
-      <pose frame=''>59 -32 0.15 0 -0 0</pose>
+    <ghostlink name='link_0_clone_111'>
+      <pose frame=''>-2 8 0.15 0 -0 0</pose>
       
       <collision name="collision">
         <geometry>
           <mesh>
-            <uri>model://eufs_description/meshes/cone_yellow.dae</uri>
+            <uri>model://eufs_description/meshes/MonkeyNoise.dae</uri>
           </mesh>
         </geometry>
       </collision>
@@ -2348,15 +2348,15 @@
       <visual name="visual">
         <geometry>
           <mesh>
-            <uri>model://eufs_description/meshes/cone_yellow.dae</uri>
+            <uri>model://eufs_description/meshes/MonkeyNoise.dae</uri>
           </mesh>
         </geometry>
       </visual>
-    </link>
+    </ghostlink>
 
 
     <link name='link_0_clone_112'>
-      <pose frame=''>62 -27 0.15 0 -0 0</pose>
+      <pose frame=''>-2 15 0.15 0 -0 0</pose>
       
       <collision name="collision">
         <geometry>
@@ -2376,13 +2376,13 @@
     </link>
 
 
-    <link name='link_0_clone_113'>
-      <pose frame=''>62 16 0.15 0 -0 0</pose>
+    <ghostlink name='link_0_clone_113'>
+      <pose frame=''>-1 -39 0.15 0 -0 0</pose>
       
       <collision name="collision">
         <geometry>
           <mesh>
-            <uri>model://eufs_description/meshes/cone_yellow.dae</uri>
+            <uri>model://eufs_description/meshes/NoiseCube.dae</uri>
           </mesh>
         </geometry>
       </collision>
@@ -2390,15 +2390,15 @@
       <visual name="visual">
         <geometry>
           <mesh>
-            <uri>model://eufs_description/meshes/cone_yellow.dae</uri>
+            <uri>model://eufs_description/meshes/NoiseCube.dae</uri>
           </mesh>
         </geometry>
       </visual>
-    </link>
+    </ghostlink>
 
 
     <link name='link_0_clone_114'>
-      <pose frame=''>62 26 0.15 0 -0 0</pose>
+      <pose frame=''>-1 -38 0.15 0 -0 0</pose>
       
       <collision name="collision">
         <geometry>
@@ -2419,7 +2419,7 @@
 
 
     <link name='link_0_clone_115'>
-      <pose frame=''>63 -40 0.15 0 -0 0</pose>
+      <pose frame=''>-1 28 0.15 0 -0 0</pose>
       
       <collision name="collision">
         <geometry>
@@ -2440,7 +2440,7 @@
 
 
     <link name='link_0_clone_116'>
-      <pose frame=''>63 -30 0.15 0 -0 0</pose>
+      <pose frame=''>-1 38 0.15 0 -0 0</pose>
       
       <collision name="collision">
         <geometry>
@@ -2461,7 +2461,7 @@
 
 
     <link name='link_0_clone_117'>
-      <pose frame=''>64 -21 0.15 0 -0 0</pose>
+      <pose frame=''>-1 54 0.15 0 -0 0</pose>
       
       <collision name="collision">
         <geometry>
@@ -2482,7 +2482,7 @@
 
 
     <link name='link_0_clone_118'>
-      <pose frame=''>66 -37 0.15 0 -0 0</pose>
+      <pose frame=''>-1 64 0.15 0 -0 0</pose>
       
       <collision name="collision">
         <geometry>
@@ -2503,12 +2503,12 @@
 
 
     <link name='link_0_clone_119'>
-      <pose frame=''>66 -16 0.15 0 -0 0</pose>
+      <pose frame=''>0 -38 0.15 0 -0 0</pose>
       
       <collision name="collision">
         <geometry>
           <mesh>
-            <uri>model://eufs_description/meshes/cone_yellow.dae</uri>
+            <uri>model://eufs_description/meshes/cone_blue.dae</uri>
           </mesh>
         </geometry>
       </collision>
@@ -2516,7 +2516,7 @@
       <visual name="visual">
         <geometry>
           <mesh>
-            <uri>model://eufs_description/meshes/cone_yellow.dae</uri>
+            <uri>model://eufs_description/meshes/cone_blue.dae</uri>
           </mesh>
         </geometry>
       </visual>
@@ -2524,7 +2524,7 @@
 
 
     <link name='link_0_clone_120'>
-      <pose frame=''>66 16 0.15 0 -0 0</pose>
+      <pose frame=''>0 -28 0.15 0 -0 0</pose>
       
       <collision name="collision">
         <geometry>
@@ -2544,13 +2544,13 @@
     </link>
 
 
-    <link name='link_0_clone_121'>
-      <pose frame=''>66 26 0.15 0 -0 0</pose>
+    <ghostlink name='link_0_clone_121'>
+      <pose frame=''>0 16 0.15 0 -0 0</pose>
       
       <collision name="collision">
         <geometry>
           <mesh>
-            <uri>model://eufs_description/meshes/cone_blue.dae</uri>
+            <uri>model://eufs_description/meshes/NoiseCube.dae</uri>
           </mesh>
         </geometry>
       </collision>
@@ -2558,15 +2558,15 @@
       <visual name="visual">
         <geometry>
           <mesh>
-            <uri>model://eufs_description/meshes/cone_blue.dae</uri>
+            <uri>model://eufs_description/meshes/NoiseCube.dae</uri>
           </mesh>
         </geometry>
       </visual>
-    </link>
+    </ghostlink>
 
 
     <link name='link_0_clone_122'>
-      <pose frame=''>68 -10 0.15 0 -0 0</pose>
+      <pose frame=''>1 18 0.15 0 -0 0</pose>
       
       <collision name="collision">
         <geometry>
@@ -2587,7 +2587,7 @@
 
 
     <link name='link_0_clone_123'>
-      <pose frame=''>70 -5 0.15 0 -0 0</pose>
+      <pose frame=''>3 36 0.15 0 -0 0</pose>
       
       <collision name="collision">
         <geometry>
@@ -2608,7 +2608,7 @@
 
 
     <link name='link_0_clone_124'>
-      <pose frame=''>70 15 0.15 0 -0 0</pose>
+      <pose frame=''>3 37 0.15 0 -0 0</pose>
       
       <collision name="collision">
         <geometry>
@@ -2629,12 +2629,12 @@
 
 
     <link name='link_0_clone_125'>
-      <pose frame=''>70 25 0.15 0 -0 0</pose>
+      <pose frame=''>3 54 0.15 0 -0 0</pose>
       
       <collision name="collision">
         <geometry>
           <mesh>
-            <uri>model://eufs_description/meshes/cone_blue.dae</uri>
+            <uri>model://eufs_description/meshes/cone_yellow.dae</uri>
           </mesh>
         </geometry>
       </collision>
@@ -2642,7 +2642,7 @@
       <visual name="visual">
         <geometry>
           <mesh>
-            <uri>model://eufs_description/meshes/cone_blue.dae</uri>
+            <uri>model://eufs_description/meshes/cone_yellow.dae</uri>
           </mesh>
         </geometry>
       </visual>
@@ -2650,7 +2650,7 @@
 
 
     <link name='link_0_clone_126'>
-      <pose frame=''>71 -30 0.15 0 -0 0</pose>
+      <pose frame=''>3 64 0.15 0 -0 0</pose>
       
       <collision name="collision">
         <geometry>
@@ -2671,12 +2671,12 @@
 
 
     <link name='link_0_clone_127'>
-      <pose frame=''>72 1 0.15 0 -0 0</pose>
+      <pose frame=''>4 -37 0.15 0 -0 0</pose>
       
       <collision name="collision">
         <geometry>
           <mesh>
-            <uri>model://eufs_description/meshes/cone_yellow.dae</uri>
+            <uri>model://eufs_description/meshes/cone_blue.dae</uri>
           </mesh>
         </geometry>
       </collision>
@@ -2684,7 +2684,7 @@
       <visual name="visual">
         <geometry>
           <mesh>
-            <uri>model://eufs_description/meshes/cone_yellow.dae</uri>
+            <uri>model://eufs_description/meshes/cone_blue.dae</uri>
           </mesh>
         </geometry>
       </visual>
@@ -2692,7 +2692,7 @@
 
 
     <link name='link_0_clone_128'>
-      <pose frame=''>72 15 0.15 0 -0 0</pose>
+      <pose frame=''>4 -27 0.15 0 -0 0</pose>
       
       <collision name="collision">
         <geometry>
@@ -2713,28 +2713,7 @@
 
 
     <link name='link_0_clone_129'>
-      <pose frame=''>73 -26 0.15 0 -0 0</pose>
-      
-      <collision name="collision">
-        <geometry>
-          <mesh>
-            <uri>model://eufs_description/meshes/cone_blue.dae</uri>
-          </mesh>
-        </geometry>
-      </collision>
-
-      <visual name="visual">
-        <geometry>
-          <mesh>
-            <uri>model://eufs_description/meshes/cone_blue.dae</uri>
-          </mesh>
-        </geometry>
-      </visual>
-    </link>
-
-
-    <link name='link_0_clone_130'>
-      <pose frame=''>73 3 0.15 0 -0 0</pose>
+      <pose frame=''>4 22 0.15 0 -0 0</pose>
       
       <collision name="collision">
         <geometry>
@@ -2754,13 +2733,13 @@
     </link>
 
 
-    <link name='link_0_clone_131'>
-      <pose frame=''>74 7 0.15 0 -0 0</pose>
+    <ghostlink name='link_0_clone_130'>
+      <pose frame=''>4 46 0.15 0 -0 0</pose>
       
       <collision name="collision">
         <geometry>
           <mesh>
-            <uri>model://eufs_description/meshes/cone_yellow.dae</uri>
+            <uri>model://eufs_description/meshes/MonkeyNoise.dae</uri>
           </mesh>
         </geometry>
       </collision>
@@ -2768,15 +2747,36 @@
       <visual name="visual">
         <geometry>
           <mesh>
-            <uri>model://eufs_description/meshes/cone_yellow.dae</uri>
+            <uri>model://eufs_description/meshes/MonkeyNoise.dae</uri>
           </mesh>
         </geometry>
       </visual>
-    </link>
+    </ghostlink>
+
+
+    <ghostlink name='link_0_clone_131'>
+      <pose frame=''>5 3 0.15 0 -0 0</pose>
+      
+      <collision name="collision">
+        <geometry>
+          <mesh>
+            <uri>model://eufs_description/meshes/NoiseCube.dae</uri>
+          </mesh>
+        </geometry>
+      </collision>
+
+      <visual name="visual">
+        <geometry>
+          <mesh>
+            <uri>model://eufs_description/meshes/NoiseCube.dae</uri>
+          </mesh>
+        </geometry>
+      </visual>
+    </ghostlink>
 
 
     <link name='link_0_clone_132'>
-      <pose frame=''>74 11 0.15 0 -0 0</pose>
+      <pose frame=''>5 55 0.15 0 -0 0</pose>
       
       <collision name="collision">
         <geometry>
@@ -2796,13 +2796,13 @@
     </link>
 
 
-    <link name='link_0_clone_133'>
-      <pose frame=''>75 -19 0.15 0 -0 0</pose>
+    <ghostlink name='link_0_clone_133'>
+      <pose frame=''>6 22 0.15 0 -0 0</pose>
       
       <collision name="collision">
         <geometry>
           <mesh>
-            <uri>model://eufs_description/meshes/cone_blue.dae</uri>
+            <uri>model://eufs_description/meshes/NoiseCube.dae</uri>
           </mesh>
         </geometry>
       </collision>
@@ -2810,20 +2810,20 @@
       <visual name="visual">
         <geometry>
           <mesh>
-            <uri>model://eufs_description/meshes/cone_blue.dae</uri>
+            <uri>model://eufs_description/meshes/NoiseCube.dae</uri>
           </mesh>
         </geometry>
       </visual>
-    </link>
+    </ghostlink>
 
 
     <link name='link_0_clone_134'>
-      <pose frame=''>77 -15 0.15 0 -0 0</pose>
+      <pose frame=''>6 39 0.15 0 -0 0</pose>
       
       <collision name="collision">
         <geometry>
           <mesh>
-            <uri>model://eufs_description/meshes/cone_blue.dae</uri>
+            <uri>model://eufs_description/meshes/cone_yellow.dae</uri>
           </mesh>
         </geometry>
       </collision>
@@ -2831,20 +2831,20 @@
       <visual name="visual">
         <geometry>
           <mesh>
-            <uri>model://eufs_description/meshes/cone_blue.dae</uri>
+            <uri>model://eufs_description/meshes/cone_yellow.dae</uri>
           </mesh>
         </geometry>
       </visual>
     </link>
 
 
-    <link name='link_0_clone_135'>
-      <pose frame=''>79 -8 0.15 0 -0 0</pose>
+    <ghostlink name='link_0_clone_135'>
+      <pose frame=''>7 -2 0.15 0 -0 0</pose>
       
       <collision name="collision">
         <geometry>
           <mesh>
-            <uri>model://eufs_description/meshes/cone_blue.dae</uri>
+            <uri>model://eufs_description/meshes/NoiseCube.dae</uri>
           </mesh>
         </geometry>
       </collision>
@@ -2852,20 +2852,20 @@
       <visual name="visual">
         <geometry>
           <mesh>
-            <uri>model://eufs_description/meshes/cone_blue.dae</uri>
+            <uri>model://eufs_description/meshes/NoiseCube.dae</uri>
           </mesh>
         </geometry>
       </visual>
-    </link>
+    </ghostlink>
 
 
     <link name='link_0_clone_136'>
-      <pose frame=''>79 18 0.15 0 -0 0</pose>
+      <pose frame=''>7 25 0.15 0 -0 0</pose>
       
       <collision name="collision">
         <geometry>
           <mesh>
-            <uri>model://eufs_description/meshes/cone_blue.dae</uri>
+            <uri>model://eufs_description/meshes/cone_yellow.dae</uri>
           </mesh>
         </geometry>
       </collision>
@@ -2873,7 +2873,7 @@
       <visual name="visual">
         <geometry>
           <mesh>
-            <uri>model://eufs_description/meshes/cone_blue.dae</uri>
+            <uri>model://eufs_description/meshes/cone_yellow.dae</uri>
           </mesh>
         </geometry>
       </visual>
@@ -2881,12 +2881,12 @@
 
 
     <link name='link_0_clone_137'>
-      <pose frame=''>81 -4 0.15 0 -0 0</pose>
+      <pose frame=''>7 27 0.15 0 -0 0</pose>
       
       <collision name="collision">
         <geometry>
           <mesh>
-            <uri>model://eufs_description/meshes/cone_blue.dae</uri>
+            <uri>model://eufs_description/meshes/cone_yellow.dae</uri>
           </mesh>
         </geometry>
       </collision>
@@ -2894,7 +2894,7 @@
       <visual name="visual">
         <geometry>
           <mesh>
-            <uri>model://eufs_description/meshes/cone_blue.dae</uri>
+            <uri>model://eufs_description/meshes/cone_yellow.dae</uri>
           </mesh>
         </geometry>
       </visual>
@@ -2902,12 +2902,12 @@
 
 
     <link name='link_0_clone_138'>
-      <pose frame=''>82 15 0.15 0 -0 0</pose>
+      <pose frame=''>7 37 0.15 0 -0 0</pose>
       
       <collision name="collision">
         <geometry>
           <mesh>
-            <uri>model://eufs_description/meshes/cone_blue.dae</uri>
+            <uri>model://eufs_description/meshes/cone_yellow.dae</uri>
           </mesh>
         </geometry>
       </collision>
@@ -2915,20 +2915,20 @@
       <visual name="visual">
         <geometry>
           <mesh>
-            <uri>model://eufs_description/meshes/cone_blue.dae</uri>
+            <uri>model://eufs_description/meshes/cone_yellow.dae</uri>
           </mesh>
         </geometry>
       </visual>
     </link>
 
 
-    <link name='link_0_clone_139'>
-      <pose frame=''>83 3 0.15 0 -0 0</pose>
+    <ghostlink name='link_0_clone_139'>
+      <pose frame=''>7 52 0.15 0 -0 0</pose>
       
       <collision name="collision">
         <geometry>
           <mesh>
-            <uri>model://eufs_description/meshes/cone_blue.dae</uri>
+            <uri>model://eufs_description/meshes/NoiseCube.dae</uri>
           </mesh>
         </geometry>
       </collision>
@@ -2936,20 +2936,20 @@
       <visual name="visual">
         <geometry>
           <mesh>
-            <uri>model://eufs_description/meshes/cone_blue.dae</uri>
+            <uri>model://eufs_description/meshes/NoiseCube.dae</uri>
           </mesh>
         </geometry>
       </visual>
-    </link>
+    </ghostlink>
 
 
     <link name='link_0_clone_140'>
-      <pose frame=''>84 7 0.15 0 -0 0</pose>
+      <pose frame=''>7 53 0.15 0 -0 0</pose>
       
       <collision name="collision">
         <geometry>
           <mesh>
-            <uri>model://eufs_description/meshes/cone_blue.dae</uri>
+            <uri>model://eufs_description/meshes/cone_yellow.dae</uri>
           </mesh>
         </geometry>
       </collision>
@@ -2957,7 +2957,7 @@
       <visual name="visual">
         <geometry>
           <mesh>
-            <uri>model://eufs_description/meshes/cone_blue.dae</uri>
+            <uri>model://eufs_description/meshes/cone_yellow.dae</uri>
           </mesh>
         </geometry>
       </visual>
@@ -2965,7 +2965,3073 @@
 
 
     <link name='link_0_clone_141'>
-      <pose frame=''>84 11 0.15 0 -0 0</pose>
+      <pose frame=''>7 63 0.15 0 -0 0</pose>
+      
+      <collision name="collision">
+        <geometry>
+          <mesh>
+            <uri>model://eufs_description/meshes/cone_blue.dae</uri>
+          </mesh>
+        </geometry>
+      </collision>
+
+      <visual name="visual">
+        <geometry>
+          <mesh>
+            <uri>model://eufs_description/meshes/cone_blue.dae</uri>
+          </mesh>
+        </geometry>
+      </visual>
+    </link>
+
+
+    <link name='link_0_clone_142'>
+      <pose frame=''>8 -35 0.15 0 -0 0</pose>
+      
+      <collision name="collision">
+        <geometry>
+          <mesh>
+            <uri>model://eufs_description/meshes/cone_blue.dae</uri>
+          </mesh>
+        </geometry>
+      </collision>
+
+      <visual name="visual">
+        <geometry>
+          <mesh>
+            <uri>model://eufs_description/meshes/cone_blue.dae</uri>
+          </mesh>
+        </geometry>
+      </visual>
+    </link>
+
+
+    <link name='link_0_clone_143'>
+      <pose frame=''>8 -25 0.15 0 -0 0</pose>
+      
+      <collision name="collision">
+        <geometry>
+          <mesh>
+            <uri>model://eufs_description/meshes/cone_yellow.dae</uri>
+          </mesh>
+        </geometry>
+      </collision>
+
+      <visual name="visual">
+        <geometry>
+          <mesh>
+            <uri>model://eufs_description/meshes/cone_yellow.dae</uri>
+          </mesh>
+        </geometry>
+      </visual>
+    </link>
+
+
+    <ghostlink name='link_0_clone_144'>
+      <pose frame=''>8 -14 0.15 0 -0 0</pose>
+      
+      <collision name="collision">
+        <geometry>
+          <mesh>
+            <uri>model://eufs_description/meshes/NoiseCube.dae</uri>
+          </mesh>
+        </geometry>
+      </collision>
+
+      <visual name="visual">
+        <geometry>
+          <mesh>
+            <uri>model://eufs_description/meshes/NoiseCube.dae</uri>
+          </mesh>
+        </geometry>
+      </visual>
+    </ghostlink>
+
+
+    <ghostlink name='link_0_clone_145'>
+      <pose frame=''>8 27 0.15 0 -0 0</pose>
+      
+      <collision name="collision">
+        <geometry>
+          <mesh>
+            <uri>model://eufs_description/meshes/MonkeyNoise.dae</uri>
+          </mesh>
+        </geometry>
+      </collision>
+
+      <visual name="visual">
+        <geometry>
+          <mesh>
+            <uri>model://eufs_description/meshes/MonkeyNoise.dae</uri>
+          </mesh>
+        </geometry>
+      </visual>
+    </ghostlink>
+
+
+    <link name='link_0_clone_146'>
+      <pose frame=''>8 40 0.15 0 -0 0</pose>
+      
+      <collision name="collision">
+        <geometry>
+          <mesh>
+            <uri>model://eufs_description/meshes/cone_yellow.dae</uri>
+          </mesh>
+        </geometry>
+      </collision>
+
+      <visual name="visual">
+        <geometry>
+          <mesh>
+            <uri>model://eufs_description/meshes/cone_yellow.dae</uri>
+          </mesh>
+        </geometry>
+      </visual>
+    </link>
+
+
+    <ghostlink name='link_0_clone_147'>
+      <pose frame=''>9 -11 0.15 0 -0 0</pose>
+      
+      <collision name="collision">
+        <geometry>
+          <mesh>
+            <uri>model://eufs_description/meshes/NoiseCube.dae</uri>
+          </mesh>
+        </geometry>
+      </collision>
+
+      <visual name="visual">
+        <geometry>
+          <mesh>
+            <uri>model://eufs_description/meshes/NoiseCube.dae</uri>
+          </mesh>
+        </geometry>
+      </visual>
+    </ghostlink>
+
+
+    <link name='link_0_clone_148'>
+      <pose frame=''>9 44 0.15 0 -0 0</pose>
+      
+      <collision name="collision">
+        <geometry>
+          <mesh>
+            <uri>model://eufs_description/meshes/cone_yellow.dae</uri>
+          </mesh>
+        </geometry>
+      </collision>
+
+      <visual name="visual">
+        <geometry>
+          <mesh>
+            <uri>model://eufs_description/meshes/cone_yellow.dae</uri>
+          </mesh>
+        </geometry>
+      </visual>
+    </link>
+
+
+    <link name='link_0_clone_149'>
+      <pose frame=''>9 48 0.15 0 -0 0</pose>
+      
+      <collision name="collision">
+        <geometry>
+          <mesh>
+            <uri>model://eufs_description/meshes/cone_yellow.dae</uri>
+          </mesh>
+        </geometry>
+      </collision>
+
+      <visual name="visual">
+        <geometry>
+          <mesh>
+            <uri>model://eufs_description/meshes/cone_yellow.dae</uri>
+          </mesh>
+        </geometry>
+      </visual>
+    </link>
+
+
+    <link name='link_0_clone_150'>
+      <pose frame=''>11 -24 0.15 0 -0 0</pose>
+      
+      <collision name="collision">
+        <geometry>
+          <mesh>
+            <uri>model://eufs_description/meshes/cone_yellow.dae</uri>
+          </mesh>
+        </geometry>
+      </collision>
+
+      <visual name="visual">
+        <geometry>
+          <mesh>
+            <uri>model://eufs_description/meshes/cone_yellow.dae</uri>
+          </mesh>
+        </geometry>
+      </visual>
+    </link>
+
+
+    <ghostlink name='link_0_clone_151'>
+      <pose frame=''>11 25 0.15 0 -0 0</pose>
+      
+      <collision name="collision">
+        <geometry>
+          <mesh>
+            <uri>model://eufs_description/meshes/NoiseCube.dae</uri>
+          </mesh>
+        </geometry>
+      </collision>
+
+      <visual name="visual">
+        <geometry>
+          <mesh>
+            <uri>model://eufs_description/meshes/NoiseCube.dae</uri>
+          </mesh>
+        </geometry>
+      </visual>
+    </ghostlink>
+
+
+    <link name='link_0_clone_152'>
+      <pose frame=''>11 26 0.15 0 -0 0</pose>
+      
+      <collision name="collision">
+        <geometry>
+          <mesh>
+            <uri>model://eufs_description/meshes/cone_yellow.dae</uri>
+          </mesh>
+        </geometry>
+      </collision>
+
+      <visual name="visual">
+        <geometry>
+          <mesh>
+            <uri>model://eufs_description/meshes/cone_yellow.dae</uri>
+          </mesh>
+        </geometry>
+      </visual>
+    </link>
+
+
+    <ghostlink name='link_0_clone_153'>
+      <pose frame=''>12 -45 0.15 0 -0 0</pose>
+      
+      <collision name="collision">
+        <geometry>
+          <mesh>
+            <uri>model://eufs_description/meshes/MonkeyNoise.dae</uri>
+          </mesh>
+        </geometry>
+      </collision>
+
+      <visual name="visual">
+        <geometry>
+          <mesh>
+            <uri>model://eufs_description/meshes/MonkeyNoise.dae</uri>
+          </mesh>
+        </geometry>
+      </visual>
+    </ghostlink>
+
+
+    <ghostlink name='link_0_clone_154'>
+      <pose frame=''>12 -39 0.15 0 -0 0</pose>
+      
+      <collision name="collision">
+        <geometry>
+          <mesh>
+            <uri>model://eufs_description/meshes/MonkeyNoise.dae</uri>
+          </mesh>
+        </geometry>
+      </collision>
+
+      <visual name="visual">
+        <geometry>
+          <mesh>
+            <uri>model://eufs_description/meshes/MonkeyNoise.dae</uri>
+          </mesh>
+        </geometry>
+      </visual>
+    </ghostlink>
+
+
+    <link name='link_0_clone_155'>
+      <pose frame=''>12 -34 0.15 0 -0 0</pose>
+      
+      <collision name="collision">
+        <geometry>
+          <mesh>
+            <uri>model://eufs_description/meshes/cone_blue.dae</uri>
+          </mesh>
+        </geometry>
+      </collision>
+
+      <visual name="visual">
+        <geometry>
+          <mesh>
+            <uri>model://eufs_description/meshes/cone_blue.dae</uri>
+          </mesh>
+        </geometry>
+      </visual>
+    </link>
+
+
+    <link name='link_0_clone_156'>
+      <pose frame=''>12 -24 0.15 0 -0 0</pose>
+      
+      <collision name="collision">
+        <geometry>
+          <mesh>
+            <uri>model://eufs_description/meshes/cone_yellow.dae</uri>
+          </mesh>
+        </geometry>
+      </collision>
+
+      <visual name="visual">
+        <geometry>
+          <mesh>
+            <uri>model://eufs_description/meshes/cone_yellow.dae</uri>
+          </mesh>
+        </geometry>
+      </visual>
+    </link>
+
+
+    <link name='link_0_clone_157'>
+      <pose frame=''>13 57 0.15 0 -0 0</pose>
+      
+      <collision name="collision">
+        <geometry>
+          <mesh>
+            <uri>model://eufs_description/meshes/cone_blue.dae</uri>
+          </mesh>
+        </geometry>
+      </collision>
+
+      <visual name="visual">
+        <geometry>
+          <mesh>
+            <uri>model://eufs_description/meshes/cone_blue.dae</uri>
+          </mesh>
+        </geometry>
+      </visual>
+    </link>
+
+
+    <ghostlink name='link_0_clone_158'>
+      <pose frame=''>13 62 0.15 0 -0 0</pose>
+      
+      <collision name="collision">
+        <geometry>
+          <mesh>
+            <uri>model://eufs_description/meshes/MonkeyNoise.dae</uri>
+          </mesh>
+        </geometry>
+      </collision>
+
+      <visual name="visual">
+        <geometry>
+          <mesh>
+            <uri>model://eufs_description/meshes/MonkeyNoise.dae</uri>
+          </mesh>
+        </geometry>
+      </visual>
+    </ghostlink>
+
+
+    <link name='link_0_clone_159'>
+      <pose frame=''>15 26 0.15 0 -0 0</pose>
+      
+      <collision name="collision">
+        <geometry>
+          <mesh>
+            <uri>model://eufs_description/meshes/cone_yellow.dae</uri>
+          </mesh>
+        </geometry>
+      </collision>
+
+      <visual name="visual">
+        <geometry>
+          <mesh>
+            <uri>model://eufs_description/meshes/cone_yellow.dae</uri>
+          </mesh>
+        </geometry>
+      </visual>
+    </link>
+
+
+    <link name='link_0_clone_160'>
+      <pose frame=''>15 36 0.15 0 -0 0</pose>
+      
+      <collision name="collision">
+        <geometry>
+          <mesh>
+            <uri>model://eufs_description/meshes/cone_blue.dae</uri>
+          </mesh>
+        </geometry>
+      </collision>
+
+      <visual name="visual">
+        <geometry>
+          <mesh>
+            <uri>model://eufs_description/meshes/cone_blue.dae</uri>
+          </mesh>
+        </geometry>
+      </visual>
+    </link>
+
+
+    <link name='link_0_clone_161'>
+      <pose frame=''>15 55 0.15 0 -0 0</pose>
+      
+      <collision name="collision">
+        <geometry>
+          <mesh>
+            <uri>model://eufs_description/meshes/cone_blue.dae</uri>
+          </mesh>
+        </geometry>
+      </collision>
+
+      <visual name="visual">
+        <geometry>
+          <mesh>
+            <uri>model://eufs_description/meshes/cone_blue.dae</uri>
+          </mesh>
+        </geometry>
+      </visual>
+    </link>
+
+
+    <ghostlink name='link_0_clone_162'>
+      <pose frame=''>17 -21 0.15 0 -0 0</pose>
+      
+      <collision name="collision">
+        <geometry>
+          <mesh>
+            <uri>model://eufs_description/meshes/NoiseCube.dae</uri>
+          </mesh>
+        </geometry>
+      </collision>
+
+      <visual name="visual">
+        <geometry>
+          <mesh>
+            <uri>model://eufs_description/meshes/NoiseCube.dae</uri>
+          </mesh>
+        </geometry>
+      </visual>
+    </ghostlink>
+
+
+    <ghostlink name='link_0_clone_163'>
+      <pose frame=''>17 33 0.15 0 -0 0</pose>
+      
+      <collision name="collision">
+        <geometry>
+          <mesh>
+            <uri>model://eufs_description/meshes/NoiseCube.dae</uri>
+          </mesh>
+        </geometry>
+      </collision>
+
+      <visual name="visual">
+        <geometry>
+          <mesh>
+            <uri>model://eufs_description/meshes/NoiseCube.dae</uri>
+          </mesh>
+        </geometry>
+      </visual>
+    </ghostlink>
+
+
+    <ghostlink name='link_0_clone_164'>
+      <pose frame=''>17 62 0.15 0 -0 0</pose>
+      
+      <collision name="collision">
+        <geometry>
+          <mesh>
+            <uri>model://eufs_description/meshes/NoiseCube.dae</uri>
+          </mesh>
+        </geometry>
+      </collision>
+
+      <visual name="visual">
+        <geometry>
+          <mesh>
+            <uri>model://eufs_description/meshes/NoiseCube.dae</uri>
+          </mesh>
+        </geometry>
+      </visual>
+    </ghostlink>
+
+
+    <link name='link_0_clone_165'>
+      <pose frame=''>18 -31 0.15 0 -0 0</pose>
+      
+      <collision name="collision">
+        <geometry>
+          <mesh>
+            <uri>model://eufs_description/meshes/cone_blue.dae</uri>
+          </mesh>
+        </geometry>
+      </collision>
+
+      <visual name="visual">
+        <geometry>
+          <mesh>
+            <uri>model://eufs_description/meshes/cone_blue.dae</uri>
+          </mesh>
+        </geometry>
+      </visual>
+    </link>
+
+
+    <ghostlink name='link_0_clone_166'>
+      <pose frame=''>18 -3 0.15 0 -0 0</pose>
+      
+      <collision name="collision">
+        <geometry>
+          <mesh>
+            <uri>model://eufs_description/meshes/NoiseCube.dae</uri>
+          </mesh>
+        </geometry>
+      </collision>
+
+      <visual name="visual">
+        <geometry>
+          <mesh>
+            <uri>model://eufs_description/meshes/NoiseCube.dae</uri>
+          </mesh>
+        </geometry>
+      </visual>
+    </ghostlink>
+
+
+    <link name='link_0_clone_167'>
+      <pose frame=''>18 40 0.15 0 -0 0</pose>
+      
+      <collision name="collision">
+        <geometry>
+          <mesh>
+            <uri>model://eufs_description/meshes/cone_blue.dae</uri>
+          </mesh>
+        </geometry>
+      </collision>
+
+      <visual name="visual">
+        <geometry>
+          <mesh>
+            <uri>model://eufs_description/meshes/cone_blue.dae</uri>
+          </mesh>
+        </geometry>
+      </visual>
+    </link>
+
+
+    <link name='link_0_clone_168'>
+      <pose frame=''>19 -31 0.15 0 -0 0</pose>
+      
+      <collision name="collision">
+        <geometry>
+          <mesh>
+            <uri>model://eufs_description/meshes/cone_blue.dae</uri>
+          </mesh>
+        </geometry>
+      </collision>
+
+      <visual name="visual">
+        <geometry>
+          <mesh>
+            <uri>model://eufs_description/meshes/cone_blue.dae</uri>
+          </mesh>
+        </geometry>
+      </visual>
+    </link>
+
+
+    <ghostlink name='link_0_clone_169'>
+      <pose frame=''>19 -30 0.15 0 -0 0</pose>
+      
+      <collision name="collision">
+        <geometry>
+          <mesh>
+            <uri>model://eufs_description/meshes/NoiseCube.dae</uri>
+          </mesh>
+        </geometry>
+      </collision>
+
+      <visual name="visual">
+        <geometry>
+          <mesh>
+            <uri>model://eufs_description/meshes/NoiseCube.dae</uri>
+          </mesh>
+        </geometry>
+      </visual>
+    </ghostlink>
+
+
+    <link name='link_0_clone_170'>
+      <pose frame=''>19 -21 0.15 0 -0 0</pose>
+      
+      <collision name="collision">
+        <geometry>
+          <mesh>
+            <uri>model://eufs_description/meshes/cone_yellow.dae</uri>
+          </mesh>
+        </geometry>
+      </collision>
+
+      <visual name="visual">
+        <geometry>
+          <mesh>
+            <uri>model://eufs_description/meshes/cone_yellow.dae</uri>
+          </mesh>
+        </geometry>
+      </visual>
+    </link>
+
+
+    <link name='link_0_clone_171'>
+      <pose frame=''>19 25 0.15 0 -0 0</pose>
+      
+      <collision name="collision">
+        <geometry>
+          <mesh>
+            <uri>model://eufs_description/meshes/cone_yellow.dae</uri>
+          </mesh>
+        </geometry>
+      </collision>
+
+      <visual name="visual">
+        <geometry>
+          <mesh>
+            <uri>model://eufs_description/meshes/cone_yellow.dae</uri>
+          </mesh>
+        </geometry>
+      </visual>
+    </link>
+
+
+    <link name='link_0_clone_172'>
+      <pose frame=''>19 35 0.15 0 -0 0</pose>
+      
+      <collision name="collision">
+        <geometry>
+          <mesh>
+            <uri>model://eufs_description/meshes/cone_blue.dae</uri>
+          </mesh>
+        </geometry>
+      </collision>
+
+      <visual name="visual">
+        <geometry>
+          <mesh>
+            <uri>model://eufs_description/meshes/cone_blue.dae</uri>
+          </mesh>
+        </geometry>
+      </visual>
+    </link>
+
+
+    <link name='link_0_clone_173'>
+      <pose frame=''>19 44 0.15 0 -0 0</pose>
+      
+      <collision name="collision">
+        <geometry>
+          <mesh>
+            <uri>model://eufs_description/meshes/cone_blue.dae</uri>
+          </mesh>
+        </geometry>
+      </collision>
+
+      <visual name="visual">
+        <geometry>
+          <mesh>
+            <uri>model://eufs_description/meshes/cone_blue.dae</uri>
+          </mesh>
+        </geometry>
+      </visual>
+    </link>
+
+
+    <link name='link_0_clone_174'>
+      <pose frame=''>19 48 0.15 0 -0 0</pose>
+      
+      <collision name="collision">
+        <geometry>
+          <mesh>
+            <uri>model://eufs_description/meshes/cone_blue.dae</uri>
+          </mesh>
+        </geometry>
+      </collision>
+
+      <visual name="visual">
+        <geometry>
+          <mesh>
+            <uri>model://eufs_description/meshes/cone_blue.dae</uri>
+          </mesh>
+        </geometry>
+      </visual>
+    </link>
+
+
+    <ghostlink name='link_0_clone_175'>
+      <pose frame=''>20 -14 0.15 0 -0 0</pose>
+      
+      <collision name="collision">
+        <geometry>
+          <mesh>
+            <uri>model://eufs_description/meshes/NoiseCube.dae</uri>
+          </mesh>
+        </geometry>
+      </collision>
+
+      <visual name="visual">
+        <geometry>
+          <mesh>
+            <uri>model://eufs_description/meshes/NoiseCube.dae</uri>
+          </mesh>
+        </geometry>
+      </visual>
+    </ghostlink>
+
+
+    <ghostlink name='link_0_clone_176'>
+      <pose frame=''>22 -8 0.15 0 -0 0</pose>
+      
+      <collision name="collision">
+        <geometry>
+          <mesh>
+            <uri>model://eufs_description/meshes/NoiseCube.dae</uri>
+          </mesh>
+        </geometry>
+      </collision>
+
+      <visual name="visual">
+        <geometry>
+          <mesh>
+            <uri>model://eufs_description/meshes/NoiseCube.dae</uri>
+          </mesh>
+        </geometry>
+      </visual>
+    </ghostlink>
+
+
+    <ghostlink name='link_0_clone_177'>
+      <pose frame=''>22 -7 0.15 0 -0 0</pose>
+      
+      <collision name="collision">
+        <geometry>
+          <mesh>
+            <uri>model://eufs_description/meshes/NoiseCube.dae</uri>
+          </mesh>
+        </geometry>
+      </collision>
+
+      <visual name="visual">
+        <geometry>
+          <mesh>
+            <uri>model://eufs_description/meshes/NoiseCube.dae</uri>
+          </mesh>
+        </geometry>
+      </visual>
+    </ghostlink>
+
+
+    <link name='link_0_clone_178'>
+      <pose frame=''>23 -30 0.15 0 -0 0</pose>
+      
+      <collision name="collision">
+        <geometry>
+          <mesh>
+            <uri>model://eufs_description/meshes/cone_blue.dae</uri>
+          </mesh>
+        </geometry>
+      </collision>
+
+      <visual name="visual">
+        <geometry>
+          <mesh>
+            <uri>model://eufs_description/meshes/cone_blue.dae</uri>
+          </mesh>
+        </geometry>
+      </visual>
+    </link>
+
+
+    <link name='link_0_clone_179'>
+      <pose frame=''>23 -20 0.15 0 -0 0</pose>
+      
+      <collision name="collision">
+        <geometry>
+          <mesh>
+            <uri>model://eufs_description/meshes/cone_yellow.dae</uri>
+          </mesh>
+        </geometry>
+      </collision>
+
+      <visual name="visual">
+        <geometry>
+          <mesh>
+            <uri>model://eufs_description/meshes/cone_yellow.dae</uri>
+          </mesh>
+        </geometry>
+      </visual>
+    </link>
+
+
+    <ghostlink name='link_0_clone_180'>
+      <pose frame=''>23 1 0.15 0 -0 0</pose>
+      
+      <collision name="collision">
+        <geometry>
+          <mesh>
+            <uri>model://eufs_description/meshes/NoiseCube.dae</uri>
+          </mesh>
+        </geometry>
+      </collision>
+
+      <visual name="visual">
+        <geometry>
+          <mesh>
+            <uri>model://eufs_description/meshes/NoiseCube.dae</uri>
+          </mesh>
+        </geometry>
+      </visual>
+    </ghostlink>
+
+
+    <ghostlink name='link_0_clone_181'>
+      <pose frame=''>23 16 0.15 0 -0 0</pose>
+      
+      <collision name="collision">
+        <geometry>
+          <mesh>
+            <uri>model://eufs_description/meshes/NoiseCube.dae</uri>
+          </mesh>
+        </geometry>
+      </collision>
+
+      <visual name="visual">
+        <geometry>
+          <mesh>
+            <uri>model://eufs_description/meshes/NoiseCube.dae</uri>
+          </mesh>
+        </geometry>
+      </visual>
+    </ghostlink>
+
+
+    <link name='link_0_clone_182'>
+      <pose frame=''>23 25 0.15 0 -0 0</pose>
+      
+      <collision name="collision">
+        <geometry>
+          <mesh>
+            <uri>model://eufs_description/meshes/cone_yellow.dae</uri>
+          </mesh>
+        </geometry>
+      </collision>
+
+      <visual name="visual">
+        <geometry>
+          <mesh>
+            <uri>model://eufs_description/meshes/cone_yellow.dae</uri>
+          </mesh>
+        </geometry>
+      </visual>
+    </link>
+
+
+    <link name='link_0_clone_183'>
+      <pose frame=''>23 35 0.15 0 -0 0</pose>
+      
+      <collision name="collision">
+        <geometry>
+          <mesh>
+            <uri>model://eufs_description/meshes/cone_blue.dae</uri>
+          </mesh>
+        </geometry>
+      </collision>
+
+      <visual name="visual">
+        <geometry>
+          <mesh>
+            <uri>model://eufs_description/meshes/cone_blue.dae</uri>
+          </mesh>
+        </geometry>
+      </visual>
+    </link>
+
+
+    <ghostlink name='link_0_clone_184'>
+      <pose frame=''>26 -38 0.15 0 -0 0</pose>
+      
+      <collision name="collision">
+        <geometry>
+          <mesh>
+            <uri>model://eufs_description/meshes/NoiseCube.dae</uri>
+          </mesh>
+        </geometry>
+      </collision>
+
+      <visual name="visual">
+        <geometry>
+          <mesh>
+            <uri>model://eufs_description/meshes/NoiseCube.dae</uri>
+          </mesh>
+        </geometry>
+      </visual>
+    </ghostlink>
+
+
+    <ghostlink name='link_0_clone_185'>
+      <pose frame=''>26 65 0.15 0 -0 0</pose>
+      
+      <collision name="collision">
+        <geometry>
+          <mesh>
+            <uri>model://eufs_description/meshes/MonkeyNoise.dae</uri>
+          </mesh>
+        </geometry>
+      </collision>
+
+      <visual name="visual">
+        <geometry>
+          <mesh>
+            <uri>model://eufs_description/meshes/MonkeyNoise.dae</uri>
+          </mesh>
+        </geometry>
+      </visual>
+    </ghostlink>
+
+
+    <link name='link_0_clone_186'>
+      <pose frame=''>27 -29 0.15 0 -0 0</pose>
+      
+      <collision name="collision">
+        <geometry>
+          <mesh>
+            <uri>model://eufs_description/meshes/cone_blue.dae</uri>
+          </mesh>
+        </geometry>
+      </collision>
+
+      <visual name="visual">
+        <geometry>
+          <mesh>
+            <uri>model://eufs_description/meshes/cone_blue.dae</uri>
+          </mesh>
+        </geometry>
+      </visual>
+    </link>
+
+
+    <link name='link_0_clone_187'>
+      <pose frame=''>27 -19 0.15 0 -0 0</pose>
+      
+      <collision name="collision">
+        <geometry>
+          <mesh>
+            <uri>model://eufs_description/meshes/cone_yellow.dae</uri>
+          </mesh>
+        </geometry>
+      </collision>
+
+      <visual name="visual">
+        <geometry>
+          <mesh>
+            <uri>model://eufs_description/meshes/cone_yellow.dae</uri>
+          </mesh>
+        </geometry>
+      </visual>
+    </link>
+
+
+    <link name='link_0_clone_188'>
+      <pose frame=''>27 24 0.15 0 -0 0</pose>
+      
+      <collision name="collision">
+        <geometry>
+          <mesh>
+            <uri>model://eufs_description/meshes/cone_yellow.dae</uri>
+          </mesh>
+        </geometry>
+      </collision>
+
+      <visual name="visual">
+        <geometry>
+          <mesh>
+            <uri>model://eufs_description/meshes/cone_yellow.dae</uri>
+          </mesh>
+        </geometry>
+      </visual>
+    </link>
+
+
+    <link name='link_0_clone_189'>
+      <pose frame=''>27 34 0.15 0 -0 0</pose>
+      
+      <collision name="collision">
+        <geometry>
+          <mesh>
+            <uri>model://eufs_description/meshes/cone_blue.dae</uri>
+          </mesh>
+        </geometry>
+      </collision>
+
+      <visual name="visual">
+        <geometry>
+          <mesh>
+            <uri>model://eufs_description/meshes/cone_blue.dae</uri>
+          </mesh>
+        </geometry>
+      </visual>
+    </link>
+
+
+    <ghostlink name='link_0_clone_190'>
+      <pose frame=''>29 16 0.15 0 -0 0</pose>
+      
+      <collision name="collision">
+        <geometry>
+          <mesh>
+            <uri>model://eufs_description/meshes/NoiseCube.dae</uri>
+          </mesh>
+        </geometry>
+      </collision>
+
+      <visual name="visual">
+        <geometry>
+          <mesh>
+            <uri>model://eufs_description/meshes/NoiseCube.dae</uri>
+          </mesh>
+        </geometry>
+      </visual>
+    </ghostlink>
+
+
+    <ghostlink name='link_0_clone_191'>
+      <pose frame=''>29 50 0.15 0 -0 0</pose>
+      
+      <collision name="collision">
+        <geometry>
+          <mesh>
+            <uri>model://eufs_description/meshes/NoiseCube.dae</uri>
+          </mesh>
+        </geometry>
+      </collision>
+
+      <visual name="visual">
+        <geometry>
+          <mesh>
+            <uri>model://eufs_description/meshes/NoiseCube.dae</uri>
+          </mesh>
+        </geometry>
+      </visual>
+    </ghostlink>
+
+
+    <link name='link_0_clone_192'>
+      <pose frame=''>31 -29 0.15 0 -0 0</pose>
+      
+      <collision name="collision">
+        <geometry>
+          <mesh>
+            <uri>model://eufs_description/meshes/cone_blue.dae</uri>
+          </mesh>
+        </geometry>
+      </collision>
+
+      <visual name="visual">
+        <geometry>
+          <mesh>
+            <uri>model://eufs_description/meshes/cone_blue.dae</uri>
+          </mesh>
+        </geometry>
+      </visual>
+    </link>
+
+
+    <link name='link_0_clone_193'>
+      <pose frame=''>31 -19 0.15 0 -0 0</pose>
+      
+      <collision name="collision">
+        <geometry>
+          <mesh>
+            <uri>model://eufs_description/meshes/cone_yellow.dae</uri>
+          </mesh>
+        </geometry>
+      </collision>
+
+      <visual name="visual">
+        <geometry>
+          <mesh>
+            <uri>model://eufs_description/meshes/cone_yellow.dae</uri>
+          </mesh>
+        </geometry>
+      </visual>
+    </link>
+
+
+    <link name='link_0_clone_194'>
+      <pose frame=''>31 24 0.15 0 -0 0</pose>
+      
+      <collision name="collision">
+        <geometry>
+          <mesh>
+            <uri>model://eufs_description/meshes/cone_yellow.dae</uri>
+          </mesh>
+        </geometry>
+      </collision>
+
+      <visual name="visual">
+        <geometry>
+          <mesh>
+            <uri>model://eufs_description/meshes/cone_yellow.dae</uri>
+          </mesh>
+        </geometry>
+      </visual>
+    </link>
+
+
+    <link name='link_0_clone_195'>
+      <pose frame=''>31 34 0.15 0 -0 0</pose>
+      
+      <collision name="collision">
+        <geometry>
+          <mesh>
+            <uri>model://eufs_description/meshes/cone_blue.dae</uri>
+          </mesh>
+        </geometry>
+      </collision>
+
+      <visual name="visual">
+        <geometry>
+          <mesh>
+            <uri>model://eufs_description/meshes/cone_blue.dae</uri>
+          </mesh>
+        </geometry>
+      </visual>
+    </link>
+
+
+    <ghostlink name='link_0_clone_196'>
+      <pose frame=''>32 -13 0.15 0 -0 0</pose>
+      
+      <collision name="collision">
+        <geometry>
+          <mesh>
+            <uri>model://eufs_description/meshes/MonkeyNoise.dae</uri>
+          </mesh>
+        </geometry>
+      </collision>
+
+      <visual name="visual">
+        <geometry>
+          <mesh>
+            <uri>model://eufs_description/meshes/MonkeyNoise.dae</uri>
+          </mesh>
+        </geometry>
+      </visual>
+    </ghostlink>
+
+
+    <ghostlink name='link_0_clone_197'>
+      <pose frame=''>35 -34 0.15 0 -0 0</pose>
+      
+      <collision name="collision">
+        <geometry>
+          <mesh>
+            <uri>model://eufs_description/meshes/MonkeyNoise.dae</uri>
+          </mesh>
+        </geometry>
+      </collision>
+
+      <visual name="visual">
+        <geometry>
+          <mesh>
+            <uri>model://eufs_description/meshes/MonkeyNoise.dae</uri>
+          </mesh>
+        </geometry>
+      </visual>
+    </ghostlink>
+
+
+    <link name='link_0_clone_198'>
+      <pose frame=''>35 -30 0.15 0 -0 0</pose>
+      
+      <collision name="collision">
+        <geometry>
+          <mesh>
+            <uri>model://eufs_description/meshes/cone_blue.dae</uri>
+          </mesh>
+        </geometry>
+      </collision>
+
+      <visual name="visual">
+        <geometry>
+          <mesh>
+            <uri>model://eufs_description/meshes/cone_blue.dae</uri>
+          </mesh>
+        </geometry>
+      </visual>
+    </link>
+
+
+    <link name='link_0_clone_199'>
+      <pose frame=''>35 -20 0.15 0 -0 0</pose>
+      
+      <collision name="collision">
+        <geometry>
+          <mesh>
+            <uri>model://eufs_description/meshes/cone_yellow.dae</uri>
+          </mesh>
+        </geometry>
+      </collision>
+
+      <visual name="visual">
+        <geometry>
+          <mesh>
+            <uri>model://eufs_description/meshes/cone_yellow.dae</uri>
+          </mesh>
+        </geometry>
+      </visual>
+    </link>
+
+
+    <ghostlink name='link_0_clone_200'>
+      <pose frame=''>35 1 0.15 0 -0 0</pose>
+      
+      <collision name="collision">
+        <geometry>
+          <mesh>
+            <uri>model://eufs_description/meshes/NoiseCube.dae</uri>
+          </mesh>
+        </geometry>
+      </collision>
+
+      <visual name="visual">
+        <geometry>
+          <mesh>
+            <uri>model://eufs_description/meshes/NoiseCube.dae</uri>
+          </mesh>
+        </geometry>
+      </visual>
+    </ghostlink>
+
+
+    <link name='link_0_clone_201'>
+      <pose frame=''>35 23 0.15 0 -0 0</pose>
+      
+      <collision name="collision">
+        <geometry>
+          <mesh>
+            <uri>model://eufs_description/meshes/cone_yellow.dae</uri>
+          </mesh>
+        </geometry>
+      </collision>
+
+      <visual name="visual">
+        <geometry>
+          <mesh>
+            <uri>model://eufs_description/meshes/cone_yellow.dae</uri>
+          </mesh>
+        </geometry>
+      </visual>
+    </link>
+
+
+    <link name='link_0_clone_202'>
+      <pose frame=''>35 33 0.15 0 -0 0</pose>
+      
+      <collision name="collision">
+        <geometry>
+          <mesh>
+            <uri>model://eufs_description/meshes/cone_blue.dae</uri>
+          </mesh>
+        </geometry>
+      </collision>
+
+      <visual name="visual">
+        <geometry>
+          <mesh>
+            <uri>model://eufs_description/meshes/cone_blue.dae</uri>
+          </mesh>
+        </geometry>
+      </visual>
+    </link>
+
+
+    <ghostlink name='link_0_clone_203'>
+      <pose frame=''>36 -18 0.15 0 -0 0</pose>
+      
+      <collision name="collision">
+        <geometry>
+          <mesh>
+            <uri>model://eufs_description/meshes/NoiseCube.dae</uri>
+          </mesh>
+        </geometry>
+      </collision>
+
+      <visual name="visual">
+        <geometry>
+          <mesh>
+            <uri>model://eufs_description/meshes/NoiseCube.dae</uri>
+          </mesh>
+        </geometry>
+      </visual>
+    </ghostlink>
+
+
+    <ghostlink name='link_0_clone_204'>
+      <pose frame=''>36 39 0.15 0 -0 0</pose>
+      
+      <collision name="collision">
+        <geometry>
+          <mesh>
+            <uri>model://eufs_description/meshes/NoiseCube.dae</uri>
+          </mesh>
+        </geometry>
+      </collision>
+
+      <visual name="visual">
+        <geometry>
+          <mesh>
+            <uri>model://eufs_description/meshes/NoiseCube.dae</uri>
+          </mesh>
+        </geometry>
+      </visual>
+    </ghostlink>
+
+
+    <ghostlink name='link_0_clone_205'>
+      <pose frame=''>36 43 0.15 0 -0 0</pose>
+      
+      <collision name="collision">
+        <geometry>
+          <mesh>
+            <uri>model://eufs_description/meshes/NoiseCube.dae</uri>
+          </mesh>
+        </geometry>
+      </collision>
+
+      <visual name="visual">
+        <geometry>
+          <mesh>
+            <uri>model://eufs_description/meshes/NoiseCube.dae</uri>
+          </mesh>
+        </geometry>
+      </visual>
+    </ghostlink>
+
+
+    <ghostlink name='link_0_clone_206'>
+      <pose frame=''>38 -43 0.15 0 -0 0</pose>
+      
+      <collision name="collision">
+        <geometry>
+          <mesh>
+            <uri>model://eufs_description/meshes/NoiseCube.dae</uri>
+          </mesh>
+        </geometry>
+      </collision>
+
+      <visual name="visual">
+        <geometry>
+          <mesh>
+            <uri>model://eufs_description/meshes/NoiseCube.dae</uri>
+          </mesh>
+        </geometry>
+      </visual>
+    </ghostlink>
+
+
+    <ghostlink name='link_0_clone_207'>
+      <pose frame=''>38 25 0.15 0 -0 0</pose>
+      
+      <collision name="collision">
+        <geometry>
+          <mesh>
+            <uri>model://eufs_description/meshes/MonkeyNoise.dae</uri>
+          </mesh>
+        </geometry>
+      </collision>
+
+      <visual name="visual">
+        <geometry>
+          <mesh>
+            <uri>model://eufs_description/meshes/MonkeyNoise.dae</uri>
+          </mesh>
+        </geometry>
+      </visual>
+    </ghostlink>
+
+
+    <link name='link_0_clone_208'>
+      <pose frame=''>39 23 0.15 0 -0 0</pose>
+      
+      <collision name="collision">
+        <geometry>
+          <mesh>
+            <uri>model://eufs_description/meshes/cone_yellow.dae</uri>
+          </mesh>
+        </geometry>
+      </collision>
+
+      <visual name="visual">
+        <geometry>
+          <mesh>
+            <uri>model://eufs_description/meshes/cone_yellow.dae</uri>
+          </mesh>
+        </geometry>
+      </visual>
+    </link>
+
+
+    <link name='link_0_clone_209'>
+      <pose frame=''>39 33 0.15 0 -0 0</pose>
+      
+      <collision name="collision">
+        <geometry>
+          <mesh>
+            <uri>model://eufs_description/meshes/cone_blue.dae</uri>
+          </mesh>
+        </geometry>
+      </collision>
+
+      <visual name="visual">
+        <geometry>
+          <mesh>
+            <uri>model://eufs_description/meshes/cone_blue.dae</uri>
+          </mesh>
+        </geometry>
+      </visual>
+    </link>
+
+
+    <link name='link_0_clone_210'>
+      <pose frame=''>42 -23 0.15 0 -0 0</pose>
+      
+      <collision name="collision">
+        <geometry>
+          <mesh>
+            <uri>model://eufs_description/meshes/cone_yellow.dae</uri>
+          </mesh>
+        </geometry>
+      </collision>
+
+      <visual name="visual">
+        <geometry>
+          <mesh>
+            <uri>model://eufs_description/meshes/cone_yellow.dae</uri>
+          </mesh>
+        </geometry>
+      </visual>
+    </link>
+
+
+    <link name='link_0_clone_211'>
+      <pose frame=''>43 -31 0.15 0 -0 0</pose>
+      
+      <collision name="collision">
+        <geometry>
+          <mesh>
+            <uri>model://eufs_description/meshes/cone_blue.dae</uri>
+          </mesh>
+        </geometry>
+      </collision>
+
+      <visual name="visual">
+        <geometry>
+          <mesh>
+            <uri>model://eufs_description/meshes/cone_blue.dae</uri>
+          </mesh>
+        </geometry>
+      </visual>
+    </link>
+
+
+    <link name='link_0_clone_212'>
+      <pose frame=''>43 -21 0.15 0 -0 0</pose>
+      
+      <collision name="collision">
+        <geometry>
+          <mesh>
+            <uri>model://eufs_description/meshes/cone_yellow.dae</uri>
+          </mesh>
+        </geometry>
+      </collision>
+
+      <visual name="visual">
+        <geometry>
+          <mesh>
+            <uri>model://eufs_description/meshes/cone_yellow.dae</uri>
+          </mesh>
+        </geometry>
+      </visual>
+    </link>
+
+
+    <ghostlink name='link_0_clone_213'>
+      <pose frame=''>43 -14 0.15 0 -0 0</pose>
+      
+      <collision name="collision">
+        <geometry>
+          <mesh>
+            <uri>model://eufs_description/meshes/NoiseCube.dae</uri>
+          </mesh>
+        </geometry>
+      </collision>
+
+      <visual name="visual">
+        <geometry>
+          <mesh>
+            <uri>model://eufs_description/meshes/NoiseCube.dae</uri>
+          </mesh>
+        </geometry>
+      </visual>
+    </ghostlink>
+
+
+    <link name='link_0_clone_214'>
+      <pose frame=''>43 22 0.15 0 -0 0</pose>
+      
+      <collision name="collision">
+        <geometry>
+          <mesh>
+            <uri>model://eufs_description/meshes/cone_yellow.dae</uri>
+          </mesh>
+        </geometry>
+      </collision>
+
+      <visual name="visual">
+        <geometry>
+          <mesh>
+            <uri>model://eufs_description/meshes/cone_yellow.dae</uri>
+          </mesh>
+        </geometry>
+      </visual>
+    </link>
+
+
+    <link name='link_0_clone_215'>
+      <pose frame=''>43 32 0.15 0 -0 0</pose>
+      
+      <collision name="collision">
+        <geometry>
+          <mesh>
+            <uri>model://eufs_description/meshes/cone_blue.dae</uri>
+          </mesh>
+        </geometry>
+      </collision>
+
+      <visual name="visual">
+        <geometry>
+          <mesh>
+            <uri>model://eufs_description/meshes/cone_blue.dae</uri>
+          </mesh>
+        </geometry>
+      </visual>
+    </link>
+
+
+    <ghostlink name='link_0_clone_216'>
+      <pose frame=''>44 49 0.15 0 -0 0</pose>
+      
+      <collision name="collision">
+        <geometry>
+          <mesh>
+            <uri>model://eufs_description/meshes/NoiseCube.dae</uri>
+          </mesh>
+        </geometry>
+      </collision>
+
+      <visual name="visual">
+        <geometry>
+          <mesh>
+            <uri>model://eufs_description/meshes/NoiseCube.dae</uri>
+          </mesh>
+        </geometry>
+      </visual>
+    </ghostlink>
+
+
+    <ghostlink name='link_0_clone_217'>
+      <pose frame=''>46 -7 0.15 0 -0 0</pose>
+      
+      <collision name="collision">
+        <geometry>
+          <mesh>
+            <uri>model://eufs_description/meshes/NoiseCube.dae</uri>
+          </mesh>
+        </geometry>
+      </collision>
+
+      <visual name="visual">
+        <geometry>
+          <mesh>
+            <uri>model://eufs_description/meshes/NoiseCube.dae</uri>
+          </mesh>
+        </geometry>
+      </visual>
+    </ghostlink>
+
+
+    <ghostlink name='link_0_clone_218'>
+      <pose frame=''>46 49 0.15 0 -0 0</pose>
+      
+      <collision name="collision">
+        <geometry>
+          <mesh>
+            <uri>model://eufs_description/meshes/NoiseCube.dae</uri>
+          </mesh>
+        </geometry>
+      </collision>
+
+      <visual name="visual">
+        <geometry>
+          <mesh>
+            <uri>model://eufs_description/meshes/NoiseCube.dae</uri>
+          </mesh>
+        </geometry>
+      </visual>
+    </ghostlink>
+
+
+    <link name='link_0_clone_219'>
+      <pose frame=''>47 -32 0.15 0 -0 0</pose>
+      
+      <collision name="collision">
+        <geometry>
+          <mesh>
+            <uri>model://eufs_description/meshes/cone_blue.dae</uri>
+          </mesh>
+        </geometry>
+      </collision>
+
+      <visual name="visual">
+        <geometry>
+          <mesh>
+            <uri>model://eufs_description/meshes/cone_blue.dae</uri>
+          </mesh>
+        </geometry>
+      </visual>
+    </link>
+
+
+    <link name='link_0_clone_220'>
+      <pose frame=''>47 -22 0.15 0 -0 0</pose>
+      
+      <collision name="collision">
+        <geometry>
+          <mesh>
+            <uri>model://eufs_description/meshes/cone_yellow.dae</uri>
+          </mesh>
+        </geometry>
+      </collision>
+
+      <visual name="visual">
+        <geometry>
+          <mesh>
+            <uri>model://eufs_description/meshes/cone_yellow.dae</uri>
+          </mesh>
+        </geometry>
+      </visual>
+    </link>
+
+
+    <link name='link_0_clone_221'>
+      <pose frame=''>47 22 0.15 0 -0 0</pose>
+      
+      <collision name="collision">
+        <geometry>
+          <mesh>
+            <uri>model://eufs_description/meshes/cone_yellow.dae</uri>
+          </mesh>
+        </geometry>
+      </collision>
+
+      <visual name="visual">
+        <geometry>
+          <mesh>
+            <uri>model://eufs_description/meshes/cone_yellow.dae</uri>
+          </mesh>
+        </geometry>
+      </visual>
+    </link>
+
+
+    <link name='link_0_clone_222'>
+      <pose frame=''>47 32 0.15 0 -0 0</pose>
+      
+      <collision name="collision">
+        <geometry>
+          <mesh>
+            <uri>model://eufs_description/meshes/cone_blue.dae</uri>
+          </mesh>
+        </geometry>
+      </collision>
+
+      <visual name="visual">
+        <geometry>
+          <mesh>
+            <uri>model://eufs_description/meshes/cone_blue.dae</uri>
+          </mesh>
+        </geometry>
+      </visual>
+    </link>
+
+
+    <ghostlink name='link_0_clone_223'>
+      <pose frame=''>47 35 0.15 0 -0 0</pose>
+      
+      <collision name="collision">
+        <geometry>
+          <mesh>
+            <uri>model://eufs_description/meshes/NoiseCube.dae</uri>
+          </mesh>
+        </geometry>
+      </collision>
+
+      <visual name="visual">
+        <geometry>
+          <mesh>
+            <uri>model://eufs_description/meshes/NoiseCube.dae</uri>
+          </mesh>
+        </geometry>
+      </visual>
+    </ghostlink>
+
+
+    <ghostlink name='link_0_clone_224'>
+      <pose frame=''>47 68 0.15 0 -0 0</pose>
+      
+      <collision name="collision">
+        <geometry>
+          <mesh>
+            <uri>model://eufs_description/meshes/NoiseCube.dae</uri>
+          </mesh>
+        </geometry>
+      </collision>
+
+      <visual name="visual">
+        <geometry>
+          <mesh>
+            <uri>model://eufs_description/meshes/NoiseCube.dae</uri>
+          </mesh>
+        </geometry>
+      </visual>
+    </ghostlink>
+
+
+    <ghostlink name='link_0_clone_225'>
+      <pose frame=''>48 -30 0.15 0 -0 0</pose>
+      
+      <collision name="collision">
+        <geometry>
+          <mesh>
+            <uri>model://eufs_description/meshes/NoiseCube.dae</uri>
+          </mesh>
+        </geometry>
+      </collision>
+
+      <visual name="visual">
+        <geometry>
+          <mesh>
+            <uri>model://eufs_description/meshes/NoiseCube.dae</uri>
+          </mesh>
+        </geometry>
+      </visual>
+    </ghostlink>
+
+
+    <ghostlink name='link_0_clone_226'>
+      <pose frame=''>48 -10 0.15 0 -0 0</pose>
+      
+      <collision name="collision">
+        <geometry>
+          <mesh>
+            <uri>model://eufs_description/meshes/NoiseCube.dae</uri>
+          </mesh>
+        </geometry>
+      </collision>
+
+      <visual name="visual">
+        <geometry>
+          <mesh>
+            <uri>model://eufs_description/meshes/NoiseCube.dae</uri>
+          </mesh>
+        </geometry>
+      </visual>
+    </ghostlink>
+
+
+    <ghostlink name='link_0_clone_227'>
+      <pose frame=''>50 16 0.15 0 -0 0</pose>
+      
+      <collision name="collision">
+        <geometry>
+          <mesh>
+            <uri>model://eufs_description/meshes/NoiseCube.dae</uri>
+          </mesh>
+        </geometry>
+      </collision>
+
+      <visual name="visual">
+        <geometry>
+          <mesh>
+            <uri>model://eufs_description/meshes/NoiseCube.dae</uri>
+          </mesh>
+        </geometry>
+      </visual>
+    </ghostlink>
+
+
+    <ghostlink name='link_0_clone_228'>
+      <pose frame=''>50 35 0.15 0 -0 0</pose>
+      
+      <collision name="collision">
+        <geometry>
+          <mesh>
+            <uri>model://eufs_description/meshes/NoiseCube.dae</uri>
+          </mesh>
+        </geometry>
+      </collision>
+
+      <visual name="visual">
+        <geometry>
+          <mesh>
+            <uri>model://eufs_description/meshes/NoiseCube.dae</uri>
+          </mesh>
+        </geometry>
+      </visual>
+    </ghostlink>
+
+
+    <link name='link_0_clone_229'>
+      <pose frame=''>51 -32 0.15 0 -0 0</pose>
+      
+      <collision name="collision">
+        <geometry>
+          <mesh>
+            <uri>model://eufs_description/meshes/cone_blue.dae</uri>
+          </mesh>
+        </geometry>
+      </collision>
+
+      <visual name="visual">
+        <geometry>
+          <mesh>
+            <uri>model://eufs_description/meshes/cone_blue.dae</uri>
+          </mesh>
+        </geometry>
+      </visual>
+    </link>
+
+
+    <link name='link_0_clone_230'>
+      <pose frame=''>51 -22 0.15 0 -0 0</pose>
+      
+      <collision name="collision">
+        <geometry>
+          <mesh>
+            <uri>model://eufs_description/meshes/cone_yellow.dae</uri>
+          </mesh>
+        </geometry>
+      </collision>
+
+      <visual name="visual">
+        <geometry>
+          <mesh>
+            <uri>model://eufs_description/meshes/cone_yellow.dae</uri>
+          </mesh>
+        </geometry>
+      </visual>
+    </link>
+
+
+    <link name='link_0_clone_231'>
+      <pose frame=''>51 21 0.15 0 -0 0</pose>
+      
+      <collision name="collision">
+        <geometry>
+          <mesh>
+            <uri>model://eufs_description/meshes/cone_yellow.dae</uri>
+          </mesh>
+        </geometry>
+      </collision>
+
+      <visual name="visual">
+        <geometry>
+          <mesh>
+            <uri>model://eufs_description/meshes/cone_yellow.dae</uri>
+          </mesh>
+        </geometry>
+      </visual>
+    </link>
+
+
+    <link name='link_0_clone_232'>
+      <pose frame=''>51 31 0.15 0 -0 0</pose>
+      
+      <collision name="collision">
+        <geometry>
+          <mesh>
+            <uri>model://eufs_description/meshes/cone_blue.dae</uri>
+          </mesh>
+        </geometry>
+      </collision>
+
+      <visual name="visual">
+        <geometry>
+          <mesh>
+            <uri>model://eufs_description/meshes/cone_blue.dae</uri>
+          </mesh>
+        </geometry>
+      </visual>
+    </link>
+
+
+    <ghostlink name='link_0_clone_233'>
+      <pose frame=''>53 14 0.15 0 -0 0</pose>
+      
+      <collision name="collision">
+        <geometry>
+          <mesh>
+            <uri>model://eufs_description/meshes/NoiseCube.dae</uri>
+          </mesh>
+        </geometry>
+      </collision>
+
+      <visual name="visual">
+        <geometry>
+          <mesh>
+            <uri>model://eufs_description/meshes/NoiseCube.dae</uri>
+          </mesh>
+        </geometry>
+      </visual>
+    </ghostlink>
+
+
+    <ghostlink name='link_0_clone_234'>
+      <pose frame=''>54 8 0.15 0 -0 0</pose>
+      
+      <collision name="collision">
+        <geometry>
+          <mesh>
+            <uri>model://eufs_description/meshes/NoiseCube.dae</uri>
+          </mesh>
+        </geometry>
+      </collision>
+
+      <visual name="visual">
+        <geometry>
+          <mesh>
+            <uri>model://eufs_description/meshes/NoiseCube.dae</uri>
+          </mesh>
+        </geometry>
+      </visual>
+    </ghostlink>
+
+
+    <link name='link_0_clone_235'>
+      <pose frame=''>55 -33 0.15 0 -0 0</pose>
+      
+      <collision name="collision">
+        <geometry>
+          <mesh>
+            <uri>model://eufs_description/meshes/cone_blue.dae</uri>
+          </mesh>
+        </geometry>
+      </collision>
+
+      <visual name="visual">
+        <geometry>
+          <mesh>
+            <uri>model://eufs_description/meshes/cone_blue.dae</uri>
+          </mesh>
+        </geometry>
+      </visual>
+    </link>
+
+
+    <ghostlink name='link_0_clone_236'>
+      <pose frame=''>55 -32 0.15 0 -0 0</pose>
+      
+      <collision name="collision">
+        <geometry>
+          <mesh>
+            <uri>model://eufs_description/meshes/NoiseCube.dae</uri>
+          </mesh>
+        </geometry>
+      </collision>
+
+      <visual name="visual">
+        <geometry>
+          <mesh>
+            <uri>model://eufs_description/meshes/NoiseCube.dae</uri>
+          </mesh>
+        </geometry>
+      </visual>
+    </ghostlink>
+
+
+    <link name='link_0_clone_237'>
+      <pose frame=''>55 -23 0.15 0 -0 0</pose>
+      
+      <collision name="collision">
+        <geometry>
+          <mesh>
+            <uri>model://eufs_description/meshes/cone_yellow.dae</uri>
+          </mesh>
+        </geometry>
+      </collision>
+
+      <visual name="visual">
+        <geometry>
+          <mesh>
+            <uri>model://eufs_description/meshes/cone_yellow.dae</uri>
+          </mesh>
+        </geometry>
+      </visual>
+    </link>
+
+
+    <ghostlink name='link_0_clone_238'>
+      <pose frame=''>55 0 0.15 0 -0 0</pose>
+      
+      <collision name="collision">
+        <geometry>
+          <mesh>
+            <uri>model://eufs_description/meshes/NoiseCube.dae</uri>
+          </mesh>
+        </geometry>
+      </collision>
+
+      <visual name="visual">
+        <geometry>
+          <mesh>
+            <uri>model://eufs_description/meshes/NoiseCube.dae</uri>
+          </mesh>
+        </geometry>
+      </visual>
+    </ghostlink>
+
+
+    <link name='link_0_clone_239'>
+      <pose frame=''>55 21 0.15 0 -0 0</pose>
+      
+      <collision name="collision">
+        <geometry>
+          <mesh>
+            <uri>model://eufs_description/meshes/cone_yellow.dae</uri>
+          </mesh>
+        </geometry>
+      </collision>
+
+      <visual name="visual">
+        <geometry>
+          <mesh>
+            <uri>model://eufs_description/meshes/cone_yellow.dae</uri>
+          </mesh>
+        </geometry>
+      </visual>
+    </link>
+
+
+    <link name='link_0_clone_240'>
+      <pose frame=''>55 31 0.15 0 -0 0</pose>
+      
+      <collision name="collision">
+        <geometry>
+          <mesh>
+            <uri>model://eufs_description/meshes/cone_blue.dae</uri>
+          </mesh>
+        </geometry>
+      </collision>
+
+      <visual name="visual">
+        <geometry>
+          <mesh>
+            <uri>model://eufs_description/meshes/cone_blue.dae</uri>
+          </mesh>
+        </geometry>
+      </visual>
+    </link>
+
+
+    <ghostlink name='link_0_clone_241'>
+      <pose frame=''>55 44 0.15 0 -0 0</pose>
+      
+      <collision name="collision">
+        <geometry>
+          <mesh>
+            <uri>model://eufs_description/meshes/NoiseCube.dae</uri>
+          </mesh>
+        </geometry>
+      </collision>
+
+      <visual name="visual">
+        <geometry>
+          <mesh>
+            <uri>model://eufs_description/meshes/NoiseCube.dae</uri>
+          </mesh>
+        </geometry>
+      </visual>
+    </ghostlink>
+
+
+    <ghostlink name='link_0_clone_242'>
+      <pose frame=''>56 17 0.15 0 -0 0</pose>
+      
+      <collision name="collision">
+        <geometry>
+          <mesh>
+            <uri>model://eufs_description/meshes/NoiseCube.dae</uri>
+          </mesh>
+        </geometry>
+      </collision>
+
+      <visual name="visual">
+        <geometry>
+          <mesh>
+            <uri>model://eufs_description/meshes/NoiseCube.dae</uri>
+          </mesh>
+        </geometry>
+      </visual>
+    </ghostlink>
+
+
+    <link name='link_0_clone_243'>
+      <pose frame=''>57 -24 0.15 0 -0 0</pose>
+      
+      <collision name="collision">
+        <geometry>
+          <mesh>
+            <uri>model://eufs_description/meshes/cone_yellow.dae</uri>
+          </mesh>
+        </geometry>
+      </collision>
+
+      <visual name="visual">
+        <geometry>
+          <mesh>
+            <uri>model://eufs_description/meshes/cone_yellow.dae</uri>
+          </mesh>
+        </geometry>
+      </visual>
+    </link>
+
+
+    <ghostlink name='link_0_clone_244'>
+      <pose frame=''>58 51 0.15 0 -0 0</pose>
+      
+      <collision name="collision">
+        <geometry>
+          <mesh>
+            <uri>model://eufs_description/meshes/NoiseCube.dae</uri>
+          </mesh>
+        </geometry>
+      </collision>
+
+      <visual name="visual">
+        <geometry>
+          <mesh>
+            <uri>model://eufs_description/meshes/NoiseCube.dae</uri>
+          </mesh>
+        </geometry>
+      </visual>
+    </ghostlink>
+
+
+    <link name='link_0_clone_245'>
+      <pose frame=''>59 -32 0.15 0 -0 0</pose>
+      
+      <collision name="collision">
+        <geometry>
+          <mesh>
+            <uri>model://eufs_description/meshes/cone_blue.dae</uri>
+          </mesh>
+        </geometry>
+      </collision>
+
+      <visual name="visual">
+        <geometry>
+          <mesh>
+            <uri>model://eufs_description/meshes/cone_blue.dae</uri>
+          </mesh>
+        </geometry>
+      </visual>
+    </link>
+
+
+    <link name='link_0_clone_246'>
+      <pose frame=''>59 -22 0.15 0 -0 0</pose>
+      
+      <collision name="collision">
+        <geometry>
+          <mesh>
+            <uri>model://eufs_description/meshes/cone_yellow.dae</uri>
+          </mesh>
+        </geometry>
+      </collision>
+
+      <visual name="visual">
+        <geometry>
+          <mesh>
+            <uri>model://eufs_description/meshes/cone_yellow.dae</uri>
+          </mesh>
+        </geometry>
+      </visual>
+    </link>
+
+
+    <link name='link_0_clone_247'>
+      <pose frame=''>59 -20 0.15 0 -0 0</pose>
+      
+      <collision name="collision">
+        <geometry>
+          <mesh>
+            <uri>model://eufs_description/meshes/cone_yellow.dae</uri>
+          </mesh>
+        </geometry>
+      </collision>
+
+      <visual name="visual">
+        <geometry>
+          <mesh>
+            <uri>model://eufs_description/meshes/cone_yellow.dae</uri>
+          </mesh>
+        </geometry>
+      </visual>
+    </link>
+
+
+    <ghostlink name='link_0_clone_248'>
+      <pose frame=''>59 -14 0.15 0 -0 0</pose>
+      
+      <collision name="collision">
+        <geometry>
+          <mesh>
+            <uri>model://eufs_description/meshes/NoiseCube.dae</uri>
+          </mesh>
+        </geometry>
+      </collision>
+
+      <visual name="visual">
+        <geometry>
+          <mesh>
+            <uri>model://eufs_description/meshes/NoiseCube.dae</uri>
+          </mesh>
+        </geometry>
+      </visual>
+    </ghostlink>
+
+
+    <link name='link_0_clone_249'>
+      <pose frame=''>59 20 0.15 0 -0 0</pose>
+      
+      <collision name="collision">
+        <geometry>
+          <mesh>
+            <uri>model://eufs_description/meshes/cone_yellow.dae</uri>
+          </mesh>
+        </geometry>
+      </collision>
+
+      <visual name="visual">
+        <geometry>
+          <mesh>
+            <uri>model://eufs_description/meshes/cone_yellow.dae</uri>
+          </mesh>
+        </geometry>
+      </visual>
+    </link>
+
+
+    <link name='link_0_clone_250'>
+      <pose frame=''>59 30 0.15 0 -0 0</pose>
+      
+      <collision name="collision">
+        <geometry>
+          <mesh>
+            <uri>model://eufs_description/meshes/cone_blue.dae</uri>
+          </mesh>
+        </geometry>
+      </collision>
+
+      <visual name="visual">
+        <geometry>
+          <mesh>
+            <uri>model://eufs_description/meshes/cone_blue.dae</uri>
+          </mesh>
+        </geometry>
+      </visual>
+    </link>
+
+
+    <ghostlink name='link_0_clone_251'>
+      <pose frame=''>59 59 0.15 0 -0 0</pose>
+      
+      <collision name="collision">
+        <geometry>
+          <mesh>
+            <uri>model://eufs_description/meshes/NoiseCube.dae</uri>
+          </mesh>
+        </geometry>
+      </collision>
+
+      <visual name="visual">
+        <geometry>
+          <mesh>
+            <uri>model://eufs_description/meshes/NoiseCube.dae</uri>
+          </mesh>
+        </geometry>
+      </visual>
+    </ghostlink>
+
+
+    <ghostlink name='link_0_clone_252'>
+      <pose frame=''>60 9 0.15 0 -0 0</pose>
+      
+      <collision name="collision">
+        <geometry>
+          <mesh>
+            <uri>model://eufs_description/meshes/NoiseCube.dae</uri>
+          </mesh>
+        </geometry>
+      </collision>
+
+      <visual name="visual">
+        <geometry>
+          <mesh>
+            <uri>model://eufs_description/meshes/NoiseCube.dae</uri>
+          </mesh>
+        </geometry>
+      </visual>
+    </ghostlink>
+
+
+    <link name='link_0_clone_253'>
+      <pose frame=''>61 -13 0.15 0 -0 0</pose>
+      
+      <collision name="collision">
+        <geometry>
+          <mesh>
+            <uri>model://eufs_description/meshes/cone_yellow.dae</uri>
+          </mesh>
+        </geometry>
+      </collision>
+
+      <visual name="visual">
+        <geometry>
+          <mesh>
+            <uri>model://eufs_description/meshes/cone_yellow.dae</uri>
+          </mesh>
+        </geometry>
+      </visual>
+    </link>
+
+
+    <ghostlink name='link_0_clone_254'>
+      <pose frame=''>62 36 0.15 0 -0 0</pose>
+      
+      <collision name="collision">
+        <geometry>
+          <mesh>
+            <uri>model://eufs_description/meshes/MonkeyNoise.dae</uri>
+          </mesh>
+        </geometry>
+      </collision>
+
+      <visual name="visual">
+        <geometry>
+          <mesh>
+            <uri>model://eufs_description/meshes/MonkeyNoise.dae</uri>
+          </mesh>
+        </geometry>
+      </visual>
+    </ghostlink>
+
+
+    <link name='link_0_clone_255'>
+      <pose frame=''>63 -6 0.15 0 -0 0</pose>
+      
+      <collision name="collision">
+        <geometry>
+          <mesh>
+            <uri>model://eufs_description/meshes/cone_yellow.dae</uri>
+          </mesh>
+        </geometry>
+      </collision>
+
+      <visual name="visual">
+        <geometry>
+          <mesh>
+            <uri>model://eufs_description/meshes/cone_yellow.dae</uri>
+          </mesh>
+        </geometry>
+      </visual>
+    </link>
+
+
+    <ghostlink name='link_0_clone_256'>
+      <pose frame=''>63 11 0.15 0 -0 0</pose>
+      
+      <collision name="collision">
+        <geometry>
+          <mesh>
+            <uri>model://eufs_description/meshes/MonkeyNoise.dae</uri>
+          </mesh>
+        </geometry>
+      </collision>
+
+      <visual name="visual">
+        <geometry>
+          <mesh>
+            <uri>model://eufs_description/meshes/MonkeyNoise.dae</uri>
+          </mesh>
+        </geometry>
+      </visual>
+    </ghostlink>
+
+
+    <link name='link_0_clone_257'>
+      <pose frame=''>63 20 0.15 0 -0 0</pose>
+      
+      <collision name="collision">
+        <geometry>
+          <mesh>
+            <uri>model://eufs_description/meshes/cone_yellow.dae</uri>
+          </mesh>
+        </geometry>
+      </collision>
+
+      <visual name="visual">
+        <geometry>
+          <mesh>
+            <uri>model://eufs_description/meshes/cone_yellow.dae</uri>
+          </mesh>
+        </geometry>
+      </visual>
+    </link>
+
+
+    <link name='link_0_clone_258'>
+      <pose frame=''>63 30 0.15 0 -0 0</pose>
+      
+      <collision name="collision">
+        <geometry>
+          <mesh>
+            <uri>model://eufs_description/meshes/cone_blue.dae</uri>
+          </mesh>
+        </geometry>
+      </collision>
+
+      <visual name="visual">
+        <geometry>
+          <mesh>
+            <uri>model://eufs_description/meshes/cone_blue.dae</uri>
+          </mesh>
+        </geometry>
+      </visual>
+    </link>
+
+
+    <ghostlink name='link_0_clone_259'>
+      <pose frame=''>64 -39 0.15 0 -0 0</pose>
+      
+      <collision name="collision">
+        <geometry>
+          <mesh>
+            <uri>model://eufs_description/meshes/NoiseCube.dae</uri>
+          </mesh>
+        </geometry>
+      </collision>
+
+      <visual name="visual">
+        <geometry>
+          <mesh>
+            <uri>model://eufs_description/meshes/NoiseCube.dae</uri>
+          </mesh>
+        </geometry>
+      </visual>
+    </ghostlink>
+
+
+    <link name='link_0_clone_260'>
+      <pose frame=''>65 0 0.15 0 -0 0</pose>
+      
+      <collision name="collision">
+        <geometry>
+          <mesh>
+            <uri>model://eufs_description/meshes/cone_yellow.dae</uri>
+          </mesh>
+        </geometry>
+      </collision>
+
+      <visual name="visual">
+        <geometry>
+          <mesh>
+            <uri>model://eufs_description/meshes/cone_yellow.dae</uri>
+          </mesh>
+        </geometry>
+      </visual>
+    </link>
+
+
+    <ghostlink name='link_0_clone_261'>
+      <pose frame=''>65 35 0.15 0 -0 0</pose>
+      
+      <collision name="collision">
+        <geometry>
+          <mesh>
+            <uri>model://eufs_description/meshes/MonkeyNoise.dae</uri>
+          </mesh>
+        </geometry>
+      </collision>
+
+      <visual name="visual">
+        <geometry>
+          <mesh>
+            <uri>model://eufs_description/meshes/MonkeyNoise.dae</uri>
+          </mesh>
+        </geometry>
+      </visual>
+    </ghostlink>
+
+
+    <ghostlink name='link_0_clone_262'>
+      <pose frame=''>66 20 0.15 0 -0 0</pose>
+      
+      <collision name="collision">
+        <geometry>
+          <mesh>
+            <uri>model://eufs_description/meshes/NoiseCube.dae</uri>
+          </mesh>
+        </geometry>
+      </collision>
+
+      <visual name="visual">
+        <geometry>
+          <mesh>
+            <uri>model://eufs_description/meshes/NoiseCube.dae</uri>
+          </mesh>
+        </geometry>
+      </visual>
+    </ghostlink>
+
+
+    <link name='link_0_clone_263'>
+      <pose frame=''>67 -24 0.15 0 -0 0</pose>
+      
+      <collision name="collision">
+        <geometry>
+          <mesh>
+            <uri>model://eufs_description/meshes/cone_blue.dae</uri>
+          </mesh>
+        </geometry>
+      </collision>
+
+      <visual name="visual">
+        <geometry>
+          <mesh>
+            <uri>model://eufs_description/meshes/cone_blue.dae</uri>
+          </mesh>
+        </geometry>
+      </visual>
+    </link>
+
+
+    <link name='link_0_clone_264'>
+      <pose frame=''>67 7 0.15 0 -0 0</pose>
+      
+      <collision name="collision">
+        <geometry>
+          <mesh>
+            <uri>model://eufs_description/meshes/cone_yellow.dae</uri>
+          </mesh>
+        </geometry>
+      </collision>
+
+      <visual name="visual">
+        <geometry>
+          <mesh>
+            <uri>model://eufs_description/meshes/cone_yellow.dae</uri>
+          </mesh>
+        </geometry>
+      </visual>
+    </link>
+
+
+    <link name='link_0_clone_265'>
+      <pose frame=''>68 10 0.15 0 -0 0</pose>
+      
+      <collision name="collision">
+        <geometry>
+          <mesh>
+            <uri>model://eufs_description/meshes/cone_yellow.dae</uri>
+          </mesh>
+        </geometry>
+      </collision>
+
+      <visual name="visual">
+        <geometry>
+          <mesh>
+            <uri>model://eufs_description/meshes/cone_yellow.dae</uri>
+          </mesh>
+        </geometry>
+      </visual>
+    </link>
+
+
+    <link name='link_0_clone_266'>
+      <pose frame=''>68 18 0.15 0 -0 0</pose>
+      
+      <collision name="collision">
+        <geometry>
+          <mesh>
+            <uri>model://eufs_description/meshes/cone_yellow.dae</uri>
+          </mesh>
+        </geometry>
+      </collision>
+
+      <visual name="visual">
+        <geometry>
+          <mesh>
+            <uri>model://eufs_description/meshes/cone_yellow.dae</uri>
+          </mesh>
+        </geometry>
+      </visual>
+    </link>
+
+
+    <link name='link_0_clone_267'>
+      <pose frame=''>69 -20 0.15 0 -0 0</pose>
+      
+      <collision name="collision">
+        <geometry>
+          <mesh>
+            <uri>model://eufs_description/meshes/cone_blue.dae</uri>
+          </mesh>
+        </geometry>
+      </collision>
+
+      <visual name="visual">
+        <geometry>
+          <mesh>
+            <uri>model://eufs_description/meshes/cone_blue.dae</uri>
+          </mesh>
+        </geometry>
+      </visual>
+    </link>
+
+
+    <link name='link_0_clone_268'>
+      <pose frame=''>69 14 0.15 0 -0 0</pose>
+      
+      <collision name="collision">
+        <geometry>
+          <mesh>
+            <uri>model://eufs_description/meshes/cone_yellow.dae</uri>
+          </mesh>
+        </geometry>
+      </collision>
+
+      <visual name="visual">
+        <geometry>
+          <mesh>
+            <uri>model://eufs_description/meshes/cone_yellow.dae</uri>
+          </mesh>
+        </geometry>
+      </visual>
+    </link>
+
+
+    <link name='link_0_clone_269'>
+      <pose frame=''>70 -16 0.15 0 -0 0</pose>
+      
+      <collision name="collision">
+        <geometry>
+          <mesh>
+            <uri>model://eufs_description/meshes/cone_blue.dae</uri>
+          </mesh>
+        </geometry>
+      </collision>
+
+      <visual name="visual">
+        <geometry>
+          <mesh>
+            <uri>model://eufs_description/meshes/cone_blue.dae</uri>
+          </mesh>
+        </geometry>
+      </visual>
+    </link>
+
+
+    <link name='link_0_clone_270'>
+      <pose frame=''>70 16 0.15 0 -0 0</pose>
+      
+      <collision name="collision">
+        <geometry>
+          <mesh>
+            <uri>model://eufs_description/meshes/cone_yellow.dae</uri>
+          </mesh>
+        </geometry>
+      </collision>
+
+      <visual name="visual">
+        <geometry>
+          <mesh>
+            <uri>model://eufs_description/meshes/cone_yellow.dae</uri>
+          </mesh>
+        </geometry>
+      </visual>
+    </link>
+
+
+    <link name='link_0_clone_271'>
+      <pose frame=''>70 26 0.15 0 -0 0</pose>
+      
+      <collision name="collision">
+        <geometry>
+          <mesh>
+            <uri>model://eufs_description/meshes/cone_blue.dae</uri>
+          </mesh>
+        </geometry>
+      </collision>
+
+      <visual name="visual">
+        <geometry>
+          <mesh>
+            <uri>model://eufs_description/meshes/cone_blue.dae</uri>
+          </mesh>
+        </geometry>
+      </visual>
+    </link>
+
+
+    <ghostlink name='link_0_clone_272'>
+      <pose frame=''>70 55 0.15 0 -0 0</pose>
+      
+      <collision name="collision">
+        <geometry>
+          <mesh>
+            <uri>model://eufs_description/meshes/NoiseCube.dae</uri>
+          </mesh>
+        </geometry>
+      </collision>
+
+      <visual name="visual">
+        <geometry>
+          <mesh>
+            <uri>model://eufs_description/meshes/NoiseCube.dae</uri>
+          </mesh>
+        </geometry>
+      </visual>
+    </ghostlink>
+
+
+    <link name='link_0_clone_273'>
+      <pose frame=''>72 -9 0.15 0 -0 0</pose>
+      
+      <collision name="collision">
+        <geometry>
+          <mesh>
+            <uri>model://eufs_description/meshes/cone_blue.dae</uri>
+          </mesh>
+        </geometry>
+      </collision>
+
+      <visual name="visual">
+        <geometry>
+          <mesh>
+            <uri>model://eufs_description/meshes/cone_blue.dae</uri>
+          </mesh>
+        </geometry>
+      </visual>
+    </link>
+
+
+    <link name='link_0_clone_274'>
+      <pose frame=''>72 24 0.15 0 -0 0</pose>
+      
+      <collision name="collision">
+        <geometry>
+          <mesh>
+            <uri>model://eufs_description/meshes/cone_blue.dae</uri>
+          </mesh>
+        </geometry>
+      </collision>
+
+      <visual name="visual">
+        <geometry>
+          <mesh>
+            <uri>model://eufs_description/meshes/cone_blue.dae</uri>
+          </mesh>
+        </geometry>
+      </visual>
+    </link>
+
+
+    <ghostlink name='link_0_clone_275'>
+      <pose frame=''>73 -10 0.15 0 -0 0</pose>
+      
+      <collision name="collision">
+        <geometry>
+          <mesh>
+            <uri>model://eufs_description/meshes/NoiseCube.dae</uri>
+          </mesh>
+        </geometry>
+      </collision>
+
+      <visual name="visual">
+        <geometry>
+          <mesh>
+            <uri>model://eufs_description/meshes/NoiseCube.dae</uri>
+          </mesh>
+        </geometry>
+      </visual>
+    </ghostlink>
+
+
+    <ghostlink name='link_0_clone_276'>
+      <pose frame=''>73 -9 0.15 0 -0 0</pose>
+      
+      <collision name="collision">
+        <geometry>
+          <mesh>
+            <uri>model://eufs_description/meshes/MonkeyNoise.dae</uri>
+          </mesh>
+        </geometry>
+      </collision>
+
+      <visual name="visual">
+        <geometry>
+          <mesh>
+            <uri>model://eufs_description/meshes/MonkeyNoise.dae</uri>
+          </mesh>
+        </geometry>
+      </visual>
+    </ghostlink>
+
+
+    <ghostlink name='link_0_clone_277'>
+      <pose frame=''>74 -26 0.15 0 -0 0</pose>
+      
+      <collision name="collision">
+        <geometry>
+          <mesh>
+            <uri>model://eufs_description/meshes/NoiseCube.dae</uri>
+          </mesh>
+        </geometry>
+      </collision>
+
+      <visual name="visual">
+        <geometry>
+          <mesh>
+            <uri>model://eufs_description/meshes/NoiseCube.dae</uri>
+          </mesh>
+        </geometry>
+      </visual>
+    </ghostlink>
+
+
+    <link name='link_0_clone_278'>
+      <pose frame=''>74 -3 0.15 0 -0 0</pose>
+      
+      <collision name="collision">
+        <geometry>
+          <mesh>
+            <uri>model://eufs_description/meshes/cone_blue.dae</uri>
+          </mesh>
+        </geometry>
+      </collision>
+
+      <visual name="visual">
+        <geometry>
+          <mesh>
+            <uri>model://eufs_description/meshes/cone_blue.dae</uri>
+          </mesh>
+        </geometry>
+      </visual>
+    </link>
+
+
+    <ghostlink name='link_0_clone_279'>
+      <pose frame=''>74 65 0.15 0 -0 0</pose>
+      
+      <collision name="collision">
+        <geometry>
+          <mesh>
+            <uri>model://eufs_description/meshes/NoiseCube.dae</uri>
+          </mesh>
+        </geometry>
+      </collision>
+
+      <visual name="visual">
+        <geometry>
+          <mesh>
+            <uri>model://eufs_description/meshes/NoiseCube.dae</uri>
+          </mesh>
+        </geometry>
+      </visual>
+    </ghostlink>
+
+
+    <ghostlink name='link_0_clone_280'>
+      <pose frame=''>75 58 0.15 0 -0 0</pose>
+      
+      <collision name="collision">
+        <geometry>
+          <mesh>
+            <uri>model://eufs_description/meshes/NoiseCube.dae</uri>
+          </mesh>
+        </geometry>
+      </collision>
+
+      <visual name="visual">
+        <geometry>
+          <mesh>
+            <uri>model://eufs_description/meshes/NoiseCube.dae</uri>
+          </mesh>
+        </geometry>
+      </visual>
+    </ghostlink>
+
+
+    <link name='link_0_clone_281'>
+      <pose frame=''>76 4 0.15 0 -0 0</pose>
+      
+      <collision name="collision">
+        <geometry>
+          <mesh>
+            <uri>model://eufs_description/meshes/cone_blue.dae</uri>
+          </mesh>
+        </geometry>
+      </collision>
+
+      <visual name="visual">
+        <geometry>
+          <mesh>
+            <uri>model://eufs_description/meshes/cone_blue.dae</uri>
+          </mesh>
+        </geometry>
+      </visual>
+    </link>
+
+
+    <ghostlink name='link_0_clone_282'>
+      <pose frame=''>77 -25 0.15 0 -0 0</pose>
+      
+      <collision name="collision">
+        <geometry>
+          <mesh>
+            <uri>model://eufs_description/meshes/NoiseCube.dae</uri>
+          </mesh>
+        </geometry>
+      </collision>
+
+      <visual name="visual">
+        <geometry>
+          <mesh>
+            <uri>model://eufs_description/meshes/NoiseCube.dae</uri>
+          </mesh>
+        </geometry>
+      </visual>
+    </ghostlink>
+
+
+    <link name='link_0_clone_283'>
+      <pose frame=''>78 10 0.15 0 -0 0</pose>
+      
+      <collision name="collision">
+        <geometry>
+          <mesh>
+            <uri>model://eufs_description/meshes/cone_blue.dae</uri>
+          </mesh>
+        </geometry>
+      </collision>
+
+      <visual name="visual">
+        <geometry>
+          <mesh>
+            <uri>model://eufs_description/meshes/cone_blue.dae</uri>
+          </mesh>
+        </geometry>
+      </visual>
+    </link>
+
+
+    <link name='link_0_clone_284'>
+      <pose frame=''>78 18 0.15 0 -0 0</pose>
+      
+      <collision name="collision">
+        <geometry>
+          <mesh>
+            <uri>model://eufs_description/meshes/cone_blue.dae</uri>
+          </mesh>
+        </geometry>
+      </collision>
+
+      <visual name="visual">
+        <geometry>
+          <mesh>
+            <uri>model://eufs_description/meshes/cone_blue.dae</uri>
+          </mesh>
+        </geometry>
+      </visual>
+    </link>
+
+
+    <ghostlink name='link_0_clone_285'>
+      <pose frame=''>78 27 0.15 0 -0 0</pose>
+      
+      <collision name="collision">
+        <geometry>
+          <mesh>
+            <uri>model://eufs_description/meshes/NoiseCube.dae</uri>
+          </mesh>
+        </geometry>
+      </collision>
+
+      <visual name="visual">
+        <geometry>
+          <mesh>
+            <uri>model://eufs_description/meshes/NoiseCube.dae</uri>
+          </mesh>
+        </geometry>
+      </visual>
+    </ghostlink>
+
+
+    <ghostlink name='link_0_clone_286'>
+      <pose frame=''>78 50 0.15 0 -0 0</pose>
+      
+      <collision name="collision">
+        <geometry>
+          <mesh>
+            <uri>model://eufs_description/meshes/NoiseCube.dae</uri>
+          </mesh>
+        </geometry>
+      </collision>
+
+      <visual name="visual">
+        <geometry>
+          <mesh>
+            <uri>model://eufs_description/meshes/NoiseCube.dae</uri>
+          </mesh>
+        </geometry>
+      </visual>
+    </ghostlink>
+
+
+    <link name='link_0_clone_287'>
+      <pose frame=''>79 14 0.15 0 -0 0</pose>
       
       <collision name="collision">
         <geometry>

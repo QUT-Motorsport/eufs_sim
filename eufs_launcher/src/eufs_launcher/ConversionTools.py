@@ -405,6 +405,8 @@ class ConversionTools:
 		sdf_main = sdf_splitagain[0]
 		sdf_model = sdf_splitagain[3].join(sdf_splitagain[1].split("%FILLCOLLISION%"))
 		sdf_model_with_collisions = sdf_splitagain[2].join(sdf_splitagain[1].split("%FILLCOLLISION%"))
+		sdf_ghostmodel = sdf_splitagain[3].join(sdf_splitagain[4].split("%FILLCOLLISION%"))
+		sdf_ghostmodel_with_collisions = sdf_splitagain[2].join(sdf_splitagain[4].split("%FILLCOLLISION%"))
 
 		sdf_main = GENERATED_FILENAME.join(sdf_main.split("%FILLNAME%"))
 
@@ -447,9 +449,13 @@ class ConversionTools:
 					sdf_allmodels = sdf_allmodels + "\n" + putModelAtPosition(sdf_orangeconemodel,i*scaledata,j*scaledata)
 				elif p == ConversionTools.conecolorBigOrange:
 					sdf_allmodels = sdf_allmodels + "\n" + putModelAtPosition(sdf_bigorangeconemodel,i*scaledata,j*scaledata)
-				elif p == ConversionTools.noisecolor and uniform(0,1)<noiseLevel:
-					sdf_noisemodel = getRandomNoiseModel().join(sdf_model_with_collisions.split("%MODELNAME%"))
-					sdf_allmodels = sdf_allmodels + "\n" + putModelAtPosition(sdf_noisemodel,i*scaledata,j*scaledata)
+				elif p == ConversionTools.noisecolor:
+					if uniform(0,1)<noiseLevel:#place noise
+						sdf_noisemodel = getRandomNoiseModel().join(sdf_model_with_collisions.split("%MODELNAME%"))
+						sdf_allmodels = sdf_allmodels + "\n" + putModelAtPosition(sdf_noisemodel,i*scaledata,j*scaledata)
+					else:#place ghostnoise
+						sdf_noisemodel = getRandomNoiseModel().join(sdf_ghostmodel_with_collisions.split("%MODELNAME%"))
+						sdf_allmodels = sdf_allmodels + "\n" + putModelAtPosition(sdf_noisemodel,i*scaledata,j*scaledata)
 
 		sdf_main = sdf_allmodels.join(sdf_main.split("%FILLDATA%"))
 

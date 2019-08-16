@@ -32,6 +32,8 @@ class Track:
         self.yellow_track = None
         self.big_orange_cones = None
         self.orange_cones = None
+        self.active_noise = None
+        self.inactive_noise = None
 	self.car_start_data = ("car_start",0.0,0.0,0.0)#x,y,direction(yaw) - can be left at (0,0,0), only relevant when fed into track_gen through 
                                                        #`eufs_launcher/ConversionTools`
                                                        #as in that case it needs to preserve car data so that the conversion is fully bijective.
@@ -79,35 +81,48 @@ class Track:
         yellow = []
         orange = []
         big_orange = []
+        active_noise = []
+        inactive_noise = []
 
         # iterate over all links of the model
         if len(root[0].findall("link")) != 0:
             for child in root[0].iter("link"):
                 pose = child.find("pose").text.split(" ")[0:2]
-                mesh_str = child.find("visual")[0][0][0].text.split("/")[-1]
-
+                mesh_str = child.find("visual")[0][0][0].text.split("/")[-1].split(".")[0]
                 # indentify cones by the name of their mesh
-                if "blue" in mesh_str:
+                if "cone_blue" == mesh_str:
                     blue.append(pose)
-                elif "yellow" in mesh_str:
+                elif "cone_yellow" == mesh_str:
                     yellow.append(pose)
-                elif "big" in mesh_str:
+                elif "cone_big" == mesh_str:
                     big_orange.append(pose)
+                elif "cone" == mesh_str:
+                    orange.append(pose)
+                else:
+                    active_noise.append(pose)
 
-        elif len(root[0].findall("include")) != 0:
+        #handle hidden links
+        if len(root[0].findall("ghostlink")) != 0:
+            for child in root[0].iter("ghostlink"):
+                pose = child.find("pose").text.split(" ")[0:2]
+                inactive_noise.append(pose)
+
+        #handle inculdes
+        if len(root[0].findall("include")) != 0:
             for child in root[0].iter("include"):
                 pose = child.find("pose").text.split(" ")[0:2]
-                mesh_str = child.find("uri").text.split("/")[-1]
+                mesh_str = child.find("uri").text.split("/")[-1].split(".")[0]
 
                 # indentify cones by the name of their mesh
-                if "blue" in mesh_str:
+                if "blue_cone" == mesh_str:
                     blue.append(pose)
-                elif "yellow" in mesh_str:
+                elif "yellow_cone" == mesh_str:
                     yellow.append(pose)
-                elif "big" in mesh_str:
+                elif "big_cone" == mesh_str:
                     big_orange.append(pose)
-                elif "orange" in mesh_str:
+                elif "orange_cone" == mesh_str:
                     orange.append(pose)
+
 
         # convert all lists to numpy as arrays for efficiency
         if len(blue) != 0:
@@ -129,6 +144,12 @@ class Track:
             self.orange_cones = np.array(orange, dtype="float64")
         else:
             print("No orange cones found")
+
+        if len(active_noise) != 0:
+            self.active_noise = np.array(active_noise, dtype = "float64")
+
+        if len(inactive_noise) != 0:
+            self.inactive_noise = np.array(inactive_noise, dtype = "float64")
 
 
     def generate_tracks(self):
@@ -282,6 +303,20 @@ class Track:
             df["x"] = np.hstack((df["x"].dropna().values, self.midpoints[:, 0]))
             df["y"] = np.hstack((df["y"].dropna().values, self.midpoints[:, 1]))
             df["tag"].iloc[-self.midpoints.shape[0]:] = "midpoint"
+
+        if self.active_noise is not None:
+            empty = pd.DataFrame(np.nan, index=np.arange(self.active_noise.shape[0]), columns=["tag", "x", "y"])
+            df = df.append(empty)
+            df["x"] = np.hstack((df["x"].dropna().values, self.active_noise[:, 0]))
+            df["y"] = np.hstack((df["y"].dropna().values, self.active_noise[:, 1]))
+            df["tag"].iloc[-self.active_noise.shape[0]:] = "active_noise"
+
+        if self.inactive_noise is not None:
+            empty = pd.DataFrame(np.nan, index=np.arange(self.inactive_noise.shape[0]), columns=["tag", "x", "y"])
+            df = df.append(empty)
+            df["x"] = np.hstack((df["x"].dropna().values, self.inactive_noise[:, 0]))
+            df["y"] = np.hstack((df["y"].dropna().values, self.inactive_noise[:, 1]))
+            df["tag"].iloc[-self.inactive_noise.shape[0]:] = "inactive_noise"
 
         #Add car data (always ("car_start",0,0,0) unless this file is called from ConversionTools))
         cardf = pd.DataFrame([self.car_start_data], columns=["tag","x","y","direction"])  

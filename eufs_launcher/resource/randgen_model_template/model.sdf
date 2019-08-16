@@ -34,3 +34,15 @@ $===$
           </mesh>
         </geometry>
       </collision>
+$===$
+    <ghostlink name='link_0_clone_%LINKNUM%'>
+      <pose frame=''>%PLACEX% %PLACEY% 0.15 0 -0 0</pose>
+      %FILLCOLLISION%
+      <visual name="visual">
+        <geometry>
+          <mesh>
+            <uri>%MODELNAME%</uri>
+          </mesh>
+        </geometry>
+      </visual>
+    </ghostlink>
