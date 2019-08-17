@@ -201,6 +201,9 @@ class EufsLauncher(Plugin):
 		loadUi(self.sketcher_ui_file, self._widget)
 
 	def load_track_and_images(self):
+		# Clear the dropdowns
+		self._widget.findChild(QComboBox,"WhichTrack").clear()
+		self._widget.findChild(QComboBox,"WhichImage").clear()
 		# Get tracks from eufs_gazebo package
 		relpath = os.path.join(rospkg.RosPack().get_path('eufs_gazebo'), 'launch')
 		launchfiles = [f for f in listdir(relpath) if isfile(join(relpath, f))]
