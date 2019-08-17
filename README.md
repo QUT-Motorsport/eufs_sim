@@ -12,6 +12,11 @@ This branch is in active development.  It is intended to add the following featu
 
 [*] Reformat all launcher code to conform to coding standards and have a clear, sensible API
 
+*  [√] PEP8 Function Names
+*  [*] PEP8 Variable Names
+*  [*] Factor out utilities into their own file
+*  [*] Tabs to spaces ( :( )
+
 [√] Have launcher auto-update file lists after using ConversionTools
 
 It is an offshoot from the `devel-trackgen-2019-summer` branch, which already has added vast improvements to the launcher from `master`.
