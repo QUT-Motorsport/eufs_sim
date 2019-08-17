@@ -63,9 +63,10 @@ class EufsLauncher(Plugin):
 		# Create QWidget
 		self._widget = QWidget()
 		# Get path to UI file which should be in the "resource" folder of this package
-		ui_file = os.path.join(rospkg.RosPack().get_path('eufs_launcher'), 'resource', 'Launcher.ui')
+		self.main_ui_file = os.path.join(rospkg.RosPack().get_path('eufs_launcher'), 'resource', 'Launcher.ui')
+		self.sketcher_ui_file = os.path.join(rospkg.RosPack().get_path('eufs_launcher'), 'resource', 'Sketcher.ui')
 		# Extend the widget with all attributes and children from UI file
-		loadUi(ui_file, self._widget)
+		loadUi(self.main_ui_file, self._widget)
 		# Give QObjects reasonable names
 		self._widget.setObjectName('EufsLauncherUI')
 		# Show _widget.windowTitle on left-top of each plugin (when 
@@ -93,13 +94,15 @@ class EufsLauncher(Plugin):
 			if f != defaultPreset:
 				self._widget.findChild(QComboBox,"WhichPreset").addItem(f)
 
-		# Hook up buttons to onclick functions
+		#Hook up buttons to onclick functions
 		self._widget.findChild(QPushButton,"LaunchButton").clicked.connect(self.launch_button_pressed)
 		self._widget.findChild(QPushButton,"GenerateButton").clicked.connect(self.generator_button_pressed)
 		self._widget.findChild(QPushButton,"LoadFromImageButton").clicked.connect(self.track_from_image_button_pressed)
 		self._widget.findChild(QPushButton,"ConvertButton").clicked.connect(self.convert_button_pressed)
 		self._widget.findChild(QPushButton,"RenameButton").clicked.connect(self.copy_button_pressed)
 		self._widget.findChild(QPushButton,"Experimentals").clicked.connect(self.experimental_button_pressed)
+		self._widget.findChild(QPushButton,"SketcherButton").clicked.connect(self.sketcher_button_pressed)
+
 
 		#Create array of running processes (currently unused, but if you ever do process = launch.launch(node), add process here!)
 		self.processes = []
@@ -125,6 +128,9 @@ class EufsLauncher(Plugin):
 
 		#Hide experimental button as not currently needed
 		self._widget.findChild(QPushButton,"Experimentals").setVisible(False)
+
+		#Hide track draw button as not currently working
+		self._widget.findChild(QPushButton,"SketcherButton").setVisible(False)
 
 		#Set up the Generator Params
 		self.updatePreset()
@@ -184,7 +190,15 @@ class EufsLauncher(Plugin):
 		#Change label to show current selected file for the copier
 		self.updateCopier()
 
+		#Get uuid
+		self.uuid = roslaunch.rlutil.get_or_generate_uuid(None, False)
+		roslaunch.configure_logging(self.uuid)
+
 		print("Plugin Successfully Launched!")
+
+	def sketcher_button_pressed(self):
+		rospy.logerr("Opening sketcher...")
+		loadUi(self.sketcher_ui_file, self._widget)
 
 	def loadTrackAndImages(self):
 		# Get tracks from eufs_gazebo package
@@ -492,8 +506,7 @@ class EufsLauncher(Plugin):
 			#There's not really any reason why not to, but it's "undefined behavior"
 			return
 		self.hasLaunchedROS = True
-		uuid = roslaunch.rlutil.get_or_generate_uuid(None, False)
-		roslaunch.configure_logging(uuid)
+		uuid = self.uuid
 
 		print("--------------------------")
 		print("\t\t\tLaunching Nodes...")

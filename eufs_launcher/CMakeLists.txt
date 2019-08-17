@@ -30,6 +30,10 @@ install(PROGRAMS scripts/rqt_eufs_launcher.py
   DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )
 
+install(PROGRAMS scripts/rqt_eufs_sketcher.py
+  DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
+)
+
 install(DIRECTORY
   resource
   DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
