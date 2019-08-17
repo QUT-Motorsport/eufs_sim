@@ -7,7 +7,7 @@ import math
 
 from qt_gui.plugin import Plugin
 from python_qt_binding import loadUi
-from python_qt_binding.QtWidgets import QWidget, QComboBox, QPushButton, QSlider, QRadioButton, QCheckBox, QMainWindow, QLabel, QLineEdit
+from python_qt_binding.QtWidgets import QWidget, QComboBox, QPushButton, QSlider, QRadioButton, QCheckBox, QMainWindow, QLabel, QLineEdit, QApplication
 
 from os import listdir
 from os.path import isfile, join
@@ -194,7 +194,10 @@ class EufsLauncher(Plugin):
 		self.uuid = roslaunch.rlutil.get_or_generate_uuid(None, False)
 		roslaunch.configure_logging(self.uuid)
 
-		print("Plugin Successfully Launched!")
+
+	def tell_launchella(self,what):
+		self._widget.findChild(QLabel,"UserFeedbackLabel").setText(what)
+		QApplication.processEvents() 
 
 	def sketcher_button_pressed(self):
 		rospy.logerr("Opening sketcher...")
@@ -232,6 +235,7 @@ class EufsLauncher(Plugin):
 				self._widget.findChild(QComboBox,"WhichImage").addItem(f)
 
 	def copy_button_pressed(self):
+		self.tell_launchella("Copying...")
 		#Copy the current file
 		isFullStack = self._widget.findChild(QCheckBox,"FullStackCopyButton").isChecked()
 		fileToCopyTo = self._widget.findChild(QLineEdit,"RenameFileTextbox").text()
@@ -281,6 +285,7 @@ class EufsLauncher(Plugin):
 			if self._widget.findChild(QCheckBox,"FullStackCopyButton").isChecked():
 				Converter.convert("csv","ALL",path_to,params=[self.get_noise_level()])
 		self.load_track_and_images()
+		self.tell_launchella("Copy Succeeded!")
 
 	def update_copier(self):
 		#Change label to show current selected file for the copier
@@ -440,7 +445,7 @@ class EufsLauncher(Plugin):
 		
 
 	def generator_button_pressed(self):
-		print("Generating Track...")
+		self.tell_launchella("Generating Track...")
 
 		isLaxGenerator = self._widget.findChild(QCheckBox,"LaxCheckBox").isChecked()
 		
@@ -462,13 +467,14 @@ class EufsLauncher(Plugin):
 			imgpath = os.path.join(rospkg.RosPack().get_path('eufs_gazebo'), 'randgen_imgs/rand.png')
 			Converter.convert("png","ALL",imgpath,params=[self.get_noise_level()])
 
-		print("Track Gen Complete!")
+		self.tell_launchella("Track Gen Complete!")
 
 		im.show()
 
 		self.load_track_and_images()
 
 	def track_from_image_button_pressed(self):
+		self.tell_launchella("Preparing to launch image as a track... ")
 		fname = self._widget.findChild(QComboBox,"WhichImage").currentText()
 		fname_full = os.path.join(rospkg.RosPack().get_path('eufs_gazebo'), 'randgen_imgs/'+fname)
 		imFullStack = self._widget.findChild(QCheckBox,"FullStackImageButton")
@@ -491,6 +497,7 @@ class EufsLauncher(Plugin):
 		fromtype = self._widget.findChild(QComboBox,"ConvertFrom").currentText()
 		totype   = self._widget.findChild(QComboBox,"ConvertTo").currentText()
 		filename = self._widget.findChild(QComboBox,"FileForConversion").currentText()
+		self.tell_launchella("Conversion Button Pressed!  From: " + fromtype + " To: " + totype + " For: " + filename)
 		midpointWidget = self._widget.findChild(QCheckBox,"MidpointBox")
 		if fromtype == "png":
 			filename = os.path.join(rospkg.RosPack().get_path('eufs_gazebo'), 'randgen_imgs/'+filename)
@@ -502,6 +509,7 @@ class EufsLauncher(Plugin):
 		Converter.convert(fromtype,totype,filename,
 					params=[self.get_noise_level(),midpointWidget.isVisible() and midpointWidget.isChecked()],conversion_suffix=suffix)
 		self.load_track_and_images()
+		self.tell_launchella("Conversion Succeeded!  From: " + fromtype + " To: " + totype + " For: " + filename)
 
 	def launch_button_pressed(self):
 		if self.hasLaunchedROS:
@@ -511,22 +519,22 @@ class EufsLauncher(Plugin):
 		self.hasLaunchedROS = True
 		uuid = self.uuid
 
-		print("--------------------------")
-		print("\t\t\tLaunching Nodes...")
+		self.tell_launchella("--------------------------")
+		self.tell_launchella("\t\t\tLaunching Nodes...")
 		trackToLaunch = self.launchfileoverride #if we have set a specific file to run regardless of selected file
 		self.launchfileoverride = None          #such as when we use the random generator
 		if not trackToLaunch:
 			trackToLaunch = self._widget.findChild(QComboBox,"WhichTrack").currentText()
-		print("Launching " + trackToLaunch)
+		self.tell_launchella("Launching " + trackToLaunch)
 		noiseLevel = self.get_noise_level()
-		print("With Noise Level: " + str(noiseLevel))
+		self.tell_launchella("With Noise Level: " + str(noiseLevel))
 		
 		controlMethod = "controlMethod:=speed"
 		if self._widget.findChild(QRadioButton,"SpeedRadio").isChecked():
-			print("With Speed Controls")
+			self.tell_launchella("With Speed Controls")
 			controlMethod = "controlMethod:=speed"
 		elif self._widget.findChild(QRadioButton,"TorqueRadio").isChecked():
-			print("With Torque Controls")
+			self.tell_launchella("With Torque Controls")
 			controlMethod = "controlMethod:=torque"
 		
 		#Ideally we would use the commented out 'launch' lines, but the ROSLaunchParent API does not allow sending arguments in Kinetic >:(
@@ -540,15 +548,15 @@ class EufsLauncher(Plugin):
 
 
 		if self._widget.findChild(QCheckBox,"VisualisatorCheckbox").isChecked():
-			print("And With LIDAR Data Visualisator.")
+			self.tell_launchella("And With LIDAR Data Visualisator.")
 			launch = roslaunch.parent.ROSLaunchParent(uuid, [os.path.join(rospkg.RosPack().get_path('eufs_description'), "launch/visualisator.launch")])
 			launch.start()
 			self.launches.append(launch)
-		print("--------------------------")
+		self.tell_launchella("As I have fulfilled my purpose in guiding you to launch a track, this launcher will no longer react to input.")
 
 	def shutdown_plugin(self):
 		# TODO unregister all publishers here
-		print("Shutdown Engaged...")
+		self.tell_launchella("Shutdown Engaged...")
 		#(Stop all processes)
 		for p in self.processes:
 			p.stop()
@@ -565,7 +573,7 @@ class EufsLauncher(Plugin):
 		#NUKE IT! (seriously just nuke it)
 		self.nuke_ros()
 
-		#print("Shutdown Complete!")
+		#self.tell_launchella("Shutdown Complete!")
 
 	def nuke_ros(self):
 		#Try to kill as much as possible
