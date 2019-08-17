@@ -81,13 +81,13 @@ class EufsLauncher(Plugin):
 		#Resize correctly
 		self._widget.setFixedWidth(1200)
 
-		self.loadTrackAndImages()
+		self.load_track_and_images()
 
 		#Get presets
-		presetnames = Generator.getPresetNames()
+		presetnames = Generator.get_preset_names()
 
 		#Add Presets to Preset Selector (always put Computer Friendly first)
-		defaultPreset = Generator.getDefaultPreset()
+		defaultPreset = Generator.get_default_preset()
 		if defaultPreset in presetnames:
 			self._widget.findChild(QComboBox,"WhichPreset").addItem(defaultPreset)
 		for f in presetnames:
@@ -133,18 +133,18 @@ class EufsLauncher(Plugin):
 		self._widget.findChild(QPushButton,"SketcherButton").setVisible(False)
 
 		#Set up the Generator Params
-		self.updatePreset()
+		self.update_preset()
 
 		#Give sliders the correct range
-		self.setSliderRanges()
+		self.set_slider_ranges()
 
 		#Relabel the params
-		self.keepParamsUpToDate()
-		self.keepSlidersUpToDate()
+		self.keep_params_up_to_date()
+		self.keep_sliders_up_to_date()
 
 		#Hook up sliders to function that monitors when they've been changed
-		self.keepTrackOfSliderChanges()
-		self.keepTrackOfPresetChanges()
+		self.keep_track_of_slider_changes()
+		self.keep_track_of_preset_changes()
 
 		#While in the process of changing sliders, we don't want our monitor function to be rapidly firing
 		#So we toggle this variable when ready
@@ -160,10 +160,10 @@ class EufsLauncher(Plugin):
 		for f in ["csv","png","launch","ALL"]:
 			self._widget.findChild(QComboBox,"ConvertTo").addItem(f)
 			
-		self.updateConverterDropdown()
-		self._widget.findChild(QComboBox,"ConvertFrom").currentTextChanged.connect(self.updateConverterDropdown)
-		self._widget.findChild(QComboBox,"ConvertTo").currentTextChanged.connect(self.updateMidpointsBox)
-		self._widget.findChild(QComboBox,"FileForConversion").currentTextChanged.connect(self.updateCopier)
+		self.update_converter_dropdown()
+		self._widget.findChild(QComboBox,"ConvertFrom").currentTextChanged.connect(self.update_converter_dropdown)
+		self._widget.findChild(QComboBox,"ConvertTo").currentTextChanged.connect(self.update_midpoints_box)
+		self._widget.findChild(QComboBox,"FileForConversion").currentTextChanged.connect(self.update_copier)
 
 		#Prep midpoints checkbox
 		midpointBox = self._widget.findChild(QCheckBox,"MidpointBox")
@@ -188,7 +188,7 @@ class EufsLauncher(Plugin):
 		cpFullStack.setChecked(True)
 
 		#Change label to show current selected file for the copier
-		self.updateCopier()
+		self.update_copier()
 
 		#Get uuid
 		self.uuid = roslaunch.rlutil.get_or_generate_uuid(None, False)
@@ -200,7 +200,7 @@ class EufsLauncher(Plugin):
 		rospy.logerr("Opening sketcher...")
 		loadUi(self.sketcher_ui_file, self._widget)
 
-	def loadTrackAndImages(self):
+	def load_track_and_images(self):
 		# Get tracks from eufs_gazebo package
 		relpath = os.path.join(rospkg.RosPack().get_path('eufs_gazebo'), 'launch')
 		launchfiles = [f for f in listdir(relpath) if isfile(join(relpath, f))]
@@ -246,50 +246,50 @@ class EufsLauncher(Plugin):
 				os.mkdir(os.path.join(rospkg.RosPack().get_path('eufs_description'), 'models',rawName_to))
 			path_from = os.path.join(rospkg.RosPack().get_path('eufs_description'), 'models',rawName_from,"model.sdf")
 			path_to   = os.path.join(rospkg.RosPack().get_path('eufs_description'), 'models',rawName_to,"model.sdf")
-			Converter.copyFile(path_from,path_to)
+			Converter.copy_file(path_from,path_to)
 
 			path_from = os.path.join(rospkg.RosPack().get_path('eufs_description'), 'models',rawName_from,"model.config")
 			path_to   = os.path.join(rospkg.RosPack().get_path('eufs_description'), 'models',rawName_to,"model.config")
-			Converter.copyFile(path_from,path_to)
+			Converter.copy_file(path_from,path_to)
 			
 			path_from = os.path.join(rospkg.RosPack().get_path('eufs_gazebo'), 'launch',fileToCopyFrom)
 			path_to   = os.path.join(rospkg.RosPack().get_path('eufs_gazebo'),'launch',rawName_to+"."+ending)
-			Converter.copyFile(path_from,path_to)
+			Converter.copy_file(path_from,path_to)
 
 			#If full stack copying, convert to all file formats
 			if self._widget.findChild(QCheckBox,"FullStackCopyButton").isChecked():
-				Converter.convert("launch","ALL",path_to,params=[self.getNoiseLevel()])
+				Converter.convert("launch","ALL",path_to,params=[self.get_noise_level()])
 
 		elif ending == "png":
 			path_from = os.path.join(rospkg.RosPack().get_path('eufs_gazebo'), 'randgen_imgs',fileToCopyFrom)
 			path_to   = os.path.join(rospkg.RosPack().get_path('eufs_gazebo'),'randgen_imgs',rawName_to+"."+ending)
-			Converter.copyFile(path_from,path_to)
+			Converter.copy_file(path_from,path_to)
 
 			#If full stack copying, convert to all file formats
 			if self._widget.findChild(QCheckBox,"FullStackCopyButton").isChecked():
-				Converter.convert("png","ALL",path_to,params=[self.getNoiseLevel()])
+				Converter.convert("png","ALL",path_to,params=[self.get_noise_level()])
 
 		elif ending == "csv":
 			path_from = os.path.join(rospkg.RosPack().get_path('eufs_gazebo'), 'tracks',fileToCopyFrom)
 			path_to   = os.path.join(rospkg.RosPack().get_path('eufs_gazebo'),'tracks',rawName_to+"."+ending)
-			Converter.copyFile(path_from,path_to)
+			Converter.copy_file(path_from,path_to)
 
 			#If full stack copying, convert to all file formats
 			if self._widget.findChild(QCheckBox,"FullStackCopyButton").isChecked():
-				Converter.convert("csv","ALL",path_to,params=[self.getNoiseLevel()])
-		self.loadTrackAndImages()
+				Converter.convert("csv","ALL",path_to,params=[self.get_noise_level()])
+		self.load_track_and_images()
 
-	def updateCopier(self):
+	def update_copier(self):
 		#Change label to show current selected file for the copier
 		copyHead = self._widget.findChild(QLabel,"RenameFileHeader")
 		copyHead.setText("Copy: "+self._widget.findChild(QComboBox,"FileForConversion").currentText())
 
-	def updateMidpointsBox(self):
+	def update_midpoints_box(self):
 		#Toggle checkbox
 		cvto = self._widget.findChild(QComboBox,"ConvertTo").currentText()
 		#self._widget.findChild(QCheckBox,"MidpointBox").setVisible(cvto=="csv" or cvto=="ALL")
 
-	def updateConverterDropdown(self):
+	def update_converter_dropdown(self):
 		fromType = self._widget.findChild(QComboBox,"ConvertFrom").currentText()
 		allfiles = []
 
@@ -319,11 +319,11 @@ class EufsLauncher(Plugin):
 		for f in allfiles:
 			theSelector.addItem(f)
 
-		self.updateCopier()
+		self.update_copier()
 
-	def updatePreset(self):
+	def update_preset(self):
 		which = self._widget.findChild(QComboBox,"WhichPreset").currentText()
-		presetData = Generator.getPreset(which)
+		presetData = Generator.get_preset(which)
 		self.MIN_STRAIGHT   = presetData[0]
 		self.MAX_STRAIGHT   = presetData[1]
 		self.MIN_CTURN      = presetData[2]
@@ -335,32 +335,32 @@ class EufsLauncher(Plugin):
 		self.LAX_GENERATION = presetData[8]
 		self._widget.findChild(QCheckBox,"LaxCheckBox").setChecked(self.LAX_GENERATION)
 
-	def keepTrackOfPresetChanges(self):
-		self._widget.findChild(QComboBox,"WhichPreset") .currentTextChanged.connect(self.presetChanged)
+	def keep_track_of_preset_changes(self):
+		self._widget.findChild(QComboBox,"WhichPreset") .currentTextChanged.connect(self.preset_changed)
 
-	def presetChanged(self):
+	def preset_changed(self):
 		self.ignoreSliderChanges = True
-		self.updatePreset()
-		self.keepParamsUpToDate()
-		self.keepSlidersUpToDate()
+		self.update_preset()
+		self.keep_params_up_to_date()
+		self.keep_sliders_up_to_date()
 		self.ignoreSliderChanges = False
 
-	def keepTrackOfSliderChanges(self):
-		self._widget.findChild(QSlider,"Param_MIN_STRAIGHT") .valueChanged.connect(self.sliderChanged)
-		self._widget.findChild(QSlider,"Param_MAX_STRAIGHT") .valueChanged.connect(self.sliderChanged)
-		self._widget.findChild(QSlider,"Param_MIN_CTURN")    .valueChanged.connect(self.sliderChanged)
-		self._widget.findChild(QSlider,"Param_MAX_CTURN")    .valueChanged.connect(self.sliderChanged)
-		self._widget.findChild(QSlider,"Param_MIN_HAIRPIN")  .valueChanged.connect(self.sliderChanged)
-		self._widget.findChild(QSlider,"Param_MAX_HAIRPIN")  .valueChanged.connect(self.sliderChanged)
-		self._widget.findChild(QSlider,"Param_HAIRPIN_PAIRS").valueChanged.connect(self.sliderChanged)
-		self._widget.findChild(QSlider,"Param_MAX_LENGTH")   .valueChanged.connect(self.sliderChanged)
+	def keep_track_of_slider_changes(self):
+		self._widget.findChild(QSlider,"Param_MIN_STRAIGHT") .valueChanged.connect(self.slider_changed)
+		self._widget.findChild(QSlider,"Param_MAX_STRAIGHT") .valueChanged.connect(self.slider_changed)
+		self._widget.findChild(QSlider,"Param_MIN_CTURN")    .valueChanged.connect(self.slider_changed)
+		self._widget.findChild(QSlider,"Param_MAX_CTURN")    .valueChanged.connect(self.slider_changed)
+		self._widget.findChild(QSlider,"Param_MIN_HAIRPIN")  .valueChanged.connect(self.slider_changed)
+		self._widget.findChild(QSlider,"Param_MAX_HAIRPIN")  .valueChanged.connect(self.slider_changed)
+		self._widget.findChild(QSlider,"Param_HAIRPIN_PAIRS").valueChanged.connect(self.slider_changed)
+		self._widget.findChild(QSlider,"Param_MAX_LENGTH")   .valueChanged.connect(self.slider_changed)
 		
-	def sliderChanged(self):
+	def slider_changed(self):
 		if self.ignoreSliderChanges: return
-		self.keepVariablesUpToDate()
-		self.keepParamsUpToDate()
+		self.keep_variables_up_to_date()
+		self.keep_params_up_to_date()
 
-	def keepParamsUpToDate(self):
+	def keep_params_up_to_date(self):
 		#This function keeps the labels next to the sliders up to date with the actual values
 		self._widget.findChild(QLabel,"Label_MIN_STRAIGHT") .setText("MIN_STRAIGHT: "  + str(self.MIN_STRAIGHT))
 		self._widget.findChild(QLabel,"Label_MAX_STRAIGHT") .setText("MAX_STRAIGHT: "  + str(self.MAX_STRAIGHT))
@@ -371,27 +371,27 @@ class EufsLauncher(Plugin):
 		self._widget.findChild(QLabel,"Label_HAIRPIN_PAIRS").setText("HAIRPIN_PAIRS: " + str(self.HAIRPIN_PAIRS))
 		self._widget.findChild(QLabel,"Label_MAX_LENGTH")   .setText("MAX_LENGTH: "    + str(self.MAX_LENGTH))
 
-	def keepSlidersUpToDate(self):
-		self.setSliderValue("Param_MIN_STRAIGHT",self.MIN_STRAIGHT)
-		self.setSliderValue("Param_MAX_STRAIGHT",self.MAX_STRAIGHT)
-		self.setSliderValue("Param_MIN_CTURN",self.MIN_CTURN)
-		self.setSliderValue("Param_MAX_CTURN",self.MAX_CTURN)
-		self.setSliderValue("Param_MIN_HAIRPIN",self.MIN_HAIRPIN)
-		self.setSliderValue("Param_MAX_HAIRPIN",self.MAX_HAIRPIN)
-		self.setSliderValue("Param_HAIRPIN_PAIRS",self.HAIRPIN_PAIRS)
-		self.setSliderValue("Param_MAX_LENGTH",self.MAX_LENGTH)
+	def keep_sliders_up_to_date(self):
+		self.set_slider_value("Param_MIN_STRAIGHT",self.MIN_STRAIGHT)
+		self.set_slider_value("Param_MAX_STRAIGHT",self.MAX_STRAIGHT)
+		self.set_slider_value("Param_MIN_CTURN",self.MIN_CTURN)
+		self.set_slider_value("Param_MAX_CTURN",self.MAX_CTURN)
+		self.set_slider_value("Param_MIN_HAIRPIN",self.MIN_HAIRPIN)
+		self.set_slider_value("Param_MAX_HAIRPIN",self.MAX_HAIRPIN)
+		self.set_slider_value("Param_HAIRPIN_PAIRS",self.HAIRPIN_PAIRS)
+		self.set_slider_value("Param_MAX_LENGTH",self.MAX_LENGTH)
 
-	def keepVariablesUpToDate(self):
-		self.MIN_STRAIGHT = self.getSliderValue("Param_MIN_STRAIGHT")
-		self.MAX_STRAIGHT = self.getSliderValue("Param_MAX_STRAIGHT")
-		self.MIN_CTURN = self.getSliderValue("Param_MIN_CTURN")
-		self.MAX_CTURN = self.getSliderValue("Param_MAX_CTURN")
-		self.MIN_HAIRPIN = self.getSliderValue("Param_MIN_HAIRPIN")
-		self.MAX_HAIRPIN = self.getSliderValue("Param_MAX_HAIRPIN")
-		self.HAIRPIN_PAIRS = self.getSliderValue("Param_HAIRPIN_PAIRS")
-		self.MAX_LENGTH = self.getSliderValue("Param_MAX_LENGTH")
+	def keep_variables_up_to_date(self):
+		self.MIN_STRAIGHT = self.get_slider_value("Param_MIN_STRAIGHT")
+		self.MAX_STRAIGHT = self.get_slider_value("Param_MAX_STRAIGHT")
+		self.MIN_CTURN = self.get_slider_value("Param_MIN_CTURN")
+		self.MAX_CTURN = self.get_slider_value("Param_MAX_CTURN")
+		self.MIN_HAIRPIN = self.get_slider_value("Param_MIN_HAIRPIN")
+		self.MAX_HAIRPIN = self.get_slider_value("Param_MAX_HAIRPIN")
+		self.HAIRPIN_PAIRS = self.get_slider_value("Param_HAIRPIN_PAIRS")
+		self.MAX_LENGTH = self.get_slider_value("Param_MAX_LENGTH")
 
-	def setSliderRanges(self):
+	def set_slider_ranges(self):
 		#This function keeps slider locations up to date with the actual values
 		#Note on ranges: 
 		#		Straights are between 0 and 150
@@ -409,24 +409,24 @@ class EufsLauncher(Plugin):
 		maxhairpinpairs = 5
 		minmaxlength = 200
 		maxmaxlength = 2000
-		self.setSliderData("Param_MIN_STRAIGHT",minstraight,maxstraight)
-		self.setSliderData("Param_MAX_STRAIGHT",minstraight,maxstraight)
-		self.setSliderData("Param_MIN_CTURN",minturn,maxturn)
-		self.setSliderData("Param_MAX_CTURN",minturn,maxturn)
-		self.setSliderData("Param_MIN_HAIRPIN",minhairpin*2,maxhairpin*2)
-		self.setSliderData("Param_MAX_HAIRPIN",minhairpin*2,maxhairpin*2)
-		self.setSliderData("Param_HAIRPIN_PAIRS",minhairpinpairs,maxhairpinpairs)
-		self.setSliderData("Param_MAX_LENGTH",minmaxlength,maxmaxlength)
+		self.set_slider_data("Param_MIN_STRAIGHT",minstraight,maxstraight)
+		self.set_slider_data("Param_MAX_STRAIGHT",minstraight,maxstraight)
+		self.set_slider_data("Param_MIN_CTURN",minturn,maxturn)
+		self.set_slider_data("Param_MAX_CTURN",minturn,maxturn)
+		self.set_slider_data("Param_MIN_HAIRPIN",minhairpin*2,maxhairpin*2)
+		self.set_slider_data("Param_MAX_HAIRPIN",minhairpin*2,maxhairpin*2)
+		self.set_slider_data("Param_HAIRPIN_PAIRS",minhairpinpairs,maxhairpinpairs)
+		self.set_slider_data("Param_MAX_LENGTH",minmaxlength,maxmaxlength)
 		
-	def getSliderValue(self,slidername):
+	def get_slider_value(self,slidername):
 		slider = self._widget.findChild(QSlider,slidername)
 		return slider.value()
 
-	def setSliderValue(self,slidername,sliderval):
+	def set_slider_value(self,slidername,sliderval):
 		slider = self._widget.findChild(QSlider,slidername)
 		slider.setValue(sliderval)
 
-	def setSliderData(self,slidername,slidermin,slidermax):
+	def set_slider_data(self,slidername,slidermin,slidermax):
 		slider = self._widget.findChild(QSlider,slidername)
 		slider.setMinimum(slidermin)
 		slider.setMaximum(slidermax)
@@ -457,30 +457,30 @@ class EufsLauncher(Plugin):
 		tgFullStack = self._widget.findChild(QCheckBox,"FullStackTrackGenButton")
 		if tgFullStack.isChecked():
 			imgpath = os.path.join(rospkg.RosPack().get_path('eufs_gazebo'), 'randgen_imgs/rand.png')
-			Converter.convert("png","ALL",imgpath,params=[self.getNoiseLevel()])
+			Converter.convert("png","ALL",imgpath,params=[self.get_noise_level()])
 
 		print("Track Gen Complete!")
 
 		im.show()
 
-		self.loadTrackAndImages()
+		self.load_track_and_images()
 
 	def track_from_image_button_pressed(self):
 		fname = self._widget.findChild(QComboBox,"WhichImage").currentText()
 		fname_full = os.path.join(rospkg.RosPack().get_path('eufs_gazebo'), 'randgen_imgs/'+fname)
 		imFullStack = self._widget.findChild(QCheckBox,"FullStackImageButton")
 		if imFullStack.isChecked():
-			Converter.convert("png","ALL",fname_full,params=[self.getNoiseLevel()])
+			Converter.convert("png","ALL",fname_full,params=[self.get_noise_level()])
 		else:
-			Converter.convert("png","launch",fname_full,params=[self.getNoiseLevel()])
+			Converter.convert("png","launch",fname_full,params=[self.get_noise_level()])
 
 		self.launchfileoverride = fname[:-4] + ".launch"
-		self.loadTrackAndImages()
+		self.load_track_and_images()
 		self.launch_button_pressed()
 
 	
 
-	def getNoiseLevel(self):
+	def get_noise_level(self):
 		noiseLevelWidget = self._widget.findChild(QSlider,"Noisiness")
 		return (1.0*(noiseLevelWidget.value()-noiseLevelWidget.minimum()))/(noiseLevelWidget.maximum()-noiseLevelWidget.minimum())
 
@@ -497,8 +497,8 @@ class EufsLauncher(Plugin):
 			filename = os.path.join(rospkg.RosPack().get_path('eufs_gazebo'), 'tracks/'+filename)
 		suffix = "_CT" if self._widget.findChild(QCheckBox,"SuffixBox").isChecked() else ""
 		Converter.convert(fromtype,totype,filename,
-					params=[self.getNoiseLevel(),midpointWidget.isVisible() and midpointWidget.isChecked()],conversion_suffix=suffix)
-		self.loadTrackAndImages()
+					params=[self.get_noise_level(),midpointWidget.isVisible() and midpointWidget.isChecked()],conversion_suffix=suffix)
+		self.load_track_and_images()
 
 	def launch_button_pressed(self):
 		if self.hasLaunchedROS:
@@ -515,7 +515,7 @@ class EufsLauncher(Plugin):
 		if not trackToLaunch:
 			trackToLaunch = self._widget.findChild(QComboBox,"WhichTrack").currentText()
 		print("Launching " + trackToLaunch)
-		noiseLevel = self.getNoiseLevel()
+		noiseLevel = self.get_noise_level()
 		print("With Noise Level: " + str(noiseLevel))
 		
 		controlMethod = "controlMethod:=speed"

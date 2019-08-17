@@ -1,7 +1,7 @@
 from PIL import Image
 from PIL import ImageDraw
 import math
-from TrackGenerator import endtangent as getTangentAngle
+from TrackGenerator import calculate_tangent_angle
 from random import randrange, uniform
 import os
 import rospkg
@@ -47,13 +47,13 @@ class ConversionTools:
 	#This section handles Track Image metadata
 
 	@staticmethod
-	def getMetadataPixel(x,y,corner,pixels,size):
+	def get_metadata_pixel(x,y,corner,pixels,size):
 		#Returns the metadata pixel (x,y,corner), as specified by the Track Image specification on the team wiki.
-		x,y = ConversionTools.getMetadataPixelLocation(x,y,corner,size)
+		x,y = ConversionTools.get_metadata_pixel_location(x,y,corner,size)
 		return pixels[x,y]
 
 	@staticmethod
-	def getMetadataPixelLocation(x,y,corner,size):
+	def get_metadata_pixel_location(x,y,corner,size):
 		#Returns the metadata pixel (x,y,corner), as specified by the Track Image specification on the team wiki.
 		width = size[0]
 		height = size[1]
@@ -71,7 +71,7 @@ class ConversionTools:
 
 
 	@staticmethod
-	def getRawMetadata(pixelvalue,mode="continuous"):
+	def get_raw_metadata(pixelvalue,mode="continuous"):
 		#This function converts metadata as outlined in the specification for Track Images on the team wiki
 		#It assumes that handling of the cases (255,255,255,255) and (r,g,b,0) are done outside this function.
 		(r,g,b,a) = pixelvalue
@@ -80,8 +80,8 @@ class ConversionTools:
 		return None
 
 	@staticmethod
-	def ungetRawMetadata(metadata,mode="continuous"):
-		#Undoes the process of getRawMetadata()
+	def unget_raw_metadata(metadata,mode="continuous"):
+		#Undoes the process of get_raw_metadata()
 		if mode == "continuous":
 			a = metadata % 254
 			metadata = (metadata - a) // 254
@@ -94,7 +94,7 @@ class ConversionTools:
 		return None
 
 	@staticmethod
-	def convertScaleMetadata(pixelvalues):
+	def convert_scale_metadata(pixelvalues):
 		#This function converts the data obtained from scale metadata pixels into actual scale information
 		#Output range is from 0.0001 to 100.
 		
@@ -103,34 +103,34 @@ class ConversionTools:
 
 		if primaryPixel == (255,255,255,255) and secondaryPixel == (255,255,255,255): return 1 #Check for the default case
 
-		metadata = ConversionTools.getRawMetadata(primaryPixel,mode="continuous")
+		metadata = ConversionTools.get_raw_metadata(primaryPixel,mode="continuous")
 		#Want to linearly transform the metadata, a range from 0 to 254**4-1, to the range 0.0001 to 100
 		toReturn = metadata/(254**4-1.0) * (100-0.0001) + 0.0001
 		return toReturn
 
 
 	@staticmethod
-	def deconvertScaleMetadata(data):
+	def deconvert_scale_metadata(data):
 		#This function converts a raw scale value into a list of metadata pixels needed to replicate it.
 		#First in list is the primary metadata pixel, second in list is the secondary (which is unused in the specification)
 		metadata = int((data-0.0001)/(100-0.0001) * (254**4-1))
-		primaryPixel = ConversionTools.ungetRawMetadata(metadata)
+		primaryPixel = ConversionTools.unget_raw_metadata(metadata)
 		secondaryPixel = (255,255,255,255)
 		return [primaryPixel,secondaryPixel]
 
 	@staticmethod
-	def convertVersionMetadata(pixelvalues):
+	def convert_version_metadata(pixelvalues):
 		#This function converts the data obtained from scale metadata pixels into actual scale information
 		#Output range is from 0 to 254**4-1
 		primaryPixel = pixelvalues[0]
 		if primaryPixel == (255,255,255,255): return 0
-		metadata = ConversionTools.getRawMetadata(primaryPixel)
+		metadata = ConversionTools.get_raw_metadata(primaryPixel)
 		return metadata
 
 	@staticmethod
-	def deconvertVersionMetadata(data):
-		#This function is the reverse transformation as convertVersionMetadata
-		return [ConversionTools.ungetRawMetadata(data)]
+	def deconvert_version_metadata(data):
+		#This function is the reverse transformation as convert_version_metadata
+		return [ConversionTools.unget_raw_metadata(data)]
 		
 
 	#######################################################################################################################################################
@@ -238,7 +238,7 @@ class ConversionTools:
 			coneClosenessParameter = 6
 
 			curPoint = xys[i]
-			curTangentAngle = getTangentAngle(xys[:(i+1)])
+			curTangentAngle = calculate_tangent_angle(xys[:(i+1)])
 			curTangentNormal = (math.ceil(coneNormalDistanceParameter*math.sin(curTangentAngle)),
 						math.ceil(-coneNormalDistanceParameter*math.cos(curTangentAngle)))
 			northPoint = ( int ( curPoint[0]+curTangentNormal[0] ) , int ( curPoint[1]+curTangentNormal[1] ) )
@@ -319,8 +319,8 @@ class ConversionTools:
 						pixels[i,j] = ConversionTools.noisecolor
 
 		#And tag it with the version number
-		loc = ConversionTools.getMetadataPixelLocation(4,4,"Bottom Right",im.size)
-		pixels[loc[0],loc[1]] = ConversionTools.deconvertVersionMetadata(ConversionTools.TRACKIMG_VERSION_NUM)[0]
+		loc = ConversionTools.get_metadata_pixel_location(4,4,"Bottom Right",im.size)
+		pixels[loc[0],loc[1]] = ConversionTools.deconvert_version_metadata(ConversionTools.TRACKIMG_VERSION_NUM)[0]
 
 		im.save(os.path.join(rospkg.RosPack().get_path('eufs_gazebo'), 'randgen_imgs/'+GENERATED_FILENAME+'.png'))
 		return im
@@ -350,15 +350,15 @@ class ConversionTools:
 		pixels = im.load()
 
 		#Let's get the scale metadata from the png:
-		scaledata = ConversionTools.convertScaleMetadata([
-							ConversionTools.getMetadataPixel(0,0,"Top Left",pixels,im.size),
-							ConversionTools.getMetadataPixel(1,0,"Top Left",pixels,im.size)])
+		scaledata = ConversionTools.convert_scale_metadata([
+							ConversionTools.get_metadata_pixel(0,0,"Top Left",pixels,im.size),
+							ConversionTools.get_metadata_pixel(1,0,"Top Left",pixels,im.size)])
 		#scaledata represents how big a pixel is.
 
 		#Let's also get the version number - we don't need it, 
 		#but in the future if breaking changes are made to the Track Image specification then it will become important.
-		loc = ConversionTools.getMetadataPixelLocation(4,4,"Bottom Right",im.size)
-		versionNumber = ConversionTools.convertVersionMetadata([pixels[loc[0],loc[1]]])
+		loc = ConversionTools.get_metadata_pixel_location(4,4,"Bottom Right",im.size)
+		versionNumber = ConversionTools.convert_version_metadata([pixels[loc[0],loc[1]]])
 
 		#.launch:
 		launch_template = open(os.path.join(rospkg.RosPack().get_path('eufs_launcher'), 'resource/randgen_launch_template'),"r")
@@ -609,7 +609,7 @@ class ConversionTools:
 		scaleDesired = max(totalxdistance,totalydistance)/(len(allcones)-1)
 		if scaleDesired < 0.0001: scaleDesired = 0.0001#Clamp scale to allowed values
 		if scaleDesired > 100:    scaleDesired = 100
-		scaleMetadata = ConversionTools.deconvertScaleMetadata(scaleDesired)
+		scaleMetadata = ConversionTools.deconvert_scale_metadata(scaleDesired)
 		
 		finalcones = []
 		twidth = int((maxx-minx+20)/scaleDesired)
@@ -643,12 +643,12 @@ class ConversionTools:
 		pixels[carx,cary] = (ConversionTools.carcolor[0],ConversionTools.carcolor[1],ConversionTools.carcolor[2],pixelValue)
 		
 		#Add metadata:
-		loc = ConversionTools.getMetadataPixelLocation(0,0,"Top Left",im.size)
+		loc = ConversionTools.get_metadata_pixel_location(0,0,"Top Left",im.size)
 		pixels[loc[0],loc[1]] = scaleMetadata[0]
-		loc = ConversionTools.getMetadataPixelLocation(1,0,"Top Left",im.size)
+		loc = ConversionTools.get_metadata_pixel_location(1,0,"Top Left",im.size)
 		pixels[loc[0],loc[1]] = scaleMetadata[1]
-		loc = ConversionTools.getMetadataPixelLocation(4,4,"Bottom Right",im.size)
-		pixels[loc[0],loc[1]] = ConversionTools.deconvertVersionMetadata(ConversionTools.TRACKIMG_VERSION_NUM)[0]
+		loc = ConversionTools.get_metadata_pixel_location(4,4,"Bottom Right",im.size)
+		pixels[loc[0],loc[1]] = ConversionTools.deconvert_version_metadata(ConversionTools.TRACKIMG_VERSION_NUM)[0]
 
 		#Save it:
 		im.save(os.path.join(rospkg.RosPack().get_path('eufs_gazebo'), 'randgen_imgs/'+filename+'.png'))
@@ -664,7 +664,7 @@ class ConversionTools:
 	#######################################################################################################################################################
 	#This section handles copying
 	@staticmethod
-	def copyFile(fr,to):
+	def copy_file(fr,to):
 		reader = open(fr,'r')
 		writer = open(to,'w')
 		data = reader.read()
