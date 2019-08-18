@@ -27,23 +27,6 @@ class EufsLauncher(Plugin):
 	def __init__(self, context):
 		super(EufsLauncher, self).__init__(context)
 
-		#Before we do anything, check if there are any nodes other than /rosout
-		#And offer the option of shutting them down
-		#Because often nodes get left behind due to the faulty shutdown of the launcher
-		#(Not my fault, really - it's because Kinetic lacks the argument-passing feature for
-		#roslaunch, meaning I have to Popen it instead, and Popen.kill doesn't successfully kill
-		#all ros nodes)
-
-
-		#Worst case scenario kill method: killall -9 gzserver gzclient
-		#We just have to nuke it.  I've tried so much, but gazebo is incredibly unstable
-		#whenever a single node gets set loose with respawn on.  Unfortunately this means
-		#this gui MUST be used as a start point - trying launch something else first and then
-		#loading the gui will kill it.
-		#The root of the problem, I believe, is the fact that we Popen instead of rospy.roslaunch
-		#the .launch file - but since we're using Kinetic and not a more recent version, the rospy.roslaunch
-		#command cannot pass arguments and is thus basically useless to us.
-		self.nuke_ros()
 
 		# Give QObjects reasonable names
 		self.setObjectName('EufsLauncher')
@@ -555,7 +538,7 @@ class EufsLauncher(Plugin):
 		self.tell_launchella("As I have fulfilled my purpose in guiding you to launch a track, this launcher will no longer react to input.")
 
 	def shutdown_plugin(self):
-		# TODO unregister all publishers here
+		# unregister all publishers, kill all nodes
 		self.tell_launchella("Shutdown Engaged...")
 		#(Stop all processes)
 		for p in self.processes:
@@ -571,7 +554,11 @@ class EufsLauncher(Plugin):
 		#	self.popenprocess = None
 
 		#NUKE IT! (seriously just nuke it)
-		self.nuke_ros()
+		#self.nuke_ros()
+
+		extranodes = rosnode.get_node_names()
+		extranodes.remove('/rosout')
+		rospy.logerr(extranodes)
 
 		#self.tell_launchella("Shutdown Complete!")
 
