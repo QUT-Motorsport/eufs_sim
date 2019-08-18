@@ -4,6 +4,7 @@ import rospkg
 import roslaunch
 import rosnode
 import math
+import time
 
 from qt_gui.plugin import Plugin
 from python_qt_binding import loadUi
@@ -26,7 +27,6 @@ class EufsLauncher(Plugin):
 
 	def __init__(self, context):
 		super(EufsLauncher, self).__init__(context)
-
 
 		# Give QObjects reasonable names
 		self.setObjectName('EufsLauncher')
@@ -91,6 +91,8 @@ class EufsLauncher(Plugin):
 		self.processes = []
 		#And also an array of running launches
 		self.launches = []
+		#And array of running popens
+		self.popens = []
 
 		# Add widget to the user interface
 	        context.add_widget(self._widget)
@@ -176,7 +178,6 @@ class EufsLauncher(Plugin):
 		#Get uuid
 		self.uuid = roslaunch.rlutil.get_or_generate_uuid(None, False)
 		roslaunch.configure_logging(self.uuid)
-
 
 	def tell_launchella(self,what):
 		self._widget.findChild(QLabel,"UserFeedbackLabel").setText(what)
@@ -500,7 +501,6 @@ class EufsLauncher(Plugin):
 			#There's not really any reason why not to, but it's "undefined behavior"
 			return
 		self.hasLaunchedROS = True
-		uuid = self.uuid
 
 		self.tell_launchella("--------------------------")
 		self.tell_launchella("\t\t\tLaunching Nodes...")
@@ -524,7 +524,7 @@ class EufsLauncher(Plugin):
 		#So we have to settle for launching this process using Python's Popen instead of the rospy API functions.
 		if self.popenprocess:
 			self.process.kill()
-		self.popenprocess = Popen(["roslaunch",os.path.join(rospkg.RosPack().get_path('eufs_gazebo'), 'launch', trackToLaunch),controlMethod])
+		self.popenprocess = self.launch_node_with_args(os.path.join(rospkg.RosPack().get_path('eufs_gazebo'), 'launch', trackToLaunch),[controlMethod])
 		#launch = roslaunch.parent.ROSLaunchParent(uuid, [os.path.join(rospkg.RosPack().get_path('eufs_gazebo'), 'launch', trackToLaunch)])
 		#launch.start()
 		#self.launches.append(launch)
@@ -532,35 +532,8 @@ class EufsLauncher(Plugin):
 
 		if self._widget.findChild(QCheckBox,"VisualisatorCheckbox").isChecked():
 			self.tell_launchella("And With LIDAR Data Visualisator.")
-			launch = roslaunch.parent.ROSLaunchParent(uuid, [os.path.join(rospkg.RosPack().get_path('eufs_description'), "launch/visualisator.launch")])
-			launch.start()
-			self.launches.append(launch)
+			self.launch_node(os.path.join(rospkg.RosPack().get_path('eufs_description'), "launch/visualisator.launch"))
 		self.tell_launchella("As I have fulfilled my purpose in guiding you to launch a track, this launcher will no longer react to input.")
-
-	def shutdown_plugin(self):
-		# unregister all publishers, kill all nodes
-		self.tell_launchella("Shutdown Engaged...")
-		#(Stop all processes)
-		for p in self.processes:
-			p.stop()
-
-		for l in self.launches:
-			l.shutdown()
-
-		#Trying to kill here will make a horrible bug
-		#no idea why.  You'll want: "killall -9 gzserver gzclient" to fix it
-		#if self.popenprocess != None:
-		#	self.popenprocess.kill()
-		#	self.popenprocess = None
-
-		#NUKE IT! (seriously just nuke it)
-		#self.nuke_ros()
-
-		extranodes = rosnode.get_node_names()
-		extranodes.remove('/rosout')
-		rospy.logerr(extranodes)
-
-		#self.tell_launchella("Shutdown Complete!")
 
 	def nuke_ros(self):
 		#Try to kill as much as possible
@@ -575,14 +548,76 @@ class EufsLauncher(Plugin):
 
 
 	def save_settings(self, plugin_settings, instance_settings):
-		# TODO save intrinsic configuration, usually using:
+		# uncomment to save intrinsic configuration, usually using:
 		# instance_settings.set_value(k, v)
 		pass
 
 	def restore_settings(self, plugin_settings, instance_settings):
-		# TODO restore intrinsic configuration, usually using:
+		# uncomment to restore intrinsic configuration, usually using:
 		# v = instance_settings.value(k)
 		pass
+
+	def launch_node(self,filepath):
+		self.launch_node_with_args(filepath,[])
+
+	def launch_node_with_args(self,filepath,args):
+		if len(args) > 0:#We cannot use ROS' api with arguments in Kinetic
+			process = Popen(["roslaunch",filepath]+args)
+			self.popens.append(process)
+			return process
+		else:
+			launch = roslaunch.parent.ROSLaunchParent(self.uuid, filepath)
+			launch.start()
+			self.launches.append(launch)
+			return launch
+
+	def shutdown_plugin(self):
+		# unregister all publishers, kill all nodes
+		self.tell_launchella("Shutdown Engaged...")
+		#(Stop all processes)
+		for p in self.processes:
+			p.stop()
+
+		for l in self.launches:
+			l.shutdown()
+
+		for p in self.popens:
+			p.kill()
+
+		#Trying to kill here will make a horrible bug
+		#no idea why.  You'll want: "killall -9 gzserver gzclient" to fix it
+		#if self.popenprocess != None:
+		#	self.popenprocess.kill()
+		#	self.popenprocess = None
+
+		#NUKE IT! (seriously just nuke it)
+		#self.nuke_ros()
+
+		extranodes = rosnode.get_node_names()
+		extranodes.remove("/eufs_launcher")
+		extranodes.remove("/rosout")
+		if (len(extranodes)>0):
+			rospy.logerr("Warning, after shutting down the launcher, these nodes are still running: " + str(extranodes))
+
+		nodes_to_kill = [	"/cone_ground_truth",
+					"/eufs/controller_spawner",
+					"/gazebo",
+					"/gazebo_gui",
+					"/robot_state_publisher",
+					"/ros_can_sim",
+					"/twist_to_ackermannDrive",
+					"/spawn_platform",
+					"/eufs_sim_rqt",
+				]
+		for badnode in extranodes:
+			if badnode in nodes_to_kill:
+				Popen(["rosnode","kill",badnode])
+		time.sleep(1)
+		extranodes = rosnode.get_node_names()
+		extranodes.remove("/eufs_launcher")
+		extranodes.remove("/rosout")
+		if len(extranodes)>0:
+			rospy.logerr("Pruned to: " + str(extranodes))
 
 	#def trigger_configuration(self):
 		# Comment in to signal that the plugin has a way to configure
