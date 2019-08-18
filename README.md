@@ -19,6 +19,10 @@ This branch is in active development.  It is intended to add the following featu
 
 [√] Have launcher auto-update file lists after using ConversionTools
 
+[√] Improve dangling node kill method so that it's not so indescriminant
+
+[*] Heuristics to avoid self-intersection in track generator
+
 It is an offshoot from the `devel-trackgen-2019-summer` branch, which already has added vast improvements to the launcher from `master`.
 
 Once all tasks are complete, this changelog section will be deleted and this will be merged into `devel-trackgen-2019-summer`, unless it has
