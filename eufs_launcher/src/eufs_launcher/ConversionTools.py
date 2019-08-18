@@ -1,7 +1,7 @@
 from PIL import Image
 from PIL import ImageDraw
 import math
-from TrackGenerator import calculate_tangent_angle
+from LauncherUtilities import calculate_tangent_angle
 from random import randrange, uniform
 import os
 import rospkg

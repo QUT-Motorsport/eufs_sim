@@ -2,29 +2,10 @@ import math
 from PIL import Image
 from PIL import ImageDraw
 from random import randrange, uniform
-from rospy import loginfo as ROSLOG
-from rospy import logerr as ROSERR
+import rospy
 from scipy.special import binom
+from LauncherUtilities import calculate_tangent_angle, cap_angle, cap_angle_odd, magnitude, normalize_vec
 
-
-"""
-To whomever in the future has come here to modify this code:
-	I have tried to make this code as readable as possible, 
-with plenty of comments explaining the mathematical reasoning 
-behind the logic.
-	However, the math behind it, while not conceptually complicated,
-is a bit of a formula slog - and to make things worse, its very
-geometric which is hard to convey through text.
-	So, if you are a bit lost here, feel free to reach out to me (Bailey)
-so that I can provide you with a better explanation of how things work.
-	The entire track generator project can be thought of through a mathematical
-lense as the following problem: Using only line and circle segments, how can we combine
-them into a G1-continuous closed loop satisfying arbitrary restraints on the size of said
-components?  
-	The grand majority of the math is "tangent-bookeeping", that is to say that
-we are primarily concerned with calculating and maintaining the consistency of
-tangent lines.
-"""
 
 """
 ###############################################################################
@@ -39,7 +20,7 @@ tangent lines.
 #									      #
 #	TrackGenerator.generate(values: List[float])                          #
 #			-> Tuple[List[Tuple[float,float]],int,int]            #
-#		Takes in a list of preset data.  Check out the get_presets()   #
+#		Takes in a list of preset data.  Check out the get_presets()  #
 #		function for a thorough and perpetually up to date list of    #
 #		each piece of data.					      #
 #		This returns a tuple of the form (xys,width,height), where:   #
@@ -56,14 +37,14 @@ tangent lines.
 #		This is done for the sake of ConversionTools' TrackImage      #
 #		specification, which requires the margin.		      #
 #									      #
-#	TrackGenerator.get_presets()  -> List[Tuple[str,List[float]]]          #
+#	TrackGenerator.get_presets()  -> List[Tuple[str,List[float]]]         #
 #		Returns a list of all generator presets (the str in the tuple)#
 #		coupled with their preset values (the list in the tuple)      #
 #									      #
 #	TrackGenerator.get_default_preset() -> str			      #
 #		Returns the default preset (usually "Small Straights")        #
 #									      #
-#	TrackGenerator.get_preset_names() -> List[str]                          #
+#	TrackGenerator.get_preset_names() -> List[str]                        #
 #		Returns a list of all the generator presets.                  #
 #									      #
 #	TrackGenerator.get_preset(name: str) -> List[float]		      #
@@ -238,6 +219,7 @@ class TrackGenerator:
 			xys2 = compactify_points(xys2)
 			overlapped = check_if_overlap(xys2)
 			if overlapped:
+				#rospy.logerr("Overlap check failed")
 				print("Oops!  The track intersects itself too much.  Retrying...")
 		return (xys,twidth,theight)
 
@@ -246,15 +228,6 @@ class TrackGenerator:
 """
 ESSENTIAL FUNCTIONS
 """
-
-def calculate_tangent_angle(xys):
-	#Calculate direction of outgoing tangent of a set of points
-	#Is an angle!
-	sx = xys[-2][0]
-	sy = xys[-2][1]
-	ex = xys[-1][0]
-	ey = xys[-1][1]
-	return math.atan2((ey-sy),(ex-sx))
 
 def generate_bezier_track(startpoint):
 		#In this function we handle the quick&dirty Bezier generator
@@ -339,6 +312,11 @@ def generate_autocross_trackdrive_track(startpoint):
 			(generated, curpoint, length) = generate_path_from_point_to_point(curpoint,goalpoint,calculate_tangent_angle(xys),fuzzradius=20)
 			curTrackLength+= length
 			xys.extend(generated)
+			#Now let's do early-checking for overlaps
+			test = compactify_points([(int(x[0]),int(x[1])) for x in xys])
+			if check_if_overlap(test): 
+				#rospy.logerr("Early Overlap Checking: Failed")
+				return (test,0,0)
 
 		#Now lets head back to the start:
 		#We're gonna set a checkpoint that is close but not exactly the start point
@@ -360,7 +338,12 @@ def generate_autocross_trackdrive_track(startpoint):
 		circleTurnAngle = math.pi - outerTurnAngle
 		circleTurnPercent = circleTurnAngle / (2*math.pi)
 		circleRadius = uniform(TrackGenerator.MIN_CONSTANT_TURN,TrackGenerator.MAX_CONSTANT_TURN)
-		(generated,curpoint,length,outnormal) = generate_constant_turn(initialPoint,circleRadius,initialTangentAngle,circlepercent=circleTurnPercent,turnleft=True)
+		(generated,curpoint,length,outnormal) = generate_constant_turn(
+								initialPoint,
+								circleRadius,
+								initialTangentAngle,
+								circlepercent=circleTurnPercent,
+								turnleft=True)
 		curTrackLength+=length
 		xys.extend(generated)
 
@@ -403,8 +386,6 @@ def generate_path_from_point_to_point(startpoint,endpoint,intangent,depth=20,hai
 	length = 0
 	points = []
 	circleradius = uniform(TrackGenerator.MIN_CONSTANT_TURN,TrackGenerator.MAX_CONSTANT_TURN)
-
-
 
 	#We want to know ahead of time which way the circle will turn - that way we don't get loopty-loops
 	#where the circle turns nearly all the way around when it would have been better to have the center
@@ -662,7 +643,7 @@ def generate_constant_turn(startpoint,radius,intangent,turnleft=None,circleperce
 	#cturns have a choices - turn left or turn right
 	#Then, they can choose what percent of the circle do they want to turn?
 	turnleft = uniform(0,1)<0.5 		if turnleft == None 		else turnleft
-	circlepercent = uniform(0.1,0.5)	if circlepercent == None 	else circlepercent
+	circlepercent = uniform(0.1,0.2)	if circlepercent == None 	else circlepercent
 
 	#Calculating this is fairly complicated
 	#Angle of circle normal = 90 degrees + intangent
@@ -826,32 +807,3 @@ def check_if_overlap(points):
 
 
 
-"""
-HELPER FUNCTIONS
-
-:Functions that save time but are not considered 'fundamental' to the process of track generation
-"""
-
-def cap_angle(ang):
-	#Returns angle between 0 and 2*math.pi
-	if ang < 0:
-		return cap_angle(ang+2*math.pi)
-	elif ang >= 2*math.pi:
-		return cap_angle(ang-2*math.pi)
-	return ang
-
-def cap_angle_odd(ang):
-	#Returns angle between -math.pi and math.pi
-	ang = cap_angle(ang)
-	if ang > math.pi:
-		ang = ang-2*math.pi
-	return ang
-
-def magnitude(vec):
-	(a,b) = vec
-	return math.sqrt(a*a+b*b)
-
-def normalize_vec(vec):
-	(a,b) = vec
-	mag = math.sqrt(a*a+b*b)
-	return (a/mag,b/mag)
