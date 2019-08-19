@@ -323,7 +323,7 @@ def generate_autocross_trackdrive_track(startpoint):
 		#so that we have breathing room for the final manouever:
 		(generated, curpoint, length) = generate_path_from_point_to_point(curpoint,\
 										(startpoint[0]-TrackGenerator.MAX_STRAIGHT*0.5,\
-										startpoint[1]+TrackGenerator.MAX_CONSTANT_TURN*1.5),\
+										startpoint[1]+TrackGenerator.MAX_CONSTANT_TURN*2),\
 										calculate_tangent_angle(xys),fuzzradius=0)
 		curTrackLength+= length
 		xys.extend(generated)
@@ -604,7 +604,7 @@ def generate_constant_turn_until_facing_point(startpoint,radius,intangent,goalpo
 			centery-=2*slope*purex
 			flipper*=-1
 	points = []
-	rangemax = 500
+	rangemax = 365
 	stepsize = 1.0/rangemax
 	for t in range(0,rangemax):
 		points.append(intermediatePoint(startpoint,(centerx,centery),flipper*t*angle*stepsize))
@@ -702,7 +702,8 @@ def generate_constant_turn(startpoint,radius,intangent,turnleft=None,circleperce
 			centery-=2*slope*purex
 			flipper*=-1
 
-	points = [intermediatePoint(startpoint,(centerx,centery),flipper*t*angle*0.001) for t in range(0,1000)]
+	fidelity = 365
+	points = [intermediatePoint(startpoint,(centerx,centery),1.0*flipper*t*angle/fidelity) for t in range(0,fidelity)]
 
 	#Length of circle is, fortunately, easy!  It's simply radius*angle
 	length = angle*radius
@@ -786,13 +787,13 @@ def compactify_points(points):
 	return points
 
 def check_if_overlap(points):
-	#Naive check to see if track overlaps itself
+	#Naive check to see if track overlaps itself - we remove duplicates from the list and check if size changes
 	#(Won't catch overlaps due to track width, only if track center overlaps)
 	points = points[:-10] #remove end points as in theory that should also be the start point
 	#(I remove extra to be a little generous to it as a courtesy - I don't really care how well the
 	#start loops to the end yet)
 
-	#Now we want to fill in the diagonally-connected points, otherwise you can imagine
+	#We want to add in the diagonally-connected points, otherwise you can imagine
 	#that two tracks moving diagonally opposite could cross eachother inbetween the pixels,
 	#fooling our test.
 	for index in range(1,len(points)):
