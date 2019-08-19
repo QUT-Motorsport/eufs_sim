@@ -604,7 +604,7 @@ def generate_constant_turn_until_facing_point(startpoint,radius,intangent,goalpo
 			centery-=2*slope*purex
 			flipper*=-1
 	points = []
-	rangemax = 5000
+	rangemax = 500
 	stepsize = 1.0/rangemax
 	for t in range(0,rangemax):
 		points.append(intermediatePoint(startpoint,(centerx,centery),flipper*t*angle*stepsize))
