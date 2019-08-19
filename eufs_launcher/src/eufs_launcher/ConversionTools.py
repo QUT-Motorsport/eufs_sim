@@ -71,7 +71,7 @@ class ConversionTools:
 
 
 	@staticmethod
-	def get_raw__metadata(pixel_value,mode="continuous"):
+	def get_raw_metadata(pixel_value,mode="continuous"):
 		#This function converts metadata as outlined in the specification for Track Images on the team wiki
 		#It assumes that handling of the cases (255,255,255,255) and (r,g,b,0) are done outside this function.
 		(r,g,b,a) = pixel_value
@@ -80,8 +80,8 @@ class ConversionTools:
 		return None
 
 	@staticmethod
-	def unget_raw__metadata(metadata,mode="continuous"):
-		#Undoes the process of get_raw__metadata()
+	def unget_raw_metadata(metadata,mode="continuous"):
+		#Undoes the process of get_raw_metadata()
 		if mode == "continuous":
 			a = metadata % 254
 			metadata = (metadata - a) // 254
@@ -103,7 +103,7 @@ class ConversionTools:
 
 		if primary_pixel == (255,255,255,255) and secondary_pixel == (255,255,255,255): return 1 #Check for the default case
 
-		metadata = ConversionTools.get_raw__metadata(primary_pixel,mode="continuous")
+		metadata = ConversionTools.get_raw_metadata(primary_pixel,mode="continuous")
 		#Want to linearly transform the metadata, a range from 0 to 254**4-1, to the range 0.0001 to 100
 		to_return = metadata/(254**4-1.0) * (100-0.0001) + 0.0001
 		return to_return
@@ -114,7 +114,7 @@ class ConversionTools:
 		#This function converts a raw_ scale value into a list of metadata pixels needed to replicate it.
 		#First in list is the primary metadata pixel, second in list is the secondary (which is unused in the specification)
 		metadata = int((data-0.0001)/(100-0.0001) * (254**4-1))
-		primary_pixel = ConversionTools.unget_raw__metadata(metadata)
+		primary_pixel = ConversionTools.unget_raw_metadata(metadata)
 		secondary_pixel = (255,255,255,255)
 		return [primary_pixel,secondary_pixel]
 
@@ -124,13 +124,13 @@ class ConversionTools:
 		#Output range is from 0 to 254**4-1
 		primary_pixel = pixel_values[0]
 		if primary_pixel == (255,255,255,255): return 0
-		metadata = ConversionTools.get_raw__metadata(primary_pixel)
+		metadata = ConversionTools.get_raw_metadata(primary_pixel)
 		return metadata
 
 	@staticmethod
 	def deconvert_version_metadata(data):
 		#This function is the reverse transformation as convert_version_metadata
-		return [ConversionTools.unget_raw__metadata(data)]
+		return [ConversionTools.unget_raw_metadata(data)]
 		
 
 	#######################################################################################################################################################
