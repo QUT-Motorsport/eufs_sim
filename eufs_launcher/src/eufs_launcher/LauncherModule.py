@@ -519,15 +519,26 @@ class EufsLauncher(Plugin):
 			self.tell_launchella("With Torque Controls")
 			control_method = "controlMethod:=torque"
 		
-		#Ideally we would use the commented out 'launch' lines, but the ROSLaunchParent API does not allow sending arguments in Kinetic >:(
-		#So we have to settle for launching this process using Python's Popen instead of the rospy API functions.
+
 		if self.popen_process:
 			self.process.kill()
-		self.popen_process = self.launch_node_with_args(os.path.join(rospkg.RosPack().get_path('eufs_gazebo'), 'launch', track_to_launch),[control_method])
-		#launch = roslaunch.parent.ROSLaunchParent(uuid, [os.path.join(rospkg.RosPack().get_path('eufs_gazebo'), 'launch', track_to_launch)])
-		#launch.start()
-		#self.launches.append(launch)
 
+		#How we launch the simulation changes depending on whether
+		dir_to_check = os.path.dirname(os.path.dirname(os.path.dirname(rospkg.RosPack().get_path('eufs_gazebo'))))
+		if dir_to_check.split("/")[-1] == "eufs-master":
+			launch_location = os.path.join(dir_to_check, 
+						'launch', 
+						'simulation.launch')
+			self.popen_process = 	self.launch_node_with_args(
+						launch_location,
+						[control_method,"track:="+track_to_launch.split(".")[0],"perception:=no_perception"]
+					)
+		else:
+			self.popen_process = self.launch_node_with_args(
+						os.path.join(rospkg.RosPack().get_path('eufs_gazebo'), 'launch', track_to_launch),
+						[control_method]
+					)
+			
 
 		if self._widget.findChild(QCheckBox,"VisualisatorCheckbox").isChecked():
 			self.tell_launchella("And With LIDAR Data Visualisator.")
