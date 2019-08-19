@@ -190,7 +190,8 @@ class ConversionTools:
 		#Create image to hold data
 		im = Image.new('RGBA', (twidth, theight), (0, 0, 0, 0)) 
 		draw = ImageDraw.Draw(im)
-
+		rospy.logerr(twidth)
+		rospy.logerr(theight)
 		#Convert data to image format
 		draw.polygon([(0,0),(twidth,0),(twidth,theight),(0,theight),(0,0)],fill='white')#background
 		draw.line(xys,fill=ConversionTools.trackouter,width=5)#track full width

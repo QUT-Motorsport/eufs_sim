@@ -444,6 +444,7 @@ class EufsLauncher(Plugin):
 								])
 
 		im = Converter.convert("xys","png",(xys,twidth,theight))
+		rospy.logerr("Mahayana Buddhism")
 
 		#If full stack selected, convert into csv and launch as well
 		tgFullStack = self._widget.findChild(QCheckBox,"FullStackTrackGenButton")

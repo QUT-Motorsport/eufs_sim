@@ -5,7 +5,7 @@ from random import randrange, uniform
 import rospy
 from scipy.special import binom
 from LauncherUtilities import calculate_tangent_angle, cap_angle, cap_angle_odd, magnitude, normalize_vec
-
+import numpy as np
 
 """
 ###############################################################################
@@ -86,6 +86,8 @@ class TrackGenerator:
 	MAX_TRACK_LENGTH = 1500
 	LAX_GENERATION = False
 	TRACK_MODE = "Circle&Line"
+	IGNORE_INTERSECTIONS = True #debugging parameter to stop generation from failing due to self-intersections
+	DEBUG_INFO = True #debugging parameter to notify user when intersection fails
 
 	def __init__(self):
 		pass
@@ -179,8 +181,8 @@ class TrackGenerator:
 		for a in allPresets:
 			if a[0] == name:
 				return a[1]
-		ROSERR("No such preset: " + name)
-		ROSERR("Defaulting to Contest Rules")
+		rospy.logerr("No such preset: " + name)
+		rospy.logerr("Defaulting to Contest Rules")
 		return get_preset("Contest Rules")
 
 	@staticmethod
@@ -217,10 +219,11 @@ class TrackGenerator:
 			(xys,twidth,theight) = generateFunction((0,0))
 			xys2 = [(int(x[0]),int(x[1])) for x in xys]
 			xys2 = compactify_points(xys2)
-			overlapped = check_if_overlap(xys2)
+			overlapped = check_if_overlap(xys2) and not TrackGenerator.IGNORE_INTERSECTIONS
 			if overlapped:
-				#rospy.logerr("Overlap check failed")
+				if TRACK_GENERATOR.DEBUG_INFO: rospy.logerr("Overlap check failed")
 				print("Oops!  The track intersects itself too much.  Retrying...")
+		rospy.logerr("Yalala")
 		return (xys,twidth,theight)
 
 	
@@ -305,29 +308,53 @@ def generate_autocross_trackdrive_track(startpoint):
 		xys.extend(generated)
 
 		#Now we want to set checkpoints to pass through:
+		#The magic numbers here are effectively random.  They serve to make the track not follow an exact square.	
+		#They could be replaced by a small random number generator, but since these numbers work well I wouldn't bother.
 		goalpoints = [	(startpoint[0]+TrackGenerator.MAX_TRACK_LENGTH*0.08,startpoint[1]),
 				(startpoint[0]+TrackGenerator.MAX_TRACK_LENGTH*0.12,startpoint[1]+TrackGenerator.MAX_TRACK_LENGTH*0.08),
 				(startpoint[0]-TrackGenerator.MAX_TRACK_LENGTH*0.03,startpoint[1]+TrackGenerator.MAX_TRACK_LENGTH*0.12)]
+
+		
+		###Testing vvv
+		testtan = uniform(0,2*math.pi)
+		testcase = (100,0)
+		(generated, curpoint, deltalength,outnormal) = \
+			generate_constant_turn_until_facing_point(
+				startpoint,
+				50,
+				testtan,
+				testcase,
+				(-math.sin(testtan),math.cos(testtan)),
+				turnagainstnormal=True)
+		curTrackLength += deltalength
+		xys.extend(generated)
+		xys.append(testcase)
+		return convert_points_to_all_positive(xys)
+		###Testing ^^^
+		
+
 		for goalpoint in goalpoints:
 			(generated, curpoint, length) = generate_path_from_point_to_point(curpoint,goalpoint,calculate_tangent_angle(xys),fuzzradius=20)
 			curTrackLength+= length
 			xys.extend(generated)
 			#Now let's do early-checking for overlaps
 			test = compactify_points([(int(x[0]),int(x[1])) for x in xys])
-			if check_if_overlap(test): 
-				#rospy.logerr("Early Overlap Checking: Failed")
+			rospy.logerr("Yamaha 2000")
+			if check_if_overlap(test) and not TrackGenerator.IGNORE_INTERSECTIONS: 
+				if TrackGenerator.DEBUG_INFO: rospy.logerr("Early Overlap Checking: Failed")
 				return (test,0,0)
 
 		#Now lets head back to the start:
 		#We're gonna set a checkpoint that is close but not exactly the start point
 		#so that we have breathing room for the final manouever:
+		rospy.logerr("Yamaha 2001")
 		(generated, curpoint, length) = generate_path_from_point_to_point(curpoint,\
 										(startpoint[0]-TrackGenerator.MAX_STRAIGHT*0.5,\
 										startpoint[1]+TrackGenerator.MAX_CONSTANT_TURN*1.5),\
 										calculate_tangent_angle(xys),fuzzradius=0)
 		curTrackLength+= length
 		xys.extend(generated)
-
+		rospy.logerr("Yamaha 2002")
 		#Now we will add a circle to point directly away from the startpoint
 		goalTangent = (-math.cos(startangle),-math.sin(startangle))
 		goalPoint = startpoint
@@ -343,24 +370,27 @@ def generate_autocross_trackdrive_track(startpoint):
 								circleRadius,
 								initialTangentAngle,
 								circlepercent=circleTurnPercent,
-								turnleft=True)
+								turnagainstnormal=True)
 		curTrackLength+=length
 		xys.extend(generated)
+		rospy.logerr("Yamaha 2003")
 
 		#Add a circle to turn 180 degrees to face the start point directly
 		#Radius is calculated by finding distance when projected along the normal
 		outnormal = normalize_vec(outnormal)
 		diff = ( curpoint[0]-startpoint[0],curpoint[1]-startpoint[1] )
 		circleRadius2 = (diff[0]*outnormal[0]+diff[1]*outnormal[1])/2
-		(generated, curpoint, length, _) = generate_constant_turn(curpoint,circleRadius2,calculate_tangent_angle(xys),circlepercent=0.5,turnleft=True)
+		(generated, curpoint, length, _) = generate_constant_turn(curpoint,circleRadius2,calculate_tangent_angle(xys),circlepercent=0.5,turnagainstnormal=True)
 		curTrackLength+=length
 		xys.extend(generated)
+		rospy.logerr("Yamaha 2004")
 
 		#Finally, add a straight to connect it to the start
 		straightLength = magnitude( ( xys[-1][0] - startpoint[0], xys[-1][1] - startpoint[1] ) )*1.1
 		(generated, curpoint, deltalength) = generate_straight(curpoint, straightLength ,calculate_tangent_angle(xys))
 		curTrackLength += deltalength
 		xys.extend(generated)
+		rospy.logerr("Yamaha 2005")
 
 		if not TrackGenerator.LAX_GENERATION:
 			#Check if accidentally created too big of a straight
@@ -414,8 +444,7 @@ def generate_path_from_point_to_point(startpoint,endpoint,intangent,depth=20,hai
 	thenormal = (1,math.tan(normalangle))
 
 	#Now let's actually draw the circle!
-	(generated, curpoint,deltalength,output_normal) = generate_constant_turn_until_facing_point(startpoint,circleradius,intangent,endpoint,
-													turnagainstnormal = thenormal)
+	(generated, curpoint,deltalength,output_normal) = generate_constant_turn_until_facing_point(startpoint,circleradius,intangent,endpoint,thenormal)
 	length += deltalength
 	points.extend(generated)
 
@@ -443,7 +472,7 @@ def generate_path_from_point_to_point(startpoint,endpoint,intangent,depth=20,hai
 		points.extend(generated)
 		#We'll either do a random cturn or a random hairpin, then continue the journey
 		cturn_or_hairpin = uniform(0,1)
-		makecturn = cturn_or_hairpin < 0.7
+		makecturn = cturn_or_hairpin < 0.9
 		if makecturn or (hairpined and not manyhairpins):#cturn
 			(generated, curpoint,deltalength,output_normal) = generate_constant_turn(curpoint,
 											uniform(TrackGenerator.MIN_CONSTANT_TURN,TrackGenerator.MAX_CONSTANT_TURN),
@@ -521,7 +550,7 @@ def generate_hairpin_turn(startpoint,radius,intangent,switchbacknum=None,turnlef
 
 		#cturn
 		(generated, curpoint,deltalength,lastnormal) = generate_constant_turn(curpoint,circlesize,curtangent,
-										circlepercent=wobbliness,turnleft=turnleft,
+										circlepercent=wobbliness,
 										turnagainstnormal=lastnormal)
 		length += deltalength
 		points.extend(generated)
@@ -538,181 +567,116 @@ def generate_hairpin_turn(startpoint,radius,intangent,switchbacknum=None,turnlef
 	return (points,points[-1],length)
 
 
-def generate_constant_turn_until_facing_point(startpoint,radius,intangent,goalpoint,turnleft=None,turnagainstnormal=None,recursed=False):
+def generate_constant_turn_until_facing_point(startpoint,radius,intangent,goalpoint,normal,turnagainstnormal=False):
 	#This is a split-off version of generate_constant_turn, where instead of taking in a percent to turn around a circle,
 	#We give it a direction we want it to stop at
-	(startx,starty) = startpoint
 
-	#cturns have a choices - turn left or turn right
-	#Then, they can choose what percent of the circle do they want to turn?
-	turnleft = uniform(0,1)<0.5 		if turnleft == None 		else turnleft
 
-	#Calculating this is fairly complicated
-	#Angle of circle normal = 90 degrees + intangent
-	#Slope of normal = -tan(90+normal) if turn left or tan(90+normal) if turn right
-	#Center is at startpoint + (r/sqrt( 1+m^2 )   ,   m*r*sqrt( 1+m^2 )) 
-	circnorm = math.pi/2 + intangent
-	slope    = math.tan(circnorm)
-	purex = radius/math.sqrt( 1+slope*slope )
-	if turnleft:
-		purex*=-1
+	#Calculate some preliminary information
+	s = startpoint
+	r = radius
+	n = normal if turnagainstnormal else (-normal[0],-normal[1])
+	n = normalize_vec(n)
+	g = goalpoint
+	c = (s[0]+r*n[0],s[1]+r*n[1])
+	cg = (c[0]-g[0],c[1]-g[1])
+	gc = (-cg[0],-cg[1])
+	sc = (s[0]-c[0],s[1]-c[1])
+	t = (math.cos(intangent),math.sin(intangent))
+	x = magnitude( gc )
+	if abs(r/x) > 1:
+		return generate_constant_turn_until_facing_point(startpoint,x,intangent,goalpoint,normal,turnagainstnormal)
 
-	centerx = startx + purex
-	centery = starty + slope*purex
 
-	#Now we use a rotation matrix to parameterize intermediate points:
-	#Given start S and center C, any point on the circle angle A away is:
-	#R_A[S-C] + C
-	#Let us box this up in a nice function:
-	def intermediatePoint(s,c,a):
-		(sx,sy) = s
-		(cx,cy) = c
-		cosa    = math.cos(a)
-		sina    = math.sin(a)
-		delx    = sx-cx
-		dely    = sy-cy
-		resultx = cosa*delx-sina*dely+cx
-		resulty = sina*delx+cosa*dely+cy
-		return (resultx,resulty)
+	#Figure out what quadrant we will have to depart the circle at (see team wiki for diagram)
+	basis_changer = np.matrix( [ [t[0],n[0]],[t[1],n[1]] ] )
 
-	def sgn(x):
-		return -1 if x < 0 else 1 if x > 0 else 0
+	old_g = np.matrix( [[gc[0]],[gc[1]]] )
+	g_prime = np.matmul(basis_changer,old_g)
+	quadrant = 1
+	if (g_prime[0] >= 0 and -r <= g_prime[1] and g_prime[1] <= 0) or (g_prime[0] >= r and -r <= g_prime[1]):
+		quadrant = 1
+	elif (g_prime[1] >= 0 and 0 <= g_prime[0] and g_prime[0] <= r) or (g_prime[1] >= r and g_prime[0] <= r):
+		quadrant = 2
+	elif (g_prime[0] <= 0 and 0 <= g_prime[1] and g_prime[1] <= r) or (g_prime[0] <= -r and g_prime[1] <= r):
+		quadrant = 3
+	else:
+		quadrant = 4
 
-	angle = 2*math.pi
-	flipper = -1 if intangent*purex > 0 else 1 #multiply by purex because we want to re-flip here if we flipped due to "turnleft"
-
-	if turnagainstnormal != None:
-		#In this case, we want to make sure it turns away from the inputted normal vector
-		#So if normal=(a,b) we want to make sure its (-a,-b)
-		#This is the same as changing turnleft
-		#So first we want to compute the current normal to make sure we don't change anything
-		#Current normal will be:
-		#points[0][0]-centerx,points[0][1]-centery
-		#So we pre-compute the points[0][a] since we haven't yet:
-		points_0 = intermediatePoint(startpoint,(centerx,centery),0)
-		curnormal = normalize_vec((points_0[0]-centerx,points_0[1]-centery))
-		turnagainstnormal = normalize_vec(turnagainstnormal)
 	
-		#Due to floating point stuffs, we won't check direct equality, we'll just look at the sign!
-		#We want normals to be flipped, so its bad if curnormal has the same sign!
-		#We also only need to check both components just in the case where the normal is (0,y)
-		needtoflip = abs(curnormal[0]-turnagainstnormal[0])<0.1 or abs(curnormal[1]-turnagainstnormal[1])<0.1
+	#For each quadrant, we need to move what is considered the "start point"
+	#By 90 degrees (see Track Generation guide on team wiki for reasoning)
+	quadrant_angle = (quadrant-1) * math.pi/2
+	quadrant_rotater = np.matrix( [ [math.cos(quadrant_angle),-math.sin(quadrant_angle)],[math.sin(quadrant_angle),math.cos(quadrant_angle)] ] )
+	old_s = None
+	swap_factor = -1 if turnagainstnormal else 1
+	if quadrant == 1:
+		old_s = np.matrix( [[sc[0]],[sc[1]]] )
+	elif quadrant == 2:
+		old_s = np.matrix( [[sc[0]],[swap_factor*sc[1]]] )
+	elif quadrant == 3:
+		old_s = np.matrix( [[sc[0]],[sc[1]]] )
+	else:
+		old_s = np.matrix( [[sc[0]],[swap_factor*sc[1]]] )
+	new_s = np.matmul(quadrant_rotater,old_s)
 
-		if needtoflip:
-			#print("Flipping!")
-			centerx-=2*purex
-			centery-=2*slope*purex
-			flipper*=-1
-	points = []
-	rangemax = 5000
-	stepsize = 1.0/rangemax
-	for t in range(0,rangemax):
-		points.append(intermediatePoint(startpoint,(centerx,centery),flipper*t*angle*stepsize))
-		if t!=0:
-			#Check if we're pointing in the right direction
-			#This equates to checking if endpoint lies on the line at points[-1] with the appropriate tangent.
-			(sx,sy) = points[-1]
-			(ex,ey) = goalpoint
-			appropriate_angle = calculate_tangent_angle(points)
-			if t > 0.5*rangemax and not recursed:
-				#Very big turn, we don't like that!  We'll just turn the other way instead
-				newturnagainstnormal = None if turnagainstnormal == None else normalize_vec((-turnagainstnormal[1],turnagainstnormal[0]))
-				return generate_constant_turn_until_facing_point(startpoint,radius,intangent,goalpoint,turnleft=turnleft,
-											turnagainstnormal=newturnagainstnormal,recursed=True)
-			if abs(cap_angle(appropriate_angle) - cap_angle(math.atan2((ey-sy),(ex-sx)))) < 0.01:
-				#Would do equality checking but limited precision, we just check if close!
-				#If so, break as we've succeeded our task
-				#print("Found goal at t=" + str(t))
-				break
+
+	#Finally, voila
+	dot = gc[0]*new_s[0] + gc[1]*new_s[1]
+	first_acos = math.acos(r/x)
+	second_acos = math.acos(dot/(x*r))
+
+
+	theta = second_acos-first_acos + quadrant_angle
+
+	cp = theta/(math.pi*2)
+
+	toReturn = generate_constant_turn(startpoint,radius,intangent,circlepercent = cp,turnagainstnormal = turnagainstnormal)
+	return toReturn
+
+
+def get_parametric_circle(start_angle,end_angle,center_point,radius):
+	#We can calculate points on a circle using a rotation matrix
+	def output(sa,ea,cp,r,t):
+		def lerp_angle(s,e,t_):
+			return (e-s)*t_+s
+		a       = lerp_angle(sa,ea,t)
+		rot_mat = np.matrix( [ [math.cos(a),-math.sin(a)],[math.sin(a),math.cos(a)] ] )
+		to_rot  = [[r],[0]]
+		direc   = np.matmul( rot_mat,to_rot)
+		return (cp[0]-direc.item(0),cp[1]+direc.item(1))
+	return lambda t: output(start_angle,end_angle,center_point,radius,t)
+
+def generate_constant_turn(startpoint,radius,intangent,circlepercent=None,turnagainstnormal=None):
+	turnagainstnormal = uniform(0,1)<0.5 		if turnagainstnormal == None 		else turnagainstnormal
+	circlepercent     = uniform(0.1,0.2)		if circlepercent == None 		else circlepercent
+
+
+	tangent_vec = (math.cos(intangent), math.sin(intangent))
+	normal_vec  = (-math.sin(intangent),math.cos(intangent))
+	if turnagainstnormal: 
+		normal_vec = (-normal_vec[0],-normal_vec[1])
+	center = (startpoint[0]+normal_vec[0]*radius,startpoint[1]+normal_vec[1]*radius)
+	shifted_start = (startpoint[0]-center[0],startpoint[1]-center[1])
+	start_angle = math.atan2( shifted_start[1],shifted_start[0]-1 )
+	end_angle   = start_angle + circlepercent*math.pi*2
+
+
+	circle_function = get_parametric_circle(start_angle,end_angle,center,radius)
+
+	fidelity = 100.0
+	points = [circle_function((t if turnagainstnormal else -t)/fidelity) for t in range(0,int(fidelity)+1)]
 
 	#Length of circle is, fortunately, easy!  It's simply radius*angle
-	length = angle*radius
+	length = circlepercent*math.pi*2*radius
 
 	#Now we want to find the normal vector, because it's useful to have to determine whether it curves inwards or outwards
 	#Normal vectors are always parallel to the vector from center to end point
-	normal = (points[-1][0]-centerx,points[-1][1]-centery)
+	normal = (points[-1][0]-center[0],points[-1][1]-center[1])
 
 	#Returns a list of points and the new edge of the racetrack and the change in length
 	return (points,points[-1],length,normal)
-
-
-
-def generate_constant_turn(startpoint,radius,intangent,turnleft=None,circlepercent=None,turnagainstnormal=None):
-	(startx,starty) = startpoint
-
-	#cturns have a choices - turn left or turn right
-	#Then, they can choose what percent of the circle do they want to turn?
-	turnleft = uniform(0,1)<0.5 		if turnleft == None 		else turnleft
-	circlepercent = uniform(0.1,0.2)	if circlepercent == None 	else circlepercent
-
-	#Calculating this is fairly complicated
-	#Angle of circle normal = 90 degrees + intangent
-	#Slope of normal = -tan(90+normal) if turn left or tan(90+normal) if turn right
-	#Center is at startpoint + (r/sqrt( 1+m^2 )   ,   m*r*sqrt( 1+m^2 )) 
-	circnorm = math.pi/2 + intangent
-	slope    = math.tan(circnorm)
-	purex = radius/math.sqrt( 1+slope*slope )
-	if turnleft:
-		purex*=-1
-
-	centerx = startx + purex
-	centery = starty + slope*purex
-
-	#Now we use a rotation matrix to parameterize intermediate points:
-	#Given start S and center C, any point on the circle angle A away is:
-	#R_A[S-C] + C
-	#Let us box this up in a nice function:
-	def intermediatePoint(s,c,a):
-		(sx,sy) = s
-		(cx,cy) = c
-		cosa    = math.cos(a)
-		sina    = math.sin(a)
-		delx    = sx-cx
-		dely    = sy-cy
-		resultx = cosa*delx-sina*dely+cx
-		resulty = sina*delx+cosa*dely+cy
-		return (resultx,resulty)
-
-	def sgn(x):
-		return -1 if x < 0 else 1 if x > 0 else 0
-
-	angle = 2*math.pi*circlepercent
-	flipper = -1 if intangent*purex > 0 else 1 #multiply by purex because we want to re-flip here if we flipped due to "turnleft"
-
-	if turnagainstnormal != None:
-		#In this case, we want to make sure it turns away from the inputted normal vector
-		#So if normal=(a,b) we want to make sure its (-a,-b)
-		#This is the same as changing turnleft
-		#So first we want to compute the current normal to make sure we don't change anything
-		#Current normal will be:
-		#points[0][0]-centerx,points[0][1]-centery
-		#So we pre-compute the points[0][a] since we haven't yet:
-		points_0 = intermediatePoint(startpoint,(centerx,centery),0)
-		curnormal = normalize_vec((points_0[0]-centerx,points_0[1]-centery))
-		turnagainstnormal = normalize_vec(turnagainstnormal)
 	
-		#Due to floating point stuffs, we won't check direct equality, we'll just look at the sign!
-		#We want normals to be flipped, so its bad if curnormal has the same sign!
-		#We also only need to check both components just in the case where the normal is (0,y)
-		needtoflip = abs(curnormal[0]-turnagainstnormal[0])<0.1 or abs(curnormal[1]-turnagainstnormal[1])<0.1
-
-		if needtoflip:
-			#print("Flipping!")
-			centerx-=2*purex
-			centery-=2*slope*purex
-			flipper*=-1
-
-	points = [intermediatePoint(startpoint,(centerx,centery),flipper*t*angle*0.001) for t in range(0,1000)]
-
-	#Length of circle is, fortunately, easy!  It's simply radius*angle
-	length = angle*radius
-
-	#Now we want to find the normal vector, because it's useful to have to determine whether it curves inwards or outwards
-	#Normal vectors are always parallel to the vector from center to end point
-	normal = (points[-1][0]-centerx,points[-1][1]-centery)
-
-	#Returns a list of points and the new edge of the racetrack and the change in length
-	return (points,points[-1],length,normal)
 
 def generate_straight(startpoint,length,angle):
 	(startx,starty) = startpoint
