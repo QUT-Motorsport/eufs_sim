@@ -316,8 +316,8 @@ def generate_autocross_trackdrive_track(startpoint):
 
 		
 		###Testing vvv
-		testtan = 0#uniform(0,2*math.pi)
-		testcase = (-100,-100)
+		testtan = uniform(0,2*math.pi)
+		testcase = (100,0)
 		(generated, curpoint, deltalength,outnormal) = \
 			generate_constant_turn_until_facing_point(
 				startpoint,
@@ -325,7 +325,7 @@ def generate_autocross_trackdrive_track(startpoint):
 				testtan,
 				testcase,
 				(-math.sin(testtan),math.cos(testtan)),
-				turnagainstnormal=False)
+				turnagainstnormal=True)
 		curTrackLength += deltalength
 		xys.extend(generated)
 		xys.append(testcase)
@@ -584,13 +584,6 @@ def generate_constant_turn_until_facing_point(startpoint,radius,intangent,goalpo
 	sc = (s[0]-c[0],s[1]-c[1])
 	t = (math.cos(intangent),math.sin(intangent))
 	x = magnitude( gc )
-
-	rospy.logerr("====")
-	rospy.logerr(s)
-	rospy.logerr(t)
-	rospy.logerr(n)
-	rospy.logerr("====")
-
 	if abs(r/x) > 1:
 		return generate_constant_turn_until_facing_point(startpoint,x,intangent,goalpoint,normal,turnagainstnormal)
 
@@ -616,14 +609,15 @@ def generate_constant_turn_until_facing_point(startpoint,radius,intangent,goalpo
 	quadrant_angle = (quadrant-1) * math.pi/2
 	quadrant_rotater = np.matrix( [ [math.cos(quadrant_angle),-math.sin(quadrant_angle)],[math.sin(quadrant_angle),math.cos(quadrant_angle)] ] )
 	old_s = None
+	swap_factor = -1 if turnagainstnormal else 1
 	if quadrant == 1:
 		old_s = np.matrix( [[sc[0]],[sc[1]]] )
 	elif quadrant == 2:
-		old_s = np.matrix( [[sc[0]],[sc[1]]] )
+		old_s = np.matrix( [[sc[0]],[swap_factor*sc[1]]] )
 	elif quadrant == 3:
 		old_s = np.matrix( [[sc[0]],[sc[1]]] )
 	else:
-		old_s = np.matrix( [[sc[0]],[sc[1]]] )
+		old_s = np.matrix( [[sc[0]],[swap_factor*sc[1]]] )
 	new_s = np.matmul(quadrant_rotater,old_s)
 
 
@@ -634,14 +628,6 @@ def generate_constant_turn_until_facing_point(startpoint,radius,intangent,goalpo
 
 
 	theta = second_acos-first_acos + quadrant_angle
-
-	rospy.logerr("====")
-	rospy.logerr(s)
-	rospy.logerr(t)
-	rospy.logerr(n)
-	rospy.logerr(quadrant)
-	rospy.logerr(theta)
-	rospy.logerr("====")
 
 	cp = theta/(math.pi*2)
 
