@@ -67,14 +67,14 @@ class EufsLauncher(Plugin):
 		self.load_track_and_images()
 
 		#Get presets
-		presetnames = Generator.get_preset_names()
+		preset_names = Generator.get_preset_names()
 
 		#Add Presets to Preset Selector (always put Computer Friendly first)
-		defaultPreset = Generator.get_default_preset()
-		if defaultPreset in presetnames:
-			self._widget.findChild(QComboBox,"WhichPreset").addItem(defaultPreset)
-		for f in presetnames:
-			if f != defaultPreset:
+		default_preset = Generator.get_default_preset()
+		if default_preset in preset_names:
+			self._widget.findChild(QComboBox,"WhichPreset").addItem(default_preset)
+		for f in preset_names:
+			if f != default_preset:
 				self._widget.findChild(QComboBox,"WhichPreset").addItem(f)
 
 		#Hook up buttons to onclick functions
@@ -98,9 +98,9 @@ class EufsLauncher(Plugin):
 	        context.add_widget(self._widget)
 
 		#Miscelaneous final initializations:
-		self.hasLaunchedROS = False
-		self.launchfileoverride = None
-		self.popenprocess = None
+		self.has_launched_ros = False
+		self.launch_file_override = None
+		self.popen_process = None
 
 		#Add experimental warning to generator
 		#self._widget.findChild(QPushButton,"GenerateButton").setText("Generate Random Track\n(Experimental)")
@@ -133,11 +133,11 @@ class EufsLauncher(Plugin):
 
 		#While in the process of changing sliders, we don't want our monitor function to be rapidly firing
 		#So we toggle this variable when ready
-		self.ignoreSliderChanges = False
+		self.ignore_slider_changes = False
 
 		#Setup Lax Generation button
-		laxButton = self._widget.findChild(QCheckBox,"LaxCheckBox")
-		laxButton.setChecked(self.LAX_GENERATION)
+		lax_botton = self._widget.findChild(QCheckBox,"LaxCheckBox")
+		lax_botton.setChecked(self.LAX_GENERATION)
 		
 		#Setup Conversion Tools dropdowns
 		for f in ["launch","png","csv"]:
@@ -151,26 +151,26 @@ class EufsLauncher(Plugin):
 		self._widget.findChild(QComboBox,"FileForConversion").currentTextChanged.connect(self.update_copier)
 
 		#Prep midpoints checkbox
-		midpointBox = self._widget.findChild(QCheckBox,"MidpointBox")
-		cvto = self._widget.findChild(QComboBox,"ConvertTo").currentText()
-		#midpointBox.setVisible(cvto=="csv" or cvto=="ALL")
-		midpointBox.setChecked(True)
+		midpoint_box = self._widget.findChild(QCheckBox,"MidpointBox")
+		convert_to = self._widget.findChild(QComboBox,"ConvertTo").currentText()
+		#midpoint_box.setVisible(convert_to=="csv" or convert_to=="ALL")
+		midpoint_box.setChecked(True)
 
 		#Suffix checkbox
-		suffixBox = self._widget.findChild(QCheckBox,"SuffixBox")
-		suffixBox.setChecked(True)
+		suffix_box = self._widget.findChild(QCheckBox,"SuffixBox")
+		suffix_box.setChecked(True)
 
 		#Track Gen full stack checkbox
-		tgFullStack = self._widget.findChild(QCheckBox,"FullStackTrackGenButton")
-		tgFullStack.setChecked(True)
+		track_generator_full_stack = self._widget.findChild(QCheckBox,"FullStackTrackGenButton")
+		track_generator_full_stack.setChecked(True)
 
 		#Image full stack checkbox
-		imFullStack = self._widget.findChild(QCheckBox,"FullStackImageButton")
-		imFullStack.setChecked(True)
+		image_launcher_full_stack = self._widget.findChild(QCheckBox,"FullStackImageButton")
+		image_launcher_full_stack.setChecked(True)
 
 		#Copier full stack checkbox
-		cpFullStack = self._widget.findChild(QCheckBox,"FullStackCopyButton")
-		cpFullStack.setChecked(True)
+		copier_full_stack = self._widget.findChild(QCheckBox,"FullStackCopyButton")
+		copier_full_stack.setChecked(True)
 
 		#Change label to show current selected file for the copier
 		self.update_copier()
@@ -192,59 +192,59 @@ class EufsLauncher(Plugin):
 		self._widget.findChild(QComboBox,"WhichTrack").clear()
 		self._widget.findChild(QComboBox,"WhichImage").clear()
 		# Get tracks from eufs_gazebo package
-		relpath = os.path.join(rospkg.RosPack().get_path('eufs_gazebo'), 'launch')
-		launchfiles = [f for f in listdir(relpath) if isfile(join(relpath, f))]
+		relevant_path = os.path.join(rospkg.RosPack().get_path('eufs_gazebo'), 'launch')
+		launch_files = [f for f in listdir(relevant_path) if isfile(join(relevant_path, f))]
 
 		#Remove "blacklisted" files (ones that don't define tracks)
 		blacklist_ = open(os.path.join(rospkg.RosPack().get_path('eufs_gazebo'), 'launch/blacklist.txt'),"r")
 		blacklist = [f.strip() for f in blacklist_]#remove \n
-		launchfiles = [f for f in launchfiles if not f in blacklist]
+		launch_files = [f for f in launch_files if not f in blacklist]
 
 		# Add Tracks to Track Selector
-		if "small_track.launch" in launchfiles:
+		if "small_track.launch" in launch_files:
 			self._widget.findChild(QComboBox,"WhichTrack").addItem("small_track.launch")
-		for f in launchfiles:
+		for f in launch_files:
 			if f != "small_track.launch":
 				self._widget.findChild(QComboBox,"WhichTrack").addItem(f)
 
 		# Get images
-		relpath = os.path.join(rospkg.RosPack().get_path('eufs_gazebo'), 'randgen_imgs')
-		imagefiles = [f for f in listdir(relpath) if isfile(join(relpath, f))]
+		relevant_path = os.path.join(rospkg.RosPack().get_path('eufs_gazebo'), 'randgen_imgs')
+		image_files = [f for f in listdir(relevant_path) if isfile(join(relevant_path, f))]
 
 		# Add Images to Image Selector (always put rand.png first)
-		if "rand.png" in imagefiles:
+		if "rand.png" in image_files:
 			self._widget.findChild(QComboBox,"WhichImage").addItem("rand.png")
-		for f in imagefiles:
+		for f in image_files:
 			if f != "rand.png" and f[-3:] == "png":
 				self._widget.findChild(QComboBox,"WhichImage").addItem(f)
 
 	def copy_button_pressed(self):
 		self.tell_launchella("Copying...")
 		#Copy the current file
-		isFullStack = self._widget.findChild(QCheckBox,"FullStackCopyButton").isChecked()
-		fileToCopyTo = self._widget.findChild(QLineEdit,"RenameFileTextbox").text()
-		fileToCopyFrom = self._widget.findChild(QComboBox,"FileForConversion").currentText()
-		rawName_to = fileToCopyTo.split(".")[0]
-		rawName_from = fileToCopyFrom.split(".")[0]
-		ending = fileToCopyFrom.split(".")[-1]
+		is_full_stack = self._widget.findChild(QCheckBox,"FullStackCopyButton").isChecked()
+		file_to_copy_to = self._widget.findChild(QLineEdit,"RenameFileTextbox").text()
+		file_to_copy_from = self._widget.findChild(QComboBox,"FileForConversion").currentText()
+		raw_name_to = file_to_copy_to.split(".")[0]
+		raw_name_from = file_to_copy_from.split(".")[0]
+		ending = file_to_copy_from.split(".")[-1]
 
-		if len(fileToCopyTo) == 0:#Don't let them create null-named files
+		if len(file_to_copy_to) == 0:#Don't let them create null-named files
 			return
 
 		if ending == "launch":
 			#For launch files, we also need to move around the model folders
-			if not os.path.exists(os.path.join(rospkg.RosPack().get_path('eufs_description'), 'models',rawName_to)):
-				os.mkdir(os.path.join(rospkg.RosPack().get_path('eufs_description'), 'models',rawName_to))
-			path_from = os.path.join(rospkg.RosPack().get_path('eufs_description'), 'models',rawName_from,"model.sdf")
-			path_to   = os.path.join(rospkg.RosPack().get_path('eufs_description'), 'models',rawName_to,"model.sdf")
+			if not os.path.exists(os.path.join(rospkg.RosPack().get_path('eufs_description'), 'models',raw_name_to)):
+				os.mkdir(os.path.join(rospkg.RosPack().get_path('eufs_description'), 'models',raw_name_to))
+			path_from = os.path.join(rospkg.RosPack().get_path('eufs_description'), 'models',raw_name_from,"model.sdf")
+			path_to   = os.path.join(rospkg.RosPack().get_path('eufs_description'), 'models',raw_name_to,"model.sdf")
 			Converter.copy_file(path_from,path_to)
 
-			path_from = os.path.join(rospkg.RosPack().get_path('eufs_description'), 'models',rawName_from,"model.config")
-			path_to   = os.path.join(rospkg.RosPack().get_path('eufs_description'), 'models',rawName_to,"model.config")
+			path_from = os.path.join(rospkg.RosPack().get_path('eufs_description'), 'models',raw_name_from,"model.config")
+			path_to   = os.path.join(rospkg.RosPack().get_path('eufs_description'), 'models',raw_name_to,"model.config")
 			Converter.copy_file(path_from,path_to)
 			
-			path_from = os.path.join(rospkg.RosPack().get_path('eufs_gazebo'), 'launch',fileToCopyFrom)
-			path_to   = os.path.join(rospkg.RosPack().get_path('eufs_gazebo'),'launch',rawName_to+"."+ending)
+			path_from = os.path.join(rospkg.RosPack().get_path('eufs_gazebo'), 'launch',file_to_copy_from)
+			path_to   = os.path.join(rospkg.RosPack().get_path('eufs_gazebo'),'launch',raw_name_to+"."+ending)
 			Converter.copy_file(path_from,path_to)
 
 			#If full stack copying, convert to all file formats
@@ -252,8 +252,8 @@ class EufsLauncher(Plugin):
 				Converter.convert("launch","ALL",path_to,params=[self.get_noise_level()])
 
 		elif ending == "png":
-			path_from = os.path.join(rospkg.RosPack().get_path('eufs_gazebo'), 'randgen_imgs',fileToCopyFrom)
-			path_to   = os.path.join(rospkg.RosPack().get_path('eufs_gazebo'),'randgen_imgs',rawName_to+"."+ending)
+			path_from = os.path.join(rospkg.RosPack().get_path('eufs_gazebo'), 'randgen_imgs',file_to_copy_from)
+			path_to   = os.path.join(rospkg.RosPack().get_path('eufs_gazebo'),'randgen_imgs',raw_name_to+"."+ending)
 			Converter.copy_file(path_from,path_to)
 
 			#If full stack copying, convert to all file formats
@@ -261,8 +261,8 @@ class EufsLauncher(Plugin):
 				Converter.convert("png","ALL",path_to,params=[self.get_noise_level()])
 
 		elif ending == "csv":
-			path_from = os.path.join(rospkg.RosPack().get_path('eufs_gazebo'), 'tracks',fileToCopyFrom)
-			path_to   = os.path.join(rospkg.RosPack().get_path('eufs_gazebo'),'tracks',rawName_to+"."+ending)
+			path_from = os.path.join(rospkg.RosPack().get_path('eufs_gazebo'), 'tracks',file_to_copy_from)
+			path_to   = os.path.join(rospkg.RosPack().get_path('eufs_gazebo'),'tracks',raw_name_to+"."+ending)
 			Converter.copy_file(path_from,path_to)
 
 			#If full stack copying, convert to all file formats
@@ -273,69 +273,69 @@ class EufsLauncher(Plugin):
 
 	def update_copier(self):
 		#Change label to show current selected file for the copier
-		copyHead = self._widget.findChild(QLabel,"RenameFileHeader")
-		copyHead.setText("Copy: "+self._widget.findChild(QComboBox,"FileForConversion").currentText())
+		copy_head = self._widget.findChild(QLabel,"RenameFileHeader")
+		copy_head.setText("Copy: "+self._widget.findChild(QComboBox,"FileForConversion").currentText())
 
 	def update_midpoints_box(self):
 		#Toggle checkbox
-		cvto = self._widget.findChild(QComboBox,"ConvertTo").currentText()
-		#self._widget.findChild(QCheckBox,"MidpointBox").setVisible(cvto=="csv" or cvto=="ALL")
+		convert_to = self._widget.findChild(QComboBox,"ConvertTo").currentText()
+		#self._widget.findChild(QCheckBox,"MidpointBox").setVisible(convert_to=="csv" or convert_to=="ALL")
 
 	def update_converter_dropdown(self):
-		fromType = self._widget.findChild(QComboBox,"ConvertFrom").currentText()
-		allfiles = []
+		from_type = self._widget.findChild(QComboBox,"ConvertFrom").currentText()
+		all_files = []
 
-		if fromType == "launch":
+		if from_type == "launch":
 			# Get tracks from eufs_gazebo package
-			relpath = os.path.join(rospkg.RosPack().get_path('eufs_gazebo'), 'launch')
-			launchfiles = [f for f in listdir(relpath) if isfile(join(relpath, f))]
+			relevant_path = os.path.join(rospkg.RosPack().get_path('eufs_gazebo'), 'launch')
+			launch_files = [f for f in listdir(relevant_path) if isfile(join(relevant_path, f))]
 	
 			#Remove "blacklisted" files (ones that don't define tracks)
 			blacklist_ = open(os.path.join(rospkg.RosPack().get_path('eufs_gazebo'), 'launch/blacklist.txt'),"r")
 			blacklist = [f.strip() for f in blacklist_]#remove \n
-			allfiles = [f for f in launchfiles if not f in blacklist]
-		elif fromType == "png":
+			all_files = [f for f in launch_files if not f in blacklist]
+		elif from_type == "png":
 			# Get images
-			relpath = os.path.join(rospkg.RosPack().get_path('eufs_gazebo'), 'randgen_imgs')
-			allfiles = [f for f in listdir(relpath) if isfile(join(relpath, f))]
-		elif fromType == "csv":
+			relevant_path = os.path.join(rospkg.RosPack().get_path('eufs_gazebo'), 'randgen_imgs')
+			all_files = [f for f in listdir(relevant_path) if isfile(join(relevant_path, f))]
+		elif from_type == "csv":
 			#Get csvs
-			relpath = os.path.join(rospkg.RosPack().get_path('eufs_gazebo'), 'tracks')
-			allfiles = [f for f in listdir(relpath) if isfile(join(relpath, f)) and f[-3:]=="csv"]
+			relevant_path = os.path.join(rospkg.RosPack().get_path('eufs_gazebo'), 'tracks')
+			all_files = [f for f in listdir(relevant_path) if isfile(join(relevant_path, f)) and f[-3:]=="csv"]
 
 		#Remove old files from selector
-		theSelector = self._widget.findChild(QComboBox,"FileForConversion")
-		theSelector.clear()
+		the_selector = self._widget.findChild(QComboBox,"FileForConversion")
+		the_selector.clear()
 
 		# Add files to selector
-		for f in allfiles:
-			theSelector.addItem(f)
+		for f in all_files:
+			the_selector.addItem(f)
 
 		self.update_copier()
 
 	def update_preset(self):
 		which = self._widget.findChild(QComboBox,"WhichPreset").currentText()
-		presetData = Generator.get_preset(which)
-		self.MIN_STRAIGHT   = presetData[0]
-		self.MAX_STRAIGHT   = presetData[1]
-		self.MIN_CTURN      = presetData[2]
-		self.MAX_CTURN      = presetData[3]
-		self.MIN_HAIRPIN    = presetData[4]*2
-		self.MAX_HAIRPIN    = presetData[5]*2
-		self.HAIRPIN_PAIRS  = presetData[6]
-		self.MAX_LENGTH     = presetData[7]
-		self.LAX_GENERATION = presetData[8]
+		preset_data = Generator.get_preset(which)
+		self.MIN_STRAIGHT   = preset_data[0]
+		self.MAX_STRAIGHT   = preset_data[1]
+		self.MIN_CTURN      = preset_data[2]
+		self.MAX_CTURN      = preset_data[3]
+		self.MIN_HAIRPIN    = preset_data[4]*2
+		self.MAX_HAIRPIN    = preset_data[5]*2
+		self.HAIRPIN_PAIRS  = preset_data[6]
+		self.MAX_LENGTH     = preset_data[7]
+		self.LAX_GENERATION = preset_data[8]
 		self._widget.findChild(QCheckBox,"LaxCheckBox").setChecked(self.LAX_GENERATION)
 
 	def keep_track_of_preset_changes(self):
 		self._widget.findChild(QComboBox,"WhichPreset") .currentTextChanged.connect(self.preset_changed)
 
 	def preset_changed(self):
-		self.ignoreSliderChanges = True
+		self.ignore_slider_changes = True
 		self.update_preset()
 		self.keep_params_up_to_date()
 		self.keep_sliders_up_to_date()
-		self.ignoreSliderChanges = False
+		self.ignore_slider_changes = False
 
 	def keep_track_of_slider_changes(self):
 		self._widget.findChild(QSlider,"Param_MIN_STRAIGHT") .valueChanged.connect(self.slider_changed)
@@ -348,7 +348,7 @@ class EufsLauncher(Plugin):
 		self._widget.findChild(QSlider,"Param_MAX_LENGTH")   .valueChanged.connect(self.slider_changed)
 		
 	def slider_changed(self):
-		if self.ignoreSliderChanges: return
+		if self.ignore_slider_changes: return
 		self.keep_variables_up_to_date()
 		self.keep_params_up_to_date()
 
@@ -391,24 +391,24 @@ class EufsLauncher(Plugin):
 		#		Hairpins are between 0 and 20, and have half-step rather than integer step (hence scaling by 2s)
 		#		Hairpin pairs are between 0 and 5
 		#               Max Length is between 200 and 2000
-		minstraight = 0
-		maxstraight = 150
-		minturn = 0
-		maxturn = 50
-		minhairpin = 0
-		maxhairpin = 20
-		minhairpinpairs = 0
-		maxhairpinpairs = 5
-		minmaxlength = 200
-		maxmaxlength = 2000
-		self.set_slider_data("Param_MIN_STRAIGHT",minstraight,maxstraight)
-		self.set_slider_data("Param_MAX_STRAIGHT",minstraight,maxstraight)
-		self.set_slider_data("Param_MIN_CTURN",minturn,maxturn)
-		self.set_slider_data("Param_MAX_CTURN",minturn,maxturn)
-		self.set_slider_data("Param_MIN_HAIRPIN",minhairpin*2,maxhairpin*2)
-		self.set_slider_data("Param_MAX_HAIRPIN",minhairpin*2,maxhairpin*2)
-		self.set_slider_data("Param_HAIRPIN_PAIRS",minhairpinpairs,maxhairpinpairs)
-		self.set_slider_data("Param_MAX_LENGTH",minmaxlength,maxmaxlength)
+		min_straight = 0
+		max_straight = 150
+		min_turn = 0
+		max_turn = 50
+		min_hairpin = 0
+		max_hairpin = 20
+		min_hairpin_pairs = 0
+		max_hairpin_pairs = 5
+		min_max_length = 200
+		max_max_length = 2000
+		self.set_slider_data("Param_MIN_STRAIGHT",min_straight,max_straight)
+		self.set_slider_data("Param_MAX_STRAIGHT",min_straight,max_straight)
+		self.set_slider_data("Param_MIN_CTURN",min_turn,max_turn)
+		self.set_slider_data("Param_MAX_CTURN",min_turn,max_turn)
+		self.set_slider_data("Param_MIN_HAIRPIN",min_hairpin*2,max_hairpin*2)
+		self.set_slider_data("Param_MAX_HAIRPIN",min_hairpin*2,max_hairpin*2)
+		self.set_slider_data("Param_HAIRPIN_PAIRS",min_hairpin_pairs,max_hairpin_pairs)
+		self.set_slider_data("Param_MAX_LENGTH",min_max_length,max_max_length)
 		
 	def get_slider_value(self,slidername):
 		slider = self._widget.findChild(QSlider,slidername)
@@ -446,10 +446,10 @@ class EufsLauncher(Plugin):
 		im = Converter.convert("xys","png",(xys,twidth,theight))
 
 		#If full stack selected, convert into csv and launch as well
-		tgFullStack = self._widget.findChild(QCheckBox,"FullStackTrackGenButton")
-		if tgFullStack.isChecked():
-			imgpath = os.path.join(rospkg.RosPack().get_path('eufs_gazebo'), 'randgen_imgs/rand.png')
-			Converter.convert("png","ALL",imgpath,params=[self.get_noise_level()])
+		track_generator_full_stack = self._widget.findChild(QCheckBox,"FullStackTrackGenButton")
+		if track_generator_full_stack.isChecked():
+			img_path = os.path.join(rospkg.RosPack().get_path('eufs_gazebo'), 'randgen_imgs/rand.png')
+			Converter.convert("png","ALL",img_path,params=[self.get_noise_level()])
 
 		self.tell_launchella("Track Gen Complete!")
 
@@ -459,73 +459,73 @@ class EufsLauncher(Plugin):
 
 	def track_from_image_button_pressed(self):
 		self.tell_launchella("Preparing to launch image as a track... ")
-		fname = self._widget.findChild(QComboBox,"WhichImage").currentText()
-		fname_full = os.path.join(rospkg.RosPack().get_path('eufs_gazebo'), 'randgen_imgs/'+fname)
-		imFullStack = self._widget.findChild(QCheckBox,"FullStackImageButton")
-		if imFullStack.isChecked():
-			Converter.convert("png","ALL",fname_full,params=[self.get_noise_level()])
+		filename = self._widget.findChild(QComboBox,"WhichImage").currentText()
+		filename_full = os.path.join(rospkg.RosPack().get_path('eufs_gazebo'), 'randgen_imgs/'+filename)
+		image_launcher_full_stack = self._widget.findChild(QCheckBox,"FullStackImageButton")
+		if image_launcher_full_stack.isChecked():
+			Converter.convert("png","ALL",filename_full,params=[self.get_noise_level()])
 		else:
-			Converter.convert("png","launch",fname_full,params=[self.get_noise_level()])
+			Converter.convert("png","launch",filename_full,params=[self.get_noise_level()])
 
-		self.launchfileoverride = fname[:-4] + ".launch"
+		self.launch_file_override = filename[:-4] + ".launch"
 		self.load_track_and_images()
 		self.launch_button_pressed()
 
 	
 
 	def get_noise_level(self):
-		noiseLevelWidget = self._widget.findChild(QSlider,"Noisiness")
-		return (1.0*(noiseLevelWidget.value()-noiseLevelWidget.minimum()))/(noiseLevelWidget.maximum()-noiseLevelWidget.minimum())
+		noise_level_widget = self._widget.findChild(QSlider,"Noisiness")
+		return (1.0*(noise_level_widget.value()-noise_level_widget.minimum()))/(noise_level_widget.maximum()-noise_level_widget.minimum())
 
 	def convert_button_pressed(self):
-		fromtype = self._widget.findChild(QComboBox,"ConvertFrom").currentText()
-		totype   = self._widget.findChild(QComboBox,"ConvertTo").currentText()
+		from_type = self._widget.findChild(QComboBox,"ConvertFrom").currentText()
+		to_type   = self._widget.findChild(QComboBox,"ConvertTo").currentText()
 		filename = self._widget.findChild(QComboBox,"FileForConversion").currentText()
-		self.tell_launchella("Conversion Button Pressed!  From: " + fromtype + " To: " + totype + " For: " + filename)
-		midpointWidget = self._widget.findChild(QCheckBox,"MidpointBox")
-		if fromtype == "png":
+		self.tell_launchella("Conversion Button Pressed!  From: " + from_type + " To: " + to_type + " For: " + filename)
+		midpoint_widget = self._widget.findChild(QCheckBox,"MidpointBox")
+		if from_type == "png":
 			filename = os.path.join(rospkg.RosPack().get_path('eufs_gazebo'), 'randgen_imgs/'+filename)
-		elif fromtype == "launch":
+		elif from_type == "launch":
 			filename = os.path.join(rospkg.RosPack().get_path('eufs_gazebo'), 'launch/'+filename)
-		elif fromtype == "csv":
+		elif from_type == "csv":
 			filename = os.path.join(rospkg.RosPack().get_path('eufs_gazebo'), 'tracks/'+filename)
 		suffix = "_CT" if self._widget.findChild(QCheckBox,"SuffixBox").isChecked() else ""
-		Converter.convert(fromtype,totype,filename,
-					params=[self.get_noise_level(),midpointWidget.isVisible() and midpointWidget.isChecked()],conversion_suffix=suffix)
+		Converter.convert(from_type,to_type,filename,
+					params=[self.get_noise_level(),midpoint_widget.isVisible() and midpoint_widget.isChecked()],conversion_suffix=suffix)
 		self.load_track_and_images()
-		self.tell_launchella("Conversion Succeeded!  From: " + fromtype + " To: " + totype + " For: " + filename)
+		self.tell_launchella("Conversion Succeeded!  From: " + from_type + " To: " + to_type + " For: " + filename)
 
 	def launch_button_pressed(self):
-		if self.hasLaunchedROS:
+		if self.has_launched_ros:
 			#Don't let people press launch twice
 			#There's not really any reason why not to, but it's "undefined behavior"
 			return
-		self.hasLaunchedROS = True
+		self.has_launched_ros = True
 
 		self.tell_launchella("--------------------------")
 		self.tell_launchella("\t\t\tLaunching Nodes...")
-		trackToLaunch = self.launchfileoverride #if we have set a specific file to run regardless of selected file
-		self.launchfileoverride = None          #such as when we use the random generator
-		if not trackToLaunch:
-			trackToLaunch = self._widget.findChild(QComboBox,"WhichTrack").currentText()
-		self.tell_launchella("Launching " + trackToLaunch)
-		noiseLevel = self.get_noise_level()
-		self.tell_launchella("With Noise Level: " + str(noiseLevel))
+		track_to_launch = self.launch_file_override #if we have set a specific file to run regardless of selected file
+		self.launch_file_override = None          #such as when we use the random generator
+		if not track_to_launch:
+			track_to_launch = self._widget.findChild(QComboBox,"WhichTrack").currentText()
+		self.tell_launchella("Launching " + track_to_launch)
+		noise_level = self.get_noise_level()
+		self.tell_launchella("With Noise Level: " + str(noise_level))
 		
-		controlMethod = "controlMethod:=speed"
+		control_method = "controlMethod:=speed"
 		if self._widget.findChild(QRadioButton,"SpeedRadio").isChecked():
 			self.tell_launchella("With Speed Controls")
-			controlMethod = "controlMethod:=speed"
+			control_method = "controlMethod:=speed"
 		elif self._widget.findChild(QRadioButton,"TorqueRadio").isChecked():
 			self.tell_launchella("With Torque Controls")
-			controlMethod = "controlMethod:=torque"
+			control_method = "controlMethod:=torque"
 		
 		#Ideally we would use the commented out 'launch' lines, but the ROSLaunchParent API does not allow sending arguments in Kinetic >:(
 		#So we have to settle for launching this process using Python's Popen instead of the rospy API functions.
-		if self.popenprocess:
+		if self.popen_process:
 			self.process.kill()
-		self.popenprocess = self.launch_node_with_args(os.path.join(rospkg.RosPack().get_path('eufs_gazebo'), 'launch', trackToLaunch),[controlMethod])
-		#launch = roslaunch.parent.ROSLaunchParent(uuid, [os.path.join(rospkg.RosPack().get_path('eufs_gazebo'), 'launch', trackToLaunch)])
+		self.popen_process = self.launch_node_with_args(os.path.join(rospkg.RosPack().get_path('eufs_gazebo'), 'launch', track_to_launch),[control_method])
+		#launch = roslaunch.parent.ROSLaunchParent(uuid, [os.path.join(rospkg.RosPack().get_path('eufs_gazebo'), 'launch', track_to_launch)])
 		#launch.start()
 		#self.launches.append(launch)
 
@@ -540,11 +540,11 @@ class EufsLauncher(Plugin):
 		#Burn it all to the ground
 		Popen(["killall","-9","gzserver"])
 		Popen(["killall","-9","gzclient"])
-		extranodes = rosnode.get_node_names()
-		extranodes.remove('/rosout')
-		extranodes = [f for f in extranodes if f[:17] != '/rqt_gui_py_node_'] #remove the gui's node from kill list
-		for badnode in extranodes:
-			Popen(["rosnode","kill",badnode])
+		extra_nodes= rosnode.get_node_names()
+		extra_nodes.remove('/rosout')
+		extra_nodes= [f for f in extra_nodes if f[:17] != '/rqt_gui_py_node_'] #remove the gui's node from kill list
+		for bad_node in extra_nodes:
+			Popen(["rosnode","kill",bad_node])
 
 
 	def save_settings(self, plugin_settings, instance_settings):
@@ -586,18 +586,18 @@ class EufsLauncher(Plugin):
 
 		#Trying to kill here will make a horrible bug
 		#no idea why.  You'll want: "killall -9 gzserver gzclient" to fix it
-		#if self.popenprocess != None:
-		#	self.popenprocess.kill()
-		#	self.popenprocess = None
+		#if self.popen_process != None:
+		#	self.popen_process.kill()
+		#	self.popen_process = None
 
 		#NUKE IT! (seriously just nuke it)
 		#self.nuke_ros()
 
-		extranodes = rosnode.get_node_names()
-		extranodes.remove("/eufs_launcher")
-		extranodes.remove("/rosout")
-		if (len(extranodes)>0):
-			rospy.logerr("Warning, after shutting down the launcher, these nodes are still running: " + str(extranodes))
+		extra_nodes= rosnode.get_node_names()
+		extra_nodes.remove("/eufs_launcher")
+		extra_nodes.remove("/rosout")
+		if (len(extra_nodes)>0):
+			rospy.logerr("Warning, after shutting down the launcher, these nodes are still running: " + str(extra_nodes))
 
 		nodes_to_kill = [	"/cone_ground_truth",
 					"/eufs/controller_spawner",
@@ -609,15 +609,15 @@ class EufsLauncher(Plugin):
 					"/spawn_platform",
 					"/eufs_sim_rqt",
 				]
-		for badnode in extranodes:
-			if badnode in nodes_to_kill:
-				Popen(["rosnode","kill",badnode])
+		for bad_node in extra_nodes:
+			if bad_node in nodes_to_kill:
+				Popen(["rosnode","kill",bad_node])
 		time.sleep(1)
-		extranodes = rosnode.get_node_names()
-		extranodes.remove("/eufs_launcher")
-		extranodes.remove("/rosout")
-		if len(extranodes)>0:
-			rospy.logerr("Pruned to: " + str(extranodes))
+		extra_nodes= rosnode.get_node_names()
+		extra_nodes.remove("/eufs_launcher")
+		extra_nodes.remove("/rosout")
+		if len(extra_nodes)>0:
+			rospy.logerr("Pruned to: " + str(extra_nodes))
 
 	#def trigger_configuration(self):
 		# Comment in to signal that the plugin has a way to configure
