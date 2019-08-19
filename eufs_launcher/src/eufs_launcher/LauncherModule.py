@@ -184,7 +184,6 @@ class EufsLauncher(Plugin):
 		QApplication.processEvents() 
 
 	def sketcher_button_pressed(self):
-		rospy.logerr("Opening sketcher...")
 		loadUi(self.sketcher_ui_file, self._widget)
 
 	def load_track_and_images(self):
@@ -532,7 +531,7 @@ class EufsLauncher(Plugin):
 
 		if self._widget.findChild(QCheckBox,"VisualisatorCheckbox").isChecked():
 			self.tell_launchella("And With LIDAR Data Visualisator.")
-			self.launch_node(os.path.join(rospkg.RosPack().get_path('eufs_description'), "launch/visualisator.launch"))
+			self.launch_node(os.path.join(rospkg.RosPack().get_path('eufs_description'), "launch","visualisator.launch"))
 		self.tell_launchella("As I have fulfilled my purpose in guiding you to launch a track, this launcher will no longer react to input.")
 
 	def nuke_ros(self):
@@ -566,7 +565,8 @@ class EufsLauncher(Plugin):
 			self.popens.append(process)
 			return process
 		else:
-			launch = roslaunch.parent.ROSLaunchParent(self.uuid, filepath)
+			rospy.logerr("FP: " + filepath)
+			launch = roslaunch.parent.ROSLaunchParent(self.uuid, [filepath])
 			launch.start()
 			self.launches.append(launch)
 			return launch
@@ -596,7 +596,8 @@ class EufsLauncher(Plugin):
 		extra_nodes= rosnode.get_node_names()
 		extra_nodes.remove("/eufs_launcher")
 		extra_nodes.remove("/rosout")
-		if (len(extra_nodes)>0):
+		left_open = len(extra_nodes)
+		if (left_open>0):
 			rospy.logerr("Warning, after shutting down the launcher, these nodes are still running: " + str(extra_nodes))
 
 		nodes_to_kill = [	"/cone_ground_truth",
@@ -612,11 +613,12 @@ class EufsLauncher(Plugin):
 		for bad_node in extra_nodes:
 			if bad_node in nodes_to_kill:
 				Popen(["rosnode","kill",bad_node])
-		time.sleep(1)
+		Popen(["killall","-9","gzserver"])
+		time.sleep(0.25)
 		extra_nodes= rosnode.get_node_names()
 		extra_nodes.remove("/eufs_launcher")
 		extra_nodes.remove("/rosout")
-		if len(extra_nodes)>0:
+		if left_open>0:
 			rospy.logerr("Pruned to: " + str(extra_nodes))
 
 	#def trigger_configuration(self):

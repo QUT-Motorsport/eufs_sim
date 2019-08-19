@@ -237,7 +237,7 @@ class ConversionTools:
 
 			cone_normal_distance_parameter = 8
 			cone_closeness_parameter = 6
-			cone_check_amount = 20
+			cone_check_amount = 30
 
 			cur_point = xys[i]
 			cur_tangent_angle = calculate_tangent_angle(xys[:(i+1)])
