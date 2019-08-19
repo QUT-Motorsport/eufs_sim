@@ -26,7 +26,7 @@ This branch is in active development.  It is intended to add the following featu
 
 [√] Speed up track generation (has been improved by tenfold)
 
-[*] Fix bug where visualisator crashes when launcher tries to launch it
+[√] Fix bug where visualisator crashes when launcher tries to launch it
 
 It is an offshoot from the `devel-trackgen-2019-summer` branch, which already has added vast improvements to the launcher from `master`.
 
