@@ -14,7 +14,7 @@ This branch is in active development.  It is intended to add the following featu
 
 *  [√] PEP8 Function Names
 *  [*] PEP8 Variable Names
-*  [*] Factor out utilities into their own file
+*  [√] Factor out utilities into their own file
 *  [*] Tabs to spaces ( :( )
 
 [√] Have launcher auto-update file lists after using ConversionTools
@@ -22,6 +22,8 @@ This branch is in active development.  It is intended to add the following featu
 [√] Improve dangling node kill method so that it's not so indescriminant
 
 [√] Heuristics to avoid self-intersection in track generator
+
+[√] Speed up track generation (has been improved by tenfold)
 
 It is an offshoot from the `devel-trackgen-2019-summer` branch, which already has added vast improvements to the launcher from `master`.
 
