@@ -17,25 +17,25 @@ import pandas as pd
 #		(since the end user shouldn't have to care about the distinction)
 #.png
 #.csv
-#raw data ("xys",this will be hidden from the user as it is only used to convert into .pngs)
+#raw_ data ("xys",this will be hidden from the user as it is only used to convert into .pngs)
 class ConversionTools:
 	def __init__():
 		pass
 
 	# Define colors for track gen and image reading
-	noisecolor = (0,255,255,255)	#cyan, the turquoise turqouise wishes it were
-	bgcolor = (255,255,255,255)	#white
-	conecolor  = (255,0,255,255)	#magenta, for yellow cones (oops...)
-	conecolor2 = (0,0,255,255)	#blue, for blue cones
-	carcolor = (0,255,0,255)	#green
-	trackcenter = (0,0,0,255)	#black
-	trackinner = (255,0,0,255)	#red
-	trackouter = (255,255,0,255)	#yellow
-	conecolorOrange = (255,165,0,255) #orange, for orange cones
-	conecolorBigOrange = (127,80,0,255) #dark orange, for big orange cones	
+	noise_color = (0,255,255,255)	#cyan, the turquoise turqouise wishes it were
+	background_color = (255,255,255,255)	#white
+	cone_color  = (255,0,255,255)	#magenta, for yellow cones (oops...)
+	cone_color_blue = (0,0,255,255)	#blue, for blue cones
+	car_color = (0,255,0,255)	#green
+	track_center = (0,0,0,255)	#black
+	track_inner = (255,0,0,255)	#red
+	track_outer = (255,255,0,255)	#yellow
+	cone_color_orange = (255,165,0,255) #orange, for orange cones
+	cone_color_big_orange = (127,80,0,255) #dark orange, for big orange cones	
 
 	#Other various retained parameters
-	linknum = -1
+	link_num = -1
 	TRACKIMG_VERSION_NUM = 1
 
 	#######################################################################################################################################################
@@ -71,17 +71,17 @@ class ConversionTools:
 
 
 	@staticmethod
-	def get_raw_metadata(pixelvalue,mode="continuous"):
+	def get_raw__metadata(pixel_value,mode="continuous"):
 		#This function converts metadata as outlined in the specification for Track Images on the team wiki
 		#It assumes that handling of the cases (255,255,255,255) and (r,g,b,0) are done outside this function.
-		(r,g,b,a) = pixelvalue
+		(r,g,b,a) = pixel_value
 		if mode == "continuous":
 			return a-1 + (b-1)*254 + (g-1)*254**2 + (r-1)*254**3
 		return None
 
 	@staticmethod
-	def unget_raw_metadata(metadata,mode="continuous"):
-		#Undoes the process of get_raw_metadata()
+	def unget_raw__metadata(metadata,mode="continuous"):
+		#Undoes the process of get_raw__metadata()
 		if mode == "continuous":
 			a = metadata % 254
 			metadata = (metadata - a) // 254
@@ -94,43 +94,43 @@ class ConversionTools:
 		return None
 
 	@staticmethod
-	def convert_scale_metadata(pixelvalues):
+	def convert_scale_metadata(pixel_values):
 		#This function converts the data obtained from scale metadata pixels into actual scale information
 		#Output range is from 0.0001 to 100.
 		
-		primaryPixel = pixelvalues[0]
-		secondaryPixel = pixelvalues[1]#unused in the specification
+		primary_pixel = pixel_values[0]
+		secondary_pixel = pixel_values[1]#unused in the specification
 
-		if primaryPixel == (255,255,255,255) and secondaryPixel == (255,255,255,255): return 1 #Check for the default case
+		if primary_pixel == (255,255,255,255) and secondary_pixel == (255,255,255,255): return 1 #Check for the default case
 
-		metadata = ConversionTools.get_raw_metadata(primaryPixel,mode="continuous")
+		metadata = ConversionTools.get_raw__metadata(primary_pixel,mode="continuous")
 		#Want to linearly transform the metadata, a range from 0 to 254**4-1, to the range 0.0001 to 100
-		toReturn = metadata/(254**4-1.0) * (100-0.0001) + 0.0001
-		return toReturn
+		to_return = metadata/(254**4-1.0) * (100-0.0001) + 0.0001
+		return to_return
 
 
 	@staticmethod
 	def deconvert_scale_metadata(data):
-		#This function converts a raw scale value into a list of metadata pixels needed to replicate it.
+		#This function converts a raw_ scale value into a list of metadata pixels needed to replicate it.
 		#First in list is the primary metadata pixel, second in list is the secondary (which is unused in the specification)
 		metadata = int((data-0.0001)/(100-0.0001) * (254**4-1))
-		primaryPixel = ConversionTools.unget_raw_metadata(metadata)
-		secondaryPixel = (255,255,255,255)
-		return [primaryPixel,secondaryPixel]
+		primary_pixel = ConversionTools.unget_raw__metadata(metadata)
+		secondary_pixel = (255,255,255,255)
+		return [primary_pixel,secondary_pixel]
 
 	@staticmethod
-	def convert_version_metadata(pixelvalues):
+	def convert_version_metadata(pixel_values):
 		#This function converts the data obtained from scale metadata pixels into actual scale information
 		#Output range is from 0 to 254**4-1
-		primaryPixel = pixelvalues[0]
-		if primaryPixel == (255,255,255,255): return 0
-		metadata = ConversionTools.get_raw_metadata(primaryPixel)
+		primary_pixel = pixel_values[0]
+		if primary_pixel == (255,255,255,255): return 0
+		metadata = ConversionTools.get_raw__metadata(primary_pixel)
 		return metadata
 
 	@staticmethod
 	def deconvert_version_metadata(data):
 		#This function is the reverse transformation as convert_version_metadata
-		return [ConversionTools.unget_raw_metadata(data)]
+		return [ConversionTools.unget_raw__metadata(data)]
 		
 
 	#######################################################################################################################################################
@@ -194,9 +194,9 @@ class ConversionTools:
 
 		#Convert data to image format
 		draw.polygon([(0,0),(twidth,0),(twidth,theight),(0,theight),(0,0)],fill='white')#background
-		draw.line(xys,fill=ConversionTools.trackouter,width=5)#track full width
-		draw.line(xys,fill=ConversionTools.trackinner,width=3)#track innards
-		draw.line(xys,fill=ConversionTools.trackcenter)#track center
+		draw.line(xys,fill=ConversionTools.track_outer,width=5)#track full width
+		draw.line(xys,fill=ConversionTools.track_inner,width=3)#track innards
+		draw.line(xys,fill=ConversionTools.track_center)#track center
 
 
 		pixels = im.load()#get reference to pixel data
@@ -211,15 +211,15 @@ class ConversionTools:
 		angle = math.atan2(ey-sy,ex-sx)#[-pi,pi] but we want [0,2pi]
 		if angle < 0:
 			angle+=2*math.pi
-		pixelValue = int(angle/(2*math.pi)*254+1) # it is *254+1 because we never want it to be 0
-		if pixelValue > 255: pixelValue = 255
-		if pixelValue <   1: pixelValue =   1
-		colorforcar = (ConversionTools.carcolor[0],ConversionTools.carcolor[1],ConversionTools.carcolor[2],pixelValue)
+		pixel_value = int(angle/(2*math.pi)*254+1) # it is *254+1 because we never want it to be 0
+		if pixel_value > 255: pixel_value = 255
+		if pixel_value <   1: pixel_value =   1
+		colorforcar = (ConversionTools.car_color[0],ConversionTools.car_color[1],ConversionTools.car_color[2],pixel_value)
 
 		draw.line([xys[0],xys[0]],fill=colorforcar)#car position
 
-		def istrack(c):
-			return c == ConversionTools.trackouter or c == ConversionTools.trackinner or c == ConversionTools.trackcenter
+		def is_track(c):
+			return c == ConversionTools.track_outer or c == ConversionTools.track_inner or c == ConversionTools.track_center
 
 		#Now we want to make all pixels bordering the track become magenta (255,0,255) - this will be our 'cone' color
 		#To find pixel boardering track, simply find white pixel adjacent to a non-white non-magenta pixle
@@ -227,56 +227,56 @@ class ConversionTools:
 
 		pixels = im.load()#get reference to pixel data
 
-		prevPointNorth = (-10000,-10000)
-		prevPointSouth = (-10000,-10000)
+		prev_point_north = (-10000,-10000)
+		prev_point_south = (-10000,-10000)
 		print("Placing Cones...")
 		for i in range(len(xys)):
 			if i == 0: continue #skip first part [as hard to calculate tangent]
 		
 			#The idea here is to place cones along normals to the tangent at any given point, while making sure they aren't too close.
 
-			coneNormalDistanceParameter = 8
-			coneClosenessParameter = 6
-			coneCheckAmount = 30
+			cone_normal_distance_parameter = 8
+			cone_closeness_parameter = 6
+			cone_check_amount = 20
 
-			curPoint = xys[i]
-			curTangentAngle = calculate_tangent_angle(xys[:(i+1)])
-			curTangentNormal = (math.ceil(coneNormalDistanceParameter*math.sin(curTangentAngle)),
-						math.ceil(-coneNormalDistanceParameter*math.cos(curTangentAngle)))
-			northPoint = ( int ( curPoint[0]+curTangentNormal[0] ) , int ( curPoint[1]+curTangentNormal[1] ) )
-			southPoint = ( int ( curPoint[0]-curTangentNormal[0] ) , int ( curPoint[1]-curTangentNormal[1] ) )
+			cur_point = xys[i]
+			cur_tangent_angle = calculate_tangent_angle(xys[:(i+1)])
+			cur_tangent_normal = (math.ceil(cone_normal_distance_parameter*math.sin(cur_tangent_angle)),
+						math.ceil(-cone_normal_distance_parameter*math.cos(cur_tangent_angle)))
+			north_point = ( int ( cur_point[0]+cur_tangent_normal[0] ) , int ( cur_point[1]+cur_tangent_normal[1] ) )
+			south_point = ( int ( cur_point[0]-cur_tangent_normal[0] ) , int ( cur_point[1]-cur_tangent_normal[1] ) )
 
-			differenceFromPrevNorth = (northPoint[0]-prevPointNorth[0])**2+(northPoint[1]-prevPointNorth[1])**2
-			differenceFromPrevSouth = (southPoint[0]-prevPointSouth[0])**2+(southPoint[1]-prevPointSouth[1])**2
-			crossDistanceNS = (northPoint[0]-prevPointSouth[0])**2+(northPoint[1]-prevPointSouth[1])**2
-			crossDistanceSN = (southPoint[0]-prevPointNorth[0])**2+(southPoint[1]-prevPointNorth[1])**2
+			difference_from_prev_north = (north_point[0]-prev_point_north[0])**2+(north_point[1]-prev_point_north[1])**2
+			difference_from_prev_south = (south_point[0]-prev_point_south[0])**2+(south_point[1]-prev_point_south[1])**2
+			cross_distance_ns = (north_point[0]-prev_point_south[0])**2+(north_point[1]-prev_point_south[1])**2
+			cross_distance_sn = (south_point[0]-prev_point_north[0])**2+(south_point[1]-prev_point_north[1])**2
 
 			#Here we ensure cones don't get too close to the track
-			distancePN = min([(northPoint[0]-xy[0])**2+(northPoint[1]-xy[1])**2 
-						for xy in xys[ max([0,i-coneCheckAmount]) : min([len(xys),i+coneCheckAmount])  ]])
-			distancePS = min([(southPoint[0]-xy[0])**2+(southPoint[1]-xy[1])**2 
-						for xy in xys[ max([0,i-coneCheckAmount]) : min([len(xys),i+coneCheckAmount])  ]])
+			distance_pn = min([(north_point[0]-xy[0])**2+(north_point[1]-xy[1])**2 
+						for xy in xys[ max([0,i-cone_check_amount]) : min([len(xys),i+cone_check_amount])  ]])
+			distance_ps = min([(south_point[0]-xy[0])**2+(south_point[1]-xy[1])**2 
+						for xy in xys[ max([0,i-cone_check_amount]) : min([len(xys),i+cone_check_amount])  ]])
 
-			northViable = differenceFromPrevNorth > coneClosenessParameter**2 \
-						and crossDistanceNS > coneClosenessParameter**2 \
-						and distancePN > coneClosenessParameter**2
-			southViable = differenceFromPrevSouth > coneClosenessParameter**2 \
-						and crossDistanceSN > coneClosenessParameter**2 \
-						and distancePS > coneClosenessParameter**2
+			north_viable = difference_from_prev_north > cone_closeness_parameter**2 \
+						and cross_distance_ns > cone_closeness_parameter**2 \
+						and distance_pn > cone_closeness_parameter**2
+			south_viable = difference_from_prev_south > cone_closeness_parameter**2 \
+						and cross_distance_sn > cone_closeness_parameter**2 \
+						and distance_ps > cone_closeness_parameter**2
 
-			if not istrack(pixels[int(northPoint[0]),int(northPoint[1])]) and northViable:
-				pixels[int(northPoint[0]),int(northPoint[1])]=ConversionTools.conecolor
-				prevPointNorth = northPoint
-			if not istrack(pixels[int(southPoint[0]),int(southPoint[1])]) and southViable:
-				pixels[int(southPoint[0]),int(southPoint[1])]=ConversionTools.conecolor
-				prevPointSouth = southPoint
+			if not is_track(pixels[int(north_point[0]),int(north_point[1])]) and north_viable:
+				pixels[int(north_point[0]),int(north_point[1])]=ConversionTools.cone_color
+				prev_point_north = north_point
+			if not is_track(pixels[int(south_point[0]),int(south_point[1])]) and south_viable:
+				pixels[int(south_point[0]),int(south_point[1])]=ConversionTools.cone_color
+				prev_point_south = south_point
 
 		
 
 		#We want to make the track have differing cone colors - yellow on inside, blue on outside
 		#All cones are currently yellow.  We'll do a "breadth-first-search" for any cones reachable
 		#from (0,0) and call those the 'outside' [(0,0) always blank as image is padded)]
-		def getAllowedAdjacents(explolist,curpix):
+		def get_allowed_adjacents(explolist,curpix):
 			(i,j) = curpix
 			allowed = []
 			if i > 0:
@@ -293,21 +293,21 @@ class ConversionTools:
 					allowed.append((i,j+1))
 			return allowed
 		print("Coloring cones...")
-		exploredlist = set([])
+		explored_list = set([])
 		frontier = set([(0,0)])
 		while len(frontier)>0:
-			newfrontier = set([])
+			new_frontier = set([])
 			for f in frontier:
 				(i,j) = f
 				pix = pixels[i,j]
-				if pix == ConversionTools.conecolor:
-					pixels[i,j] = ConversionTools.conecolor2
-					newfrontier.update(getAllowedAdjacents(exploredlist,(i,j)))
-				elif pix == ConversionTools.bgcolor:
-					newfrontier.update(getAllowedAdjacents(exploredlist,(i,j)))
-				exploredlist.add(f)
-			frontier = newfrontier
-			#curexplored = len(exploredlist)
+				if pix == ConversionTools.cone_color:
+					pixels[i,j] = ConversionTools.cone_color_blue
+					new_frontier.update(get_allowed_adjacents(explored_list,(i,j)))
+				elif pix == ConversionTools.background_color:
+					new_frontier.update(get_allowed_adjacents(explored_list,(i,j)))
+				explored_list.add(f)
+			frontier = new_frontier
+			#curexplored = len(explored_list)
 			#maxexplored = twidth*theight*1.0
 			#print("Max Percent: " + str(curexplored/maxexplored))
 				
@@ -318,9 +318,9 @@ class ConversionTools:
 		for i in range(im.size[0]):
 			for j in range(im.size[1]):
 				if i<5 or j<5 or i>=im.size[0]-5 or j>=im.size[0]-5: continue#don't add noise in margin
-				if pixels[i,j] == ConversionTools.bgcolor:
+				if pixels[i,j] == ConversionTools.background_color:
 					if uniform(0,100) < 1:#1% covered maximal noise
-						pixels[i,j] = ConversionTools.noisecolor
+						pixels[i,j] = ConversionTools.noise_color
 
 		#Add margins (as specified by the file format)
 		margin = 5
@@ -359,19 +359,19 @@ class ConversionTools:
 		#	randgen_model_template/model.sdf
 		GENERATED_FILENAME = what.split('/')[-1][:-4]+conversion_suffix#[:-4] to split off .png, looks like an emoji...
 		im = Image.open(what)
-		noiseLevel = params[0]
+		noise_level = params[0]
 		pixels = im.load()
 
 		#Let's get the scale metadata from the png:
-		scaledata = ConversionTools.convert_scale_metadata([
+		scale_data = ConversionTools.convert_scale_metadata([
 							ConversionTools.get_metadata_pixel(0,0,"Top Left",pixels,im.size),
 							ConversionTools.get_metadata_pixel(1,0,"Top Left",pixels,im.size)])
-		#scaledata represents how big a pixel is.
+		#scale_data represents how big a pixel is.
 
 		#Let's also get the version number - we don't need it, 
 		#but in the future if breaking changes are made to the Track Image specification then it will become important.
 		loc = ConversionTools.get_metadata_pixel_location(4,4,"Bottom Right",im.size)
-		versionNumber = ConversionTools.convert_version_metadata([pixels[loc[0],loc[1]]])
+		version_number = ConversionTools.convert_version_metadata([pixels[loc[0],loc[1]]])
 
 		#.launch:
 		launch_template = open(os.path.join(rospkg.RosPack().get_path('eufs_launcher'), 'resource/randgen_launch_template'),"r")
@@ -379,23 +379,23 @@ class ConversionTools:
 		launch_merged = "".join(launch_template)
 		launch_merged = GENERATED_FILENAME.join(launch_merged.split("%FILLNAME%"))
 
-		def xCoordTransform(x):
+		def x_coord_transform(x):
 			return x-50
-		def yCoordTransform(y):
+		def y_coord_transform(y):
 			return y-50
-		def isCarColor(x):
-			return x[:-1]==ConversionTools.carcolor[:-1]
-		def rotationTransform(x):
+		def is_car_color(x):
+			return x[:-1]==ConversionTools.car_color[:-1]
+		def rotation_transform(x):
 			return 2*math.pi*((x-1)/254.0)#we never allow alpha to equal 0
 
 		#Get PLACEX,PLACEY (look for (0,255,0,a))
 		for i in range(im.size[0]):
 			for j in range(im.size[1]):
 				p = pixels[i,j]
-				if isCarColor(p):
-					launch_merged = str(xCoordTransform(i*scaledata)).join(launch_merged.split("%PLACEX%"))
-					launch_merged = str(yCoordTransform(j*scaledata)).join(launch_merged.split("%PLACEY%"))
-					launch_merged = str(rotationTransform(p[3])).join(launch_merged.split("%PLACEROTATION%"))
+				if is_car_color(p):
+					launch_merged = str(x_coord_transform(i*scale_data)).join(launch_merged.split("%PLACEX%"))
+					launch_merged = str(y_coord_transform(j*scale_data)).join(launch_merged.split("%PLACEY%"))
+					launch_merged = str(rotation_transform(p[3])).join(launch_merged.split("%PLACEROTATION%"))
 
 		launch_out = open(os.path.join(rospkg.RosPack().get_path('eufs_gazebo'), 'launch/'+GENERATED_FILENAME+".launch"),"w")
 		launch_out.write(launch_merged)
@@ -413,9 +413,9 @@ class ConversionTools:
 
 		#model:
 		#First we create the folder
-		folderpath = os.path.join(rospkg.RosPack().get_path('eufs_description'), 'models',GENERATED_FILENAME)
-		if not os.path.exists(folderpath):
-			os.mkdir(folderpath)
+		folder_path = os.path.join(rospkg.RosPack().get_path('eufs_description'), 'models',GENERATED_FILENAME)
+		if not os.path.exists(folder_path):
+			os.mkdir(folder_path)
 		else:
 			print("Overwrote old " + GENERATED_FILENAME)
 
@@ -432,69 +432,69 @@ class ConversionTools:
 		#Now the real meat of this, the .sdf
 		sdf_template = open(os.path.join(rospkg.RosPack().get_path('eufs_launcher'), 'resource/randgen_model_template/model.sdf'),"r")
 		#params = %FILLNAME% %FILLDATA%
-		#ModelParams = %PLACEX% %PLACEY% %MODELNAME% %FILLCOLLISION% %LINKNUM%
+		#ModelParams = %PLACEX% %PLACEY% %MODELNAME% %FILLCOLLISION% %link_num%
 		sdf_merged = "".join(sdf_template)
-		sdf_splitagain = sdf_merged.split("$===$")
+		sdf_split_again = sdf_merged.split("$===$")
 
-		#sdf_splitagain:
+		#sdf_split_again:
 		#	0: Main body of sdf file
 		#	1: Outline of mesh visual
 		#	2: Outline of mesh collision data
 		#	3: Noisecube collision data, meant for noise as a low-complexity collision to prevent falling out the world
-		sdf_main = sdf_splitagain[0]
-		sdf_model = sdf_splitagain[3].join(sdf_splitagain[1].split("%FILLCOLLISION%"))
-		sdf_model_with_collisions = sdf_splitagain[2].join(sdf_splitagain[1].split("%FILLCOLLISION%"))
-		sdf_ghostmodel = sdf_splitagain[3].join(sdf_splitagain[4].split("%FILLCOLLISION%"))
-		sdf_ghostmodel_with_collisions = sdf_splitagain[2].join(sdf_splitagain[4].split("%FILLCOLLISION%"))
+		sdf_main = sdf_split_again[0]
+		sdf_model = sdf_split_again[3].join(sdf_split_again[1].split("%FILLCOLLISION%"))
+		sdf_model_with_collisions = sdf_split_again[2].join(sdf_split_again[1].split("%FILLCOLLISION%"))
+		sdf_ghost_model = sdf_split_again[3].join(sdf_split_again[4].split("%FILLCOLLISION%"))
+		sdf_ghost_model_with_collisions = sdf_split_again[2].join(sdf_split_again[4].split("%FILLCOLLISION%"))
 
 		sdf_main = GENERATED_FILENAME.join(sdf_main.split("%FILLNAME%"))
 
-		sdf_blueconemodel = "model://eufs_description/meshes/cone_blue.dae".join(sdf_model_with_collisions.split("%MODELNAME%"))
-		sdf_yellowconemodel = "model://eufs_description/meshes/cone_yellow.dae".join(sdf_model_with_collisions.split("%MODELNAME%"))
-		sdf_orangeconemodel = "model://eufs_description/meshes/cone.dae".join(sdf_model_with_collisions.split("%MODELNAME%"))
-		sdf_bigorangeconemodel = "model://eufs_description/meshes/cone_big.dae".join(sdf_model_with_collisions.split("%MODELNAME%"))
+		sdf_blue_cone_model = "model://eufs_description/meshes/cone_blue.dae".join(sdf_model_with_collisions.split("%MODELNAME%"))
+		sdf_yellow_cone_model = "model://eufs_description/meshes/cone_yellow.dae".join(sdf_model_with_collisions.split("%MODELNAME%"))
+		sdf_orange_cone_model = "model://eufs_description/meshes/cone.dae".join(sdf_model_with_collisions.split("%MODELNAME%"))
+		sdf_big_orange_cone_model = "model://eufs_description/meshes/cone_big.dae".join(sdf_model_with_collisions.split("%MODELNAME%"))
 
 		#Now let's load in the noise priorities
-		noisefiles = open(os.path.join(rospkg.RosPack().get_path('eufs_launcher'), 'resource/noiseFiles.txt'),"r")
-		noisefiles = ("".join(noisefiles)).split("$===$")[1].strip().split("\n")
-		noiseweightings_ = [line.split("|") for line in noisefiles]
-		noiseweightings  = [(float(line[0]),line[1]) for line in noiseweightings_]
+		noise_files = open(os.path.join(rospkg.RosPack().get_path('eufs_launcher'), 'resource/noiseFiles.txt'),"r")
+		noise_files = ("".join(noise_files)).split("$===$")[1].strip().split("\n")
+		noise_weightings_ = [line.split("|") for line in noise_files]
+		noise_weightings  = [(float(line[0]),line[1]) for line in noise_weightings_]
 
-		def getRandomNoiseModel():
+		def get_random_noise_model():
 			randval = uniform(0,100)
-			for a in noiseweightings:
+			for a in noise_weightings:
 				if a[0]>randval:
 					return a[1]
 			return "model://eufs_description/meshes/NoiseCube.dae"
 
 		#Let's place all the models!
-		ConversionTools.linknum = -1
-		def putModelAtPosition(mod,x,y):
-			ConversionTools.linknum+=1
-			return str(ConversionTools.linknum).join( \
-				str(xCoordTransform(x)).join( \
-					str(yCoordTransform(y)).join( \
-						mod.split("%PLACEY%")).split("%PLACEX%")).split("%LINKNUM%"))
+		ConversionTools.link_num = -1
+		def put_model_at_position(mod,x,y):
+			ConversionTools.link_num+=1
+			return str(ConversionTools.link_num).join( \
+				str(x_coord_transform(x)).join( \
+					str(y_coord_transform(y)).join( \
+						mod.split("%PLACEY%")).split("%PLACEX%")).split("%link_num%"))
 
 		sdf_allmodels = ""
 		for i in range(im.size[0]):
 			for j in range(im.size[1]):
 				p = pixels[i,j]
-				if p == ConversionTools.conecolor:
-					sdf_allmodels = sdf_allmodels + "\n" + putModelAtPosition(sdf_yellowconemodel,i*scaledata,j*scaledata)
-				elif p == ConversionTools.conecolor2:
-					sdf_allmodels = sdf_allmodels + "\n" + putModelAtPosition(sdf_blueconemodel,i*scaledata,j*scaledata)
-				elif p == ConversionTools.conecolorOrange:
-					sdf_allmodels = sdf_allmodels + "\n" + putModelAtPosition(sdf_orangeconemodel,i*scaledata,j*scaledata)
-				elif p == ConversionTools.conecolorBigOrange:
-					sdf_allmodels = sdf_allmodels + "\n" + putModelAtPosition(sdf_bigorangeconemodel,i*scaledata,j*scaledata)
-				elif p == ConversionTools.noisecolor:
-					if uniform(0,1)<noiseLevel:#place noise
-						sdf_noisemodel = getRandomNoiseModel().join(sdf_model_with_collisions.split("%MODELNAME%"))
-						sdf_allmodels = sdf_allmodels + "\n" + putModelAtPosition(sdf_noisemodel,i*scaledata,j*scaledata)
+				if p == ConversionTools.cone_color:
+					sdf_allmodels = sdf_allmodels + "\n" + put_model_at_position(sdf_yellow_cone_model,i*scale_data,j*scale_data)
+				elif p == ConversionTools.cone_color_blue:
+					sdf_allmodels = sdf_allmodels + "\n" + put_model_at_position(sdf_blue_cone_model,i*scale_data,j*scale_data)
+				elif p == ConversionTools.cone_color_orange:
+					sdf_allmodels = sdf_allmodels + "\n" + put_model_at_position(sdf_orange_cone_model,i*scale_data,j*scale_data)
+				elif p == ConversionTools.cone_color_big_orange:
+					sdf_allmodels = sdf_allmodels + "\n" + put_model_at_position(sdf_big_orange_cone_model,i*scale_data,j*scale_data)
+				elif p == ConversionTools.noise_color:
+					if uniform(0,1)<noise_level:#place noise
+						sdf_noisemodel = get_random_noise_model().join(sdf_model_with_collisions.split("%MODELNAME%"))
+						sdf_allmodels = sdf_allmodels + "\n" + put_model_at_position(sdf_noisemodel,i*scale_data,j*scale_data)
 					else:#place ghostnoise
-						sdf_noisemodel = getRandomNoiseModel().join(sdf_ghostmodel_with_collisions.split("%MODELNAME%"))
-						sdf_allmodels = sdf_allmodels + "\n" + putModelAtPosition(sdf_noisemodel,i*scaledata,j*scaledata)
+						sdf_noisemodel = get_random_noise_model().join(sdf_ghost_model_with_collisions.split("%MODELNAME%"))
+						sdf_allmodels = sdf_allmodels + "\n" + put_model_at_position(sdf_noisemodel,i*scale_data,j*scale_data)
 
 		sdf_main = sdf_allmodels.join(sdf_main.split("%FILLDATA%"))
 
@@ -515,16 +515,16 @@ class ConversionTools:
 	@staticmethod
 	def launch_to_csv(what,params=[0],conversion_suffix=""):
 		filename = what.split("/")[-1].split(".")[0]
-		cardata_reader = open(what)
-		cardata = cardata_reader.read()
-		cardata_reader.close()
-		carx   = cardata.split("<arg name=\"x\" default=\"")[1].split("\"")[0]
-		cary   = cardata.split("<arg name=\"y\" default=\"")[1].split("\"")[0]
-		caryaw = cardata.split("<arg name=\"yaw\" default=\"")[1].split("\"")[0]
+		car_data_reader = open(what)
+		car_data = car_data_reader.read()
+		car_data_reader.close()
+		car_x   = car_data.split("<arg name=\"x\" default=\"")[1].split("\"")[0]
+		car_y   = car_data.split("<arg name=\"y\" default=\"")[1].split("\"")[0]
+		car_yaw = car_data.split("<arg name=\"yaw\" default=\"")[1].split("\"")[0]
 		midpoints=False
 		if len(params) >= 2:
 			midpoints = params[1]
-		Track.runConverter(filename,midpoints=midpoints,car_start_data=("car_start",carx,cary,caryaw),conversion_suffix = conversion_suffix)
+		Track.runConverter(filename,midpoints=midpoints,car_start_data=("car_start",car_x,car_y,car_yaw),conversion_suffix = conversion_suffix)
 
 	#######################################################################################################################################################
 	#######################################################################################################################################################
@@ -539,98 +539,98 @@ class ConversionTools:
 		#We are merely going to open up the csv, read through all the lines, and round down the point to an integer.
 		#(While preserving cone color).
 		df = pd.read_csv(what)
-		bluecones = df[df['tag']=="blue"]
-		yellowcones = df[df['tag']=="yellow"]
-		orangecones = df[df['tag']=="orange"]
-		bigorangecones = df[df['tag']=="big_orange"]
-		activenoise = df[df['tag']=="active_noise"]
-		inactivenoise = df[df['tag']=="inactive_noise"]
-		carloc = df[df['tag']=="car_start"]
+		blue_cones = df[df['tag']=="blue"]
+		yellow_cones = df[df['tag']=="yellow"]
+		orange_cones = df[df['tag']=="orange"]
+		big_orange_cones = df[df['tag']=="big_orange"]
+		active_noise = df[df['tag']=="active_noise"]
+		inactive_noise = df[df['tag']=="inactive_noise"]
+		car_location = df[df['tag']=="car_start"]
 
-		rawblue = []
-		rawyellow = []
-		raworange = []
-		rawbigorange = []
-		rawnoise = []
-		rawcarloc = (0,0,0,0)
-		for bluecone in bluecones.itertuples():
+		raw_blue = []
+		raw_yellow = []
+		raw_orange = []
+		raw_big_orange = []
+		raw_noise = []
+		raw_car_location = (0,0,0,0)
+		for bluecone in blue_cones.itertuples():
 			x = (bluecone[2])
 			y = (bluecone[3])
-			rawblue.append(("blue",x,y,0))
+			raw_blue.append(("blue",x,y,0))
 
-		for yellowcone in yellowcones.itertuples():
+		for yellowcone in yellow_cones.itertuples():
 			x = (yellowcone[2])
 			y = (yellowcone[3])
-			rawyellow.append(("yellow",x,y,0))
+			raw_yellow.append(("yellow",x,y,0))
 
-		for orangecone in orangecones.itertuples():
+		for orangecone in orange_cones.itertuples():
 			x = (orangecone[2])
 			y = (orangecone[3])
-			raworange.append(("orange",x,y,0))
+			raw_orange.append(("orange",x,y,0))
 
-		for bigorangecone in bigorangecones.itertuples():
-			x = (bigorangecone[2])
-			y = (bigorangecone[3])
-			rawbigorange.append(("big_orange",x,y,0))
+		for big_orangecone in big_orange_cones.itertuples():
+			x = (big_orangecone[2])
+			y = (big_orangecone[3])
+			raw_big_orange.append(("big_orange",x,y,0))
 
-		for noise in activenoise.itertuples():
+		for noise in active_noise.itertuples():
 			x = (noise[2])
 			y = (noise[3])
-			rawnoise.append(("noise",x,y,0))
+			raw_noise.append(("noise",x,y,0))
 
-		for noise in inactivenoise.itertuples():
+		for noise in inactive_noise.itertuples():
 			x = (noise[2])
 			y = (noise[3])
-			rawnoise.append(("noise",x,y,0))
+			raw_noise.append(("noise",x,y,0))
 
-		for c in carloc.itertuples():
-			rawcarloc = ("car",(c[2]),(c[3]),(c[4]))
+		for c in car_location.itertuples():
+			raw_car_location = ("car",(c[2]),(c[3]),(c[4]))
 
-		allcones = rawblue + rawyellow + raworange + rawbigorange + rawnoise + [rawcarloc]
+		all_cones = raw_blue + raw_yellow + raw_orange + raw_big_orange + raw_noise + [raw_car_location]
 
 		#Here we convert it all to positive
-		minx = 100000
-		miny = 100000
-		maxx = -100000
-		maxy = -100000
-		for cone in allcones:
-			if cone[1]<minx:
-				minx = cone[1]
-			if cone[2]<miny:
-				miny = cone[2]
-			if cone[1]>maxx:
-				maxx = cone[1]
-			if cone[2]>maxy:
-				maxy = cone[2]
+		min_x = 100000
+		min_y = 100000
+		max_x = -100000
+		max_y = -100000
+		for cone in all_cones:
+			if cone[1]<min_x:
+				min_x = cone[1]
+			if cone[2]<min_y:
+				min_y = cone[2]
+			if cone[1]>max_x:
+				max_x = cone[1]
+			if cone[2]>max_y:
+				max_y = cone[2]
 
 		#Here we figure out the track scaling by calculating the average smallest distance between cones
-		totalxdistance = 0
-		totalydistance = 0
-		for cone1 in allcones:
-			closestx = 10000
-			closesty = 10000
-			for cone2 in allcones:
+		total_x_distance = 0
+		total_y_distance = 0
+		for cone1 in all_cones:
+			closest_x = 10000
+			closest_y = 10000
+			for cone2 in all_cones:
 				if cone1 == cone2: continue
 				dx = abs(cone1[1]-cone2[1])
 				dy = abs(cone1[2]-cone2[2])
-				if dx < closestx: closestx = dx
-				if dy < closesty: closesty = dy
-			totalxdistance+=closestx
-			totalydistance+=closesty
+				if dx < closest_x: closest_x = dx
+				if dy < closest_y: closest_y = dy
+			total_x_distance+=closest_x
+			total_y_distance+=closest_y
 		
 		#Our scale will strive to preserve distances when possible.
-		scaleDesired = max(totalxdistance,totalydistance)/(len(allcones)-1)
-		if scaleDesired < 0.0001: scaleDesired = 0.0001#Clamp scale to allowed values
-		if scaleDesired > 100:    scaleDesired = 100
-		scaleMetadata = ConversionTools.deconvert_scale_metadata(scaleDesired)
+		scale_desired = max(total_x_distance,total_y_distance)/(len(all_cones)-1)
+		if scale_desired < 0.0001: scale_desired = 0.0001#Clamp scale to allowed values
+		if scale_desired > 100:    scale_desired = 100
+		scale_metadata = ConversionTools.deconvert_scale_metadata(scale_desired)
 		
-		finalcones = []
-		twidth = int((maxx-minx+20)/scaleDesired)
-		theight = int((maxy-miny+20)/scaleDesired)
-		carx = int((rawcarloc[1]-minx+10)/scaleDesired)
-		cary = int((rawcarloc[2]-miny+10)/scaleDesired)
-		for cone in allcones:
-			finalcones.append( (cone[0],int((cone[1]-minx+10)/scaleDesired),int((cone[2]-miny+10)/scaleDesired))   )
+		final_cones = []
+		twidth = int((max_x-min_x+20)/scale_desired)
+		theight = int((max_y-min_y+20)/scale_desired)
+		car_x = int((raw_car_location[1]-min_x+10)/scale_desired)
+		car_y = int((raw_car_location[2]-min_y+10)/scale_desired)
+		for cone in all_cones:
+			final_cones.append( (cone[0],int((cone[1]-min_x+10)/scale_desired),int((cone[2]-min_y+10)/scale_desired))   )
 
 		#draw the track
 		im = Image.new('RGBA', (twidth, theight), (0, 0, 0, 0)) 
@@ -640,26 +640,26 @@ class ConversionTools:
 		draw.polygon([(0,0),(twidth,0),(twidth,theight),(0,theight),(0,0)],fill='white')#background
 
 		pixels = im.load()
-		#conecolor is inside, conecolor2 is outside
-		def getConeColor(conename):
-			if  conename ==  "yellow":     return ConversionTools.conecolor
-			elif conename == "blue":       return ConversionTools.conecolor2
-			elif conename == "orange":     return ConversionTools.conecolorOrange
-			elif conename == "big_orange": return ConversionTools.conecolorBigOrange
-			elif conename == "noise":      return ConversionTools.noisecolor
-			return ConversionTools.conecolor
-		for cone in finalcones:
-			pixels[cone[1],cone[2]] = getConeColor(cone[0])
-		pixelValue = int(rawcarloc[3]/(2*math.pi)*254+1) # it is *254+1 because we never want it to be 0
-		if pixelValue > 255: pixelValue = 255
-		if pixelValue <   1: pixelValue =   1
-		pixels[carx,cary] = (ConversionTools.carcolor[0],ConversionTools.carcolor[1],ConversionTools.carcolor[2],pixelValue)
+		#cone_color is inside, cone_color_blue is outside
+		def get_cone_color(cone_name):
+			if  cone_name ==  "yellow":     return ConversionTools.cone_color
+			elif cone_name == "blue":       return ConversionTools.cone_color_blue
+			elif cone_name == "orange":     return ConversionTools.cone_color_orange
+			elif cone_name == "big_orange": return ConversionTools.cone_color_big_orange
+			elif cone_name == "noise":      return ConversionTools.noise_color
+			return ConversionTools.cone_color
+		for cone in final_cones:
+			pixels[cone[1],cone[2]] = get_cone_color(cone[0])
+		pixel_value = int(raw_car_location[3]/(2*math.pi)*254+1) # it is *254+1 because we never want it to be 0
+		if pixel_value > 255: pixel_value = 255
+		if pixel_value <   1: pixel_value =   1
+		pixels[car_x,car_y] = (ConversionTools.car_color[0],ConversionTools.car_color[1],ConversionTools.car_color[2],pixel_value)
 		
 		#Add metadata:
 		loc = ConversionTools.get_metadata_pixel_location(0,0,"Top Left",im.size)
-		pixels[loc[0],loc[1]] = scaleMetadata[0]
+		pixels[loc[0],loc[1]] = scale_metadata[0]
 		loc = ConversionTools.get_metadata_pixel_location(1,0,"Top Left",im.size)
-		pixels[loc[0],loc[1]] = scaleMetadata[1]
+		pixels[loc[0],loc[1]] = scale_metadata[1]
 		loc = ConversionTools.get_metadata_pixel_location(4,4,"Bottom Right",im.size)
 		pixels[loc[0],loc[1]] = ConversionTools.deconvert_version_metadata(ConversionTools.TRACKIMG_VERSION_NUM)[0]
 
