@@ -442,7 +442,7 @@ class EufsLauncher(Plugin):
 								1 if isLaxGenerator else 0,
 								1 if self._widget.findChild(QComboBox,"WhichPreset").currentText()=="Bezier" else 0
 								])
-
+		self.tell_launchella("Loading Image...")
 		im = Converter.convert("xys","png",(xys,twidth,theight))
 
 		#If full stack selected, convert into csv and launch as well

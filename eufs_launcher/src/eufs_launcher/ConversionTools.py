@@ -187,6 +187,7 @@ class ConversionTools:
 		GENERATED_FILENAME = "rand" + conversion_suffix
 		#Unpack
 		(xys,twidth,theight) = what
+
 		#Create image to hold data
 		im = Image.new('RGBA', (twidth, theight), (0, 0, 0, 0)) 
 		draw = ImageDraw.Draw(im)
@@ -236,6 +237,7 @@ class ConversionTools:
 
 			coneNormalDistanceParameter = 8
 			coneClosenessParameter = 6
+			coneCheckAmount = 30
 
 			curPoint = xys[i]
 			curTangentAngle = calculate_tangent_angle(xys[:(i+1)])
@@ -250,8 +252,10 @@ class ConversionTools:
 			crossDistanceSN = (southPoint[0]-prevPointNorth[0])**2+(southPoint[1]-prevPointNorth[1])**2
 
 			#Here we ensure cones don't get too close to the track
-			distancePN = min([(northPoint[0]-xy[0])**2+(northPoint[1]-xy[1])**2 for xy in xys[ max([0,i-20]) : min([len(xys),i+20])  ]])
-			distancePS = min([(southPoint[0]-xy[0])**2+(southPoint[1]-xy[1])**2 for xy in xys[ max([0,i-20]) : min([len(xys),i+20])  ]])
+			distancePN = min([(northPoint[0]-xy[0])**2+(northPoint[1]-xy[1])**2 
+						for xy in xys[ max([0,i-coneCheckAmount]) : min([len(xys),i+coneCheckAmount])  ]])
+			distancePS = min([(southPoint[0]-xy[0])**2+(southPoint[1]-xy[1])**2 
+						for xy in xys[ max([0,i-coneCheckAmount]) : min([len(xys),i+coneCheckAmount])  ]])
 
 			northViable = differenceFromPrevNorth > coneClosenessParameter**2 \
 						and crossDistanceNS > coneClosenessParameter**2 \
@@ -318,11 +322,20 @@ class ConversionTools:
 					if uniform(0,100) < 1:#1% covered maximal noise
 						pixels[i,j] = ConversionTools.noisecolor
 
-		#And tag it with the version number
-		loc = ConversionTools.get_metadata_pixel_location(4,4,"Bottom Right",im.size)
-		pixels[loc[0],loc[1]] = ConversionTools.deconvert_version_metadata(ConversionTools.TRACKIMG_VERSION_NUM)[0]
+		#Add margins (as specified by the file format)
+		margin = 5
+		im2 = Image.new('RGBA', (twidth+2*margin, theight+2*margin), (255, 255, 255, 255)) 
+		pixels2 = im2.load()
+		for x in range(im.size[0]):
+			for y in range(im.size[1]):
+				pixels2[x+margin,y+margin] = pixels[x,y]
 
-		im.save(os.path.join(rospkg.RosPack().get_path('eufs_gazebo'), 'randgen_imgs/'+GENERATED_FILENAME+'.png'))
+		#And tag it with the version number
+		loc = ConversionTools.get_metadata_pixel_location(4,4,"Bottom Right",im2.size)
+		pixels2[loc[0],loc[1]] = ConversionTools.deconvert_version_metadata(ConversionTools.TRACKIMG_VERSION_NUM)[0]
+
+
+		im2.save(os.path.join(rospkg.RosPack().get_path('eufs_gazebo'), 'randgen_imgs/'+GENERATED_FILENAME+'.png'))
 		return im
 
 	#######################################################################################################################################################
