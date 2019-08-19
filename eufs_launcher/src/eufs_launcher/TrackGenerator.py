@@ -86,6 +86,7 @@ class TrackGenerator:
 	MAX_TRACK_LENGTH = 1500
 	LAX_GENERATION = False
 	TRACK_MODE = "Circle&Line"
+	FAILURE_INFO = False #debugging parameter to print out when generation fails
 
 	def __init__(self):
 		pass
@@ -219,8 +220,14 @@ class TrackGenerator:
 			xys2 = compactify_points(xys2)
 			overlapped = check_if_overlap(xys2)
 			if overlapped:
-				#rospy.logerr("Overlap check failed")
+				if TrackGenerator.FAILURE_INFO: rospy.logerr("Overlap check failed")
 				print("Oops!  The track intersects itself too much.  Retrying...")
+		
+		#Now let's randomly flip it a bit to spice it up
+		if uniform(0,1) < 0.5:#flip xys by x
+			xys = [(-x+twidth,y) for (x,y) in xys]
+		if uniform(0,1) < 0.5:#flip xys by y
+			xys = [(x,-y+theight) for (x,y) in xys]
 		return (xys,twidth,theight)
 
 	
@@ -308,15 +315,25 @@ def generate_autocross_trackdrive_track(startpoint):
 		goalpoints = [	(startpoint[0]+TrackGenerator.MAX_TRACK_LENGTH*0.08,startpoint[1]),
 				(startpoint[0]+TrackGenerator.MAX_TRACK_LENGTH*0.12,startpoint[1]+TrackGenerator.MAX_TRACK_LENGTH*0.08),
 				(startpoint[0]-TrackGenerator.MAX_TRACK_LENGTH*0.03,startpoint[1]+TrackGenerator.MAX_TRACK_LENGTH*0.12)]
+
+		fails = 0
+		max_fails = 1#This controls how much it tries to salvage a bad run
+				#It turns out that most times it fails, its not salvageable,
+				#so I set it to 1 so that as soon as it fails it scraps the run.
 		for goalpoint in goalpoints:
+			prevxys = xys
 			(generated, curpoint, length) = generate_path_from_point_to_point(curpoint,goalpoint,calculate_tangent_angle(xys),fuzzradius=20)
-			curTrackLength+= length
+			curTrackLength += length
 			xys.extend(generated)
 			#Now let's do early-checking for overlaps
 			test = compactify_points([(int(x[0]),int(x[1])) for x in xys])
 			if check_if_overlap(test): 
-				#rospy.logerr("Early Overlap Checking: Failed")
-				return (test,0,0)
+				if TrackGenerator.FAILURE_INFO: rospy.logerr("Early Overlap Checking: Failed")
+				fails+=1
+				curTrackLength -= length
+				xys = prevxys
+				if fails==max_fails:
+					return (test,0,0)
 
 		#Now lets head back to the start:
 		#We're gonna set a checkpoint that is close but not exactly the start point
