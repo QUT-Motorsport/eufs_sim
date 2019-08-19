@@ -21,7 +21,7 @@ This branch is in active development.  It is intended to add the following featu
 
 [√] Improve dangling node kill method so that it's not so indescriminant
 
-[√] Heuristics to avoid self-intersection in track generator
+[*] Heuristics to avoid self-intersection in track generator
 
 It is an offshoot from the `devel-trackgen-2019-summer` branch, which already has added vast improvements to the launcher from `master`.
 
