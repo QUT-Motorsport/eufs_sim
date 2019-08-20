@@ -20,6 +20,7 @@ from PIL import ImageDraw
 from random import randrange, uniform
 
 from TrackGenerator import TrackGenerator as Generator
+from TrackGenerator import GenerationFailedException
 
 from ConversionTools import ConversionTools as Converter
 
@@ -432,27 +433,33 @@ class EufsLauncher(Plugin):
 
 		isLaxGenerator = self._widget.findChild(QCheckBox,"LaxCheckBox").isChecked()
 		
+		try:
 
-		xys,twidth,theight = Generator.generate([	self.MIN_STRAIGHT,self.MAX_STRAIGHT,
-								self.MIN_CTURN,self.MAX_CTURN,
-								self.MIN_HAIRPIN/2,self.MAX_HAIRPIN/2,
-								self.HAIRPIN_PAIRS,
-								self.MAX_LENGTH,
-								1 if isLaxGenerator else 0,
-								1 if self._widget.findChild(QComboBox,"WhichPreset").currentText()=="Bezier" else 0
-								])
-		self.tell_launchella("Loading Image...")
-		im = Converter.convert("xys","png",(xys,twidth,theight))
+			xys,twidth,theight = Generator.generate([	self.MIN_STRAIGHT,self.MAX_STRAIGHT,
+									self.MIN_CTURN,self.MAX_CTURN,
+									self.MIN_HAIRPIN/2,self.MAX_HAIRPIN/2,
+									self.HAIRPIN_PAIRS,
+									self.MAX_LENGTH,
+									1 if isLaxGenerator else 0,
+									1 if self._widget.findChild(QComboBox,"WhichPreset").currentText()=="Bezier" else 0
+									])
+			self.tell_launchella("Loading Image...")
+			im = Converter.convert("xys","png",(xys,twidth,theight))
 
-		#If full stack selected, convert into csv and launch as well
-		track_generator_full_stack = self._widget.findChild(QCheckBox,"FullStackTrackGenButton")
-		if track_generator_full_stack.isChecked():
-			img_path = os.path.join(rospkg.RosPack().get_path('eufs_gazebo'), 'randgen_imgs/rand.png')
-			Converter.convert("png","ALL",img_path,params=[self.get_noise_level()])
+			#If full stack selected, convert into csv and launch as well
+			track_generator_full_stack = self._widget.findChild(QCheckBox,"FullStackTrackGenButton")
+			if track_generator_full_stack.isChecked():
+				img_path = os.path.join(rospkg.RosPack().get_path('eufs_gazebo'), 'randgen_imgs/rand.png')
+				Converter.convert("png","ALL",img_path,params=[self.get_noise_level()])
 
-		self.tell_launchella("Track Gen Complete!")
+			self.tell_launchella("Track Gen Complete!")
 
-		im.show()
+			im.show()
+		except GenerationFailedException:
+			rospy.logerr(	"\nError!  The generator could not generate a track in time.\n"+
+					"Maybe try different parameters?\n"+
+					"Turning on Lax Generation and increasing MAX_STRAIGHT and MIN_STRAIGHT usually helps.")
+			self.tell_launchella("Track Gen Failed :(  Try different parameters?")
 
 		self.load_track_and_images()
 

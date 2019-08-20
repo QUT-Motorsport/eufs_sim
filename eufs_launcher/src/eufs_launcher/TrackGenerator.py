@@ -5,7 +5,7 @@ from random import randrange, uniform
 import rospy
 from scipy.special import binom
 from LauncherUtilities import calculate_tangent_angle, cap_angle, cap_angle_odd, magnitude, normalize_vec
-
+import numpy as np
 
 """
 ###############################################################################
@@ -67,6 +67,9 @@ from LauncherUtilities import calculate_tangent_angle, cap_angle, cap_angle_odd,
 ###############################################################################
 """
 
+class GenerationFailedException(Exception):
+   """Raised when generator takes too long."""
+   pass
 
 class TrackGenerator:
 
@@ -213,6 +216,7 @@ class TrackGenerator:
 		xys = []
 		overlapped = False
 		generate_function = generate_autocross_trackdrive_track if TrackGenerator.TRACK_MODE == "Circle&Line" else generate_bezier_track
+		failure_count = 0
 		while overlapped or xys==[]:
 			#Re-generate if the track overlaps itself
 			(xys,twidth,theight) = generate_function((0,0))
@@ -220,8 +224,11 @@ class TrackGenerator:
 			xys2 = compactify_points(xys2)
 			overlapped = check_if_overlap(xys2)
 			if overlapped:
-				if TrackGenerator.FAILURE_INFO: rospy.logerr("Overlap check failed")
+				if TrackGenerator.FAILURE_INFO: rospy.logerr("Overlap check "+str(failure_count)+" failed")
 				print("Oops!  The track intersects itself too much.  Retrying...")
+				failure_count+=1
+			if failure_count > 1000:
+				raise GenerationFailedException
 		
 		#Now let's randomly flip it a bit to spice it up
 		if uniform(0,1) < 0.5:#flip xys by x
@@ -369,7 +376,12 @@ def generate_autocross_trackdrive_track(start_point):
 		normal_out = normalize_vec(normal_out)
 		diff = ( cur_point[0]-start_point[0],cur_point[1]-start_point[1] )
 		circle_radius2 = (diff[0]*normal_out[0]+diff[1]*normal_out[1])/2
-		(generated, cur_point, length, _) = generate_constant_turn(cur_point,circle_radius2,calculate_tangent_angle(xys),circle_percent=0.5,turn_left=True)
+		(generated, cur_point, length, _) = generate_constant_turn(
+			cur_point,
+			abs(circle_radius2),
+			calculate_tangent_angle(xys),
+			circle_percent=0.5,
+			turn_left=circle_radius2>0)
 		cur_track_length+=length
 		xys.extend(generated)
 
@@ -460,7 +472,7 @@ def generate_path_from_point_to_point(start_point,end_point,tangent_in,depth=20,
 		points.extend(generated)
 		#We'll either do a random cturn or a random hairpin, then continue the journey
 		cturn_or_hairpin = uniform(0,1)
-		make_cturn = cturn_or_hairpin < 0.7
+		make_cturn = True#cturn_or_hairpin < 0.7
 		if make_cturn or (hairpined and not many_hairpins):#cturn
 			(generated, cur_point,delta_length,output_normal) = generate_constant_turn(cur_point,
 											uniform(TrackGenerator.MIN_CONSTANT_TURN,TrackGenerator.MAX_CONSTANT_TURN),
@@ -653,33 +665,10 @@ def generate_constant_turn_until_facing_point(start_point,radius,tangent_in,goal
 	return (points,points[-1],length,normal)
 
 
-
-def generate_constant_turn(start_point,radius,tangent_in,turn_left=None,circle_percent=None,turn_against_normal=None):
-	(startx,starty) = start_point
-
-	#cturns have a choices - turn left or turn right
-	#Then, they can choose what percent of the circle do they want to turn?
-	turn_left = uniform(0,1)<0.5 		if turn_left == None 		else turn_left
-	circle_percent = uniform(0.1,0.2)	if circle_percent == None 	else circle_percent
-
-	#Calculating this is fairly complicated
-	#Angle of circle normal = 90 degrees + tangent_in
-	#Slope of normal = -tan(90+normal) if turn left or tan(90+normal) if turn right
-	#Center is at start_point + (r/sqrt( 1+m^2 )   ,   m*r*sqrt( 1+m^2 )) 
-	circle_normal = math.pi/2 + tangent_in
-	slope    = math.tan(circle_normal)
-	pure_x = radius/math.sqrt( 1+slope*slope )
-	if turn_left:
-		pure_x*=-1
-
-	center_x = startx + pure_x
-	center_y = starty + slope*pure_x
-
-	#Now we use a rotation matrix to parameterize intermediate points:
-	#Given start S and center C, any point on the circle angle A away is:
-	#R_A[S-C] + C
-	#Let us box this up in a nice function:
-	def intermediate_point(s,c,a):
+def get_parametric_circle(start_point,center_point,delta_angle):
+	#We can calculate points on a circle using a rotation matrix
+	#R(a)*[S-C]+C gives us any point on a circle starting at S with center C with counterclockwise angular distance 'a'
+	def output(s,c,a):
 		(sx,sy) = s
 		(cx,cy) = c
 		cos_a    = math.cos(a)
@@ -689,48 +678,42 @@ def generate_constant_turn(start_point,radius,tangent_in,turn_left=None,circle_p
 		result_x = cos_a*del_x-sin_a*del_y+cx
 		result_y = sin_a*del_x+cos_a*del_y+cy
 		return (result_x,result_y)
+	return lambda t: output(start_point,center_point,t*delta_angle)
 
-	def sgn(x):
-		return -1 if x < 0 else 1 if x > 0 else 0
 
-	angle = 2*math.pi*circle_percent
-	flipper = -1 if tangent_in*pure_x > 0 else 1 #multiply by pure_x because we want to re-flip here if we flipped due to "turn_left"
-
-	if turn_against_normal != None:
-		#In this case, we want to make sure it turns away from the inputted normal vector
-		#So if normal=(a,b) we want to make sure its (-a,-b)
-		#This is the same as changing turn_left
-		#So first we want to compute the current normal to make sure we don't change anything
-		#Current normal will be:
-		#points[0][0]-center_x,points[0][1]-center_y
-		#So we pre-compute the points[0][a] since we haven't yet:
-		points_0 = intermediate_point(start_point,(center_x,center_y),0)
-		cur_normal = normalize_vec((points_0[0]-center_x,points_0[1]-center_y))
-		turn_against_normal = normalize_vec(turn_against_normal)
+def generate_constant_turn(start_point,radius,tangent_in,turn_left=None,circle_percent=None,turn_against_normal=None):
 	
-		#Due to floating point stuffs, we won't check direct equality, we'll just look at the sign!
-		#We want normals to be flipped, so its bad if cur_normal has the same sign!
-		#We also only need to check both components just in the case where the normal is (0,y)
-		need_to_flip = abs(cur_normal[0]-turn_against_normal[0])<0.1 or abs(cur_normal[1]-turn_against_normal[1])<0.1
+	#cturns have choices - turn left or turn right
+	#Then, they can choose what percent of the circle do they want to turn?
+	turn_left = uniform(0,1)<0.5 		if turn_left == None 		else turn_left
+	circle_percent = uniform(0.1,0.5)	if circle_percent == None 	else circle_percent
 
-		if need_to_flip:
-			#print("Flipping!")
-			center_x-=2*pure_x
-			center_y-=2*slope*pure_x
-			flipper*=-1
+	tangent_vec = (math.cos(tangent_in), math.sin(tangent_in))
+	normal_vec  = (-math.sin(tangent_in),math.cos(tangent_in))
+	if turn_left: 
+		normal_vec = (-normal_vec[0],-normal_vec[1])
+	if turn_against_normal != None:
+		normal_vec = normalize_vec(turn_against_normal)
+	center = (start_point[0]+normal_vec[0]*radius,start_point[1]+normal_vec[1]*radius)
+	turn_angle = circle_percent*math.pi*2
+	cross_product = np.cross( [tangent_vec[0],tangent_vec[1]],[normal_vec[0],normal_vec[1]] )
+	flipper = -1 if cross_product < 0 else 1 #calculates if turning clockwise (-1) or anticlockwise (1)
+	circle_function = get_parametric_circle(start_point,center,flipper*turn_angle)
 
-	fidelity = 365
-	points = [intermediate_point(start_point,(center_x,center_y),1.0*flipper*t*angle/fidelity) for t in range(0,fidelity)]
+	fidelity = 365.0
+	points = [circle_function(t/fidelity) for t in range(0,int(fidelity)+1)]
 
 	#Length of circle is, fortunately, easy!  It's simply radius*angle
-	length = angle*radius
+	length = turn_angle*radius
 
 	#Now we want to find the normal vector, because it's useful to have to determine whether it curves inwards or outwards
 	#Normal vectors are always parallel to the vector from center to end point
-	normal = (points[-1][0]-center_x,points[-1][1]-center_y)
+	normal = (points[-1][0]-center[0],points[-1][1]-center[1])
 
 	#Returns a list of points and the new edge of the racetrack and the change in length
 	return (points,points[-1],length,normal)
+	
+	
 
 def generate_straight(start_point,length,angle):
 	(startx,starty) = start_point
