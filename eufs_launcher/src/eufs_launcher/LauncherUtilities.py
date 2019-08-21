@@ -9,18 +9,6 @@ def calculate_tangent_angle(xys):
 	ey = xys[-1][1]
 	return math.atan2((ey-sy),(ex-sx))
 
-def calculate_tangent_vector(xys):
-	#Calculate direction of outgoing tangent of a set of points
-	#Is a vector!
-	angle = calculate_tangent_angle(xys)
-	return (math.cos(angle),math.sin(angle))
-
-def calculate_vector_angle(vec):
-	return calculate_tangent_angle([(0,0),vec])
-
-def calculate_vector_from_angle(angle):
-	return (math.cos(angle),math.sin(angle))
-
 def cap_angle(ang):
 	#Returns angle between 0 and 2*math.pi
 	if ang < 0:
