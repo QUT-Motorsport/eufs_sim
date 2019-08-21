@@ -218,12 +218,14 @@ class TrackGenerator:
 		generate_function = generate_autocross_trackdrive_track if TrackGenerator.TRACK_MODE == "Circle&Line" else generate_bezier_track
 		failure_count = 0
 		while overlapped or xys==[]:
+			#break
 			#Re-generate if the track overlaps itself
 			(xys,twidth,theight) = generate_function((0,0))
 			xys2 = [(int(x[0]),int(x[1])) for x in xys]
 			xys2 = compactify_points(xys2)
 			overlapped = check_if_overlap(xys2)
 			if overlapped:
+				#break
 				if TrackGenerator.FAILURE_INFO: rospy.logerr("Overlap check "+str(failure_count)+" failed")
 				print("Oops!  The track intersects itself too much.  Retrying...")
 				failure_count+=1
@@ -235,6 +237,25 @@ class TrackGenerator:
 			xys = [(-x+twidth,y) for (x,y) in xys]
 		if uniform(0,1) < 0.5:#flip xys by y
 			xys = [(x,-y+theight) for (x,y) in xys]
+	
+		"""
+		###Testing vvv
+		testtan = uniform(0,2*math.pi)#5.35485383049#3.42577742985#uniform(0,2*math.pi)
+		testcase = (-100,-100)
+		(generated, curpoint, deltalength,outnormal) = \
+			generate_constant_turn_until_facing_point(
+				(50,50),
+				50,
+				testtan,
+				testcase,
+				turn_left=uniform(0,1)<0.5)
+		xys.extend(generated)
+		xys.append(testcase)
+		return convert_points_to_all_positive(xys)
+		###Testing ^^^
+		"""
+		#return convert_points_to_all_positive(xys)
+
 		return (xys,twidth,theight)
 
 	
@@ -568,6 +589,110 @@ def generate_hairpin_turn(start_point,radius,tangent_in,switchback_num=None,turn
 
 
 def generate_constant_turn_until_facing_point(start_point,radius,tangent_in,goal_point,turn_left=None,turn_against_normal=None,recursed=False):
+	turn_left = uniform(0,1) < 0.5 if turn_left == None else turn_left
+
+	#Calculate some preliminary information
+	s = start_point
+	r = radius
+	normal = (-math.sin(tangent_in),math.cos(tangent_in))
+	n = normal if not turn_left else (-normal[0],-normal[1])
+	n = normalize_vec(n)
+	g = goal_point
+	rn = (r*n[0],r*n[1])
+	c = (s[0]+rn[0],s[1]+rn[1])
+	cg = (c[0]-g[0],c[1]-g[1])
+	gc = (-cg[0],-cg[1])
+	gs = (g[0]-s[0],g[1]-s[1])
+	sc = (s[0]-c[0],s[1]-c[1])
+	t = (math.cos(tangent_in),math.sin(tangent_in))
+	x = magnitude( gc )
+
+
+	if abs(r/x) > 1:
+		x=r
+
+
+	#Figure out what quadrant we will have to depart the circle at
+	#First convert to the tangent-normal basis
+	basis_changer = np.linalg.inv(np.matrix( [ [t[0],n[0]],[t[1],n[1]] ] ))
+	old_g = np.matrix( [[gc[0]],[gc[1]]] )
+	g_new = np.matmul(basis_changer,old_g)
+	old_s = np.matrix( [[sc[0]],[sc[1]]] )
+	s_new = np.matmul(basis_changer,old_s)
+	g_prime = g_new
+	
+
+	#Now check quadrants
+	quadrant = 1
+	if (g_prime[0] >= 0 and -r <= g_prime[1] and g_prime[1] <= 0) or (g_prime[0] >= r and -r <= g_prime[1]):
+		quadrant = 1
+	elif (g_prime[1] >= 0 and 0 <= g_prime[0] and g_prime[0] <= r) or (g_prime[1] >= r and g_prime[0] <= r):
+		quadrant = 2
+	elif (g_prime[0] <= 0 and 0 <= g_prime[1] and g_prime[1] <= r) or (g_prime[0] <= -r and g_prime[1] <= r):
+		quadrant = 3
+	else:
+		quadrant = 4
+
+
+	#For each quadrant, we need to move what is considered the "start point"
+	#By 90 degrees (see Track Generation guide on team wiki for reasoning)
+	quadrant_angle = (quadrant-1) * math.pi/2
+	quadrant_rotater = np.matrix( [ [math.cos(quadrant_angle),-math.sin(quadrant_angle)],[math.sin(quadrant_angle),math.cos(quadrant_angle)] ] )
+
+	new_s = np.matmul(quadrant_rotater,np.matrix( [[sc[0]],[sc[1]]] ))
+
+
+	#Finally, voila
+	theta = 0
+	if quadrant == 1 or quadrant == 3 or not turn_left:
+		inner_angle = math.acos(r/x)
+		np_gc = np.array([gc[0],gc[1]])
+		np_s  = np.array([new_s.item(0),new_s.item(1)])
+		outer_angle = math.atan2(np.linalg.norm(np.cross(np_gc,np_s)),np.dot(np_gc,np_s))
+		theta = outer_angle-inner_angle+quadrant_angle
+	else:
+		inner_angle = math.acos(r/x)
+		np_gc = np.array([gc[0],gc[1]])
+		np_s  = np.array([new_s.item(0),new_s.item(1)])
+		outer_angle = math.atan2(np.linalg.norm(np.cross(np_gc,np_s)),-np.dot(np_gc,np_s))
+		theta = outer_angle-inner_angle+quadrant_angle
+
+	#The problem with heading directly to the goal with perfect precision is that once well-positioned,
+	#this curve is on a "hair line" of turning the wrong way, leading to a 50% chance of a full turn
+	#So if we're very close to a full turn we'll just smudge it.
+	if theta > 2*(31/32)*math.pi and not recursed: 
+		return generate_constant_turn_until_facing_point(start_point,
+								radius,
+								tangent_in,
+								goal_point,
+								turn_left=turn_left,
+								turn_against_normal=turn_against_normal,
+								recursed=True)
+	"""
+	Above calculations were the same as the following, but more numerically stable for small angles.
+	#dot = gc[0]*new_s[0] + gc[1]*new_s[1]
+	#inner_angle = math.acos(r/x)
+	#outer_angle = math.acos(dot/(x*r))
+	#diff_angle = outer_angle-inner_angle
+	#if diff_angle < 0: diff_angle += math.pi/2
+	#theta = diff_angle + quadrant_angle
+	"""
+
+	#inner_angle = math.acos(r/x)
+	#np_gc = np.array([gc[0],gc[1]])
+	#np_s  = np.array([new_s.item(0),new_s.item(1)])
+	#rospy.logerr(np_gc.shape)
+	#rospy.logerr(new_s.shape)
+	#outer_angle = math.atan2(np.linalg.norm(np.cross(np_gc,np_s)),np.dot(np_gc,np_s))
+	#theta = outer_angle-inner_angle+quadrant_angle
+
+
+	cp = theta/(math.pi*2)
+
+	toReturn = generate_constant_turn(start_point,radius,tangent_in,turn_left = turn_left, circle_percent = cp)
+	return toReturn
+
+	"""
 	#This is a split-off version of generate_constant_turn, where instead of taking in a percent to turn around a circle,
 	#We give it a direction we want it to stop at
 	(startx,starty) = start_point
@@ -663,6 +788,7 @@ def generate_constant_turn_until_facing_point(start_point,radius,tangent_in,goal
 
 	#Returns a list of points and the new edge of the racetrack and the change in length
 	return (points,points[-1],length,normal)
+	"""
 
 
 def get_parametric_circle(start_point,center_point,delta_angle):
