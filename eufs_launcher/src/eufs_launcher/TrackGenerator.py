@@ -571,40 +571,28 @@ def generate_hairpin_turn(start_point,radius,tangent_in,switchback_num=None,turn
 
 
 def generate_constant_turn_until_facing_point(start_point,radius,tangent_in,goal_point,turn_left=None,turn_against_normal=None,recursed=False):
+
+	#Just a heads up, this section is performance-critical.
 	turn_left = uniform(0,1) < 0.5 if turn_left == None else turn_left
 
-	#Calculate some preliminary information
+	#Calculate preliminary values
 	s = start_point
 	r = radius
 	normal = (-math.sin(tangent_in),math.cos(tangent_in))
 	n = normal if not turn_left else (-normal[0],-normal[1])
-	n = normalize_vec(n)
 	g = goal_point
 	rn = (r*n[0],r*n[1])
 	c = (s[0]+rn[0],s[1]+rn[1])
-	cg = (c[0]-g[0],c[1]-g[1])
-	gc = (-cg[0],-cg[1])
-	gs = (g[0]-s[0],g[1]-s[1])
+	gc = (g[0]-c[0],g[1]-c[1])
 	sc = (s[0]-c[0],s[1]-c[1])
 	t = (math.cos(tangent_in),math.sin(tangent_in))
-	x = magnitude( gc )
-
-
-	if abs(r/x) > 1:
-		x=r
-
+	x = max(magnitude( gc ),r)
 
 	#Figure out what quadrant we will have to depart the circle at
-	#First convert to the tangent-normal basis
-	basis_changer = np.linalg.inv(np.matrix( [ [t[0],n[0]],[t[1],n[1]] ] ))
-	old_g = np.matrix( [[gc[0]],[gc[1]]] )
-	g_new = np.matmul(basis_changer,old_g)
-	old_s = np.matrix( [[sc[0]],[sc[1]]] )
-	s_new = np.matmul(basis_changer,old_s)
-	g_prime = g_new
-	
+	#First convert to the tangent-normal basis (TNB reference frame)
+	g_prime = (t[0]*gc[0]+t[1]*gc[1],n[0]*gc[0]+n[1]*gc[1])
 
-	#Now check quadrants
+	#Now find out which quadrant it is in
 	quadrant = 1
 	if (g_prime[0] >= 0 and -r <= g_prime[1] and g_prime[1] <= 0) or (g_prime[0] >= r and -r <= g_prime[1]):
 		quadrant = 1
@@ -615,22 +603,19 @@ def generate_constant_turn_until_facing_point(start_point,radius,tangent_in,goal
 	else:
 		quadrant = 4
 
-
-	#For each quadrant, we need to move what is considered the "start point"
-	#By 90 degrees (see Track Generation guide on team wiki for reasoning)
+	#For each quadrant, we need to move what is considered the "start point" by 90 degrees
 	quadrant_angle = (quadrant-1) * math.pi/2
-	quadrant_rotater = np.matrix( [ [math.cos(quadrant_angle),-math.sin(quadrant_angle)],[math.sin(quadrant_angle),math.cos(quadrant_angle)] ] )
+	cos_a = math.cos(quadrant_angle)
+	sin_a = math.sin(quadrant_angle)
+	new_s = (cos_a*sc[0]-sin_a*sc[1],sin_a*sc[0]+cos_a*sc[1])
 
-	new_s = np.matmul(quadrant_rotater,np.matrix( [[sc[0]],[sc[1]]] ))
-
-
-	#Finally, voila
+	#This section calculates the angle within a circle quadrant that is needed to turn.
 	theta = 0
 	if quadrant == 1 or quadrant == 3 or not turn_left:
 		inner_angle = math.acos(r/x)
-		np_gc = np.array([gc[0],gc[1]])
-		np_s  = np.array([new_s.item(0),new_s.item(1)])
-		outer_angle = math.atan2(np.linalg.norm(np.cross(np_gc,np_s)),np.dot(np_gc,np_s))
+		cross = gc[0]*new_s[1]-gc[1]*new_s[0]
+		dot   = gc[0]*new_s[0]+gc[1]*new_s[1]
+		outer_angle = math.atan2(cross,dot)
 		theta = outer_angle-inner_angle+quadrant_angle
 	else:
 		#To be honest, I do not know why the dot product should be negated in this case
@@ -639,9 +624,9 @@ def generate_constant_turn_until_facing_point(start_point,radius,tangent_in,goal
 		#to get this darn function to work so I'm leaving it like this for now.
 		#Fresh eyes would be beneficial, whether it be someone else or future-me.
 		inner_angle = math.acos(r/x)
-		np_gc = np.array([gc[0],gc[1]])
-		np_s  = np.array([new_s.item(0),new_s.item(1)])
-		outer_angle = math.atan2(np.linalg.norm(np.cross(np_gc,np_s)),-np.dot(np_gc,np_s))
+		cross = gc[0]*new_s[1]-gc[1]*new_s[0]
+		dot   = gc[0]*new_s[0]+gc[1]*new_s[1]
+		outer_angle = math.atan2(cross,-dot)
 		theta = outer_angle-inner_angle+quadrant_angle
 
 	#The problem with heading directly to the goal with perfect precision is that once well-positioned,
@@ -659,7 +644,6 @@ def generate_constant_turn_until_facing_point(start_point,radius,tangent_in,goal
 
 	toReturn = generate_constant_turn(start_point,radius,tangent_in,turn_left = turn_left, circle_percent = cp)
 	return toReturn
-
 	
 
 
@@ -680,7 +664,7 @@ def get_parametric_circle(start_point,center_point,delta_angle):
 
 
 def generate_constant_turn(start_point,radius,tangent_in,turn_left=None,circle_percent=None,turn_against_normal=None):
-	
+	if radius > TrackGenerator.MAX_CONSTANT_TURN: rospy.logerr("ERR LARGE RADIUS: " + str(radius))
 	#cturns have choices - turn left or turn right
 	#Then, they can choose what percent of the circle do they want to turn?
 	turn_left = uniform(0,1)<0.5 		if turn_left == None 		else turn_left
@@ -701,7 +685,7 @@ def generate_constant_turn(start_point,radius,tangent_in,turn_left=None,circle_p
 	#Length of circle is, fortunately, easy!  It's simply radius*angle
 	length = turn_angle*radius
 
-	fidelity = math.ceil(length)
+	fidelity = 360
 	points = [circle_function(t/fidelity) for t in range(0,int(fidelity)+1)]
 
 	#Now we want to find the normal vector, because it's useful to have to determine whether it curves inwards or outwards
