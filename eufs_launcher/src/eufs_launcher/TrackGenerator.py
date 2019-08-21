@@ -229,7 +229,7 @@ class TrackGenerator:
 				if TrackGenerator.FAILURE_INFO: rospy.logerr("Overlap check "+str(failure_count)+" failed")
 				print("Oops!  The track intersects itself too much.  Retrying...")
 				failure_count+=1
-			if failure_count > 1000:
+			if failure_count > 10000:
 				raise GenerationFailedException
 		
 		#Now let's randomly flip it a bit to spice it up
@@ -698,11 +698,11 @@ def generate_constant_turn(start_point,radius,tangent_in,turn_left=None,circle_p
 	flipper = -1 if cross_product < 0 else 1 #calculates if turning clockwise (-1) or anticlockwise (1)
 	circle_function = get_parametric_circle(start_point,center,flipper*turn_angle)
 
-	fidelity = 365.0
-	points = [circle_function(t/fidelity) for t in range(0,int(fidelity)+1)]
-
 	#Length of circle is, fortunately, easy!  It's simply radius*angle
 	length = turn_angle*radius
+
+	fidelity = math.ceil(length)
+	points = [circle_function(t/fidelity) for t in range(0,int(fidelity)+1)]
 
 	#Now we want to find the normal vector, because it's useful to have to determine whether it curves inwards or outwards
 	#Normal vectors are always parallel to the vector from center to end point
