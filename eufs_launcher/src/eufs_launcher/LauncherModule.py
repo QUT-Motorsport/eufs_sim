@@ -525,6 +525,10 @@ class EufsLauncher(Plugin):
 		elif self._widget.findChild(QRadioButton,"TorqueRadio").isChecked():
 			self.tell_launchella("With Torque Controls")
 			control_method = "controlMethod:=torque"
+
+		perception_stack = ["perception:=no_perception"]
+		if self._widget.findChild(QCheckBox,"PerceptionCheckbox").isChecked():
+			perception_stack = []#is on
 		
 
 		if self.popen_process:
@@ -538,7 +542,7 @@ class EufsLauncher(Plugin):
 						'simulation.launch')
 			self.popen_process = 	self.launch_node_with_args(
 						launch_location,
-						[control_method,"track:="+track_to_launch.split(".")[0],"perception:=no_perception"]
+						[control_method,"track:="+track_to_launch.split(".")[0]]+perception_stack
 					)
 		else:
 			self.popen_process = self.launch_node_with_args(

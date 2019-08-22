@@ -212,6 +212,26 @@
    </property>
   </widget>
 
+  <!--Perception Launcher-->
+  <widget class="QCheckBox" name="PerceptionCheckbox">
+  <property name="geometry">
+      <rect>
+        <x>600</x>
+        <y>85</y>
+        <width>150</width>
+        <height>30</height>
+      </rect>
+    </property>
+    <property name="text" >
+      <string>Launch Perception Stack</string>
+    </property>
+    <property name="font">
+       <font>
+            <pointsize>7</pointsize>
+       </font>
+   </property>
+  </widget>
+
   <widget class="QLabel" name="GeneratorParametersLabel">
    <property name="geometry">
     <rect>
