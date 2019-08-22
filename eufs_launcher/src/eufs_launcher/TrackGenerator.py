@@ -571,7 +571,107 @@ def generate_hairpin_turn(start_point,radius,tangent_in,switchback_num=None,turn
 
 
 def generate_constant_turn_until_facing_point(start_point,radius,tangent_in,goal_point,turn_left=None,turn_against_normal=None,recursed=False):
+	#This is a split-off version of generate_constant_turn, where instead of taking in a percent to turn around a circle,
+	#We give it a direction we want it to stop at
+	(startx,starty) = start_point
 
+	#cturns have a choices - turn left or turn right
+	#Then, they can choose what percent of the circle do they want to turn?
+	turn_left = uniform(0,1)<0.5 		if turn_left == None 		else turn_left
+
+	#Calculating this is fairly complicated
+	#Angle of circle normal = 90 degrees + tangent_in
+	#Slope of normal = -tan(90+normal) if turn left or tan(90+normal) if turn right
+	#Center is at start_point + (r/sqrt( 1+m^2 )   ,   m*r*sqrt( 1+m^2 )) 
+	circle_normal = math.pi/2 + tangent_in
+	slope    = math.tan(circle_normal)
+	pure_x = radius/math.sqrt( 1+slope*slope )
+	if turn_left:
+		pure_x*=-1
+
+	center_x = startx + pure_x
+	center_y = starty + slope*pure_x
+
+	#Now we use a rotation matrix to parameterize intermediate points:
+	#Given start S and center C, any point on the circle angle A away is:
+	#R_A[S-C] + C
+	#Let us box this up in a nice function:
+	def intermediate_point(s,c,a):
+		(sx,sy) = s
+		(cx,cy) = c
+		cos_a    = math.cos(a)
+		sin_a    = math.sin(a)
+		del_x    = sx-cx
+		del_y    = sy-cy
+		result_x = cos_a*del_x-sin_a*del_y+cx
+		result_y = sin_a*del_x+cos_a*del_y+cy
+		return (result_x,result_y)
+
+	def sgn(x):
+		return -1 if x < 0 else 1 if x > 0 else 0
+
+	angle = 2*math.pi
+	flipper = -1 if tangent_in*pure_x > 0 else 1 #multiply by pure_x because we want to re-flip here if we flipped due to "turn_left"
+
+	if turn_against_normal != None:
+		#In this case, we want to make sure it turns away from the inputted normal vector
+		#So if normal=(a,b) we want to make sure its (-a,-b)
+		#This is the same as changing turn_left
+		#So first we want to compute the current normal to make sure we don't change anything
+		#Current normal will be:
+		#points[0][0]-center_x,points[0][1]-center_y
+		#So we pre-compute the points[0][a] since we haven't yet:
+		points_0 = intermediate_point(start_point,(center_x,center_y),0)
+		cur_normal = normalize_vec((points_0[0]-center_x,points_0[1]-center_y))
+		turn_against_normal = normalize_vec(turn_against_normal)
+	
+		#Due to floating point stuffs, we won't check direct equality, we'll just look at the sign!
+		#We want normals to be flipped, so its bad if cur_normal has the same sign!
+		#We also only need to check both components just in the case where the normal is (0,y)
+		need_to_flip = abs(cur_normal[0]-turn_against_normal[0])<0.1 or abs(cur_normal[1]-turn_against_normal[1])<0.1
+
+		if need_to_flip:
+			#print("Flipping!")
+			center_x-=2*pure_x
+			center_y-=2*slope*pure_x
+			flipper*=-1
+	points = []
+	max_range = 365
+	step_size = 1.0/max_range
+	for t in range(0,max_range):
+		points.append(intermediate_point(start_point,(center_x,center_y),flipper*t*angle*step_size))
+		if t!=0:
+			#Check if we're pointing in the right direction
+			#This equates to checking if end_point lies on the line at points[-1] with the appropriate tangent.
+			(sx,sy) = points[-1]
+			(ex,ey) = goal_point
+			appropriate_angle = calculate_tangent_angle(points)
+			if t > 0.5*max_range and not recursed:
+				#Very big turn, we don't like that!  We'll just turn the other way instead
+				new_turn_against_normal = None if turn_against_normal == None else normalize_vec((-turn_against_normal[1],turn_against_normal[0]))
+				return generate_constant_turn_until_facing_point(start_point,radius,tangent_in,goal_point,turn_left=turn_left,
+											turn_against_normal=new_turn_against_normal,recursed=True)
+			if abs(cap_angle(appropriate_angle) - cap_angle(math.atan2((ey-sy),(ex-sx)))) < 0.01:
+				#Would do equality checking but limited precision, we just check if close!
+				#If so, break as we've succeeded our task
+				#print("Found goal at t=" + str(t))
+				break
+
+	#Length of circle is, fortunately, easy!  It's simply radius*angle
+	length = angle*radius
+
+	#Now we want to find the normal vector, because it's useful to have to determine whether it curves inwards or outwards
+	#Normal vectors are always parallel to the vector from center to end point
+	normal = (points[-1][0]-center_x,points[-1][1]-center_y)
+
+	#Returns a list of points and the new edge of the racetrack and the change in length
+	return (points,points[-1],length,normal)
+
+	#Below is an algebraic solution to this problem that my mathematical heart couldn't bring to delete
+	#It is much slower than the above iterative solution, which is why it is not in use.
+	#If you can figure out how to give it a speed boost, all the power to you!
+	#Algebraic solutions should be preferred to iterative when their speed and stability are equal.
+	"""
 	#Just a heads up, this section is performance-critical.
 	turn_left = uniform(0,1) < 0.5 if turn_left == None else turn_left
 
@@ -644,7 +744,7 @@ def generate_constant_turn_until_facing_point(start_point,radius,tangent_in,goal
 
 	toReturn = generate_constant_turn(start_point,radius,tangent_in,turn_left = turn_left, circle_percent = cp)
 	return toReturn
-	
+	"""
 
 
 def get_parametric_circle(start_point,center_point,delta_angle):
@@ -664,7 +764,7 @@ def get_parametric_circle(start_point,center_point,delta_angle):
 
 
 def generate_constant_turn(start_point,radius,tangent_in,turn_left=None,circle_percent=None,turn_against_normal=None):
-	if radius > TrackGenerator.MAX_CONSTANT_TURN: rospy.logerr("ERR LARGE RADIUS: " + str(radius))
+	#if radius > TrackGenerator.MAX_CONSTANT_TURN: rospy.logerr("ERR LARGE RADIUS: " + str(radius))
 	#cturns have choices - turn left or turn right
 	#Then, they can choose what percent of the circle do they want to turn?
 	turn_left = uniform(0,1)<0.5 		if turn_left == None 		else turn_left
@@ -685,7 +785,7 @@ def generate_constant_turn(start_point,radius,tangent_in,turn_left=None,circle_p
 	#Length of circle is, fortunately, easy!  It's simply radius*angle
 	length = turn_angle*radius
 
-	fidelity = 360
+	fidelity = 360.0
 	points = [circle_function(t/fidelity) for t in range(0,int(fidelity)+1)]
 
 	#Now we want to find the normal vector, because it's useful to have to determine whether it curves inwards or outwards
