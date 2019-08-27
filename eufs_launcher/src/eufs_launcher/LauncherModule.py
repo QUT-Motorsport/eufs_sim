@@ -27,6 +27,9 @@ from ConversionTools import ConversionTools as Converter
 class EufsLauncher(Plugin):
 
 	def __init__(self, context):
+		"""
+		This function handles loading the launcher GUI and all the setting-up of the values and buttons displayed.
+		"""
 		super(EufsLauncher, self).__init__(context)
 
 		# Give QObjects reasonable names
@@ -181,13 +184,18 @@ class EufsLauncher(Plugin):
 		roslaunch.configure_logging(self.uuid)
 
 	def tell_launchella(self,what):
+		"""Display text in feedback box (lower left corner)."""
 		self._widget.findChild(QLabel,"UserFeedbackLabel").setText(what)
 		QApplication.processEvents() 
 
 	def sketcher_button_pressed(self):
+		"""Called when sketcher button is pressed, currently not in use."""
 		loadUi(self.sketcher_ui_file, self._widget)
 
 	def load_track_and_images(self):
+		"""
+		Peruses file system for files to add to the drop-down menus of the launcher.
+		"""
 		# Clear the dropdowns
 		self._widget.findChild(QComboBox,"WhichTrack").clear()
 		self._widget.findChild(QComboBox,"WhichImage").clear()
@@ -219,6 +227,7 @@ class EufsLauncher(Plugin):
 				self._widget.findChild(QComboBox,"WhichImage").addItem(f)
 
 	def copy_button_pressed(self):
+		"""When copy button is pressed, launch ConversionTools"""
 		self.tell_launchella("Copying...")
 		#Copy the current file
 		is_full_stack = self._widget.findChild(QCheckBox,"FullStackCopyButton").isChecked()
@@ -272,16 +281,18 @@ class EufsLauncher(Plugin):
 		self.tell_launchella("Copy Succeeded!")
 
 	def update_copier(self):
-		#Change label to show current selected file for the copier
+		"""Change label to show current selected file for the copier"""
 		copy_head = self._widget.findChild(QLabel,"RenameFileHeader")
 		copy_head.setText("Copy: "+self._widget.findChild(QComboBox,"FileForConversion").currentText())
 
 	def update_midpoints_box(self):
+		"""Controls the handling of the box that, when ticked, tells the to-csv converter to calculate cone midpoints."""
 		#Toggle checkbox
 		convert_to = self._widget.findChild(QComboBox,"ConvertTo").currentText()
 		#self._widget.findChild(QCheckBox,"MidpointBox").setVisible(convert_to=="csv" or convert_to=="ALL")
 
 	def update_converter_dropdown(self):
+		"""Keep the drop-down menus of ConversionTools in sync with the filesystem."""
 		from_type = self._widget.findChild(QComboBox,"ConvertFrom").currentText()
 		all_files = []
 
@@ -314,6 +325,7 @@ class EufsLauncher(Plugin):
 		self.update_copier()
 
 	def update_preset(self):
+		"""When preset is changed, change the sliders accordingly."""
 		which = self._widget.findChild(QComboBox,"WhichPreset").currentText()
 		preset_data = Generator.get_preset(which)
 		self.MIN_STRAIGHT   = preset_data[0]
@@ -328,9 +340,15 @@ class EufsLauncher(Plugin):
 		self._widget.findChild(QCheckBox,"LaxCheckBox").setChecked(self.LAX_GENERATION)
 
 	def keep_track_of_preset_changes(self):
+		"""Hooks up the preset button with the preset_changed function."""
 		self._widget.findChild(QComboBox,"WhichPreset") .currentTextChanged.connect(self.preset_changed)
 
 	def preset_changed(self):
+		"""
+		When preset is changed, set everything into motion that needs to happen.
+		
+		Updates dropdowns and sliders.
+		"""
 		self.ignore_slider_changes = True
 		self.update_preset()
 		self.keep_params_up_to_date()
@@ -338,6 +356,9 @@ class EufsLauncher(Plugin):
 		self.ignore_slider_changes = False
 
 	def keep_track_of_slider_changes(self):
+		"""
+		Hooks up all sliders with functions to respond to their changes.
+		"""
 		self._widget.findChild(QSlider,"Param_MIN_STRAIGHT") .valueChanged.connect(self.slider_changed)
 		self._widget.findChild(QSlider,"Param_MAX_STRAIGHT") .valueChanged.connect(self.slider_changed)
 		self._widget.findChild(QSlider,"Param_MIN_CTURN")    .valueChanged.connect(self.slider_changed)
@@ -348,12 +369,13 @@ class EufsLauncher(Plugin):
 		self._widget.findChild(QSlider,"Param_MAX_LENGTH")   .valueChanged.connect(self.slider_changed)
 		
 	def slider_changed(self):
+		"""When a slider is changed, update the parameters."""
 		if self.ignore_slider_changes: return
 		self.keep_variables_up_to_date()
 		self.keep_params_up_to_date()
 
 	def keep_params_up_to_date(self):
-		#This function keeps the labels next to the sliders up to date with the actual values
+		"""This function keeps the labels next to the sliders up to date with the actual values."""
 		self._widget.findChild(QLabel,"Label_MIN_STRAIGHT") .setText("MIN_STRAIGHT: "  + str(self.MIN_STRAIGHT))
 		self._widget.findChild(QLabel,"Label_MAX_STRAIGHT") .setText("MAX_STRAIGHT: "  + str(self.MAX_STRAIGHT))
 		self._widget.findChild(QLabel,"Label_MIN_CTURN")    .setText("MIN_CTURN: "     + str(self.MIN_CTURN))
@@ -364,6 +386,7 @@ class EufsLauncher(Plugin):
 		self._widget.findChild(QLabel,"Label_MAX_LENGTH")   .setText("MAX_LENGTH: "    + str(self.MAX_LENGTH))
 
 	def keep_sliders_up_to_date(self):
+		"""This function keeps the values of the sliders up to date with the actual values."""
 		self.set_slider_value("Param_MIN_STRAIGHT",self.MIN_STRAIGHT)
 		self.set_slider_value("Param_MAX_STRAIGHT",self.MAX_STRAIGHT)
 		self.set_slider_value("Param_MIN_CTURN",self.MIN_CTURN)
@@ -374,6 +397,7 @@ class EufsLauncher(Plugin):
 		self.set_slider_value("Param_MAX_LENGTH",self.MAX_LENGTH)
 
 	def keep_variables_up_to_date(self):
+		"""This function keeps LauncherModule's variables in tune with the slider values."""
 		self.MIN_STRAIGHT = self.get_slider_value("Param_MIN_STRAIGHT")
 		self.MAX_STRAIGHT = self.get_slider_value("Param_MAX_STRAIGHT")
 		self.MIN_CTURN = self.get_slider_value("Param_MIN_CTURN")
@@ -384,13 +408,16 @@ class EufsLauncher(Plugin):
 		self.MAX_LENGTH = self.get_slider_value("Param_MAX_LENGTH")
 
 	def set_slider_ranges(self):
-		#This function keeps slider locations up to date with the actual values
-		#Note on ranges: 
-		#		Straights are between 0 and 150
-		#		Turns are between 0 and 50
-		#		Hairpins are between 0 and 20, and have half-step rather than integer step (hence scaling by 2s)
-		#		Hairpin pairs are between 0 and 5
-		#               Max Length is between 200 and 2000
+		"""
+		This function specifies the bounds of the sliders.
+
+		Note on ranges: 
+				Straights are between 0 and 150
+				Turns are between 0 and 50
+				Hairpins are between 0 and 20, and have half-step rather than integer step (hence scaling by 2s)
+				Hairpin pairs are between 0 and 5
+		               Max Length is between 200 and 2000
+		"""
 		min_straight = 0
 		max_straight = 150
 		min_turn = 0
@@ -411,24 +438,30 @@ class EufsLauncher(Plugin):
 		self.set_slider_data("Param_MAX_LENGTH",min_max_length,max_max_length)
 		
 	def get_slider_value(self,slidername):
+		"""Returns the value of the specified slider."""
 		slider = self._widget.findChild(QSlider,slidername)
 		return slider.value()
 
 	def set_slider_value(self,slidername,sliderval):
+		"""Sets the value of the specified slider."""
 		slider = self._widget.findChild(QSlider,slidername)
 		slider.setValue(sliderval)
 
 	def set_slider_data(self,slidername,slidermin,slidermax):
+		"""Sets the minimum and maximum values of sliders."""
 		slider = self._widget.findChild(QSlider,slidername)
 		slider.setMinimum(slidermin)
 		slider.setMaximum(slidermax)
 		
 
 	def experimental_button_pressed(self):
-		self._widget.findChild(QPushButton,"GenerateButton").setVisible(True)
+		"""When features are listed as experimental, then they are invisible until this function switches them on."""
+		pass
+		#Example: self._widget.findChild(QPushButton,"GenerateButton").setVisible(True)
 		
 
 	def generator_button_pressed(self):
+		"""Handles random track generation by accessing TrackGenerator and ConversionTools."""
 		self.tell_launchella("Generating Track...")
 
 		isLaxGenerator = self._widget.findChild(QCheckBox,"LaxCheckBox").isChecked()
@@ -464,6 +497,7 @@ class EufsLauncher(Plugin):
 		self.load_track_and_images()
 
 	def track_from_image_button_pressed(self):
+		"""Converts .png to .launch by interfacing with ConversionTools, then launches said .launch."""
 		self.tell_launchella("Preparing to launch image as a track... ")
 		filename = self._widget.findChild(QComboBox,"WhichImage").currentText()
 		filename_full = os.path.join(rospkg.RosPack().get_path('eufs_gazebo'), 'randgen_imgs/'+filename)
@@ -480,10 +514,12 @@ class EufsLauncher(Plugin):
 	
 
 	def get_noise_level(self):
+		"""Returns the noise slider's noise level."""
 		noise_level_widget = self._widget.findChild(QSlider,"Noisiness")
 		return (1.0*(noise_level_widget.value()-noise_level_widget.minimum()))/(noise_level_widget.maximum()-noise_level_widget.minimum())
 
 	def convert_button_pressed(self):
+		"""Handles interfacing with ConversionTools."""
 		from_type = self._widget.findChild(QComboBox,"ConvertFrom").currentText()
 		to_type   = self._widget.findChild(QComboBox,"ConvertTo").currentText()
 		filename = self._widget.findChild(QComboBox,"FileForConversion").currentText()
@@ -502,6 +538,7 @@ class EufsLauncher(Plugin):
 		self.tell_launchella("Conversion Succeeded!  From: " + from_type + " To: " + to_type + " For: " + filename)
 
 	def launch_button_pressed(self):
+		"""Launches Gazebo."""
 		if self.has_launched_ros:
 			#Don't let people press launch twice
 			#There's not really any reason why not to, but it's "undefined behavior"
@@ -557,6 +594,9 @@ class EufsLauncher(Plugin):
 		self.tell_launchella("As I have fulfilled my purpose in guiding you to launch a track, this launcher will no longer react to input.")
 
 	def nuke_ros(self):
+		"""
+		Kill everything about ROS - only used for debugging
+		"""
 		#Try to kill as much as possible
 		#Burn it all to the ground
 		Popen(["killall","-9","gzserver"])
@@ -579,22 +619,27 @@ class EufsLauncher(Plugin):
 		pass
 
 	def launch_node(self,filepath):
+		"""Wrapper for launch_node_with_args"""
 		self.launch_node_with_args(filepath,[])
 
 	def launch_node_with_args(self,filepath,args):
+		"""
+		Launches ros node.
+
+		If arguments are supplied, it has to use Popen rather than the default launch method.
+		"""
 		if len(args) > 0:#We cannot use ROS' api with arguments in Kinetic
 			process = Popen(["roslaunch",filepath]+args)
 			self.popens.append(process)
 			return process
 		else:
-			rospy.logerr("FP: " + filepath)
 			launch = roslaunch.parent.ROSLaunchParent(self.uuid, [filepath])
 			launch.start()
 			self.launches.append(launch)
 			return launch
 
 	def shutdown_plugin(self):
-		# unregister all publishers, kill all nodes
+		"""Unregister all publishers, kill all nodes."""
 		self.tell_launchella("Shutdown Engaged...")
 		#(Stop all processes)
 		for p in self.processes:
@@ -606,15 +651,8 @@ class EufsLauncher(Plugin):
 		for p in self.popens:
 			p.kill()
 
-		#Trying to kill here will make a horrible bug
-		#no idea why.  You'll want: "killall -9 gzserver gzclient" to fix it
-		#if self.popen_process != None:
-		#	self.popen_process.kill()
-		#	self.popen_process = None
-
-		#NUKE IT! (seriously just nuke it)
-		#self.nuke_ros()
-
+		#Manual node killer:
+		"""
 		extra_nodes= rosnode.get_node_names()
 		extra_nodes.remove("/eufs_launcher")
 		extra_nodes.remove("/rosout")
@@ -642,6 +680,7 @@ class EufsLauncher(Plugin):
 		extra_nodes.remove("/rosout")
 		if left_open>0:
 			rospy.logerr("Pruned to: " + str(extra_nodes))
+		"""
 
 	#def trigger_configuration(self):
 		# Comment in to signal that the plugin has a way to configure

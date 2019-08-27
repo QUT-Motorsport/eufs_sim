@@ -96,12 +96,12 @@ class TrackGenerator:
 
 	@staticmethod
 	def get_presets():
-	"""
-	Returns a list of generator presets.
+		"""
+		Returns a list of generator presets.
 
-	Presets contain all the information that parameterizes track generation.
-	Also couples the presets with colloquial names for them.
-	"""
+		Presets contain all the information that parameterizes track generation.
+		Also couples the presets with colloquial names for them.
+		"""
 		return [("Contest Rules",[
 				10,#Min straight length
 				80,#Max straight length
