@@ -336,8 +336,12 @@ class ConversionTools:
 					new_frontier.update(get_allowed_adjacents(explored_list,(i,j)))
 				explored_list.add(f)
 			frontier = new_frontier
-		
-		
+
+		#Add ground truth cones
+		(i,j) = all_points_north[0]
+		pixels[int(i),int(j)] = ConversionTools.cone_color_orange
+		(i,j) = all_points_south[0]
+		pixels[int(i),int(j)] = ConversionTools.cone_color_orange
 
 		#Finally, we just need to place noise.  At maximal noise, the track should be maybe 1% covered? (that's actually quite a lot!)
 
