@@ -526,7 +526,7 @@ class EufsLauncher(Plugin):
 			self.tell_launchella("With Torque Controls")
 			control_method = "controlMethod:=torque"
 
-		perception_stack = ["perception:=no_perception"]
+		perception_stack = ["launch_group:=no_perception"]
 		if self._widget.findChild(QCheckBox,"PerceptionCheckbox").isChecked():
 			perception_stack = []#is on
 		
