@@ -53,8 +53,6 @@ You shold have something like this:
 
 ![Full Gui](https://gitlab.com/eufs/eufs_sim/wikis/uploads/933b243148108ecda8e98327fd84d137/UpdatedLauncher2.png)
 
-<!-- For the most part, this should be self explanatory - the exception being perhaps the generation, noise, and image stuff. -->
-
 You can select different tracks from the dropdown menu. Then you can launch the simulation with the top-leftmost **Launch** button
 
 The bottom-left will read in the selected image and turn it into a track, launching it immediately.
@@ -63,7 +61,16 @@ The bottom-middle will generate a random track image to `rand.png`.  You can see
 The bottom-left button is sensitive to a parameter called "noise" - these are randomly placed objects to the side of the track that the
 car's sensors may pick up, mimicking real-world 'noise' from the environment.  By default this is off, but you can drag the slider to adjust it to whatever levels you desire.
 
-If you don't have a good computer, stick to the Computer Friendly random generation preset.
+If you don't have a good computer, stick to the Small Straights random generation preset, or perhaps Bezier if your computer is very slow.  
+(Bezier tracks forgo realism for speed, whereas Small Straights keeps the track realistic, just smaller.)
+
+An additional feature of the GUI is the ConversionTools.  As the generator creates .png files, the launcher requires .launch files, 
+and important data for perception is often put into .csv format, the GUI has a converter that allows you to freely convert between file formats.
+By default, files that are converted have a suffix appended to them (usually _CT) to prevent accidental overwriting of important files.
+This can be turned off by checking the suffix box - the conversion process is fairly lossless, so if a file is accidentally overwritten, it
+will likely behave the exact same way as the old file did.
+
+A full manual of how to use the GUI is available ![here](https://gitlab.com/eufs/eufs_sim/wikis/Simulation/Launcher-Overview).
 
 ## 4. Additional sensors <a name="sensors"></a>
 Additional sensors for testing are avilable via the `ros-kinetic-robotnik-sensor` package. Some of them are already defined in `eufs_description/robots/eufs.urdf.xarco`. You can simply commment them in and attach them appropriately to the car.
