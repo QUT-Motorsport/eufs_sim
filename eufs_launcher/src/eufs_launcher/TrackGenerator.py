@@ -96,6 +96,12 @@ class TrackGenerator:
 
 	@staticmethod
 	def get_presets():
+	"""
+	Returns a list of generator presets.
+
+	Presets contain all the information that parameterizes track generation.
+	Also couples the presets with colloquial names for them.
+	"""
 		return [("Contest Rules",[
 				10,#Min straight length
 				80,#Max straight length
@@ -147,30 +153,36 @@ class TrackGenerator:
 
 	@staticmethod
 	def get_default_mode_string():
+		"""Returns the name of the default generation mode [Does it use circles or bezier curves?]."""
 		return "Circle&Line"
 
 	@staticmethod
 	def get_default_mode_number():
+		"""Gets default id of the default generation mode."""
 		return TrackGenerator.get_number_from_mode(TrackGenerator.get_default_mode_string())
 
 	@staticmethod
 	def get_mode_from_number(num):
+		"""Given a generation mode id, return its name."""
 		if num==0: return "Circle&Line"
 		elif num==1: return "Bezier"
-		return "Circle&Line"
+		return get_default_mode_string()
 
 	@staticmethod
 	def get_number_from_mode(mode):
+		"""Given a generation mode name, return its id."""
 		if mode=="Circle&Line": return 0
 		elif mode == "Bezier": return 1
-		return 0
+		return get_default_mode_number()
 
 	@staticmethod
 	def get_default_preset():
+		"""Returns the name of the default generation preset."""
 		return "Small Straights"
 
 	@staticmethod
 	def get_preset_names():
+		"""Returns a list of all generation preset names."""
 		to_return = []
 		all_presets = TrackGenerator.get_presets()
 		for a in all_presets:
@@ -179,22 +191,23 @@ class TrackGenerator:
 
 	@staticmethod
 	def get_preset(name):
+		"""
+		Given a name, returns a list of the preset's values.
+
+		If such a name does not exist, it will send console warnings
+		and default to the default preset.
+		"""
 		all_presets = TrackGenerator.get_presets()
 		for a in all_presets:
 			if a[0] == name:
 				return a[1]
 		rospy.logerr("No such preset: " + name)
-		rospy.logerr("Defaulting to Contest Rules")
-		return get_preset("Contest Rules")
-
-	@staticmethod
-	def set_preset(name):
-		values = TrackGenerator.get_preset(name)
-		TrackGenerator.set_data(values)
-		
+		rospy.logerr("Defaulting to " + get_default_preset())
+		return get_preset(get_default_preset())
 
 	@staticmethod
 	def set_data(values):
+		"""Sets up TrackGenerator to use the generation parameters specified in the input."""
 		TrackGenerator.MIN_STRAIGHT = values[0]
 		TrackGenerator.MAX_STRAIGHT = values[1]
 		TrackGenerator.MIN_CONSTANT_TURN = values[2]
@@ -209,23 +222,24 @@ class TrackGenerator:
 
 	@staticmethod
 	def generate(values):
-		#Generate the track as pure data
-		#Returns a list of points to define the path of the track, along with a bounding width & height for how big the track is.
-		#Input is a list of track parameters
+		"""
+		Generates the track as pure data (a List[Tuple[float,float]] list of points on the track)
+
+		Returns a list of points to define the path of the track, along with a bounding width & height for how big the track is.
+		Input is a list of track parameters
+		"""
 		TrackGenerator.set_data(values)
 		xys = []
 		overlapped = False
 		generate_function = generate_autocross_trackdrive_track if TrackGenerator.TRACK_MODE == "Circle&Line" else generate_bezier_track
 		failure_count = 0
 		while overlapped or xys==[]:
-			#break
 			#Re-generate if the track overlaps itself
 			(xys,twidth,theight) = generate_function((0,0))
 			xys2 = [(int(x[0]),int(x[1])) for x in xys]
 			xys2 = compactify_points(xys2)
 			overlapped = check_if_overlap(xys2)
 			if overlapped:
-				#break
 				if TrackGenerator.FAILURE_INFO: rospy.logerr("Overlap check "+str(failure_count)+" failed")
 				print("Oops!  The track intersects itself too much.  Retrying...")
 				failure_count+=1
@@ -247,7 +261,13 @@ ESSENTIAL FUNCTIONS
 """
 
 def generate_bezier_track(start_point):
-		#In this function we handle the quick&dirty Bezier generator
+		"""
+		In this function we handle the quick&dirty Bezier generator
+
+		This is the entry point for the generator's Bezier mode after generate() is called.
+		It takes in an initial point, and returns track data such that we have a list of points
+		outlining a closed G1-continuous loop made out of purely Bezier curves.
+		"""
 		xys = []
 
 		goal_points = [	(start_point[0]+TrackGenerator.MAX_TRACK_LENGTH*0.08,start_point[1]),
@@ -268,8 +288,19 @@ def generate_bezier_track(start_point):
 		
 		return convert_points_to_all_positive(xys)
 
-def get_random_bezier(start_point,end_point,start_tangent=None,calculate_tangent_angle=None,order=4):
-		#For the math to work out, we need Beziers to be at least quartic
+def get_random_bezier(start_point,end_point,start_tangent=None,calculate_tangent_angle=None):
+		"""
+		Generates a random cubic bezier, and returns it as a function of t so that arbitrary precision can be used.
+
+		Returns a tuple of the bezier function, the incoming tangent, and the outgoing tangent.
+		Requires the start and end point of the bezier to be specified
+		Optional parameters are:
+			start_tangent: the tangent that the start of the bezier curve should follow
+			calculate_tangent_angle: the tangent that the end of the bezier curve should follow
+		Optional parameters are randomized if not specified.
+		"""
+
+		#For the math to work out, we need Beziers to be [at least] cubic (parameterized by 4 points)
 		start_tangent = uniform(0,2*math.pi) if start_tangent == None else start_tangent
 		calculate_tangent_angle   = uniform(0,2*math.pi) if calculate_tangent_angle   == None else calculate_tangent_angle
 
@@ -293,11 +324,13 @@ def get_random_bezier(start_point,end_point,start_tangent=None,calculate_tangent
 
 
 def get_parametric_bezier(control_points):
-		#This function will itself return a function of a parameterized bezier
-		#That is, the result will be a function that takes a time parameter from 0 to 1
-		#and traveling along it results in the points on the bezier.
-		#I made this code match the Bezier curve definition on wikipedia as closely as
-		#possible (Explicit definition, not the recursive one)
+		"""
+		This function will itself return a function of a parameterized bezier
+		That is, the result will be a function that takes a time parameter from 0 to 1
+		and traveling along it results in the points on the bezier.
+		I made this code match the Bezier curve definition on wikipedia as closely as
+		possible (Explicit definition, not the recursive one)
+		"""
 		def to_return(cp,t):
 			the_sum_x = 0
 			the_sum_y = 0
@@ -310,7 +343,12 @@ def get_parametric_bezier(control_points):
 		return lambda t: to_return(control_points,t)
 
 def generate_autocross_trackdrive_track(start_point):
-		#In this function we handle the traditional Circle&Line generator
+		"""
+		In this function we handle the traditional Circle&Line generator
+
+		Takes in an initial point, and returns a G1-continuous closed loop
+		made by piecing circles and lines together.
+		"""
 		xys = []
 		cur_track_length = 0
 		cur_point = start_point
@@ -409,12 +447,15 @@ def generate_autocross_trackdrive_track(start_point):
 
 
 def generate_path_from_point_to_point(start_point,end_point,tangent_in,depth=20,hairpined=False,many_hairpins=False,fuzz_radius=0):
-	#Here we want to get from a to b by randomly placing paths 
-	#[Note: depth parameter is just to limit recursion overflows]
-	#[And hairpined parameter prevents multiple hairpins - we should have at most
-	#one or else its hard to generate nice paths]
-	#[many_hairpins overrides this and allows an arbitrary amount]
-	#[fuzz_radius is how close to the end we want to be]
+	"""
+	Here we want to get from a to b by randomly placing paths 
+
+	[Note: depth parameter is just to limit recursion overflows]
+	[And hairpined parameter prevents multiple hairpins - we should have at most one or else its hard to generate nice paths]
+	[many_hairpins overrides this and allows an arbitrary amount]
+	[fuzz_radius is how close to the end we want to be, 0 will make it arrive exactly in place.]
+	"""
+
 	length = 0
 	points = []
 	circle_radius = uniform(TrackGenerator.MIN_CONSTANT_TURN,TrackGenerator.MAX_CONSTANT_TURN)
@@ -438,9 +479,6 @@ def generate_path_from_point_to_point(start_point,end_point,tangent_in,depth=20,
 	if cap_angle(direct_path_angle-normal_angle)>cap_angle(direct_path_angle-direct_path_angle):
 		normal_angle = cap_angle(math.pi + normal_angle)
 
-	#Also flip it if tangent heading in 'negative' direction
-	#if (abs(cap_angle_odd(tangent_in))math.pi/2):
-	#	normal_angle = cap_angle(math.pi + normal_angle)
 
 	#Finally lets convert this into a normal:
 	the_normal = (1,math.tan(normal_angle))
@@ -455,11 +493,6 @@ def generate_path_from_point_to_point(start_point,end_point,tangent_in,depth=20,
 	(cx,cy) = points[-1]
 	(ex,ey) = end_point
 	square_distance = (ex-cx)*(ex-cx)+(ey-cy)*(ey-cy)
-	#print("--------------------------------")
-	#print(math.sqrt(square_distance))
-	#print(points[-1])
-	#print(end_point)
-	#print("++++++++++++++++++++++++++++++++")
 	if square_distance <= TrackGenerator.MAX_STRAIGHT**2+fuzz_radius**2:
 		#We'll just draw a straight to it
 		(generated, cur_point,delta_length) = generate_straight(points[-1],
@@ -510,6 +543,19 @@ def generate_path_from_point_to_point(start_point,end_point,tangent_in,depth=20,
 	return (points,points[-1],length)
 
 def generate_hairpin_turn(start_point,radius,tangent_in,switchback_num=None,turn_left=None,wobbliness=None,straight_size=None,circle_size=None,uniform_circles=True):
+	"""
+	Generates a hairpin turn using circles and lines.
+
+	start_point: The starting point for the hairpin.
+	radius: Deprecated, use circle_size.
+	tangent_in: The tangent along which the hairpin should start.
+	switchback_num: Amount of turns in the hairpin
+	turn_left: If True, the switchback will turn against the normal vector
+	wobbliness: The percentage of circumference of the circles.  If left blank, will be between 0.45 and 0.55
+	straight_size: The length of the straight part of the circle.
+	circle_size: The radius of the circles, overridden if uniform_circles = false
+	uniform_circles: If True, all circles will be of the same radius, otherwise their radii is random.
+	"""
 	cur_point = start_point
 	cur_tangent = tangent_in
 	length = 0
@@ -571,8 +617,16 @@ def generate_hairpin_turn(start_point,radius,tangent_in,switchback_num=None,turn
 
 
 def generate_constant_turn_until_facing_point(start_point,radius,tangent_in,goal_point,turn_left=None,turn_against_normal=None,recursed=False):
-	#This is a split-off version of generate_constant_turn, where instead of taking in a percent to turn around a circle,
-	#We give it a direction we want it to stop at
+	"""
+	This is a split-off version of generate_constant_turn, where we give it a direction we want it to stop at.
+
+	This function uses an iterative solution, as the albegraic solution is much slower than it.
+	The algebraic function is currently listed as a large comment below this function, if you
+	know how to speed it up to get a near-equivalent speed to this function, please do.
+	The functions need to be of algebraic form for them to easily fit within the framework
+	I would like to implement TrackGenerator in, which would help improve code readability
+	and would give a really easy way to implement slaloms.
+	"""
 	(startx,starty) = start_point
 
 	#cturns have a choices - turn left or turn right
@@ -748,8 +802,12 @@ def generate_constant_turn_until_facing_point(start_point,radius,tangent_in,goal
 
 
 def get_parametric_circle(start_point,center_point,delta_angle):
-	#We can calculate points on a circle using a rotation matrix
-	#R(a)*[S-C]+C gives us any point on a circle starting at S with center C with counterclockwise angular distance 'a'
+	"""
+	Returns a function in terms of t \elem [0,1] to parameterize a circle	
+
+	We can calculate points on a circle using a rotation matrix
+	R(a)*[S-C]+C gives us any point on a circle starting at S with center C with counterclockwise angular distance 'a'
+	"""
 	def output(s,c,a):
 		(sx,sy) = s
 		(cx,cy) = c
@@ -764,7 +822,18 @@ def get_parametric_circle(start_point,center_point,delta_angle):
 
 
 def generate_constant_turn(start_point,radius,tangent_in,turn_left=None,circle_percent=None,turn_against_normal=None):
-	#if radius > TrackGenerator.MAX_CONSTANT_TURN: rospy.logerr("ERR LARGE RADIUS: " + str(radius))
+	"""
+	Given the inputs, return a list of points outlining a circle segment.
+
+	turn_left makes the function turn against the normal,
+	turn_against_normal allows you to specify exactly what normal you are turning against.
+
+	I want to change the signature to generate_constant_turn(start_point,tangent_in,normal_in,radius,circle_percent,turn_against_normal:bool)
+	and return (xys,tangent_out,normal_out,added_length)
+	but this function is so interwoven with the rest of the code that it is fairly difficult.
+	"""	
+
+
 	#cturns have choices - turn left or turn right
 	#Then, they can choose what percent of the circle do they want to turn?
 	turn_left = uniform(0,1)<0.5 		if turn_left == None 		else turn_left
@@ -798,6 +867,9 @@ def generate_constant_turn(start_point,radius,tangent_in,turn_left=None,circle_p
 	
 
 def generate_straight(start_point,length,angle):
+	"""
+	Generates a straight line pointing at an angle with a certain length at a start point.
+	"""
 	(startx,starty) = start_point
 
 	#Now create a parameterized function in terms of the angle
@@ -830,9 +902,11 @@ def generate_straight(start_point,length,angle):
 
 
 def convert_points_to_all_positive(xys):
-	#If the track dips to the negative side of the x or y axes, shift everything over
-	#Returns shifted points tupled with the range over which the points span
-	#We also want everything converted to an integer!
+	"""
+	If the track dips to the negative side of the x or y axes, shift everything over
+	Returns shifted points tupled with the range over which the points span
+	We also want everything converted to an integer!
+	"""
 	max_neg_x = 0
 	max_neg_y = 0
 	max_x    = 0
@@ -855,7 +929,7 @@ def convert_points_to_all_positive(xys):
 
 
 def compactify_points(points):
-	#Given a list of int points, if any two adjacent points are the same then remove one of them
+	"""Given a list of points, if any two adjacent points are the same after conversion to int, then remove one of them"""
 	remove_list = []
 	prev_point = (-10000,-10000)
 	def make_int(tup):
@@ -869,8 +943,11 @@ def compactify_points(points):
 	return points
 
 def check_if_overlap(points):
-	#Naive check to see if track overlaps itself - we remove duplicates from the list and check if size changes
-	#(Won't catch overlaps due to track width, only if track center overlaps)
+	"""
+	Naive check to see if track overlaps itself
+
+	(Won't catch overlaps due to track width, only if track center overlaps)
+	"""
 	points = points[:-10] #remove end points as in theory that should also be the start point
 	#(I remove extra to be a little generous to it as a courtesy - I don't really care how well the
 	#start loops to the end yet)
