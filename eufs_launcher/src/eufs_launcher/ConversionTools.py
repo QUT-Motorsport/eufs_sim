@@ -228,16 +228,20 @@ class ConversionTools:
 
 		pixels = im.load()#get reference to pixel data
 
-		prev_point_north = (-10000,-10000)
-		prev_point_south = (-10000,-10000)
+		all_points_north = []
+		all_points_south = []
+		prev_points_north = [(-10000,-10000)]
+		prev_points_south = [(-10000,-10000)]
 		print("Placing Cones...")
 		for i in range(len(xys)):
 			if i == 0: continue #skip first part [as hard to calculate tangent]
 		
 			#The idea here is to place cones along normals to the tangent at any given point, while making sure they aren't too close.
 
-			cone_closeness_parameter = cone_normal_distance_parameter-2#This could perhaps be made a launcher parameter too.
-			cone_check_amount = 30
+			#Hardcoded parameters (not available in launcher because the set of well-behaved answers is far from dense in the problemspace)
+			cone_cross_closeness_parameter = cone_normal_distance_parameter*3/4-1	#How close can cones be from those on opposite side.
+			cone_check_amount = 30							#Larger numbers makes us check more parts of the track for conflicts.
+			cone_adjacent_closeness_parameter = 6					#How close can cones be from those on the same side.
 
 			cur_point = xys[i]
 			cur_tangent_angle = calculate_tangent_angle(xys[:(i+1)])
@@ -246,10 +250,25 @@ class ConversionTools:
 			north_point = ( int ( cur_point[0]+cur_tangent_normal[0] ) , int ( cur_point[1]+cur_tangent_normal[1] ) )
 			south_point = ( int ( cur_point[0]-cur_tangent_normal[0] ) , int ( cur_point[1]-cur_tangent_normal[1] ) )
 
-			difference_from_prev_north = (north_point[0]-prev_point_north[0])**2+(north_point[1]-prev_point_north[1])**2
-			difference_from_prev_south = (south_point[0]-prev_point_south[0])**2+(south_point[1]-prev_point_south[1])**2
-			cross_distance_ns = (north_point[0]-prev_point_south[0])**2+(north_point[1]-prev_point_south[1])**2
-			cross_distance_sn = (south_point[0]-prev_point_north[0])**2+(south_point[1]-prev_point_north[1])**2
+			#calculates shortest distance to cone on same side of track
+			difference_from_prev_north = \
+				min([
+					(north_point[0]-prev_point_north[0])**2+(north_point[1]-prev_point_north[1])**2
+				for prev_point_north in prev_points_north])
+			difference_from_prev_south = \
+				min([
+					(south_point[0]-prev_point_south[0])**2+(south_point[1]-prev_point_south[1])**2
+				for prev_point_south in prev_points_south])
+
+			#calculates shortest distance to cone on different side of track
+			cross_distance_ns = \
+				min([
+					(north_point[0]-prev_point_south[0])**2+(north_point[1]-prev_point_south[1])**2
+				for prev_point_south in prev_points_south])
+			cross_distance_sn = \
+				min([
+					(south_point[0]-prev_point_north[0])**2+(south_point[1]-prev_point_north[1])**2
+				for prev_point_north in prev_points_north])
 
 			#Here we ensure cones don't get too close to the track
 			distance_pn = min([(north_point[0]-xy[0])**2+(north_point[1]-xy[1])**2 
@@ -257,22 +276,32 @@ class ConversionTools:
 			distance_ps = min([(south_point[0]-xy[0])**2+(south_point[1]-xy[1])**2 
 						for xy in xys[ max([0,i-cone_check_amount]) : min([len(xys),i+cone_check_amount])  ]])
 
-			north_viable = difference_from_prev_north > cone_closeness_parameter**2 \
-						and cross_distance_ns > cone_closeness_parameter**2 \
-						and distance_pn > cone_closeness_parameter**2
-			south_viable = difference_from_prev_south > cone_closeness_parameter**2 \
-						and cross_distance_sn > cone_closeness_parameter**2 \
-						and distance_ps > cone_closeness_parameter**2
+			north_viable = difference_from_prev_north > cone_adjacent_closeness_parameter**2 \
+						and cross_distance_ns > cone_cross_closeness_parameter**2 \
+						and distance_pn > cone_cross_closeness_parameter**2
+			south_viable = difference_from_prev_south > cone_adjacent_closeness_parameter**2 \
+						and cross_distance_sn > cone_cross_closeness_parameter**2 \
+						and distance_ps > cone_cross_closeness_parameter**2
 
 			if not is_track(pixels[int(north_point[0]),int(north_point[1])]) and north_viable:
 				pixels[int(north_point[0]),int(north_point[1])]=ConversionTools.cone_color
-				prev_point_north = north_point
+				all_points_north.append(north_point)
 			if not is_track(pixels[int(south_point[0]),int(south_point[1])]) and south_viable:
 				pixels[int(south_point[0]),int(south_point[1])]=ConversionTools.cone_color
-				prev_point_south = south_point
+				all_points_south.append(south_point)
+
+			#Only keep track of last couple of previous cones (and the very first one, for when the loop joins up)
+			if len(all_points_north) > cone_check_amount:
+				prev_points_north = all_points_north[-cone_check_amount:] + [all_points_north[0]]
+			elif len(all_points_north) > 0:
+				prev_points_north = all_points_north
+			if len(all_points_south) > cone_check_amount:
+				prev_points_south = all_points_south[-cone_check_amount:] + [all_points_south[0]]
+			elif len(all_points_south) > 0:
+				prev_points_south = all_points_south
 
 		
-
+		
 		#We want to make the track have differing cone colors - yellow on inside, blue on outside
 		#All cones are currently yellow.  We'll do a "breadth-first-search" for any cones reachable
 		#from (0,0) and call those the 'outside' [(0,0) always blank as image is padded)]
@@ -307,10 +336,7 @@ class ConversionTools:
 					new_frontier.update(get_allowed_adjacents(explored_list,(i,j)))
 				explored_list.add(f)
 			frontier = new_frontier
-			#curexplored = len(explored_list)
-			#maxexplored = twidth*theight*1.0
-			#print("Max Percent: " + str(curexplored/maxexplored))
-				
+		
 		
 
 		#Finally, we just need to place noise.  At maximal noise, the track should be maybe 1% covered? (that's actually quite a lot!)

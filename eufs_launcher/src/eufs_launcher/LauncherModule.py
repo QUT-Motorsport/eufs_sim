@@ -337,7 +337,7 @@ class EufsLauncher(Plugin):
 		self.HAIRPIN_PAIRS  = preset_data[6]
 		self.MAX_LENGTH     = preset_data[7]
 		self.LAX_GENERATION = preset_data[8]
-		self.TRACK_WIDTH    = 8
+		self.TRACK_WIDTH    = 4
 		self._widget.findChild(QCheckBox,"LaxCheckBox").setChecked(self.LAX_GENERATION)
 
 	def keep_track_of_preset_changes(self):
@@ -660,7 +660,7 @@ class EufsLauncher(Plugin):
 			p.kill()
 
 		#Manual node killer:
-		"""
+		
 		extra_nodes= rosnode.get_node_names()
 		extra_nodes.remove("/eufs_launcher")
 		extra_nodes.remove("/rosout")
@@ -688,7 +688,7 @@ class EufsLauncher(Plugin):
 		extra_nodes.remove("/rosout")
 		if left_open>0:
 			rospy.logerr("Pruned to: " + str(extra_nodes))
-		"""
+		
 
 	#def trigger_configuration(self):
 		# Comment in to signal that the plugin has a way to configure
