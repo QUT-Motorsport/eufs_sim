@@ -337,6 +337,7 @@ class EufsLauncher(Plugin):
 		self.HAIRPIN_PAIRS  = preset_data[6]
 		self.MAX_LENGTH     = preset_data[7]
 		self.LAX_GENERATION = preset_data[8]
+		self.TRACK_WIDTH    = 8
 		self._widget.findChild(QCheckBox,"LaxCheckBox").setChecked(self.LAX_GENERATION)
 
 	def keep_track_of_preset_changes(self):
@@ -367,6 +368,7 @@ class EufsLauncher(Plugin):
 		self._widget.findChild(QSlider,"Param_MAX_HAIRPIN")  .valueChanged.connect(self.slider_changed)
 		self._widget.findChild(QSlider,"Param_HAIRPIN_PAIRS").valueChanged.connect(self.slider_changed)
 		self._widget.findChild(QSlider,"Param_MAX_LENGTH")   .valueChanged.connect(self.slider_changed)
+		self._widget.findChild(QSlider,"Param_TRACK_WIDTH")  .valueChanged.connect(self.slider_changed)
 		
 	def slider_changed(self):
 		"""When a slider is changed, update the parameters."""
@@ -384,6 +386,7 @@ class EufsLauncher(Plugin):
 		self._widget.findChild(QLabel,"Label_MAX_HAIRPIN")  .setText("MAX_HAIRPIN: "   + str((self.MAX_HAIRPIN/2.0)))
 		self._widget.findChild(QLabel,"Label_HAIRPIN_PAIRS").setText("HAIRPIN_PAIRS: " + str(self.HAIRPIN_PAIRS))
 		self._widget.findChild(QLabel,"Label_MAX_LENGTH")   .setText("MAX_LENGTH: "    + str(self.MAX_LENGTH))
+		self._widget.findChild(QLabel,"Label_TRACK_WIDTH")  .setText("TRACK_WIDTH: "  + str(self.TRACK_WIDTH	))
 
 	def keep_sliders_up_to_date(self):
 		"""This function keeps the values of the sliders up to date with the actual values."""
@@ -395,6 +398,7 @@ class EufsLauncher(Plugin):
 		self.set_slider_value("Param_MAX_HAIRPIN",self.MAX_HAIRPIN)
 		self.set_slider_value("Param_HAIRPIN_PAIRS",self.HAIRPIN_PAIRS)
 		self.set_slider_value("Param_MAX_LENGTH",self.MAX_LENGTH)
+		self.set_slider_value("Param_TRACK_WIDTH",self.TRACK_WIDTH)
 
 	def keep_variables_up_to_date(self):
 		"""This function keeps LauncherModule's variables in tune with the slider values."""
@@ -406,6 +410,7 @@ class EufsLauncher(Plugin):
 		self.MAX_HAIRPIN = self.get_slider_value("Param_MAX_HAIRPIN")
 		self.HAIRPIN_PAIRS = self.get_slider_value("Param_HAIRPIN_PAIRS")
 		self.MAX_LENGTH = self.get_slider_value("Param_MAX_LENGTH")
+		self.TRACK_WIDTH = self.get_slider_value("Param_TRACK_WIDTH")
 
 	def set_slider_ranges(self):
 		"""
@@ -428,6 +433,8 @@ class EufsLauncher(Plugin):
 		max_hairpin_pairs = 5
 		min_max_length = 200
 		max_max_length = 2000
+		min_width = 2
+		max_width = 10
 		self.set_slider_data("Param_MIN_STRAIGHT",min_straight,max_straight)
 		self.set_slider_data("Param_MAX_STRAIGHT",min_straight,max_straight)
 		self.set_slider_data("Param_MIN_CTURN",min_turn,max_turn)
@@ -436,6 +443,7 @@ class EufsLauncher(Plugin):
 		self.set_slider_data("Param_MAX_HAIRPIN",min_hairpin*2,max_hairpin*2)
 		self.set_slider_data("Param_HAIRPIN_PAIRS",min_hairpin_pairs,max_hairpin_pairs)
 		self.set_slider_data("Param_MAX_LENGTH",min_max_length,max_max_length)
+		self.set_slider_data("Param_TRACK_WIDTH",min_width,max_width)
 		
 	def get_slider_value(self,slidername):
 		"""Returns the value of the specified slider."""
@@ -477,7 +485,7 @@ class EufsLauncher(Plugin):
 									1 if self._widget.findChild(QComboBox,"WhichPreset").currentText()=="Bezier" else 0
 									])
 			self.tell_launchella("Loading Image...")
-			im = Converter.convert("xys","png",(xys,twidth,theight))
+			im = Converter.convert("xys","png",(xys,twidth,theight),params=[self.TRACK_WIDTH])
 
 			#If full stack selected, convert into csv and launch as well
 			track_generator_full_stack = self._widget.findChild(QCheckBox,"FullStackTrackGenButton")

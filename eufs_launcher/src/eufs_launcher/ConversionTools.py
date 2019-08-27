@@ -187,6 +187,7 @@ class ConversionTools:
 		GENERATED_FILENAME = "rand" + conversion_suffix
 		#Unpack
 		(xys,twidth,theight) = what
+		cone_normal_distance_parameter = params[0] if len(params) > 0 else 8
 
 		#Create image to hold data
 		im = Image.new('RGBA', (twidth, theight), (0, 0, 0, 0)) 
@@ -235,8 +236,7 @@ class ConversionTools:
 		
 			#The idea here is to place cones along normals to the tangent at any given point, while making sure they aren't too close.
 
-			cone_normal_distance_parameter = 8
-			cone_closeness_parameter = 6
+			cone_closeness_parameter = cone_normal_distance_parameter-2#This could perhaps be made a launcher parameter too.
 			cone_check_amount = 30
 
 			cur_point = xys[i]

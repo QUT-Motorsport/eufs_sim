@@ -547,6 +547,42 @@
        </font>
    </property>
   </widget>
+  <widget class="QLabel" name="Label_TRACK_WIDTH">
+   <property name="geometry">
+    <rect>
+     <x>430</x>
+     <y>350</y>
+     <width>100</width>
+     <height>27</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>MAX_LENGTH (###): </string>
+   </property>
+   <property name="font">
+       <font>
+            <pointsize>7</pointsize>
+       </font>
+   </property>
+  </widget>
+  <widget class="QSlider" name="Param_TRACK_WIDTH">
+   <property name="geometry">
+    <rect>
+     <x>430</x>
+     <y>368</y>
+     <width>70</width>
+     <height>20</height>
+    </rect>
+   </property>
+   <property name="orientation">
+      <enum>Qt::Horizontal</enum>
+    </property>
+    <property name="font">
+       <font>
+            <pointsize>7</pointsize>
+       </font>
+   </property>
+  </widget>
 
   <!--Generate Button-->
   <widget class="QPushButton" name="GenerateButton">
