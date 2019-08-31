@@ -34,9 +34,15 @@ class ConversionTools:
         orange_cone_color = (255,165,0,255)         #orange, for orange cones
         big_orange_cone_color = (127,80,0,255)      #dark orange, for big orange cones        
 
-        #Other various retained parameters
+        # Other various retained parameters
         link_num = -1
         TRACKIMG_VERSION_NUM = 1
+
+        # Metadata corner variables
+        TOP_LEFT     = "Top Left"
+        BOTTOM_LEFT  = "Bottom Left"
+        TOP_RIGHT    = "Top Right"
+        BOTTOM_RIGHT = "Bottom Right"
 
         #########################################################
         #              Handle Track Image Metadata              #
@@ -44,22 +50,31 @@ class ConversionTools:
 
         @staticmethod
         def get_metadata_pixel(x,y,corner,pixels,size):
-                # Returns the metadata pixel (x,y,corner), as specified by the Track Image specification on the team wiki.
-                x,y = ConversionTools.get_metadata_pixel_location(x,y,corner,size)
-                return pixels[x,y]
+                """
+                Returns the metadata pixel (x,y,corner)'s value.
+                
+                x: x position within the corner
+                y: y position within the corner
+                corner: which corner of the image we are in
+                pixels: pixels of the image
+                size: size of the image
+                """
+
+                x_out,y_out = ConversionTools.get_metadata_pixel_location(x,y,corner,size)
+                return pixels[x_out,y_out]
 
         @staticmethod
         def get_metadata_pixel_location(x,y,corner,size):
-                # Returns the metadata pixel (x,y,corner), as specified by the Track Image specification on the team wiki.
+                """Returns the metadata pixel (x,y,corner)'s location on the actual image."""
                 width = size[0]
                 height = size[1]
-                if corner == "Top Left":
+                if corner   == ConversionTools.TOP_LEFT:
                         return (x,y)
-                elif corner == "Bottom Left":
+                elif corner == ConversionTools.BOTTOM_LEFT:
                         return (x,height-6+y)
-                elif corner == "Top Right":
+                elif corner == ConversionTools.TOP_RIGHT:
                         return (width-6+x,y)
-                elif corner == "Bottom Right":
+                elif corner == ConversionTools.BOTTOM_RIGHT:
                         return (width-6+x,height-6+y)
                 else: 
                         rospy.logerr("Error, not a valid corner!  Typo?: " + corner)
@@ -348,7 +363,7 @@ class ConversionTools:
                                 pixels2[x+margin,y+margin] = pixels[x,y]
 
                 #And tag it with the version number
-                loc = ConversionTools.get_metadata_pixel_location(4,4,"Bottom Right",im2.size)
+                loc = ConversionTools.get_metadata_pixel_location(4,4,ConversionTools.BOTTOM_RIGHT,im2.size)
                 pixels2[loc[0],loc[1]] = ConversionTools.deconvert_version_metadata(ConversionTools.TRACKIMG_VERSION_NUM)[0]
 
 
@@ -374,13 +389,14 @@ class ConversionTools:
 
                 #Let's get the scale metadata from the png:
                 scale_data = ConversionTools.convert_scale_metadata([
-                                                        ConversionTools.get_metadata_pixel(0,0,"Top Left",pixels,im.size),
-                                                        ConversionTools.get_metadata_pixel(1,0,"Top Left",pixels,im.size)])
+                        ConversionTools.get_metadata_pixel(0,0,ConversionTools.TOP_LEFT,pixels,im.size),
+                        ConversionTools.get_metadata_pixel(1,0,ConversionTools.TOP_LEFT,pixels,im.size)
+                ])
                 #scale_data represents how big a pixel is.
 
                 #Let's also get the version number - we don't need it, 
                 #but in the future if breaking changes are made to the Track Image specification then it will become important.
-                loc = ConversionTools.get_metadata_pixel_location(4,4,"Bottom Right",im.size)
+                loc = ConversionTools.get_metadata_pixel_location(4,4,ConversionTools.BOTTOM_RIGHT,im.size)
                 version_number = ConversionTools.convert_version_metadata([pixels[loc[0],loc[1]]])
 
                 #.launch:
@@ -651,11 +667,11 @@ class ConversionTools:
                 pixels[car_x,car_y] = (ConversionTools.car_color[0],ConversionTools.car_color[1],ConversionTools.car_color[2],pixel_value)
                 
                 #Add metadata:
-                loc = ConversionTools.get_metadata_pixel_location(0,0,"Top Left",im.size)
+                loc = ConversionTools.get_metadata_pixel_location(0,0,ConversionTools.TOP_LEFT,im.size)
                 pixels[loc[0],loc[1]] = scale_metadata[0]
-                loc = ConversionTools.get_metadata_pixel_location(1,0,"Top Left",im.size)
+                loc = ConversionTools.get_metadata_pixel_location(1,0,ConversionTools.TOP_LEFT,im.size)
                 pixels[loc[0],loc[1]] = scale_metadata[1]
-                loc = ConversionTools.get_metadata_pixel_location(4,4,"Bottom Right",im.size)
+                loc = ConversionTools.get_metadata_pixel_location(4,4,ConversionTools.BOTTOM_RIGHT,im.size)
                 pixels[loc[0],loc[1]] = ConversionTools.deconvert_version_metadata(ConversionTools.TRACKIMG_VERSION_NUM)[0]
 
                 #Save it:
