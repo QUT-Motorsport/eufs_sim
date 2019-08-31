@@ -215,52 +215,61 @@ class ConversionTools:
                 """
                 Converts xys format to png.
 
-                which_file: output filename
-                params[0]:  Track width (cone distance)
-                params[1]:  Tuple of: list of points, image width, image height
+                which_file:        Output filename
+                params[0]:         Track width (cone distance)
+                params[1]:         Tuple of: list of points, image width, image height
+                conversion_suffix: Additional suffix to append to the output filename.
                 """
 
                 GENERATED_FILENAME = which_file + conversion_suffix
-                #Unpack
+
+                # Unpack
                 (xys,twidth,theight) = params[1]
                 cone_normal_distance_parameter = params[0]
 
-                #Create image to hold data
+                # Create image to hold data
                 im = Image.new('RGBA', (twidth, theight), (0, 0, 0, 0)) 
                 draw = ImageDraw.Draw(im)
 
-                #Convert data to image format
-                draw.polygon([(0,0),(twidth,0),(twidth,theight),(0,theight),(0,0)],fill='white')#background
-                draw.line(xys,fill=ConversionTools.track_outer_color,width=5)#track full width
-                draw.line(xys,fill=ConversionTools.track_inner_color,width=3)#track innards
-                draw.line(xys,fill=ConversionTools.track_center_color)#track center
+                # Draw backround:
+                draw.polygon([(0,0),(twidth,0),(twidth,theight),(0,theight),(0,0)],fill='white')
 
+                # Draw thick track with colored layers
+                draw.line(xys,fill=ConversionTools.track_outer_color,width=5)
+                draw.line(xys,fill=ConversionTools.track_inner_color,width=3)
+                draw.line(xys,fill=ConversionTools.track_center_color)
 
-                pixels = im.load()#get reference to pixel data
+                pixels = im.load()
 
+                # Get a list of integerized points to work well with integer-valued pixel locations.
                 compact_xys = compactify_points([(int(xy[0]),int(xy[1])) for xy in xys])
 
-                #We want to calculate direction of car position -
+                # We want to calculate direction of car position
                 sx = xys[0][0]
                 sy = xys[0][1]
                 ex = xys[1][0]
                 ey = xys[1][1]
-                angle = math.atan2(ey-sy,ex-sx)#[-pi,pi] but we want [0,2pi]
+
+                angle = math.atan2(ey-sy,ex-sx)
                 if angle < 0:
+                        #[-pi,pi] but we want [0,2pi]
                         angle+=2*math.pi
-                pixel_value = int(angle/(2*math.pi)*254+1) # it is *254+1 because we never want it to be 0
+
+                # It is *254+1 because we never want it to be 0
+                pixel_value = int(angle/(2*math.pi)*254+1)
                 if pixel_value > 255: pixel_value = 255
                 if pixel_value <   1: pixel_value =   1
-                colorforcar = (ConversionTools.car_color[0],ConversionTools.car_color[1],ConversionTools.car_color[2],pixel_value)
 
-                draw.line([xys[0],xys[0]],fill=colorforcar)#car position
+                # Draw car
+                colorforcar = (ConversionTools.car_color[0],ConversionTools.car_color[1],ConversionTools.car_color[2],pixel_value)
+                draw.line([xys[0],xys[0]],fill=colorforcar)
 
                 def is_track(c):
                         return c == ConversionTools.track_outer_color or c == ConversionTools.track_inner_color or c == ConversionTools.track_center_color
 
-                #Now we want to make all pixels bordering the track become magenta (255,0,255) - this will be our 'cone' color
-                #To find pixel boardering track, simply find white pixel adjacent to a non-white non-magenta pixle
-                #We will also want to make it such that cones are about 4-6 away from eachother euclideanly        
+                # Now we want to make all pixels bordering the track become magenta (255,0,255) - this will be our 'cone' color
+                # To find pixel boardering track, simply find white pixel adjacent to a non-white non-magenta pixle
+                # We will also want to make it such that cones are about 4-6 away from eachother euclideanly        
 
                 pixels = im.load()#get reference to pixel data
 
@@ -270,14 +279,23 @@ class ConversionTools:
                 prev_points_south = [(-10000,-10000)]
                 print("Placing Cones...")
                 for i in range(len(xys)):
-                        if i == 0: continue #skip first part [as hard to calculate tangent]
+                        #Skip first part [as hard to calculate tangent]
+                        if i == 0: continue
                 
-                        #The idea here is to place cones along normals to the tangent at any given point, while making sure they aren't too close.
+                        # The idea here is to place cones along normals to the tangent at any given point, 
+                        # while making sure they aren't too close.
 
-                        #Hardcoded parameters (not available in launcher because the set of well-behaved answers is far from dense in the problemspace)
-                        cone_cross_closeness_parameter = cone_normal_distance_parameter*3/4-1        #How close can cones be from those on opposite side.
-                        cone_check_amount = 30                                                        #Larger numbers makes us check more parts of the track for conflicts.
-                        cone_adjacent_closeness_parameter = 6                                        #How close can cones be from those on the same side.
+                        # Hardcoded parameters (not available in launcher because the set of 
+                        # well-behaved answers is far from dense in the problemspace):
+
+                        # How close can cones be from those on opposite side.
+                        cone_cross_closeness_parameter = cone_normal_distance_parameter*3/4-1
+
+                        # Larger numbers makes us check more parts of the track for conflicts.
+                        cone_check_amount = 30
+
+                        # How close can cones be from those on the same side.
+                        cone_adjacent_closeness_parameter = 6
 
                         cur_point = xys[i]
                         cur_tangent_angle = calculate_tangent_angle(xys[:(i+1)])
@@ -286,7 +304,7 @@ class ConversionTools:
                         north_point = ( int ( cur_point[0]+cur_tangent_normal[0] ) , int ( cur_point[1]+cur_tangent_normal[1] ) )
                         south_point = ( int ( cur_point[0]-cur_tangent_normal[0] ) , int ( cur_point[1]-cur_tangent_normal[1] ) )
 
-                        #calculates shortest distance to cone on same side of track
+                        # Calculates shortest distance to cone on same side of track
                         difference_from_prev_north = \
                                 min([
                                         (north_point[0]-prev_point_north[0])**2+(north_point[1]-prev_point_north[1])**2
@@ -296,7 +314,7 @@ class ConversionTools:
                                         (south_point[0]-prev_point_south[0])**2+(south_point[1]-prev_point_south[1])**2
                                 for prev_point_south in prev_points_south])
 
-                        #calculates shortest distance to cone on different side of track
+                        # Calculates shortest distance to cone on different side of track
                         cross_distance_ns = \
                                 min([
                                         (north_point[0]-prev_point_south[0])**2+(north_point[1]-prev_point_south[1])**2
@@ -306,12 +324,13 @@ class ConversionTools:
                                         (south_point[0]-prev_point_north[0])**2+(south_point[1]-prev_point_north[1])**2
                                 for prev_point_north in prev_points_north])
 
-                        #Here we ensure cones don't get too close to the track
+                        # Here we ensure cones don't get too close to the track
                         distance_pn = min([(north_point[0]-xy[0])**2+(north_point[1]-xy[1])**2 
                                                 for xy in xys[ max([0,i-cone_check_amount]) : min([len(xys),i+cone_check_amount])  ]])
                         distance_ps = min([(south_point[0]-xy[0])**2+(south_point[1]-xy[1])**2 
                                                 for xy in xys[ max([0,i-cone_check_amount]) : min([len(xys),i+cone_check_amount])  ]])
 
+                        # And we consider all these factors to see if the cones are viable
                         north_viable = difference_from_prev_north > cone_adjacent_closeness_parameter**2 \
                                                 and cross_distance_ns > cone_cross_closeness_parameter**2 \
                                                 and distance_pn > cone_cross_closeness_parameter**2
@@ -319,6 +338,7 @@ class ConversionTools:
                                                 and cross_distance_sn > cone_cross_closeness_parameter**2 \
                                                 and distance_ps > cone_cross_closeness_parameter**2
 
+                        # And when they are viable, draw them!
                         if not is_track(pixels[int(north_point[0]),int(north_point[1])]) and north_viable:
                                 pixels[int(north_point[0]),int(north_point[1])]=ConversionTools.inner_cone_color
                                 all_points_north.append(north_point)
@@ -326,7 +346,7 @@ class ConversionTools:
                                 pixels[int(south_point[0]),int(south_point[1])]=ConversionTools.inner_cone_color
                                 all_points_south.append(south_point)
 
-                        #Only keep track of last couple of previous cones (and the very first one, for when the loop joins up)
+                        # Only keep track of last couple of previous cones (and the very first one, for when the loop joins up)
                         if len(all_points_north) > cone_check_amount:
                                 prev_points_north = all_points_north[-cone_check_amount:] + [all_points_north[0]]
                         elif len(all_points_north) > 0:
@@ -338,9 +358,9 @@ class ConversionTools:
 
                 
                 
-                #We want to make the track have differing cone colors - yellow on inside, blue on outside
-                #All cones are currently yellow.  We'll do a "breadth-first-search" for any cones reachable
-                #from (0,0) and call those the 'outside' [(0,0) always blank as image is padded)]
+                # We want to make the track have differing cone colors - yellow on inside, blue on outside
+                # All cones are currently yellow.  We'll do a "breadth-first-search" for any cones reachable
+                # from (0,0) and call those the 'outside' [(0,0) always blank as image is padded)]
                 def get_allowed_adjacents(explolist,curpix):
                         (i,j) = curpix
                         allowed = []
@@ -358,6 +378,7 @@ class ConversionTools:
                                         allowed.append((i,j+1))
                         return allowed
                 print("Coloring cones...")
+
                 explored_list = set([])
                 frontier = set([(0,0)])
                 while len(frontier)>0:
@@ -373,22 +394,24 @@ class ConversionTools:
                                 explored_list.add(f)
                         frontier = new_frontier
 
-                #Add ground truth cones
+                # Add orange start cones
                 (i,j) = all_points_north[0]
                 pixels[int(i),int(j)] = ConversionTools.orange_cone_color
                 (i,j) = all_points_south[0]
                 pixels[int(i),int(j)] = ConversionTools.orange_cone_color
 
-                #Finally, we just need to place noise.  At maximal noise, the track should be maybe 1% covered? (that's actually quite a lot!)
+                # Finally, we just need to place noise.  At maximal noise, the track should be maybe 1% covered? (that's actually quite a lot!)
 
                 for i in range(im.size[0]):
                         for j in range(im.size[1]):
-                                if i<5 or j<5 or i>=im.size[0]-5 or j>=im.size[0]-5: continue#don't add noise in margin
+                                # Don't add noise in margin
+                                if i<5 or j<5 or i>=im.size[0]-5 or j>=im.size[0]-5: continue
                                 if pixels[i,j] == ConversionTools.background_color:
-                                        if uniform(0,100) < 1:#1% covered maximal noise
+                                        # Only 1% should be covered with noise
+                                        if uniform(0,100) < 1:
                                                 pixels[i,j] = ConversionTools.noise_color
 
-                #Add margins (as specified by the file format)
+                # Add margins (as specified by the file format)
                 margin = 5
                 im2 = Image.new('RGBA', (twidth+2*margin, theight+2*margin), (255, 255, 255, 255)) 
                 pixels2 = im2.load()
@@ -396,7 +419,7 @@ class ConversionTools:
                         for y in range(im.size[1]):
                                 pixels2[x+margin,y+margin] = pixels[x,y]
 
-                #And tag it with the version number
+                # And tag it with the version number
                 loc = ConversionTools.get_metadata_pixel_location(4,4,ConversionTools.BOTTOM_RIGHT,im2.size)
                 pixels2[loc[0],loc[1]] = ConversionTools.deconvert_version_metadata(ConversionTools.TRACKIMG_VERSION_NUM)[0]
 
