@@ -12,12 +12,12 @@ from track_gen import Track
 from TrackGenerator import compactify_points
 import pandas as pd
 
-#Here are all the track formats we care about:
-#.launch (well, we actually want the model data, not the .launch, but we'll treat it as wanting the .launch)
+# Here are all the track formats we care about:
+# .launch (well, we actually want the model data, not the .launch, but we'll treat it as wanting the .launch)
 #                (since the end user shouldn't have to care about the distinction)
-#.png
-#.csv
-#raw_data ("xys",this will be hidden from the user as it is only used to convert into .pngs)
+# .png
+# .csv
+# raw_data ("xys",this will be hidden from the user as it is only used to convert into .pngs)
 class ConversionTools:
         def __init__():
                 pass
@@ -25,14 +25,14 @@ class ConversionTools:
         # Define colors for track gen and image reading
         noise_color = (0,255,255,255)               #cyan, the turquoise turqouise wishes it were
         background_color = (255,255,255,255)        #white
-        cone_color  = (255,0,255,255)               #magenta, for yellow cones (oops...)
-        cone_color_blue = (0,0,255,255)             #blue, for blue cones
+        inner_cone_color  = (255,0,255,255)               #magenta, for yellow cones (oops...)
+        outer_cone_color = (0,0,255,255)             #blue, for blue cones
         car_color = (0,255,0,255)                   #green
-        track_center = (0,0,0,255)                  #black
-        track_inner = (255,0,0,255)                 #red
-        track_outer = (255,255,0,255)               #yellow
-        cone_color_orange = (255,165,0,255)         #orange, for orange cones
-        cone_color_big_orange = (127,80,0,255)      #dark orange, for big orange cones        
+        track_center_color = (0,0,0,255)                  #black
+        track_inner_color = (255,0,0,255)                 #red
+        track_outer_color = (255,255,0,255)               #yellow
+        orange_cone_color = (255,165,0,255)         #orange, for orange cones
+        big_orange_cone_color = (127,80,0,255)      #dark orange, for big orange cones        
 
         #Other various retained parameters
         link_num = -1
@@ -195,9 +195,9 @@ class ConversionTools:
 
                 #Convert data to image format
                 draw.polygon([(0,0),(twidth,0),(twidth,theight),(0,theight),(0,0)],fill='white')#background
-                draw.line(xys,fill=ConversionTools.track_outer,width=5)#track full width
-                draw.line(xys,fill=ConversionTools.track_inner,width=3)#track innards
-                draw.line(xys,fill=ConversionTools.track_center)#track center
+                draw.line(xys,fill=ConversionTools.track_outer_color,width=5)#track full width
+                draw.line(xys,fill=ConversionTools.track_inner_color,width=3)#track innards
+                draw.line(xys,fill=ConversionTools.track_center_color)#track center
 
 
                 pixels = im.load()#get reference to pixel data
@@ -220,7 +220,7 @@ class ConversionTools:
                 draw.line([xys[0],xys[0]],fill=colorforcar)#car position
 
                 def is_track(c):
-                        return c == ConversionTools.track_outer or c == ConversionTools.track_inner or c == ConversionTools.track_center
+                        return c == ConversionTools.track_outer_color or c == ConversionTools.track_inner_color or c == ConversionTools.track_center_color
 
                 #Now we want to make all pixels bordering the track become magenta (255,0,255) - this will be our 'cone' color
                 #To find pixel boardering track, simply find white pixel adjacent to a non-white non-magenta pixle
@@ -284,10 +284,10 @@ class ConversionTools:
                                                 and distance_ps > cone_cross_closeness_parameter**2
 
                         if not is_track(pixels[int(north_point[0]),int(north_point[1])]) and north_viable:
-                                pixels[int(north_point[0]),int(north_point[1])]=ConversionTools.cone_color
+                                pixels[int(north_point[0]),int(north_point[1])]=ConversionTools.inner_cone_color
                                 all_points_north.append(north_point)
                         if not is_track(pixels[int(south_point[0]),int(south_point[1])]) and south_viable:
-                                pixels[int(south_point[0]),int(south_point[1])]=ConversionTools.cone_color
+                                pixels[int(south_point[0]),int(south_point[1])]=ConversionTools.inner_cone_color
                                 all_points_south.append(south_point)
 
                         #Only keep track of last couple of previous cones (and the very first one, for when the loop joins up)
@@ -329,8 +329,8 @@ class ConversionTools:
                         for f in frontier:
                                 (i,j) = f
                                 pix = pixels[i,j]
-                                if pix == ConversionTools.cone_color:
-                                        pixels[i,j] = ConversionTools.cone_color_blue
+                                if pix == ConversionTools.inner_cone_color:
+                                        pixels[i,j] = ConversionTools.outer_cone_color
                                         new_frontier.update(get_allowed_adjacents(explored_list,(i,j)))
                                 elif pix == ConversionTools.background_color:
                                         new_frontier.update(get_allowed_adjacents(explored_list,(i,j)))
@@ -339,9 +339,9 @@ class ConversionTools:
 
                 #Add ground truth cones
                 (i,j) = all_points_north[0]
-                pixels[int(i),int(j)] = ConversionTools.cone_color_orange
+                pixels[int(i),int(j)] = ConversionTools.orange_cone_color
                 (i,j) = all_points_south[0]
-                pixels[int(i),int(j)] = ConversionTools.cone_color_orange
+                pixels[int(i),int(j)] = ConversionTools.orange_cone_color
 
                 #Finally, we just need to place noise.  At maximal noise, the track should be maybe 1% covered? (that's actually quite a lot!)
 
@@ -510,13 +510,13 @@ class ConversionTools:
                 for i in range(im.size[0]):
                         for j in range(im.size[1]):
                                 p = pixels[i,j]
-                                if p == ConversionTools.cone_color:
+                                if p == ConversionTools.inner_cone_color:
                                         sdf_allmodels = sdf_allmodels + "\n" + put_model_at_position(sdf_yellow_cone_model,i*scale_data,j*scale_data)
-                                elif p == ConversionTools.cone_color_blue:
+                                elif p == ConversionTools.outer_cone_color:
                                         sdf_allmodels = sdf_allmodels + "\n" + put_model_at_position(sdf_blue_cone_model,i*scale_data,j*scale_data)
-                                elif p == ConversionTools.cone_color_orange:
+                                elif p == ConversionTools.orange_cone_color:
                                         sdf_allmodels = sdf_allmodels + "\n" + put_model_at_position(sdf_orange_cone_model,i*scale_data,j*scale_data)
-                                elif p == ConversionTools.cone_color_big_orange:
+                                elif p == ConversionTools.big_orange_cone_color:
                                         sdf_allmodels = sdf_allmodels + "\n" + put_model_at_position(sdf_big_orange_cone_model,i*scale_data,j*scale_data)
                                 elif p == ConversionTools.noise_color:
                                         if uniform(0,1)<noise_level:#place noise
@@ -670,14 +670,14 @@ class ConversionTools:
                 draw.polygon([(0,0),(twidth,0),(twidth,theight),(0,theight),(0,0)],fill='white')#background
 
                 pixels = im.load()
-                #cone_color is inside, cone_color_blue is outside
+                #cone_color is inside, outer_cone_color is outside
                 def get_cone_color(cone_name):
-                        if  cone_name ==  "yellow":     return ConversionTools.cone_color
-                        elif cone_name == "blue":       return ConversionTools.cone_color_blue
-                        elif cone_name == "orange":     return ConversionTools.cone_color_orange
-                        elif cone_name == "big_orange": return ConversionTools.cone_color_big_orange
+                        if  cone_name ==  "yellow":     return ConversionTools.inner_cone_color
+                        elif cone_name == "blue":       return ConversionTools.outer_cone_color
+                        elif cone_name == "orange":     return ConversionTools.orange_cone_color
+                        elif cone_name == "big_orange": return ConversionTools.big_orange_cone_color
                         elif cone_name == "noise":      return ConversionTools.noise_color
-                        return ConversionTools.cone_color
+                        return ConversionTools.inner_cone_color
                 for cone in final_cones:
                         pixels[cone[1],cone[2]] = get_cone_color(cone[0])
                 pixel_value = int(raw_car_location[3]/(2*math.pi)*254+1) # it is *254+1 because we never want it to be 0

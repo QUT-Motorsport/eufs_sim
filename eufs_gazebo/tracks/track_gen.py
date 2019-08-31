@@ -34,12 +34,12 @@ class Track:
         self.orange_cones = None
         self.active_noise = None
         self.inactive_noise = None
-z
+
         # Car data in the format of ("car_start", x, y, yaw)
-	# It can be left as ("car_start", 0, 0, 0), only relevant when fed into track_gen through 
+        # It can be left as ("car_start", 0, 0, 0), only relevant when fed into track_gen through 
         # `eufs_launcher/ConversionTools`
         # as in that case it needs to preserve car data so that the conversion is fully bijective.
-	self.car_start_data = ("car_start", 0.0, 0.0, 0.0)
+        self.car_start_data = ("car_start", 0.0, 0.0, 0.0)
 
     def load_csv(self, file_path):
         """Loads CSV file of cone location data and store it in the class.
