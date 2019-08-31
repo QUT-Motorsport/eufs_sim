@@ -104,13 +104,13 @@ z
                 else:
                     active_noise.append(pose)
 
-        #handle hidden links
+        # handle hidden links
         if len(root[0].findall("ghostlink")) != 0:
             for child in root[0].iter("ghostlink"):
                 pose = child.find("pose").text.split(" ")[0:2]
                 inactive_noise.append(pose)
 
-        #handle inculdes
+        # handle includes
         if len(root[0].findall("include")) != 0:
             for child in root[0].iter("include"):
                 pose = child.find("pose").text.split(" ")[0:2]
@@ -388,8 +388,6 @@ z
         Returns:
             Numpy array with point p removed
         """
-        #points = ps[np.all(ps != p, 1), :]#this line does not work!  It deletes more than one point, even nonequal ones.
-        #For some reason, the old code here was removing extra points.  I've added a quick-and-dirty fix for this.
         points = []
         for point in ps: 
             if list(p) != list(point):
