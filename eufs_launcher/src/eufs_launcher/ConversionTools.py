@@ -212,10 +212,18 @@ class ConversionTools:
 
         @staticmethod
         def xys_to_png(which_file,params,conversion_suffix=""):
-                GENERATED_FILENAME = "rand" + conversion_suffix
+                """
+                Converts xys format to png.
+
+                which_file: output filename
+                params[0]:  Track width (cone distance)
+                params[1]:  Tuple of: list of points, image width, image height
+                """
+
+                GENERATED_FILENAME = which_file + conversion_suffix
                 #Unpack
-                (xys,twidth,theight) = which_file
-                cone_normal_distance_parameter = params[0] if len(params) > 0 else 8
+                (xys,twidth,theight) = params[1]
+                cone_normal_distance_parameter = params[0]
 
                 #Create image to hold data
                 im = Image.new('RGBA', (twidth, theight), (0, 0, 0, 0)) 

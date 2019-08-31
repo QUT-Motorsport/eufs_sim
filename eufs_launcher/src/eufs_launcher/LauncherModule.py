@@ -485,7 +485,7 @@ class EufsLauncher(Plugin):
                                                                         1 if self._widget.findChild(QComboBox,"WhichPreset").currentText()=="Bezier" else 0
                                                                         ])
                         self.tell_launchella("Loading Image...")
-                        im = Converter.convert("xys","png",(xys,twidth,theight),params=[self.TRACK_WIDTH])
+                        im = Converter.convert("xys","png","rand",params=[self.TRACK_WIDTH,(xys,twidth,theight)])
 
                         #If full stack selected, convert into csv and launch as well
                         track_generator_full_stack = self._widget.findChild(QCheckBox,"FullStackTrackGenButton")
