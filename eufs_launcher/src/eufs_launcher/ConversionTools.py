@@ -44,9 +44,6 @@ class ConversionTools:
         TOP_RIGHT    = "Top Right"
         BOTTOM_RIGHT = "Bottom Right"
 
-        # Metadata transformation types
-        CONTINUOUS_TRANSFORMATION = "continuous"
-
         #########################################################
         #              Handle Track Image Metadata              #
         #########################################################
@@ -85,35 +82,28 @@ class ConversionTools:
 
 
         @staticmethod
-        def get_raw_metadata(pixel_value,mode):
+        def get_raw_metadata(pixel_value):
                 """
                 This function converts metadata as outlined in the specification for Track Images on the team wiki
                 It assumes that handling of the cases (255,255,255,255) and (r,g,b,0) are done outside this function.
 
                 pixel_value: the (r,g,b,a) value of the pixel
-                mode:        the type of transformation desired
-                                  CONTINUOUS_TRANSFORMATION: Used for version and scale metadata
-                             There are currently no other transformation types.
                                 
                 """
                 (r,g,b,a) = pixel_value
-                if mode == ConversionTools.CONTINUOUS_TRANSFORMATION:
-                        return a-1 + (b-1)*254 + (g-1)*254**2 + (r-1)*254**3
-                return None
+                return a-1 + (b-1)*254 + (g-1)*254**2 + (r-1)*254**3
 
         @staticmethod
-        def unget_raw_metadata(metadata,mode):
+        def unget_raw_metadata(metadata):
                 """Undoes the process of get_raw_metadata()"""
-                if mode == ConversionTools.CONTINUOUS_TRANSFORMATION:
-                        a = metadata % 254
-                        metadata = (metadata - a) // 254
-                        b = metadata % 254
-                        metadata = (metadata - b) // 254
-                        g = metadata % 254
-                        r = (metadata - g) // 254
+                a = metadata % 254
+                metadata = (metadata - a) // 254
+                b = metadata % 254
+                metadata = (metadata - b) // 254
+                g = metadata % 254
+                r = (metadata - g) // 254
 
-                        return (r+1,g+1,b+1,a+1)
-                return None
+                return (r+1,g+1,b+1,a+1)
 
         @staticmethod
         def convert_scale_metadata(pixel_values):
@@ -123,29 +113,37 @@ class ConversionTools:
                 """                
 
                 primary_pixel = pixel_values[0]
-                secondary_pixel = pixel_values[1]#unused in the specification
+                secondary_pixel = pixel_values[1]
 
-                if primary_pixel == (255,255,255,255) and secondary_pixel == (255,255,255,255): return 1 #Check for the default case
+                #Check for default pixel values
+                if (primary_pixel == (255,255,255,255) and
+                   secondary_pixel == (255,255,255,255)):
+                        return 1
 
-                metadata = ConversionTools.get_raw_metadata(primary_pixel,mode=ConversionTools.CONTINUOUS_TRANSFORMATION)
-                #Want to linearly transform the metadata, a range from 0 to 254**4-1, to the range 0.0001 to 100
-                to_return = metadata/(254**4-1.0) * (100-0.0001) + 0.0001
-                return to_return
+                metadata = ConversionTools.get_raw_metadata(primary_pixel)
+
+                # Want to linearly transform the metadata, a range from 0 to 254**4-1, to the range 0.0001 to 100
+                return metadata/(254**4-1.0) * (100-0.0001) + 0.0001
 
 
         @staticmethod
         def deconvert_scale_metadata(data):
-                #This function converts a raw_ scale value into a list of metadata pixels needed to replicate it.
-                #First in list is the primary metadata pixel, second in list is the secondary (which is unused in the specification)
+                """
+                This function converts a raw_ scale value into a list of metadata pixels needed to replicate it.
+                First in list is the primary metadata pixel, second in list is the secondary
+                """
+
                 metadata = int((data-0.0001)/(100-0.0001) * (254**4-1))
-                primary_pixel = ConversionTools.unget_raw_metadata(metadata,ConversionTools.CONTINUOUS_TRANSFORMATION)
+                primary_pixel = ConversionTools.unget_raw_metadata(metadata)
                 secondary_pixel = (255,255,255,255)
                 return [primary_pixel,secondary_pixel]
 
         @staticmethod
         def convert_version_metadata(pixel_values):
-                #This function converts the data obtained from scale metadata pixels into actual scale information
-                #Output range is from 0 to 254**4-1
+                """
+                This function converts the data obtained from scale metadata pixels into actual scale information
+                Output range is from 0 to 254**4-1
+                """
                 primary_pixel = pixel_values[0]
                 if primary_pixel == (255,255,255,255): return 0
                 metadata = ConversionTools.get_raw_metadata(primary_pixel)
@@ -153,7 +151,7 @@ class ConversionTools:
 
         @staticmethod
         def deconvert_version_metadata(data):
-                #This function is the reverse transformation as convert_version_metadata
+                """This function is the reverse transformation as convert_version_metadata"""
                 return [ConversionTools.unget_raw_metadata(data)]
                 
 
@@ -162,46 +160,61 @@ class ConversionTools:
         #########################################################
 
         @staticmethod
-        def convert(cfrom,cto,what,params=[],conversion_suffix=""):
+        def convert(cfrom,cto,which_file,params=[],conversion_suffix=""):
+                """
+                Will convert which_file of filetype cfrom to filetype cto with filename which_file+conversion_suffix
+
+                cfrom:      Type to convert from (xys, png, launch, csv) [should be a string]
+                cto:        Type to convert to   (png, launch, csv)      [should be a string]
+
+                which_file: The file to be converted - should be a full filepath.
+
+                params:     Additional parameters that may be necessary.
+                            These will depend on conversion type, so check the docstrings of
+                            the specific desired conversion function for full information.
+
+                conversion_suffix: A suffix appended to the filename of the output file.
+                """
+
                 if cfrom=="xys" and cto=="png":
-                        return ConversionTools.xys_to_png(what,params,conversion_suffix)
+                        return ConversionTools.xys_to_png(which_file,params,conversion_suffix)
                 if cfrom=="png" and cto=="launch":
-                        return ConversionTools.png_to_launch(what,params,conversion_suffix)
+                        return ConversionTools.png_to_launch(which_file,params,conversion_suffix)
                 if cfrom=="png" and cto=="csv":
-                        ConversionTools.png_to_launch(what,params,conversion_suffix)
-                        newwhatarray = what.split("/")
-                        newwhatarray[-2] = "launch"
-                        what = "/".join(newwhatarray)
-                        return ConversionTools.launch_to_csv(what[:-4]+conversion_suffix+".launch",params,conversion_suffix="")
+                        ConversionTools.png_to_launch(which_file,params,conversion_suffix)
+                        new_file_array = which_file.split("/")
+                        new_file_array[-2] = "launch"
+                        which_file = "/".join(new_file_array)
+                        return ConversionTools.launch_to_csv(which_file[:-4]+conversion_suffix+".launch",params,conversion_suffix="")
                 if cfrom=="launch" and cto=="csv":
-                        return ConversionTools.launch_to_csv(what,params,conversion_suffix)
+                        return ConversionTools.launch_to_csv(which_file,params,conversion_suffix)
                 if cfrom=="launch" and cto=="png":
-                        ConversionTools.launch_to_csv(what,params,conversion_suffix)
-                        newwhatarray = what.split("/")
-                        newwhatarray[-2] = "tracks"
-                        what = "/".join(newwhatarray)
-                        return ConversionTools.csv_to_png(what[:-7]+conversion_suffix+".csv",params,conversion_suffix="")
+                        ConversionTools.launch_to_csv(which_file,params,conversion_suffix)
+                        new_file_array = which_file.split("/")
+                        new_file_array[-2] = "tracks"
+                        which_file = "/".join(new_file_array)
+                        return ConversionTools.csv_to_png(which_file[:-7]+conversion_suffix+".csv",params,conversion_suffix="")
                 if cfrom=="csv" and cto == "launch":
-                        ConversionTools.csv_to_png(what,params,conversion_suffix)
-                        newwhatarray = what.split("/")
-                        newwhatarray[-2] = "randgen_imgs"
-                        what = "/".join(newwhatarray)
-                        return ConversionTools.png_to_launch(what[:-4]+conversion_suffix+".png",params,conversion_suffix="")
+                        ConversionTools.csv_to_png(which_file,params,conversion_suffix)
+                        new_file_array = which_file.split("/")
+                        new_file_array[-2] = "randgen_imgs"
+                        which_file = "/".join(new_file_array)
+                        return ConversionTools.png_to_launch(which_file[:-4]+conversion_suffix+".png",params,conversion_suffix="")
                 if cfrom=="csv" and cto == "png":
-                        return ConversionTools.csv_to_png(what,params,conversion_suffix)
+                        return ConversionTools.csv_to_png(which_file,params,conversion_suffix)
                 if cto == "ALL" or cto == "all":
                         #Don't worry, if something tries to convert to itself it just gets ignored
-                        ConversionTools.convert(cfrom,"launch",what,params,conversion_suffix)
-                        ConversionTools.convert(cfrom,"csv",what,params,conversion_suffix)
-                        return ConversionTools.convert(cfrom,"png",what,params,conversion_suffix)
+                        ConversionTools.convert(cfrom,"launch",which_file,params,conversion_suffix)
+                        ConversionTools.convert(cfrom,"csv",which_file,params,conversion_suffix)
+                        return ConversionTools.convert(cfrom,"png",which_file,params,conversion_suffix)
                 return None
                         
 
         @staticmethod
-        def xys_to_png(what,params,conversion_suffix=""):
+        def xys_to_png(which_file,params,conversion_suffix=""):
                 GENERATED_FILENAME = "rand" + conversion_suffix
                 #Unpack
-                (xys,twidth,theight) = what
+                (xys,twidth,theight) = which_file
                 cone_normal_distance_parameter = params[0] if len(params) > 0 else 8
 
                 #Create image to hold data
@@ -384,7 +397,7 @@ class ConversionTools:
                 return im
 
         @staticmethod
-        def png_to_launch(what,params=[0],conversion_suffix=""):
+        def png_to_launch(which_file,params=[0],conversion_suffix=""):
                 #This is a fairly intensive process - we need:
                 #        to put %FILENAME%.launch in eufs_gazebo/launch
                 #        to put %FILENAME%.world in eufs_gazebo/world
@@ -395,8 +408,8 @@ class ConversionTools:
                 #       randgen_world_template
                 #        randgen_model_template/model.config
                 #        randgen_model_template/model.sdf
-                GENERATED_FILENAME = what.split('/')[-1][:-4]+conversion_suffix#[:-4] to split off .png, looks like an emoji...
-                im = Image.open(what)
+                GENERATED_FILENAME = which_file.split('/')[-1][:-4]+conversion_suffix#[:-4] to split off .png, looks like an emoji...
+                im = Image.open(which_file)
                 noise_level = params[0]
                 pixels = im.load()
 
@@ -543,9 +556,9 @@ class ConversionTools:
                 
 
         @staticmethod
-        def launch_to_csv(what,params=[0],conversion_suffix=""):
-                filename = what.split("/")[-1].split(".")[0]
-                car_data_reader = open(what)
+        def launch_to_csv(which_file,params=[0],conversion_suffix=""):
+                filename = which_file.split("/")[-1].split(".")[0]
+                car_data_reader = open(which_file)
                 car_data = car_data_reader.read()
                 car_data_reader.close()
                 car_x   = car_data.split("<arg name=\"x\" default=\"")[1].split("\"")[0]
@@ -558,11 +571,11 @@ class ConversionTools:
 
 
         @staticmethod
-        def csv_to_png(what,params,conversion_suffix=""):
-                filename = what.split("/")[-1].split(".")[0]+conversion_suffix
+        def csv_to_png(which_file,params,conversion_suffix=""):
+                filename = which_file.split("/")[-1].split(".")[0]+conversion_suffix
                 #We are merely going to open up the csv, read through all the lines, and round down the point to an integer.
                 #(While preserving cone color).
-                df = pd.read_csv(what)
+                df = pd.read_csv(which_file)
                 blue_cones = df[df['tag']=="blue"]
                 yellow_cones = df[df['tag']=="yellow"]
                 orange_cones = df[df['tag']=="orange"]
