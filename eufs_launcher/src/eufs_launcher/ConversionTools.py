@@ -241,7 +241,8 @@ class ConversionTools:
 
                 pixels = im.load()
 
-                # Get a list of integerized points to work well with integer-valued pixel locations.
+                # Get a list of integerized points to work well with 
+                # integer-valued pixel locations.
                 compact_xys = compactify_points([(int(xy[0]),int(xy[1])) for xy in xys])
 
                 # We want to calculate direction of car position
@@ -250,28 +251,39 @@ class ConversionTools:
                 ex = xys[1][0]
                 ey = xys[1][1]
 
+                # So we calculate the angle that the car is facing (the yaw)
                 angle = math.atan2(ey-sy,ex-sx)
                 if angle < 0:
-                        #[-pi,pi] but we want [0,2pi]
-                        angle+=2*math.pi
+                        # Angle is on range [-pi,pi] but we want [0,2pi]
+                        # So if it is less than 0, pop it onto the correct range.
+                        angle += 2 * math.pi
 
-                # It is *254+1 because we never want it to be 0
-                pixel_value = int(angle/(2*math.pi)*254+1)
+                # We convert angles to range [1,255] rather than [0,255]
+                # As if it is 0 then, since it is stored as an alpha value,
+                # optimization techniques for storage may be used by the png
+                # file format to set the whole pixel to some standard value,
+                # such as (0,0,0,0), which is decidedly not what we want as
+                # the rgb values still matter.
+                pixel_value = int(angle / ( 2 * math.pi ) * 254 + 1)
                 if pixel_value > 255: pixel_value = 255
                 if pixel_value <   1: pixel_value =   1
 
                 # Draw car
-                colorforcar = (ConversionTools.car_color[0],ConversionTools.car_color[1],ConversionTools.car_color[2],pixel_value)
-                draw.line([xys[0],xys[0]],fill=colorforcar)
+                color_for_car = ConversionTools.car_color[:3]+(pixel_value,)
+                draw.line([xys[0],xys[0]],fill=color_for_car)
 
                 def is_track(c):
-                        return c == ConversionTools.track_outer_color or c == ConversionTools.track_inner_color or c == ConversionTools.track_center_color
+                        return c == ConversionTools.track_outer_color or \
+                               c == ConversionTools.track_inner_color or \
+                               c == ConversionTools.track_center_color
 
-                # Now we want to make all pixels bordering the track become magenta (255,0,255) - this will be our 'cone' color
-                # To find pixel boardering track, simply find white pixel adjacent to a non-white non-magenta pixle
-                # We will also want to make it such that cones are about 4-6 away from eachother euclideanly        
+                # Now we want to make all pixels bordering the track become magenta (255,0,255) -
+                # this will be our 'cone' color
+                # To find pixel boardering track, simply find white pixel adjacent to 
+                # a non-white non-magenta pixle
+                # We will also want to make it such that cones are about 4-6 
+                # away from eachother euclideanly        
 
-                pixels = im.load()#get reference to pixel data
 
                 all_points_north = []
                 all_points_south = []
@@ -282,7 +294,8 @@ class ConversionTools:
                         #Skip first part [as hard to calculate tangent]
                         if i == 0: continue
                 
-                        # The idea here is to place cones along normals to the tangent at any given point, 
+                        # The idea here is to place cones along normals to the 
+                        # tangent at any given point, 
                         # while making sure they aren't too close.
 
                         # Hardcoded parameters (not available in launcher because the set of 
@@ -299,67 +312,108 @@ class ConversionTools:
 
                         cur_point = xys[i]
                         cur_tangent_angle = calculate_tangent_angle(xys[:(i+1)])
-                        cur_tangent_normal = (math.ceil(cone_normal_distance_parameter*math.sin(cur_tangent_angle)),
-                                                math.ceil(-cone_normal_distance_parameter*math.cos(cur_tangent_angle)))
-                        north_point = ( int ( cur_point[0]+cur_tangent_normal[0] ) , int ( cur_point[1]+cur_tangent_normal[1] ) )
-                        south_point = ( int ( cur_point[0]-cur_tangent_normal[0] ) , int ( cur_point[1]-cur_tangent_normal[1] ) )
+                        cur_tangent_normal = (
+                            math.ceil(
+                                cone_normal_distance_parameter*math.sin(cur_tangent_angle)
+                            ),
+                            math.ceil(
+                                -cone_normal_distance_parameter*math.cos(cur_tangent_angle)
+                            )
+                        )
+                        north_point = ( int ( cur_point[0]+cur_tangent_normal[0] ) ,
+                                        int ( cur_point[1]+cur_tangent_normal[1] ) )
+                        south_point = ( int ( cur_point[0]-cur_tangent_normal[0] ) , 
+                                        int ( cur_point[1]-cur_tangent_normal[1] ) )
 
                         # Calculates shortest distance to cone on same side of track
                         difference_from_prev_north = \
                                 min([
-                                        (north_point[0]-prev_point_north[0])**2+(north_point[1]-prev_point_north[1])**2
+                                        (north_point[0]-prev_point_north[0])**2
+                                       +(north_point[1]-prev_point_north[1])**2
                                 for prev_point_north in prev_points_north])
                         difference_from_prev_south = \
                                 min([
-                                        (south_point[0]-prev_point_south[0])**2+(south_point[1]-prev_point_south[1])**2
+                                        (south_point[0]-prev_point_south[0])**2
+                                       +(south_point[1]-prev_point_south[1])**2
                                 for prev_point_south in prev_points_south])
 
                         # Calculates shortest distance to cone on different side of track
                         cross_distance_ns = \
                                 min([
-                                        (north_point[0]-prev_point_south[0])**2+(north_point[1]-prev_point_south[1])**2
+                                        (north_point[0]-prev_point_south[0])**2
+                                       +(north_point[1]-prev_point_south[1])**2
                                 for prev_point_south in prev_points_south])
                         cross_distance_sn = \
                                 min([
-                                        (south_point[0]-prev_point_north[0])**2+(south_point[1]-prev_point_north[1])**2
+                                        (south_point[0]-prev_point_north[0])**2
+                                       +(south_point[1]-prev_point_north[1])**2
                                 for prev_point_north in prev_points_north])
 
                         # Here we ensure cones don't get too close to the track
-                        distance_pn = min([(north_point[0]-xy[0])**2+(north_point[1]-xy[1])**2 
-                                                for xy in xys[ max([0,i-cone_check_amount]) : min([len(xys),i+cone_check_amount])  ]])
-                        distance_ps = min([(south_point[0]-xy[0])**2+(south_point[1]-xy[1])**2 
-                                                for xy in xys[ max([0,i-cone_check_amount]) : min([len(xys),i+cone_check_amount])  ]])
+                        rel_xys = xys[ 
+                            max([0,i-cone_check_amount]): 
+                            min([len(xys),i+cone_check_amount])  
+                        ]
+                        distance_pn = min([
+                                            (north_point[0]-xy[0])**2
+                                           +(north_point[1]-xy[1])**2 
+                                                for xy in rel_xys
+                        ])
+                        distance_ps = min([
+                                            (south_point[0]-xy[0])**2
+                                           +(south_point[1]-xy[1])**2 
+                                                for xy in rel_xys
+                        ])
 
                         # And we consider all these factors to see if the cones are viable
-                        north_viable = difference_from_prev_north > cone_adjacent_closeness_parameter**2 \
-                                                and cross_distance_ns > cone_cross_closeness_parameter**2 \
-                                                and distance_pn > cone_cross_closeness_parameter**2
-                        south_viable = difference_from_prev_south > cone_adjacent_closeness_parameter**2 \
-                                                and cross_distance_sn > cone_cross_closeness_parameter**2 \
-                                                and distance_ps > cone_cross_closeness_parameter**2
+                        north_viable = (
+                              difference_from_prev_north > cone_adjacent_closeness_parameter**2
+                          and cross_distance_ns > cone_cross_closeness_parameter**2
+                          and distance_pn > cone_cross_closeness_parameter**2
+                        )
+                        south_viable = (
+                              difference_from_prev_south > cone_adjacent_closeness_parameter**2
+                          and cross_distance_sn > cone_cross_closeness_parameter**2
+                          and distance_ps > cone_cross_closeness_parameter**2
+                        )
 
                         # And when they are viable, draw them!
-                        if not is_track(pixels[int(north_point[0]),int(north_point[1])]) and north_viable:
-                                pixels[int(north_point[0]),int(north_point[1])]=ConversionTools.inner_cone_color
+                        if (
+                            not is_track(pixels[int(north_point[0]),int(north_point[1])]) 
+                            and north_viable
+                        ):
+                                px_x = int(north_point[0])
+                                px_y = int(north_point[1])
+                                pixels[px_x,px_y]=ConversionTools.inner_cone_color
                                 all_points_north.append(north_point)
-                        if not is_track(pixels[int(south_point[0]),int(south_point[1])]) and south_viable:
-                                pixels[int(south_point[0]),int(south_point[1])]=ConversionTools.inner_cone_color
+                        if (
+                            not is_track(pixels[int(south_point[0]),int(south_point[1])]) 
+                            and south_viable
+                        ):
+                                px_x = int(south_point[0])
+                                px_y = int(south_point[1])
+                                pixels[px_x,px_y]=ConversionTools.inner_cone_color
                                 all_points_south.append(south_point)
 
-                        # Only keep track of last couple of previous cones (and the very first one, for when the loop joins up)
+                        # Only keep track of last couple of previous cones 
+                        # (and the very first one, for when the loop joins up)
                         if len(all_points_north) > cone_check_amount:
-                                prev_points_north = all_points_north[-cone_check_amount:] + [all_points_north[0]]
+                                prev_points_north = all_points_north[-cone_check_amount:] \
+                                                 + [all_points_north[0]]
                         elif len(all_points_north) > 0:
                                 prev_points_north = all_points_north
                         if len(all_points_south) > cone_check_amount:
-                                prev_points_south = all_points_south[-cone_check_amount:] + [all_points_south[0]]
+                                prev_points_south = all_points_south[-cone_check_amount:] \
+                                                 + [all_points_south[0]]
                         elif len(all_points_south) > 0:
                                 prev_points_south = all_points_south
 
                 
                 
-                # We want to make the track have differing cone colors - yellow on inside, blue on outside
-                # All cones are currently yellow.  We'll do a "breadth-first-search" for any cones reachable
+                # We want to make the track have differing cone colors - 
+                # yellow on inside, blue on outside
+                # All cones are currently yellow.  
+                # We'll do a "breadth-first-search" for any cones reachable
                 # from (0,0) and call those the 'outside' [(0,0) always blank as image is padded)]
                 def get_allowed_adjacents(explolist,curpix):
                         (i,j) = curpix
@@ -388,9 +442,13 @@ class ConversionTools:
                                 pix = pixels[i,j]
                                 if pix == ConversionTools.inner_cone_color:
                                         pixels[i,j] = ConversionTools.outer_cone_color
-                                        new_frontier.update(get_allowed_adjacents(explored_list,(i,j)))
+                                        new_frontier.update(
+                                                get_allowed_adjacents(explored_list,(i,j))
+                                        )
                                 elif pix == ConversionTools.background_color:
-                                        new_frontier.update(get_allowed_adjacents(explored_list,(i,j)))
+                                        new_frontier.update(
+                                                get_allowed_adjacents(explored_list,(i,j))
+                                        )
                                 explored_list.add(f)
                         frontier = new_frontier
 
@@ -400,7 +458,8 @@ class ConversionTools:
                 (i,j) = all_points_south[0]
                 pixels[int(i),int(j)] = ConversionTools.orange_cone_color
 
-                # Finally, we just need to place noise.  At maximal noise, the track should be maybe 1% covered? (that's actually quite a lot!)
+                # Finally, we just need to place noise.  
+                # At maximal noise, the track should be about 1% covered.
 
                 for i in range(im.size[0]):
                         for j in range(im.size[1]):
@@ -420,11 +479,21 @@ class ConversionTools:
                                 pixels2[x+margin,y+margin] = pixels[x,y]
 
                 # And tag it with the version number
-                loc = ConversionTools.get_metadata_pixel_location(4,4,ConversionTools.BOTTOM_RIGHT,im2.size)
-                pixels2[loc[0],loc[1]] = ConversionTools.deconvert_version_metadata(ConversionTools.TRACKIMG_VERSION_NUM)[0]
+                loc = ConversionTools.get_metadata_pixel_location(
+                                            4,
+                                            4,
+                                            ConversionTools.BOTTOM_RIGHT,
+                                            im2.size
+                )
+                pixels2[loc[0],loc[1]] = ConversionTools.deconvert_version_metadata(
+                                             ConversionTools.TRACKIMG_VERSION_NUM
+                )[0]
 
 
-                im2.save(os.path.join(rospkg.RosPack().get_path('eufs_gazebo'), 'randgen_imgs/'+GENERATED_FILENAME+'.png'))
+                im2.save(
+                        os.path.join(rospkg.RosPack().get_path('eufs_gazebo'),
+                        'randgen_imgs/'+GENERATED_FILENAME+'.png')
+                )
                 return im
 
         @staticmethod
@@ -432,14 +501,15 @@ class ConversionTools:
                 #This is a fairly intensive process - we need:
                 #        to put %FILENAME%.launch in eufs_gazebo/launch
                 #        to put %FILENAME%.world in eufs_gazebo/world
-                #        to put %FILENAME%/model.config and %FILENAME%/model.sdf in eufs_description/models
+                #        to put %FILENAME%/model.config and %FILENAME%/model.sdf 
+                #                 in eufs_description/models
 
                 #Our template files are stored in eufs_launcher/resource as:
                 #        randgen_launch_template
-                #       randgen_world_template
+                #        randgen_world_template
                 #        randgen_model_template/model.config
                 #        randgen_model_template/model.sdf
-                GENERATED_FILENAME = which_file.split('/')[-1][:-4]+conversion_suffix#[:-4] to split off .png, looks like an emoji...
+                GENERATED_FILENAME = which_file.split('/')[-1][:-4]+conversion_suffix
                 im = Image.open(which_file)
                 noise_level = params[0]
                 pixels = im.load()
