@@ -460,7 +460,30 @@ z
 
 
     @staticmethod
-    def runConverter(track_name,midpoints=False,car_start_data=("car_start",0.0,0.0,0.0),conversion_suffix = ""):
+    def runConverter(track_name,
+                     midpoints=False,
+                     car_start_data=("car_start",0.0,0.0,0.0),
+                     conversion_suffix = ""):
+        """
+        Creates a csv from the sdf passed in (through track_name)
+
+        track_name:        The name (not path) of the folder of the sdf for the track.
+                           For example, if you desire a csv for the track with sdf stored
+                           in YourTrack/model.sdf, then track_name should be "YourTrack".
+
+        midpoints:         A boolean, when true the csv will also be populated with data
+                           about the midpoints of cones in the track
+
+        car_start_data:    Information about the start location of the car, as it
+                           cannot be gleaned from the sdf.  It is used to preserve
+                           information so that csvs can be converted back to .launches,
+                           and is not necessary if you do not desire that functionality.
+
+        conversion_suffix: This string will be appended to the end of track_name when
+                           naming the csv file.  It is useful if there may already be
+                           a csv file for the track and for whatever reason you do not
+                           desire to overwrite it.
+        """
         track_path = os.path.join(rospkg.RosPack().get_path('eufs_description'), "models",
                                   track_name, "model.sdf")
 
