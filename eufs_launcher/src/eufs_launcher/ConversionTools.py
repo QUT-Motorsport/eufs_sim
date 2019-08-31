@@ -310,44 +310,49 @@ class ConversionTools:
                         # How close can cones be from those on the same side.
                         cone_adjacent_closeness_parameter = 6
 
+                        # Here we calculate the normal vectors along the track
+                        # As we want cones to be placed along the normal.
                         cur_point = xys[i]
                         cur_tangent_angle = calculate_tangent_angle(xys[:(i+1)])
                         cur_tangent_normal = (
                             math.ceil(
-                                cone_normal_distance_parameter*math.sin(cur_tangent_angle)
+                                cone_normal_distance_parameter * math.sin(cur_tangent_angle)
                             ),
                             math.ceil(
-                                -cone_normal_distance_parameter*math.cos(cur_tangent_angle)
+                                -cone_normal_distance_parameter * math.cos(cur_tangent_angle)
                             )
                         )
-                        north_point = ( int ( cur_point[0]+cur_tangent_normal[0] ) ,
-                                        int ( cur_point[1]+cur_tangent_normal[1] ) )
-                        south_point = ( int ( cur_point[0]-cur_tangent_normal[0] ) , 
-                                        int ( cur_point[1]-cur_tangent_normal[1] ) )
+
+                        # This is where the cones will be placed, provided they pass the
+                        # distance checks later.
+                        north_point = (int(cur_point[0] + cur_tangent_normal[0]),
+                                       int(cur_point[1] + cur_tangent_normal[1]))
+                        south_point = (int(cur_point[0] - cur_tangent_normal[0]), 
+                                       int(cur_point[1] - cur_tangent_normal[1]))
 
                         # Calculates shortest distance to cone on same side of track
-                        difference_from_prev_north = \
-                                min([
+                        difference_from_prev_north = min([
                                         (north_point[0]-prev_point_north[0])**2
                                        +(north_point[1]-prev_point_north[1])**2
-                                for prev_point_north in prev_points_north])
-                        difference_from_prev_south = \
-                                min([
+                                for prev_point_north in prev_points_north
+                        ])
+                        difference_from_prev_south = min([
                                         (south_point[0]-prev_point_south[0])**2
                                        +(south_point[1]-prev_point_south[1])**2
-                                for prev_point_south in prev_points_south])
+                                for prev_point_south in prev_points_south
+                        ])
 
                         # Calculates shortest distance to cone on different side of track
-                        cross_distance_ns = \
-                                min([
+                        cross_distance_ns = min([
                                         (north_point[0]-prev_point_south[0])**2
                                        +(north_point[1]-prev_point_south[1])**2
-                                for prev_point_south in prev_points_south])
-                        cross_distance_sn = \
-                                min([
+                                for prev_point_south in prev_points_south
+                        ])
+                        cross_distance_sn = min([
                                         (south_point[0]-prev_point_north[0])**2
                                        +(south_point[1]-prev_point_north[1])**2
-                                for prev_point_north in prev_points_north])
+                                for prev_point_north in prev_points_north
+                        ])
 
                         # Here we ensure cones don't get too close to the track
                         rel_xys = xys[ 
@@ -397,14 +402,22 @@ class ConversionTools:
 
                         # Only keep track of last couple of previous cones 
                         # (and the very first one, for when the loop joins up)
+                        # Specifically, if we assume cone_check_amount is 30, then
+                        # we have prev_points north keep track of the most recent 30 cones,
+                        # and also the very first start cone.
+                        # This is because we want to make sure no cones are too close to eachother,
+                        # but checking all cones would be too expensive.
+                        # The first cone is kept track of because the track is a loop so
+                        # it needs to look ahead a bit.
                         if len(all_points_north) > cone_check_amount:
-                                prev_points_north = all_points_north[-cone_check_amount:] \
-                                                 + [all_points_north[0]]
+                                prev_points_north = (all_points_north[-cone_check_amount:]
+                                                  + [all_points_north[0]])
                         elif len(all_points_north) > 0:
                                 prev_points_north = all_points_north
+
                         if len(all_points_south) > cone_check_amount:
-                                prev_points_south = all_points_south[-cone_check_amount:] \
-                                                 + [all_points_south[0]]
+                                prev_points_south = (all_points_south[-cone_check_amount:]
+                                                  + [all_points_south[0]])
                         elif len(all_points_south) > 0:
                                 prev_points_south = all_points_south
 
@@ -413,26 +426,42 @@ class ConversionTools:
                 # We want to make the track have differing cone colors - 
                 # yellow on inside, blue on outside
                 # All cones are currently yellow.  
-                # We'll do a "breadth-first-search" for any cones reachable
-                # from (0,0) and call those the 'outside' [(0,0) always blank as image is padded)]
+                # We'll do a "fill-search" for any cones reachable
+                # from (0,0) and call those the 'outside' 
+                # as (0,0) is always blank since the image is padded)
+                # So we will return a list of all points that the search can reach.
+                # Precisely, this is a list of all points adjacent to curpix that
+                # have not already been explored.
                 def get_allowed_adjacents(explolist,curpix):
                         (i,j) = curpix
                         allowed = []
                         if i > 0:
-                                if not( (i-1,j) in explolist ):
-                                        allowed.append((i-1,j))
+                                if not((i-1, j) in explolist):
+                                        allowed.append((i-1, j))
                         if j > 0:
-                                if not( (i,j-1) in explolist ):
-                                        allowed.append((i,j-1))
+                                if not((i,j-1) in explolist):
+                                        allowed.append((i, j-1))
                         if i < twidth-1:
-                                if not( (i+1,j) in explolist ):
-                                        allowed.append((i+1,j))
+                                if not((i+1,j) in explolist):
+                                        allowed.append((i+1, j))
                         if j < theight-1:
-                                if not( (i,j+1) in explolist ):
-                                        allowed.append((i,j+1))
+                                if not((i,j+1) in explolist):
+                                        allowed.append((i, j+1))
                         return allowed
                 print("Coloring cones...")
 
+                # This is the bread-and-butter of the search algorithm.
+                # All it is doing is checking if the points in frontier are
+                # a cone, and if they are then swap it to the correct cone color.
+                # (all cones are inner_cone_color by default, but those on the outside
+                # of the track must be swapped to outer_cone_color).
+                # When we search a pixel, we remove it from the frontier and
+                # add its adjacents to the frontier (provided they are not already explored).
+                # We only do this if the pixel is a background or cone pixel, otherwise
+                # we do not add its adjacents to the frontier.
+                # We don't want the search to be able to pass through track pixels, as then
+                # we would end up on the "inside" of the track, and would wrongfully color
+                # inner_cones as outer_cones.
                 explored_list = set([])
                 frontier = set([(0,0)])
                 while len(frontier)>0:
@@ -464,7 +493,8 @@ class ConversionTools:
                 for i in range(im.size[0]):
                         for j in range(im.size[1]):
                                 # Don't add noise in margin
-                                if i<5 or j<5 or i>=im.size[0]-5 or j>=im.size[0]-5: continue
+                                if i<5 or j<5 or i>=im.size[0]-5 or j>=im.size[0]-5: 
+                                        continue
                                 if pixels[i,j] == ConversionTools.background_color:
                                         # Only 1% should be covered with noise
                                         if uniform(0,100) < 1:
