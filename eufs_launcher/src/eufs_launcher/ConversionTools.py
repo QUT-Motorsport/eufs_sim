@@ -44,6 +44,9 @@ class ConversionTools:
         TOP_RIGHT    = "Top Right"
         BOTTOM_RIGHT = "Bottom Right"
 
+        # Metadata transformation types
+        CONTINUOUS_TRANSFORMATION = "continuous"
+
         #########################################################
         #              Handle Track Image Metadata              #
         #########################################################
@@ -82,18 +85,26 @@ class ConversionTools:
 
 
         @staticmethod
-        def get_raw_metadata(pixel_value,mode="continuous"):
-                # This function converts metadata as outlined in the specification for Track Images on the team wiki
-                # It assumes that handling of the cases (255,255,255,255) and (r,g,b,0) are done outside this function.
+        def get_raw_metadata(pixel_value,mode):
+                """
+                This function converts metadata as outlined in the specification for Track Images on the team wiki
+                It assumes that handling of the cases (255,255,255,255) and (r,g,b,0) are done outside this function.
+
+                pixel_value: the (r,g,b,a) value of the pixel
+                mode:        the type of transformation desired
+                                  CONTINUOUS_TRANSFORMATION: Used for version and scale metadata
+                             There are currently no other transformation types.
+                                
+                """
                 (r,g,b,a) = pixel_value
-                if mode == "continuous":
+                if mode == ConversionTools.CONTINUOUS_TRANSFORMATION:
                         return a-1 + (b-1)*254 + (g-1)*254**2 + (r-1)*254**3
                 return None
 
         @staticmethod
-        def unget_raw_metadata(metadata,mode="continuous"):
-                # Undoes the process of get_raw_metadata()
-                if mode == "continuous":
+        def unget_raw_metadata(metadata,mode):
+                """Undoes the process of get_raw_metadata()"""
+                if mode == ConversionTools.CONTINUOUS_TRANSFORMATION:
                         a = metadata % 254
                         metadata = (metadata - a) // 254
                         b = metadata % 254
@@ -106,15 +117,17 @@ class ConversionTools:
 
         @staticmethod
         def convert_scale_metadata(pixel_values):
-                #This function converts the data obtained from scale metadata pixels into actual scale information
-                #Output range is from 0.0001 to 100.
-                
+                """
+                This function converts the data obtained from scale metadata pixels into actual scale information
+                Output range is from 0.0001 to 100.
+                """                
+
                 primary_pixel = pixel_values[0]
                 secondary_pixel = pixel_values[1]#unused in the specification
 
                 if primary_pixel == (255,255,255,255) and secondary_pixel == (255,255,255,255): return 1 #Check for the default case
 
-                metadata = ConversionTools.get_raw_metadata(primary_pixel,mode="continuous")
+                metadata = ConversionTools.get_raw_metadata(primary_pixel,mode=ConversionTools.CONTINUOUS_TRANSFORMATION)
                 #Want to linearly transform the metadata, a range from 0 to 254**4-1, to the range 0.0001 to 100
                 to_return = metadata/(254**4-1.0) * (100-0.0001) + 0.0001
                 return to_return
@@ -125,7 +138,7 @@ class ConversionTools:
                 #This function converts a raw_ scale value into a list of metadata pixels needed to replicate it.
                 #First in list is the primary metadata pixel, second in list is the secondary (which is unused in the specification)
                 metadata = int((data-0.0001)/(100-0.0001) * (254**4-1))
-                primary_pixel = ConversionTools.unget_raw_metadata(metadata)
+                primary_pixel = ConversionTools.unget_raw_metadata(metadata,ConversionTools.CONTINUOUS_TRANSFORMATION)
                 secondary_pixel = (255,255,255,255)
                 return [primary_pixel,secondary_pixel]
 
