@@ -842,38 +842,17 @@ class ConversionTools:
 
 
                 # Add all models into a template
+                color_to_model = {
+                        ConversionTools.inner_cone_color: sdf_yellow_cone_model,
+                        ConversionTools.outer_cone_color: sdf_blue_cone_model,
+                        ConversionTools.orange_cone_color: sdf_orange_cone_model,
+                        ConversionTools.big_orange_cone_color: sdf_big_orange_cone_model
+ 
+                }
                 for i in range(im.size[0]):
                         for j in range(im.size[1]):
                                 p = pixels[i,j]
-                                if p == ConversionTools.inner_cone_color:
-                                        sdf_allmodels = expand_allmodels(
-                                                            sdf_allmodels,
-                                                            sdf_yellow_cone_model,
-                                                            i,
-                                                            j
-                                        )
-                                elif p == ConversionTools.outer_cone_color:
-                                        sdf_allmodels = expand_allmodels(
-                                                            sdf_allmodels,
-                                                            sdf_blue_cone_model,
-                                                            i,
-                                                            j
-                                        )
-                                elif p == ConversionTools.orange_cone_color:
-                                        sdf_allmodels = expand_allmodels(
-                                                            sdf_allmodels,
-                                                            sdf_orange_cone_model,
-                                                            i,
-                                                            j
-                                        )
-                                elif p == ConversionTools.big_orange_cone_color:
-                                        sdf_allmodels = expand_allmodels(
-                                                            sdf_allmodels,
-                                                            sdf_big_orange_cone_model,
-                                                            i,
-                                                            j
-                                        )
-                                elif p == ConversionTools.noise_color:
+                                if p == ConversionTools.noise_color:
                                         if uniform(0,1)<noise_level:
                                                 # Noise should be placed
                                                 sdf_noisemodel = get_random_noise_template(
@@ -896,6 +875,13 @@ class ConversionTools:
                                                                        i,
                                                                        j
                                                 )
+                                elif p in color_to_model:
+                                        sdf_allmodels = expand_allmodels(
+                                                            sdf_allmodels,
+                                                            color_to_model[p],
+                                                            i,
+                                                            j
+                                        )
 
                 # Splice the sdf file back together.
                 sdf_main = sdf_allmodels.join(sdf_main.split("%FILLDATA%"))
