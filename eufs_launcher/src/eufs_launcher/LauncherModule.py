@@ -82,6 +82,9 @@ class EufsLauncher(Plugin):
                 # Resize correctly
                 self._widget.setFixedWidth(1200)
 
+                # Store gazebo's path as it is used quite a lot:
+                self.GAZEBO = rospkg.RosPack().get_path('eufs_gazebo')
+
                 # Give widget components permanent names
                 self.PRESET_SELECTOR   = self._widget.findChild(QComboBox,"WhichPreset")
                 self.TRACK_SELECTOR    = self._widget.findChild(QComboBox,"WhichTrack")
@@ -92,7 +95,6 @@ class EufsLauncher(Plugin):
 
                 self.CONVERT_BUTTON      = self._widget.findChild(QPushButton,"ConvertButton")
                 self.RENAME_BUTTON       = self._widget.findChild(QPushButton,"RenameButton")
-                self.EXPERIMENTAL_BUTTON = self._widget.findChild(QPushButton,"Experimentals")
                 self.SKETCHER_BUTTON     = self._widget.findChild(QPushButton,"SketcherButton")
                 self.LAX_CHECKBOX        = self._widget.findChild(QCheckBox,"LaxCheckBox")
                 self.CONVERT_FROM_MENU   = self._widget.findChild(QComboBox,"ConvertFrom")
@@ -168,60 +170,56 @@ class EufsLauncher(Plugin):
                 self.LOAD_IMAGE_BUTTON.clicked.connect(self.track_from_image_button_pressed)
                 self.CONVERT_BUTTON.clicked.connect(self.convert_button_pressed)
                 self.RENAME_BUTTON.clicked.connect(self.copy_button_pressed)
-                self.EXPERIMENTAL_BUTTON.clicked.connect(self.experimental_button_pressed)
                 self.SKETCHER_BUTTON.clicked.connect(self.sketcher_button_pressed)
 
 
-                #Create array of running processes
+                # Create array of running processes
                 self.processes = []
-                #And also an array of running launches
+                # And also an array of running launches
                 self.launches = []
-                #And array of running popens
+                # And array of running popens (things launched by popen)
                 self.popens = []
 
                 # Add widget to the user interface
                 context.add_widget(self._widget)
 
-                #Miscellaneous final initializations:
+                # Miscellaneous final initializations:
                 self.has_launched_ros = False
                 self.launch_file_override = None
                 self.popen_process = None
 
-                #Space the load track button better
+                # Space the load track button better
                 self.LOAD_IMAGE_BUTTON.setText("Load Track\nFrom Image")
 
-                #Hide experimental button as not currently needed
-                self.EXPERIMENTAL_BUTTON.setVisible(False)
-
-                #Hide track draw button as not currently working
+                # Hide track draw button as not currently working
                 self.SKETCHER_BUTTON.setVisible(False)
 
-                #Set up the Generator Params
+                # Set up the Generator Params
                 self.update_preset()
 
-                #Give sliders the correct range
+                # Give sliders the correct range
                 self.set_slider_ranges()
 
-                #Relabel the params
+                # Relabel the params
                 self.keep_params_up_to_date()
                 self.keep_sliders_up_to_date()
 
-                #Hook up sliders to function that monitors when they've been changed
+                # Hook up sliders to function that monitors when they've been changed
                 self.keep_track_of_slider_changes()
                 self.keep_track_of_preset_changes()
 
-                #While in the process of changing sliders, 
-                #we don't want our monitor function to be rapidly firing
-                #So we toggle this variable when ready
+                # While in the process of changing sliders, 
+                # we don't want our monitor function to be rapidly firing
+                # So we toggle this variable when ready
                 self.ignore_slider_changes = False
 
-                #Setup Lax Generation button
+                # Setup Lax Generation button
                 self.LAX_CHECKBOX.setChecked(self.LAX_GENERATION)
                 
-                #Setup Conversion Tools dropdowns
-                for f in ["launch","png","csv"]:
+                # Setup Conversion Tools dropdowns
+                for f in ["launch", "png", "csv"]:
                         self.CONVERT_FROM_MENU.addItem(f)
-                for f in ["csv","png","launch","ALL"]:
+                for f in ["csv", "png", "launch", "ALL"]:
                         self.CONVERT_TO_MENU.addItem(f)
                         
                 self.update_converter_dropdown()
@@ -229,55 +227,64 @@ class EufsLauncher(Plugin):
                 self.CONVERT_TO_MENU.currentTextChanged.connect(self.update_midpoints_box)
                 self.FILE_FOR_CONVERSION_BOX.currentTextChanged.connect(self.update_copier)
 
-                #Prep midpoints checkbox
+                # Prep midpoints checkbox
                 convert_to = self.CONVERT_TO_MENU.currentText()
                 self.MIDPOINT_CHECKBOX.setChecked(True)
 
-                #Suffix checkbox
+                # Suffix checkbox
                 suffix_box = self.SUFFIX_CHECKBOX
                 suffix_box.setChecked(True)
 
-                #Track Gen full stack checkbox
+                # Track Gen full stack checkbox
                 track_generator_full_stack = self.FULL_STACK_TRACK_GEN_BUTTON
                 track_generator_full_stack.setChecked(True)
 
-                #Image full stack checkbox
+                # Image full stack checkbox
                 image_launcher_full_stack = self.FULL_STACK_IMAGE_BUTTON
                 image_launcher_full_stack.setChecked(True)
 
-                #Copier full stack checkbox
+                # Copier full stack checkbox
                 copier_full_stack = self.FULL_STACK_COPY_BUTTON
                 copier_full_stack.setChecked(True)
 
-                #Change label to show current selected file for the copier
+                # Change label to show current selected file for the copier
                 self.update_copier()
 
-                #Get uuid
+                # Get uuid of roslaunch
                 self.uuid = roslaunch.rlutil.get_or_generate_uuid(None, False)
                 roslaunch.configure_logging(self.uuid)
 
         def tell_launchella(self,what):
                 """Display text in feedback box (lower left corner)."""
+
                 self.USER_FEEDBACK_LABEL.setText(what)
                 QApplication.processEvents() 
 
         def sketcher_button_pressed(self):
-                """Called when sketcher button is pressed, currently not in use."""
+                """Called when sketcher button is pressed."""
+
                 loadUi(self.sketcher_ui_file, self._widget)
 
         def load_track_and_images(self):
                 """
                 Peruses file system for files to add to the drop-down menus of the launcher.
                 """
+
                 # Clear the dropdowns
                 self.TRACK_SELECTOR.clear()
                 self.IMAGE_SELECTOR.clear()
                 # Get tracks from eufs_gazebo package
-                relevant_path = os.path.join(rospkg.RosPack().get_path('eufs_gazebo'), 'launch')
-                launch_files = [f for f in listdir(relevant_path) if isfile(join(relevant_path, f))]
+                relevant_path = os.path.join(self.GAZEBO, 'launch')
+                launch_files = [
+                        f for f in listdir(relevant_path) if isfile(join(relevant_path, f))
+                ]
 
-                #Remove "blacklisted" files (ones that don't define tracks)
-                blacklist_ = open(os.path.join(rospkg.RosPack().get_path('eufs_gazebo'), 'launch/blacklist.txt'),"r")
+                # Remove "blacklisted" files (ones that don't define tracks)
+                blacklist_filepath = os.path.join(
+                        self.GAZEBO, 
+                        'launch/blacklist.txt'
+                )
+                blacklist_ = open(blacklist_filepath,"r")
                 blacklist = [f.strip() for f in blacklist_]#remove \n
                 launch_files = [f for f in launch_files if not f in blacklist]
 
@@ -289,7 +296,10 @@ class EufsLauncher(Plugin):
                                 self.TRACK_SELECTOR.addItem(f)
 
                 # Get images
-                relevant_path = os.path.join(rospkg.RosPack().get_path('eufs_gazebo'), 'randgen_imgs')
+                relevant_path = os.path.join(
+                        self.GAZEBO, 
+                        'randgen_imgs'
+                )
                 image_files = [f for f in listdir(relevant_path) if isfile(join(relevant_path, f))]
 
                 # Add Images to Image Selector (always put rand.png first)
@@ -301,8 +311,10 @@ class EufsLauncher(Plugin):
 
         def copy_button_pressed(self):
                 """When copy button is pressed, launch ConversionTools"""
+
                 self.tell_launchella("Copying...")
-                #Copy the current file
+
+                # Copy the current file
                 is_full_stack = self.FULL_STACK_COPY_BUTTON.isChecked()
                 file_to_copy_to = self.RENAME_FILE_TEXTBOX.text()
                 file_to_copy_from = self.FILE_FOR_CONVERSION_BOX.currentText()
@@ -310,46 +322,101 @@ class EufsLauncher(Plugin):
                 raw_name_from = file_to_copy_from.split(".")[0]
                 ending = file_to_copy_from.split(".")[-1]
 
-                if len(file_to_copy_to) == 0:#Don't let them create null-named files
+                # Don't let them create null-named files
+                if len(file_to_copy_to) == 0:
                         return
 
+                # For launch files, we also need to move around the model folders
                 if ending == "launch":
-                        #For launch files, we also need to move around the model folders
-                        if not os.path.exists(os.path.join(rospkg.RosPack().get_path('eufs_description'), 'models',raw_name_to)):
-                                os.mkdir(os.path.join(rospkg.RosPack().get_path('eufs_description'), 'models',raw_name_to))
-                        path_from = os.path.join(rospkg.RosPack().get_path('eufs_description'), 'models',raw_name_from,"model.sdf")
-                        path_to   = os.path.join(rospkg.RosPack().get_path('eufs_description'), 'models',raw_name_to,"model.sdf")
+                        model_path = os.path.join(
+                                rospkg.RosPack().get_path('eufs_description'), 
+                                'models',
+                                raw_name_to
+                        )
+                        if not os.path.exists(model_path):
+                                os.mkdir(model_path)
+
+                        # Copy sdf files
+                        path_from = os.path.join(
+                                rospkg.RosPack().get_path('eufs_description'),
+                                'models',
+                                raw_name_from,
+                                "model.sdf"
+                        )
+                        path_to = os.path.join(
+                                rospkg.RosPack().get_path('eufs_description'), 
+                                'models',
+                                raw_name_to,
+                                "model.sdf"
+                        )
                         Converter.copy_file(path_from,path_to)
 
-                        path_from = os.path.join(rospkg.RosPack().get_path('eufs_description'), 'models',raw_name_from,"model.config")
-                        path_to   = os.path.join(rospkg.RosPack().get_path('eufs_description'), 'models',raw_name_to,"model.config")
+                        # Copy config files
+                        path_from = os.path.join(
+                                rospkg.RosPack().get_path('eufs_description'),
+                                'models',
+                                raw_name_from,
+                                "model.config"
+                        )
+                        path_to = os.path.join(
+                                rospkg.RosPack().get_path('eufs_description'), 
+                                'models',
+                                raw_name_to,
+                                "model.config"
+                        )
                         Converter.copy_file(path_from,path_to)
                         
-                        path_from = os.path.join(rospkg.RosPack().get_path('eufs_gazebo'), 'launch',file_to_copy_from)
-                        path_to   = os.path.join(rospkg.RosPack().get_path('eufs_gazebo'),'launch',raw_name_to+"."+ending)
+                        # Copy launch files
+                        path_from = os.path.join(
+                                self.GAZEBO, 
+                                'launch',
+                                file_to_copy_from
+                        )
+                        path_to = os.path.join(
+                                self.GAZEBO,
+                                'launch',
+                                raw_name_to+"."+ending
+                        )
                         Converter.copy_file(path_from,path_to)
 
-                        #If full stack copying, convert to all file formats
-                        if self.FULL_STACK_COPY_BUTTON.isChecked():
-                                Converter.convert("launch","ALL",path_to,params={"noise":self.get_noise_level()})
-
+                # Copy pngs
                 elif ending == "png":
-                        path_from = os.path.join(rospkg.RosPack().get_path('eufs_gazebo'), 'randgen_imgs',file_to_copy_from)
-                        path_to   = os.path.join(rospkg.RosPack().get_path('eufs_gazebo'),'randgen_imgs',raw_name_to+"."+ending)
+                        path_from = os.path.join(
+                                self.GAZEBO,
+                                'randgen_imgs',
+                                file_to_copy_from
+                        )
+                        path_to = os.path.join(
+                                self.GAZEBO,
+                                'randgen_imgs',
+                                raw_name_to+"."+ending
+                        )
                         Converter.copy_file(path_from,path_to)
 
-                        #If full stack copying, convert to all file formats
-                        if self.FULL_STACK_COPY_BUTTON.isChecked():
-                                Converter.convert("png","ALL",path_to,params={"noise":self.get_noise_level()})
-
+                # Copy csvs
                 elif ending == "csv":
-                        path_from = os.path.join(rospkg.RosPack().get_path('eufs_gazebo'), 'tracks',file_to_copy_from)
-                        path_to   = os.path.join(rospkg.RosPack().get_path('eufs_gazebo'),'tracks',raw_name_to+"."+ending)
+                        path_from = os.path.join(
+                                self.GAZEBO, 
+                                'tracks',
+                                file_to_copy_from
+                        )
+                        path_to = os.path.join(
+                                self.GAZEBO,
+                                'tracks',
+                                raw_name_to+"."+ending
+                        )
                         Converter.copy_file(path_from,path_to)
 
-                        #If full stack copying, convert to all file formats
-                        if self.FULL_STACK_COPY_BUTTON.isChecked():
-                                Converter.convert("csv","ALL",path_to,params={"noise":self.get_noise_level()})
+                # If full stack copying, convert to all file formats
+                if self.FULL_STACK_COPY_BUTTON.isChecked():
+                        Converter.convert(
+                                ending,
+                                "ALL",
+                                path_to,
+                                params={"noise":self.get_noise_level()}
+                        )
+
+                # Update drop-downs with new files in directory
                 self.load_track_and_images()
                 self.tell_launchella("Copy Succeeded!")
 
@@ -359,10 +426,12 @@ class EufsLauncher(Plugin):
                 copy_head.setText("Copy: "+self.FILE_FOR_CONVERSION_BOX.currentText())
 
         def update_midpoints_box(self):
-                """Controls the handling of the box that, when ticked, tells the to-csv converter to calculate cone midpoints."""
+                """
+                Controls the handling of the box that, when ticked, 
+                tells the to-csv converter to calculate cone midpoints.
+                """
                 #Toggle checkbox
                 convert_to = self.CONVERT_TO_MENU.currentText()
-                #self.MIDPOINT_CHECKBOX.setVisible(convert_to=="csv" or convert_to=="ALL")
 
         def update_converter_dropdown(self):
                 """Keep the drop-down menus of ConversionTools in sync with the filesystem."""
@@ -371,21 +440,42 @@ class EufsLauncher(Plugin):
 
                 if from_type == "launch":
                         # Get tracks from eufs_gazebo package
-                        relevant_path = os.path.join(rospkg.RosPack().get_path('eufs_gazebo'), 'launch')
-                        launch_files = [f for f in listdir(relevant_path) if isfile(join(relevant_path, f))]
+                        relevant_path = os.path.join(
+                                self.GAZEBO, 
+                                'launch'
+                        )
+                        launch_files = [
+                               f for f in listdir(relevant_path) if isfile(join(relevant_path, f))
+                        ]
         
-                        #Remove "blacklisted" files (ones that don't define tracks)
-                        blacklist_ = open(os.path.join(rospkg.RosPack().get_path('eufs_gazebo'), 'launch/blacklist.txt'),"r")
-                        blacklist = [f.strip() for f in blacklist_]#remove \n
+                        # Remove "blacklisted" files (ones that don't define tracks)
+                        blacklist_filepath = os.path.join(
+                                self.GAZEBO,
+                                'launch/blacklist.txt'
+                        )
+                        blacklist_ = open(blacklist_filepath,"r")
+                        blacklist = [f.strip() for f in blacklist_]
                         all_files = [f for f in launch_files if not f in blacklist]
                 elif from_type == "png":
                         # Get images
-                        relevant_path = os.path.join(rospkg.RosPack().get_path('eufs_gazebo'), 'randgen_imgs')
-                        all_files = [f for f in listdir(relevant_path) if isfile(join(relevant_path, f))]
+                        relevant_path = os.path.join(
+                                self.GAZEBO, 
+                                'randgen_imgs'
+                        )
+                        all_files = [
+                                f for f in listdir(relevant_path) 
+                                if isfile(join(relevant_path, f))
+                        ]
                 elif from_type == "csv":
-                        #Get csvs
-                        relevant_path = os.path.join(rospkg.RosPack().get_path('eufs_gazebo'), 'tracks')
-                        all_files = [f for f in listdir(relevant_path) if isfile(join(relevant_path, f)) and f[-3:]=="csv"]
+                        # Get csvs
+                        relevant_path = os.path.join(
+                                self.GAZEBO, 
+                                'tracks'
+                        )
+                        all_files = [
+                                f for f in listdir(relevant_path) 
+                                if isfile(join(relevant_path, f)) and f[-3:]=="csv"
+                        ]
 
                 #Remove old files from selector
                 the_selector = self.FILE_FOR_CONVERSION_BOX
@@ -450,7 +540,7 @@ class EufsLauncher(Plugin):
                 self.keep_params_up_to_date()
 
         def keep_params_up_to_date(self):
-                """This function keeps the labels next to the sliders up to date with the actual values."""
+                """This function keeps the labels next to the sliders up to date."""
                 self.MIN_STRAIGHT_LABEL .setText("MIN_STRAIGHT: "  + str(self.MIN_STRAIGHT))
                 self.MAX_STRAIGHT_LABEL .setText("MAX_STRAIGHT: "  + str(self.MAX_STRAIGHT))
                 self.MIN_CTURN_LABEL    .setText("MIN_CTURN: "     + str(self.MIN_CTURN))
@@ -459,10 +549,10 @@ class EufsLauncher(Plugin):
                 self.MAX_HAIRPIN_LABEL  .setText("MAX_HAIRPIN: "   + str((self.MAX_HAIRPIN/2.0)))
                 self.HAIRPIN_PAIRS_LABEL.setText("HAIRPIN_PAIRS: " + str(self.HAIRPIN_PAIRS))
                 self.MAX_LENGTH_LABEL   .setText("MAX_LENGTH: "    + str(self.MAX_LENGTH))
-                self.TRACK_WIDTH_LABEL  .setText("TRACK_WIDTH: "  + str(self.TRACK_WIDTH        ))
+                self.TRACK_WIDTH_LABEL  .setText("TRACK_WIDTH: "  + str(self.TRACK_WIDTH))
 
         def keep_sliders_up_to_date(self):
-                """This function keeps the values of the sliders up to date with the actual values."""
+                """This function keeps the values of the sliders up to date."""
                 self.set_slider_value("Param_MIN_STRAIGHT",self.MIN_STRAIGHT)
                 self.set_slider_value("Param_MAX_STRAIGHT",self.MAX_STRAIGHT)
                 self.set_slider_value("Param_MIN_CTURN",self.MIN_CTURN)
@@ -474,7 +564,7 @@ class EufsLauncher(Plugin):
                 self.set_slider_value("Param_TRACK_WIDTH",self.TRACK_WIDTH)
 
         def keep_variables_up_to_date(self):
-                """This function keeps LauncherModule's variables in tune with the slider values."""
+                """This function keeps LauncherModule's variables up to date."""
                 self.MIN_STRAIGHT = self.get_slider_value("Param_MIN_STRAIGHT")
                 self.MAX_STRAIGHT = self.get_slider_value("Param_MAX_STRAIGHT")
                 self.MIN_CTURN = self.get_slider_value("Param_MIN_CTURN")
@@ -489,12 +579,17 @@ class EufsLauncher(Plugin):
                 """
                 This function specifies the bounds of the sliders.
 
-                Note on ranges: 
+                The following values are entirely arbitrary: 
                                 Straights are between 0 and 150
                                 Turns are between 0 and 50
-                                Hairpins are between 0 and 20, and have half-step rather than integer step (hence scaling by 2s)
+                                Hairpins are between 0 and 20, 
+                                     and have half-step rather than integer step 
+                                     (hence scaling by 2s)
                                 Hairpin pairs are between 0 and 5
-                               Max Length is between 200 and 2000
+                                Max Length is between 200 and 2000
+
+                The values were chosen because the sliders needed min and max values, and
+                these values seemed to encompass the range of desired functionality.
                 """
                 min_straight = 0
                 max_straight = 150
@@ -533,60 +628,94 @@ class EufsLauncher(Plugin):
                 slider = self._widget.findChild(QSlider,slidername)
                 slider.setMinimum(slidermin)
                 slider.setMaximum(slidermax)
-                
-
-        def experimental_button_pressed(self):
-                """When features are listed as experimental, then they are invisible until this function switches them on."""
-                pass
-                #Example: self.GENERATOR_BUTTON.setVisible(True)
+               
                 
 
         def generator_button_pressed(self):
-                """Handles random track generation by accessing TrackGenerator and ConversionTools."""
+                """Handles random track generation."""
+
                 self.tell_launchella("Generating Track...")
 
                 isLaxGenerator = self.LAX_CHECKBOX.isChecked()
                 
                 try:
 
-                        xys,twidth,theight = Generator.generate([        self.MIN_STRAIGHT,self.MAX_STRAIGHT,
-                                                                        self.MIN_CTURN,self.MAX_CTURN,
-                                                                        self.MIN_HAIRPIN/2,self.MAX_HAIRPIN/2,
-                                                                        self.HAIRPIN_PAIRS,
-                                                                        self.MAX_LENGTH,
-                                                                        1 if isLaxGenerator else 0,
-                                                                        1 if self.PRESET_SELECTOR.currentText()=="Bezier" else 0
-                                                                        ])
+                        xys,twidth,theight = Generator.generate([
+                                self.MIN_STRAIGHT,
+                                self.MAX_STRAIGHT,                                    
+                                self.MIN_CTURN,
+                                self.MAX_CTURN,                                    
+                                self.MIN_HAIRPIN/2,
+                                self.MAX_HAIRPIN/2,                                     
+                                self.HAIRPIN_PAIRS,                             
+                                self.MAX_LENGTH,                                   
+                                1 if isLaxGenerator else 0,                                   
+                                1 if self.PRESET_SELECTOR.currentText()=="Bezier" else 0
+                        ])
                         self.tell_launchella("Loading Image...")
-                        im = Converter.convert("xys","png","rand",params={"track width":self.TRACK_WIDTH,"point list":(xys,twidth,theight)})
+                        im = Converter.convert(
+                                "xys",
+                                "png",
+                                "rand",
+                                params={
+                                        "track width":self.TRACK_WIDTH,
+                                        "point list":(xys,twidth,theight)
+                                }
+                        )
 
-                        #If full stack selected, convert into csv and launch as well
+                        # If full stack selected, convert into csv and launch as well
                         track_generator_full_stack = self.FULL_STACK_TRACK_GEN_BUTTON
                         if track_generator_full_stack.isChecked():
-                                img_path = os.path.join(rospkg.RosPack().get_path('eufs_gazebo'), 'randgen_imgs/rand.png')
-                                Converter.convert("png","ALL",img_path,params={"noise":self.get_noise_level()})
+                                img_path = os.path.join(
+                                        self.GAZEBO, 
+                                        'randgen_imgs/rand.png'
+                                )
+                                Converter.convert(
+                                        "png",
+                                        "ALL",
+                                        img_path,
+                                        params={"noise":self.get_noise_level()}
+                                )
 
                         self.tell_launchella("Track Gen Complete!")
 
                         im.show()
                 except GenerationFailedException:
-                        rospy.logerr(        "\nError!  The generator could not generate a track in time.\n"+
-                                        "Maybe try different parameters?\n"+
-                                        "Turning on Lax Generation and increasing MAX_STRAIGHT and MIN_STRAIGHT usually helps.")
+                        rospy.logerr("\nError!  The generator could not generate in time.\n"+
+                                       "Maybe try different parameters?\n"+
+                                       "Turning on Lax Generation and increasing MAX_STRAIGHT"+
+                                       " and MIN_STRAIGHT usually helps.")
                         self.tell_launchella("Track Gen Failed :(  Try different parameters?")
 
                 self.load_track_and_images()
 
         def track_from_image_button_pressed(self):
-                """Converts .png to .launch by interfacing with ConversionTools, then launches said .launch."""
+                """
+                Converts .png to .launch by interfacing with ConversionTools, 
+                then launches said .launch.
+                """
+
                 self.tell_launchella("Preparing to launch image as a track... ")
                 filename = self.IMAGE_SELECTOR.currentText()
-                filename_full = os.path.join(rospkg.RosPack().get_path('eufs_gazebo'), 'randgen_imgs/'+filename)
+                filename_full = os.path.join(
+                        self.GAZEBO, 
+                        'randgen_imgs/'+filename
+                )
                 image_launcher_full_stack = self.FULL_STACK_IMAGE_BUTTON
                 if image_launcher_full_stack.isChecked():
-                        Converter.convert("png","ALL",filename_full,params={"noise":self.get_noise_level()})
+                        Converter.convert(
+                                "png",
+                                "ALL",
+                                filename_full,
+                                params={"noise":self.get_noise_level()}
+                        )
                 else:
-                        Converter.convert("png","launch",filename_full,params={"noise":self.get_noise_level()})
+                        Converter.convert(
+                                "png",
+                                "launch",
+                                filename_full,
+                                params={"noise":self.get_noise_level()}
+                        )
 
                 self.launch_file_override = filename[:-4] + ".launch"
                 self.load_track_and_images()
@@ -596,46 +725,75 @@ class EufsLauncher(Plugin):
 
         def get_noise_level(self):
                 """Returns the noise slider's noise level."""
+
                 noise_level_widget = self.NOISE_SLIDER
-                return (1.0*(noise_level_widget.value()-noise_level_widget.minimum()))/(noise_level_widget.maximum()-noise_level_widget.minimum())
+                numerator = (1.0 * (noise_level_widget.value() - noise_level_widget.minimum()))
+                denominator = (noise_level_widget.maximum() - noise_level_widget.minimum())
+                return numerator/denominator
 
         def convert_button_pressed(self):
                 """Handles interfacing with ConversionTools."""
+
+                # Get info from launcher gui
                 from_type = self.CONVERT_FROM_MENU.currentText()
                 to_type   = self.CONVERT_TO_MENU.currentText()
                 filename = self.FILE_FOR_CONVERSION_BOX.currentText()
-                self.tell_launchella("Conversion Button Pressed!  From: " + from_type + " To: " + to_type + " For: " + filename)
+                self.tell_launchella("Conversion Button Pressed!  From: " 
+                                    + from_type + " To: " + to_type + " For: " + filename)
                 midpoint_widget = self.MIDPOINT_CHECKBOX
+
+                # Calculate correct full filepath for file to convert
                 if from_type == "png":
-                        filename = os.path.join(rospkg.RosPack().get_path('eufs_gazebo'), 'randgen_imgs/'+filename)
+                        filename = os.path.join(self.GAZEBO, 'randgen_imgs/'+filename)
                 elif from_type == "launch":
-                        filename = os.path.join(rospkg.RosPack().get_path('eufs_gazebo'), 'launch/'+filename)
+                        filename = os.path.join(self.GAZEBO, 'launch/'+filename)
                 elif from_type == "csv":
-                        filename = os.path.join(rospkg.RosPack().get_path('eufs_gazebo'), 'tracks/'+filename)
+                        filename = os.path.join(self.GAZEBO, 'tracks/'+filename)
+
+                # Calculate some parameters
                 suffix = "_CT" if self.SUFFIX_CHECKBOX.isChecked() else ""
-                Converter.convert(from_type,to_type,filename,
-                                        params={"noise":self.get_noise_level(),"midpoints":midpoint_widget.isVisible() and midpoint_widget.isChecked()},conversion_suffix=suffix)
+                use_midpoints = midpoint_widget.isVisible() and midpoint_widget.isChecked()
+
+                # Convert it
+                Converter.convert(
+                        from_type,
+                        to_type,
+                        filename,
+                        params={
+                                "noise":self.get_noise_level(),
+                                "midpoints":use_midpoints
+                        },
+                        conversion_suffix=suffix
+                )
                 self.load_track_and_images()
-                self.tell_launchella("Conversion Succeeded!  From: " + from_type + " To: " + to_type + " For: " + filename)
+                self.tell_launchella("Conversion Succeeded!  From: " 
+                                    + from_type + " To: " + to_type + " For: " + filename)
 
         def launch_button_pressed(self):
                 """Launches Gazebo."""
+
                 if self.has_launched_ros:
-                        #Don't let people press launch twice
-                        #There's not really any reason why not to, but it's "undefined behavior"
+                        # Don't let people press launch twice
                         return
                 self.has_launched_ros = True
 
                 self.tell_launchella("--------------------------")
                 self.tell_launchella("\t\t\tLaunching Nodes...")
-                track_to_launch = self.launch_file_override #if we have set a specific file to run regardless of selected file
-                self.launch_file_override = None          #such as when we use the random generator
+             
+                # If we have set a specific file to run regardless of selected file,
+                # which may happen when we launch from an image,
+                # we make sure to launch the overriding track instead.
+                track_to_launch = self.launch_file_override
+                self.launch_file_override = None          
                 if not track_to_launch:
                         track_to_launch = self.TRACK_SELECTOR.currentText()
+
+                # Get noise level
                 self.tell_launchella("Launching " + track_to_launch)
                 noise_level = self.get_noise_level()
                 self.tell_launchella("With Noise Level: " + str(noise_level))
                 
+                # Get control information
                 control_method = "controlMethod:=speed"
                 if self.SPEED_RADIO.isChecked():
                         self.tell_launchella("With Speed Controls")
@@ -644,60 +802,52 @@ class EufsLauncher(Plugin):
                         self.tell_launchella("With Torque Controls")
                         control_method = "controlMethod:=torque"
 
+                # Get perception ifnormation
                 perception_stack = ["launch_group:=no_perception"]
                 if self.PERCEPTION_CHECKBOX.isChecked():
                         perception_stack = []#is on
-                
 
-                if self.popen_process:
-                        self.process.kill()
-
-                #How we launch the simulation changes depending on whether
-                dir_to_check = os.path.dirname(os.path.dirname(os.path.dirname(rospkg.RosPack().get_path('eufs_gazebo'))))
+                # How we launch the simulation changes depending on whether
+                # we are using the eufs_sim package standalone, or working within
+                # the eufs-master ecosystem.
+                dir_to_check = os.path.dirname(os.path.dirname(os.path.dirname(self.GAZEBO)))
                 if dir_to_check.split("/")[-1] == "eufs-master":
-                        launch_location = os.path.join(dir_to_check, 
+                        launch_location = os.path.join(
+                                                dir_to_check, 
                                                 'launch', 
-                                                'simulation.launch')
-                        self.popen_process =         self.launch_node_with_args(
+                                                'simulation.launch'
+                        )
+                        self.popen_process = self.launch_node_with_args(
                                                 launch_location,
-                                                [control_method,"track:="+track_to_launch.split(".")[0]]+perception_stack
+                                                [
+                                                        control_method,
+                                                        "track:="+track_to_launch.split(".")[0]
+                                                ]+perception_stack
                                         )
                 else:
                         self.popen_process = self.launch_node_with_args(
-                                                os.path.join(rospkg.RosPack().get_path('eufs_gazebo'), 'launch', track_to_launch),
+                                                os.path.join(
+                                                        self.GAZEBO,
+                                                        'launch', 
+                                                        track_to_launch
+                                                ),
                                                 [control_method]
                                         )
                         
-
+                # Launch the visualisator if applicable.
                 if self.VISUALISATOR_CHECKBOX.isChecked():
                         self.tell_launchella("And With LIDAR Data Visualisator.")
-                        self.launch_node(os.path.join(rospkg.RosPack().get_path('eufs_description'), "launch","visualisator.launch"))
-                self.tell_launchella("As I have fulfilled my purpose in guiding you to launch a track, this launcher will no longer react to input.")
+                        node_path = os.path.join(
+                                rospkg.RosPack().get_path('eufs_description'),
+                                "launch",
+                                "visualisator.launch"
+                        )
+                        self.launch_node(node_path)
 
-        def nuke_ros(self):
-                """
-                Kill everything about ROS - only used for debugging
-                """
-                #Try to kill as much as possible
-                #Burn it all to the ground
-                Popen(["killall","-9","gzserver"])
-                Popen(["killall","-9","gzclient"])
-                extra_nodes= rosnode.get_node_names()
-                extra_nodes.remove('/rosout')
-                extra_nodes= [f for f in extra_nodes if f[:17] != '/rqt_gui_py_node_'] #remove the gui's node from kill list
-                for bad_node in extra_nodes:
-                        Popen(["rosnode","kill",bad_node])
+                self.tell_launchella("As I have fulfilled my purpose in guiding you "+
+                                     "to launch a track, this launcher will no longer "+
+                                     "react to input.")
 
-
-        def save_settings(self, plugin_settings, instance_settings):
-                # uncomment to save intrinsic configuration, usually using:
-                # instance_settings.set_value(k, v)
-                pass
-
-        def restore_settings(self, plugin_settings, instance_settings):
-                # uncomment to restore intrinsic configuration, usually using:
-                # v = instance_settings.value(k)
-                pass
 
         def launch_node(self,filepath):
                 """Wrapper for launch_node_with_args"""
@@ -707,9 +857,10 @@ class EufsLauncher(Plugin):
                 """
                 Launches ros node.
 
-                If arguments are supplied, it has to use Popen rather than the default launch method.
+                If arguments are supplied, it has to use Popen 
+                rather than the default launch method.
                 """
-                if len(args) > 0:#We cannot use ROS' api with arguments in Kinetic
+                if len(args) > 0:
                         process = Popen(["roslaunch",filepath]+args)
                         self.popens.append(process)
                         return process
@@ -722,6 +873,7 @@ class EufsLauncher(Plugin):
         def shutdown_plugin(self):
                 """Unregister all publishers, kill all nodes."""
                 self.tell_launchella("Shutdown Engaged...")
+
                 #(Stop all processes)
                 for p in self.processes:
                         p.stop()
@@ -732,16 +884,17 @@ class EufsLauncher(Plugin):
                 for p in self.popens:
                         p.kill()
 
-                #Manual node killer:
-                
+                #Manual node killer (needs to be used on nodes opened by Popen):
                 extra_nodes= rosnode.get_node_names()
                 extra_nodes.remove("/eufs_launcher")
                 extra_nodes.remove("/rosout")
                 left_open = len(extra_nodes)
                 if (left_open>0):
-                        rospy.logerr("Warning, after shutting down the launcher, these nodes are still running: " + str(extra_nodes))
+                        rospy.logerr("Warning, after shutting down the launcher, "+
+                                     "these nodes are still running: " + str(extra_nodes))
 
-                nodes_to_kill = [        "/cone_ground_truth",
+                nodes_to_kill = [       
+                                        "/cone_ground_truth",
                                         "/eufs/controller_spawner",
                                         "/gazebo",
                                         "/gazebo_gui",
@@ -756,17 +909,12 @@ class EufsLauncher(Plugin):
                                 Popen(["rosnode","kill",bad_node])
                 Popen(["killall","-9","gzserver"])
                 time.sleep(0.25)
-                extra_nodes= rosnode.get_node_names()
+                extra_nodes = rosnode.get_node_names()
                 extra_nodes.remove("/eufs_launcher")
                 extra_nodes.remove("/rosout")
                 if left_open>0:
                         rospy.logerr("Pruned to: " + str(extra_nodes))
                 
-
-        #def trigger_configuration(self):
-                # Comment in to signal that the plugin has a way to configure
-                # This will enable a setting button (gear icon) in each dock widget title bar
-                # Usually used to open a modal configuration dialog
 
 
 

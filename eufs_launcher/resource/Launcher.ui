@@ -1136,26 +1136,7 @@
    </property>
   </widget>
 
-  <!--Experimental Button (currently deprecated, doesn't appear)-->
-  <!--But I may decide to add it back in the future.-->
-  <widget class="QPushButton" name="Experimentals">
-   <property name="geometry">
-    <rect>
-     <x>450</x>
-     <y>10</y>
-     <width>150</width>
-     <height>20</height>
-    </rect>
-   </property>
-   <property name="text" >
-      <string>Experimental</string>
-    </property>
-    <property name="font">
-       <font>
-            <pointsize>7</pointsize>
-       </font>
-   </property>
-  </widget>
+
 
 
  </widget>
