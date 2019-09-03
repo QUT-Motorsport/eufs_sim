@@ -84,8 +84,10 @@ class ConversionTools:
         @staticmethod
         def get_raw_metadata(pixel_value):
                 """
-                This function converts metadata as outlined in the specification for Track Images on the team wiki
-                It assumes that handling of the cases (255,255,255,255) and (r,g,b,0) are done outside this function.
+                This function converts metadata as outlined in the 
+                specification for Track Images on the team wiki
+                It assumes that handling of the cases (255,255,255,255) and (r,g,b,0) 
+                are done outside this function.
 
                 pixel_value: the (r,g,b,a) value of the pixel
                                 
@@ -108,7 +110,8 @@ class ConversionTools:
         @staticmethod
         def convert_scale_metadata(pixel_values):
                 """
-                This function converts the data obtained from scale metadata pixels into actual scale information
+                This function converts the data obtained from 
+                scale metadata pixels into actual scale information
                 Output range is from 0.0001 to 100.
                 """                
 
@@ -129,7 +132,8 @@ class ConversionTools:
         @staticmethod
         def deconvert_scale_metadata(data):
                 """
-                This function converts a raw_ scale value into a list of metadata pixels needed to replicate it.
+                This function converts a raw_ scale value into a 
+                list of metadata pixels needed to replicate it.
                 First in list is the primary metadata pixel, second in list is the secondary
                 """
 
@@ -141,7 +145,8 @@ class ConversionTools:
         @staticmethod
         def convert_version_metadata(pixel_values):
                 """
-                This function converts the data obtained from scale metadata pixels into actual scale information
+                This function converts the data obtained from 
+                scale metadata pixels into actual scale information
                 Output range is from 0 to 254**4-1
                 """
                 primary_pixel = pixel_values[0]
@@ -162,7 +167,8 @@ class ConversionTools:
         @staticmethod
         def convert(cfrom,cto,which_file,params=[],conversion_suffix=""):
                 """
-                Will convert which_file of filetype cfrom to filetype cto with filename which_file+conversion_suffix
+                Will convert which_file of filetype cfrom to filetype cto with
+                filename which_file+conversion_suffix
 
                 cfrom:      Type to convert from (xys, png, launch, csv) [should be a string]
                 cto:        Type to convert to   (png, launch, csv)      [should be a string]
@@ -174,6 +180,9 @@ class ConversionTools:
                             the specific desired conversion function for full information.
 
                 conversion_suffix: A suffix appended to the filename of the output file.
+
+                If converted to an image, it will return that image in case the function caller
+                desires to do any displaying of the result (otherwise it returns None)
                 """
 
                 if cfrom=="xys" and cto=="png":
@@ -185,7 +194,11 @@ class ConversionTools:
                         new_file_array = which_file.split("/")
                         new_file_array[-2] = "launch"
                         which_file = "/".join(new_file_array)
-                        return ConversionTools.launch_to_csv(which_file[:-4]+conversion_suffix+".launch",params,conversion_suffix="")
+                        return ConversionTools.launch_to_csv(
+                                   which_file[:-4]+conversion_suffix+".launch",
+                                   params,
+                                   conversion_suffix=""
+                        )
                 if cfrom=="launch" and cto=="csv":
                         return ConversionTools.launch_to_csv(which_file,params,conversion_suffix)
                 if cfrom=="launch" and cto=="png":
@@ -193,20 +206,34 @@ class ConversionTools:
                         new_file_array = which_file.split("/")
                         new_file_array[-2] = "tracks"
                         which_file = "/".join(new_file_array)
-                        return ConversionTools.csv_to_png(which_file[:-7]+conversion_suffix+".csv",params,conversion_suffix="")
+                        return ConversionTools.csv_to_png(
+                                   which_file[:-7]+conversion_suffix+".csv",
+                                   params,
+                                   conversion_suffix=""
+                        )
                 if cfrom=="csv" and cto == "launch":
                         ConversionTools.csv_to_png(which_file,params,conversion_suffix)
                         new_file_array = which_file.split("/")
                         new_file_array[-2] = "randgen_imgs"
                         which_file = "/".join(new_file_array)
-                        return ConversionTools.png_to_launch(which_file[:-4]+conversion_suffix+".png",params,conversion_suffix="")
+                        return ConversionTools.png_to_launch(
+                                   which_file[:-4]+conversion_suffix+".png",
+                                   params,
+                                   conversion_suffix=""
+                        )
                 if cfrom=="csv" and cto == "png":
                         return ConversionTools.csv_to_png(which_file,params,conversion_suffix)
                 if cto == "ALL" or cto == "all":
-                        #Don't worry, if something tries to convert to itself it just gets ignored
+                        #If something tries to convert to itself it just gets ignored
                         ConversionTools.convert(cfrom,"launch",which_file,params,conversion_suffix)
                         ConversionTools.convert(cfrom,"csv",which_file,params,conversion_suffix)
-                        return ConversionTools.convert(cfrom,"png",which_file,params,conversion_suffix)
+                        return ConversionTools.convert(
+                                   cfrom,
+                                   "png",
+                                   which_file,
+                                   params,
+                                   conversion_suffix
+                        )
                 return None
                         
 
@@ -902,9 +929,31 @@ class ConversionTools:
 
         @staticmethod
         def csv_to_png(which_file,params,conversion_suffix=""):
+                """
+                Converts a .csv to a .png
+
+                which_file:        The name of the csv file to convert
+                                   example: rand.csv
+
+                params:            A list of optional parameters.  
+                                   None are used at this time, but it is listed in the
+                                   function signature to have a consistent signature for all
+                                   the methods of the form a_to_b().
+
+                conversion_suffix: Something to append to the output filename
+                                   So if it is "foo", rand.png becomes randfoo.launch.
+
+                """
+
                 filename = which_file.split("/")[-1].split(".")[0]+conversion_suffix
-                #We are merely going to open up the csv, read through all the lines, and round down the point to an integer.
-                #(While preserving cone color).
+
+                # We are going to open up the csv, read through all the lines, 
+                # and round down the point to an integer after taking into account
+                # the scale factor of the csv and potentially scaling accordingly
+                # to avoid massive images.
+                # (While preserving cone color).
+
+                # First, we read in the csv data into a dataframe
                 df = pd.read_csv(which_file)
                 blue_cones = df[df['tag']=="blue"]
                 yellow_cones = df[df['tag']=="yellow"]
@@ -914,48 +963,55 @@ class ConversionTools:
                 inactive_noise = df[df['tag']=="inactive_noise"]
                 car_location = df[df['tag']=="car_start"]
 
+                # Here we parse the data and get a full list of all relevant info of the cones
+                # and the car (type,x,y,yaw)
                 raw_blue = []
                 raw_yellow = []
                 raw_orange = []
                 raw_big_orange = []
                 raw_noise = []
-                raw_car_location = (0,0,0,0)
+                raw_car_location = (0, 0, 0, 0)
                 for bluecone in blue_cones.itertuples():
                         x = (bluecone[2])
                         y = (bluecone[3])
-                        raw_blue.append(("blue",x,y,0))
+                        raw_blue.append(("blue", x, y, 0))
 
                 for yellowcone in yellow_cones.itertuples():
                         x = (yellowcone[2])
                         y = (yellowcone[3])
-                        raw_yellow.append(("yellow",x,y,0))
+                        raw_yellow.append(("yellow", x, y, 0))
 
                 for orangecone in orange_cones.itertuples():
                         x = (orangecone[2])
                         y = (orangecone[3])
-                        raw_orange.append(("orange",x,y,0))
+                        raw_orange.append(("orange", x, y, 0))
 
                 for big_orangecone in big_orange_cones.itertuples():
                         x = (big_orangecone[2])
                         y = (big_orangecone[3])
-                        raw_big_orange.append(("big_orange",x,y,0))
+                        raw_big_orange.append(("big_orange", x, y, 0))
 
                 for noise in active_noise.itertuples():
                         x = (noise[2])
                         y = (noise[3])
-                        raw_noise.append(("noise",x,y,0))
+                        raw_noise.append(("noise", x, y, 0))
 
                 for noise in inactive_noise.itertuples():
                         x = (noise[2])
                         y = (noise[3])
-                        raw_noise.append(("noise",x,y,0))
+                        raw_noise.append(("noise", x, y, 0))
 
                 for c in car_location.itertuples():
-                        raw_car_location = ("car",(c[2]),(c[3]),(c[4]))
+                        raw_car_location = ("car", c[2], c[3], c[4])
 
-                all_cones = raw_blue + raw_yellow + raw_orange + raw_big_orange + raw_noise + [raw_car_location]
+                all_cones = (raw_blue 
+                           + raw_yellow 
+                           + raw_orange 
+                           + raw_big_orange 
+                           + raw_noise 
+                           + [raw_car_location])
 
-                #Here we convert it all to positive
+                # Here we convert all positions to positive
                 min_x = 100000
                 min_y = 100000
                 max_x = -100000
@@ -970,7 +1026,8 @@ class ConversionTools:
                         if cone[2]>max_y:
                                 max_y = cone[2]
 
-                #Here we figure out the track scaling by calculating the average smallest distance between cones
+                # Here we figure out the track scaling by calculating 
+                # the average smallest distance between cones
                 total_x_distance = 0
                 total_y_distance = 0
                 for cone1 in all_cones:
@@ -985,53 +1042,98 @@ class ConversionTools:
                         total_x_distance+=closest_x
                         total_y_distance+=closest_y
                 
-                #Our scale will strive to preserve distances when possible.
+                # Our scale will strive to preserve distances when possible.
                 scale_desired = max(total_x_distance,total_y_distance)/(len(all_cones)-1)
                 if scale_desired < 0.0001: scale_desired = 0.0001#Clamp scale to allowed values
                 if scale_desired > 100:    scale_desired = 100
                 scale_metadata = ConversionTools.deconvert_scale_metadata(scale_desired)
                 
+                # Now we store the scaled information inside final_cones/
                 final_cones = []
-                twidth = int((max_x-min_x+20)/scale_desired)
-                theight = int((max_y-min_y+20)/scale_desired)
-                car_x = int((raw_car_location[1]-min_x+10)/scale_desired)
-                car_y = int((raw_car_location[2]-min_y+10)/scale_desired)
+                twidth =  int((max_x - min_x + 20) / scale_desired)
+                theight = int((max_y - min_y + 20) / scale_desired)
+                car_x = int((raw_car_location[1] - min_x + 10) / scale_desired)
+                car_y = int((raw_car_location[2] - min_y + 10) / scale_desired)
                 for cone in all_cones:
-                        final_cones.append( (cone[0],int((cone[1]-min_x+10)/scale_desired),int((cone[2]-min_y+10)/scale_desired))   )
+                        new_x = int((cone[1] - min_x + 10) / scale_desired)
+                        new_y = int((cone[2] - min_y + 10) / scale_desired)
+                        final_cones.append((cone[0], new_x, new_y))
 
-                #draw the track
+                # Start drawing the track
                 im = Image.new('RGBA', (twidth, theight), (0, 0, 0, 0)) 
                 draw = ImageDraw.Draw(im)
 
-                #Convert data to image format
-                draw.polygon([(0,0),(twidth,0),(twidth,theight),(0,theight),(0,0)],fill='white')#background
+                # Convert data to image format
+                draw.polygon(
+                             [(0,0),(twidth,0),(twidth,theight),(0,theight),(0,0)],
+                             fill='white'
+                )
 
+                # Now we are placing the pixels of our output image
                 pixels = im.load()
-                #cone_color is inside, outer_cone_color is outside
                 def get_cone_color(cone_name):
-                        if  cone_name ==  "yellow":     return ConversionTools.inner_cone_color
-                        elif cone_name == "blue":       return ConversionTools.outer_cone_color
-                        elif cone_name == "orange":     return ConversionTools.orange_cone_color
-                        elif cone_name == "big_orange": return ConversionTools.big_orange_cone_color
-                        elif cone_name == "noise":      return ConversionTools.noise_color
+                        if   cone_name == "yellow":     
+                                return ConversionTools.inner_cone_color
+                        elif cone_name == "blue":       
+                                return ConversionTools.outer_cone_color
+                        elif cone_name == "orange":     
+                                return ConversionTools.orange_cone_color
+                        elif cone_name == "big_orange": 
+                                return ConversionTools.big_orange_cone_color
+                        elif cone_name == "noise":      
+                                return ConversionTools.noise_color
                         return ConversionTools.inner_cone_color
+
+                # Place the cone pixels
                 for cone in final_cones:
                         pixels[cone[1],cone[2]] = get_cone_color(cone[0])
-                pixel_value = int(raw_car_location[3]/(2*math.pi)*254+1) # it is *254+1 because we never want it to be 0
+
+                # Calculate the car's yaw's corresponding alpha value
+                pixel_value = int(raw_car_location[3]/(2*math.pi)*254+1) 
                 if pixel_value > 255: pixel_value = 255
                 if pixel_value <   1: pixel_value =   1
-                pixels[car_x,car_y] = (ConversionTools.car_color[0],ConversionTools.car_color[1],ConversionTools.car_color[2],pixel_value)
-                
-                #Add metadata:
-                loc = ConversionTools.get_metadata_pixel_location(0,0,ConversionTools.TOP_LEFT,im.size)
-                pixels[loc[0],loc[1]] = scale_metadata[0]
-                loc = ConversionTools.get_metadata_pixel_location(1,0,ConversionTools.TOP_LEFT,im.size)
-                pixels[loc[0],loc[1]] = scale_metadata[1]
-                loc = ConversionTools.get_metadata_pixel_location(4,4,ConversionTools.BOTTOM_RIGHT,im.size)
-                pixels[loc[0],loc[1]] = ConversionTools.deconvert_version_metadata(ConversionTools.TRACKIMG_VERSION_NUM)[0]
 
-                #Save it:
-                im.save(os.path.join(rospkg.RosPack().get_path('eufs_gazebo'), 'randgen_imgs/'+filename+'.png'))
+                # Finally, add the car
+                pixels[car_x,car_y] = (
+                                       ConversionTools.car_color[0],
+                                       ConversionTools.car_color[1],
+                                       ConversionTools.car_color[2],
+                                       pixel_value
+                )
+                
+                # Add scale metadata:
+                loc = ConversionTools.get_metadata_pixel_location(
+                                                                  0,
+                                                                  0,
+                                                                  ConversionTools.TOP_LEFT,
+                                                                  im.size
+                )
+                pixels[loc[0],loc[1]] = scale_metadata[0]
+                loc = ConversionTools.get_metadata_pixel_location(
+                                                                  1,
+                                                                  0,
+                                                                  ConversionTools.TOP_LEFT,
+                                                                  im.size
+                )
+                pixels[loc[0],loc[1]] = scale_metadata[1]
+
+                # Add versioning metadata
+                loc = ConversionTools.get_metadata_pixel_location(
+                                                                  4,
+                                                                  4,
+                                                                  ConversionTools.BOTTOM_RIGHT,
+                                                                  im.size
+                )
+                pixels[loc[0],loc[1]] = ConversionTools.deconvert_version_metadata(
+                                             ConversionTools.TRACKIMG_VERSION_NUM
+                )[0]
+
+                # Save the image:
+                output_path = os.path.join(
+                                           rospkg.RosPack().get_path('eufs_gazebo'),
+                                           'randgen_imgs/'+filename+'.png'
+                )
+                im.save(output_path)
                 return im
                 
 
