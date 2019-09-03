@@ -28,7 +28,8 @@ class EufsLauncher(Plugin):
 
         def __init__(self, context):
                 """
-                This function handles loading the launcher GUI and all the setting-up of the values and buttons displayed.
+                This function handles loading the launcher GUI 
+                and all the setting-up of the values and buttons displayed.
                 """
                 super(EufsLauncher, self).__init__(context)
 
@@ -49,49 +50,129 @@ class EufsLauncher(Plugin):
 
                 # Create QWidget
                 self._widget = QWidget()
+
                 # Get path to UI file which should be in the "resource" folder of this package
-                self.main_ui_file = os.path.join(rospkg.RosPack().get_path('eufs_launcher'), 'resource', 'Launcher.ui')
-                self.sketcher_ui_file = os.path.join(rospkg.RosPack().get_path('eufs_launcher'), 'resource', 'Sketcher.ui')
+                self.main_ui_file = os.path.join(
+                                                 rospkg.RosPack().get_path('eufs_launcher'), 
+                                                 'resource',
+                                                 'Launcher.ui'
+                )
+                self.sketcher_ui_file = os.path.join(
+                                                 rospkg.RosPack().get_path('eufs_launcher'),
+                                                 'resource', 
+                                                 'Sketcher.ui'
+                )
+
                 # Extend the widget with all attributes and children from UI file
                 loadUi(self.main_ui_file, self._widget)
+
                 # Give QObjects reasonable names
                 self._widget.setObjectName('EufsLauncherUI')
+
                 # Show _widget.windowTitle on left-top of each plugin (when 
                 # it's set in _widget). This is useful when you open multiple 
                 # plugins at once. Also if you open multiple instances of your 
                 # plugin at once, these lines add number to make it easy to 
                 # tell from pane to pane.
                 if context.serial_number() > 1:
-                        self._widget.setWindowTitle(self._widget.windowTitle() + (' (%d)' % context.serial_number()))
-                #self._widget.setWindowTitle("Eufs Launcher v1.1.0 (Serial: " +str(context.serial_number()) + ")")
+                        the_title = (self._widget.windowTitle() 
+                                   + (' (%d)' % context.serial_number()))
+                        self._widget.setWindowTitle(the_title)
 
-                #Resize correctly
+                # Resize correctly
                 self._widget.setFixedWidth(1200)
 
+                # Give widget components permanent names
+                self.PRESET_SELECTOR   = self._widget.findChild(QComboBox,"WhichPreset")
+                self.TRACK_SELECTOR    = self._widget.findChild(QComboBox,"WhichTrack")
+                self.IMAGE_SELECTOR    = self._widget.findChild(QComboBox,"WhichImage")
+                self.LAUNCH_BUTTON     = self._widget.findChild(QPushButton,"LaunchButton")
+                self.GENERATOR_BUTTON  = self._widget.findChild(QPushButton,"GenerateButton")
+                self.LOAD_IMAGE_BUTTON = self._widget.findChild(QPushButton,"LoadFromImageButton")
+
+                self.CONVERT_BUTTON      = self._widget.findChild(QPushButton,"ConvertButton")
+                self.RENAME_BUTTON       = self._widget.findChild(QPushButton,"RenameButton")
+                self.EXPERIMENTAL_BUTTON = self._widget.findChild(QPushButton,"Experimentals")
+                self.SKETCHER_BUTTON     = self._widget.findChild(QPushButton,"SketcherButton")
+                self.LAX_CHECKBOX        = self._widget.findChild(QCheckBox,"LaxCheckBox")
+                self.CONVERT_FROM_MENU   = self._widget.findChild(QComboBox,"ConvertFrom")
+                self.CONVERT_TO_MENU     = self._widget.findChild(QComboBox,"ConvertTo")
+                self.MIDPOINT_CHECKBOX   = self._widget.findChild(QCheckBox,"MidpointBox")
+
+                self.SUFFIX_CHECKBOX     = self._widget.findChild(QCheckBox,"SuffixBox")
+                self.USER_FEEDBACK_LABEL = self._widget.findChild(QLabel,"UserFeedbackLabel")
+                self.RENAME_FILE_TEXTBOX = self._widget.findChild(QLineEdit,"RenameFileTextbox")
+                self.RENAME_FILE_HEADER  = self._widget.findChild(QLabel,"RenameFileHeader")
+                self.NOISE_SLIDER        = self._widget.findChild(QSlider,"Noisiness")
+                self.SPEED_RADIO         = self._widget.findChild(QRadioButton,"SpeedRadio")
+                self.TORQUE_RADIO        = self._widget.findChild(QRadioButton,"TorqueRadio")
+                self.PERCEPTION_CHECKBOX = self._widget.findChild(QCheckBox,"PerceptionCheckbox")
+                self.VISUALISATOR_CHECKBOX = self._widget.findChild(QCheckBox,"PerceptionCheckbox")
+
+                self.FILE_FOR_CONVERSION_BOX = self._widget.findChild(
+                        QComboBox,
+                        "FileForConversion"
+                )
+                self.FULL_STACK_COPY_BUTTON = self._widget.findChild(
+                        QCheckBox,
+                        "FullStackCopyButton"
+                )
+                self.FULL_STACK_TRACK_GEN_BUTTON = self._widget.findChild(
+                        QCheckBox,
+                        "FullStackTrackGenButton"
+                )
+                self.FULL_STACK_IMAGE_BUTTON = self._widget.findChild(
+                        QCheckBox,
+                        "FullStackImageButton"
+                )
+
+                self.MIN_STRAIGHT_SLIDER  = self._widget.findChild(QSlider,"Param_MIN_STRAIGHT")
+                self.MAX_STRAIGHT_SLIDER  = self._widget.findChild(QSlider,"Param_MAX_STRAIGHT")
+                self.MIN_CTURN_SLIDER     = self._widget.findChild(QSlider,"Param_MIN_CTURN")
+                self.MAX_CTURN_SLIDER     = self._widget.findChild(QSlider,"Param_MAX_CTURN")
+                self.MIN_HAIRPIN_SLIDER   = self._widget.findChild(QSlider,"Param_MIN_HAIRPIN")
+                self.MAX_HAIRPIN_SLIDER   = self._widget.findChild(QSlider,"Param_MAX_HAIRPIN")
+                self.HAIRPIN_PAIRS_SLIDER = self._widget.findChild(QSlider,"Param_HAIRPIN_PAIRS")
+                self.MAX_LENGTH_SLIDER    = self._widget.findChild(QSlider,"Param_MAX_LENGTH")
+                self.TRACK_WIDTH_SLIDER   = self._widget.findChild(QSlider,"Param_TRACK_WIDTH")
+
+                self.MIN_STRAIGHT_LABEL   = self._widget.findChild(QLabel,"Label_MIN_STRAIGHT")
+                self.MAX_STRAIGHT_LABEL   = self._widget.findChild(QLabel,"Label_MAX_STRAIGHT")
+                self.MIN_CTURN_LABEL      = self._widget.findChild(QLabel,"Label_MIN_CTURN")
+                self.MAX_CTURN_LABEL      = self._widget.findChild(QLabel,"Label_MAX_CTURN")
+                self.MIN_HAIRPIN_LABEL    = self._widget.findChild(QLabel,"Label_MIN_HAIRPIN")
+                self.MAX_HAIRPIN_LABEL    = self._widget.findChild(QLabel,"Label_MAX_HAIRPIN")
+                self.HAIRPIN_PAIRS_LABEL  = self._widget.findChild(QLabel,"Label_HAIRPIN_PAIRS")
+                self.MAX_LENGTH_LABEL     = self._widget.findChild(QLabel,"Label_MAX_LENGTH")
+                self.TRACK_WIDTH_LABEL    = self._widget.findChild(QLabel,"Label_TRACK_WIDTH")
+
+
+                # Check the file directory to update drop-down menu
                 self.load_track_and_images()
 
-                #Get presets
+                # Get presets
                 preset_names = Generator.get_preset_names()
 
-                #Add Presets to Preset Selector (always put Computer Friendly first)
+
+                # Add Presets to Preset Selector (always put Computer Friendly first)
                 default_preset = Generator.get_default_preset()
                 if default_preset in preset_names:
-                        self._widget.findChild(QComboBox,"WhichPreset").addItem(default_preset)
+                        self.PRESET_SELECTOR.addItem(default_preset)
                 for f in preset_names:
                         if f != default_preset:
-                                self._widget.findChild(QComboBox,"WhichPreset").addItem(f)
+                                self.PRESET_SELECTOR.addItem(f)
 
-                #Hook up buttons to onclick functions
-                self._widget.findChild(QPushButton,"LaunchButton").clicked.connect(self.launch_button_pressed)
-                self._widget.findChild(QPushButton,"GenerateButton").clicked.connect(self.generator_button_pressed)
-                self._widget.findChild(QPushButton,"LoadFromImageButton").clicked.connect(self.track_from_image_button_pressed)
-                self._widget.findChild(QPushButton,"ConvertButton").clicked.connect(self.convert_button_pressed)
-                self._widget.findChild(QPushButton,"RenameButton").clicked.connect(self.copy_button_pressed)
-                self._widget.findChild(QPushButton,"Experimentals").clicked.connect(self.experimental_button_pressed)
-                self._widget.findChild(QPushButton,"SketcherButton").clicked.connect(self.sketcher_button_pressed)
+                # Hook up buttons to onclick functions
+                self.LAUNCH_BUTTON.clicked.connect(self.launch_button_pressed)
+                self.GENERATOR_BUTTON.clicked.connect(self.generator_button_pressed)
+                self.LOAD_IMAGE_BUTTON.clicked.connect(self.track_from_image_button_pressed)
+                self.CONVERT_BUTTON.clicked.connect(self.convert_button_pressed)
+                self.RENAME_BUTTON.clicked.connect(self.copy_button_pressed)
+                self.EXPERIMENTAL_BUTTON.clicked.connect(self.experimental_button_pressed)
+                self.SKETCHER_BUTTON.clicked.connect(self.sketcher_button_pressed)
 
 
-                #Create array of running processes (currently unused, but if you ever do process = launch.launch(node), add process here!)
+                #Create array of running processes
                 self.processes = []
                 #And also an array of running launches
                 self.launches = []
@@ -101,25 +182,19 @@ class EufsLauncher(Plugin):
                 # Add widget to the user interface
                 context.add_widget(self._widget)
 
-                #Miscelaneous final initializations:
+                #Miscellaneous final initializations:
                 self.has_launched_ros = False
                 self.launch_file_override = None
                 self.popen_process = None
 
-                #Add experimental warning to generator
-                #self._widget.findChild(QPushButton,"GenerateButton").setText("Generate Random Track\n(Experimental)")
-
                 #Space the load track button better
-                self._widget.findChild(QPushButton,"LoadFromImageButton").setText("Load Track\nFrom Image")
-
-                #Hide generator button
-                #self._widget.findChild(QPushButton,"GenerateButton").setVisible(False)
+                self.LOAD_IMAGE_BUTTON.setText("Load Track\nFrom Image")
 
                 #Hide experimental button as not currently needed
-                self._widget.findChild(QPushButton,"Experimentals").setVisible(False)
+                self.EXPERIMENTAL_BUTTON.setVisible(False)
 
                 #Hide track draw button as not currently working
-                self._widget.findChild(QPushButton,"SketcherButton").setVisible(False)
+                self.SKETCHER_BUTTON.setVisible(False)
 
                 #Set up the Generator Params
                 self.update_preset()
@@ -135,45 +210,43 @@ class EufsLauncher(Plugin):
                 self.keep_track_of_slider_changes()
                 self.keep_track_of_preset_changes()
 
-                #While in the process of changing sliders, we don't want our monitor function to be rapidly firing
+                #While in the process of changing sliders, 
+                #we don't want our monitor function to be rapidly firing
                 #So we toggle this variable when ready
                 self.ignore_slider_changes = False
 
                 #Setup Lax Generation button
-                lax_botton = self._widget.findChild(QCheckBox,"LaxCheckBox")
-                lax_botton.setChecked(self.LAX_GENERATION)
+                self.LAX_CHECKBOX.setChecked(self.LAX_GENERATION)
                 
                 #Setup Conversion Tools dropdowns
                 for f in ["launch","png","csv"]:
-                        self._widget.findChild(QComboBox,"ConvertFrom").addItem(f)
+                        self.CONVERT_FROM_MENU.addItem(f)
                 for f in ["csv","png","launch","ALL"]:
-                        self._widget.findChild(QComboBox,"ConvertTo").addItem(f)
+                        self.CONVERT_TO_MENU.addItem(f)
                         
                 self.update_converter_dropdown()
-                self._widget.findChild(QComboBox,"ConvertFrom").currentTextChanged.connect(self.update_converter_dropdown)
-                self._widget.findChild(QComboBox,"ConvertTo").currentTextChanged.connect(self.update_midpoints_box)
-                self._widget.findChild(QComboBox,"FileForConversion").currentTextChanged.connect(self.update_copier)
+                self.CONVERT_FROM_MENU.currentTextChanged.connect(self.update_converter_dropdown)
+                self.CONVERT_TO_MENU.currentTextChanged.connect(self.update_midpoints_box)
+                self.FILE_FOR_CONVERSION_BOX.currentTextChanged.connect(self.update_copier)
 
                 #Prep midpoints checkbox
-                midpoint_box = self._widget.findChild(QCheckBox,"MidpointBox")
-                convert_to = self._widget.findChild(QComboBox,"ConvertTo").currentText()
-                #midpoint_box.setVisible(convert_to=="csv" or convert_to=="ALL")
-                midpoint_box.setChecked(True)
+                convert_to = self.CONVERT_TO_MENU.currentText()
+                self.MIDPOINT_CHECKBOX.setChecked(True)
 
                 #Suffix checkbox
-                suffix_box = self._widget.findChild(QCheckBox,"SuffixBox")
+                suffix_box = self.SUFFIX_CHECKBOX
                 suffix_box.setChecked(True)
 
                 #Track Gen full stack checkbox
-                track_generator_full_stack = self._widget.findChild(QCheckBox,"FullStackTrackGenButton")
+                track_generator_full_stack = self.FULL_STACK_TRACK_GEN_BUTTON
                 track_generator_full_stack.setChecked(True)
 
                 #Image full stack checkbox
-                image_launcher_full_stack = self._widget.findChild(QCheckBox,"FullStackImageButton")
+                image_launcher_full_stack = self.FULL_STACK_IMAGE_BUTTON
                 image_launcher_full_stack.setChecked(True)
 
                 #Copier full stack checkbox
-                copier_full_stack = self._widget.findChild(QCheckBox,"FullStackCopyButton")
+                copier_full_stack = self.FULL_STACK_COPY_BUTTON
                 copier_full_stack.setChecked(True)
 
                 #Change label to show current selected file for the copier
@@ -185,7 +258,7 @@ class EufsLauncher(Plugin):
 
         def tell_launchella(self,what):
                 """Display text in feedback box (lower left corner)."""
-                self._widget.findChild(QLabel,"UserFeedbackLabel").setText(what)
+                self.USER_FEEDBACK_LABEL.setText(what)
                 QApplication.processEvents() 
 
         def sketcher_button_pressed(self):
@@ -197,8 +270,8 @@ class EufsLauncher(Plugin):
                 Peruses file system for files to add to the drop-down menus of the launcher.
                 """
                 # Clear the dropdowns
-                self._widget.findChild(QComboBox,"WhichTrack").clear()
-                self._widget.findChild(QComboBox,"WhichImage").clear()
+                self.TRACK_SELECTOR.clear()
+                self.IMAGE_SELECTOR.clear()
                 # Get tracks from eufs_gazebo package
                 relevant_path = os.path.join(rospkg.RosPack().get_path('eufs_gazebo'), 'launch')
                 launch_files = [f for f in listdir(relevant_path) if isfile(join(relevant_path, f))]
@@ -210,10 +283,10 @@ class EufsLauncher(Plugin):
 
                 # Add Tracks to Track Selector
                 if "small_track.launch" in launch_files:
-                        self._widget.findChild(QComboBox,"WhichTrack").addItem("small_track.launch")
+                        self.TRACK_SELECTOR.addItem("small_track.launch")
                 for f in launch_files:
                         if f != "small_track.launch":
-                                self._widget.findChild(QComboBox,"WhichTrack").addItem(f)
+                                self.TRACK_SELECTOR.addItem(f)
 
                 # Get images
                 relevant_path = os.path.join(rospkg.RosPack().get_path('eufs_gazebo'), 'randgen_imgs')
@@ -221,18 +294,18 @@ class EufsLauncher(Plugin):
 
                 # Add Images to Image Selector (always put rand.png first)
                 if "rand.png" in image_files:
-                        self._widget.findChild(QComboBox,"WhichImage").addItem("rand.png")
+                        self.IMAGE_SELECTOR.addItem("rand.png")
                 for f in image_files:
                         if f != "rand.png" and f[-3:] == "png":
-                                self._widget.findChild(QComboBox,"WhichImage").addItem(f)
+                                self.IMAGE_SELECTOR.addItem(f)
 
         def copy_button_pressed(self):
                 """When copy button is pressed, launch ConversionTools"""
                 self.tell_launchella("Copying...")
                 #Copy the current file
-                is_full_stack = self._widget.findChild(QCheckBox,"FullStackCopyButton").isChecked()
-                file_to_copy_to = self._widget.findChild(QLineEdit,"RenameFileTextbox").text()
-                file_to_copy_from = self._widget.findChild(QComboBox,"FileForConversion").currentText()
+                is_full_stack = self.FULL_STACK_COPY_BUTTON.isChecked()
+                file_to_copy_to = self.RENAME_FILE_TEXTBOX.text()
+                file_to_copy_from = self.FILE_FOR_CONVERSION_BOX.currentText()
                 raw_name_to = file_to_copy_to.split(".")[0]
                 raw_name_from = file_to_copy_from.split(".")[0]
                 ending = file_to_copy_from.split(".")[-1]
@@ -257,7 +330,7 @@ class EufsLauncher(Plugin):
                         Converter.copy_file(path_from,path_to)
 
                         #If full stack copying, convert to all file formats
-                        if self._widget.findChild(QCheckBox,"FullStackCopyButton").isChecked():
+                        if self.FULL_STACK_COPY_BUTTON.isChecked():
                                 Converter.convert("launch","ALL",path_to,params={"noise":self.get_noise_level()})
 
                 elif ending == "png":
@@ -266,7 +339,7 @@ class EufsLauncher(Plugin):
                         Converter.copy_file(path_from,path_to)
 
                         #If full stack copying, convert to all file formats
-                        if self._widget.findChild(QCheckBox,"FullStackCopyButton").isChecked():
+                        if self.FULL_STACK_COPY_BUTTON.isChecked():
                                 Converter.convert("png","ALL",path_to,params={"noise":self.get_noise_level()})
 
                 elif ending == "csv":
@@ -275,25 +348,25 @@ class EufsLauncher(Plugin):
                         Converter.copy_file(path_from,path_to)
 
                         #If full stack copying, convert to all file formats
-                        if self._widget.findChild(QCheckBox,"FullStackCopyButton").isChecked():
+                        if self.FULL_STACK_COPY_BUTTON.isChecked():
                                 Converter.convert("csv","ALL",path_to,params={"noise":self.get_noise_level()})
                 self.load_track_and_images()
                 self.tell_launchella("Copy Succeeded!")
 
         def update_copier(self):
                 """Change label to show current selected file for the copier"""
-                copy_head = self._widget.findChild(QLabel,"RenameFileHeader")
-                copy_head.setText("Copy: "+self._widget.findChild(QComboBox,"FileForConversion").currentText())
+                copy_head = self.RENAME_FILE_HEADER
+                copy_head.setText("Copy: "+self.FILE_FOR_CONVERSION_BOX.currentText())
 
         def update_midpoints_box(self):
                 """Controls the handling of the box that, when ticked, tells the to-csv converter to calculate cone midpoints."""
                 #Toggle checkbox
-                convert_to = self._widget.findChild(QComboBox,"ConvertTo").currentText()
-                #self._widget.findChild(QCheckBox,"MidpointBox").setVisible(convert_to=="csv" or convert_to=="ALL")
+                convert_to = self.CONVERT_TO_MENU.currentText()
+                #self.MIDPOINT_CHECKBOX.setVisible(convert_to=="csv" or convert_to=="ALL")
 
         def update_converter_dropdown(self):
                 """Keep the drop-down menus of ConversionTools in sync with the filesystem."""
-                from_type = self._widget.findChild(QComboBox,"ConvertFrom").currentText()
+                from_type = self.CONVERT_FROM_MENU.currentText()
                 all_files = []
 
                 if from_type == "launch":
@@ -315,7 +388,7 @@ class EufsLauncher(Plugin):
                         all_files = [f for f in listdir(relevant_path) if isfile(join(relevant_path, f)) and f[-3:]=="csv"]
 
                 #Remove old files from selector
-                the_selector = self._widget.findChild(QComboBox,"FileForConversion")
+                the_selector = self.FILE_FOR_CONVERSION_BOX
                 the_selector.clear()
 
                 # Add files to selector
@@ -326,7 +399,7 @@ class EufsLauncher(Plugin):
 
         def update_preset(self):
                 """When preset is changed, change the sliders accordingly."""
-                which = self._widget.findChild(QComboBox,"WhichPreset").currentText()
+                which = self.PRESET_SELECTOR.currentText()
                 preset_data = Generator.get_preset(which)
                 self.MIN_STRAIGHT   = preset_data[0]
                 self.MAX_STRAIGHT   = preset_data[1]
@@ -338,11 +411,11 @@ class EufsLauncher(Plugin):
                 self.MAX_LENGTH     = preset_data[7]
                 self.LAX_GENERATION = preset_data[8]
                 self.TRACK_WIDTH    = 4
-                self._widget.findChild(QCheckBox,"LaxCheckBox").setChecked(self.LAX_GENERATION)
+                self.LAX_CHECKBOX.setChecked(self.LAX_GENERATION)
 
         def keep_track_of_preset_changes(self):
                 """Hooks up the preset button with the preset_changed function."""
-                self._widget.findChild(QComboBox,"WhichPreset") .currentTextChanged.connect(self.preset_changed)
+                self.PRESET_SELECTOR .currentTextChanged.connect(self.preset_changed)
 
         def preset_changed(self):
                 """
@@ -360,15 +433,15 @@ class EufsLauncher(Plugin):
                 """
                 Hooks up all sliders with functions to respond to their changes.
                 """
-                self._widget.findChild(QSlider,"Param_MIN_STRAIGHT") .valueChanged.connect(self.slider_changed)
-                self._widget.findChild(QSlider,"Param_MAX_STRAIGHT") .valueChanged.connect(self.slider_changed)
-                self._widget.findChild(QSlider,"Param_MIN_CTURN")    .valueChanged.connect(self.slider_changed)
-                self._widget.findChild(QSlider,"Param_MAX_CTURN")    .valueChanged.connect(self.slider_changed)
-                self._widget.findChild(QSlider,"Param_MIN_HAIRPIN")  .valueChanged.connect(self.slider_changed)
-                self._widget.findChild(QSlider,"Param_MAX_HAIRPIN")  .valueChanged.connect(self.slider_changed)
-                self._widget.findChild(QSlider,"Param_HAIRPIN_PAIRS").valueChanged.connect(self.slider_changed)
-                self._widget.findChild(QSlider,"Param_MAX_LENGTH")   .valueChanged.connect(self.slider_changed)
-                self._widget.findChild(QSlider,"Param_TRACK_WIDTH")  .valueChanged.connect(self.slider_changed)
+                self.MIN_STRAIGHT_SLIDER .valueChanged.connect(self.slider_changed)
+                self.MAX_STRAIGHT_SLIDER .valueChanged.connect(self.slider_changed)
+                self.MIN_CTURN_SLIDER    .valueChanged.connect(self.slider_changed)
+                self.MAX_CTURN_SLIDER    .valueChanged.connect(self.slider_changed)
+                self.MIN_HAIRPIN_SLIDER  .valueChanged.connect(self.slider_changed)
+                self.MAX_HAIRPIN_SLIDER  .valueChanged.connect(self.slider_changed)
+                self.HAIRPIN_PAIRS_SLIDER.valueChanged.connect(self.slider_changed)
+                self.MAX_LENGTH_SLIDER   .valueChanged.connect(self.slider_changed)
+                self.TRACK_WIDTH_SLIDER  .valueChanged.connect(self.slider_changed)
                 
         def slider_changed(self):
                 """When a slider is changed, update the parameters."""
@@ -378,15 +451,15 @@ class EufsLauncher(Plugin):
 
         def keep_params_up_to_date(self):
                 """This function keeps the labels next to the sliders up to date with the actual values."""
-                self._widget.findChild(QLabel,"Label_MIN_STRAIGHT") .setText("MIN_STRAIGHT: "  + str(self.MIN_STRAIGHT))
-                self._widget.findChild(QLabel,"Label_MAX_STRAIGHT") .setText("MAX_STRAIGHT: "  + str(self.MAX_STRAIGHT))
-                self._widget.findChild(QLabel,"Label_MIN_CTURN")    .setText("MIN_CTURN: "     + str(self.MIN_CTURN))
-                self._widget.findChild(QLabel,"Label_MAX_CTURN")    .setText("MAX_CTURN: "     + str(self.MAX_CTURN))
-                self._widget.findChild(QLabel,"Label_MIN_HAIRPIN")  .setText("MIN_HAIRPIN: "   + str((self.MIN_HAIRPIN/2.0)))
-                self._widget.findChild(QLabel,"Label_MAX_HAIRPIN")  .setText("MAX_HAIRPIN: "   + str((self.MAX_HAIRPIN/2.0)))
-                self._widget.findChild(QLabel,"Label_HAIRPIN_PAIRS").setText("HAIRPIN_PAIRS: " + str(self.HAIRPIN_PAIRS))
-                self._widget.findChild(QLabel,"Label_MAX_LENGTH")   .setText("MAX_LENGTH: "    + str(self.MAX_LENGTH))
-                self._widget.findChild(QLabel,"Label_TRACK_WIDTH")  .setText("TRACK_WIDTH: "  + str(self.TRACK_WIDTH        ))
+                self.MIN_STRAIGHT_LABEL .setText("MIN_STRAIGHT: "  + str(self.MIN_STRAIGHT))
+                self.MAX_STRAIGHT_LABEL .setText("MAX_STRAIGHT: "  + str(self.MAX_STRAIGHT))
+                self.MIN_CTURN_LABEL    .setText("MIN_CTURN: "     + str(self.MIN_CTURN))
+                self.MAX_CTURN_LABEL    .setText("MAX_CTURN: "     + str(self.MAX_CTURN))
+                self.MIN_HAIRPIN_LABEL  .setText("MIN_HAIRPIN: "   + str((self.MIN_HAIRPIN/2.0)))
+                self.MAX_HAIRPIN_LABEL  .setText("MAX_HAIRPIN: "   + str((self.MAX_HAIRPIN/2.0)))
+                self.HAIRPIN_PAIRS_LABEL.setText("HAIRPIN_PAIRS: " + str(self.HAIRPIN_PAIRS))
+                self.MAX_LENGTH_LABEL   .setText("MAX_LENGTH: "    + str(self.MAX_LENGTH))
+                self.TRACK_WIDTH_LABEL  .setText("TRACK_WIDTH: "  + str(self.TRACK_WIDTH        ))
 
         def keep_sliders_up_to_date(self):
                 """This function keeps the values of the sliders up to date with the actual values."""
@@ -465,14 +538,14 @@ class EufsLauncher(Plugin):
         def experimental_button_pressed(self):
                 """When features are listed as experimental, then they are invisible until this function switches them on."""
                 pass
-                #Example: self._widget.findChild(QPushButton,"GenerateButton").setVisible(True)
+                #Example: self.GENERATOR_BUTTON.setVisible(True)
                 
 
         def generator_button_pressed(self):
                 """Handles random track generation by accessing TrackGenerator and ConversionTools."""
                 self.tell_launchella("Generating Track...")
 
-                isLaxGenerator = self._widget.findChild(QCheckBox,"LaxCheckBox").isChecked()
+                isLaxGenerator = self.LAX_CHECKBOX.isChecked()
                 
                 try:
 
@@ -482,13 +555,13 @@ class EufsLauncher(Plugin):
                                                                         self.HAIRPIN_PAIRS,
                                                                         self.MAX_LENGTH,
                                                                         1 if isLaxGenerator else 0,
-                                                                        1 if self._widget.findChild(QComboBox,"WhichPreset").currentText()=="Bezier" else 0
+                                                                        1 if self.PRESET_SELECTOR.currentText()=="Bezier" else 0
                                                                         ])
                         self.tell_launchella("Loading Image...")
                         im = Converter.convert("xys","png","rand",params={"track width":self.TRACK_WIDTH,"point list":(xys,twidth,theight)})
 
                         #If full stack selected, convert into csv and launch as well
-                        track_generator_full_stack = self._widget.findChild(QCheckBox,"FullStackTrackGenButton")
+                        track_generator_full_stack = self.FULL_STACK_TRACK_GEN_BUTTON
                         if track_generator_full_stack.isChecked():
                                 img_path = os.path.join(rospkg.RosPack().get_path('eufs_gazebo'), 'randgen_imgs/rand.png')
                                 Converter.convert("png","ALL",img_path,params={"noise":self.get_noise_level()})
@@ -507,9 +580,9 @@ class EufsLauncher(Plugin):
         def track_from_image_button_pressed(self):
                 """Converts .png to .launch by interfacing with ConversionTools, then launches said .launch."""
                 self.tell_launchella("Preparing to launch image as a track... ")
-                filename = self._widget.findChild(QComboBox,"WhichImage").currentText()
+                filename = self.IMAGE_SELECTOR.currentText()
                 filename_full = os.path.join(rospkg.RosPack().get_path('eufs_gazebo'), 'randgen_imgs/'+filename)
-                image_launcher_full_stack = self._widget.findChild(QCheckBox,"FullStackImageButton")
+                image_launcher_full_stack = self.FULL_STACK_IMAGE_BUTTON
                 if image_launcher_full_stack.isChecked():
                         Converter.convert("png","ALL",filename_full,params={"noise":self.get_noise_level()})
                 else:
@@ -523,23 +596,23 @@ class EufsLauncher(Plugin):
 
         def get_noise_level(self):
                 """Returns the noise slider's noise level."""
-                noise_level_widget = self._widget.findChild(QSlider,"Noisiness")
+                noise_level_widget = self.NOISE_SLIDER
                 return (1.0*(noise_level_widget.value()-noise_level_widget.minimum()))/(noise_level_widget.maximum()-noise_level_widget.minimum())
 
         def convert_button_pressed(self):
                 """Handles interfacing with ConversionTools."""
-                from_type = self._widget.findChild(QComboBox,"ConvertFrom").currentText()
-                to_type   = self._widget.findChild(QComboBox,"ConvertTo").currentText()
-                filename = self._widget.findChild(QComboBox,"FileForConversion").currentText()
+                from_type = self.CONVERT_FROM_MENU.currentText()
+                to_type   = self.CONVERT_TO_MENU.currentText()
+                filename = self.FILE_FOR_CONVERSION_BOX.currentText()
                 self.tell_launchella("Conversion Button Pressed!  From: " + from_type + " To: " + to_type + " For: " + filename)
-                midpoint_widget = self._widget.findChild(QCheckBox,"MidpointBox")
+                midpoint_widget = self.MIDPOINT_CHECKBOX
                 if from_type == "png":
                         filename = os.path.join(rospkg.RosPack().get_path('eufs_gazebo'), 'randgen_imgs/'+filename)
                 elif from_type == "launch":
                         filename = os.path.join(rospkg.RosPack().get_path('eufs_gazebo'), 'launch/'+filename)
                 elif from_type == "csv":
                         filename = os.path.join(rospkg.RosPack().get_path('eufs_gazebo'), 'tracks/'+filename)
-                suffix = "_CT" if self._widget.findChild(QCheckBox,"SuffixBox").isChecked() else ""
+                suffix = "_CT" if self.SUFFIX_CHECKBOX.isChecked() else ""
                 Converter.convert(from_type,to_type,filename,
                                         params={"noise":self.get_noise_level(),"midpoints":midpoint_widget.isVisible() and midpoint_widget.isChecked()},conversion_suffix=suffix)
                 self.load_track_and_images()
@@ -558,21 +631,21 @@ class EufsLauncher(Plugin):
                 track_to_launch = self.launch_file_override #if we have set a specific file to run regardless of selected file
                 self.launch_file_override = None          #such as when we use the random generator
                 if not track_to_launch:
-                        track_to_launch = self._widget.findChild(QComboBox,"WhichTrack").currentText()
+                        track_to_launch = self.TRACK_SELECTOR.currentText()
                 self.tell_launchella("Launching " + track_to_launch)
                 noise_level = self.get_noise_level()
                 self.tell_launchella("With Noise Level: " + str(noise_level))
                 
                 control_method = "controlMethod:=speed"
-                if self._widget.findChild(QRadioButton,"SpeedRadio").isChecked():
+                if self.SPEED_RADIO.isChecked():
                         self.tell_launchella("With Speed Controls")
                         control_method = "controlMethod:=speed"
-                elif self._widget.findChild(QRadioButton,"TorqueRadio").isChecked():
+                elif self.TORQUE_RADIO.isChecked():
                         self.tell_launchella("With Torque Controls")
                         control_method = "controlMethod:=torque"
 
                 perception_stack = ["launch_group:=no_perception"]
-                if self._widget.findChild(QCheckBox,"PerceptionCheckbox").isChecked():
+                if self.PERCEPTION_CHECKBOX.isChecked():
                         perception_stack = []#is on
                 
 
@@ -596,7 +669,7 @@ class EufsLauncher(Plugin):
                                         )
                         
 
-                if self._widget.findChild(QCheckBox,"VisualisatorCheckbox").isChecked():
+                if self.VISUALISATOR_CHECKBOX.isChecked():
                         self.tell_launchella("And With LIDAR Data Visualisator.")
                         self.launch_node(os.path.join(rospkg.RosPack().get_path('eufs_description'), "launch","visualisator.launch"))
                 self.tell_launchella("As I have fulfilled my purpose in guiding you to launch a track, this launcher will no longer react to input.")
