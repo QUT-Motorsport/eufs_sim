@@ -10,12 +10,12 @@
   <arg name="cmd_timeout" default="0.5"/>
   
   <!-- Vehicle pose -->
-  <arg name="x" default="3"/>
-  <arg name="y" default="-30"/>
+  <arg name="x" default="4"/>
+  <arg name="y" default="50"/>
   <arg name="z" default="0.1"/>
   <arg name="roll" default="0.0"/>
   <arg name="pitch" default="0.0"/>
-  <arg name="yaw" default="0.296843400339"/>
+  <arg name="yaw" default="5.88739410673"/>
   
   <!-- Control Method Argument -->
   <arg name="controlMethod" default="speed"/>
