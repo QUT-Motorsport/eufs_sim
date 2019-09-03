@@ -165,7 +165,7 @@ class ConversionTools:
         #########################################################
 
         @staticmethod
-        def convert(cfrom,cto,which_file,params=[],conversion_suffix=""):
+        def convert(cfrom,cto,which_file,params={},conversion_suffix=""):
                 """
                 Will convert which_file of filetype cfrom to filetype cto with
                 filename which_file+conversion_suffix
@@ -242,17 +242,17 @@ class ConversionTools:
                 """
                 Converts xys format to png.
 
-                which_file:        Output filename
-                params[0]:         Track width (cone distance)
-                params[1]:         Tuple of: list of points, image width, image height
-                conversion_suffix: Additional suffix to append to the output filename.
+                which_file:            Output filename
+                params["track width"]: Track width (cone distance)
+                params["point list"]:  Tuple of: list of points, image width, image height
+                conversion_suffix:     Additional suffix to append to the output filename.
                 """
 
                 GENERATED_FILENAME = which_file + conversion_suffix
 
                 # Unpack
-                (xys,twidth,theight) = params[1]
-                cone_normal_distance_parameter = params[0]
+                (xys,twidth,theight) = params["point list"]
+                cone_normal_distance_parameter = params["track width"]
 
                 # Create image to hold data
                 im = Image.new('RGBA', (twidth, theight), (0, 0, 0, 0)) 
@@ -561,9 +561,7 @@ class ConversionTools:
                 which_file:        The name of the png file to convert
                                    example: rand.png
 
-                params:            A list of optional parameters.  
-                                   The first component should be the noise level 
-                                   (on range [0,1])
+                params["noise"]:   Percentage of noise to activate
 
                 conversion_suffix: Something to append to the output filename
                                    So if it is "foo", rand.png becomes randfoo.launch.
@@ -582,7 +580,7 @@ class ConversionTools:
                 """
                 GENERATED_FILENAME = which_file.split('/')[-1][:-4]+conversion_suffix
                 im = Image.open(which_file)
-                noise_level = params[0]
+                noise_level = params["noise"]
                 pixels = im.load()
 
                 # Let's get the scale metadata from the png:
@@ -899,7 +897,19 @@ class ConversionTools:
                 
 
         @staticmethod
-        def launch_to_csv(which_file,params=[0],conversion_suffix=""):
+        def launch_to_csv(which_file,params,conversion_suffix=""):
+                """
+                Converts a .launch to a .csv
+
+                which_file:          The name of the launch file to convert
+                                     example: rand.launch
+
+                params["midpoints"]: True if csv should contain midpoint info
+
+                conversion_suffix:   Something to append to the output filename
+                                     So if it is "foo", rand.png becomes randfoo.launch.
+                """
+
                 filename = which_file.split("/")[-1].split(".")[0]
                 car_data_reader = open(which_file)
                 car_data = car_data_reader.read()
@@ -908,8 +918,8 @@ class ConversionTools:
                 car_y   = car_data.split("<arg name=\"y\" default=\"")[1].split("\"")[0]
                 car_yaw = car_data.split("<arg name=\"yaw\" default=\"")[1].split("\"")[0]
                 midpoints=False
-                if len(params) >= 2:
-                        midpoints = params[1]
+                if "midpoints" in params:
+                        midpoints = params["midpoints"]
                 Track.runConverter(filename,midpoints=midpoints,car_start_data=("car_start",car_x,car_y,car_yaw),conversion_suffix = conversion_suffix)
 
 
@@ -921,7 +931,7 @@ class ConversionTools:
                 which_file:        The name of the csv file to convert
                                    example: rand.csv
 
-                params:            A list of optional parameters.  
+                params:            A dictionary of optional parameters.  
                                    None are used at this time, but it is listed in the
                                    function signature to have a consistent signature for all
                                    the methods of the form a_to_b().

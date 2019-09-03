@@ -258,7 +258,7 @@ class EufsLauncher(Plugin):
 
                         #If full stack copying, convert to all file formats
                         if self._widget.findChild(QCheckBox,"FullStackCopyButton").isChecked():
-                                Converter.convert("launch","ALL",path_to,params=[self.get_noise_level()])
+                                Converter.convert("launch","ALL",path_to,params={"noise":self.get_noise_level()})
 
                 elif ending == "png":
                         path_from = os.path.join(rospkg.RosPack().get_path('eufs_gazebo'), 'randgen_imgs',file_to_copy_from)
@@ -267,7 +267,7 @@ class EufsLauncher(Plugin):
 
                         #If full stack copying, convert to all file formats
                         if self._widget.findChild(QCheckBox,"FullStackCopyButton").isChecked():
-                                Converter.convert("png","ALL",path_to,params=[self.get_noise_level()])
+                                Converter.convert("png","ALL",path_to,params={"noise":self.get_noise_level()})
 
                 elif ending == "csv":
                         path_from = os.path.join(rospkg.RosPack().get_path('eufs_gazebo'), 'tracks',file_to_copy_from)
@@ -276,7 +276,7 @@ class EufsLauncher(Plugin):
 
                         #If full stack copying, convert to all file formats
                         if self._widget.findChild(QCheckBox,"FullStackCopyButton").isChecked():
-                                Converter.convert("csv","ALL",path_to,params=[self.get_noise_level()])
+                                Converter.convert("csv","ALL",path_to,params={"noise":self.get_noise_level()})
                 self.load_track_and_images()
                 self.tell_launchella("Copy Succeeded!")
 
@@ -485,13 +485,13 @@ class EufsLauncher(Plugin):
                                                                         1 if self._widget.findChild(QComboBox,"WhichPreset").currentText()=="Bezier" else 0
                                                                         ])
                         self.tell_launchella("Loading Image...")
-                        im = Converter.convert("xys","png","rand",params=[self.TRACK_WIDTH,(xys,twidth,theight)])
+                        im = Converter.convert("xys","png","rand",params={"track width":self.TRACK_WIDTH,"point list":(xys,twidth,theight)})
 
                         #If full stack selected, convert into csv and launch as well
                         track_generator_full_stack = self._widget.findChild(QCheckBox,"FullStackTrackGenButton")
                         if track_generator_full_stack.isChecked():
                                 img_path = os.path.join(rospkg.RosPack().get_path('eufs_gazebo'), 'randgen_imgs/rand.png')
-                                Converter.convert("png","ALL",img_path,params=[self.get_noise_level()])
+                                Converter.convert("png","ALL",img_path,params={"noise":self.get_noise_level()})
 
                         self.tell_launchella("Track Gen Complete!")
 
@@ -511,9 +511,9 @@ class EufsLauncher(Plugin):
                 filename_full = os.path.join(rospkg.RosPack().get_path('eufs_gazebo'), 'randgen_imgs/'+filename)
                 image_launcher_full_stack = self._widget.findChild(QCheckBox,"FullStackImageButton")
                 if image_launcher_full_stack.isChecked():
-                        Converter.convert("png","ALL",filename_full,params=[self.get_noise_level()])
+                        Converter.convert("png","ALL",filename_full,params={"noise":self.get_noise_level()})
                 else:
-                        Converter.convert("png","launch",filename_full,params=[self.get_noise_level()])
+                        Converter.convert("png","launch",filename_full,params={"noise":self.get_noise_level()})
 
                 self.launch_file_override = filename[:-4] + ".launch"
                 self.load_track_and_images()
@@ -541,7 +541,7 @@ class EufsLauncher(Plugin):
                         filename = os.path.join(rospkg.RosPack().get_path('eufs_gazebo'), 'tracks/'+filename)
                 suffix = "_CT" if self._widget.findChild(QCheckBox,"SuffixBox").isChecked() else ""
                 Converter.convert(from_type,to_type,filename,
-                                        params=[self.get_noise_level(),midpoint_widget.isVisible() and midpoint_widget.isChecked()],conversion_suffix=suffix)
+                                        params={"noise":self.get_noise_level(),"midpoints":midpoint_widget.isVisible() and midpoint_widget.isChecked()},conversion_suffix=suffix)
                 self.load_track_and_images()
                 self.tell_launchella("Conversion Succeeded!  From: " + from_type + " To: " + to_type + " For: " + filename)
 
