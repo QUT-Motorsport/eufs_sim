@@ -23,16 +23,16 @@ class ConversionTools:
                 pass
 
         # Define colors for track gen and image reading
-        noise_color = (0,255,255,255)               #cyan, the turquoise turqouise wishes it were
-        background_color = (255,255,255,255)        #white
-        inner_cone_color  = (255,0,255,255)         #magenta, for yellow cones (oops...)
-        outer_cone_color = (0,0,255,255)            #blue, for blue cones
-        car_color = (0,255,0,255)                   #green
-        track_center_color = (0,0,0,255)            #black
-        track_inner_color = (255,0,0,255)           #red
-        track_outer_color = (255,255,0,255)         #yellow
-        orange_cone_color = (255,165,0,255)         #orange, for orange cones
-        big_orange_cone_color = (127,80,0,255)      #dark orange, for big orange cones        
+        noise_color =           (0,   255, 255, 255)        #cyan
+        background_color =      (255, 255, 255, 255)        #white
+        inner_cone_color  =     (255, 0,   255, 255)        #magenta, for yellow cones (oops...)
+        outer_cone_color =      (0,   0,   255, 255)        #blue, for blue cones
+        car_color =             (0,   255, 0,   255)        #green
+        track_center_color =    (0,   0,   0,   255)        #black
+        track_inner_color =     (255, 0,   0,   255)        #red
+        track_outer_color =     (255, 255, 0,   255)        #yellow
+        orange_cone_color =     (255, 165, 0,   255)        #orange, for orange cones
+        big_orange_cone_color = (127, 80,  0,   255)        #dark orange, for big orange cones
 
         # Other various retained parameters
         link_num = -1
@@ -49,7 +49,7 @@ class ConversionTools:
         #########################################################
 
         @staticmethod
-        def get_metadata_pixel(x,y,corner,pixels,size):
+        def get_metadata_pixel(x, y, corner, pixels, size):
                 """
                 Returns the metadata pixel (x,y,corner)'s value.
                 
@@ -60,22 +60,22 @@ class ConversionTools:
                 size: size of the image
                 """
 
-                x_out,y_out = ConversionTools.get_metadata_pixel_location(x,y,corner,size)
-                return pixels[x_out,y_out]
+                x_out, y_out = ConversionTools.get_metadata_pixel_location(x, y, corner, size)
+                return pixels[x_out, y_out]
 
         @staticmethod
-        def get_metadata_pixel_location(x,y,corner,size):
+        def get_metadata_pixel_location(x, y, corner, size):
                 """Returns the metadata pixel (x,y,corner)'s location on the actual image."""
                 width = size[0]
                 height = size[1]
                 if corner   == ConversionTools.TOP_LEFT:
-                        return (x,y)
+                        return (x, y)
                 elif corner == ConversionTools.BOTTOM_LEFT:
-                        return (x,height-6+y)
+                        return (x, height - 6 + y)
                 elif corner == ConversionTools.TOP_RIGHT:
-                        return (width-6+x,y)
+                        return (width - 6 + x, y)
                 elif corner == ConversionTools.BOTTOM_RIGHT:
-                        return (width-6+x,height-6+y)
+                        return (width - 6 + x, height - 6 + y)
                 else: 
                         rospy.logerr("Error, not a valid corner!  Typo?: " + corner)
                         return None
@@ -92,8 +92,8 @@ class ConversionTools:
                 pixel_value: the (r,g,b,a) value of the pixel
                                 
                 """
-                (r,g,b,a) = pixel_value
-                return a-1 + (b-1)*254 + (g-1)*254**2 + (r-1)*254**3
+                (r, g, b, a) = pixel_value
+                return a - 1 + (b - 1) * 254 + (g - 1) * 254**2 + (r - 1) * 254**3
 
         @staticmethod
         def unget_raw_metadata(metadata):
@@ -105,7 +105,7 @@ class ConversionTools:
                 g = metadata % 254
                 r = (metadata - g) // 254
 
-                return (r+1,g+1,b+1,a+1)
+                return (r + 1, g + 1, b + 1, a + 1)
 
         @staticmethod
         def convert_scale_metadata(pixel_values):
@@ -119,14 +119,15 @@ class ConversionTools:
                 secondary_pixel = pixel_values[1]
 
                 #Check for default pixel values
-                if (primary_pixel == (255,255,255,255) and
-                   secondary_pixel == (255,255,255,255)):
+                if (primary_pixel == (255, 255, 255, 255) and
+                   secondary_pixel == (255, 255, 255, 255)):
                         return 1
 
                 metadata = ConversionTools.get_raw_metadata(primary_pixel)
 
-                # Want to linearly transform the metadata, a range from 0 to 254**4-1, to the range 0.0001 to 100
-                return metadata/(254**4-1.0) * (100-0.0001) + 0.0001
+                # Want to linearly transform the metadata, a range from 0 to 254**4-1, 
+                # to the range 0.0001 to 100
+                return metadata / (254**4 - 1.0) * (100 - 0.0001) + 0.0001
 
 
         @staticmethod
@@ -137,10 +138,10 @@ class ConversionTools:
                 First in list is the primary metadata pixel, second in list is the secondary
                 """
 
-                metadata = int((data-0.0001)/(100-0.0001) * (254**4-1))
+                metadata = int((data - 0.0001) / (100 - 0.0001) * (254**4 - 1))
                 primary_pixel = ConversionTools.unget_raw_metadata(metadata)
-                secondary_pixel = (255,255,255,255)
-                return [primary_pixel,secondary_pixel]
+                secondary_pixel = (255, 255, 255, 255)
+                return [primary_pixel, secondary_pixel]
 
         @staticmethod
         def convert_version_metadata(pixel_values):
@@ -150,7 +151,7 @@ class ConversionTools:
                 Output range is from 0 to 254**4-1
                 """
                 primary_pixel = pixel_values[0]
-                if primary_pixel == (255,255,255,255): return 0
+                if primary_pixel == (255, 255, 255, 255): return 0
                 metadata = ConversionTools.get_raw_metadata(primary_pixel)
                 return metadata
 
@@ -259,18 +260,25 @@ class ConversionTools:
                 draw = ImageDraw.Draw(im)
 
                 # Draw backround:
-                draw.polygon([(0,0),(twidth,0),(twidth,theight),(0,theight),(0,0)],fill='white')
+                bounding_poly = [
+                                 (0,      0      ),
+                                 (twidth, 0      ),
+                                 (twidth, theight),
+                                 (0,      theight),
+                                 (0,      0      )
+                ]
+                draw.polygon(bounding_poly, fill='white')
 
                 # Draw thick track with colored layers
-                draw.line(xys,fill=ConversionTools.track_outer_color,width=5)
-                draw.line(xys,fill=ConversionTools.track_inner_color,width=3)
-                draw.line(xys,fill=ConversionTools.track_center_color)
+                draw.line(xys, fill=ConversionTools.track_outer_color, width=5)
+                draw.line(xys, fill=ConversionTools.track_inner_color, width=3)
+                draw.line(xys, fill=ConversionTools.track_center_color)
 
                 pixels = im.load()
 
                 # Get a list of integerized points to work well with 
                 # integer-valued pixel locations.
-                compact_xys = compactify_points([(int(xy[0]),int(xy[1])) for xy in xys])
+                compact_xys = compactify_points([(int(xy[0]), int(xy[1])) for xy in xys])
 
                 # We want to calculate direction of car position
                 sx = xys[0][0]
@@ -279,7 +287,7 @@ class ConversionTools:
                 ey = xys[1][1]
 
                 # So we calculate the angle that the car is facing (the yaw)
-                angle = math.atan2(ey-sy,ex-sx)
+                angle = math.atan2(ey - sy,ex - sx)
                 if angle < 0:
                         # Angle is on range [-pi,pi] but we want [0,2pi]
                         # So if it is less than 0, pop it onto the correct range.
@@ -297,12 +305,12 @@ class ConversionTools:
 
                 # Draw car
                 color_for_car = ConversionTools.car_color[:3]+(pixel_value,)
-                draw.line([xys[0],xys[0]],fill=color_for_car)
+                draw.line([xys[0], xys[0]], fill=color_for_car)
 
                 def is_track(c):
-                        return c == ConversionTools.track_outer_color or \
-                               c == ConversionTools.track_inner_color or \
-                               c == ConversionTools.track_center_color
+                        return (c == ConversionTools.track_outer_color 
+                             or c == ConversionTools.track_inner_color 
+                             or c == ConversionTools.track_center_color)
 
                 # Now we want to make all pixels bordering the track become magenta (255,0,255) -
                 # this will be our 'cone' color
@@ -314,8 +322,8 @@ class ConversionTools:
 
                 all_points_north = []
                 all_points_south = []
-                prev_points_north = [(-10000,-10000)]
-                prev_points_south = [(-10000,-10000)]
+                prev_points_north = [(-10000, -10000)]
+                prev_points_south = [(-10000, -10000)]
                 print("Placing Cones...")
                 for i in range(len(xys)):
                         #Skip first part [as hard to calculate tangent]
@@ -329,7 +337,7 @@ class ConversionTools:
                         # well-behaved answers is far from dense in the problemspace):
 
                         # How close can cones be from those on opposite side.
-                        cone_cross_closeness_parameter = cone_normal_distance_parameter*3/4-1
+                        cone_cross_closeness_parameter = cone_normal_distance_parameter * 3 / 4 - 1
 
                         # Larger numbers makes us check more parts of the track for conflicts.
                         cone_check_amount = 30
@@ -359,41 +367,41 @@ class ConversionTools:
 
                         # Calculates shortest distance to cone on same side of track
                         difference_from_prev_north = min([
-                                        (north_point[0]-prev_point_north[0])**2
-                                       +(north_point[1]-prev_point_north[1])**2
+                                         (north_point[0] - prev_point_north[0])**2
+                                       + (north_point[1] - prev_point_north[1])**2
                                 for prev_point_north in prev_points_north
                         ])
                         difference_from_prev_south = min([
-                                        (south_point[0]-prev_point_south[0])**2
-                                       +(south_point[1]-prev_point_south[1])**2
+                                         (south_point[0] - prev_point_south[0])**2
+                                       + (south_point[1] - prev_point_south[1])**2
                                 for prev_point_south in prev_points_south
                         ])
 
                         # Calculates shortest distance to cone on different side of track
                         cross_distance_ns = min([
-                                        (north_point[0]-prev_point_south[0])**2
-                                       +(north_point[1]-prev_point_south[1])**2
+                                         (north_point[0] - prev_point_south[0])**2
+                                       + (north_point[1] - prev_point_south[1])**2
                                 for prev_point_south in prev_points_south
                         ])
                         cross_distance_sn = min([
-                                        (south_point[0]-prev_point_north[0])**2
-                                       +(south_point[1]-prev_point_north[1])**2
+                                         (south_point[0] - prev_point_north[0])**2
+                                       + (south_point[1] - prev_point_north[1])**2
                                 for prev_point_north in prev_points_north
                         ])
 
                         # Here we ensure cones don't get too close to the track
                         rel_xys = xys[ 
-                            max([0,i-cone_check_amount]): 
-                            min([len(xys),i+cone_check_amount])  
+                            max([0, i - cone_check_amount]): 
+                            min([len(xys), i + cone_check_amount])  
                         ]
                         distance_pn = min([
-                                            (north_point[0]-xy[0])**2
-                                           +(north_point[1]-xy[1])**2 
+                                             (north_point[0] - xy[0])**2
+                                           + (north_point[1] - xy[1])**2 
                                                 for xy in rel_xys
                         ])
                         distance_ps = min([
-                                            (south_point[0]-xy[0])**2
-                                           +(south_point[1]-xy[1])**2 
+                                             (south_point[0] - xy[0])**2
+                                           + (south_point[1] - xy[1])**2 
                                                 for xy in rel_xys
                         ])
 
@@ -411,20 +419,20 @@ class ConversionTools:
 
                         # And when they are viable, draw them!
                         if (
-                            not is_track(pixels[int(north_point[0]),int(north_point[1])]) 
+                            not is_track(pixels[int(north_point[0]), int(north_point[1])]) 
                             and north_viable
                         ):
                                 px_x = int(north_point[0])
                                 px_y = int(north_point[1])
-                                pixels[px_x,px_y]=ConversionTools.inner_cone_color
+                                pixels[px_x, px_y]=ConversionTools.inner_cone_color
                                 all_points_north.append(north_point)
                         if (
-                            not is_track(pixels[int(south_point[0]),int(south_point[1])]) 
+                            not is_track(pixels[int(south_point[0]), int(south_point[1])]) 
                             and south_viable
                         ):
                                 px_x = int(south_point[0])
                                 px_y = int(south_point[1])
-                                pixels[px_x,px_y]=ConversionTools.inner_cone_color
+                                pixels[px_x, px_y]=ConversionTools.inner_cone_color
                                 all_points_south.append(south_point)
 
                         # Only keep track of last couple of previous cones 
@@ -490,29 +498,29 @@ class ConversionTools:
                 # we would end up on the "inside" of the track, and would wrongfully color
                 # inner_cones as outer_cones.
                 explored_list = set([])
-                frontier = set([(0,0)])
+                frontier = set([(0, 0)])
                 while len(frontier)>0:
                         new_frontier = set([])
                         for f in frontier:
-                                (i,j) = f
-                                pix = pixels[i,j]
+                                (i, j) = f
+                                pix = pixels[i, j]
                                 if pix == ConversionTools.inner_cone_color:
-                                        pixels[i,j] = ConversionTools.outer_cone_color
+                                        pixels[i, j] = ConversionTools.outer_cone_color
                                         new_frontier.update(
-                                                get_allowed_adjacents(explored_list,(i,j))
+                                                get_allowed_adjacents(explored_list,(i, j))
                                         )
                                 elif pix == ConversionTools.background_color:
                                         new_frontier.update(
-                                                get_allowed_adjacents(explored_list,(i,j))
+                                                get_allowed_adjacents(explored_list,(i, j))
                                         )
                                 explored_list.add(f)
                         frontier = new_frontier
 
                 # Add orange start cones
-                (i,j) = all_points_north[0]
-                pixels[int(i),int(j)] = ConversionTools.orange_cone_color
-                (i,j) = all_points_south[0]
-                pixels[int(i),int(j)] = ConversionTools.orange_cone_color
+                (i, j) = all_points_north[0]
+                pixels[int(i), int(j)] = ConversionTools.orange_cone_color
+                (i, j) = all_points_south[0]
+                pixels[int(i), int(j)] = ConversionTools.orange_cone_color
 
                 # Finally, we just need to place noise.  
                 # At maximal noise, the track should be about 1% covered.
@@ -520,20 +528,24 @@ class ConversionTools:
                 for i in range(im.size[0]):
                         for j in range(im.size[1]):
                                 # Don't add noise in margin
-                                if i<5 or j<5 or i>=im.size[0]-5 or j>=im.size[0]-5: 
+                                if i < 5 or j < 5 or i >= im.size[0] - 5 or j >= im.size[0] - 5: 
                                         continue
-                                if pixels[i,j] == ConversionTools.background_color:
+                                if pixels[i, j] == ConversionTools.background_color:
                                         # Only 1% should be covered with noise
-                                        if uniform(0,100) < 1:
-                                                pixels[i,j] = ConversionTools.noise_color
+                                        if uniform(0, 100) < 1:
+                                                pixels[i, j] = ConversionTools.noise_color
 
                 # Add margins (as specified by the file format)
                 margin = 5
-                im2 = Image.new('RGBA', (twidth+2*margin, theight+2*margin), (255, 255, 255, 255)) 
+                im2 = Image.new(
+                                'RGBA', 
+                                (twidth + 2 * margin, theight + 2 * margin), 
+                                (255, 255, 255, 255)
+                ) 
                 pixels2 = im2.load()
                 for x in range(im.size[0]):
                         for y in range(im.size[1]):
-                                pixels2[x+margin,y+margin] = pixels[x,y]
+                                pixels2[x + margin, y + margin] = pixels[x, y]
 
                 # And tag it with the version number
                 loc = ConversionTools.get_metadata_pixel_location(
@@ -542,7 +554,7 @@ class ConversionTools:
                                             ConversionTools.BOTTOM_RIGHT,
                                             im2.size
                 )
-                pixels2[loc[0],loc[1]] = ConversionTools.deconvert_version_metadata(
+                pixels2[loc[0], loc[1]] = ConversionTools.deconvert_version_metadata(
                                              ConversionTools.TRACKIMG_VERSION_NUM
                 )[0]
 
@@ -554,7 +566,7 @@ class ConversionTools:
                 return im
 
         @staticmethod
-        def png_to_launch(which_file,params=[0],conversion_suffix=""):
+        def png_to_launch(which_file, params, conversion_suffix=""):
                 """
                 Converts a .png to a .launch with .world, model.sdf, model.config files.
 
@@ -611,14 +623,14 @@ class ConversionTools:
                                                                   ConversionTools.BOTTOM_RIGHT,
                                                                   im.size
                 )
-                version_number = ConversionTools.convert_version_metadata([pixels[loc[0],loc[1]]])
+                version_number = ConversionTools.convert_version_metadata([pixels[loc[0], loc[1]]])
 
                 # Let's start filling in the .launch template:
                 launch_template_file = os.path.join(
                                                     rospkg.RosPack().get_path('eufs_launcher'),
                                                     'resource/randgen_launch_template'
                 )
-                launch_template = open(launch_template_file,"r")
+                launch_template = open(launch_template_file, "r")
 
                 # .launches need to point to .worlds and model files of the same name,
                 # so here we are pasting in copies of the relevant filename.
@@ -628,13 +640,13 @@ class ConversionTools:
                 # These are helper functions to convert pixel data, such as coordinates,
                 # into raw numerical data for the .launch file.
                 def x_coord_transform(x):
-                        return x-50
+                        return x - 50
                 def y_coord_transform(y):
-                        return y-50
+                        return y - 50
                 def is_car_color(x):
                         return x[:-1]==ConversionTools.car_color[:-1]
                 def rotation_transform(x):
-                        return 2*math.pi*((x-1)/254.0)
+                        return 2 * math.pi * ((x - 1) / 254.0)
 
                 # Find the car's position
                 for i in range(im.size[0]):
@@ -642,12 +654,12 @@ class ConversionTools:
                                 p = pixels[i,j]
                                 if is_car_color(p):
                                         # Get x data
-                                        x_pos = x_coord_transform(i*scale_data)
+                                        x_pos = x_coord_transform(i * scale_data)
                                         split_x_data = launch_merged.split("%PLACEX%")
                                         launch_merged = str(x_pos).join(split_x_data)
  
                                         # Get y data
-                                        y_pos = y_coord_transform(j*scale_data)
+                                        y_pos = y_coord_transform(j * scale_data)
                                         split_y_data = launch_merged.split("%PLACEY%")
                                         launch_merged = str(y_pos).join(split_y_data)
 
@@ -671,7 +683,7 @@ class ConversionTools:
                                               rospkg.RosPack().get_path('eufs_launcher'),
                                               'resource/randgen_world_template'
                 )
-                world_template = open(world_template_filepath,"r")
+                world_template = open(world_template_filepath, "r")
 
                 # The world file needs to point to the correct model folder,
                 # which conveniently has the same name as the world file itself. 
@@ -684,7 +696,7 @@ class ConversionTools:
                                                   'worlds',
                                                   GENERATED_FILENAME+".world"
                 )
-                world_out = open(world_out_filepath,"w")
+                world_out = open(world_out_filepath, "w")
                 world_out.write(world_merged)
                 world_out.close()
 
@@ -707,7 +719,7 @@ class ConversionTools:
                                                    rospkg.RosPack().get_path('eufs_launcher'),
                                                    'resource/randgen_model_template/model.config'
                 )
-                config_template = open(config_template_filepath,"r")
+                config_template = open(config_template_filepath, "r")
 
                 # Let the config file know the name of the track it represents
                 config_merged = "".join(config_template)
@@ -720,7 +732,7 @@ class ConversionTools:
                                                    GENERATED_FILENAME,
                                                    "model.config"
                 )
-                config_out = open(config_out_filepath,"w")
+                config_out = open(config_out_filepath, "w")
                 config_out.write(config_merged)
                 config_out.close()
 
@@ -730,7 +742,7 @@ class ConversionTools:
                                                      rospkg.RosPack().get_path('eufs_launcher'),
                                                      'resource/randgen_model_template/model.sdf'
                 )
-                sdf_template = open(sdf_template_filepath,"r")
+                sdf_template = open(sdf_template_filepath, "r")
                 sdf_merged = "".join(sdf_template)
                 sdf_split_again = sdf_merged.split("$===$")
 
@@ -776,9 +788,9 @@ class ConversionTools:
                         return cone_string.join(collision_template)
 
                 # Calculate model data for cones
-                sdf_blue_cone_model = join_cone_model_data("cone_blue")
-                sdf_yellow_cone_model =  join_cone_model_data("cone_yellow")
-                sdf_orange_cone_model =  join_cone_model_data("cone")
+                sdf_blue_cone_model =        join_cone_model_data("cone_blue")
+                sdf_yellow_cone_model =      join_cone_model_data("cone_yellow")
+                sdf_orange_cone_model =      join_cone_model_data("cone")
                 sdf_big_orange_cone_model =  join_cone_model_data("cone_big")
 
                 # Now let's load in the noise priorities
@@ -786,7 +798,7 @@ class ConversionTools:
                                                    rospkg.RosPack().get_path('eufs_launcher'),
                                                    'resource/noiseFiles.txt'
                 )
-                noise_files = open(noise_priority_file,"r")
+                noise_files = open(noise_priority_file, "r")
                 noise_files = ("".join(noise_files)).split("$===$")[1].strip().split("\n")
                 noise_weightings_ = [line.split("|") for line in noise_files]
                 noise_weightings  = [(float(line[0]),line[1]) for line in noise_weightings_]
@@ -794,9 +806,9 @@ class ConversionTools:
                 # This function will choose a noise model according to weightings
                 # given in the resource/noiseFiles.txt file.
                 def get_random_noise_model():
-                        randval = uniform(0,100)
+                        randval = uniform(0, 100)
                         for a in noise_weightings:
-                                if a[0]>randval:
+                                if a[0] > randval:
                                         return a[1]
                         return "model://eufs_description/meshes/NoiseCube.dae"
 
@@ -804,7 +816,7 @@ class ConversionTools:
                 # We'll keep track of how many we've placed 
                 # so that we can give each a unique name.
                 ConversionTools.link_num = -1
-                def put_model_at_position(mod,x,y):
+                def put_model_at_position(mod, x, y):
                         """
                         mod: model template to be placed
                         x,y: x and y positions for mod
@@ -821,13 +833,13 @@ class ConversionTools:
                         return mod_with_link
 
                 sdf_allmodels = ""
-                def expand_allmodels(allmods,mod,x,y):
+                def expand_allmodels(allmods, mod, x, y):
                         """
                         Takes in a model and a pixel location,
                         converts the pixel location to a raw location,
                         and places the model inside sdf_allmodels
                         """
-                        mod_at_p =  put_model_at_position(mod,x*scale_data,y*scale_data)
+                        mod_at_p =  put_model_at_position(mod, x * scale_data, y * scale_data)
                         return allmods + "\n" + mod_at_p
 
                 def get_random_noise_template(mod_with_collisions):
@@ -849,9 +861,9 @@ class ConversionTools:
                 }
                 for i in range(im.size[0]):
                         for j in range(im.size[1]):
-                                p = pixels[i,j]
+                                p = pixels[i, j]
                                 if p == ConversionTools.noise_color:
-                                        if uniform(0,1)<noise_level:
+                                        if uniform(0, 1) < noise_level:
                                                 # Noise should be placed
                                                 sdf_noisemodel = get_random_noise_template(
                                                                    sdf_model_with_collisions
@@ -920,7 +932,12 @@ class ConversionTools:
                 midpoints=False
                 if "midpoints" in params:
                         midpoints = params["midpoints"]
-                Track.runConverter(filename,midpoints=midpoints,car_start_data=("car_start",car_x,car_y,car_yaw),conversion_suffix = conversion_suffix)
+                Track.runConverter(
+                                   filename,
+                                   midpoints=midpoints,
+                                   car_start_data=("car_start",car_x,car_y,car_yaw),
+                                   conversion_suffix = conversion_suffix
+                )
 
 
         @staticmethod
@@ -1031,8 +1048,8 @@ class ConversionTools:
                         closest_y = 10000
                         for cone2 in all_cones:
                                 if cone1 == cone2: continue
-                                dx = abs(cone1[1]-cone2[1])
-                                dy = abs(cone1[2]-cone2[2])
+                                dx = abs(cone1[1] - cone2[1])
+                                dy = abs(cone1[2] - cone2[2])
                                 if dx < closest_x: closest_x = dx
                                 if dy < closest_y: closest_y = dy
                         total_x_distance+=closest_x
@@ -1061,7 +1078,7 @@ class ConversionTools:
 
                 # Convert data to image format
                 draw.polygon(
-                             [(0,0),(twidth,0),(twidth,theight),(0,theight),(0,0)],
+                             [(0, 0), (twidth, 0), (twidth, theight), (0, theight), (0, 0)],
                              fill='white'
                 )
 
@@ -1082,19 +1099,19 @@ class ConversionTools:
 
                 # Place the cone pixels
                 for cone in final_cones:
-                        pixels[cone[1],cone[2]] = get_cone_color(cone[0])
+                        pixels[cone[1], cone[2]] = get_cone_color(cone[0])
 
                 # Calculate the car's yaw's corresponding alpha value
-                pixel_value = int(raw_car_location[3]/(2*math.pi)*254+1) 
+                pixel_value = int(raw_car_location[3] / (2 * math.pi) * 254 + 1) 
                 if pixel_value > 255: pixel_value = 255
                 if pixel_value <   1: pixel_value =   1
 
                 # Finally, add the car
-                pixels[car_x,car_y] = (
-                                       ConversionTools.car_color[0],
-                                       ConversionTools.car_color[1],
-                                       ConversionTools.car_color[2],
-                                       pixel_value
+                pixels[car_x, car_y] = (
+                                        ConversionTools.car_color[0],
+                                        ConversionTools.car_color[1],
+                                        ConversionTools.car_color[2],
+                                        pixel_value
                 )
                 
                 # Add scale metadata:
@@ -1104,14 +1121,14 @@ class ConversionTools:
                                                                   ConversionTools.TOP_LEFT,
                                                                   im.size
                 )
-                pixels[loc[0],loc[1]] = scale_metadata[0]
+                pixels[loc[0], loc[1]] = scale_metadata[0]
                 loc = ConversionTools.get_metadata_pixel_location(
                                                                   1,
                                                                   0,
                                                                   ConversionTools.TOP_LEFT,
                                                                   im.size
                 )
-                pixels[loc[0],loc[1]] = scale_metadata[1]
+                pixels[loc[0], loc[1]] = scale_metadata[1]
 
                 # Add versioning metadata
                 loc = ConversionTools.get_metadata_pixel_location(
@@ -1120,7 +1137,7 @@ class ConversionTools:
                                                                   ConversionTools.BOTTOM_RIGHT,
                                                                   im.size
                 )
-                pixels[loc[0],loc[1]] = ConversionTools.deconvert_version_metadata(
+                pixels[loc[0], loc[1]] = ConversionTools.deconvert_version_metadata(
                                              ConversionTools.TRACKIMG_VERSION_NUM
                 )[0]
 
