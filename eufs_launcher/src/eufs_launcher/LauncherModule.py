@@ -254,7 +254,7 @@ class EufsLauncher(Plugin):
                 self.uuid = roslaunch.rlutil.get_or_generate_uuid(None, False)
                 roslaunch.configure_logging(self.uuid)
 
-        def tell_launchella(self,what):
+        def tell_launchella(self, what):
                 """Display text in feedback box (lower left corner)."""
 
                 self.USER_FEEDBACK_LABEL.setText(what)
@@ -349,7 +349,7 @@ class EufsLauncher(Plugin):
                                 raw_name_to,
                                 "model.sdf"
                         )
-                        Converter.copy_file(path_from,path_to)
+                        Converter.copy_file(path_from, path_to)
 
                         # Copy config files
                         path_from = os.path.join(
@@ -364,7 +364,7 @@ class EufsLauncher(Plugin):
                                 raw_name_to,
                                 "model.config"
                         )
-                        Converter.copy_file(path_from,path_to)
+                        Converter.copy_file(path_from, path_to)
                         
                         # Copy launch files
                         path_from = os.path.join(
@@ -375,9 +375,9 @@ class EufsLauncher(Plugin):
                         path_to = os.path.join(
                                 self.GAZEBO,
                                 'launch',
-                                raw_name_to+"."+ending
+                                raw_name_to + "." + ending
                         )
-                        Converter.copy_file(path_from,path_to)
+                        Converter.copy_file(path_from, path_to)
 
                 # Copy pngs
                 elif ending == "png":
@@ -389,9 +389,9 @@ class EufsLauncher(Plugin):
                         path_to = os.path.join(
                                 self.GAZEBO,
                                 'randgen_imgs',
-                                raw_name_to+"."+ending
+                                raw_name_to + "." + ending
                         )
-                        Converter.copy_file(path_from,path_to)
+                        Converter.copy_file(path_from, path_to)
 
                 # Copy csvs
                 elif ending == "csv":
@@ -403,9 +403,9 @@ class EufsLauncher(Plugin):
                         path_to = os.path.join(
                                 self.GAZEBO,
                                 'tracks',
-                                raw_name_to+"."+ending
+                                raw_name_to + "." + ending
                         )
-                        Converter.copy_file(path_from,path_to)
+                        Converter.copy_file(path_from, path_to)
 
                 # If full stack copying, convert to all file formats
                 if self.FULL_STACK_COPY_BUTTON.isChecked():
@@ -423,7 +423,7 @@ class EufsLauncher(Plugin):
         def update_copier(self):
                 """Change label to show current selected file for the copier"""
                 copy_head = self.RENAME_FILE_HEADER
-                copy_head.setText("Copy: "+self.FILE_FOR_CONVERSION_BOX.currentText())
+                copy_head.setText("Copy: " + self.FILE_FOR_CONVERSION_BOX.currentText())
 
         def update_midpoints_box(self):
                 """
@@ -495,8 +495,8 @@ class EufsLauncher(Plugin):
                 self.MAX_STRAIGHT   = preset_data[1]
                 self.MIN_CTURN      = preset_data[2]
                 self.MAX_CTURN      = preset_data[3]
-                self.MIN_HAIRPIN    = preset_data[4]*2
-                self.MAX_HAIRPIN    = preset_data[5]*2
+                self.MIN_HAIRPIN    = preset_data[4] * 2
+                self.MAX_HAIRPIN    = preset_data[5] * 2
                 self.HAIRPIN_PAIRS  = preset_data[6]
                 self.MAX_LENGTH     = preset_data[7]
                 self.LAX_GENERATION = preset_data[8]
@@ -545,35 +545,35 @@ class EufsLauncher(Plugin):
                 self.MAX_STRAIGHT_LABEL .setText("MAX_STRAIGHT: "  + str(self.MAX_STRAIGHT))
                 self.MIN_CTURN_LABEL    .setText("MIN_CTURN: "     + str(self.MIN_CTURN))
                 self.MAX_CTURN_LABEL    .setText("MAX_CTURN: "     + str(self.MAX_CTURN))
-                self.MIN_HAIRPIN_LABEL  .setText("MIN_HAIRPIN: "   + str((self.MIN_HAIRPIN/2.0)))
-                self.MAX_HAIRPIN_LABEL  .setText("MAX_HAIRPIN: "   + str((self.MAX_HAIRPIN/2.0)))
+                self.MIN_HAIRPIN_LABEL  .setText("MIN_HAIRPIN: "   + str((self.MIN_HAIRPIN / 2.0)))
+                self.MAX_HAIRPIN_LABEL  .setText("MAX_HAIRPIN: "   + str((self.MAX_HAIRPIN / 2.0)))
                 self.HAIRPIN_PAIRS_LABEL.setText("HAIRPIN_PAIRS: " + str(self.HAIRPIN_PAIRS))
                 self.MAX_LENGTH_LABEL   .setText("MAX_LENGTH: "    + str(self.MAX_LENGTH))
-                self.TRACK_WIDTH_LABEL  .setText("TRACK_WIDTH: "  + str(self.TRACK_WIDTH))
+                self.TRACK_WIDTH_LABEL  .setText("TRACK_WIDTH: "   + str(self.TRACK_WIDTH))
 
         def keep_sliders_up_to_date(self):
                 """This function keeps the values of the sliders up to date."""
-                self.set_slider_value("Param_MIN_STRAIGHT",self.MIN_STRAIGHT)
-                self.set_slider_value("Param_MAX_STRAIGHT",self.MAX_STRAIGHT)
-                self.set_slider_value("Param_MIN_CTURN",self.MIN_CTURN)
-                self.set_slider_value("Param_MAX_CTURN",self.MAX_CTURN)
-                self.set_slider_value("Param_MIN_HAIRPIN",self.MIN_HAIRPIN)
-                self.set_slider_value("Param_MAX_HAIRPIN",self.MAX_HAIRPIN)
-                self.set_slider_value("Param_HAIRPIN_PAIRS",self.HAIRPIN_PAIRS)
-                self.set_slider_value("Param_MAX_LENGTH",self.MAX_LENGTH)
-                self.set_slider_value("Param_TRACK_WIDTH",self.TRACK_WIDTH)
+                self.set_slider_value("Param_MIN_STRAIGHT",  self.MIN_STRAIGHT)
+                self.set_slider_value("Param_MAX_STRAIGHT",  self.MAX_STRAIGHT)
+                self.set_slider_value("Param_MIN_CTURN",     self.MIN_CTURN)
+                self.set_slider_value("Param_MAX_CTURN",     self.MAX_CTURN)
+                self.set_slider_value("Param_MIN_HAIRPIN",   self.MIN_HAIRPIN)
+                self.set_slider_value("Param_MAX_HAIRPIN",   self.MAX_HAIRPIN)
+                self.set_slider_value("Param_HAIRPIN_PAIRS", self.HAIRPIN_PAIRS)
+                self.set_slider_value("Param_MAX_LENGTH",    self.MAX_LENGTH)
+                self.set_slider_value("Param_TRACK_WIDTH",   self.TRACK_WIDTH)
 
         def keep_variables_up_to_date(self):
                 """This function keeps LauncherModule's variables up to date."""
-                self.MIN_STRAIGHT = self.get_slider_value("Param_MIN_STRAIGHT")
-                self.MAX_STRAIGHT = self.get_slider_value("Param_MAX_STRAIGHT")
-                self.MIN_CTURN = self.get_slider_value("Param_MIN_CTURN")
-                self.MAX_CTURN = self.get_slider_value("Param_MAX_CTURN")
-                self.MIN_HAIRPIN = self.get_slider_value("Param_MIN_HAIRPIN")
-                self.MAX_HAIRPIN = self.get_slider_value("Param_MAX_HAIRPIN")
+                self.MIN_STRAIGHT  = self.get_slider_value("Param_MIN_STRAIGHT")
+                self.MAX_STRAIGHT  = self.get_slider_value("Param_MAX_STRAIGHT")
+                self.MIN_CTURN     = self.get_slider_value("Param_MIN_CTURN")
+                self.MAX_CTURN     = self.get_slider_value("Param_MAX_CTURN")
+                self.MIN_HAIRPIN   = self.get_slider_value("Param_MIN_HAIRPIN")
+                self.MAX_HAIRPIN   = self.get_slider_value("Param_MAX_HAIRPIN")
                 self.HAIRPIN_PAIRS = self.get_slider_value("Param_HAIRPIN_PAIRS")
-                self.MAX_LENGTH = self.get_slider_value("Param_MAX_LENGTH")
-                self.TRACK_WIDTH = self.get_slider_value("Param_TRACK_WIDTH")
+                self.MAX_LENGTH    = self.get_slider_value("Param_MAX_LENGTH")
+                self.TRACK_WIDTH   = self.get_slider_value("Param_TRACK_WIDTH")
 
         def set_slider_ranges(self):
                 """
@@ -603,29 +603,29 @@ class EufsLauncher(Plugin):
                 max_max_length = 2000
                 min_width = 2
                 max_width = 10
-                self.set_slider_data("Param_MIN_STRAIGHT",min_straight,max_straight)
-                self.set_slider_data("Param_MAX_STRAIGHT",min_straight,max_straight)
-                self.set_slider_data("Param_MIN_CTURN",min_turn,max_turn)
-                self.set_slider_data("Param_MAX_CTURN",min_turn,max_turn)
-                self.set_slider_data("Param_MIN_HAIRPIN",min_hairpin*2,max_hairpin*2)
-                self.set_slider_data("Param_MAX_HAIRPIN",min_hairpin*2,max_hairpin*2)
-                self.set_slider_data("Param_HAIRPIN_PAIRS",min_hairpin_pairs,max_hairpin_pairs)
-                self.set_slider_data("Param_MAX_LENGTH",min_max_length,max_max_length)
-                self.set_slider_data("Param_TRACK_WIDTH",min_width,max_width)
+                self.set_slider_data("Param_MIN_STRAIGHT", min_straight, max_straight)
+                self.set_slider_data("Param_MAX_STRAIGHT", min_straight, max_straight)
+                self.set_slider_data("Param_MIN_CTURN", min_turn, max_turn)
+                self.set_slider_data("Param_MAX_CTURN", min_turn, max_turn)
+                self.set_slider_data("Param_MIN_HAIRPIN", min_hairpin * 2, max_hairpin * 2)
+                self.set_slider_data("Param_MAX_HAIRPIN", min_hairpin * 2, max_hairpin * 2)
+                self.set_slider_data("Param_HAIRPIN_PAIRS", min_hairpin_pairs, max_hairpin_pairs)
+                self.set_slider_data("Param_MAX_LENGTH", min_max_length, max_max_length)
+                self.set_slider_data("Param_TRACK_WIDTH", min_width, max_width)
                 
-        def get_slider_value(self,slidername):
+        def get_slider_value(self, slidername):
                 """Returns the value of the specified slider."""
-                slider = self._widget.findChild(QSlider,slidername)
+                slider = self._widget.findChild(QSlider, slidername)
                 return slider.value()
 
-        def set_slider_value(self,slidername,sliderval):
+        def set_slider_value(self, slidername, sliderval):
                 """Sets the value of the specified slider."""
-                slider = self._widget.findChild(QSlider,slidername)
+                slider = self._widget.findChild(QSlider, slidername)
                 slider.setValue(sliderval)
 
-        def set_slider_data(self,slidername,slidermin,slidermax):
+        def set_slider_data(self, slidername, slidermin, slidermax):
                 """Sets the minimum and maximum values of sliders."""
-                slider = self._widget.findChild(QSlider,slidername)
+                slider = self._widget.findChild(QSlider, slidername)
                 slider.setMinimum(slidermin)
                 slider.setMaximum(slidermax)
                
@@ -906,8 +906,8 @@ class EufsLauncher(Plugin):
                                 ]
                 for bad_node in extra_nodes:
                         if bad_node in nodes_to_kill:
-                                Popen(["rosnode","kill",bad_node])
-                Popen(["killall","-9","gzserver"])
+                                Popen(["rosnode", "kill", bad_node])
+                Popen(["killall", "-9", "gzserver"])
                 time.sleep(0.25)
                 extra_nodes = rosnode.get_node_names()
                 extra_nodes.remove("/eufs_launcher")
@@ -915,20 +915,6 @@ class EufsLauncher(Plugin):
                 if left_open>0:
                         rospy.logerr("Pruned to: " + str(extra_nodes))
                 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 

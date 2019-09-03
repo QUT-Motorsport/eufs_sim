@@ -186,45 +186,73 @@ class ConversionTools:
                 desires to do any displaying of the result (otherwise it returns None)
                 """
 
-                if cfrom=="xys" and cto=="png":
-                        return ConversionTools.xys_to_png(which_file,params,conversion_suffix)
-                if cfrom=="png" and cto=="launch":
-                        return ConversionTools.png_to_launch(which_file,params,conversion_suffix)
-                if cfrom=="png" and cto=="csv":
-                        ConversionTools.png_to_launch(which_file,params,conversion_suffix)
+                if   cfrom=="xys" and cto=="png":
+                        return ConversionTools.xys_to_png(
+                                which_file,
+                                params,
+                                conversion_suffix
+                        )
+                elif cfrom=="png" and cto=="launch":
+                        return ConversionTools.png_to_launch(
+                                which_file,
+                                params,
+                                conversion_suffix
+                        )
+                elif cfrom=="png" and cto=="csv":
+                        ConversionTools.png_to_launch(
+                                which_file,
+                                params,
+                                conversion_suffix
+                        )
                         new_file_array = which_file.split("/")
                         new_file_array[-2] = "launch"
                         which_file = "/".join(new_file_array)
                         return ConversionTools.launch_to_csv(
-                                   which_file[:-4]+conversion_suffix+".launch",
-                                   params,
-                                   conversion_suffix=""
+                                 which_file[:-4]+conversion_suffix+".launch",
+                                 params,
+                                 conversion_suffix=""
                         )
-                if cfrom=="launch" and cto=="csv":
-                        return ConversionTools.launch_to_csv(which_file,params,conversion_suffix)
-                if cfrom=="launch" and cto=="png":
-                        ConversionTools.launch_to_csv(which_file,params,conversion_suffix)
+                elif cfrom=="launch" and cto=="csv":
+                        return ConversionTools.launch_to_csv(
+                                 which_file,
+                                 params,
+                                 conversion_suffix
+                        )
+                elif cfrom=="launch" and cto=="png":
+                        ConversionTools.launch_to_csv(
+                                 which_file,
+                                 params,
+                                 conversion_suffix
+                        )
                         new_file_array = which_file.split("/")
                         new_file_array[-2] = "tracks"
                         which_file = "/".join(new_file_array)
                         return ConversionTools.csv_to_png(
-                                   which_file[:-7]+conversion_suffix+".csv",
-                                   params,
-                                   conversion_suffix=""
+                                 which_file[:-7]+conversion_suffix+".csv",
+                                 params,
+                                 conversion_suffix=""
                         )
-                if cfrom=="csv" and cto == "launch":
-                        ConversionTools.csv_to_png(which_file,params,conversion_suffix)
+                elif cfrom=="csv" and cto == "launch":
+                        ConversionTools.csv_to_png(
+                                 which_file,
+                                 params,
+                                 conversion_suffix
+                        )
                         new_file_array = which_file.split("/")
                         new_file_array[-2] = "randgen_imgs"
                         which_file = "/".join(new_file_array)
                         return ConversionTools.png_to_launch(
-                                   which_file[:-4]+conversion_suffix+".png",
-                                   params,
-                                   conversion_suffix=""
+                                 which_file[:-4]+conversion_suffix+".png",
+                                 params,
+                                 conversion_suffix=""
                         )
-                if cfrom=="csv" and cto == "png":
-                        return ConversionTools.csv_to_png(which_file,params,conversion_suffix)
-                if cto == "ALL" or cto == "all":
+                elif cfrom=="csv" and cto == "png":
+                        return ConversionTools.csv_to_png(
+                                 which_file,
+                                 params,
+                                 conversion_suffix
+                        )
+                elif cto == "ALL" or cto == "all":
                         #If something tries to convert to itself it just gets ignored
                         ConversionTools.convert(cfrom,"launch",which_file,params,conversion_suffix)
                         ConversionTools.convert(cfrom,"csv",which_file,params,conversion_suffix)
@@ -239,7 +267,7 @@ class ConversionTools:
                         
 
         @staticmethod
-        def xys_to_png(which_file,params,conversion_suffix=""):
+        def xys_to_png(which_file, params, conversion_suffix=""):
                 """
                 Converts xys format to png.
 
@@ -909,7 +937,7 @@ class ConversionTools:
                 
 
         @staticmethod
-        def launch_to_csv(which_file,params,conversion_suffix=""):
+        def launch_to_csv(which_file, params, conversion_suffix=""):
                 """
                 Converts a .launch to a .csv
 
@@ -941,7 +969,7 @@ class ConversionTools:
 
 
         @staticmethod
-        def csv_to_png(which_file,params,conversion_suffix=""):
+        def csv_to_png(which_file, params, conversion_suffix=""):
                 """
                 Converts a .csv to a .png
 
@@ -1144,7 +1172,7 @@ class ConversionTools:
                 # Save the image:
                 output_path = os.path.join(
                                            rospkg.RosPack().get_path('eufs_gazebo'),
-                                           'randgen_imgs/'+filename+'.png'
+                                           'randgen_imgs/' + filename + '.png'
                 )
                 im.save(output_path)
                 return im
@@ -1156,9 +1184,9 @@ class ConversionTools:
         #########################################################
         
         @staticmethod
-        def copy_file(fr,to):
-                reader = open(fr,'r')
-                writer = open(to,'w')
+        def copy_file(fr, to):
+                reader = open(fr, 'r')
+                writer = open(to, 'w')
                 data = reader.read()
                 writer.write(data)
                 reader.close()
