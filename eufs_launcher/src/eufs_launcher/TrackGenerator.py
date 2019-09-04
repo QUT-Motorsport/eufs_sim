@@ -354,10 +354,32 @@ def generate_bezier_track(start_point):
 
 
 
+def generate_autocross_trackdrive_track(start_point):
+        """
+        In this function we handle the traditional Circle&Line generator
+
+        Takes in an initial point, and returns a G1-continuous closed loop
+        made by piecing circles and lines together.
+        """
+        xys = []
+        total_length = 0
+
+        # We start with a small straight
+        tangent_in = get_random_unit_vector()
+        point_in = start_point
+        normal_in = get_normal_vector(tangent_in)
+        points_out, tangent_out, normal_out, added_length = generic_straight(
+                point_in,
+                tangent_in,
+                normal_in
+        )
+        total_length += added_length
+        xys.extend(points_out)
 
 
 
 
+        return convert_points_to_all_positive(xys)
 
 
 
@@ -398,12 +420,42 @@ def de_parameterize(func):
         return [func(1.0 * t / (TrackGenerator.FIDELITY - 1)) 
                 for t in range(0 , TrackGenerator.FIDELITY)]
 
+def generic_straight(point_in,
+                     tangent_in,
+                     normal_in,
+                     params = {}):
+        """
+        Creates a straight line micro generator
+
+        params["length"]: specifies how long to make the straight
+        """
+
+        # Load in params
+        if "length" in params:
+                length = params["length"]
+        else:
+                length = uniform(TrackGenerator.MIN_STRAIGHT,TrackGenerator.MAX_STRAIGHT)
+
+        # Prepare outputs
+        straight_func = parametric_straight(tangent_in,point_in,length)
+        tangent_out   = tangent_in
+        normal_out    = normal_in
+        added_length  = length
+
+        return (
+                de_parameterize(straight_func),
+                tangent_out,
+                normal_out,
+                added_length
+        )
+
+
 def connector_bezier(point_in,
                      point_out, 
                      tangent_in,
                      tangent_out, 
                      normal_in, 
-                     params={}):
+                     params = {}):
         """
         Creates a cubic bezier micro generator.
 
@@ -470,6 +522,12 @@ def parametric_bezier(control_points):
                         the_sum_y += coefficient * cp[i][1]
                 return (the_sum_x, the_sum_y)
         return lambda t: to_return(control_points, t)
+
+def parametric_straight(slope_vec,start_point,line_length):
+        """Returns the parametric function of a line given a slope and start point"""
+        def to_return(slope,start,length,t):
+                return add_vectors(start,scale_vector(slope, 1.0 * t * line_length))
+        return lambda t: to_return(slope_vec,start_point,line_length,t)
 
 
 
