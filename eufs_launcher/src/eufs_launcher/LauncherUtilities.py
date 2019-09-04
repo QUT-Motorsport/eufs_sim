@@ -1,4 +1,5 @@
 import math
+from random import uniform
 
 def calculate_tangent_angle(xys):
         """
@@ -39,3 +40,89 @@ def normalize_vec(vec):
         (a, b) = vec
         mag = math.sqrt(a * a + b * b)
         return (a / mag,b / mag)
+
+def get_random_unit_vector():
+        """Returns a unit vector facing in a random direction"""
+        rand_angle = uniform(0,2*math.pi)
+        return (math.cos(rand_angle),math.sin(rand_angle))
+
+def add_vectors(a,b):
+        """Given two tuples a and b, add them together"""
+        return (a[0]+b[0],a[1]+b[1])
+
+def scale_vector(vec,scale):
+        """Multiplies vec by scale"""
+        return (vec[0]*scale,vec[1]*scale)
+
+def get_normal_vector(vec):
+        """Given a vector, return a vector normal to it"""
+        return (-vec[1],vec[0])
+
+def convert_points_to_all_positive(xys):
+        """
+        If the track dips to the negative side of the x or y axes, shift everything over
+        Returns shifted points tupled with the range over which the points span
+        We also want everything converted to an integer!
+        """
+        max_neg_x = 0
+        max_neg_y = 0
+        max_x    = 0
+        max_y    = 0
+
+        for point in xys:
+                (x, y) = point
+                max_neg_x = min(x, max_neg_x)
+                max_neg_y = min(y, max_neg_y)
+                max_x    = max(x, max_x)
+                max_y    = max(y, max_y)
+
+        new_xys = []
+        padding = 10
+        for point in xys:
+                (x, y) = point
+                new_xys.append(((x - max_neg_x) + padding,(y - max_neg_y) + padding))
+
+        return (new_xys, int(max_x - max_neg_x) + 2 * padding,int(max_y - max_neg_y) + 2 * padding)
+
+
+def compactify_points(points):
+        """
+        Given a list of points, if any two adjacent points are the 
+        same after conversion to int, then remove one of them
+        """
+        remove_list = []
+        prev_point = (-10000, -10000)
+        def make_int(tup):
+                return (int(tup[0]), int(tup[1]))
+        for a in range(0, len(points)):
+                if (make_int(points[a]) == make_int(prev_point)):
+                        remove_list.append(a)
+                prev_point = points[a]
+        for index in sorted(remove_list, reverse=True):
+                del points[index]
+        return points
+
+def check_if_overlap(points):
+        """
+        Naive check to see if track overlaps itself
+
+        (Won't catch overlaps due to track width, only if track center overlaps)
+        """
+
+        # Remove end points as in theory that should also be the start point
+        # (I remove extra to be a little generous to it as a courtesy)
+        points = points[:-10]
+        #We want to add in the diagonally-connected points, otherwise you can imagine
+        #that two tracks moving diagonally opposite could cross eachother inbetween the pixels,
+        #fooling our test.
+
+        for index in range(1, len(points)):
+                (sx, sy) = points[index - 1]
+                (ex, ey) = points[index]
+                manhattan_distance = abs(ex - sx) + abs(ey - sy)
+                if (manhattan_distance > 1):
+                        #moved diagonally, insert an extra point for it at the end!
+                        points.append( (sx + 1, sy) if ex > sx else (sx - 1, sy) )
+
+        return len(set(points)) != len(points)
+
