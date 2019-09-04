@@ -491,15 +491,15 @@ class EufsLauncher(Plugin):
                 """When preset is changed, change the sliders accordingly."""
                 which = self.PRESET_SELECTOR.currentText()
                 preset_data = Generator.get_preset(which)
-                self.MIN_STRAIGHT   = preset_data[0]
-                self.MAX_STRAIGHT   = preset_data[1]
-                self.MIN_CTURN      = preset_data[2]
-                self.MAX_CTURN      = preset_data[3]
-                self.MIN_HAIRPIN    = preset_data[4] * 2
-                self.MAX_HAIRPIN    = preset_data[5] * 2
-                self.HAIRPIN_PAIRS  = preset_data[6]
-                self.MAX_LENGTH     = preset_data[7]
-                self.LAX_GENERATION = preset_data[8]
+                self.MIN_STRAIGHT   = preset_data["MIN_STRAIGHT"]
+                self.MAX_STRAIGHT   = preset_data["MAX_STRAIGHT"]
+                self.MIN_CTURN      = preset_data["MIN_CONSTANT_TURN"]
+                self.MAX_CTURN      = preset_data["MAX_CONSTANT_TURN"]
+                self.MIN_HAIRPIN    = preset_data["MIN_HAIRPIN"] * 2
+                self.MAX_HAIRPIN    = preset_data["MAX_HAIRPIN"] * 2
+                self.HAIRPIN_PAIRS  = preset_data["MAX_HAIRPIN_PAIRS"]
+                self.MAX_LENGTH     = preset_data["MAX_LENGTH"]
+                self.LAX_GENERATION = preset_data["LAX_GENERATION"]
                 self.TRACK_WIDTH    = 4
                 self.LAX_CHECKBOX.setChecked(self.LAX_GENERATION)
 
@@ -639,19 +639,29 @@ class EufsLauncher(Plugin):
                 isLaxGenerator = self.LAX_CHECKBOX.isChecked()
                 
                 try:
+                        # Prepare and pass in all the parameters of the track
+                        # If track takes too long to generate, this section will
+                        # throw an error, to be handled after this try clause.
+                        if self.PRESET_SELECTOR.currentText() == "Bezier":
+                                the_mode = Generator.BEZIER_MODE
+                        else:
+                                the_mode = Generator.CIRCLE_AND_LINE_MODE
+                        
+                        xys,twidth,theight = Generator.generate({
+                                "MIN_STRAIGHT":self.MIN_STRAIGHT,
+                                "MAX_STRAIGHT":self.MAX_STRAIGHT,
+                                "MIN_CONSTANT_TURN":self.MIN_CTURN,
+                                "MAX_CONSTANT_TURN":self.MAX_CTURN,
+                                "MIN_HAIRPIN":self.MIN_HAIRPIN/2,
+                                "MAX_HAIRPIN":self.MAX_HAIRPIN/2,
+                                "MAX_HAIRPIN_PAIRS":self.HAIRPIN_PAIRS,
+                                "MAX_LENGTH":self.MAX_LENGTH,                                   
+                                "LAX_GENERATION":isLaxGenerator,                                   
+                                "MODE":the_mode
+                        })
 
-                        xys,twidth,theight = Generator.generate([
-                                self.MIN_STRAIGHT,
-                                self.MAX_STRAIGHT,                                    
-                                self.MIN_CTURN,
-                                self.MAX_CTURN,                                    
-                                self.MIN_HAIRPIN/2,
-                                self.MAX_HAIRPIN/2,                                     
-                                self.HAIRPIN_PAIRS,                             
-                                self.MAX_LENGTH,                                   
-                                1 if isLaxGenerator else 0,                                   
-                                1 if self.PRESET_SELECTOR.currentText()=="Bezier" else 0
-                        ])
+                        # If track is generated successfully, turn it into a track image
+                        # and display it to the user.
                         self.tell_launchella("Loading Image...")
                         im = Converter.convert(
                                 "xys",

@@ -7,66 +7,6 @@ from scipy.special import binom
 from LauncherUtilities import *
 import numpy as np
 
-"""
-################################################################################
-################################################################################
-################################################################################
-###########################Track Generator Overview#############################
-################################################################################
-################################################################################
-################################################################################
-###########################Functions For Public Use#############################
-################################################################################
-#                                                                              #
-#        TrackGenerator.generate(values: List[float])                          #
-#                        -> Tuple[List[Tuple[float,float]],int,int]            #
-#                Takes in a list of preset data.  Check out the get_presets()  #
-#                function for a thorough and perpetually up to date list of    #
-#                each piece of data.                                           #
-#                This returns a tuple of the form (xys,width,height), where:   #
-#                        xys:                                                  #
-#                                A list of points that outline the             #
-#                                generated track.                              #
-#                        width:                                                #
-#                                The width that is spanned by xys              #
-#                        height:                                               #
-#                                The height that is spanned by xys             #
-#                There will always be a margin of at least 5 on the returned   #
-#                xys, so width and height are always at least 10 larger than   #
-#                if the range was strictly calculated.                         #
-#                This is done for the sake of ConversionTools' TrackImage      #
-#                specification, which requires the margin.                     #
-#                                                                              #
-#        TrackGenerator.get_presets()  -> List[Tuple[str,List[float]]]         #
-#                Returns a list of all generator presets (the str in the tuple)#
-#                coupled with their preset values (the list in the tuple)      #
-#                                                                              #
-#        TrackGenerator.get_default_preset() -> str                            #
-#                Returns the default preset (usually "Small Straights")        #
-#                                                                              #
-#        TrackGenerator.get_preset_names() -> List[str]                        #
-#                Returns a list of all the generator presets.                  #
-#                                                                              #
-#        TrackGenerator.get_preset(name: str) -> List[float]                   #
-#                Returns a list of all the preset data of the specified        #
-#                preset (the one with the matching name).                      #
-#                                                                              #
-################################################################################
-#                                                                              #
-#        There are other functions available (many others), but they are not   #
-#        necessarily meant for use outside this file.                          #
-#                                                                              #
-#        That doesn't stop them from being used, of course - but depending on  #
-#        the circumstances, their use implies that they maybe should be        #
-#        factored out into a seperate library.                                 #
-#                                                                              #
-#        Since the LauncherModule/TrackGenerator/ConversionTools ecosystem is  #
-#        still in a state of flux, function signatures for all functions but   #
-#        the ones listed above are subject to change without warning.          #
-#                                                                              #
-################################################################################
-"""
-
 class GenerationFailedException(Exception):
    """Raised when generator takes too long."""
    pass
@@ -91,9 +31,12 @@ class TrackGenerator:
         MIN_CONSTANT_TURN = 10
         MAX_CONSTANT_TURN = 25
         MIN_HAIRPIN = 4.5
+        MAX_HAIRPIN = 10
         MAX_TRACK_LENGTH = 1500
         LAX_GENERATION = False
         TRACK_MODE = CIRCLE_AND_LINE_MODE
+        MAX_HAIRPIN_PAIRS = 1
+        MIN_HAIRPIN_PAIRS = 0
 
         # Debugging parameter to print out when generation fails
         FAILURE_INFO = False
@@ -107,89 +50,67 @@ class TrackGenerator:
         @staticmethod
         def get_presets():
                 """
-                Returns a list of generator presets.
+                Returns a dictionary of generator presets.
 
                 Presets contain all the information that parameterizes track generation.
                 Also couples the presets with colloquial names for them.
                 """
-                return [("Contest Rules",[
-                                10,#Min straight length
-                                80,#Max straight length
-                                10,#Min constant turn radius
-                                25,#Max constant turn radius
-                                4.5,#Min hairpin turn radius
-                                10,#Max hairpin turn radius
-                                3,#Max hairpin pairs amount
-                                1500,#Max length
-                                0,#Lax Generation (off)
-                                0#Circle&Line mode
-                        ]),
-                        ("Small Straights",[
-                                5,#Min straight length
-                                40,#Max straight length
-                                10,#Min constant turn radius
-                                25,#Max constant turn radius
-                                4.5,#Min hairpin turn radius
-                                10,#Max hairpin turn radius
-                                3,#Max hairpin pairs amount
-                                700,#Max length
-                                1,#Lax Generation (on)
-                                0#Circle&Line mode
-                        ]),
-                        ("Computer Friendly",[
-                                10,#Min straight length
-                                80,#Max straight length
-                                5,#Min constant turn radius
-                                15,#Max constant turn radius
-                                4.5,#Min hairpin turn radius
-                                10,#Max hairpin turn radius
-                                3,#Max hairpin pairs amount
-                                500,#Max length
-                                1,#Lax Generation (on)
-                                0#Circle&Line mode
-                        ]),
-                        ("Bezier",[
-                                10,#Min straight length
-                                80,#Max straight length
-                                5,#Min constant turn radius
-                                15,#Max constant turn radius
-                                4.5,#Min hairpin turn radius
-                                10,#Max hairpin turn radius
-                                3,#Max hairpin pairs amount
-                                500,#Max length
-                                1,#Lax Generation (on)
-                                1#Bezier mode
-                        ])]
+                return {
+                        "Contest Rules": {
+                                "MIN_STRAIGHT":10,
+                                "MAX_STRAIGHT":80,
+                                "MIN_CONSTANT_TURN":10,
+                                "MAX_CONSTANT_TURN":25,
+                                "MIN_HAIRPIN":4.5,
+                                "MAX_HAIRPIN":10,
+                                "MAX_HAIRPIN_PAIRS":3,
+                                "MAX_LENGTH":1500,
+                                "LAX_GENERATION":False,
+                                "MODE":TrackGenerator.CIRCLE_AND_LINE_MODE
+                        },
+                        "Small Straights": {
+                                "MIN_STRAIGHT":5,
+                                "MAX_STRAIGHT":40,
+                                "MIN_CONSTANT_TURN":10,
+                                "MAX_CONSTANT_TURN":25,
+                                "MIN_HAIRPIN":4.5,
+                                "MAX_HAIRPIN":10,
+                                "MAX_HAIRPIN_PAIRS":3,
+                                "MAX_LENGTH":700,
+                                "LAX_GENERATION":True,
+                                "MODE":TrackGenerator.CIRCLE_AND_LINE_MODE
+                        },
+                        "Computer Friendly": {
+                                "MIN_STRAIGHT":10,
+                                "MAX_STRAIGHT":80,
+                                "MIN_CONSTANT_TURN":5,
+                                "MAX_CONSTANT_TURN":15,
+                                "MIN_HAIRPIN":4.5,
+                                "MAX_HAIRPIN":10,
+                                "MAX_HAIRPIN_PAIRS":3,
+                                "MAX_LENGTH":500,
+                                "LAX_GENERATION":True,
+                                "MODE":TrackGenerator.CIRCLE_AND_LINE_MODE
+                        },
+                        "Bezier": {
+                                "MIN_STRAIGHT":10,
+                                "MAX_STRAIGHT":80,
+                                "MIN_CONSTANT_TURN":5,
+                                "MAX_CONSTANT_TURN":15,
+                                "MIN_HAIRPIN":4.5,
+                                "MAX_HAIRPIN":10,
+                                "MAX_HAIRPIN_PAIRS":3,
+                                "MAX_LENGTH":500,
+                                "LAX_GENERATION":True,
+                                "MODE":TrackGenerator.BEZIER_MODE
+                        }
+                }
 
         @staticmethod
         def get_default_mode_string():
                 """Returns the name of the default generation mode"""
 
                 return TrackGenerator.CIRCLE_AND_LINE_MODE
-
-        @staticmethod
-        def get_default_mode_number():
-                """Gets default id of the default generation mode."""
-
-                return TrackGenerator.get_number_from_mode(
-                        TrackGenerator.get_default_mode_string()
-                )
-
-        @staticmethod
-        def get_mode_from_number(num):
-                """Given a generation mode id, return its name."""
-
-                if     num == 0: return TrackGenerator.CIRCLE_AND_LINE_MODE
-                elif   num == 1: return TrackGenerator.BEZIER_MODE
-                return get_default_mode_string()
-
-        @staticmethod
-        def get_number_from_mode(mode):
-                """Given a generation mode name, return its id."""
-
-                if     mode == TrackGenerator.CIRCLE_AND_LINE_MODE: return 0
-                elif   mode == TrackGenerator.BEZIER_MODE: return 1
-                return get_default_mode_number()
 
         @staticmethod
         def get_default_preset():
@@ -204,22 +125,21 @@ class TrackGenerator:
                 to_return = []
                 all_presets = TrackGenerator.get_presets()
                 for a in all_presets:
-                        to_return.append(a[0])
+                        to_return.append(a)
                 return to_return
 
         @staticmethod
         def get_preset(name):
                 """
-                Given a name, returns a list of the preset's values.
+                Given a name, returns a dictionary of the preset's values.
 
                 If such a name does not exist, it will send console warnings
                 and default to the default preset.
                 """
 
                 all_presets = TrackGenerator.get_presets()
-                for a in all_presets:
-                        if a[0] == name:
-                                return a[1]
+                if name in all_presets:
+                        return all_presets[name]
                 rospy.logerr("No such preset: " + name)
                 rospy.logerr("Defaulting to " + get_default_preset())
                 return get_preset(get_default_preset())
@@ -231,17 +151,17 @@ class TrackGenerator:
                 specified in the input.
                 """
 
-                TrackGenerator.MIN_STRAIGHT = values[0]
-                TrackGenerator.MAX_STRAIGHT = values[1]
-                TrackGenerator.MIN_CONSTANT_TURN = values[2]
-                TrackGenerator.MAX_CONSTANT_TURN = values[3]
-                TrackGenerator.MIN_HAIRPIN = values[4]
-                TrackGenerator.MAX_HAIRPIN = values[5]
-                TrackGenerator.MAX_HAIRPIN_NUM = values[6]
-                TrackGenerator.MIN_HAIRPIN_NUM = 1 if TrackGenerator.MAX_HAIRPIN_NUM > 0 else 0
-                TrackGenerator.MAX_TRACK_LENGTH = values[7]
-                TrackGenerator.LAX_GENERATION = values[8]==1
-                TrackGenerator.TRACK_MODE = TrackGenerator.get_mode_from_number(values[9])
+                TrackGenerator.MIN_STRAIGHT = values["MIN_STRAIGHT"]
+                TrackGenerator.MAX_STRAIGHT = values["MAX_STRAIGHT"]
+                TrackGenerator.MIN_CONSTANT_TURN = values["MIN_CONSTANT_TURN"]
+                TrackGenerator.MAX_CONSTANT_TURN = values["MAX_CONSTANT_TURN"]
+                TrackGenerator.MIN_HAIRPIN = values["MIN_HAIRPIN"]
+                TrackGenerator.MAX_HAIRPIN = values["MAX_HAIRPIN"]
+                TrackGenerator.MAX_HAIRPIN_PAIRS = values["MAX_HAIRPIN_PAIRS"]
+                TrackGenerator.MIN_HAIRPIN_PAIRS = 1 if TrackGenerator.MAX_HAIRPIN_PAIRS > 0 else 0
+                TrackGenerator.MAX_TRACK_LENGTH = values["MAX_LENGTH"]
+                TrackGenerator.LAX_GENERATION = values["LAX_GENERATION"]
+                TrackGenerator.TRACK_MODE = values["MODE"]
 
         @staticmethod
         def generate(values):
@@ -680,8 +600,8 @@ def generate_point_to_point(point_in,
                         # Otherwise due to the way we head towards the path, 
                         # its basically guaranteed we get a self-intersection.
                         num_switches = 2*randrange(
-                                TrackGenerator.MIN_HAIRPIN_NUM,
-                                TrackGenerator.MAX_HAIRPIN_NUM
+                                TrackGenerator.MIN_HAIRPIN_PAIRS,
+                                TrackGenerator.MAX_HAIRPIN_PAIRS
                         )
                         (points_out, tangent_out, normal_out, delta_length) = (
                                 generic_hairpin_turn(
@@ -916,8 +836,8 @@ def generic_hairpin_turn(point_in,
                 switchbacks = params["switchbacks"]
         else:
                 switchbacks = 2 * randrange(
-                        TrackGenerator.MIN_HAIRPIN_NUM,
-                        TrackGenerator.MAX_HAIRPIN_NUM
+                        TrackGenerator.MIN_HAIRPIN_PAIRS,
+                        TrackGenerator.MAX_HAIRPIN_PAIRS
                 )
 
         # We are interested in making sure switchbacks never intersect
