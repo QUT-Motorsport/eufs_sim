@@ -270,6 +270,7 @@ class TrackGenerator:
                         xys2 = compactify_points(xys2)
                         overlapped = check_if_overlap(xys2)
                         if overlapped:
+                                break
                                 if TrackGenerator.FAILURE_INFO: 
                                         rospy.logerr("Overlap check "+str(failure_count)+" failed")
                                 failure_count+=1
@@ -282,7 +283,8 @@ class TrackGenerator:
                 if uniform(0,1) < 0.5:#flip xys by y
                         xys = [(x,-y+theight) for (x,y) in xys]
 
-                return (xys,twidth,theight)
+                return convert_points_to_all_positive(xys)
+                #return (xys,twidth,theight)
 
 
 ####################
@@ -318,7 +320,7 @@ def generate_bezier_track(start_point):
         point_in   = start_point
         tangent_out = get_random_unit_vector()
 
-        for point_out in goal_points[:-1]:
+        for point_out in goal_points:
                 # Draw next component
 	        points_out, tangent_out, normal_out, added_length = connector_bezier(
 	                point_in,
@@ -376,12 +378,98 @@ def generate_autocross_trackdrive_track(start_point):
         total_length += added_length
         xys.extend(points_out)
 
+        # Now we want to set checkpoints to pass through:
+        goal_points = [(start_point[0] + TrackGenerator.MAX_TRACK_LENGTH * 0.08,
+                        start_point[1]),
+                       (start_point[0] + TrackGenerator.MAX_TRACK_LENGTH * 0.12,
+                        start_point[1] + TrackGenerator.MAX_TRACK_LENGTH * 0.08),
+                       (start_point[0] - TrackGenerator.MAX_TRACK_LENGTH * 0.03,
+                        start_point[1] + TrackGenerator.MAX_TRACK_LENGTH * 0.12)]
 
+        # This controls how much it tries to salvage a bad run
+        # It turns out that most times it fails, its not salvageable,
+        # so I set it to 1 so that as soon as it fails it scraps the run.
+        max_fails = 1
+        fails = 0
 
+        # And now we generate towards each goal point
+        for goal_point in goal_points:
+                prev_xys = xys
+                
+                # Prepare inputs
+                tangent_in = tangent_out
+                normal_in  = normal_out
+                point_out  = goal_point
+                point_in   = points_out[-1]
+
+                # Generate from point to point
+                (points_out, tangent_out, normal_out, added_length) = generate_point_to_point(
+                        point_in,
+                        point_out,
+                        tangent_in,
+                        normal_in,
+                        20
+                )
+                total_length += added_length
+                xys.extend(points_out)
+
+                # Now let's do early-checking for overlaps
+                test = compactify_points([(int(x[0]), int(x[1])) for x in xys])
+                if check_if_overlap(test): 
+                        if TrackGenerator.FAILURE_INFO: 
+                                rospy.logerr("Early Overlap Checking: Failed")
+
+                        # Generation failed test, undo last bit
+                        fails += 1
+                        total_length -= added_length
+                        xys = prev_xys
+
+                        if fails == max_fails:
+                                return (test, 0, 0)
 
         return convert_points_to_all_positive(xys)
 
 
+def generate_point_to_point(point_in,
+                            point_out,
+                            tangent_in,
+                            normal_in,
+                            fuzz_radius,
+                            depth=20,
+                            hairpined=False,
+                            many_hairpins=False):
+        """
+        Generates a track from point_in to point_out with incoming tangent tangent_in,
+        and incoming normal normal_in.
+
+        Does not necessarily exactly end at point_out, it merely aims to get within fuzz_radius.
+
+        depth is the max amout of times it may recurse (this is a recursive function that
+        incrementally builds the track up recursion by recursion).
+
+        hairpined, when True, signals that a previous recursion of this function placed a hairpin.
+        many_hairpins, when False, disallows multiple hairpins.  So if hairpined is True then
+        many_hairpins being false would prevent additional hairpins.
+
+        Outputs (points_out, tangent_out, normal_out, added_length)
+        """
+
+        added_length = 0
+        xys = []
+        
+        # We start out by refocusing ourselves towards point_out, using a refocus_constant_turn.
+        (points_out, tangent_out, normal_out, delta_length) = (
+                refocus_constant_turn(
+                        point_in,
+                        point_out,
+                        tangent_in,
+                        normal_in,
+                )
+        )
+        added_length += delta_length
+        xys.extend(points_out)
+
+        return (xys, tangent_out, normal_out, added_length)
 
 
 ####################
@@ -449,6 +537,108 @@ def generic_straight(point_in,
                 added_length
         )
 
+def refocus_constant_turn(point_in,
+                          point_out,
+                          tangent_in,
+                          normal_in,
+                          params = {}):
+        """
+        Creates a circle segment micro generator.
+
+        params["turn_against_normal"]: boolean, when true then the 
+                                       circle will have the opposite normal.
+        params["radius"]: radius of the circle
+        params["recursed"]: if true, prevent this function from recursing again
+        """
+
+        # Load in params
+        if "turn_against_normal" in params:
+                turn_against_normal = params["turn_against_normal"]
+        else:
+                turn_against_normal = uniform(0,1)<0.5
+
+        if turn_against_normal:
+                # We need to flip our reference frame.
+                normal_in = scale_vector(normal_in, -1)
+
+        if "radius" in params:
+                radius = params["radius"]
+        else: 
+                radius = uniform(TrackGenerator.MIN_CONSTANT_TURN,TrackGenerator.MAX_CONSTANT_TURN)
+
+        if "recursed" in params:
+                recursed = params["recursed"]
+        else:
+                recursed = False
+
+        center = add_vectors(point_in, scale_vector(normal_in,radius))
+
+        # Now we use a rotation matrix to parameterize intermediate points:
+        # Given start S and center C, any point on the circle angle A away is:
+        # R_A[S-C] + C
+        # Let us box this up in a nice function:
+        def intermediate_point(s,c,a):
+                (sx,sy) = s
+                (cx,cy) = c
+                cos_a    = math.cos(a)
+                sin_a    = math.sin(a)
+                del_x    = sx - cx
+                del_y    = sy - cy
+                result_x = cos_a * del_x - sin_a * del_y + cx
+                result_y = sin_a * del_x + cos_a * del_y + cy
+                return (result_x, result_y)
+        circle_func = lambda a: intermediate_point(point_in,center,a)
+
+        # We are going to iteratively walk around the circle until we are facing the right way
+        points_out = []
+        max_range = TrackGenerator.FIDELITY
+        step_size = 1.0 / max_range
+        angle = 0
+        for t in range(0,max_range):
+                angle = t * step_size * 2 * math.pi
+                points_out.append(
+                        circle_func(angle)
+                )
+                if t != 0:
+                        # Check if we're pointing in the right direction
+                        # This equates to checking if end_point lies on the 
+                        # line at points[-1] with the appropriate tangent.
+                        (sx,sy) = points_out[-1]
+                        (ex,ey) = point_out
+                        appropriate_angle = calculate_tangent_angle(points_out)
+                        if t > 0.8 * max_range and not recursed:
+                                # Very big turn, we don't like that!  
+                                # We'll just turn the other way instead
+                                return refocus_constant_turn(
+                                        point_in,
+                                        point_out,
+                                        tangent_in,
+                                        normal_in,
+                                        params = {
+                                                "recursed":True,
+                                                "radius":radius,
+                                                "turn_against_normal":True
+                                        }
+                                )
+                        if abs(
+                                cap_angle(appropriate_angle) 
+                               -cap_angle(math.atan2((ey - sy), (ex - sx)))
+                        ) < 0.01:
+                                # Would do equality checking but limited precision, 
+                                # we just check if close!
+                                break
+
+        # Length of circle is, fortunately, easy!  It's simply radius*angle
+        added_length = angle*radius
+
+        # Now we want to find the new normal vector, 
+        normal_out = (points_out[-1][0] - center[0], points_out[-1][1] - center[1])
+
+        # And finally recalculate the tangent:
+        tangent_out = calculate_tangent_angle(points_out)
+
+        # Returns a list of points and the new edge of the racetrack and the change in length
+        return (points_out,tangent_out,normal_out,added_length)
 
 def connector_bezier(point_in,
                      point_out, 
