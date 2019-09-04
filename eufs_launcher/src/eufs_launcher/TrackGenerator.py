@@ -496,7 +496,7 @@ def generate_autocross_trackdrive_track(start_point):
                 tangent_in,
                 normal_in,
                 params={
-                        "turn_against_normal": circle_radius > 0,
+                        "turn_against_normal": False,
                         "circle_percent":      0.5,
                         "radius":              abs(circle_radius)
                 }
@@ -519,6 +519,13 @@ def generate_autocross_trackdrive_track(start_point):
         )
         total_length += added_length
         xys.extend(points_out)
+
+
+        # Sometimes the tangents don't actually match up
+        # so if that happens, we throw out the track and start anew.
+        if get_distance(initial_tangent,tangent_out) > 0.01:
+                return generate_autocross_trackdrive_track(start_point)
+
 
         if not TrackGenerator.LAX_GENERATION:
                 # Check if accidentally created too big of a straight at the very end
