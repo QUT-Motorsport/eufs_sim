@@ -43,24 +43,32 @@ def normalize_vec(vec):
         """
         (a, b) = vec
         mag = math.sqrt(a * a + b * b)
-        return (a / mag,b / mag)
+        return (a / mag, b / mag)
 
-def get_random_unit_vector():
+def get_random_unit_vector(lower_bound = 0, upper_bound = 2 * math.pi):
         """Returns a unit vector facing in a random direction"""
-        rand_angle = uniform(0,2*math.pi)
-        return (math.cos(rand_angle),math.sin(rand_angle))
+        rand_angle = uniform(lower_bound, upper_bound)
+        return (math.cos(rand_angle), math.sin(rand_angle))
 
 def add_vectors(a,b):
         """Given two tuples a and b, add them together"""
-        return (a[0]+b[0],a[1]+b[1])
+        return (a[0] + b[0], a[1] + b[1])
 
 def scale_vector(vec,scale):
         """Multiplies vec by scale"""
-        return (vec[0]*scale,vec[1]*scale)
+        return (vec[0] * scale, vec[1] * scale)
 
 def get_normal_vector(vec):
         """Given a vector, return a vector normal to it"""
-        return (-vec[1],vec[0])
+        return (-vec[1], vec[0])
+
+def subtract_vectors(a,b):
+        """Given two tuples a and b, find a-b"""
+        return (a[0] - b[0], a[1] - b[1])
+
+def get_distance(a,b):
+        """Returns the distance between two points"""
+        return magnitude(subtract_vectors(a,b))
 
 def convert_points_to_all_positive(xys):
         """

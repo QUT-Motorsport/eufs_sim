@@ -270,7 +270,6 @@ class TrackGenerator:
                         xys2 = compactify_points(xys2)
                         overlapped = check_if_overlap(xys2)
                         if overlapped:
-                                break
                                 if TrackGenerator.FAILURE_INFO: 
                                         rospy.logerr("Overlap check "+str(failure_count)+" failed")
                                 failure_count+=1
@@ -283,8 +282,7 @@ class TrackGenerator:
                 if uniform(0,1) < 0.5:#flip xys by y
                         xys = [(x,-y+theight) for (x,y) in xys]
 
-                return convert_points_to_all_positive(xys)
-                #return (xys,twidth,theight)
+                return (xys,twidth,theight)
 
 
 ####################
@@ -367,10 +365,11 @@ def generate_autocross_trackdrive_track(start_point):
         total_length = 0
 
         # We start with a small straight
-        tangent_in = get_random_unit_vector()
+        initial_tangent = get_random_unit_vector(0,math.pi/8)
+        tangent_in = initial_tangent
         point_in = start_point
         normal_in = get_normal_vector(tangent_in)
-        points_out, tangent_out, normal_out, added_length = generic_straight(
+        (points_out, tangent_out, normal_out, added_length) = generic_straight(
                 point_in,
                 tangent_in,
                 normal_in
@@ -427,6 +426,114 @@ def generate_autocross_trackdrive_track(start_point):
                         if fails == max_fails:
                                 return (test, 0, 0)
 
+        # Now lets head back to the start:
+        # We're gonna set a checkpoint that is close but not exactly the start point
+        # so that we have breathing room for the final manouever:
+        directing_point = (start_point[0] - TrackGenerator.MAX_STRAIGHT * 0.5,
+                           start_point[1] + TrackGenerator.MAX_CONSTANT_TURN * 2)
+
+        # Prepare inputs
+        tangent_in = tangent_out
+        normal_in  = normal_out
+        point_out  = directing_point
+        point_in   = points_out[-1]
+
+        # Generate from point to point
+        (points_out, tangent_out, normal_out, added_length) = generate_point_to_point(
+                point_in,
+                point_out,
+                tangent_in,
+                normal_in,
+                0
+        )
+        total_length += added_length
+        xys.extend(points_out)
+
+        # Now we will add a circle to point directly away from start point
+        tangent_in  = tangent_out
+        normal_in   = normal_out
+        point_in    = points_out[-1]
+        tangent_out = scale_vector(initial_tangent,-1)
+
+        # We need to calculate the turn angle (angle between 2 vectors):
+        outer_turn_angle = math.acos(
+                - tangent_in[0] * tangent_out[0]
+                - tangent_in[1] * tangent_out[1]
+        )
+        circle_turn_angle = math.pi - outer_turn_angle
+        circle_turn_percent = circle_turn_angle / (2 * math.pi)
+        circle_radius = uniform(
+                TrackGenerator.MIN_CONSTANT_TURN,
+                TrackGenerator.MAX_CONSTANT_TURN
+        )
+
+        # Now we draw this circle:
+        (points_out, tangent_out, normal_out, added_length) = generic_constant_turn(
+                point_in,
+                tangent_in,
+                normal_in,
+                params={
+                        "turn_against_normal": False,
+                        "circle_percent":      circle_turn_percent,
+                        "radius":              circle_radius
+                }
+        )
+        total_length += added_length
+        xys.extend(points_out)
+
+        # And now we add a half-turn to point us directly back to the start.
+        # Radius is calculated by finding distance when projected along the normal
+        tangent_in  = tangent_out
+        normal_in   = normal_out
+        point_in    = points_out[-1]
+        tangent_out = initial_tangent
+        diff = subtract_vectors(point_in,start_point)
+        circle_radius = (diff[0] * normal_in[0] + diff[1] * normal_in[1])/2
+
+        # Now we draw the circle:
+        (points_out, tangent_out, normal_out, added_length) = generic_constant_turn(
+                point_in,
+                tangent_in,
+                normal_in,
+                params={
+                        "turn_against_normal": circle_radius > 0,
+                        "circle_percent":      0.5,
+                        "radius":              abs(circle_radius)
+                }
+        )
+        total_length += added_length
+        xys.extend(points_out)
+
+        # And then add a straight to connect back to the start
+        tangent_in = tangent_out
+        normal_in  = normal_out
+        point_in   = points_out[-1]
+        straight_length = get_distance(point_in, start_point) * 1.1
+        (points_out, tangent_out, normal_out, added_length) = generic_straight(
+                point_in,
+                tangent_in,
+                normal_in,
+                params = {
+                        "length": straight_length
+                }
+        )
+        total_length += added_length
+        xys.extend(points_out)
+
+        if not TrackGenerator.LAX_GENERATION:
+                # Check if accidentally created too big of a straight at the very end
+                if (straight_length + TrackGenerator.MIN_STRAIGHT 
+                 > TrackGenerator.MAX_STRAIGHT):
+
+                        # We always start each track with a minimum-length straight, 
+                        # which is joined up with the final straight,
+                        # hence the addition of MIN_STRAIGHT here.
+                        return generate_autocross_trackdrive_track(start_point)
+
+                # Check if whole track is too big
+                elif total_length > TrackGenerator.MAX_TRACK_LENGTH:
+                        return generate_autocross_trackdrive_track(start_point)
+
         return convert_points_to_all_positive(xys)
 
 
@@ -435,9 +542,9 @@ def generate_point_to_point(point_in,
                             tangent_in,
                             normal_in,
                             fuzz_radius,
-                            depth=20,
-                            hairpined=False,
-                            many_hairpins=False):
+                            depth = 20,
+                            hairpined = False,
+                            many_hairpins = False):
         """
         Generates a track from point_in to point_out with incoming tangent tangent_in,
         and incoming normal normal_in.
@@ -449,7 +556,7 @@ def generate_point_to_point(point_in,
 
         hairpined, when True, signals that a previous recursion of this function placed a hairpin.
         many_hairpins, when False, disallows multiple hairpins.  So if hairpined is True then
-        many_hairpins being false would prevent additional hairpins.
+        many_hairpins being False would prevent additional hairpins.
 
         Outputs (points_out, tangent_out, normal_out, added_length)
         """
@@ -468,6 +575,142 @@ def generate_point_to_point(point_in,
         )
         added_length += delta_length
         xys.extend(points_out)
+
+        # Prepare data for next component
+        point_in   = points_out[-1]
+        tangent_in = tangent_out
+        normal_in  = normal_out
+
+        # Now we want to know how close we are to the goal - if we're close enough
+        # to just directly draw a straight path to it.
+        distance_from_end = get_distance(point_in,point_out)
+        if distance_from_end <= TrackGenerator.MAX_STRAIGHT + fuzz_radius:
+                straight_length = min(distance_from_end, TrackGenerator.MAX_STRAIGHT)
+                (points_out, tangent_out, normal_out, delta_length) = generic_straight(
+                        point_in,
+                        tangent_in,
+                        normal_in,
+                        params = {"length":straight_length}
+                )
+                added_length += delta_length
+                xys.extend(points_out)
+
+        # If we are far away from the goal, we want to get closer to it in a
+        # "random" way to create variance in the track.
+        else:
+                # We'll start by just going as far as we can to the goal.
+                # Unless we're very close, then we only go half as far to
+                # give us some space (and add variance)
+                if distance_from_end <= (TrackGenerator.MAX_STRAIGHT * 1.2):
+                        straight_length = TrackGenerator.MAX_STRAIGHT
+                else:
+                        straight_length = TrackGenerator.MAX_STRAIGHT/2
+                (points_out, tangent_out, normal_out, delta_length) = generic_straight(
+                        point_in,
+                        tangent_in,
+                        normal_in,
+                        params = {"length":straight_length}
+                )
+                added_length += delta_length
+                xys.extend(points_out)
+
+                # Prepare data for next component
+                point_in   = points_out[-1]
+                tangent_in = tangent_out
+                normal_in  = normal_out
+                
+
+                # Now we add some variance by choosing between cturns or hairpins
+                # There is no special significance to the 70% value, it happens to
+                # get a good balance.
+                make_cturn = uniform(0, 1) < 0.7
+
+                # But of course, we can't draw a hairpin if we've drawn too many already.
+                if make_cturn or (hairpined and not many_hairpins):
+                        (points_out, tangent_out, normal_out, delta_length) = (
+                                generic_constant_turn(
+                                        point_in,
+                                        tangent_in,
+                                        normal_in,
+                                        params = {
+                                                "circle_percent":uniform(0.1, 0.3)
+                                        }
+                                )
+                        )
+                        added_length += delta_length
+                        xys.extend(points_out)
+
+                        # Prepare data for next component
+                        point_in   = points_out[-1]
+                        tangent_in = tangent_out
+                        normal_in  = normal_out
+
+                        # And now let's add another circle turning the other way
+                        # so that we make the track more "winding", and allow us to
+                        # make real progress towards the goal.
+                        (points_out, tangent_out, normal_out, delta_length) = (
+                                generic_constant_turn(
+                                        point_in,
+                                        tangent_in,
+                                        normal_in,
+                                        params = {
+                                                "circle_percent":uniform(0.1, 0.3)
+                                        }
+                                )
+                        )
+                        added_length += delta_length
+                        xys.extend(points_out)
+
+                        # Prepare data for next component
+                        point_in   = points_out[-1]
+                        tangent_in = tangent_out
+                        normal_in  = normal_out
+
+                # Make a hairpin
+                else:
+                        # We only want an even amount of turns so that we can leave 
+                        # heading the same direction we entered.
+                        # Otherwise due to the way we head towards the path, 
+                        # its basically guaranteed we get a self-intersection.
+                        num_switches = 2*randrange(
+                                TrackGenerator.MIN_HAIRPIN_NUM,
+                                TrackGenerator.MAX_HAIRPIN_NUM
+                        )
+                        (points_out, tangent_out, normal_out, delta_length) = (
+                                generic_hairpin_turn(
+                                        point_in,
+                                        tangent_in,
+                                        normal_in,
+                                        params = {
+                                                "switchbacks":num_switches
+                                        }
+                                )
+                        )
+                        added_length += delta_length
+                        xys.extend(points_out)
+
+                        # Prepare data for next component
+                        point_in   = points_out[-1]
+                        tangent_in = tangent_out
+                        normal_in  = normal_out
+
+                # Now, we recurse
+                if depth > 0:
+                        (points_out, tangent_out, normal_out, added_length) = (
+                                generate_point_to_point(
+                                        point_in,
+                                        point_out,
+                                        tangent_in,
+                                        normal_in,
+                                        fuzz_radius,
+                                        depth = depth - 1,
+                                        hairpined = hairpined or not make_cturn,
+                                        many_hairpins = many_hairpins
+                                )
+                        )
+                        added_length += delta_length
+                        xys.extend(points_out)
+
 
         return (xys, tangent_out, normal_out, added_length)
 
@@ -508,6 +751,8 @@ def de_parameterize(func):
         return [func(1.0 * t / (TrackGenerator.FIDELITY - 1)) 
                 for t in range(0 , TrackGenerator.FIDELITY)]
 
+
+
 def generic_straight(point_in,
                      tangent_in,
                      normal_in,
@@ -537,6 +782,206 @@ def generic_straight(point_in,
                 added_length
         )
 
+
+
+def generic_constant_turn(point_in,
+                          tangent_in,
+                          normal_in,
+                          params = {}):
+        """
+        Creates a circle segment micro generator.
+
+        params["turn_against_normal"]: boolean, when true then the 
+                                       circle will have the opposite normal.
+        params["radius"]: radius of the circle
+        params["circle_percent"]: percent of a full turn the circle should undergo
+        """
+
+        # Load in params
+        if "turn_against_normal" in params:
+                turn_against_normal = params["turn_against_normal"]
+        else:
+                turn_against_normal = uniform(0,1) < 0.5
+
+        if turn_against_normal:
+                # We need to flip our reference frame.
+                normal_in = scale_vector(normal_in, -1)
+
+        if "radius" in params:
+                radius = params["radius"]
+        else: 
+                radius = uniform(TrackGenerator.MIN_CONSTANT_TURN,TrackGenerator.MAX_CONSTANT_TURN)
+
+        if "circle_percent" in params:
+                circle_percent = params["circle_percent"]
+        else: 
+                # Note: if circles turn too much, risk of self-intersection rises dramatically.
+                circle_percent = uniform(0.1,0.5)
+
+        center = add_vectors(point_in, scale_vector(normal_in,radius))
+
+        # We need to calculate which direction to draw the circle, too
+        # Traditionally it is drawn counter-clockwise, but it would need to go
+        # clockwise if the "handedness" of the system is opposite normal.
+        # We can calculate handedness through the sign of the determinant
+        # of the tangent and normal matrices
+        def sgn(x):
+                """-1 if x is negative, +1 if positive, 0 if 0."""
+                return -1 if x < 0 else 1 if x > 0 else 0
+        handedness = sgn(tangent_in[0] * normal_in[1] - tangent_in[1] * normal_in[0])
+        turn_angle = handedness * circle_percent * math.pi * 2
+
+        # And now we can grab output points
+        circle_function = parametric_circle(point_in, center, turn_angle)
+        points_out = de_parameterize(circle_function)
+
+        # Calculate total length
+        added_length = turn_angle * radius
+
+        # Now we want to find the new normal vector, 
+        normal_out = normalize_vec((points_out[-1][0] - center[0], points_out[-1][1] - center[1]))
+
+        # And finally recalculate the tangent:
+        tangent_out = calculate_tangent_vector(points_out)
+
+        # Returns a list of points and the new edge of the racetrack and the change in length
+        return (points_out,tangent_out,normal_out,added_length)
+        
+
+def generic_hairpin_turn(point_in,
+                         tangent_in,
+                         normal_in,
+                         params = {}):
+        """
+        Creates a hairpin micro generator.
+
+        params["turn_against_normal"]: boolean, when true then the 
+                                       hairpin will have the opposite normal.
+
+        params["radius"]: radius of the circle
+
+        params["uniform_circles"]: if True, all circles have the same radius (params["radius"])
+                                   if False, all circles have random radii to add variety.
+
+        params["straight_length"]: the length of the straight segments
+
+        params["wobbliness"]: The percentage of circumference of the circles
+                              This will be overridden if the function detects that
+                              The hairpin would self-intersect with the given wobbliness.
+
+        params["switchbacks"]: The amount of turns in the hairpin
+        """
+
+        xys = []
+        added_length = 0
+
+        # Load in params
+        if "turn_against_normal" in params:
+                turn_against_normal = params["turn_against_normal"]
+        else:
+                turn_against_normal = uniform(0,1)<0.5
+
+        if turn_against_normal:
+                # We need to flip our reference frame.
+                normal_in = scale_vector(normal_in, -1)
+
+        if "radius" in params:
+                radius = params["radius"]
+        else: 
+                radius = uniform(TrackGenerator.MIN_CONSTANT_TURN,TrackGenerator.MAX_CONSTANT_TURN)
+
+        if "uniform_circles" in params:
+                uniform_circles = params["uniform_circles"]
+        else: 
+                uniform_circles = uniform(0, 1) < 0.5
+
+        if "straight_length" in params:
+                straight_length = params["straight_length"]
+        else:
+                straight_length = uniform(TrackGenerator.MIN_STRAIGHT,TrackGenerator.MAX_STRAIGHT)
+
+        if "wobbliness" in params:
+                wobbliness = params["wobbliness"]
+        else:
+                wobbliness = uniform(0.45, 0.55)
+
+        if "switchbacks" in params:
+                switchbacks = params["switchbacks"]
+        else:
+                switchbacks = 2 * randrange(
+                        TrackGenerator.MIN_HAIRPIN_NUM,
+                        TrackGenerator.MAX_HAIRPIN_NUM
+                )
+
+        # We are interested in making sure switchbacks never intersect
+        # If you draw a diagram, this gives you a diamond with angles pi/2,pi/2,L, and pi/2-L 
+        # where L is:
+        # ((2*pi*(1-wobbliness))/2)
+        # Using trigonometry, we can calculate the radius to intersection
+        # in terms of the angle and circle radius:
+        # intersect_point = radius * tan(L)
+        # If intersect_point is greater than max_intersection, we're good!
+        # Otherwise we want to cap it there.  So we find the inverse-function for "wobbliness"
+        # 1-atan2(intersect_point,radius)/math.pi = wobbliness
+        # max_intersection is the distance we tolerate intersections beyond.
+        max_intersection = 50
+        angle_l = (2 * math.pi * (1 - wobbliness)) / 2
+        intersect_point = radius * math.tan(angle_l)
+        if intersect_point < max_intersection:
+                wobbliness = 1 - math.atan2(max_intersection, radius) / math.pi
+
+        # Now we loop through each segment of the hairpin
+        for a in range(0, switchbacks):
+                # Switchback starts with a circle, then a line
+
+                # Get the desired radius of the circle
+                if not uniform_circles:
+                        radius = uniform(
+                                TrackGenerator.MIN_CONSTANT_TURN, 
+                                TrackGenerator.MAX_CONSTANT_TURN
+                        )
+
+                # Do the circle part
+                (points_out, tangent_out, normal_out, delta_length) = generic_constant_turn(
+                        point_in,
+                        tangent_in, 
+                        normal_in,
+                        params = {
+                                "turn_against_normal": True,
+                                "circle_percent":      wobbliness,
+                                "radius":              radius
+                        }
+                )
+                added_length += delta_length
+                xys.extend(points_out)
+
+                # Prepare for next component
+                point_in   = points_out[-1]
+                tangent_in = tangent_out
+                normal_in  = normal_out
+
+                # Now tack on the straight
+                (points_out, tangent_out, normal_out, delta_length) = generic_straight(
+                        point_in,
+                        tangent_in,
+                        normal_in,
+                        params = {
+                                "length": straight_length
+                        }
+                )
+                added_length += delta_length
+                xys.extend(points_out)
+
+                # Prepare for next component
+                # For hairpins, normals should always flip!
+                # That way they zigzag
+                point_in   = points_out[-1]
+                tangent_in = tangent_out
+                normal_in = scale_vector(normal_out, -1)
+
+
+        return (xys, tangent_out, normal_out, added_length)
+
 def refocus_constant_turn(point_in,
                           point_out,
                           tangent_in,
@@ -555,7 +1000,7 @@ def refocus_constant_turn(point_in,
         if "turn_against_normal" in params:
                 turn_against_normal = params["turn_against_normal"]
         else:
-                turn_against_normal = uniform(0,1)<0.5
+                turn_against_normal = uniform(0,1) < 0.5
 
         if turn_against_normal:
                 # We need to flip our reference frame.
@@ -642,13 +1087,15 @@ def refocus_constant_turn(point_in,
         added_length = angle*radius
 
         # Now we want to find the new normal vector, 
-        normal_out = (points_out[-1][0] - center[0], points_out[-1][1] - center[1])
+        normal_out = normalize_vec((points_out[-1][0] - center[0], points_out[-1][1] - center[1]))
 
         # And finally recalculate the tangent:
         tangent_out = calculate_tangent_vector(points_out)
 
         # Returns a list of points and the new edge of the racetrack and the change in length
         return (points_out,tangent_out,normal_out,added_length)
+
+
 
 def connector_bezier(point_in,
                      point_out, 
@@ -704,6 +1151,7 @@ def connector_bezier(point_in,
         )
         
 
+
 def parametric_bezier(control_points):
         """
         This function will itself return a function of a parameterized bezier
@@ -723,11 +1171,34 @@ def parametric_bezier(control_points):
                 return (the_sum_x, the_sum_y)
         return lambda t: to_return(control_points, t)
 
-def parametric_straight(slope_vec,start_point,line_length):
-        """Returns the parametric function of a line given a slope and start point"""
-        def to_return(slope,start,length,t):
-                return add_vectors(start,scale_vector(slope, 1.0 * t * line_length))
-        return lambda t: to_return(slope_vec,start_point,line_length,t)
 
+
+def parametric_straight(slope_vec, start_point, line_length):
+        """Returns the parametric function of a line given a slope and start point"""
+        def to_return(slope, start, length, t):
+                return add_vectors(start, scale_vector(slope, 1.0 * t * line_length))
+        return lambda t: to_return(slope_vec,start_point, line_length, t)
+
+
+
+def parametric_circle(start_point, center_point, delta_angle):
+        """
+        Returns a function in terms of t \elem [0,1] to parameterize a circle        
+
+        We can calculate points on a circle using a rotation matrix
+        R(a)*[S-C]+C gives us any point on a circle starting at S with center C 
+        with counterclockwise angular distance 'a'
+        """
+        def output(s, c, a):
+                (sx, sy) = s
+                (cx, cy) = c
+                cos_a    = math.cos(a)
+                sin_a    = math.sin(a)
+                del_x    = sx - cx
+                del_y    = sy - cy
+                result_x = cos_a * del_x - sin_a * del_y + cx
+                result_y = sin_a * del_x + cos_a * del_y + cy
+                return (result_x, result_y)
+        return lambda t: output(start_point, center_point, t * delta_angle)
 
 
