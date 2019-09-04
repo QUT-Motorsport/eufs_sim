@@ -573,6 +573,16 @@ def refocus_constant_turn(point_in,
 
         center = add_vectors(point_in, scale_vector(normal_in,radius))
 
+        # We need to calculate which direction to draw the circle, too
+        # Traditionally it is drawn counter-clockwise, but it would need to go
+        # clockwise if the "handedness" of the system is opposite normal.
+        # We can calculate handedness through the sign of the determinant
+        # of the tangent and normal matrices
+        def sgn(x):
+                """-1 if x is negative, +1 if positive, 0 if 0."""
+                return -1 if x < 0 else 1 if x > 0 else 0
+        handedness = sgn(tangent_in[0] * normal_in[1] - tangent_in[1] * normal_in[0])
+
         # Now we use a rotation matrix to parameterize intermediate points:
         # Given start S and center C, any point on the circle angle A away is:
         # R_A[S-C] + C
@@ -597,7 +607,7 @@ def refocus_constant_turn(point_in,
         for t in range(0,max_range):
                 angle = t * step_size * 2 * math.pi
                 points_out.append(
-                        circle_func(angle)
+                        circle_func(angle*handedness)
                 )
                 if t != 0:
                         # Check if we're pointing in the right direction
@@ -635,7 +645,7 @@ def refocus_constant_turn(point_in,
         normal_out = (points_out[-1][0] - center[0], points_out[-1][1] - center[1])
 
         # And finally recalculate the tangent:
-        tangent_out = calculate_tangent_angle(points_out)
+        tangent_out = calculate_tangent_vector(points_out)
 
         # Returns a list of points and the new edge of the racetrack and the change in length
         return (points_out,tangent_out,normal_out,added_length)

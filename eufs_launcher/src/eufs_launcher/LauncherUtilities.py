@@ -12,6 +12,10 @@ def calculate_tangent_angle(xys):
         ey = xys[-1][1]
         return math.atan2((ey - sy),(ex - sx))
 
+def calculate_tangent_vector(xys):
+        angle = calculate_tangent_angle(xys)
+        return (math.cos(angle),math.sin(angle))
+
 def cap_angle(ang):
         """Returns angle between 0 and 2*math.pi"""
         if ang < 0:
