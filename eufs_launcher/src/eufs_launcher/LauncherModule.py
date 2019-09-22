@@ -4,10 +4,11 @@ import rospkg
 import roslaunch
 import rosnode
 import math
+import time
 
 from qt_gui.plugin import Plugin
 from python_qt_binding import loadUi
-from python_qt_binding.QtWidgets import QWidget, QComboBox, QPushButton, QSlider, QRadioButton, QCheckBox
+from python_qt_binding.QtWidgets import QWidget, QComboBox, QPushButton, QSlider, QRadioButton, QCheckBox, QMainWindow, QLabel, QLineEdit, QApplication
 
 from os import listdir
 from os.path import isfile, join
@@ -18,1070 +19,913 @@ from PIL import Image
 from PIL import ImageDraw
 from random import randrange, uniform
 
+from TrackGenerator import TrackGenerator as Generator
+from TrackGenerator import GenerationFailedException
+
+from ConversionTools import ConversionTools as Converter
+
 class EufsLauncher(Plugin):
 
-	def __init__(self, context):
-		super(EufsLauncher, self).__init__(context)
+        def __init__(self, context):
+                """
+                This function handles loading the launcher GUI 
+                and all the setting-up of the values and buttons displayed.
+                """
+                super(EufsLauncher, self).__init__(context)
 
-		#Before we do anything, check if there are any nodes other than /rosout
-		#And offer the option of shutting them down
-		#Because often nodes get left behind due to the faulty shutdown of the launcher
-		#(Not my fault, really - it's because Kinetic lacks the argument-passing feature for
-		#roslaunch, meaning I have to Popen it instead, and Popen.kill doesn't successfully kill
-		#all ros nodes)
+                # Give QObjects reasonable names
+                self.setObjectName('EufsLauncher')
+
+                # Process standalone plugin command-line arguments
+                from argparse import ArgumentParser
+                parser = ArgumentParser()
+                # Add argument(s) to the parser.
+                parser.add_argument("-q", "--quiet", action="store_true",
+                        dest="quiet",
+                        help="Put plugin in silent mode")
+                args, unknowns = parser.parse_known_args(context.argv())
+                if not args.quiet:
+                        print 'arguments: ', args
+                        print 'unknowns: ', unknowns
+
+                # Create QWidget
+                self._widget = QWidget()
+
+                # Get path to UI file which should be in the "resource" folder of this package
+                self.main_ui_file = os.path.join(
+                                                 rospkg.RosPack().get_path('eufs_launcher'), 
+                                                 'resource',
+                                                 'Launcher.ui'
+                )
+                self.sketcher_ui_file = os.path.join(
+                                                 rospkg.RosPack().get_path('eufs_launcher'),
+                                                 'resource', 
+                                                 'Sketcher.ui'
+                )
+
+                # Extend the widget with all attributes and children from UI file
+                loadUi(self.main_ui_file, self._widget)
+
+                # Give QObjects reasonable names
+                self._widget.setObjectName('EufsLauncherUI')
+
+                # Show _widget.windowTitle on left-top of each plugin (when 
+                # it's set in _widget). This is useful when you open multiple 
+                # plugins at once. Also if you open multiple instances of your 
+                # plugin at once, these lines add number to make it easy to 
+                # tell from pane to pane.
+                if context.serial_number() > 1:
+                        the_title = (self._widget.windowTitle() 
+                                   + (' (%d)' % context.serial_number()))
+                        self._widget.setWindowTitle(the_title)
+
+                # Resize correctly
+                self._widget.setFixedWidth(1200)
+
+                # Store gazebo's path as it is used quite a lot:
+                self.GAZEBO = rospkg.RosPack().get_path('eufs_gazebo')
+
+                # Give widget components permanent names
+                self.PRESET_SELECTOR   = self._widget.findChild(QComboBox,"WhichPreset")
+                self.TRACK_SELECTOR    = self._widget.findChild(QComboBox,"WhichTrack")
+                self.IMAGE_SELECTOR    = self._widget.findChild(QComboBox,"WhichImage")
+                self.LAUNCH_BUTTON     = self._widget.findChild(QPushButton,"LaunchButton")
+                self.GENERATOR_BUTTON  = self._widget.findChild(QPushButton,"GenerateButton")
+                self.LOAD_IMAGE_BUTTON = self._widget.findChild(QPushButton,"LoadFromImageButton")
+
+                self.CONVERT_BUTTON      = self._widget.findChild(QPushButton,"ConvertButton")
+                self.RENAME_BUTTON       = self._widget.findChild(QPushButton,"RenameButton")
+                self.SKETCHER_BUTTON     = self._widget.findChild(QPushButton,"SketcherButton")
+                self.LAX_CHECKBOX        = self._widget.findChild(QCheckBox,"LaxCheckBox")
+                self.CONVERT_FROM_MENU   = self._widget.findChild(QComboBox,"ConvertFrom")
+                self.CONVERT_TO_MENU     = self._widget.findChild(QComboBox,"ConvertTo")
+                self.MIDPOINT_CHECKBOX   = self._widget.findChild(QCheckBox,"MidpointBox")
+
+                self.SUFFIX_CHECKBOX     = self._widget.findChild(QCheckBox,"SuffixBox")
+                self.USER_FEEDBACK_LABEL = self._widget.findChild(QLabel,"UserFeedbackLabel")
+                self.RENAME_FILE_TEXTBOX = self._widget.findChild(QLineEdit,"RenameFileTextbox")
+                self.RENAME_FILE_HEADER  = self._widget.findChild(QLabel,"RenameFileHeader")
+                self.NOISE_SLIDER        = self._widget.findChild(QSlider,"Noisiness")
+                self.SPEED_RADIO         = self._widget.findChild(QRadioButton,"SpeedRadio")
+                self.TORQUE_RADIO        = self._widget.findChild(QRadioButton,"TorqueRadio")
+                self.PERCEPTION_CHECKBOX = self._widget.findChild(QCheckBox,"PerceptionCheckbox")
+                self.VISUALISATOR_CHECKBOX = self._widget.findChild(QCheckBox,"PerceptionCheckbox")
+
+                self.FILE_FOR_CONVERSION_BOX = self._widget.findChild(
+                        QComboBox,
+                        "FileForConversion"
+                )
+                self.FULL_STACK_COPY_BUTTON = self._widget.findChild(
+                        QCheckBox,
+                        "FullStackCopyButton"
+                )
+                self.FULL_STACK_TRACK_GEN_BUTTON = self._widget.findChild(
+                        QCheckBox,
+                        "FullStackTrackGenButton"
+                )
+                self.FULL_STACK_IMAGE_BUTTON = self._widget.findChild(
+                        QCheckBox,
+                        "FullStackImageButton"
+                )
+
+                self.MIN_STRAIGHT_SLIDER  = self._widget.findChild(QSlider,"Param_MIN_STRAIGHT")
+                self.MAX_STRAIGHT_SLIDER  = self._widget.findChild(QSlider,"Param_MAX_STRAIGHT")
+                self.MIN_CTURN_SLIDER     = self._widget.findChild(QSlider,"Param_MIN_CTURN")
+                self.MAX_CTURN_SLIDER     = self._widget.findChild(QSlider,"Param_MAX_CTURN")
+                self.MIN_HAIRPIN_SLIDER   = self._widget.findChild(QSlider,"Param_MIN_HAIRPIN")
+                self.MAX_HAIRPIN_SLIDER   = self._widget.findChild(QSlider,"Param_MAX_HAIRPIN")
+                self.HAIRPIN_PAIRS_SLIDER = self._widget.findChild(QSlider,"Param_HAIRPIN_PAIRS")
+                self.MAX_LENGTH_SLIDER    = self._widget.findChild(QSlider,"Param_MAX_LENGTH")
+                self.TRACK_WIDTH_SLIDER   = self._widget.findChild(QSlider,"Param_TRACK_WIDTH")
+
+                self.MIN_STRAIGHT_LABEL   = self._widget.findChild(QLabel,"Label_MIN_STRAIGHT")
+                self.MAX_STRAIGHT_LABEL   = self._widget.findChild(QLabel,"Label_MAX_STRAIGHT")
+                self.MIN_CTURN_LABEL      = self._widget.findChild(QLabel,"Label_MIN_CTURN")
+                self.MAX_CTURN_LABEL      = self._widget.findChild(QLabel,"Label_MAX_CTURN")
+                self.MIN_HAIRPIN_LABEL    = self._widget.findChild(QLabel,"Label_MIN_HAIRPIN")
+                self.MAX_HAIRPIN_LABEL    = self._widget.findChild(QLabel,"Label_MAX_HAIRPIN")
+                self.HAIRPIN_PAIRS_LABEL  = self._widget.findChild(QLabel,"Label_HAIRPIN_PAIRS")
+                self.MAX_LENGTH_LABEL     = self._widget.findChild(QLabel,"Label_MAX_LENGTH")
+                self.TRACK_WIDTH_LABEL    = self._widget.findChild(QLabel,"Label_TRACK_WIDTH")
 
 
-		#Worst case scenario kill method: killall -9 gzserver gzclient
-		#We just have to nuke it.  I've tried so much, but gazebo is incredibly unstable
-		#whenever a single node gets set loose with respawn on.  Unfortunately this means
-		#this gui MUST be used as a start point - trying launch something else first and then
-		#loading the gui will kill it.
-		#The root of the problem, I believe, is the fact that we Popen instead of rospy.roslaunch
-		#the .launch file - but since we're using Kinetic and not a more recent version, the rospy.roslaunch
-		#command cannot pass arguments and is thus basically useless to us.
-		self.nuke_ros()
+                # Check the file directory to update drop-down menu
+                self.load_track_and_images()
 
-		# Give QObjects reasonable names
-		self.setObjectName('EufsLauncher')
+                # Get presets
+                preset_names = Generator.get_preset_names()
 
-		# Process standalone plugin command-line arguments
-		from argparse import ArgumentParser
-		parser = ArgumentParser()
-		# Add argument(s) to the parser.
-		parser.add_argument("-q", "--quiet", action="store_true",
-			dest="quiet",
-			help="Put plugin in silent mode")
-		args, unknowns = parser.parse_known_args(context.argv())
-		if not args.quiet:
-			print 'arguments: ', args
-			print 'unknowns: ', unknowns
 
-		# Create QWidget
-		self._widget = QWidget()
-		# Get path to UI file which should be in the "resource" folder of this package
-		ui_file = os.path.join(rospkg.RosPack().get_path('eufs_launcher'), 'resource', 'Launcher.ui')
-		# Extend the widget with all attributes and children from UI file
-		loadUi(ui_file, self._widget)
-		# Give QObjects reasonable names
-		self._widget.setObjectName('EufsLauncherUI')
-		# Show _widget.windowTitle on left-top of each plugin (when 
-		# it's set in _widget). This is useful when you open multiple 
-		# plugins at once. Also if you open multiple instances of your 
-		# plugin at once, these lines add number to make it easy to 
-		# tell from pane to pane.
-		if context.serial_number() > 1:
-			self._widget.setWindowTitle(self._widget.windowTitle() + (' (%d)' % context.serial_number()))
+                # Add Presets to Preset Selector (always put Computer Friendly first)
+                default_preset = Generator.get_default_preset()
+                if default_preset in preset_names:
+                        self.PRESET_SELECTOR.addItem(default_preset)
+                for f in preset_names:
+                        if f != default_preset:
+                                self.PRESET_SELECTOR.addItem(f)
+
+                # Hook up buttons to onclick functions
+                self.LAUNCH_BUTTON.clicked.connect(self.launch_button_pressed)
+                self.GENERATOR_BUTTON.clicked.connect(self.generator_button_pressed)
+                self.LOAD_IMAGE_BUTTON.clicked.connect(self.track_from_image_button_pressed)
+                self.CONVERT_BUTTON.clicked.connect(self.convert_button_pressed)
+                self.RENAME_BUTTON.clicked.connect(self.copy_button_pressed)
+                self.SKETCHER_BUTTON.clicked.connect(self.sketcher_button_pressed)
+
+
+                # Create array of running processes
+                self.processes = []
+                # And also an array of running launches
+                self.launches = []
+                # And array of running popens (things launched by popen)
+                self.popens = []
+
+                # Add widget to the user interface
+                context.add_widget(self._widget)
+
+                # Miscellaneous final initializations:
+                self.has_launched_ros = False
+                self.launch_file_override = None
+                self.popen_process = None
+
+                # Space the load track button better
+                self.LOAD_IMAGE_BUTTON.setText("Load Track\nFrom Image")
+
+                # Hide track draw button as not currently working
+                self.SKETCHER_BUTTON.setVisible(False)
+
+                # Set up the Generator Params
+                self.update_preset()
+
+                # Give sliders the correct range
+                self.set_slider_ranges()
+
+                # Relabel the params
+                self.keep_params_up_to_date()
+                self.keep_sliders_up_to_date()
+
+                # Hook up sliders to function that monitors when they've been changed
+                self.keep_track_of_slider_changes()
+                self.keep_track_of_preset_changes()
+
+                # While in the process of changing sliders, 
+                # we don't want our monitor function to be rapidly firing
+                # So we toggle this variable when ready
+                self.ignore_slider_changes = False
+
+                # Setup Lax Generation button
+                self.LAX_CHECKBOX.setChecked(self.LAX_GENERATION)
+                
+                # Setup Conversion Tools dropdowns
+                for f in ["launch", "png", "csv"]:
+                        self.CONVERT_FROM_MENU.addItem(f)
+                for f in ["csv", "png", "launch", "ALL"]:
+                        self.CONVERT_TO_MENU.addItem(f)
+                        
+                self.update_converter_dropdown()
+                self.CONVERT_FROM_MENU.currentTextChanged.connect(self.update_converter_dropdown)
+                self.CONVERT_TO_MENU.currentTextChanged.connect(self.update_midpoints_box)
+                self.FILE_FOR_CONVERSION_BOX.currentTextChanged.connect(self.update_copier)
+
+                # Prep midpoints checkbox
+                convert_to = self.CONVERT_TO_MENU.currentText()
+                self.MIDPOINT_CHECKBOX.setChecked(True)
+
+                # Suffix checkbox
+                suffix_box = self.SUFFIX_CHECKBOX
+                suffix_box.setChecked(True)
+
+                # Track Gen full stack checkbox
+                track_generator_full_stack = self.FULL_STACK_TRACK_GEN_BUTTON
+                track_generator_full_stack.setChecked(True)
+
+                # Image full stack checkbox
+                image_launcher_full_stack = self.FULL_STACK_IMAGE_BUTTON
+                image_launcher_full_stack.setChecked(True)
+
+                # Copier full stack checkbox
+                copier_full_stack = self.FULL_STACK_COPY_BUTTON
+                copier_full_stack.setChecked(True)
+
+                # Change label to show current selected file for the copier
+                self.update_copier()
+
+                # Get uuid of roslaunch
+                self.uuid = roslaunch.rlutil.get_or_generate_uuid(None, False)
+                roslaunch.configure_logging(self.uuid)
+
+        def tell_launchella(self, what):
+                """Display text in feedback box (lower left corner)."""
+
+                self.USER_FEEDBACK_LABEL.setText(what)
+                QApplication.processEvents() 
+
+        def sketcher_button_pressed(self):
+                """Called when sketcher button is pressed."""
+
+                loadUi(self.sketcher_ui_file, self._widget)
+
+        def load_track_and_images(self):
+                """
+                Peruses file system for files to add to the drop-down menus of the launcher.
+                """
+
+                # Clear the dropdowns
+                self.TRACK_SELECTOR.clear()
+                self.IMAGE_SELECTOR.clear()
+                # Get tracks from eufs_gazebo package
+                relevant_path = os.path.join(self.GAZEBO, 'launch')
+                launch_files = [
+                        f for f in listdir(relevant_path) if isfile(join(relevant_path, f))
+                ]
+
+                # Remove "blacklisted" files (ones that don't define tracks)
+                blacklist_filepath = os.path.join(
+                        self.GAZEBO, 
+                        'launch/blacklist.txt'
+                )
+                blacklist_ = open(blacklist_filepath,"r")
+                blacklist = [f.strip() for f in blacklist_]#remove \n
+                launch_files = [f for f in launch_files if not f in blacklist]
+
+                # Add Tracks to Track Selector
+                if "small_track.launch" in launch_files:
+                        self.TRACK_SELECTOR.addItem("small_track.launch")
+                for f in launch_files:
+                        if f != "small_track.launch":
+                                self.TRACK_SELECTOR.addItem(f)
+
+                # Get images
+                relevant_path = os.path.join(
+                        self.GAZEBO, 
+                        'randgen_imgs'
+                )
+                image_files = [f for f in listdir(relevant_path) if isfile(join(relevant_path, f))]
+
+                # Add Images to Image Selector (always put rand.png first)
+                if "rand.png" in image_files:
+                        self.IMAGE_SELECTOR.addItem("rand.png")
+                for f in image_files:
+                        if f != "rand.png" and f[-3:] == "png":
+                                self.IMAGE_SELECTOR.addItem(f)
+
+        def copy_button_pressed(self):
+                """When copy button is pressed, launch ConversionTools"""
+
+                self.tell_launchella("Copying...")
+
+                # Copy the current file
+                is_full_stack = self.FULL_STACK_COPY_BUTTON.isChecked()
+                file_to_copy_to = self.RENAME_FILE_TEXTBOX.text()
+                file_to_copy_from = self.FILE_FOR_CONVERSION_BOX.currentText()
+                raw_name_to = file_to_copy_to.split(".")[0]
+                raw_name_from = file_to_copy_from.split(".")[0]
+                ending = file_to_copy_from.split(".")[-1]
+
+                # Don't let them create null-named files
+                if len(file_to_copy_to) == 0:
+                        return
+
+                # For launch files, we also need to move around the model folders
+                if ending == "launch":
+                        model_path = os.path.join(
+                                rospkg.RosPack().get_path('eufs_description'), 
+                                'models',
+                                raw_name_to
+                        )
+                        if not os.path.exists(model_path):
+                                os.mkdir(model_path)
+
+                        # Copy sdf files
+                        path_from = os.path.join(
+                                rospkg.RosPack().get_path('eufs_description'),
+                                'models',
+                                raw_name_from,
+                                "model.sdf"
+                        )
+                        path_to = os.path.join(
+                                rospkg.RosPack().get_path('eufs_description'), 
+                                'models',
+                                raw_name_to,
+                                "model.sdf"
+                        )
+                        Converter.copy_file(path_from, path_to)
+
+                        # Copy config files
+                        path_from = os.path.join(
+                                rospkg.RosPack().get_path('eufs_description'),
+                                'models',
+                                raw_name_from,
+                                "model.config"
+                        )
+                        path_to = os.path.join(
+                                rospkg.RosPack().get_path('eufs_description'), 
+                                'models',
+                                raw_name_to,
+                                "model.config"
+                        )
+                        Converter.copy_file(path_from, path_to)
+                        
+                        # Copy launch files
+                        path_from = os.path.join(
+                                self.GAZEBO, 
+                                'launch',
+                                file_to_copy_from
+                        )
+                        path_to = os.path.join(
+                                self.GAZEBO,
+                                'launch',
+                                raw_name_to + "." + ending
+                        )
+                        Converter.copy_file(path_from, path_to)
+
+                # Copy pngs
+                elif ending == "png":
+                        path_from = os.path.join(
+                                self.GAZEBO,
+                                'randgen_imgs',
+                                file_to_copy_from
+                        )
+                        path_to = os.path.join(
+                                self.GAZEBO,
+                                'randgen_imgs',
+                                raw_name_to + "." + ending
+                        )
+                        Converter.copy_file(path_from, path_to)
+
+                # Copy csvs
+                elif ending == "csv":
+                        path_from = os.path.join(
+                                self.GAZEBO, 
+                                'tracks',
+                                file_to_copy_from
+                        )
+                        path_to = os.path.join(
+                                self.GAZEBO,
+                                'tracks',
+                                raw_name_to + "." + ending
+                        )
+                        Converter.copy_file(path_from, path_to)
+
+                # If full stack copying, convert to all file formats
+                if self.FULL_STACK_COPY_BUTTON.isChecked():
+                        Converter.convert(
+                                ending,
+                                "ALL",
+                                path_to,
+                                params={"noise":self.get_noise_level()}
+                        )
+
+                # Update drop-downs with new files in directory
+                self.load_track_and_images()
+                self.tell_launchella("Copy Succeeded!")
+
+        def update_copier(self):
+                """Change label to show current selected file for the copier"""
+                copy_head = self.RENAME_FILE_HEADER
+                copy_head.setText("Copy: " + self.FILE_FOR_CONVERSION_BOX.currentText())
+
+        def update_midpoints_box(self):
+                """
+                Controls the handling of the box that, when ticked, 
+                tells the to-csv converter to calculate cone midpoints.
+                """
+                #Toggle checkbox
+                convert_to = self.CONVERT_TO_MENU.currentText()
+
+        def update_converter_dropdown(self):
+                """Keep the drop-down menus of ConversionTools in sync with the filesystem."""
+                from_type = self.CONVERT_FROM_MENU.currentText()
+                all_files = []
+
+                if from_type == "launch":
+                        # Get tracks from eufs_gazebo package
+                        relevant_path = os.path.join(
+                                self.GAZEBO, 
+                                'launch'
+                        )
+                        launch_files = [
+                               f for f in listdir(relevant_path) if isfile(join(relevant_path, f))
+                        ]
         
-		# Get tracks from eufs_gazebo package
-		relpath = os.path.join(rospkg.RosPack().get_path('eufs_gazebo'), 'launch')
-		launchfiles = [f for f in listdir(relpath) if isfile(join(relpath, f))]
-
-		#Remove "blacklisted" files (ones that don't define tracks)
-		blacklist_ = open(os.path.join(rospkg.RosPack().get_path('eufs_gazebo'), 'launch/blacklist.txt'),"r")
-		blacklist = [f.strip() for f in blacklist_]#remove \n
-		launchfiles = [f for f in launchfiles if not f in blacklist]
-
-		# Add Tracks to Track Selector
-		for f in launchfiles:
-			self._widget.findChild(QComboBox,"WhichTrack").addItem(f)
-
-		# Get images
-		relpath = os.path.join(rospkg.RosPack().get_path('eufs_gazebo'), 'randgen_imgs')
-		imagefiles = [f for f in listdir(relpath) if isfile(join(relpath, f))]
-
-		# Add Images to Image Selector (always put rand.png first)
-		if "rand.png" in imagefiles:
-			self._widget.findChild(QComboBox,"WhichImage").addItem("rand.png")
-		for f in imagefiles:
-			if f != "rand.png" and f[-3:] == "png":
-				self._widget.findChild(QComboBox,"WhichImage").addItem(f)
-
-		# Hook up buttons to onclick functions
-		self._widget.findChild(QPushButton,"LaunchButton").clicked.connect(self.launch_button_pressed)
-		self._widget.findChild(QPushButton,"GenerateButton").clicked.connect(self.generator_button_pressed)
-		self._widget.findChild(QPushButton,"LoadFromImageButton").clicked.connect(self.track_from_image_button_pressed)
-		self._widget.findChild(QPushButton,"Experimentals").clicked.connect(self.experimental_button_pressed)
-
-		#Create array of running processes (currently unused, but if you ever do process = launch.launch(node), add process here!)
-		self.processes = []
-		#And also an array of running launches
-		self.launches = []
-
-		# Add widget to the user interface
-	        context.add_widget(self._widget)
-
-		# Define colors for track gen and image reading
-		self.noisecolor = (0,255,255,255)	#cyan, the turquoise turqouise wishes it were
-		self.bgcolor = (255,255,255,255)	#white
-		self.conecolor  = (255,0,255,255)	#magenta, for yellow cones
-		self.conecolor2 = (0,0,255,255)		#blue, for blue cones
-		self.carcolor = (0,255,0,255)		#green
-		self.trackcenter = (0,0,0,255)		#black
-		self.trackinner = (255,0,0,255)		#red
-		self.trackouter = (255,255,0,255)	#yellow
-
-		#Miscelaneous final initializations:
-		self.hasLaunchedROS = False
-		self.launchfileoverride = None
-		self.popenprocess = None
-
-		#Add experimental warning to generator
-		#self._widget.findChild(QPushButton,"GenerateButton").setText("Generate Random Track\n(Experimental)")
-
-		#Space the load track button better
-		self._widget.findChild(QPushButton,"LoadFromImageButton").setText("Load Track\nFrom Image")
-
-		#Hide generator button
-		#self._widget.findChild(QPushButton,"GenerateButton").setVisible(False)
-
-		#Hide experimental button as not currently needed
-		self._widget.findChild(QPushButton,"Experimentals").setVisible(False)
-
-		print("Plugin Successfully Launched!")
-
-	def experimental_button_pressed(self):
-		self._widget.findChild(QPushButton,"GenerateButton").setVisible(True)
-		
-
-	def generator_button_pressed(self):
-		GENERATED_FILENAME = "rand"
-		print("Generating Track...")
-
-		#Generate the track as pure data
-		xys = []
-		overlapped = False
-		while overlapped or xys==[]:
-			#Re-generate if the track overlaps itself
-			(xys,twidth,theight) = generateAutocrossTrackdriveTrack((0,0))
-			xys = compactify_points(xys)
-			overlapped = check_if_overlap(xys)
-			if overlapped:
-				print("Oops!  The track intersects itself too much.  Retrying...")
-
-		#Create image to hold data
-		im = Image.new('RGBA', (twidth, theight), (0, 0, 0, 0)) 
-		draw = ImageDraw.Draw(im)
-
-		#Convert data to image format
-		draw.polygon([(0,0),(twidth,0),(twidth,theight),(0,theight),(0,0)],fill='white')#background
-		draw.line(xys,fill=self.trackouter,width=5)#track full width
-		draw.line(xys,fill=self.trackinner,width=3)#track innards
-		draw.line(xys,fill=self.trackcenter)#track center
-
-
-		pixels = im.load()#get reference to pixel data
-
-		"""
-		prevcone1 = None
-		for index in range(1,len(xys)):
-			#We will calculate normal vectors and put cones there
-			#Line below calculates the normal
-			(dx,dy) = normalizevec((1,endtangent([xys[index-1],xys[index]])+math.pi))
-			(x,y) = xys[index]
-			scalefactor = 7
-			(ntx,nty) = (int(x+scalefactor*dx),int(y+scalefactor*dy))
-			(nbx,nby) = (int(x-scalefactor*dx),int(y-scalefactor*dy))
-			if prevcone1 == None:
-				pixels[ntx,nty] = self.conecolor2
-				pixels[nbx,nby] = self.conecolor
-				prevcone1 = (nbx,nby)
-			else:
-				#Make sure the same colored cones go on the same side!
-				(pcx,pcy) = prevcone1
-				topcloseness = abs(ntx-pcx)+abs(nty-pcy)
-				bottomcloseness = abs(nbx-pcx)+abs(nby-pcy)
-				if bottomcloseness<topcloseness:
-					pixels[ntx,nty] = self.conecolor2
-					pixels[nbx,nby] = self.conecolor
-					prevcone1 = (nbx,nby)
-				else:
-					pixels[ntx,nty] = self.conecolor
-					pixels[nbx,nby] = self.conecolor2
-					prevcone1 = (ntx,nty)
-		"""	
-
-		#We want to calculate direction of car position -
-		sx = xys[0][0]
-		sy = xys[0][1]
-		ex = xys[1][0]
-		ey = xys[1][1]
-		angle = math.atan2(ey-sy,ex-sx)#[-pi,pi] but we want [0,2pi]
-		if angle < 0:
-			angle+=2*math.pi
-		pixelValue = int(angle/(2*math.pi)*254+1) # it is *254+1 because we never want it to be 0
-		if pixelValue > 255: pixelValue = 255
-		if pixelValue <   1: pixelValue =   1
-		colorforcar = (self.carcolor[0],self.carcolor[1],self.carcolor[2],pixelValue)
-
-		draw.line([xys[0],xys[0]],fill=colorforcar)#car position
-
-		
-
-		#Now we want to make all pixels boardering the track become magenta (255,0,255) - this will be our 'cone' color
-		#To find pixel boardering track, simply find white pixel adjacent to a non-white non-magenta pixle
-		#We will also make sure not to put cones next to eachother	
-
-		pixels = im.load()#get reference to pixel data
-
-		def istrack(c):
-			return c == self.trackouter or c == self.trackinner or c == self.trackcenter
-
-		for i in range(im.size[0]):
-			for j in range(im.size[1]):
-				if pixels[i,j] == self.bgcolor:
-					isNextToTrack = False
-					isNextToCone = False
-					if i>0:
-						p=pixels[i-1,j]
-						isNextToTrack = isNextToTrack or istrack(p)
-						isNextToCone  = isNextToCone  or p==self.conecolor
-					if j>0:
-						p=pixels[i,j-1]
-						isNextToTrack = isNextToTrack or istrack(p)
-						isNextToCone  = isNextToCone  or p==self.conecolor
-					if i<twidth-1:
-						p=pixels[i+1,j]
-						isNextToTrack = isNextToTrack or istrack(p)
-						isNextToCone  = isNextToCone  or p==self.conecolor
-					if j<theight-1:
-						p=pixels[i,j+1]
-						isNextToTrack = isNextToTrack or istrack(p)
-						isNextToCone  = isNextToCone  or p==self.conecolor
-					if isNextToTrack and not isNextToCone:
-						pixels[i,j] = self.conecolor
-
-		
-		#We want to make the track have differing cone colors - yellow on inside, blue on outside
-		#All cones are currently yellow.  We'll do a "breadth-first-search" for any cones reachable
-		#from (0,0) and call those the 'outside' [(0,0) always blank as image is padded)]
-		def getAllowedAdjacents(explolist,curpix):
-			(i,j) = curpix
-			allowed = []
-			if i > 0:
-				if not( (i-1,j) in explolist ):
-					allowed.append((i-1,j))
-			if j > 0:
-				if not( (i,j-1) in explolist ):
-					allowed.append((i,j-1))
-			if i < twidth-1:
-				if not( (i+1,j) in explolist ):
-					allowed.append((i+1,j))
-			if j < theight-1:
-				if not( (i,j+1) in explolist ):
-					allowed.append((i,j+1))
-			return allowed
-		print("Coloring cones...")
-		exploredlist = set([])
-		frontier = set([(0,0)])
-		while len(frontier)>0:
-			newfrontier = set([])
-			for f in frontier:
-				(i,j) = f
-				pix = pixels[i,j]
-				if pix == self.conecolor:
-					pixels[i,j] = self.conecolor2
-					newfrontier.update(getAllowedAdjacents(exploredlist,(i,j)))
-				elif pix == self.bgcolor:
-					newfrontier.update(getAllowedAdjacents(exploredlist,(i,j)))
-				exploredlist.add(f)
-			frontier = newfrontier
-			#curexplored = len(exploredlist)
-			#maxexplored = twidth*theight*1.0
-			#print("Max Percent: " + str(curexplored/maxexplored))
-				
-		
-
-		#Finally, we just need to place noise.  At maximal noise, the track should be maybe 1% covered? (that's actually quite a lot!)
-
-		for i in range(im.size[0]):
-			for j in range(im.size[1]):
-				if pixels[i,j] == self.bgcolor:
-					if uniform(0,100) < 1:#1% covered maximal noise
-						pixels[i,j] = self.noisecolor
-
-		im.save(os.path.join(rospkg.RosPack().get_path('eufs_gazebo'), 'randgen_imgs/'+GENERATED_FILENAME+'.png'))
-		print("Image Generation Done, Converting to .world...")
-
-		#self.create_track_from_image(im,GENERATED_FILENAME)
-
-		print("Track Gen Complete!")
-
-		im.show()
-		#self.launchfileoverride = GENERATED_FILENAME + ".launch"
-		#self.launch_button_pressed()
-
-	def track_from_image_button_pressed(self):
-		fname = self._widget.findChild(QComboBox,"WhichImage").currentText()
-		fname_full = os.path.join(rospkg.RosPack().get_path('eufs_gazebo'), 'randgen_imgs/'+fname)
-		self.create_track_from_image(Image.open(fname_full),fname[:-4])#[:-4] to split off .png, looks like an emoji...
-		self.launchfileoverride = fname[:-4] + ".launch"
-		self.launch_button_pressed()
-
-	def create_track_from_image(self,im,GENERATED_FILENAME):
-		#This is a fairly intensive process - we need:
-		#	to put %FILENAME%.launch in eufs_gazebo/launch
-		#	to put %FILENAME%.world in eufs_gazebo/world
-		#	to put %FILENAME%/model.config and %FILENAME%/model.sdf in eufs_description/models
-
-		#Our template files are stored in eufs_launcher/resource as:
-		#	randgen_launch_template
-		#       randgen_world_template
-		#	randgen_model_template/model.config
-		#	randgen_model_template/model.sdf
-
-		#.launch:
-		launch_template = open(os.path.join(rospkg.RosPack().get_path('eufs_launcher'), 'resource/randgen_launch_template'),"r")
-		#params = %FILLNAME% %PLACEX% %PLACEY% %PLACEROTATION%
-		launch_merged = "".join(launch_template)
-		launch_merged = GENERATED_FILENAME.join(launch_merged.split("%FILLNAME%"))
-
-		def xCoordTransform(x):
-			return x-50
-		def yCoordTransform(y):
-			return y-50
-		def isCarColor(x):
-			return x[:-1]==self.carcolor[:-1]
-		def rotationTransform(x):
-			return 2*math.pi*((x-1)/254.0)#we never allow alpha to equal 0
-
-		#Get PLACEX,PLACEY (look for (0,255,0,a))
-		pixels = im.load()
-		for i in range(im.size[0]):
-			for j in range(im.size[1]):
-				p = pixels[i,j]
-				if isCarColor(p):
-					launch_merged = str(xCoordTransform(i)).join(launch_merged.split("%PLACEX%"))
-					launch_merged = str(yCoordTransform(j)).join(launch_merged.split("%PLACEY%"))
-					launch_merged = str(rotationTransform(p[3])).join(launch_merged.split("%PLACEROTATION%"))
-
-		launch_out = open(os.path.join(rospkg.RosPack().get_path('eufs_gazebo'), 'launch/'+GENERATED_FILENAME+".launch"),"w")
-		launch_out.write(launch_merged)
-		launch_out.close()
-
-		#.world:
-		world_template = open(os.path.join(rospkg.RosPack().get_path('eufs_launcher'), 'resource/randgen_world_template'),"r")
-		#params = %FILLNAME%
-		world_merged = "".join(world_template)
-		world_merged = GENERATED_FILENAME.join(world_merged.split("%FILLNAME%"))
-
-		world_out = open(os.path.join(rospkg.RosPack().get_path('eufs_gazebo'), 'worlds',GENERATED_FILENAME+".world"),"w")
-		world_out.write(world_merged)
-		world_out.close()
-
-		#model:
-		#First we create the folder
-		folderpath = os.path.join(rospkg.RosPack().get_path('eufs_description'), 'models',GENERATED_FILENAME)
-		if not os.path.exists(folderpath):
-			os.mkdir(folderpath)
-		else:
-			print("Overwrote old " + GENERATED_FILENAME)
-
-		#Now let's do the .config as its easiest
-		config_template = open(os.path.join(rospkg.RosPack().get_path('eufs_launcher'), 'resource/randgen_model_template/model.config'),"r")
-		#params = %FILLNAME%
-		config_merged = "".join(config_template)
-		config_merged = GENERATED_FILENAME.join(config_merged.split("%FILLNAME%"))
-
-		config_out = open(os.path.join(rospkg.RosPack().get_path('eufs_description'), 'models',GENERATED_FILENAME,"model.config"),"w")
-		config_out.write(config_merged)
-		config_out.close()
-
-		#Now the real meat of this, the .sdf
-		sdf_template = open(os.path.join(rospkg.RosPack().get_path('eufs_launcher'), 'resource/randgen_model_template/model.sdf'),"r")
-		#params = %FILLNAME% %FILLDATA%
-		#ModelParams = %PLACEX% %PLACEY% %MODELNAME% %FILLCOLLISION% %LINKNUM%
-		sdf_merged = "".join(sdf_template)
-		sdf_splitagain = sdf_merged.split("$===$")
-
-		#sdf_splitagain:
-		#	0: Main body of sdf file
-		#	1: Outline of mesh visual
-		#	2: Outline of mesh collision data
-		#	3: Noisecube collision data, meant for noise as a low-complexity collision to prevent falling out the world
-		sdf_main = sdf_splitagain[0]
-		sdf_model = sdf_splitagain[3].join(sdf_splitagain[1].split("%FILLCOLLISION%"))
-		sdf_model_with_collisions = sdf_splitagain[2].join(sdf_splitagain[1].split("%FILLCOLLISION%"))
-
-		sdf_main = GENERATED_FILENAME.join(sdf_main.split("%FILLNAME%"))
-
-		sdf_blueconemodel = "model://eufs_description/meshes/cone_blue.dae".join(sdf_model_with_collisions.split("%MODELNAME%"))
-		sdf_yellowconemodel = "model://eufs_description/meshes/cone_yellow.dae".join(sdf_model_with_collisions.split("%MODELNAME%"))
-
-		#Now let's load in the noise priorities
-		noisefiles = open(os.path.join(rospkg.RosPack().get_path('eufs_launcher'), 'resource/noiseFiles.txt'),"r")
-		noisefiles = ("".join(noisefiles)).split("$===$")[1].strip().split("\n")
-		noiseweightings_ = [line.split("|") for line in noisefiles]
-		noiseweightings  = [(float(line[0]),line[1]) for line in noiseweightings_]
-
-		def getRandomNoiseModel():
-			randval = uniform(0,100)
-			for a in noiseweightings:
-				if a[0]>randval:
-					return a[1]
-			return "model://eufs_description/meshes/NoiseCube.dae"
-		
-		#Let's place all the models!
-		self.linknum = -1
-		def putModelAtPosition(mod,x,y):
-			self.linknum+=1
-			return str(self.linknum).join( \
-				str(xCoordTransform(x)).join( \
-					str(yCoordTransform(y)).join( \
-						mod.split("%PLACEY%")).split("%PLACEX%")).split("%LINKNUM%"))
-
-		sdf_allmodels = ""
-		noiseLevel = self.getNoiseLevel()
-		for i in range(im.size[0]):
-			for j in range(im.size[1]):
-				p = pixels[i,j]
-				if p == self.conecolor:
-					sdf_allmodels = sdf_allmodels + "\n" + putModelAtPosition(sdf_yellowconemodel,i,j)
-				elif p == self.conecolor2:
-					sdf_allmodels = sdf_allmodels + "\n" + putModelAtPosition(sdf_blueconemodel,i,j)
-				elif p == self.noisecolor and uniform(0,1)<noiseLevel:
-					sdf_noisemodel = getRandomNoiseModel().join(sdf_model_with_collisions.split("%MODELNAME%"))
-					sdf_allmodels = sdf_allmodels + "\n" + putModelAtPosition(sdf_noisemodel,i,j)
-
-		sdf_main = sdf_allmodels.join(sdf_main.split("%FILLDATA%"))
-
-		sdf_out = open(os.path.join(rospkg.RosPack().get_path('eufs_description'), 'models',GENERATED_FILENAME,"model.sdf"),"w")
-		sdf_out.write(sdf_main)
-		sdf_out.close()
-
-	def getNoiseLevel(self):
-		noiseLevelWidget = self._widget.findChild(QSlider,"Noisiness")
-		return (1.0*(noiseLevelWidget.value()-noiseLevelWidget.minimum()))/(noiseLevelWidget.maximum()-noiseLevelWidget.minimum())
-
-	def launch_button_pressed(self):
-		if self.hasLaunchedROS:
-			#Don't let people press launch twice
-			#There's not really any reason why not to, but it's "undefined behavior"
-			return
-		self.hasLaunchedROS = True
-		uuid = roslaunch.rlutil.get_or_generate_uuid(None, False)
-		roslaunch.configure_logging(uuid)
-
-		print("--------------------------")
-		print("\t\t\tLaunching Nodes...")
-		trackToLaunch = self.launchfileoverride #if we have set a specific file to run regardless of selected file
-		self.launchfileoverride = None          #such as when we use the random generator
-		if not trackToLaunch:
-			trackToLaunch = self._widget.findChild(QComboBox,"WhichTrack").currentText()
-		print("Launching " + trackToLaunch)
-		noiseLevel = self.getNoiseLevel()
-		print("With Noise Level: " + str(noiseLevel))
-		
-		controlMethod = "controlMethod:=speed"
-		if self._widget.findChild(QRadioButton,"SpeedRadio").isChecked():
-			print("With Speed Controls")
-			controlMethod = "controlMethod:=speed"
-		elif self._widget.findChild(QRadioButton,"TorqueRadio").isChecked():
-			print("With Torque Controls")
-			controlMethod = "controlMethod:=torque"
-		
-		#Ideally we would use the commented out 'launch' lines, but the ROSLaunchParent API does not allow sending arguments in Kinetic >:(
-		#So we have to settle for launching this process using Python's Popen instead of the rospy API functions.
-		if self.popenprocess:
-			self.process.kill()
-		self.popenprocess = Popen(["roslaunch",os.path.join(rospkg.RosPack().get_path('eufs_gazebo'), 'launch', trackToLaunch),controlMethod])
-		#launch = roslaunch.parent.ROSLaunchParent(uuid, [os.path.join(rospkg.RosPack().get_path('eufs_gazebo'), 'launch', trackToLaunch)])
-		#launch.start()
-		#self.launches.append(launch)
-
-
-		if self._widget.findChild(QCheckBox,"VisualisatorCheckbox").isChecked():
-			print("And With LIDAR Data Visualisator.")
-			launch = roslaunch.parent.ROSLaunchParent(uuid, [os.path.join(rospkg.RosPack().get_path('eufs_description'), "launch/visualisator.launch")])
-			launch.start()
-			self.launches.append(launch)
-		print("--------------------------")
-
-	def shutdown_plugin(self):
-		# TODO unregister all publishers here
-		print("Shutdown Engaged...")
-		#(Stop all processes)
-		for p in self.processes:
-			p.stop()
-
-		for l in self.launches:
-			l.shutdown()
-
-		#Trying to kill here will make a horrible bug
-		#no idea why.  You'll want: "killall -9 gzserver gzclient" to fix it
-		#if self.popenprocess != None:
-		#	self.popenprocess.kill()
-		#	self.popenprocess = None
-
-		#NUKE IT! (seriously just nuke it)
-		self.nuke_ros()
-
-		#print("Shutdown Complete!")
-
-	def nuke_ros(self):
-		#Try to kill as much as possible
-		#Burn it all to the ground
-		Popen(["killall","-9","gzserver"])
-		Popen(["killall","-9","gzclient"])
-		extranodes = rosnode.get_node_names()
-		extranodes.remove('/rosout')
-		extranodes = [f for f in extranodes if f[:17] != '/rqt_gui_py_node_'] #remove the gui's node from kill list
-		for badnode in extranodes:
-			Popen(["rosnode","kill",badnode])
-
-
-	def save_settings(self, plugin_settings, instance_settings):
-		# TODO save intrinsic configuration, usually using:
-		# instance_settings.set_value(k, v)
-		pass
-
-	def restore_settings(self, plugin_settings, instance_settings):
-		# TODO restore intrinsic configuration, usually using:
-		# v = instance_settings.value(k)
-		pass
-
-	#def trigger_configuration(self):
-		# Comment in to signal that the plugin has a way to configure
-		# This will enable a setting button (gear icon) in each dock widget title bar
-		# Usually used to open a modal configuration dialog
-
-def endtangent(xys):
-	#Calculate direction of outgoing tangent of a set of points
-	#Is an angle!
-	sx = xys[-2][0]
-	sy = xys[-2][1]
-	ex = xys[-1][0]
-	ey = xys[-1][1]
-	return math.atan2((ey-sy),(ex-sx))
-
-def capangle(ang):
-	#Returns angle between 0 and 2*math.pi
-	if ang < 0:
-		return capangle(ang+2*math.pi)
-	elif ang >= 2*math.pi:
-		return capangle(ang-2*math.pi)
-	return ang
-
-def capangle_odd(ang):
-	#Returns angle between -math.pi and math.pi
-	ang = capangle(ang)
-	if ang > math.pi:
-		ang = ang-2*math.pi
-	return ang
-
-def normalizevec(vec):
-	(a,b) = vec
-	mag = math.sqrt(a*a+b*b)
-	return (a/mag,b/mag)
-
-def generateAutocrossTrackdriveTrack(startpoint):
-	#The rules:
-	#	Straights: 		<=80 meters
-	#	Constant Turns:		<=25 meter radius
-	#	Hairpin Turns: 		>=4.5 meter outside radius
-	#	Slalom: 		Cones in a straight line with 7.5 to 12 meter spacing [NOTE: can't be generated at this point, added later]
-	#	Track Width: 		>=3 meters
-	#	Track Length: 		<=1500 meters
-	xys = []
-	curTrackLength = 0
-	curpoint = startpoint
-
-	#Let's start with a small straght
-	(generated, curpoint, deltalength) = generateStraight(startpoint,uniform(80,80),math.pi/8)
-	curTrackLength += deltalength
-	xys.extend(generated)
-
-	#Now we want to set checkpoints to pass through:
-	goalpoints = [(startpoint[0]+150,startpoint[1]),(startpoint[0]+200,startpoint[1]+150),(startpoint[0]-50,startpoint[1]+200)]
-	for goalpoint in goalpoints:
-		(generated, curpoint, length) = generatePathFromPointToPoint(curpoint,goalpoint,endtangent(xys),fuzzradius=20)
-		curTrackLength+= length
-		xys.extend(generated)
-
-	#Now lets head back to the start:
-	(generated, curpoint, length) = generatePathFromPointToPoint(curpoint,startpoint,endtangent(xys),fuzzradius=0)
-	curTrackLength+= length
-	xys.extend(generated)
-
-	if curTrackLength > 1500:
-		print("Track gen failed - track too long, oops!  Retrying.")
-		return generateAutocrossTrackdriveTrack(startpoint)
-
-	return convertPointsToAllPositive(xys)
-
-def generatePathFromPointToPoint(startpoint,endpoint,intangent,depth=20,hairpined=False,manyhairpins=False,fuzzradius=0):
-	#Here we want to get from a to b by randomly placing paths 
-	#[Note: depth parameter is just to limit recursion overflows]
-	#[And hairpined parameter prevents multiple hairpins - we should have at most
-	#one or else its hard to generate nice paths]
-	#[manyhairpins overrides this and allows an arbitrary amount]
-	#[fuzzradius is how close to the end we want to be]
-	length = 0
-	points = []
-	circleradius = uniform(25,25)
-
-
-	"""
-	#--------------------------------------------------
-	#Here lies the circle code that did not take into account the fact that the circle itself changed where the "startpoint" was	
-	#I'm keeping it here incase someone wants to modify it to take that into account.
-	#I gave up and used an approximation method, creating the function generateConstantTurnUntilFacingPoint
-	#--------------------------------------------------
-
-	#First we want to direct ourselves towards endpoint, since intangent is the current direction
-	goaltangent = endtangent([startpoint,endpoint])
-	
-	#We're going to place a cturn to point us in the right direction, but we need to calculate the percent needed
-	#We can get the angles the lines are pointing at using atan
-	#Draw a circle to see why, keep in mind tangent perpendicular to radius!
-	#I've not simplified the numbers so its easier for you to re-derive
-	inangle = math.pi-(math.pi/2-math.atan(intangent))
-	goalangle = math.pi-(math.pi/2-math.atan(goaltangent))
-	finalangle = goalangle-inangle
-	finalpercent = finalangle/(2*math.pi)
-	print("In: " + str(inangle))
-	print("Goal: " + str(goalangle))
-	#---------------------------------------------------
-	"""
-
-	#We want to know ahead of time which way the circle will turn - that way we don't get loopty-loops
-	#where the circle turns nearly all the way around when it would have been better to have the center
-	#on the other side.
-	#We'll do this by calculating the normal we want.
-	#First, we want to know the path from start to goal.
-	#And more specifically, its angle
-	directpathangle = endtangent([startpoint,endpoint])
-	
-	#Our circle code takes in "turnagainstnormal" - alternatively, this parameter is equivalent to passing in
-	#a vector pointing TOWARDS the radius.  So let's calculate that!  If we have the goal be at a "higher" angle
-	#than it, we want the radius to be up, otherwise down.  The angle of it pointing up is simply pi/2 higher than the tangent (90 degrees)
-	normalangle = capangle(math.pi/2 + intangent)
-
-	#We now calculate if we need to add an additional pi to it.
-	#If directpathangle is higher than intangent - but how do we define higher?  We say that it is higher if the
-	#counterclockwise angle difference is smaller than the clockwise difference.
-	if capangle(directpathangle-normalangle)>capangle(directpathangle-directpathangle):
-		normalangle = capangle(math.pi + normalangle)
-
-	#Also flip it if tangent heading in 'negative' direction
-	#if (abs(capangle_odd(intangent))math.pi/2):
-	#	normalangle = capangle(math.pi + normalangle)
-
-	#Finally lets convert this into a normal:
-	thenormal = (1,math.tan(normalangle))
-	
-	#Now let's actually draw the circle!
-	(generated, curpoint,deltalength,output_normal) = generateConstantTurnUntilFacingPoint(startpoint,circleradius,intangent,endpoint,turnagainstnormal = thenormal)
-		#generateConstantTurn(startpoint,circleradius,intangent,circlepercent=finalpercent)
-	length += deltalength
-	points.extend(generated)
-
-	#Check if we're within 80 of the goal:
-	(cx,cy) = points[-1]
-	(ex,ey) = endpoint
-	squaredistance = (ex-cx)*(ex-cx)+(ey-cy)*(ey-cy)
-	#print("--------------------------------")
-	#print(math.sqrt(squaredistance))
-	#print(points[-1])
-	#print(endpoint)
-	#print("++++++++++++++++++++++++++++++++")
-	if squaredistance <= 80*80+fuzzradius*fuzzradius:
-		#We'll just draw a straight to it
-		#print("\n\nSUCCESS!!!\n\n")
-		#print("Fuzz: " + str(squaredistance - 80*80))
-		(generated, curpoint,deltalength) = generateStraight(points[-1],min(math.sqrt(squaredistance),80),endtangent(points))
-		length += deltalength
-		points.extend(generated)
-	else:
-		#Go as far as we can (unless we're very close in which case don't, because it'll cause the next iteration to look weird)
-		straightsize = 80 if squaredistance <= 100*100 else 40
-		(generated, curpoint,deltalength) = generateStraight(points[-1],straightsize,endtangent(points))
-		length += deltalength
-		points.extend(generated)
-		#We'll either do a random cturn or a random hairpin, then continue the journey
-		cturn_or_hairpin = uniform(0,1)
-		makecturn = cturn_or_hairpin < 0.7
-		if makecturn or (hairpined and not manyhairpins):#cturn
-			(generated, curpoint,deltalength,output_normal) = generateConstantTurn(curpoint,uniform(10,25),endtangent(points),
-											circlepercent=uniform(0,0.25),turnagainstnormal = output_normal)
-			length += deltalength
-			points.extend(generated)
-			(generated, curpoint,deltalength,output_normal) = generateConstantTurn(curpoint,uniform(10,25),endtangent(points),
-											circlepercent=uniform(0,0.25),turnagainstnormal = output_normal)
-			length += deltalength
-			points.extend(generated)
-		else:
-			#We only want an even amount of turns so that we can leave heading the same direction we entered.
-			#otherwise due to the way we head towards the path, its basically guaranteed we get a self-intersection.
-			numswitches = 2*randrange(1,3)
-			(generated, curpoint,deltalength) = generateHairpinTurn(curpoint,uniform(4.5,10),endtangent(points),switchbacknum=numswitches)
-			length += deltalength
-			points.extend(generated)
-		#Now we recurse!
-		if depth>0:
-			(generated, curpoint, length) = generatePathFromPointToPoint(curpoint,endpoint,endtangent(points),depth-1,
-											hairpined=hairpined or not makecturn,manyhairpins=manyhairpins,
-											fuzzradius=fuzzradius)
-			length += deltalength
-			points.extend(generated)
-			
-
-
-	return (points,points[-1],length)
-
-def generateHairpinTurn(startpoint,radius,intangent,switchbacknum=None,turnleft=None,wobbliness=None,straightsize=None,circlesize=None,uniformcircles=True):
-	curpoint = startpoint
-	curtangent = intangent
-	length = 0
-	startleftnum = 0 if turnleft else 1
-	
-	#A hairpin has a few choices:
-	#	How many switchbacks
-	#	Direction of first switchback
-	#	"Wobbliness" (circlepercent)
-	#	Size of straightways
-	turnleft = uniform(0,1)<0.5 		if turnleft == None 		else turnleft
-	switchbacknum = randrange(2,10)		if switchbacknum == None	else switchbacknum
-	wobbliness = uniform(0.45,0.55)		if wobbliness == None		else wobbliness
-	straightsize = uniform(10,80)		if straightsize == None		else straightsize
-	circlesize = uniform(10,25)		if circlesize == None		else circlesize
-
-	#We are interested in making sure switchbacks never intersect
-	#If you draw a diagram, this gives you a diamond with angles pi/2,pi/2,L, and pi/2-L where L is:
-	#((2*pi*(1-wobbliness))/2)
-	#Using trigonometry, we can calculate the radius to intersection in terms of the angle and circle radius:
-	#intersect_point = radius * tan(L)
-	#If intersect_point is greater than max_intersection, we're good!
-	#Otherwise we want to cap it there.  So we find the inverse-function for "wobbliness"
-	#1-atan2(intersect_point,radius)/math.pi = wobbliness
-	max_intersection = 50
-	angle_l = (2*math.pi*(1-wobbliness))/2
-	intersect_point = radius * math.tan(angle_l)
-	#print("Point of intersection: "  + str(intersect_point))
-	if intersect_point > max_intersection:
-		#print("Capping wobbliness prevent intersection!")
-		wobbliness = 1-math.atan2(max_intersection,radius)/math.pi
-		#print("New wobbliness: " + str(wobbliness))
-
-	points = []
-	lastnormal = None
-	for a in range(0,switchbacknum):
-		#Switchback starts with a circle, then a line
-		#then we repeat
-		
-		circlesize = circlesize if uniformcircles else uniform(10,25)
-
-		#cturn
-		(generated, curpoint,deltalength,lastnormal) = generateConstantTurn(curpoint,circlesize,curtangent,
-										circlepercent=wobbliness,turnleft=turnleft,
-										turnagainstnormal=lastnormal)
-		length += deltalength
-		points.extend(generated)
-		curtangent = endtangent(points)
-
-		#straight
-		(generated, curpoint,deltalength) = generateStraight(curpoint,straightsize,curtangent)
-		length += deltalength
-		points.extend(generated)
-		curtangent = endtangent(points)
-
-
-	#Returns a list of points and the new edge of the racetrack and the change in length
-	return (points,points[-1],length)
-
-def generateConstantTurnUntilFacingPoint(startpoint,radius,intangent,goalpoint,turnleft=None,turnagainstnormal=None,recursed=False):
-	#This is a split-off version of generateConstantTurn, where instead of taking in a percent to turn around a circle,
-	#We give it a direction we want it to stop at
-	(startx,starty) = startpoint
-
-	#cturns have a choices - turn left or turn right
-	#Then, they can choose what percent of the circle do they want to turn?
-	turnleft = uniform(0,1)<0.5 		if turnleft == None 		else turnleft
-
-	#Calculating this is fairly complicated
-	#Angle of circle normal = 90 degrees + intangent
-	#Slope of normal = -tan(90+normal) if turn left or tan(90+normal) if turn right
-	#Center is at startpoint + (r/sqrt( 1+m^2 )   ,   m*r*sqrt( 1+m^2 )) 
-	circnorm = math.pi/2 + intangent
-	slope    = math.tan(circnorm)
-	purex = radius/math.sqrt( 1+slope*slope )
-	if turnleft:
-		purex*=-1
-
-	centerx = startx + purex
-	centery = starty + slope*purex
-
-	#Now we use a rotation matrix to parameterize intermediate points:
-	#Given start S and center C, any point on the circle angle A away is:
-	#R_A[S-C] + C
-	#Let us box this up in a nice function:
-	def intermediatePoint(s,c,a):
-		(sx,sy) = s
-		(cx,cy) = c
-		cosa    = math.cos(a)
-		sina    = math.sin(a)
-		delx    = sx-cx
-		dely    = sy-cy
-		resultx = cosa*delx-sina*dely+cx
-		resulty = sina*delx+cosa*dely+cy
-		return (resultx,resulty)
-
-	def sgn(x):
-		return -1 if x < 0 else 1 if x > 0 else 0
-
-	angle = 2*math.pi
-	flipper = -1 if intangent*purex > 0 else 1 #multiply by purex because we want to re-flip here if we flipped due to "turnleft"
-
-	if turnagainstnormal != None:
-		#In this case, we want to make sure it turns away from the inputted normal vector
-		#So if normal=(a,b) we want to make sure its (-a,-b)
-		#This is the same as changing turnleft
-		#So first we want to compute the current normal to make sure we don't change anything
-		#Current normal will be:
-		#points[0][0]-centerx,points[0][1]-centery
-		#So we pre-compute the points[0][a] since we haven't yet:
-		points_0 = intermediatePoint(startpoint,(centerx,centery),0)
-		curnormal = normalizevec((points_0[0]-centerx,points_0[1]-centery))
-		turnagainstnormal = normalizevec(turnagainstnormal)
-		
-		#Due to floating point stuffs, we won't check direct equality, we'll just look at the sign!
-		#We want normals to be flipped, so its bad if curnormal has the same sign!
-		#We also only need to check both components just in the case where the normal is (0,y)
-		needtoflip = abs(curnormal[0]-turnagainstnormal[0])<0.1 or abs(curnormal[1]-turnagainstnormal[1])<0.1
-
-		if needtoflip:
-			#print("Flipping!")
-			centerx-=2*purex
-			centery-=2*slope*purex
-			flipper*=-1
-	points = []
-	rangemax = 5000
-	stepsize = 1.0/rangemax
-	for t in range(0,rangemax):
-		points.append(intermediatePoint(startpoint,(centerx,centery),flipper*t*angle*stepsize))
-		if t!=0:
-			#Check if we're pointing in the right direction
-			#This equates to checking if endpoint lies on the line at points[-1] with the appropriate tangent.
-			(sx,sy) = points[-1]
-			(ex,ey) = goalpoint
-			appropriate_angle = endtangent(points)
-			if t > 0.5*rangemax and not recursed:
-				#Very big turn, we don't like that!  We'll just turn the other way instead
-				newturnagainstnormal = None if turnagainstnormal == None else normalizevec((-turnagainstnormal[1],turnagainstnormal[0]))
-				return generateConstantTurnUntilFacingPoint(startpoint,radius,intangent,goalpoint,turnleft=turnleft,
-											turnagainstnormal=newturnagainstnormal,recursed=True)
-			if abs(capangle(appropriate_angle) - capangle(math.atan2((ey-sy),(ex-sx)))) < 0.01:
-				#Would do equality checking but limited precision, we just check if close!
-				#If so, break as we've succeeded our task
-				#print("Found goal at t=" + str(t))
-				break
-
-	#Length of circle is, fortunately, easy!  It's simply radius*angle
-	length = angle*radius
-
-	#Now we want to find the normal vector, because it's useful to have to determine whether it curves inwards or outwards
-	#Normal vectors are always parallel to the vector from center to end point
-	normal = (points[-1][0]-centerx,points[-1][1]-centery)
-
-	#Returns a list of points and the new edge of the racetrack and the change in length
-	return (points,points[-1],length,normal)
-
-
-def generateConstantTurn(startpoint,radius,intangent,turnleft=None,circlepercent=None,turnagainstnormal=None):
-	(startx,starty) = startpoint
-
-	#cturns have a choices - turn left or turn right
-	#Then, they can choose what percent of the circle do they want to turn?
-	turnleft = uniform(0,1)<0.5 		if turnleft == None 		else turnleft
-	circlepercent = uniform(0.1,0.5)	if circlepercent == None 	else circlepercent
-
-	#Calculating this is fairly complicated
-	#Angle of circle normal = 90 degrees + intangent
-	#Slope of normal = -tan(90+normal) if turn left or tan(90+normal) if turn right
-	#Center is at startpoint + (r/sqrt( 1+m^2 )   ,   m*r*sqrt( 1+m^2 )) 
-	circnorm = math.pi/2 + intangent
-	slope    = math.tan(circnorm)
-	purex = radius/math.sqrt( 1+slope*slope )
-	if turnleft:
-		purex*=-1
-
-	centerx = startx + purex
-	centery = starty + slope*purex
-
-	#Now we use a rotation matrix to parameterize intermediate points:
-	#Given start S and center C, any point on the circle angle A away is:
-	#R_A[S-C] + C
-	#Let us box this up in a nice function:
-	def intermediatePoint(s,c,a):
-		(sx,sy) = s
-		(cx,cy) = c
-		cosa    = math.cos(a)
-		sina    = math.sin(a)
-		delx    = sx-cx
-		dely    = sy-cy
-		resultx = cosa*delx-sina*dely+cx
-		resulty = sina*delx+cosa*dely+cy
-		return (resultx,resulty)
-
-	def sgn(x):
-		return -1 if x < 0 else 1 if x > 0 else 0
-
-	angle = 2*math.pi*circlepercent
-	flipper = -1 if intangent*purex > 0 else 1 #multiply by purex because we want to re-flip here if we flipped due to "turnleft"
-
-	if turnagainstnormal != None:
-		#In this case, we want to make sure it turns away from the inputted normal vector
-		#So if normal=(a,b) we want to make sure its (-a,-b)
-		#This is the same as changing turnleft
-		#So first we want to compute the current normal to make sure we don't change anything
-		#Current normal will be:
-		#points[0][0]-centerx,points[0][1]-centery
-		#So we pre-compute the points[0][a] since we haven't yet:
-		points_0 = intermediatePoint(startpoint,(centerx,centery),0)
-		curnormal = normalizevec((points_0[0]-centerx,points_0[1]-centery))
-		turnagainstnormal = normalizevec(turnagainstnormal)
-		
-		#Due to floating point stuffs, we won't check direct equality, we'll just look at the sign!
-		#We want normals to be flipped, so its bad if curnormal has the same sign!
-		#We also only need to check both components just in the case where the normal is (0,y)
-		needtoflip = abs(curnormal[0]-turnagainstnormal[0])<0.1 or abs(curnormal[1]-turnagainstnormal[1])<0.1
-
-		if needtoflip:
-			#print("Flipping!")
-			centerx-=2*purex
-			centery-=2*slope*purex
-			flipper*=-1
-
-	points = [intermediatePoint(startpoint,(centerx,centery),flipper*t*angle*0.01) for t in range(0,100)]
-
-	#Length of circle is, fortunately, easy!  It's simply radius*angle
-	length = angle*radius
-
-	#Now we want to find the normal vector, because it's useful to have to determine whether it curves inwards or outwards
-	#Normal vectors are always parallel to the vector from center to end point
-	normal = (points[-1][0]-centerx,points[-1][1]-centery)
-
-	#Returns a list of points and the new edge of the racetrack and the change in length
-	return (points,points[-1],length,normal)
-
-
-def generateStraight(startpoint,length,angle):
-	(startx,starty) = startpoint
-	
-	#Now create a parameterized function in terms of the angle
-	#This is easy - tan(angle) = slope, so y = mt + starty, x = t + startx
-	#The length of this line is delx^2+dely^2 = length^2, so (mt)^2+t^2 = length^2
-	#implying t^2 = length^2/(1+m^2)
-	#So t ranges from 0 to length/sqrt(1+m^2)
-	slope = math.tan(angle)
-	tmax = length/math.sqrt(1+slope*slope)
-
-	if angle*slope < 0:
-		#I don't actually know the geometrical reason why this is needed :/
-		#But if you don't do this, sometimes the line points the wrong way!
-		tmax *=-1
-	
-	#Since we draw the track by placing lines, we only need the endpoints of this!
-	#(For other curves we approximate by a bunch of small lines, so we'd need full data)
-	#However we actually don't want that because it will mess with the self-intersection-detection
-	#later on.
-	if tmax >= 0:
-		points = [(t+startx,slope*t+starty) for t in range(0,int(math.ceil(tmax)))]
-	else:
-		points = [(-t+startx,-slope*t+starty) for t in range(0,int(math.ceil(-tmax)))]
-	#points = [startpoint,(tmax+startx,slope*tmax+starty)]
-
-
-	#Returns a list of points and the new edge of the racetrack and the change in length
-	return (points,points[-1],length)
-
-def convertPointsToAllPositive(xys):
-	#If we went negative anywhere, shift everything over
-	#Returns shifted points tupled with the range over which the points span
-	#We also want everything converted to an integer!
-	maxnegx = 0
-	maxnegy = 0
-	maxx    = 0
-        maxy    = 0
-
-	for point in xys:
-		(x,y) = point
-		maxnegx = min(x,maxnegx)
-		maxnegy = min(y,maxnegy)
-		maxx    = max(x,maxx)
-		maxy    = max(y,maxy)
-
-	newxys = []
-	padding = 10
-	for point in xys:
-		(x,y) = point
-		newxys.append((int(x-maxnegx)+padding,int(y-maxnegy)+padding))
-
-	return (newxys,int(maxx-maxnegx)+2*padding,int(maxy-maxnegy)+2*padding)
-
-def compactify_points(points):
-	#Given a list of int points, if any two adjacent points are the same then remove one of them
-	removelist = []
-	prevpoint = (-10000,-10000)
-	for a in range(0,len(points)):
-		if (points[a] == prevpoint):
-			removelist.append(a)
-		prevpoint = points[a]
-	for index in sorted(removelist,reverse=True):
-		del points[index]
-	return points
-
-def check_if_overlap(points):
-	#Naive check to see if track overlaps itself
-	#(Won't catch overlaps due to track width, only if track center overlaps)
-	points = points[:-5] #remove end points as in theory that should also be the start point
-	#(I remove extra to be a little generous to it as a courtesy - I don't really care how well the
-	#start loops to the end yet)
-	
-	#Now we want to fill in the diagonally-connected points, otherwise you can imagine
-	#that two tracks moving diagonally opposite could cross eachother inbetween the pixels,
-	#fooling our test.
-	for index in range(1,len(points)):
-		(sx,sy) = points[index-1]
-		(ex,ey) = points[index]
-		manhatdist = abs(ex-sx)+abs(ey-sy)
-		if (manhatdist > 1):
-			#moved diagonally, insert an extra point for it at the end!
-			points.append( (sx+1,sy) if ex > sx else (sx-1,sy) )
-
-	return len(set(points)) != len(points)
-
-# Bezier code taken from https://stackoverflow.com/questions/246525/how-can-i-draw-a-bezier-curve-using-pythons-pil
-
-def make_bezier(xys):
-	# xys should be a sequence of 2-tuples (Bezier control points)
-	n = len(xys)
-	combinations = pascal_row(n-1)
-	def bezier(ts):
-		# This uses the generalized formula for bezier curves
-		# http://en.wikipedia.org/wiki/B%C3%A9zier_curve#Generalization
-		result = []
-		for t in ts:
-			tpowers = (t**i for i in range(n))
-			upowers = reversed([(1-t)**i for i in range(n)])
-			coefs = [c*a*b for c, a, b in zip(combinations, tpowers, upowers)]
-			result.append(
-				tuple(sum([coef*p for coef, p in zip(coefs, ps)]) for ps in zip(*xys)))
-		return result
-	return bezier
-
-def pascal_row(n):
-	# This returns the nth row of Pascal's Triangle
-	result = [1]
-	x, numerator = 1, n
-	for denominator in range(1, n//2+1):
-		# print(numerator,denominator,x)
-		x *= numerator
-		x /= denominator
-		result.append(x)
-		numerator -= 1
-	if n&1 == 0:
-		# n is even
-		result.extend(reversed(result[:-1]))
-	else:
-		result.extend(reversed(result)) 
-	return result
+                        # Remove "blacklisted" files (ones that don't define tracks)
+                        blacklist_filepath = os.path.join(
+                                self.GAZEBO,
+                                'launch/blacklist.txt'
+                        )
+                        blacklist_ = open(blacklist_filepath,"r")
+                        blacklist = [f.strip() for f in blacklist_]
+                        all_files = [f for f in launch_files if not f in blacklist]
+                elif from_type == "png":
+                        # Get images
+                        relevant_path = os.path.join(
+                                self.GAZEBO, 
+                                'randgen_imgs'
+                        )
+                        all_files = [
+                                f for f in listdir(relevant_path) 
+                                if isfile(join(relevant_path, f))
+                        ]
+                elif from_type == "csv":
+                        # Get csvs
+                        relevant_path = os.path.join(
+                                self.GAZEBO, 
+                                'tracks'
+                        )
+                        all_files = [
+                                f for f in listdir(relevant_path) 
+                                if isfile(join(relevant_path, f)) and f[-3:]=="csv"
+                        ]
+
+                #Remove old files from selector
+                the_selector = self.FILE_FOR_CONVERSION_BOX
+                the_selector.clear()
+
+                # Add files to selector
+                for f in all_files:
+                        the_selector.addItem(f)
+
+                self.update_copier()
+
+        def update_preset(self):
+                """When preset is changed, change the sliders accordingly."""
+                which = self.PRESET_SELECTOR.currentText()
+                preset_data = Generator.get_preset(which)
+                self.MIN_STRAIGHT   = preset_data["MIN_STRAIGHT"]
+                self.MAX_STRAIGHT   = preset_data["MAX_STRAIGHT"]
+                self.MIN_CTURN      = preset_data["MIN_CONSTANT_TURN"]
+                self.MAX_CTURN      = preset_data["MAX_CONSTANT_TURN"]
+                self.MIN_HAIRPIN    = preset_data["MIN_HAIRPIN"] * 2
+                self.MAX_HAIRPIN    = preset_data["MAX_HAIRPIN"] * 2
+                self.HAIRPIN_PAIRS  = preset_data["MAX_HAIRPIN_PAIRS"]
+                self.MAX_LENGTH     = preset_data["MAX_LENGTH"]
+                self.LAX_GENERATION = preset_data["LAX_GENERATION"]
+                self.TRACK_WIDTH    = 4
+                self.LAX_CHECKBOX.setChecked(self.LAX_GENERATION)
+
+        def keep_track_of_preset_changes(self):
+                """Hooks up the preset button with the preset_changed function."""
+                self.PRESET_SELECTOR .currentTextChanged.connect(self.preset_changed)
+
+        def preset_changed(self):
+                """
+                When preset is changed, set everything into motion that needs to happen.
+                
+                Updates dropdowns and sliders.
+                """
+                self.ignore_slider_changes = True
+                self.update_preset()
+                self.keep_params_up_to_date()
+                self.keep_sliders_up_to_date()
+                self.ignore_slider_changes = False
+
+        def keep_track_of_slider_changes(self):
+                """
+                Hooks up all sliders with functions to respond to their changes.
+                """
+                self.MIN_STRAIGHT_SLIDER .valueChanged.connect(self.slider_changed)
+                self.MAX_STRAIGHT_SLIDER .valueChanged.connect(self.slider_changed)
+                self.MIN_CTURN_SLIDER    .valueChanged.connect(self.slider_changed)
+                self.MAX_CTURN_SLIDER    .valueChanged.connect(self.slider_changed)
+                self.MIN_HAIRPIN_SLIDER  .valueChanged.connect(self.slider_changed)
+                self.MAX_HAIRPIN_SLIDER  .valueChanged.connect(self.slider_changed)
+                self.HAIRPIN_PAIRS_SLIDER.valueChanged.connect(self.slider_changed)
+                self.MAX_LENGTH_SLIDER   .valueChanged.connect(self.slider_changed)
+                self.TRACK_WIDTH_SLIDER  .valueChanged.connect(self.slider_changed)
+                
+        def slider_changed(self):
+                """When a slider is changed, update the parameters."""
+                if self.ignore_slider_changes: return
+                self.keep_variables_up_to_date()
+                self.keep_params_up_to_date()
+
+        def keep_params_up_to_date(self):
+                """This function keeps the labels next to the sliders up to date."""
+                self.MIN_STRAIGHT_LABEL .setText("MIN_STRAIGHT: "  + str(self.MIN_STRAIGHT))
+                self.MAX_STRAIGHT_LABEL .setText("MAX_STRAIGHT: "  + str(self.MAX_STRAIGHT))
+                self.MIN_CTURN_LABEL    .setText("MIN_CTURN: "     + str(self.MIN_CTURN))
+                self.MAX_CTURN_LABEL    .setText("MAX_CTURN: "     + str(self.MAX_CTURN))
+                self.MIN_HAIRPIN_LABEL  .setText("MIN_HAIRPIN: "   + str((self.MIN_HAIRPIN / 2.0)))
+                self.MAX_HAIRPIN_LABEL  .setText("MAX_HAIRPIN: "   + str((self.MAX_HAIRPIN / 2.0)))
+                self.HAIRPIN_PAIRS_LABEL.setText("HAIRPIN_PAIRS: " + str(self.HAIRPIN_PAIRS))
+                self.MAX_LENGTH_LABEL   .setText("MAX_LENGTH: "    + str(self.MAX_LENGTH))
+                self.TRACK_WIDTH_LABEL  .setText("TRACK_WIDTH: "   + str(self.TRACK_WIDTH))
+
+        def keep_sliders_up_to_date(self):
+                """This function keeps the values of the sliders up to date."""
+                self.set_slider_value("Param_MIN_STRAIGHT",  self.MIN_STRAIGHT)
+                self.set_slider_value("Param_MAX_STRAIGHT",  self.MAX_STRAIGHT)
+                self.set_slider_value("Param_MIN_CTURN",     self.MIN_CTURN)
+                self.set_slider_value("Param_MAX_CTURN",     self.MAX_CTURN)
+                self.set_slider_value("Param_MIN_HAIRPIN",   self.MIN_HAIRPIN)
+                self.set_slider_value("Param_MAX_HAIRPIN",   self.MAX_HAIRPIN)
+                self.set_slider_value("Param_HAIRPIN_PAIRS", self.HAIRPIN_PAIRS)
+                self.set_slider_value("Param_MAX_LENGTH",    self.MAX_LENGTH)
+                self.set_slider_value("Param_TRACK_WIDTH",   self.TRACK_WIDTH)
+
+        def keep_variables_up_to_date(self):
+                """This function keeps LauncherModule's variables up to date."""
+                self.MIN_STRAIGHT  = self.get_slider_value("Param_MIN_STRAIGHT")
+                self.MAX_STRAIGHT  = self.get_slider_value("Param_MAX_STRAIGHT")
+                self.MIN_CTURN     = self.get_slider_value("Param_MIN_CTURN")
+                self.MAX_CTURN     = self.get_slider_value("Param_MAX_CTURN")
+                self.MIN_HAIRPIN   = self.get_slider_value("Param_MIN_HAIRPIN")
+                self.MAX_HAIRPIN   = self.get_slider_value("Param_MAX_HAIRPIN")
+                self.HAIRPIN_PAIRS = self.get_slider_value("Param_HAIRPIN_PAIRS")
+                self.MAX_LENGTH    = self.get_slider_value("Param_MAX_LENGTH")
+                self.TRACK_WIDTH   = self.get_slider_value("Param_TRACK_WIDTH")
+
+        def set_slider_ranges(self):
+                """
+                This function specifies the bounds of the sliders.
+
+                The following values are entirely arbitrary: 
+                                Straights are between 0 and 150
+                                Turns are between 0 and 50
+                                Hairpins are between 0 and 20, 
+                                     and have half-step rather than integer step 
+                                     (hence scaling by 2s)
+                                Hairpin pairs are between 0 and 5
+                                Max Length is between 200 and 2000
+
+                The values were chosen because the sliders needed min and max values, and
+                these values seemed to encompass the range of desired functionality.
+                """
+                min_straight = 0
+                max_straight = 150
+                min_turn = 0
+                max_turn = 50
+                min_hairpin = 0
+                max_hairpin = 20
+                min_hairpin_pairs = 0
+                max_hairpin_pairs = 5
+                min_max_length = 200
+                max_max_length = 2000
+                min_width = 2
+                max_width = 10
+                self.set_slider_data("Param_MIN_STRAIGHT", min_straight, max_straight)
+                self.set_slider_data("Param_MAX_STRAIGHT", min_straight, max_straight)
+                self.set_slider_data("Param_MIN_CTURN", min_turn, max_turn)
+                self.set_slider_data("Param_MAX_CTURN", min_turn, max_turn)
+                self.set_slider_data("Param_MIN_HAIRPIN", min_hairpin * 2, max_hairpin * 2)
+                self.set_slider_data("Param_MAX_HAIRPIN", min_hairpin * 2, max_hairpin * 2)
+                self.set_slider_data("Param_HAIRPIN_PAIRS", min_hairpin_pairs, max_hairpin_pairs)
+                self.set_slider_data("Param_MAX_LENGTH", min_max_length, max_max_length)
+                self.set_slider_data("Param_TRACK_WIDTH", min_width, max_width)
+                
+        def get_slider_value(self, slidername):
+                """Returns the value of the specified slider."""
+                slider = self._widget.findChild(QSlider, slidername)
+                return slider.value()
+
+        def set_slider_value(self, slidername, sliderval):
+                """Sets the value of the specified slider."""
+                slider = self._widget.findChild(QSlider, slidername)
+                slider.setValue(sliderval)
+
+        def set_slider_data(self, slidername, slidermin, slidermax):
+                """Sets the minimum and maximum values of sliders."""
+                slider = self._widget.findChild(QSlider, slidername)
+                slider.setMinimum(slidermin)
+                slider.setMaximum(slidermax)
+               
+                
+
+        def generator_button_pressed(self):
+                """Handles random track generation."""
+
+                self.tell_launchella("Generating Track...")
+
+                isLaxGenerator = self.LAX_CHECKBOX.isChecked()
+                
+                try:
+                        # Prepare and pass in all the parameters of the track
+                        # If track takes too long to generate, this section will
+                        # throw an error, to be handled after this try clause.
+                        if self.PRESET_SELECTOR.currentText() == "Bezier":
+                                the_mode = Generator.BEZIER_MODE
+                        else:
+                                the_mode = Generator.CIRCLE_AND_LINE_MODE
+                        
+                        xys,twidth,theight = Generator.generate({
+                                "MIN_STRAIGHT":self.MIN_STRAIGHT,
+                                "MAX_STRAIGHT":self.MAX_STRAIGHT,
+                                "MIN_CONSTANT_TURN":self.MIN_CTURN,
+                                "MAX_CONSTANT_TURN":self.MAX_CTURN,
+                                "MIN_HAIRPIN":self.MIN_HAIRPIN/2,
+                                "MAX_HAIRPIN":self.MAX_HAIRPIN/2,
+                                "MAX_HAIRPIN_PAIRS":self.HAIRPIN_PAIRS,
+                                "MAX_LENGTH":self.MAX_LENGTH,                                   
+                                "LAX_GENERATION":isLaxGenerator,                                   
+                                "MODE":the_mode
+                        })
+
+                        # If track is generated successfully, turn it into a track image
+                        # and display it to the user.
+                        self.tell_launchella("Loading Image...")
+                        im = Converter.convert(
+                                "xys",
+                                "png",
+                                "rand",
+                                params={
+                                        "track width":self.TRACK_WIDTH,
+                                        "point list":(xys,twidth,theight)
+                                }
+                        )
+
+                        # If full stack selected, convert into csv and launch as well
+                        track_generator_full_stack = self.FULL_STACK_TRACK_GEN_BUTTON
+                        if track_generator_full_stack.isChecked():
+                                img_path = os.path.join(
+                                        self.GAZEBO, 
+                                        'randgen_imgs/rand.png'
+                                )
+                                Converter.convert(
+                                        "png",
+                                        "ALL",
+                                        img_path,
+                                        params={"noise":self.get_noise_level()}
+                                )
+
+                        self.tell_launchella("Track Gen Complete!")
+
+                        im.show()
+                except GenerationFailedException:
+                        rospy.logerr("\nError!  The generator could not generate in time.\n"+
+                                       "Maybe try different parameters?\n"+
+                                       "Turning on Lax Generation and increasing MAX_STRAIGHT"+
+                                       " and MIN_STRAIGHT usually helps.")
+                        self.tell_launchella("Track Gen Failed :(  Try different parameters?")
+
+                self.load_track_and_images()
+
+        def track_from_image_button_pressed(self):
+                """
+                Converts .png to .launch by interfacing with ConversionTools, 
+                then launches said .launch.
+                """
+
+                self.tell_launchella("Preparing to launch image as a track... ")
+                filename = self.IMAGE_SELECTOR.currentText()
+                filename_full = os.path.join(
+                        self.GAZEBO, 
+                        'randgen_imgs/'+filename
+                )
+                image_launcher_full_stack = self.FULL_STACK_IMAGE_BUTTON
+                if image_launcher_full_stack.isChecked():
+                        Converter.convert(
+                                "png",
+                                "ALL",
+                                filename_full,
+                                params={"noise":self.get_noise_level()}
+                        )
+                else:
+                        Converter.convert(
+                                "png",
+                                "launch",
+                                filename_full,
+                                params={"noise":self.get_noise_level()}
+                        )
+
+                self.launch_file_override = filename[:-4] + ".launch"
+                self.load_track_and_images()
+                self.launch_button_pressed()
+
+        
+
+        def get_noise_level(self):
+                """Returns the noise slider's noise level."""
+
+                noise_level_widget = self.NOISE_SLIDER
+                numerator = (1.0 * (noise_level_widget.value() - noise_level_widget.minimum()))
+                denominator = (noise_level_widget.maximum() - noise_level_widget.minimum())
+                return numerator/denominator
+
+        def convert_button_pressed(self):
+                """Handles interfacing with ConversionTools."""
+
+                # Get info from launcher gui
+                from_type = self.CONVERT_FROM_MENU.currentText()
+                to_type   = self.CONVERT_TO_MENU.currentText()
+                filename = self.FILE_FOR_CONVERSION_BOX.currentText()
+                self.tell_launchella("Conversion Button Pressed!  From: " 
+                                    + from_type + " To: " + to_type + " For: " + filename)
+                midpoint_widget = self.MIDPOINT_CHECKBOX
+
+                # Calculate correct full filepath for file to convert
+                if from_type == "png":
+                        filename = os.path.join(self.GAZEBO, 'randgen_imgs/'+filename)
+                elif from_type == "launch":
+                        filename = os.path.join(self.GAZEBO, 'launch/'+filename)
+                elif from_type == "csv":
+                        filename = os.path.join(self.GAZEBO, 'tracks/'+filename)
+
+                # Calculate some parameters
+                suffix = "_CT" if self.SUFFIX_CHECKBOX.isChecked() else ""
+                use_midpoints = midpoint_widget.isVisible() and midpoint_widget.isChecked()
+
+                # Convert it
+                Converter.convert(
+                        from_type,
+                        to_type,
+                        filename,
+                        params={
+                                "noise":self.get_noise_level(),
+                                "midpoints":use_midpoints
+                        },
+                        conversion_suffix=suffix
+                )
+                self.load_track_and_images()
+                self.tell_launchella("Conversion Succeeded!  From: " 
+                                    + from_type + " To: " + to_type + " For: " + filename)
+
+        def launch_button_pressed(self):
+                """Launches Gazebo."""
+
+                if self.has_launched_ros:
+                        # Don't let people press launch twice
+                        return
+                self.has_launched_ros = True
+
+                self.tell_launchella("--------------------------")
+                self.tell_launchella("\t\t\tLaunching Nodes...")
+             
+                # If we have set a specific file to run regardless of selected file,
+                # which may happen when we launch from an image,
+                # we make sure to launch the overriding track instead.
+                track_to_launch = self.launch_file_override
+                self.launch_file_override = None          
+                if not track_to_launch:
+                        track_to_launch = self.TRACK_SELECTOR.currentText()
+
+                # Get noise level
+                self.tell_launchella("Launching " + track_to_launch)
+                noise_level = self.get_noise_level()
+                self.tell_launchella("With Noise Level: " + str(noise_level))
+                
+                # Get control information
+                control_method = "controlMethod:=speed"
+                if self.SPEED_RADIO.isChecked():
+                        self.tell_launchella("With Speed Controls")
+                        control_method = "controlMethod:=speed"
+                elif self.TORQUE_RADIO.isChecked():
+                        self.tell_launchella("With Torque Controls")
+                        control_method = "controlMethod:=torque"
+
+                # Get perception ifnormation
+                perception_stack = ["launch_group:=no_perception"]
+                if self.PERCEPTION_CHECKBOX.isChecked():
+                        perception_stack = []#is on
+
+                # How we launch the simulation changes depending on whether
+                # we are using the eufs_sim package standalone, or working within
+                # the eufs-master ecosystem.
+                dir_to_check = os.path.dirname(os.path.dirname(os.path.dirname(self.GAZEBO)))
+                if dir_to_check.split("/")[-1] == "eufs-master":
+                        launch_location = os.path.join(
+                                                dir_to_check, 
+                                                'launch', 
+                                                'simulation.launch'
+                        )
+                        self.popen_process = self.launch_node_with_args(
+                                                launch_location,
+                                                [
+                                                        control_method,
+                                                        "track:="+track_to_launch.split(".")[0]
+                                                ]+perception_stack
+                                        )
+                else:
+                        self.popen_process = self.launch_node_with_args(
+                                                os.path.join(
+                                                        self.GAZEBO,
+                                                        'launch', 
+                                                        track_to_launch
+                                                ),
+                                                [control_method]
+                                        )
+                        
+                # Launch the visualisator if applicable.
+                if self.VISUALISATOR_CHECKBOX.isChecked():
+                        self.tell_launchella("And With LIDAR Data Visualisator.")
+                        node_path = os.path.join(
+                                rospkg.RosPack().get_path('eufs_description'),
+                                "launch",
+                                "visualisator.launch"
+                        )
+                        self.launch_node(node_path)
+
+                self.tell_launchella("As I have fulfilled my purpose in guiding you "+
+                                     "to launch a track, this launcher will no longer "+
+                                     "react to input.")
+
+
+        def launch_node(self,filepath):
+                """Wrapper for launch_node_with_args"""
+                self.launch_node_with_args(filepath,[])
+
+        def launch_node_with_args(self,filepath,args):
+                """
+                Launches ros node.
+
+                If arguments are supplied, it has to use Popen 
+                rather than the default launch method.
+                """
+                if len(args) > 0:
+                        process = Popen(["roslaunch",filepath]+args)
+                        self.popens.append(process)
+                        return process
+                else:
+                        launch = roslaunch.parent.ROSLaunchParent(self.uuid, [filepath])
+                        launch.start()
+                        self.launches.append(launch)
+                        return launch
+
+        def shutdown_plugin(self):
+                """Unregister all publishers, kill all nodes."""
+                self.tell_launchella("Shutdown Engaged...")
+
+                #(Stop all processes)
+                for p in self.processes:
+                        p.stop()
+
+                for l in self.launches:
+                        l.shutdown()
+
+                for p in self.popens:
+                        p.kill()
+
+                #Manual node killer (needs to be used on nodes opened by Popen):
+                extra_nodes= rosnode.get_node_names()
+                extra_nodes.remove("/eufs_launcher")
+                extra_nodes.remove("/rosout")
+                left_open = len(extra_nodes)
+                if (left_open>0):
+                        rospy.logerr("Warning, after shutting down the launcher, "+
+                                     "these nodes are still running: " + str(extra_nodes))
+
+                nodes_to_kill = [       
+                                        "/cone_ground_truth",
+                                        "/eufs/controller_spawner",
+                                        "/gazebo",
+                                        "/gazebo_gui",
+                                        "/robot_state_publisher",
+                                        "/ros_can_sim",
+                                        "/twist_to_ackermannDrive",
+                                        "/spawn_platform",
+                                        "/eufs_sim_rqt",
+                                ]
+                for bad_node in extra_nodes:
+                        if bad_node in nodes_to_kill:
+                                Popen(["rosnode", "kill", bad_node])
+                Popen(["killall", "-9", "gzserver"])
+                time.sleep(0.25)
+                extra_nodes = rosnode.get_node_names()
+                extra_nodes.remove("/eufs_launcher")
+                extra_nodes.remove("/rosout")
+                if left_open>0:
+                        rospy.logerr("Pruned to: " + str(extra_nodes))
+                
+
+
+
+

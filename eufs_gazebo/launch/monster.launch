@@ -10,12 +10,12 @@
   <arg name="cmd_timeout" default="0.5"/>
   
   <!-- Vehicle pose -->
-  <arg name="x" default="-33"/>
-  <arg name="y" default="30"/>
+  <arg name="x" default="31"/>
+  <arg name="y" default="-30"/>
   <arg name="z" default="0.1"/>
   <arg name="roll" default="0.0"/>
   <arg name="pitch" default="0.0"/>
-  <arg name="yaw" default="0.0"/>
+  <arg name="yaw" default="0.766845450876"/>
   
   <!-- Control Method Argument -->
   <arg name="controlMethod" default="speed"/>
@@ -25,7 +25,7 @@
 
   <!-- Gazebo -->
   <include file="$(find gazebo_ros)/launch/empty_world.launch">
-        <arg name="world_name" value="$(find eufs_gazebo)/worlds/big_track.world"/>
+        <arg name="world_name" value="$(find eufs_gazebo)/worlds/monster.world"/>
     <arg name="debug" value="$(arg debug)"/>
     <arg name="gui" value="$(arg gui)"/>
     <arg name="paused" value="false"/>
@@ -48,7 +48,7 @@
 
   <node name="cone_ground_truth" pkg="eufs_gazebo" type="cone_ground_truth.py" output="screen">
       <param name="view_distance" value="15"/>
-      <param name="track_path" value="$(find eufs_gazebo)/tracks/big_track.csv"/>
+      <param name="track_path" value="$(find eufs_gazebo)/tracks/monster.csv"/>
   </node>
   
 </launch>

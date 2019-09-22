@@ -6,21 +6,21 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>400</width>
+    <width>800</width>
     <height>300</height>
    </rect>
   </property>
   <property name="windowTitle">
    <string>EUFS Launcher</string>
-  </property>s
+  </property>
 
   <!--Drop-Down Box: Options added in code, impossible in a .ui file.-->
   <!--This handles track selection.-->
   <widget class="QLabel" name="TrackLabel">
    <property name="geometry">
     <rect>
-     <x>120</x>
-     <y>70</y>
+     <x>60</x>
+     <y>50</y>
      <width>50</width>
      <height>27</height>
     </rect>
@@ -37,9 +37,9 @@
   <widget class="QComboBox" name="WhichTrack">
    <property name="geometry">
     <rect>
-     <x>170</x>
-     <y>70</y>
-     <width>300</width>
+     <x>90</x>
+     <y>50</y>
+     <width>250</width>
      <height>27</height>
     </rect>
    </property>
@@ -50,14 +50,74 @@
    </property>
   </widget>
 
+  <!-- Basic launcher! -->
+  <widget class="QLabel" name="BasicLauncherLabel">
+   <property name="geometry">
+    <rect>
+     <x>140</x>
+     <y>10</y>
+     <width>200</width>
+     <height>27</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>Basic Launcher</string>
+   </property>
+   <property name="font">
+       <font>
+            <pointsize>14</pointsize>
+       </font>
+   </property>
+  </widget>
+
+  <!--Actual Launch Button-->
+  <widget class="QPushButton" name="LaunchButton">
+   <property name="geometry">
+    <rect>
+     <x>130</x>
+     <y>80</y>
+     <width>170</width>
+     <height>100</height>
+    </rect>
+   </property>
+   <property name="text" >
+      <string>Launch!</string>
+    </property>
+    <property name="font">
+       <font>
+            <pointsize>7</pointsize>
+       </font>
+   </property>
+  </widget>
+
+  <!-- Launcher Parameters! -->
+  <widget class="QLabel" name="LauncherParametersLabel">
+   <property name="geometry">
+    <rect>
+     <x>520</x>
+     <y>10</y>
+     <width>200</width>
+     <height>27</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>Launcher Parameters</string>
+   </property>
+   <property name="font">
+       <font>
+            <pointsize>14</pointsize>
+       </font>
+   </property>
+  </widget>
+
   <!--Radio Buttons-->
   <!--To toggle between torque and speed controls.-->
   <!--If you add a new buttonGroup, don't forget to add it to the bottom of the file.-->
   <widget class="QLabel" name="NoiseLabel">
     <property name="geometry">
        <rect>
-         <x>120</x>
-         <y>100</y>
+         <x>500</x>
+         <y>50</y>
          <width>150</width>
          <height>30</height>
        </rect>
@@ -74,8 +134,8 @@
   <widget class="QRadioButton" name="SpeedRadio">
     <property name="geometry">
       <rect>
-        <x>120</x>
-        <y>120</y>
+        <x>500</x>
+        <y>70</y>
         <width>100</width>
         <height>30</height>
       </rect>
@@ -107,8 +167,8 @@
   <widget class="QRadioButton" name="TorqueRadio">
     <property name="geometry">
       <rect>
-        <x>120</x>
-        <y>140</y>
+        <x>500</x>
+        <y>90</y>
         <width>100</width>
         <height>30</height>
       </rect>
@@ -136,9 +196,9 @@
   <widget class="QCheckBox" name="VisualisatorCheckbox">
   <property name="geometry">
       <rect>
-        <x>250</x>
-        <y>120</y>
-        <width>250</width>
+        <x>600</x>
+        <y>70</y>
+        <width>150</width>
         <height>30</height>
       </rect>
     </property>
@@ -152,18 +212,18 @@
    </property>
   </widget>
 
-  <!--Actual Launch Button-->
-  <widget class="QPushButton" name="LaunchButton">
-   <property name="geometry">
-    <rect>
-     <x>10</x>
-     <y>300</y>
-     <width>170</width>
-     <height>100</height>
-    </rect>
-   </property>
-   <property name="text" >
-      <string>Launch!</string>
+  <!--Perception Launcher-->
+  <widget class="QCheckBox" name="PerceptionCheckbox">
+  <property name="geometry">
+      <rect>
+        <x>600</x>
+        <y>85</y>
+        <width>150</width>
+        <height>30</height>
+      </rect>
+    </property>
+    <property name="text" >
+      <string>Launch Perception Stack</string>
     </property>
     <property name="font">
        <font>
@@ -171,18 +231,371 @@
        </font>
    </property>
   </widget>
+
+  <widget class="QLabel" name="GeneratorParametersLabel">
+   <property name="geometry">
+    <rect>
+     <x>510</x>
+     <y>150</y>
+     <width>200</width>
+     <height>27</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>Generation Parameters</string>
+   </property>
+   <property name="font">
+       <font>
+            <pointsize>14</pointsize>
+       </font>
+   </property>
+  </widget>
+
+  <!-- Generation Parameters -->
+  <widget class="QLabel" name="Label_MIN_STRAIGHT">
+   <property name="geometry">
+    <rect>
+     <x>440</x>
+     <y>180</y>
+     <width>100</width>
+     <height>27</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>MIN_STRAIGHT (###): </string>
+   </property>
+   <property name="font">
+       <font>
+            <pointsize>7</pointsize>
+       </font>
+   </property>
+  </widget>
+  <widget class="QSlider" name="Param_MIN_STRAIGHT">
+   <property name="geometry">
+    <rect>
+     <x>535</x>
+     <y>180</y>
+     <width>60</width>
+     <height>30</height>
+    </rect>
+   </property>
+   <property name="orientation">
+      <enum>Qt::Horizontal</enum>
+    </property>
+    <property name="font">
+       <font>
+            <pointsize>7</pointsize>
+       </font>
+   </property>
+  </widget>
+
+  <widget class="QLabel" name="Label_MAX_STRAIGHT">
+   <property name="geometry">
+    <rect>
+     <x>440</x>
+     <y>200</y>
+     <width>100</width>
+     <height>27</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>MAX_STRAIGHT (###): </string>
+   </property>
+   <property name="font">
+       <font>
+            <pointsize>7</pointsize>
+       </font>
+   </property>
+  </widget>
+  <widget class="QSlider" name="Param_MAX_STRAIGHT">
+   <property name="geometry">
+    <rect>
+     <x>535</x>
+     <y>200</y>
+     <width>60</width>
+     <height>30</height>
+    </rect>
+   </property>
+   <property name="orientation">
+      <enum>Qt::Horizontal</enum>
+    </property>
+    <property name="font">
+       <font>
+            <pointsize>7</pointsize>
+       </font>
+   </property>
+  </widget>
+
+  <widget class="QLabel" name="Label_MIN_CTURN">
+   <property name="geometry">
+    <rect>
+     <x>440</x>
+     <y>220</y>
+     <width>100</width>
+     <height>27</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>MIN_CTURN (###): </string>
+   </property>
+   <property name="font">
+       <font>
+            <pointsize>7</pointsize>
+       </font>
+   </property>
+  </widget>
+  <widget class="QSlider" name="Param_MIN_CTURN">
+   <property name="geometry">
+    <rect>
+     <x>535</x>
+     <y>220</y>
+     <width>60</width>
+     <height>30</height>
+    </rect>
+   </property>
+   <property name="orientation">
+      <enum>Qt::Horizontal</enum>
+    </property>
+    <property name="font">
+       <font>
+            <pointsize>7</pointsize>
+       </font>
+   </property>
+  </widget>
+
+  <widget class="QLabel" name="Label_MAX_CTURN">
+   <property name="geometry">
+    <rect>
+     <x>440</x>
+     <y>240</y>
+     <width>100</width>
+     <height>27</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>MAX_CTURN (###): </string>
+   </property>
+   <property name="font">
+       <font>
+            <pointsize>7</pointsize>
+       </font>
+   </property>
+  </widget>
+  <widget class="QSlider" name="Param_MAX_CTURN">
+   <property name="geometry">
+    <rect>
+     <x>535</x>
+     <y>240</y>
+     <width>60</width>
+     <height>30</height>
+    </rect>
+   </property>
+   <property name="orientation">
+      <enum>Qt::Horizontal</enum>
+    </property>
+    <property name="font">
+       <font>
+            <pointsize>7</pointsize>
+       </font>
+   </property>
+  </widget>
+
+  <widget class="QLabel" name="Label_MIN_HAIRPIN">
+   <property name="geometry">
+    <rect>
+     <x>610</x>
+     <y>180</y>
+     <width>100</width>
+     <height>27</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>MIN_HAIRPIN (###): </string>
+   </property>
+   <property name="font">
+       <font>
+            <pointsize>7</pointsize>
+       </font>
+   </property>
+  </widget>
+  <widget class="QSlider" name="Param_MIN_HAIRPIN">
+   <property name="geometry">
+    <rect>
+     <x>705</x>
+     <y>180</y>
+     <width>60</width>
+     <height>30</height>
+    </rect>
+   </property>
+   <property name="orientation">
+      <enum>Qt::Horizontal</enum>
+    </property>
+    <property name="font">
+       <font>
+            <pointsize>7</pointsize>
+       </font>
+   </property>
+  </widget>
+
+  <widget class="QLabel" name="Label_MAX_HAIRPIN">
+   <property name="geometry">
+    <rect>
+     <x>610</x>
+     <y>200</y>
+     <width>100</width>
+     <height>27</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>MAX_HAIRPIN (###): </string>
+   </property>
+   <property name="font">
+       <font>
+            <pointsize>7</pointsize>
+       </font>
+   </property>
+  </widget>
+  <widget class="QSlider" name="Param_MAX_HAIRPIN">
+   <property name="geometry">
+    <rect>
+     <x>705</x>
+     <y>200</y>
+     <width>60</width>
+     <height>30</height>
+    </rect>
+   </property>
+   <property name="orientation">
+      <enum>Qt::Horizontal</enum>
+    </property>
+    <property name="font">
+       <font>
+            <pointsize>7</pointsize>
+       </font>
+   </property>
+  </widget>
+
+  <widget class="QLabel" name="Label_HAIRPIN_PAIRS">
+   <property name="geometry">
+    <rect>
+     <x>610</x>
+     <y>220</y>
+     <width>100</width>
+     <height>27</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>HAIRPIN_PAIRS (###): </string>
+   </property>
+   <property name="font">
+       <font>
+            <pointsize>7</pointsize>
+       </font>
+   </property>
+  </widget>
+  <widget class="QSlider" name="Param_HAIRPIN_PAIRS">
+   <property name="geometry">
+    <rect>
+     <x>705</x>
+     <y>220</y>
+     <width>60</width>
+     <height>30</height>
+    </rect>
+   </property>
+   <property name="orientation">
+      <enum>Qt::Horizontal</enum>
+    </property>
+    <property name="font">
+       <font>
+            <pointsize>7</pointsize>
+       </font>
+   </property>
+  </widget>
+
+  <widget class="QLabel" name="Label_MAX_LENGTH">
+   <property name="geometry">
+    <rect>
+     <x>610</x>
+     <y>240</y>
+     <width>100</width>
+     <height>27</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>MAX_LENGTH (###): </string>
+   </property>
+   <property name="font">
+       <font>
+            <pointsize>7</pointsize>
+       </font>
+   </property>
+  </widget>
+  <widget class="QSlider" name="Param_MAX_LENGTH">
+   <property name="geometry">
+    <rect>
+     <x>705</x>
+     <y>240</y>
+     <width>60</width>
+     <height>30</height>
+    </rect>
+   </property>
+   <property name="orientation">
+      <enum>Qt::Horizontal</enum>
+    </property>
+    <property name="font">
+       <font>
+            <pointsize>7</pointsize>
+       </font>
+   </property>
+  </widget>
+  <widget class="QLabel" name="Label_TRACK_WIDTH">
+   <property name="geometry">
+    <rect>
+     <x>430</x>
+     <y>350</y>
+     <width>100</width>
+     <height>27</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>MAX_LENGTH (###): </string>
+   </property>
+   <property name="font">
+       <font>
+            <pointsize>7</pointsize>
+       </font>
+   </property>
+  </widget>
+  <widget class="QSlider" name="Param_TRACK_WIDTH">
+   <property name="geometry">
+    <rect>
+     <x>430</x>
+     <y>368</y>
+     <width>70</width>
+     <height>20</height>
+    </rect>
+   </property>
+   <property name="orientation">
+      <enum>Qt::Horizontal</enum>
+    </property>
+    <property name="font">
+       <font>
+            <pointsize>7</pointsize>
+       </font>
+   </property>
+  </widget>
+
   <!--Generate Button-->
   <widget class="QPushButton" name="GenerateButton">
    <property name="geometry">
     <rect>
-     <x>200</x>
+     <x>530</x>
      <y>300</y>
      <width>170</width>
      <height>100</height>
     </rect>
    </property>
    <property name="text" >
-      <string>Generate Random Track</string><!--In the code we change this to "Generate Random Track\n(Experimental)" as this doesn't support \n-->
+      <string>Generate Random Track</string>
     </property>
     <property name="font">
        <font>
@@ -190,11 +603,110 @@
        </font>
    </property>
   </widget>
+
+  <!--Drop-Down Box: Options added in code, impossible in a .ui file.-->
+  <!--This handles preset selection.-->
+  <widget class="QLabel" name="PresetLabel">
+   <property name="geometry">
+    <rect>
+     <x>470</x>
+     <y>270</y>
+     <width>50</width>
+     <height>27</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>Preset: </string>
+   </property>
+   <property name="font">
+       <font>
+            <pointsize>7</pointsize>
+       </font>
+   </property>
+  </widget>
+  <widget class="QComboBox" name="WhichPreset">
+   <property name="geometry">
+    <rect>
+     <x>500</x>
+     <y>270</y>
+     <width>250</width>
+     <height>27</height>
+    </rect>
+   </property>
+   <property name="font">
+       <font>
+            <pointsize>7</pointsize>
+       </font>
+   </property>
+  </widget>
+
+  <!--Lax Generation Button -->
+  <widget class="QCheckBox" name="LaxCheckBox">
+  <property name="geometry">
+      <rect>
+        <x>430</x>
+        <y>300</y>
+        <width>100</width>
+        <height>30</height>
+      </rect>
+    </property>
+    <property name="text" >
+      <string>Lax Generation</string>
+    </property>
+    <property name="font">
+       <font>
+            <pointsize>7</pointsize>
+       </font>
+   </property>
+  </widget>
+
+  <!--Full Stack for Trackgen Button -->
+  <widget class="QCheckBox" name="FullStackTrackGenButton">
+  <property name="geometry">
+      <rect>
+        <x>430</x>
+        <y>330</y>
+        <width>100</width>
+        <height>30</height>
+      </rect>
+    </property>
+    <property name="text" >
+      <string>Full Stack</string>
+    </property>
+    <property name="font">
+       <font>
+            <pointsize>7</pointsize>
+       </font>
+   </property>
+  </widget>
+ 
+
+  <!-- Image launcher! -->
+  <widget class="QLabel" name="ImageLauncherLabel">
+   <property name="geometry">
+    <rect>
+     <x>130</x>
+     <y>210</y>
+     <width>200</width>
+     <height>27</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>Image Launcher</string>
+   </property>
+   <property name="font">
+       <font>
+            <pointsize>14</pointsize>
+       </font>
+   </property>
+  </widget>
+
+
   <!--Load From Image Button-->
   <widget class="QPushButton" name="LoadFromImageButton">
    <property name="geometry">
     <rect>
-     <x>390</x>
+     <x>130</x>
      <y>300</y>
      <width>170</width>
      <height>100</height>
@@ -210,19 +722,59 @@
    </property>
   </widget>
 
+  <!--Full Stack for Image Button -->
+  <widget class="QCheckBox" name="FullStackImageButton">
+  <property name="geometry">
+      <rect>
+        <x>60</x>
+        <y>300</y>
+        <width>100</width>
+        <height>30</height>
+      </rect>
+    </property>
+    <property name="text" >
+      <string>Full Stack</string>
+    </property>
+    <property name="font">
+       <font>
+            <pointsize>7</pointsize>
+       </font>
+   </property>
+  </widget>
+
+  <!-- Image Sketcher! -->
+  <widget class="QPushButton" name="SketcherButton">
+   <property name="geometry">
+    <rect>
+     <x>60</x>
+     <y>330</y>
+     <width>50</width>
+     <height>30</height>
+    </rect>
+   </property>
+   <property name="text" >
+      <string>Draw!</string>
+    </property>
+    <property name="font">
+       <font>
+            <pointsize>7</pointsize>
+       </font>
+   </property>
+  </widget>
+
   <!--Slider-->
   <!--This handles terrain noise generation-->
   <widget class="QLabel" name="NoiseLabel">
    <property name="geometry">
     <rect>
-     <x>350</x>
-     <y>220</y>
+     <x>60</x>
+     <y>240</y>
      <width>50</width>
      <height>27</height>
     </rect>
    </property>
    <property name="text">
-    <string>Noise</string>
+    <string>Noise:</string>
    </property>
    <property name="font">
        <font>
@@ -233,9 +785,9 @@
   <widget class="QSlider" name="Noisiness">
    <property name="geometry">
     <rect>
-     <x>230</x>
+     <x>90</x>
      <y>240</y>
-     <width>280</width>
+     <width>250</width>
      <height>30</height>
     </rect>
    </property>
@@ -254,7 +806,7 @@
   <widget class="QLabel" name="ImageLabel">
    <property name="geometry">
     <rect>
-     <x>210</x>
+     <x>60</x>
      <y>270</y>
      <width>50</width>
      <height>27</height>
@@ -272,9 +824,9 @@
   <widget class="QComboBox" name="WhichImage">
    <property name="geometry">
     <rect>
-     <x>260</x>
+     <x>90</x>
      <y>270</y>
-     <width>280</width>
+     <width>250</width>
      <height>27</height>
     </rect>
    </property>
@@ -285,18 +837,142 @@
    </property>
   </widget>
 
-  <!--Experimental Button-->
-  <widget class="QPushButton" name="Experimentals">
+  <!-- Conversion tools! -->
+  <widget class="QLabel" name="ConversionToolsLabel">
    <property name="geometry">
     <rect>
-     <x>450</x>
+     <x>890</x>
      <y>10</y>
-     <width>150</width>
-     <height>20</height>
+     <width>200</width>
+     <height>27</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>Conversion Tools</string>
+   </property>
+   <property name="font">
+       <font>
+            <pointsize>14</pointsize>
+       </font>
+   </property>
+  </widget>
+
+  <!-- From and To -->
+  <widget class="QLabel" name="ConvertFromLabel">
+   <property name="geometry">
+    <rect>
+     <x>820</x>
+     <y>60</y>
+     <width>50</width>
+     <height>27</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>From: </string>
+   </property>
+   <property name="font">
+       <font>
+            <pointsize>7</pointsize>
+       </font>
+   </property>
+  </widget>
+  <widget class="QComboBox" name="ConvertFrom">
+   <property name="geometry">
+    <rect>
+     <x>850</x>
+     <y>60</y>
+     <width>100</width>
+     <height>27</height>
+    </rect>
+   </property>
+   <property name="font">
+       <font>
+            <pointsize>7</pointsize>
+       </font>
+   </property>
+  </widget>
+
+  <widget class="QLabel" name="ConvertToLabel">
+   <property name="geometry">
+    <rect>
+     <x>980</x>
+     <y>60</y>
+     <width>50</width>
+     <height>27</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>To: </string>
+   </property>
+   <property name="font">
+       <font>
+            <pointsize>7</pointsize>
+       </font>
+   </property>
+  </widget>
+  <widget class="QComboBox" name="ConvertTo">
+   <property name="geometry">
+    <rect>
+     <x>1000</x>
+     <y>60</y>
+     <width>100</width>
+     <height>27</height>
+    </rect>
+   </property>
+   <property name="font">
+       <font>
+            <pointsize>7</pointsize>
+       </font>
+   </property>
+  </widget>
+
+  <!-- File select for conversion -->
+  <widget class="QLabel" name="FileForConversionLabel">
+   <property name="geometry">
+    <rect>
+     <x>820</x>
+     <y>90</y>
+     <width>50</width>
+     <height>27</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>Filename: </string>
+   </property>
+   <property name="font">
+       <font>
+            <pointsize>7</pointsize>
+       </font>
+   </property>
+  </widget>
+  <widget class="QComboBox" name="FileForConversion">
+   <property name="geometry">
+    <rect>
+     <x>860</x>
+     <y>90</y>
+     <width>230</width>
+     <height>27</height>
+    </rect>
+   </property>
+   <property name="font">
+       <font>
+            <pointsize>7</pointsize>
+       </font>
+   </property>
+  </widget>
+
+  <!-- Actual Convert Button! -->
+  <widget class="QPushButton" name="ConvertButton">
+   <property name="geometry">
+    <rect>
+     <x>890</x>
+     <y>120</y>
+     <width>170</width>
+     <height>100</height>
     </rect>
    </property>
    <property name="text" >
-      <string>Experimental</string>
+      <string>Convert</string>
     </property>
     <property name="font">
        <font>
@@ -304,6 +980,163 @@
        </font>
    </property>
   </widget>
+
+
+  <!-- Midpoints Button -->
+  <widget class="QCheckBox" name="MidpointBox">
+  <property name="geometry">
+      <rect>
+        <x>820</x>
+        <y>120</y>
+        <width>80</width>
+        <height>30</height>
+      </rect>
+    </property>
+    <property name="text" >
+      <string>Midpoints</string>
+    </property>
+    <property name="font">
+       <font>
+            <pointsize>7</pointsize>
+       </font>
+   </property>
+  </widget>
+
+  <!-- Suffix Button -->
+  <widget class="QCheckBox" name="SuffixBox">
+  <property name="geometry">
+      <rect>
+        <x>820</x>
+        <y>150</y>
+        <width>80</width>
+        <height>30</height>
+      </rect>
+    </property>
+    <property name="text" >
+      <string>Suffix</string>
+    </property>
+    <property name="font">
+       <font>
+            <pointsize>7</pointsize>
+       </font>
+   </property>
+  </widget>
+
+  <widget class="QLabel" name="RenameFileHeader">
+   <property name="geometry">
+    <rect>
+     <x>890</x>
+     <y>240</y>
+     <width>200</width>
+     <height>27</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>Copy: ####</string>
+   </property>
+   <property name="font">
+       <font>
+            <pointsize>11</pointsize>
+       </font>
+   </property>
+  </widget>
+
+  <!-- Rename file -->
+  <widget class="QLabel" name="RenameFileLable">
+   <property name="geometry">
+    <rect>
+     <x>820</x>
+     <y>270</y>
+     <width>90</width>
+     <height>27</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>Create copy called: </string>
+   </property>
+   <property name="font">
+       <font>
+            <pointsize>7</pointsize>
+       </font>
+   </property>
+  </widget>
+  <widget class="QLineEdit" name="RenameFileTextbox">
+   <property name="geometry">
+    <rect>
+     <x>910</x>
+     <y>270</y>
+     <width>200</width>
+     <height>27</height>
+    </rect>
+   </property>
+   <property name="font">
+       <font>
+            <pointsize>7</pointsize>
+       </font>
+   </property>
+  </widget>
+
+  <!-- Actual Rename Button! -->
+  <widget class="QPushButton" name="RenameButton">
+   <property name="geometry">
+    <rect>
+     <x>890</x>
+     <y>300</y>
+     <width>170</width>
+     <height>100</height>
+    </rect>
+   </property>
+   <property name="text" >
+      <string>Copy</string>
+    </property>
+    <property name="font">
+       <font>
+            <pointsize>7</pointsize>
+       </font>
+   </property>
+  </widget>
+
+  <!-- Full Stack Button -->
+  <widget class="QCheckBox" name="FullStackCopyButton">
+  <property name="geometry">
+      <rect>
+        <x>820</x>
+        <y>300</y>
+        <width>80</width>
+        <height>30</height>
+      </rect>
+    </property>
+    <property name="text" >
+      <string>Full Stack</string>
+    </property>
+    <property name="font">
+       <font>
+            <pointsize>7</pointsize>
+       </font>
+   </property>
+  </widget>
+
+  <!-- User Feedback Label -->
+  <widget class="QLabel" name="UserFeedbackLabel">
+   <property name="geometry">
+    <rect>
+     <x>10</x>
+     <y>400</y>
+     <width>800</width>
+     <height>27</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>Welcome to the launcher!  I'm Launchella, your wonderful assistant.</string>
+   </property>
+   <property name="font">
+       <font>
+            <pointsize>7</pointsize>
+       </font>
+   </property>
+  </widget>
+
+
 
 
  </widget>

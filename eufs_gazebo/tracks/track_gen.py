@@ -18,6 +18,8 @@ from scipy.spatial import cKDTree
 from xml.dom import minidom
 import argparse
 import os
+import rospkg
+import rospy
 
 
 class Track:
@@ -30,6 +32,14 @@ class Track:
         self.yellow_track = None
         self.big_orange_cones = None
         self.orange_cones = None
+        self.active_noise = None
+        self.inactive_noise = None
+
+        # Car data in the format of ("car_start", x, y, yaw)
+        # It can be left as ("car_start", 0, 0, 0), only relevant when fed into track_gen through 
+        # `eufs_launcher/ConversionTools`
+        # as in that case it needs to preserve car data so that the conversion is fully bijective.
+        self.car_start_data = ("car_start", 0.0, 0.0, 0.0)
 
     def load_csv(self, file_path):
         """Loads CSV file of cone location data and store it in the class.
@@ -47,8 +57,9 @@ class Track:
             print("Please give me a .csv file. Exitting")
             return
 
-        data = pd.read_csv(file_path, names=["tag", "x", "y"], skiprows=1)
+        data = pd.read_csv(file_path, names=["tag", "x", "y","direction"], skiprows=1)
         self.blue_cones = np.array(data[data.tag == "blue"][["x", "y"]])
+	self.car = np.array(data[data.tag == "car_start"][["x", "y","direction"]])
         self.yellow_cones = np.array(data[data.tag == "yellow"][["x", "y"]])
         self.big_orange_cones = np.array(data[data.tag == "big_orange"][["x", "y"]])
         self.orange_cones = np.array(data[data.tag == "orange"][["x", "y"]])
@@ -73,35 +84,48 @@ class Track:
         yellow = []
         orange = []
         big_orange = []
+        active_noise = []
+        inactive_noise = []
 
         # iterate over all links of the model
         if len(root[0].findall("link")) != 0:
             for child in root[0].iter("link"):
                 pose = child.find("pose").text.split(" ")[0:2]
-                mesh_str = child.find("visual")[0][0][0].text.split("/")[-1]
-
+                mesh_str = child.find("visual")[0][0][0].text.split("/")[-1].split(".")[0]
                 # indentify cones by the name of their mesh
-                if "blue" in mesh_str:
+                if "cone_blue" == mesh_str:
                     blue.append(pose)
-                elif "yellow" in mesh_str:
+                elif "cone_yellow" == mesh_str:
                     yellow.append(pose)
-                elif "big" in mesh_str:
+                elif "cone_big" == mesh_str:
                     big_orange.append(pose)
+                elif "cone" == mesh_str:
+                    orange.append(pose)
+                else:
+                    active_noise.append(pose)
 
-        elif len(root[0].findall("include")) != 0:
+        # handle hidden links
+        if len(root[0].findall("ghostlink")) != 0:
+            for child in root[0].iter("ghostlink"):
+                pose = child.find("pose").text.split(" ")[0:2]
+                inactive_noise.append(pose)
+
+        # handle includes
+        if len(root[0].findall("include")) != 0:
             for child in root[0].iter("include"):
                 pose = child.find("pose").text.split(" ")[0:2]
-                mesh_str = child.find("uri").text.split("/")[-1]
+                mesh_str = child.find("uri").text.split("/")[-1].split(".")[0]
 
                 # indentify cones by the name of their mesh
-                if "blue" in mesh_str:
+                if "blue_cone" == mesh_str:
                     blue.append(pose)
-                elif "yellow" in mesh_str:
+                elif "yellow_cone" == mesh_str:
                     yellow.append(pose)
-                elif "big" in mesh_str:
+                elif "big_cone" == mesh_str:
                     big_orange.append(pose)
-                elif "orange" in mesh_str:
+                elif "orange_cone" == mesh_str:
                     orange.append(pose)
+
 
         # convert all lists to numpy as arrays for efficiency
         if len(blue) != 0:
@@ -123,6 +147,13 @@ class Track:
             self.orange_cones = np.array(orange, dtype="float64")
         else:
             print("No orange cones found")
+
+        if len(active_noise) != 0:
+            self.active_noise = np.array(active_noise, dtype = "float64")
+
+        if len(inactive_noise) != 0:
+            self.inactive_noise = np.array(inactive_noise, dtype = "float64")
+
 
     def generate_tracks(self):
         """Generates blue, yellow and centerline tracks for the course
@@ -247,7 +278,7 @@ class Track:
         if filename.find(".csv") == -1:
             filename = filename + ".csv"
 
-        df = pd.DataFrame(columns=["tag", "x", "y"])
+        df = pd.DataFrame(columns=["tag", "x", "y","direction"])
 
         # assuming there always are blue and yellow cones
         df["x"] = np.hstack((self.blue_cones[:, 0], self.yellow_cones[:, 0]))
@@ -276,8 +307,26 @@ class Track:
             df["y"] = np.hstack((df["y"].dropna().values, self.midpoints[:, 1]))
             df["tag"].iloc[-self.midpoints.shape[0]:] = "midpoint"
 
-        df.to_csv(filename, index=False)
+        if self.active_noise is not None:
+            empty = pd.DataFrame(np.nan, index=np.arange(self.active_noise.shape[0]), columns=["tag", "x", "y"])
+            df = df.append(empty)
+            df["x"] = np.hstack((df["x"].dropna().values, self.active_noise[:, 0]))
+            df["y"] = np.hstack((df["y"].dropna().values, self.active_noise[:, 1]))
+            df["tag"].iloc[-self.active_noise.shape[0]:] = "active_noise"
 
+        if self.inactive_noise is not None:
+            empty = pd.DataFrame(np.nan, index=np.arange(self.inactive_noise.shape[0]), columns=["tag", "x", "y"])
+            df = df.append(empty)
+            df["x"] = np.hstack((df["x"].dropna().values, self.inactive_noise[:, 0]))
+            df["y"] = np.hstack((df["y"].dropna().values, self.inactive_noise[:, 1]))
+            df["tag"].iloc[-self.inactive_noise.shape[0]:] = "inactive_noise"
+
+        #Add car data (always ("car_start",0,0,0) unless this file is called from ConversionTools))
+        cardf = pd.DataFrame([self.car_start_data], columns=["tag","x","y","direction"])  
+        df["direction"] = 0
+        df = df.append(cardf)
+
+        df.to_csv(filename, index=False,columns=["tag","x","y","direction"])
         print("Succesfully saved to csv")
 
     def save_sdf(self, model_name):
@@ -339,8 +388,11 @@ class Track:
         Returns:
             Numpy array with point p removed
         """
-        points = ps[np.all(ps != p, 1), :]
-        return points
+        points = []
+        for point in ps: 
+            if list(p) != list(point):
+                points.append(point)
+        return np.array(points)
 
     def find_closest(self, p, ps):
         """Find the closes point to p from points ps
@@ -394,7 +446,6 @@ class Track:
             current_point = closest_cone
 
         ordered.append(current_point)
-
         return np.array(ordered)
 
     def rotate_origin_only(self, xy, radians):
@@ -407,7 +458,61 @@ class Track:
         out = np.vstack((xx, yy))
         return out.T
 
+
+    @staticmethod
+    def runConverter(track_name,
+                     midpoints=False,
+                     car_start_data=("car_start",0.0,0.0,0.0),
+                     conversion_suffix = ""):
+        """
+        Creates a csv from the sdf passed in (through track_name)
+
+        track_name:        The name (not path) of the folder of the sdf for the track.
+                           For example, if you desire a csv for the track with sdf stored
+                           in YourTrack/model.sdf, then track_name should be "YourTrack".
+
+        midpoints:         A boolean, when true the csv will also be populated with data
+                           about the midpoints of cones in the track
+
+        car_start_data:    Information about the start location of the car, as it
+                           cannot be gleaned from the sdf.  It is used to preserve
+                           information so that csvs can be converted back to .launches,
+                           and is not necessary if you do not desire that functionality.
+
+        conversion_suffix: This string will be appended to the end of track_name when
+                           naming the csv file.  It is useful if there may already be
+                           a csv file for the track and for whatever reason you do not
+                           desire to overwrite it.
+        """
+        track_path = os.path.join(rospkg.RosPack().get_path('eufs_description'), "models",
+                                  track_name, "model.sdf")
+
+        # check if eufs_description exists
+        try:
+            assert os.path.isdir(rospkg.RosPack().get_path('eufs_description'))
+        except:
+            raise(AssertionError(("Can't find eufs_description directory."
+                  "it is in the same location as eufs_gazebo!")))
+
+        # check if requested track exists
+        try:
+            assert os.path.exists(track_path)
+        except:
+            raise(AssertionError(("Can't find track called {} make sure that it is"
+                  "within eufs_description/models/".format(track_name))))
+    
+        track = Track()
+	track.car_start_data = car_start_data
+        track.load_sdf(track_path)
+        if midpoints:
+            track.generate_midpoints()
+            track.generate_tracks()
+        track.save_csv(os.path.join(rospkg.RosPack().get_path('eufs_gazebo'), "tracks",track_name+conversion_suffix))
+
 if __name__ == "__main__":
+    #Just a heads up, you can run this with a gui by running the launcher:
+    #`roslaunch eufs_launcher eufs_launcher.launch`
+    #And using the "Conversion Tools" section.
     parser = argparse.ArgumentParser(description="Generates a CSV file of cone\
                                      locations based on the SDF Gazebo models")
     parser.add_argument('track_name', metavar='track_name', type=str,
@@ -416,28 +521,4 @@ if __name__ == "__main__":
                         help="If true, midpoints will be generated and saved in the CSV")
 
     args = parser.parse_args()
-    d = os.path.abspath(__file__)
-    home = os.path.dirname(os.path.dirname(os.path.dirname(d)))
-    track_path = os.path.join(home, "eufs_description", "models",
-                              args.track_name, "model.sdf")
-
-    # check if eufs_description exists
-    try:
-        assert os.path.isdir(os.path.join(home, "eufs_description"))
-    except:
-        raise(AssertionError(("Can't find eufs_description directory."
-              "it is in the same location as eufs_gazebo!")))
-
-    # check if requested track exists
-    try:
-        assert os.path.exists(track_path)
-    except:
-        raise(AssertionError(("Can't find track called {} make sure that it is"
-              "within eufs_description/models/".format(args.track_name))))
-
-    track = Track()
-    track.load_sdf(track_path)
-    if args.midpoints:
-        track.generate_midpoints()
-        track.generate_tracks()
-    track.save_csv(args.track_name)
+    runConverter(args.track_name,args.midpoints)
