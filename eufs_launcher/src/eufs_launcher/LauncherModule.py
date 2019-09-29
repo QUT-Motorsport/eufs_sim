@@ -642,11 +642,9 @@ class EufsLauncher(Plugin):
                         # Prepare and pass in all the parameters of the track
                         # If track takes too long to generate, this section will
                         # throw an error, to be handled after this try clause.
-                        if self.PRESET_SELECTOR.currentText() == "Bezier":
-                                the_mode = Generator.BEZIER_MODE
-                        else:
-                                the_mode = Generator.CIRCLE_AND_LINE_MODE
-                        
+                        component_data = Generator.get_preset( 
+                                self.PRESET_SELECTOR.currentText()
+                        )["COMPONENTS"]
                         xys,twidth,theight = Generator.generate({
                                 "MIN_STRAIGHT":self.MIN_STRAIGHT,
                                 "MAX_STRAIGHT":self.MAX_STRAIGHT,
@@ -657,7 +655,7 @@ class EufsLauncher(Plugin):
                                 "MAX_HAIRPIN_PAIRS":self.HAIRPIN_PAIRS,
                                 "MAX_LENGTH":self.MAX_LENGTH,                                   
                                 "LAX_GENERATION":isLaxGenerator,                                   
-                                "MODE":the_mode
+                                "COMPONENTS":component_data
                         })
 
                         # If track is generated successfully, turn it into a track image

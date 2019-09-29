@@ -1,11 +1,12 @@
 import math
 from PIL import Image
 from PIL import ImageDraw
-from random import randrange, uniform, choice
+import random
 import rospy
 from scipy.special import binom
 from LauncherUtilities import *
 import numpy as np
+import collections
 
 class GenerationFailedException(Exception):
         """Raised when generator takes too long."""
@@ -27,10 +28,9 @@ class TrackGenerator:
         special_micro_list = []
         previous_micro = ""
 
-
-        # Modes
-        CIRCLE_AND_LINE_MODE = "Circle&Line"
-        BEZIER_MODE          = "Bezier"
+        # The component__weighting_dict stores the weightings for each component
+        # And defaults to 0 if the component isn't found.
+        component_weighting_dict = collections.defaultdict(lambda: 0)
 
         # The rules for autocross:
         #        Straights:                     <=80 meters
@@ -49,7 +49,6 @@ class TrackGenerator:
         MAX_HAIRPIN = 10
         MAX_TRACK_LENGTH = 1500
         LAX_GENERATION = False
-        TRACK_MODE = CIRCLE_AND_LINE_MODE
         MAX_HAIRPIN_PAIRS = 1
         MIN_HAIRPIN_PAIRS = 0
 
@@ -81,7 +80,11 @@ class TrackGenerator:
                                 "MAX_HAIRPIN_PAIRS":3,
                                 "MAX_LENGTH":1500,
                                 "LAX_GENERATION":False,
-                                "MODE":TrackGenerator.CIRCLE_AND_LINE_MODE
+                                "COMPONENTS":{
+                                        "STRAIGHT":1,
+                                        "CONSTANT_TURN":0.7,
+                                        "HAIRPIN_TURN":0.3
+                                }
                         },
                         "Small Straights": {
                                 "MIN_STRAIGHT":5,
@@ -93,7 +96,11 @@ class TrackGenerator:
                                 "MAX_HAIRPIN_PAIRS":3,
                                 "MAX_LENGTH":700,
                                 "LAX_GENERATION":True,
-                                "MODE":TrackGenerator.CIRCLE_AND_LINE_MODE
+                                "COMPONENTS":{
+                                        "STRAIGHT":1,
+                                        "CONSTANT_TURN":0.7,
+                                        "HAIRPIN_TURN":0.3
+                                }
                         },
                         "Computer Friendly": {
                                 "MIN_STRAIGHT":10,
@@ -105,19 +112,28 @@ class TrackGenerator:
                                 "MAX_HAIRPIN_PAIRS":3,
                                 "MAX_LENGTH":500,
                                 "LAX_GENERATION":True,
-                                "MODE":TrackGenerator.CIRCLE_AND_LINE_MODE
+                                "COMPONENTS":{
+                                        "STRAIGHT":1,
+                                        "CONSTANT_TURN":0.7,
+                                        "HAIRPIN_TURN":0.3
+                                }
                         },
-                        "Bezier": {
-                                "MIN_STRAIGHT":10,
-                                "MAX_STRAIGHT":80,
-                                "MIN_CONSTANT_TURN":5,
-                                "MAX_CONSTANT_TURN":15,
+                        "Bezier Small Straights": {
+                                "MIN_STRAIGHT":5,
+                                "MAX_STRAIGHT":40,
+                                "MIN_CONSTANT_TURN":10,
+                                "MAX_CONSTANT_TURN":25,
                                 "MIN_HAIRPIN":4.5,
                                 "MAX_HAIRPIN":10,
                                 "MAX_HAIRPIN_PAIRS":3,
-                                "MAX_LENGTH":500,
+                                "MAX_LENGTH":700,
                                 "LAX_GENERATION":True,
-                                "MODE":TrackGenerator.BEZIER_MODE
+                                "COMPONENTS":{
+                                        "STRAIGHT":1,
+                                        "CONSTANT_TURN":0.7,
+                                        "HAIRPIN_TURN":0.3,
+                                        "BEZIER":10
+                                }
                         }
                 }
 
@@ -176,7 +192,10 @@ class TrackGenerator:
                 TrackGenerator.MIN_HAIRPIN_PAIRS = 1 if TrackGenerator.MAX_HAIRPIN_PAIRS > 0 else 0
                 TrackGenerator.MAX_TRACK_LENGTH = values["MAX_LENGTH"]
                 TrackGenerator.LAX_GENERATION = values["LAX_GENERATION"]
-                TrackGenerator.TRACK_MODE = values["MODE"]
+                TrackGenerator.component_weighting_dict = collections.defaultdict(
+                        lambda: 0,
+                        values["COMPONENTS"]
+                )
 
         @staticmethod
         def generate(values):
@@ -208,9 +227,9 @@ class TrackGenerator:
                                 raise GenerationFailedException
                 
                 # Now let's randomly flip it a bit to spice it up
-                if uniform(0,1) < 0.5:#flip xys by x
+                if random.uniform(0,1) < 0.5:#flip xys by x
                         xys = [(-x+twidth,y) for (x,y) in xys]
-                if uniform(0,1) < 0.5:#flip xys by y
+                if random.uniform(0,1) < 0.5:#flip xys by y
                         xys = [(x,-y+theight) for (x,y) in xys]
 
                 return (xys,twidth,theight)
@@ -528,8 +547,15 @@ def get_random_micro(type_of_micro):
                     and x[0] not in TrackGenerator.double_placement_set
                 )
         ]
+        weightings = [
+                TrackGenerator.component_weighting_dict[x[0]] for x in list_to_check
+        ]
 
-        return choice(list_to_check)
+        # In python 3, we would use random.choices(list_to_check, weightings)
+        # This doesn't exist in python 2, so for now we have implemented our
+        # own version of it.
+        # random_choices is defined in LauncherUtilities.py
+        return random_choices(list_to_check, weightings)
 
 def use_micro(micro_tuple):
         """
@@ -658,7 +684,7 @@ def generate_random_track(start_point):
         point_in    = points_out[-1]
         tangent_out = initial_tangent
 
-        points_out, tangent_out, normal_out, added_length = connector_constant_turn(
+        points_out, tangent_out, normal_out, added_length = get_connector()(
                 point_in,
                 start_point,
                 tangent_in,
@@ -777,7 +803,7 @@ def generate_point_to_point(point_in,
                 # Now we add some variance by choosing between cturns or hairpins
                 # There is no special significance to the 70% value, it happens to
                 # get a good balance.
-                make_cturn = uniform(0, 1) < 0.7
+                make_cturn = random.uniform(0, 1) < 0.7
 
                 # But of course, we can't draw a hairpin if we've drawn too many already.
                 if make_cturn or (hairpined and not many_hairpins):
@@ -787,7 +813,7 @@ def generate_point_to_point(point_in,
                                         tangent_in,
                                         normal_in,
                                         params = {
-                                                "circle_percent":uniform(0.1, 0.3)
+                                                "circle_percent":random.uniform(0.1, 0.3)
                                         }
                                 )
                         )
@@ -808,7 +834,7 @@ def generate_point_to_point(point_in,
                                         tangent_in,
                                         normal_in,
                                         params = {
-                                                "circle_percent":uniform(0.1, 0.3)
+                                                "circle_percent":random.uniform(0.1, 0.3)
                                         }
                                 )
                         )
@@ -826,7 +852,7 @@ def generate_point_to_point(point_in,
                         # heading the same direction we entered.
                         # Otherwise due to the way we head towards the path, 
                         # its basically guaranteed we get a self-intersection.
-                        num_switches = 2*randrange(
+                        num_switches = 2*random.randrange(
                                 TrackGenerator.MIN_HAIRPIN_PAIRS,
                                 TrackGenerator.MAX_HAIRPIN_PAIRS
                         )
@@ -922,7 +948,7 @@ def generic_straight(point_in,
         if "length" in params:
                 length = params["length"]
         else:
-                length = uniform(TrackGenerator.MIN_STRAIGHT,TrackGenerator.MAX_STRAIGHT)
+                length = random.uniform(TrackGenerator.MIN_STRAIGHT,TrackGenerator.MAX_STRAIGHT)
 
         # Prepare outputs
         straight_func = parametric_straight(tangent_in,point_in,length)
@@ -955,7 +981,7 @@ def generic_constant_turn(point_in,
         if "turn_against_normal" in params:
                 turn_against_normal = params["turn_against_normal"]
         else:
-                turn_against_normal = uniform(0,1) < 0.5
+                turn_against_normal = random.uniform(0,1) < 0.5
 
         if turn_against_normal:
                 # We need to flip our reference frame.
@@ -964,13 +990,13 @@ def generic_constant_turn(point_in,
         if "radius" in params:
                 radius = params["radius"]
         else: 
-                radius = uniform(TrackGenerator.MIN_CONSTANT_TURN,TrackGenerator.MAX_CONSTANT_TURN)
+                radius = random.uniform(TrackGenerator.MIN_CONSTANT_TURN,TrackGenerator.MAX_CONSTANT_TURN)
 
         if "circle_percent" in params:
                 circle_percent = params["circle_percent"]
         else: 
                 # Note: if circles turn too much, risk of self-intersection rises dramatically.
-                circle_percent = uniform(0.1,0.5)
+                circle_percent = random.uniform(0.1,0.5)
 
         center = add_vectors(point_in, scale_vector(normal_in,radius))
 
@@ -1033,7 +1059,7 @@ def generic_hairpin_turn(point_in,
         if "turn_against_normal" in params:
                 turn_against_normal = params["turn_against_normal"]
         else:
-                turn_against_normal = uniform(0,1)<0.5
+                turn_against_normal = random.uniform(0,1)<0.5
 
         if turn_against_normal:
                 # We need to flip our reference frame.
@@ -1042,27 +1068,27 @@ def generic_hairpin_turn(point_in,
         if "radius" in params:
                 radius = params["radius"]
         else: 
-                radius = uniform(TrackGenerator.MIN_CONSTANT_TURN,TrackGenerator.MAX_CONSTANT_TURN)
+                radius = random.uniform(TrackGenerator.MIN_CONSTANT_TURN,TrackGenerator.MAX_CONSTANT_TURN)
 
         if "uniform_circles" in params:
                 uniform_circles = params["uniform_circles"]
         else: 
-                uniform_circles = uniform(0, 1) < 0.5
+                uniform_circles = random.uniform(0, 1) < 0.5
 
         if "straight_length" in params:
                 straight_length = params["straight_length"]
         else:
-                straight_length = uniform(TrackGenerator.MIN_STRAIGHT,TrackGenerator.MAX_STRAIGHT)
+                straight_length = random.uniform(TrackGenerator.MIN_STRAIGHT,TrackGenerator.MAX_STRAIGHT)
 
         if "wobbliness" in params:
                 wobbliness = params["wobbliness"]
         else:
-                wobbliness = uniform(0.45, 0.55)
+                wobbliness = random.uniform(0.45, 0.55)
 
         if "switchbacks" in params:
                 switchbacks = params["switchbacks"]
         else:
-                switchbacks = 2 * randrange(
+                switchbacks = 2 * random.randrange(
                         TrackGenerator.MIN_HAIRPIN_PAIRS,
                         TrackGenerator.MAX_HAIRPIN_PAIRS
                 )
@@ -1090,7 +1116,7 @@ def generic_hairpin_turn(point_in,
 
                 # Get the desired radius of the circle
                 if not uniform_circles:
-                        radius = uniform(
+                        radius = random.uniform(
                                 TrackGenerator.MIN_CONSTANT_TURN, 
                                 TrackGenerator.MAX_CONSTANT_TURN
                         )
@@ -1155,7 +1181,7 @@ def refocus_constant_turn(point_in,
         if "turn_against_normal" in params:
                 turn_against_normal = params["turn_against_normal"]
         else:
-                turn_against_normal = uniform(0,1) < 0.5
+                turn_against_normal = random.uniform(0,1) < 0.5
 
         if turn_against_normal:
                 # We need to flip our reference frame.
@@ -1164,7 +1190,9 @@ def refocus_constant_turn(point_in,
         if "radius" in params:
                 radius = params["radius"]
         else: 
-                radius = uniform(TrackGenerator.MIN_CONSTANT_TURN,TrackGenerator.MAX_CONSTANT_TURN)
+                radius = random.uniform(
+                        TrackGenerator.MIN_CONSTANT_TURN,TrackGenerator.MAX_CONSTANT_TURN
+                )
 
         if "recursed" in params:
                 recursed = params["recursed"]
@@ -1275,7 +1303,7 @@ def connector_constant_turn(point_in,
         )
         circle_turn_angle = math.pi - outer_turn_angle
         circle_turn_percent = circle_turn_angle / (2 * math.pi)
-        circle_radius = uniform(
+        circle_radius = random.uniform(
                 TrackGenerator.MIN_CONSTANT_TURN,
                 TrackGenerator.MAX_CONSTANT_TURN
         )
@@ -1356,11 +1384,11 @@ def connector_bezier(point_in,
         if "scale_in" in params:
                 scale_in = params["scale_in"]
         else:
-                scale_in = uniform(10,100)
+                scale_in = random.uniform(10,100)
         if "scale_out" in params:
                 scale_out = params["scale_out"]
         else:
-                scale_out = uniform(10,100)
+                scale_out = random.uniform(10,100)
 
 
         # The incoming tangent is the same as the line from P0 to P1

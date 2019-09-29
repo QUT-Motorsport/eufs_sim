@@ -1,5 +1,6 @@
 import math
 from random import uniform
+import rospy
 
 def calculate_tangent_angle(xys):
         """
@@ -137,4 +138,32 @@ def check_if_overlap(points):
                         points.append( (sx + 1, sy) if ex > sx else (sx - 1, sy) )
 
         return len(set(points)) != len(points)
+
+def random_choices(list_to_check, weightings):
+        """
+        Chooses a random element from list_to_check based on weightings.
+
+        Same functionality as random.choices, which does not exist in python 2.
+        """
+
+        # We will choose a random number from 0 to the sum of the weightings,
+        # and then loop through the weightings and check partial sums of weightings.
+        # If the partial sum is strictly more than random_value, then we stop and return
+        # the element that pushed the sum over the edge.
+        # Strict inequalities are necessary to avoid 0-weighted things getting chosen.
+        random_value = uniform(0, sum(weightings))
+
+        partial_sum = 0
+        for index, weight in enumerate(weightings):
+                partial_sum += weight
+                if random_value < partial_sum:
+                        return list_to_check[index]
+
+        # As a default, return the last element in the list
+        # This is due to uniform() returning a number inclusive to the bounds, along
+        # with strict inequality testing. (which means it is possible random_value
+        # equals sum(weightings) and thus won't be considered due to strict inequalities.
+        return [x for idx, x in enumerate(list_to_check) if weightings[idx] > 0][-1]
+
+
 
