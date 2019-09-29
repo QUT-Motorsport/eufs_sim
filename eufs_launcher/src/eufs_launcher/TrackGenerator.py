@@ -26,6 +26,7 @@ class TrackGenerator:
         connector_micro_list = []
         linear_micro_list = []
         special_micro_list = []
+        rare_micro_list = []
         previous_micro = ""
 
         # The component__weighting_dict stores the weightings for each component
@@ -99,7 +100,8 @@ class TrackGenerator:
                                 "COMPONENTS":{
                                         "STRAIGHT":1,
                                         "CONSTANT_TURN":0.7,
-                                        "HAIRPIN_TURN":0.3
+                                        "HAIRPIN_TURN":0.3,
+                                        "LEFT_RIGHT_TURN":2
                                 }
                         },
                         "Computer Friendly": {
@@ -115,7 +117,8 @@ class TrackGenerator:
                                 "COMPONENTS":{
                                         "STRAIGHT":1,
                                         "CONSTANT_TURN":0.7,
-                                        "HAIRPIN_TURN":0.3
+                                        "HAIRPIN_TURN":0.3,
+                                        "LEFT_RIGHT_TURN":2
                                 }
                         },
                         "Bezier Small Straights": {
@@ -132,6 +135,7 @@ class TrackGenerator:
                                         "STRAIGHT":1,
                                         "CONSTANT_TURN":0.7,
                                         "HAIRPIN_TURN":0.3,
+                                        "LEFT_RIGHT_TURN":2,
                                         "BEZIER":10
                                 }
                         }
@@ -189,7 +193,9 @@ class TrackGenerator:
                 TrackGenerator.MIN_HAIRPIN = values["MIN_HAIRPIN"]
                 TrackGenerator.MAX_HAIRPIN = values["MAX_HAIRPIN"]
                 TrackGenerator.MAX_HAIRPIN_PAIRS = values["MAX_HAIRPIN_PAIRS"]
-                TrackGenerator.MIN_HAIRPIN_PAIRS = 1 if TrackGenerator.MAX_HAIRPIN_PAIRS > 0 else 0
+                TrackGenerator.MIN_HAIRPIN_PAIRS = (
+                        1 if TrackGenerator.MAX_HAIRPIN_PAIRS > 0 else 0
+                )
                 TrackGenerator.MAX_TRACK_LENGTH = values["MAX_LENGTH"]
                 TrackGenerator.LAX_GENERATION = values["LAX_GENERATION"]
                 TrackGenerator.component_weighting_dict = collections.defaultdict(
@@ -221,7 +227,11 @@ class TrackGenerator:
                         overlapped = check_if_overlap(xys2)
                         if overlapped:
                                 if TrackGenerator.FAILURE_INFO: 
-                                        rospy.logerr("Overlap check "+str(failure_count)+" failed")
+                                        rospy.logerr(
+                                                "Overlap check "
+                                              + str(failure_count)
+                                              + " failed"
+                                        )
                                 failure_count+=1
                         if failure_count > 10000:
                                 raise GenerationFailedException
@@ -295,7 +305,7 @@ def connector_micro(micro_name,allow_double_placement = False):
                 return decorated_function
         return to_return
 
-def linear_micro(micro_name,allow_double_placement = False):
+def linear_micro(micro_name,allow_double_placement = False, linearize = False):
         """
         Decorator for refocus track components 
 
@@ -303,17 +313,39 @@ def linear_micro(micro_name,allow_double_placement = False):
 
         allow_double_placement: Allows this component to be placed back-to-back
 
+        linearize: If True, this adds the "length" parameter automatically
+                   by fishing it from the params list of the decorated_function.
+                   This allows funtions like linear_straight to be written like
+                   a generic_straight, without having to worry about function
+                   signature.
+
         Linear components should have certain tangency
         properties guaranteed.  Consult the wiki for
         an in-depth understanding.
         """
         def to_return(decorated_function):
-                to_append = (micro_name,decorated_function)
+                if linearize:
+                        to_append = (
+                                micro_name, 
+                                get_linearized_function(decorated_function)
+                        )
+                else: 
+                        to_append = (micro_name, decorated_function)
                 TrackGenerator.linear_micro_list.append(to_append)
                 if allow_double_placement:
                         TrackGenerator.double_placement_set.add(micro_name)
                 return decorated_function
+                        
         return to_return
+
+def get_linearized_function(to_linearize):
+        """
+        Linearizes function according to linearize parameter of linear_micro decorator.
+        """
+        def linearized_function(point_in, tangent_in, normal_in, length, params = {}):
+                params["length"] = length
+                return to_linearize(point_in, tangent_in, normal_in, params = params)
+        return linearized_function
 
 def special_micro(micro_name,cone_placer,allow_double_placement = False):
         """
@@ -333,206 +365,34 @@ def special_micro(micro_name,cone_placer,allow_double_placement = False):
                 return decorated_function
         return to_return
 
+def rare_micro(micro_name, count = 1):
+        """
+        If a micro is made rare, it will only be allowed 
+        to appear a limited amount of times in a track.
+
+        micro_name: name of the micro that is rare
+
+        count: the amount of times it is allowed to appear
+        """
+        TrackGenerator.rare_micro_list.append((micro_name, 0, count))
+        def to_return(decorated_function):
+                return decorated_function
+        return to_return
+       
+
 ####################
 # Macro Generators #
 ####################
 
-def generate_bezier_track(start_point):
+def is_used_too_much(micro_name):
         """
-        In this function we handle the quick&dirty Bezier generator
-
-        This is the entry point for the generator's Bezier mode after generate() is called.
-        It takes in an initial point, and returns track data such that 
-        we have a list of points
-        outlining a closed G1-continuous loop made out of purely Bezier curves.
+        Prevents a micro from being used too much 
+        (can't surpass max_count given in rare_micro_list)
         """
-        xys = []
-        total_length = 0
-
-        # Set up goal points
-        goal_points = [        
-                (start_point[0] + TrackGenerator.MAX_TRACK_LENGTH * 0.08,
-                 start_point[1]),
-                (start_point[0] + TrackGenerator.MAX_TRACK_LENGTH * 0.12,
-                 start_point[1] + TrackGenerator.MAX_TRACK_LENGTH * 0.08),
-                (start_point[0] - TrackGenerator.MAX_TRACK_LENGTH * 0.03,
-                 start_point[1] + TrackGenerator.MAX_TRACK_LENGTH * 0.12)
-        ]
-
-        # Set up info for next component
-        initial_tangent = get_random_unit_vector()
-        tangent_in = initial_tangent
-        normal_in  = get_normal_vector(tangent_in)
-        point_in   = start_point
-        tangent_out = get_random_unit_vector()
-
-        for point_out in goal_points:
-                # Draw next component
-	        points_out, tangent_out, normal_out, added_length = connector_bezier(
-	                point_in,
-	                point_out,
-	                tangent_in,
-                        tangent_out,
-	                normal_in
-	        )
-
-                # Set up info for next component
-                xys.extend(points_out)
-                point_in      = points_out[-1]
-                tangent_in    = tangent_out
-                normal_in     = normal_out
-                total_length += added_length
-                tangent_out   = get_random_unit_vector()
-
-        # Set up info for final component
-        point_out   = start_point
-        tangent_out = initial_tangent
-
-        # Draw final component
-        points_out, tangent_out, normal_out, added_length = connector_bezier(
-                point_in,
-                point_out,
-                tangent_in,
-                tangent_out,
-                normal_in
-        )
-        xys.extend(points_out)
-
-        return convert_points_to_all_positive(xys)
-
-def generate_autocross_trackdrive_track(start_point):
-        """
-        In this function we handle the traditional Circle&Line generator
-
-        Takes in an initial point, and returns a G1-continuous closed loop
-        made by piecing circles and lines together.
-        """
-        xys = []
-        total_length = 0
-
-        # We start with a small straight
-        initial_tangent = get_random_unit_vector(0,math.pi/8)
-        tangent_in = initial_tangent
-        point_in = start_point
-        normal_in = get_normal_vector(tangent_in)
-        (points_out, tangent_out, normal_out, added_length) = generic_straight(
-                point_in,
-                tangent_in,
-                normal_in
-        )
-        total_length += added_length
-        xys.extend(points_out)
-
-        # Now we want to set checkpoints to pass through:
-        goal_points = [(start_point[0] + TrackGenerator.MAX_TRACK_LENGTH * 0.08,
-                        start_point[1]),
-                       (start_point[0] + TrackGenerator.MAX_TRACK_LENGTH * 0.12,
-                        start_point[1] + TrackGenerator.MAX_TRACK_LENGTH * 0.08),
-                       (start_point[0] - TrackGenerator.MAX_TRACK_LENGTH * 0.03,
-                        start_point[1] + TrackGenerator.MAX_TRACK_LENGTH * 0.12)]
-
-        # This controls how much it tries to salvage a bad run
-        # It turns out that most times it fails, its not salvageable,
-        # so I set it to 1 so that as soon as it fails it scraps the run.
-        max_fails = 1
-        fails = 0
-
-        # And now we generate towards each goal point
-        for goal_point in goal_points:
-                prev_xys = xys
-                
-                # Prepare inputs
-                tangent_in = tangent_out
-                normal_in  = normal_out
-                point_out  = goal_point
-                point_in   = points_out[-1]
-
-                # Generate from point to point
-                (points_out, tangent_out, normal_out, added_length) = generate_point_to_point(
-                        point_in,
-                        point_out,
-                        tangent_in,
-                        normal_in,
-                        20
-                )
-                total_length += added_length
-                xys.extend(points_out)
-
-                # Now let's do early-checking for overlaps
-                test = compactify_points([(int(x[0]), int(x[1])) for x in xys])
-                if check_if_overlap(test): 
-                        if TrackGenerator.FAILURE_INFO: 
-                                rospy.logerr("Early Overlap Checking: Failed")
-
-                        # Generation failed test, undo last bit
-                        fails += 1
-                        total_length -= added_length
-                        xys = prev_xys
-
-                        if fails == max_fails:
-                                return (test, 0, 0)
-
-        # Now lets head back to the start:
-        # We're gonna set a checkpoint that is close but not exactly the start point
-        # so that we have breathing room for the final manouever:
-        directing_point = (start_point[0] - TrackGenerator.MAX_STRAIGHT * 0.5,
-                           start_point[1] + TrackGenerator.MAX_CONSTANT_TURN * 2)
-
-        # Prepare inputs
-        tangent_in = tangent_out
-        normal_in  = normal_out
-        point_out  = directing_point
-        point_in   = points_out[-1]
-
-        # Generate from point to point
-        (points_out, tangent_out, normal_out, added_length) = generate_point_to_point(
-                point_in,
-                point_out,
-                tangent_in,
-                normal_in,
-                0
-        )
-        total_length += added_length
-        xys.extend(points_out)
-
-
-        # Now we will add a circle to point directly away from start point
-        tangent_in  = tangent_out
-        normal_in   = normal_out
-        point_in    = points_out[-1]
-        tangent_out = initial_tangent
-
-        points_out, tangent_out, normal_out, added_length = connector_constant_turn(
-                point_in,
-                start_point,
-                tangent_in,
-                tangent_out,
-                normal_in
-        )
-        xys.extend(points_out)
-        
-
-        # Sometimes the tangents don't actually match up
-        # so if that happens, we throw out the track and start anew.
-        if get_distance(initial_tangent,tangent_out) > 0.01:
-                return generate_autocross_trackdrive_track(start_point)
-
-
-        if not TrackGenerator.LAX_GENERATION:
-                # Check if accidentally created too big of a straight at the very end
-                if (straight_length + TrackGenerator.MIN_STRAIGHT 
-                 > TrackGenerator.MAX_STRAIGHT):
-
-                        # We always start each track with a minimum-length straight, 
-                        # which is joined up with the final straight,
-                        # hence the addition of MIN_STRAIGHT here.
-                        return generate_autocross_trackdrive_track(start_point)
-
-                # Check if whole track is too big
-                elif total_length > TrackGenerator.MAX_TRACK_LENGTH:
-                        return generate_autocross_trackdrive_track(start_point)
-
-        return convert_points_to_all_positive(xys)
+        for name, count, max_count in TrackGenerator.rare_micro_list:
+                if name == micro_name and count >= max_count:
+                        return True
+        return False
 
 def get_random_micro(type_of_micro):
         """
@@ -545,6 +405,9 @@ def get_random_micro(type_of_micro):
                 if not (
                         x[0] == TrackGenerator.previous_micro 
                     and x[0] not in TrackGenerator.double_placement_set
+                )
+                and not (
+                        is_used_too_much(x[0])
                 )
         ]
         weightings = [
@@ -559,7 +422,8 @@ def get_random_micro(type_of_micro):
 
 def use_micro(micro_tuple):
         """
-        Takes in a (name,function) tuple like the ones stored in TrackGenerator.generic_micro_list
+        Takes in a (name,function) tuple like the ones stored in 
+        TrackGenerator.generic_micro_list
         
         Changes TrackGenerator.previous_micro to the micro, and returns the function so it
         can be used.
@@ -583,16 +447,26 @@ def get_connector():
 def get_linear():
         """Returns a linear micro & logs it as used"""
         return use_micro(get_random_micro("linear"))
-                
+         
+def reset_counts():
+        """
+
+        """
+        TrackGenerator.previous_micro = ""
+        TrackGenerator.rare_micro_list = [
+                (name, 0, max_count) for name, cur_count, max_count 
+                in TrackGenerator.rare_micro_list
+        ]
+       
 def generate_random_track(start_point):
         """
         Generates a random track given a starting point.
         """
-        TrackGenerator.previous_micro = ""
+        reset_counts()
         total_length = 0
         xys = []
 
-        # We start with a small straight
+        # We start with a small linear
         initial_tangent = get_random_unit_vector(0,math.pi/8)
         tangent_in = initial_tangent
         point_in = start_point
@@ -600,7 +474,11 @@ def generate_random_track(start_point):
         (points_out, tangent_out, normal_out, added_length) = get_linear()(
                 point_in,
                 tangent_in,
-                normal_in
+                normal_in,
+                random.uniform(
+                        TrackGenerator.MIN_STRAIGHT,
+                        TrackGenerator.MAX_STRAIGHT
+                )
         )
         total_length += added_length
         xys.extend(points_out)
@@ -701,17 +579,9 @@ def generate_random_track(start_point):
 
 
         if not TrackGenerator.LAX_GENERATION:
-                # Check if accidentally created too big of a straight at the very end
-                if (straight_length + TrackGenerator.MIN_STRAIGHT 
-                 > TrackGenerator.MAX_STRAIGHT):
-
-                        # We always start each track with a minimum-length straight, 
-                        # which is joined up with the final straight,
-                        # hence the addition of MIN_STRAIGHT here.
-                        return generate_random_track(start_point)
 
                 # Check if whole track is too big
-                elif total_length > TrackGenerator.MAX_TRACK_LENGTH:
+                if total_length > TrackGenerator.MAX_TRACK_LENGTH:
                         return generate_random_track(start_point)
 
         return convert_points_to_all_positive(xys)
@@ -722,21 +592,16 @@ def generate_point_to_point(point_in,
                             tangent_in,
                             normal_in,
                             fuzz_radius,
-                            depth = 20,
-                            hairpined = False,
-                            many_hairpins = False):
+                            depth = 20):
         """
         Generates a track from point_in to point_out with incoming tangent tangent_in,
         and incoming normal normal_in.
 
-        Does not necessarily exactly end at point_out, it merely aims to get within fuzz_radius.
+        Does not necessarily exactly end at point_out, it merely aims to get 
+        within fuzz_radius.
 
         depth is the max amout of times it may recurse (this is a recursive function that
         incrementally builds the track up recursion by recursion).
-
-        hairpined, when True, signals that a previous recursion of this function placed a hairpin.
-        many_hairpins, when False, disallows multiple hairpins.  So if hairpined is True then
-        many_hairpins being False would prevent additional hairpins.
 
         Outputs (points_out, tangent_out, normal_out, added_length)
         """
@@ -746,7 +611,7 @@ def generate_point_to_point(point_in,
         
         # We start out by refocusing ourselves towards point_out.
         (points_out, tangent_out, normal_out, delta_length) = (
-                refocus_constant_turn(
+                get_refocus()(
                         point_in,
                         point_out,
                         tangent_in,
@@ -766,11 +631,11 @@ def generate_point_to_point(point_in,
         distance_from_end = get_distance(point_in,point_out)
         if distance_from_end <= TrackGenerator.MAX_STRAIGHT + fuzz_radius:
                 straight_length = min(distance_from_end, TrackGenerator.MAX_STRAIGHT)
-                (points_out, tangent_out, normal_out, delta_length) = generic_straight(
+                (points_out, tangent_out, normal_out, delta_length) = get_linear()(
                         point_in,
                         tangent_in,
                         normal_in,
-                        params = {"length":straight_length}
+                        straight_length
                 )
                 added_length += delta_length
                 xys.extend(points_out)
@@ -785,11 +650,11 @@ def generate_point_to_point(point_in,
                         straight_length = TrackGenerator.MAX_STRAIGHT
                 else:
                         straight_length = TrackGenerator.MAX_STRAIGHT/2
-                (points_out, tangent_out, normal_out, delta_length) = generic_straight(
+                (points_out, tangent_out, normal_out, delta_length) = get_linear()(
                         point_in,
                         tangent_in,
                         normal_in,
-                        params = {"length":straight_length}
+                        straight_length
                 )
                 added_length += delta_length
                 xys.extend(points_out)
@@ -800,79 +665,20 @@ def generate_point_to_point(point_in,
                 normal_in  = normal_out
                 
 
-                # Now we add some variance by choosing between cturns or hairpins
-                # There is no special significance to the 70% value, it happens to
-                # get a good balance.
-                make_cturn = random.uniform(0, 1) < 0.7
-
-                # But of course, we can't draw a hairpin if we've drawn too many already.
-                if make_cturn or (hairpined and not many_hairpins):
-                        (points_out, tangent_out, normal_out, delta_length) = (
-                                generic_constant_turn(
-                                        point_in,
-                                        tangent_in,
-                                        normal_in,
-                                        params = {
-                                                "circle_percent":random.uniform(0.1, 0.3)
-                                        }
-                                )
+                (points_out, tangent_out, normal_out, delta_length) = (
+                        get_generic()(
+                                point_in,
+                                tangent_in,
+                                normal_in
                         )
-                        added_length += delta_length
-                        xys.extend(points_out)
+                )
+                added_length += delta_length
+                xys.extend(points_out)
 
-                        # Prepare data for next component
-                        point_in   = points_out[-1]
-                        tangent_in = tangent_out
-                        normal_in  = normal_out
-
-                        # And now let's add another circle turning the other way
-                        # so that we make the track more "winding", and allow us to
-                        # make real progress towards the goal.
-                        (points_out, tangent_out, normal_out, delta_length) = (
-                                generic_constant_turn(
-                                        point_in,
-                                        tangent_in,
-                                        normal_in,
-                                        params = {
-                                                "circle_percent":random.uniform(0.1, 0.3)
-                                        }
-                                )
-                        )
-                        added_length += delta_length
-                        xys.extend(points_out)
-
-                        # Prepare data for next component
-                        point_in   = points_out[-1]
-                        tangent_in = tangent_out
-                        normal_in  = normal_out
-
-                # Make a hairpin
-                else:
-                        # We only want an even amount of turns so that we can leave 
-                        # heading the same direction we entered.
-                        # Otherwise due to the way we head towards the path, 
-                        # its basically guaranteed we get a self-intersection.
-                        num_switches = 2*random.randrange(
-                                TrackGenerator.MIN_HAIRPIN_PAIRS,
-                                TrackGenerator.MAX_HAIRPIN_PAIRS
-                        )
-                        (points_out, tangent_out, normal_out, delta_length) = (
-                                generic_hairpin_turn(
-                                        point_in,
-                                        tangent_in,
-                                        normal_in,
-                                        params = {
-                                                "switchbacks":num_switches
-                                        }
-                                )
-                        )
-                        added_length += delta_length
-                        xys.extend(points_out)
-
-                        # Prepare data for next component
-                        point_in   = points_out[-1]
-                        tangent_in = tangent_out
-                        normal_in  = normal_out
+                # Prepare data for next component
+                point_in   = points_out[-1]
+                tangent_in = tangent_out
+                normal_in  = normal_out
 
                 # Now, we recurse
                 if depth > 0:
@@ -884,8 +690,6 @@ def generate_point_to_point(point_in,
                                         normal_in,
                                         fuzz_radius,
                                         depth = depth - 1,
-                                        hairpined = hairpined or not make_cturn,
-                                        many_hairpins = many_hairpins
                                 )
                         )
                         added_length += delta_length
@@ -932,7 +736,7 @@ def de_parameterize(func):
                 for t in range(0 , TrackGenerator.FIDELITY)]
 
 
-@linear_micro("STRAIGHT")
+@linear_micro("STRAIGHT", linearize = True)
 @generic_micro("STRAIGHT")
 def generic_straight(point_in,
                      tangent_in,
@@ -990,7 +794,10 @@ def generic_constant_turn(point_in,
         if "radius" in params:
                 radius = params["radius"]
         else: 
-                radius = random.uniform(TrackGenerator.MIN_CONSTANT_TURN,TrackGenerator.MAX_CONSTANT_TURN)
+                radius = random.uniform(
+                        TrackGenerator.MIN_CONSTANT_TURN,
+                        TrackGenerator.MAX_CONSTANT_TURN
+                )
 
         if "circle_percent" in params:
                 circle_percent = params["circle_percent"]
@@ -1027,6 +834,7 @@ def generic_constant_turn(point_in,
         # Returns a list of points and the new edge of the racetrack and the change in length
         return (points_out,tangent_out,normal_out,added_length)
         
+@rare_micro("HAIRPIN_TURN", count = 2)
 @generic_micro("HAIRPIN_TURN")
 def generic_hairpin_turn(point_in,
                          tangent_in,
@@ -1068,7 +876,10 @@ def generic_hairpin_turn(point_in,
         if "radius" in params:
                 radius = params["radius"]
         else: 
-                radius = random.uniform(TrackGenerator.MIN_CONSTANT_TURN,TrackGenerator.MAX_CONSTANT_TURN)
+                radius = random.uniform(
+                        TrackGenerator.MIN_CONSTANT_TURN,
+                        TrackGenerator.MAX_CONSTANT_TURN
+                )
 
         if "uniform_circles" in params:
                 uniform_circles = params["uniform_circles"]
@@ -1078,7 +889,10 @@ def generic_hairpin_turn(point_in,
         if "straight_length" in params:
                 straight_length = params["straight_length"]
         else:
-                straight_length = random.uniform(TrackGenerator.MIN_STRAIGHT,TrackGenerator.MAX_STRAIGHT)
+                straight_length = random.uniform(
+                        TrackGenerator.MIN_STRAIGHT,
+                        TrackGenerator.MAX_STRAIGHT
+                )
 
         if "wobbliness" in params:
                 wobbliness = params["wobbliness"]
@@ -1362,6 +1176,56 @@ def connector_constant_turn(point_in,
         xys.extend(points_out)
 
         return (xys, tangent_out, normal_out, total_length)
+
+@generic_micro("LEFT_RIGHT_TURN")
+def generic_left_right_turn(point_in,
+                            tangent_in,
+                            normal_in,
+                            params = {}):
+        """
+        Creates a hairpin micro generator.
+
+        This is just the composition of two turns to create a winding road.
+        """
+
+        added_length = 0
+        xys = []
+
+        # First turn
+        (points_out, tangent_out, normal_out, delta_length) = (
+                generic_constant_turn(
+                        point_in,
+                        tangent_in,
+                        normal_in,
+                        params = {
+                                "circle_percent":random.uniform(0.1, 0.3)
+                        }
+                )
+        )
+        added_length += delta_length
+        xys.extend(points_out)
+
+        # Prepare data for next component
+        point_in   = points_out[-1]
+        tangent_in = tangent_out
+        normal_in  = normal_out
+
+        # And now let's add another circle turning the other way
+        # so that we make the track more "winding".
+        (points_out, tangent_out, normal_out, delta_length) = (
+                generic_constant_turn(
+                        point_in,
+                        tangent_in,
+                        normal_in,
+                        params = {
+                                "circle_percent":random.uniform(0.1, 0.3)
+                        }
+                )
+        )
+        added_length += delta_length
+        xys.extend(points_out)
+
+        return (xys, tangent_out, normal_out, added_length)
 
 @connector_micro("BEZIER")
 def connector_bezier(point_in,
