@@ -12,10 +12,47 @@ class GenerationFailedException(Exception):
         """Raised when generator takes too long."""
         pass
 
+class GeneratorContext:
+        """
+        Context manager for the generator.
+
+        Initialized with the generator parameters, and optionally a function to be
+        called if generation fails.
+
+        Failure can also be accessed by checking generator_context_instance.failed
+        if preferred.
+
+        Meant for use in with-blocks.
+        """
+        def __init__(self,values,failure_function = lambda: None):
+                self.values = values
+                self.failed = False
+                self.failure_function = failure_function
+
+        def __enter__(self):
+                TrackGenerator.has_context = True
+                TrackGenerator.set_data(self.values)
+
+        def __exit__(self, exc_type, exc_value, traceback):
+                TrackGenerator.has_context = False
+                if exc_type is GenerationFailedException:
+                        rospy.logerr(
+                                "\nError!  The generator could not generate in time.\n" +
+                                "Maybe try different parameters?\n" +
+                                "Turning on Lax Generation and increasing MAX_STRAIGHT" +
+                                " and MIN_STRAIGHT usually helps."
+                        )
+                        self.failed = True
+                        self.failure_function()
+                        
+
 class TrackGenerator:
         """
         Handles track generation.
         """
+
+        # Only allow track generator if it is in the right context
+        has_context = False
 
         # Lists for micro generators
         # These will be expanded by micro generators
@@ -204,18 +241,15 @@ class TrackGenerator:
                 )
 
         @staticmethod
-        def generate(values):
+        def generate():
                 """
                 Generates the track as pure data 
                   (a List[Tuple[float,float]] list of points on the track)
 
                 Returns a list of points to define the path of the track, 
                   along with a bounding width & height for how big the track is.
-
-                Input is a list of track parameters
                 """
 
-                TrackGenerator.set_data(values)
                 xys = []
                 overlapped = False
                 failure_count = 0
@@ -237,9 +271,11 @@ class TrackGenerator:
                                 raise GenerationFailedException
                 
                 # Now let's randomly flip it a bit to spice it up
-                if random.uniform(0,1) < 0.5:#flip xys by x
+                if random.uniform(0,1) < 0.5:
+                        # flip xys by x
                         xys = [(-x+twidth,y) for (x,y) in xys]
-                if random.uniform(0,1) < 0.5:#flip xys by y
+                if random.uniform(0,1) < 0.5:
+                        # flip xys by y
                         xys = [(x,-y+theight) for (x,y) in xys]
 
                 return (xys,twidth,theight)

@@ -20,7 +20,7 @@ from PIL import ImageDraw
 from random import randrange, uniform
 
 from TrackGenerator import TrackGenerator as Generator
-from TrackGenerator import GenerationFailedException
+from TrackGenerator import GeneratorContext
 
 from ConversionTools import ConversionTools as Converter
 
@@ -638,25 +638,31 @@ class EufsLauncher(Plugin):
 
                 isLaxGenerator = self.LAX_CHECKBOX.isChecked()
                 
-                try:
-                        # Prepare and pass in all the parameters of the track
-                        # If track takes too long to generate, this section will
-                        # throw an error, to be handled after this try clause.
-                        component_data = Generator.get_preset( 
-                                self.PRESET_SELECTOR.currentText()
-                        )["COMPONENTS"]
-                        xys,twidth,theight = Generator.generate({
-                                "MIN_STRAIGHT":self.MIN_STRAIGHT,
-                                "MAX_STRAIGHT":self.MAX_STRAIGHT,
-                                "MIN_CONSTANT_TURN":self.MIN_CTURN,
-                                "MAX_CONSTANT_TURN":self.MAX_CTURN,
-                                "MIN_HAIRPIN":self.MIN_HAIRPIN/2,
-                                "MAX_HAIRPIN":self.MAX_HAIRPIN/2,
-                                "MAX_HAIRPIN_PAIRS":self.HAIRPIN_PAIRS,
-                                "MAX_LENGTH":self.MAX_LENGTH,                                   
-                                "LAX_GENERATION":isLaxGenerator,                                   
-                                "COMPONENTS":component_data
-                        })
+                # Prepare and pass in all the parameters of the track
+                # If track takes too long to generate, this section will
+                # throw an error, to be handled after this try clause.
+                component_data = Generator.get_preset( 
+                        self.PRESET_SELECTOR.currentText()
+                )["COMPONENTS"]
+
+                generator_values = {
+                        "MIN_STRAIGHT":self.MIN_STRAIGHT,
+                        "MAX_STRAIGHT":self.MAX_STRAIGHT,
+                        "MIN_CONSTANT_TURN":self.MIN_CTURN,
+                        "MAX_CONSTANT_TURN":self.MAX_CTURN,
+                        "MIN_HAIRPIN":self.MIN_HAIRPIN/2,
+                        "MAX_HAIRPIN":self.MAX_HAIRPIN/2,
+                        "MAX_HAIRPIN_PAIRS":self.HAIRPIN_PAIRS,
+                        "MAX_LENGTH":self.MAX_LENGTH,                                   
+                        "LAX_GENERATION":isLaxGenerator,                                   
+                        "COMPONENTS":component_data
+                }
+
+                def failure_function():
+                        self.tell_launchella("Track Gen Failed :(  Try different parameters?")
+
+                with GeneratorContext(generator_values, failure_function):
+                        xys,twidth,theight = Generator.generate()
 
                         # If track is generated successfully, turn it into a track image
                         # and display it to the user.
@@ -688,12 +694,6 @@ class EufsLauncher(Plugin):
                         self.tell_launchella("Track Gen Complete!")
 
                         im.show()
-                except GenerationFailedException:
-                        rospy.logerr("\nError!  The generator could not generate in time.\n"+
-                                       "Maybe try different parameters?\n"+
-                                       "Turning on Lax Generation and increasing MAX_STRAIGHT"+
-                                       " and MIN_STRAIGHT usually helps.")
-                        self.tell_launchella("Track Gen Failed :(  Try different parameters?")
 
                 self.load_track_and_images()
 
