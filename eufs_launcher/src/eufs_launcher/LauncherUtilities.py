@@ -166,4 +166,3 @@ def random_choices(list_to_check, weightings):
         return [x for idx, x in enumerate(list_to_check) if weightings[idx] > 0][-1]
 
 
-

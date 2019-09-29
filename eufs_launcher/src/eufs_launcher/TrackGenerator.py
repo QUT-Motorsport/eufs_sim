@@ -44,7 +44,6 @@ class GeneratorContext:
                         )
                         self.failed = True
                         self.failure_function()
-                        
 
 class TrackGenerator:
         """
@@ -239,6 +238,80 @@ class TrackGenerator:
                         lambda: 0,
                         values["COMPONENTS"]
                 )
+
+        # These three are used as constants for batch generation.
+        class GEN_STOP:
+                pass
+        class GEN_CONTINUE:
+                pass
+        class GEN_RELEASE:
+                pass
+
+        @staticmethod
+        def batch(first, subsequent = 0, threshold = None):
+                """
+                A python coroutine that batches up track generations.
+
+                It generates "first" amount of generations in one batch,
+                and create a generator that returns these.
+
+                If "subsequent" is set to something other than 0, then
+                whenever the saved-up batches get below "threshold", the
+                generator will generate "subsequent" more tracks.
+
+                If "subsequent" is zero, the generation will terminate.
+
+                The coroutine should be sent "GEN_CONTINUE" if it should continue,
+                and "GEN_STOP" if it should stop immediately, and "GEN_RELEASE" if
+                it should return everything it has queued up so far.
+                """
+                GEN_CONTINUE = TrackGenerator.GEN_CONTINUE
+                GEN_STOP = TrackGenerator.GEN_STOP
+                GEN_RELEASE = TrackGenerator.GEN_RELEASE
+
+                # We do the priming of the coroutine in this function, hence
+                # the nested functions here!
+                def inner_coroutine(first, subsequent, threshold): 
+                        # If threshold has no value, set it to check whenever it has
+                        # used up "subsequent" generations (so that it is effectively
+                        # refilling the batch back up to "first")
+                        if threshold is None and subsequent > 0:
+                                threshold = first - subsequent + 1
+                        elif threshold is None:
+                                threshold = -1
+
+                        saved_batch = [TrackGenerator.generate() for x in range(0, first)]
+
+                        # Add None to the batch so priming it doesn't remove valid data.
+                        saved_batch += [None]
+                        signal = GEN_CONTINUE
+
+                        while len(saved_batch) > 0:
+
+                                # Handle the coroutine signals passed back in
+                                if signal is GEN_STOP:
+                                        _ = yield saved_batch
+                                        return
+                                elif signal is GEN_RELEASE:
+                                        signal = yield saved_batch
+                                        saved_batch = []
+                                elif signal is GEN_CONTINUE:
+                                        signal = yield saved_batch.pop()
+
+                                # If needs to refill the batch, refill it!
+                                if len(saved_batch) < threshold:
+                                        saved_batch = (
+                                                [TrackGenerator.generate() 
+                                                 for x in range(0, subsequent)]
+                                              + saved_batch
+                                        )
+                        return
+                to_return = inner_coroutine(first, subsequent, threshold)
+                
+                # Prime coroutine
+                next(to_return)
+
+                return to_return
 
         @staticmethod
         def generate():
