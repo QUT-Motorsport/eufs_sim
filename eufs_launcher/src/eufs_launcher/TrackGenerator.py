@@ -1068,15 +1068,28 @@ def cone_default(xys, starting = False, track_width = None, slalom = False, prev
         prev_points_south = [(-10000, -10000)]
         to_return = []
 
+        # Process the previous points down to a manageable amount.
         if prev_points is not None:
-                prev_points_south = [
+                first_orange_cones = [
+                        (x, y) for x, y, c in prev_points
+                        if c is CONE_ORANGE
+                ][:2]
+                all_points_south = [
                         (x, y) for x, y, c in prev_points
                         if c is CONE_INNER
-                ][:cone_check_amount]
-                prev_points_north = [
+                ]
+                all_points_south = (
+                        all_points_south[-cone_check_amount:]
+                        + first_orange_cones
+                )
+                all_points_north = [
                         (x, y) for x, y, c in prev_points
                         if c is CONE_OUTER
-                ][:cone_check_amount]
+                ]
+                all_points_north = (
+                        all_points_north[-cone_check_amount:]
+                        + first_orange_cones
+                )
 
         for i in range(len(xys)):
                 #Skip first part [as hard to calculate tangent]
