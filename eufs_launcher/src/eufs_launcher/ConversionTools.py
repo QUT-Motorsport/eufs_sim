@@ -374,7 +374,9 @@ class ConversionTools:
                                 true_color = ConversionTools.outer_cone_color
                         elif color is CONE_ORANGE:
                                 true_color = ConversionTools.orange_cone_color
-                        if (not is_track(pixels[int(px), int(py)])):
+
+                        # Only allow orange cones to be placed on the track
+                        if (not is_track(pixels[int(px), int(py)]) or color is CONE_ORANGE):
                                 pixels[int(px), int(py)] = true_color
 
                 
