@@ -1014,13 +1014,25 @@ class CONE_ORANGE:
 
 def cone_start(xys, track_width = None):
         """Wrapper for cone_default with start parameter"""
-        return cone_default(xys, starting = True, track_width = track_width, slalom = False)
+        return cone_default(
+                xys, 
+                starting = True, 
+                track_width = track_width, 
+                slalom = False,
+                prev_points = None
+        )
 
-def cone_slalom(xys, track_width = None):
+def cone_slalom(xys, track_width = None, prev_points = None):
         """Wrapper for cone_default with slalom parameter"""
-        return cone_default(xys, starting = False, track_width = track_width, slalom = True)
+        return cone_default(
+                xys, 
+                starting = False, 
+                track_width = track_width, 
+                slalom = True,
+                prev_points = prev_points
+        )
 
-def cone_default(xys, starting = False, track_width = None, slalom = False):
+def cone_default(xys, starting = False, track_width = None, slalom = False, prev_points = None):
         """
         Default cone placement algorithm, can be overriden on a micro by using the 
         special micro decorator.
@@ -1033,16 +1045,38 @@ def cone_default(xys, starting = False, track_width = None, slalom = False):
         is useful if accessing ConversionTools.xys_to_png from a non-generator context.
         """
 
+        if track_width is None:
+                cone_normal_distance_parameter = TrackGenerator.TRACK_WIDTH
+        else:
+                cone_normal_distance_parameter = track_width
+
+        # Hardcoded parameters (not available in launcher because the set of 
+        # well-behaved answers is far from dense in the problemspace):
+
+        # How close can cones be from those on opposite side.
+        cone_cross_closeness_parameter = cone_normal_distance_parameter * 3 / 4 - 1
+
+        # Larger numbers makes us check more parts of the track for conflicts.
+        cone_check_amount = 30
+
+        # How close can cones be from those on the same side.
+        cone_adjacent_closeness_parameter = 6
+
         all_points_north = []
         all_points_south = []
         prev_points_north = [(-10000, -10000)]
         prev_points_south = [(-10000, -10000)]
         to_return = []
 
-        if track_width is None:
-                cone_normal_distance_parameter = TrackGenerator.TRACK_WIDTH
-        else:
-                cone_normal_distance_parameter = track_width
+        if prev_points is not None:
+                prev_points_south = [
+                        (x, y) for x, y, c in prev_points
+                        if c is CONE_INNER
+                ][:cone_check_amount]
+                prev_points_north = [
+                        (x, y) for x, y, c in prev_points
+                        if c is CONE_OUTER
+                ][:cone_check_amount]
 
         for i in range(len(xys)):
                 #Skip first part [as hard to calculate tangent]
@@ -1051,18 +1085,6 @@ def cone_default(xys, starting = False, track_width = None, slalom = False):
                 # The idea here is to place cones along normals to the 
                 # tangent at any given point, 
                 # while making sure they aren't too close.
-
-                # Hardcoded parameters (not available in launcher because the set of 
-                # well-behaved answers is far from dense in the problemspace):
-
-                # How close can cones be from those on opposite side.
-                cone_cross_closeness_parameter = cone_normal_distance_parameter * 3 / 4 - 1
-
-                # Larger numbers makes us check more parts of the track for conflicts.
-                cone_check_amount = 30
-
-                # How close can cones be from those on the same side.
-                cone_adjacent_closeness_parameter = 6
 
                 # Here we calculate the normal vectors along the track
                 # As we want cones to be placed along the normal.

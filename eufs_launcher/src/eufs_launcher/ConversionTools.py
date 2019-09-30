@@ -365,7 +365,9 @@ class ConversionTools:
                         if idx == 0:
                                 cone_locs.extend(cone_start(points))
                         else:
-                                cone_locs.extend(get_cone_function(name)(points))
+                                cone_locs.extend(
+                                        get_cone_function(name)(points, prev_points = cone_locs)
+                                )
 
                 for px, py, color in cone_locs:
                         if color is CONE_INNER:
