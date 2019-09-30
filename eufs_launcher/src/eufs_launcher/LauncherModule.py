@@ -253,6 +253,7 @@ class EufsLauncher(Plugin):
                 # Get uuid of roslaunch
                 self.uuid = roslaunch.rlutil.get_or_generate_uuid(None, False)
                 roslaunch.configure_logging(self.uuid)
+		self.DEBUG_SHUTDOWN = False
 
         def tell_launchella(self, what):
                 """Display text in feedback box (lower left corner)."""
@@ -901,7 +902,7 @@ class EufsLauncher(Plugin):
                 extra_nodes.remove("/eufs_launcher")
                 extra_nodes.remove("/rosout")
                 left_open = len(extra_nodes)
-                if (left_open>0):
+                if (left_open>0 and self.DEBUG_SHUTDOWN):
                         rospy.logerr("Warning, after shutting down the launcher, "+
                                      "these nodes are still running: " + str(extra_nodes))
 
@@ -924,7 +925,7 @@ class EufsLauncher(Plugin):
                 extra_nodes = rosnode.get_node_names()
                 extra_nodes.remove("/eufs_launcher")
                 extra_nodes.remove("/rosout")
-                if left_open>0:
+                if left_open>0 and self.DEBUG_SHUTDOWN:
                         rospy.logerr("Pruned to: " + str(extra_nodes))
                 
 

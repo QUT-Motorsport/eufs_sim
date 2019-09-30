@@ -441,12 +441,18 @@ class TrackGenerator:
                                 raise GenerationFailedException
                 
                 # Now let's randomly flip it a bit to spice it up
-                """if random.uniform(0,1) < 0.5:
+                if random.uniform(0,1) < 0.5:
                         # flip xys by x
-                        xys = [(-x+twidth,y) for (x,y) in xys]
+                        xys = [
+                                (name, [(-x + twidth, y) for (x, y) in pointlist])
+                                for name, pointlist in xys
+                        ]
                 if random.uniform(0,1) < 0.5:
                         # flip xys by y
-                        xys = [(x,-y+theight) for (x,y) in xys]"""
+                        xys = [
+                                (name, [(x, -y + theight) for (x, y) in pointlist])
+                                for name, pointlist in xys
+                        ]
 
                 return (xys,twidth,theight)
 
@@ -1091,6 +1097,9 @@ def cone_default(xys, starting = False, track_width = None, slalom = False, prev
                         + first_orange_cones
                 )
 
+        # This is used to check if the yellow and blue cones suddenly swapped.
+        last_tangent_normal = (0,0)
+
         for i in range(len(xys)):
                 #Skip first part [as hard to calculate tangent]
                 if i == 0: continue
@@ -1111,6 +1120,21 @@ def cone_default(xys, starting = False, track_width = None, slalom = False, prev
                         -cone_normal_distance_parameter * math.cos(cur_tangent_angle)
                     )
                 )
+
+                # Check if normal direction suddenly flipped relative to last iteration.
+                # (And reverse it if it happened)
+                dot_product = (
+                        last_tangent_normal[0] * cur_tangent_normal[0],
+                        last_tangent_normal[1] * cur_tangent_normal[1]
+                )
+
+                # Tangent flipped!
+                # (As when dot product is negative, vectors are opposite)
+                if dot_product < -0.1:
+                        cur_tangent_normal = scale_vector(cur_tangent_normal, -1)
+                        rospy.logerr("Tangents flipped")
+
+                last_tangent_normal = cur_tangent_normal
 
                 # This is where the cones will be placed, provided they pass the
                 # distance checks later.
