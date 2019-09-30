@@ -334,7 +334,7 @@ class TrackGenerator:
                 pass
 
         @staticmethod
-        def batch(first, subsequent = 0, threshold = None, postprocessing = lambda: x):
+        def batch(first, subsequent = 0, threshold = None, postprocessing = lambda x: x):
                 """
                 A python coroutine that batches up track generations.
 
