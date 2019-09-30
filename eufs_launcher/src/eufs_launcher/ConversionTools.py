@@ -1,7 +1,9 @@
 from PIL import Image
 from PIL import ImageDraw
 import math
-from LauncherUtilities import calculate_tangent_angle
+from LauncherUtilities import (calculate_tangent_angle, 
+                               get_points_from_component_list,
+                               compactify_points)
 from random import randrange, uniform
 import os
 import rospkg
@@ -18,6 +20,7 @@ import pandas as pd
 # .png
 # .csv
 # raw_data ("xys",this will be hidden from the user as it is only used to convert into .pngs)
+# raw_data may also be "comps", which is the output of TrackGenerator
 class ConversionTools:
         def __init__():
                 pass
@@ -186,19 +189,25 @@ class ConversionTools:
                 desires to do any displaying of the result (otherwise it returns None)
                 """
 
-                if   cfrom=="xys" and cto=="png":
+                if   cfrom == "xys" and cto == "png":
                         return ConversionTools.xys_to_png(
                                 which_file,
                                 params,
                                 conversion_suffix
                         )
-                elif cfrom=="png" and cto=="launch":
+                elif cfrom == "comps" and cto == "png":
+                        return ConversionTools.comps_to_png(
+                                which_file,
+                                params,
+                                conversion_suffix
+                        )
+                elif cfrom == "png" and cto == "launch":
                         return ConversionTools.png_to_launch(
                                 which_file,
                                 params,
                                 conversion_suffix
                         )
-                elif cfrom=="png" and cto=="csv":
+                elif cfrom == "png" and cto == "csv":
                         ConversionTools.png_to_launch(
                                 which_file,
                                 params,
@@ -212,13 +221,13 @@ class ConversionTools:
                                  params,
                                  conversion_suffix=""
                         )
-                elif cfrom=="launch" and cto=="csv":
+                elif cfrom == "launch" and cto == "csv":
                         return ConversionTools.launch_to_csv(
                                  which_file,
                                  params,
                                  conversion_suffix
                         )
-                elif cfrom=="launch" and cto=="png":
+                elif cfrom == "launch" and cto == "png":
                         ConversionTools.launch_to_csv(
                                  which_file,
                                  params,
@@ -232,7 +241,7 @@ class ConversionTools:
                                  params,
                                  conversion_suffix=""
                         )
-                elif cfrom=="csv" and cto == "launch":
+                elif cfrom == "csv" and cto == "launch":
                         ConversionTools.csv_to_png(
                                  which_file,
                                  params,
@@ -246,7 +255,7 @@ class ConversionTools:
                                  params,
                                  conversion_suffix=""
                         )
-                elif cfrom=="csv" and cto == "png":
+                elif cfrom == "csv" and cto == "png":
                         return ConversionTools.csv_to_png(
                                  which_file,
                                  params,
@@ -267,7 +276,38 @@ class ConversionTools:
                         
 
         @staticmethod
-        def xys_to_png(which_file, params, conversion_suffix=""):
+        def comps_to_png(which_file, params, conversion_suffix = ""):
+                """
+                Converts raw track generator output to png.
+
+                which_file:            Output filename
+                params["track width"]: Track width (cone distance)
+                params["track data"]:  The track generator data
+                conversion_suffix:     Additional suffix to append to the output filename.
+                """
+
+                GENERATED_FILENAME = which_file + conversion_suffix
+
+                # Unpack
+                (components, twidth, theight)    = params["track data"]
+                cone_normal_distance_parameter = params["track width"]
+
+                all_points = compactify_points([
+                        (int(x[0]), int(x[1])) for x 
+                        in get_points_from_component_list(components)
+                ])
+
+                return ConversionTools.xys_to_png(
+                        GENERATED_FILENAME,
+                        {
+                                "point list":  (all_points, twidth, theight),
+                                "track width": cone_normal_distance_parameter
+                        },
+                        ""
+                )
+
+        @staticmethod
+        def xys_to_png(which_file, params, conversion_suffix = ""):
                 """
                 Converts xys format to png.
 
@@ -280,7 +320,7 @@ class ConversionTools:
                 GENERATED_FILENAME = which_file + conversion_suffix
 
                 # Unpack
-                (xys,twidth,theight) = params["point list"]
+                (xys, twidth, theight) = params["point list"]
                 cone_normal_distance_parameter = params["track width"]
 
                 # Create image to hold data

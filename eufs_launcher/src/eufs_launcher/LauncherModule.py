@@ -668,12 +668,12 @@ class EufsLauncher(Plugin):
                         # and display it to the user.
                         self.tell_launchella("Loading Image...")
                         im = Converter.convert(
-                                "xys",
+                                "comps",
                                 "png",
                                 "rand",
-                                params={
+                                params = {
                                         "track width":self.TRACK_WIDTH,
-                                        "point list":(xys,twidth,theight)
+                                        "track data":(xys,twidth,theight)
                                 }
                         )
 

@@ -45,6 +45,49 @@ class GeneratorContext:
                         self.failed = True
                         self.failure_function()
 
+
+class Parametrization:
+        """
+        Class that is used to seemlessly store and combine parametrization functions
+        for the generator.
+
+        Parametrization functions are defined as functions which take a number \elem [0,1]
+        and return a point.  It is used to define geometric curves in terms of a percentage.
+        So if you had a circle parametrization function, and gave it an input 0.25, it would
+        return the point 25% of the way around the circle segment.
+        """
+        def __init__(self,func):
+                self._func = func
+
+        def __call__(self,num):
+                return self._func(num)
+
+        @staticmethod
+        def compose(others):
+                """
+                Combines two parametrizations in a way such that the composite
+                still only takes a number from 0 to 1.
+                """
+
+                amount = len(others)
+                threshold = 1.0/amount
+                def composite(num):
+                        # Check out of bounds
+                        if num <= 0:
+                                return others[0](0)
+                        elif num >= 1:
+                                return others[-1](1)
+
+                        # Acts as composition of components
+                        i = 0
+                        while True:
+                                if num < threshold:
+                                        return others[i](amount * num)
+                                else:
+                                        num -= threshold
+                                        i += 1
+                return Parametrization(composite)
+
 class TrackGenerator:
         """
         Handles track generation.
@@ -248,7 +291,7 @@ class TrackGenerator:
                 pass
 
         @staticmethod
-        def batch(first, subsequent = 0, threshold = None):
+        def batch(first, subsequent = 0, threshold = None, postprocessing = lambda: None):
                 """
                 A python coroutine that batches up track generations.
 
@@ -264,6 +307,9 @@ class TrackGenerator:
                 The coroutine should be sent "GEN_CONTINUE" if it should continue,
                 and "GEN_STOP" if it should stop immediately, and "GEN_RELEASE" if
                 it should return everything it has queued up so far.
+
+                postprocessing is a function to be applied after normal generation.
+                Its intended function is to convert the raw data into track image data.
                 """
                 GEN_CONTINUE = TrackGenerator.GEN_CONTINUE
                 GEN_STOP = TrackGenerator.GEN_STOP
@@ -280,7 +326,10 @@ class TrackGenerator:
                         elif threshold is None:
                                 threshold = -1
 
-                        saved_batch = [TrackGenerator.generate() for x in range(0, first)]
+                        saved_batch = [
+                                postprocessing(TrackGenerator.generate()) 
+                                for x in range(0, first)
+                        ]
 
                         # Add None to the batch so priming it doesn't remove valid data.
                         saved_batch += [None]
@@ -301,7 +350,7 @@ class TrackGenerator:
                                 # If needs to refill the batch, refill it!
                                 if len(saved_batch) < threshold:
                                         saved_batch = (
-                                                [TrackGenerator.generate() 
+                                                [postprocessing(TrackGenerator.generate()) 
                                                  for x in range(0, subsequent)]
                                               + saved_batch
                                         )
@@ -329,9 +378,14 @@ class TrackGenerator:
                 while overlapped or xys==[]:
                         # Re-generate if the track overlaps itself
                         (xys,twidth,theight) = generate_random_track((0,0))
-                        xys2 = [(int(x[0]),int(x[1])) for x in xys]
-                        xys2 = compactify_points(xys2)
-                        overlapped = check_if_overlap(xys2)
+                        if twidth == theight and twidth == 0:
+                                overlapped = True
+                        else:
+                                xys2 = compactify_points([
+                                        (int(x[0]), int(x[1])) for x 
+                                        in get_points_from_component_list(xys)
+                                ])
+                                overlapped = check_if_overlap(xys2)
                         if overlapped:
                                 if TrackGenerator.FAILURE_INFO: 
                                         rospy.logerr(
@@ -340,16 +394,16 @@ class TrackGenerator:
                                               + " failed"
                                         )
                                 failure_count+=1
-                        if failure_count > 10000:
+                        if failure_count > 1000:
                                 raise GenerationFailedException
                 
                 # Now let's randomly flip it a bit to spice it up
-                if random.uniform(0,1) < 0.5:
+                """if random.uniform(0,1) < 0.5:
                         # flip xys by x
                         xys = [(-x+twidth,y) for (x,y) in xys]
                 if random.uniform(0,1) < 0.5:
                         # flip xys by y
-                        xys = [(x,-y+theight) for (x,y) in xys]
+                        xys = [(x,-y+theight) for (x,y) in xys]"""
 
                 return (xys,twidth,theight)
 
@@ -541,6 +595,11 @@ def use_micro(micro_tuple):
         TrackGenerator.previous_micro = micro_tuple[0]
         return micro_tuple[1]
 
+def register_output(list_to_register_to, points_out):
+        """Registers a collection of points according to the micro generated."""
+        to_append = (TrackGenerator.previous_micro, points_out)
+        list_to_register_to.append(to_append)
+
 def get_generic():
         """Returns a generic micro & logs it as used"""
         return use_micro(get_random_micro("generic"))
@@ -566,6 +625,10 @@ def reset_counts():
                 (name, 0, max_count) for name, cur_count, max_count 
                 in TrackGenerator.rare_micro_list
         ]
+
+def get_last_comp_points(comps):
+        """Gets last list of point in a list of components"""
+        return comps[-1][1]
        
 def generate_random_track(start_point):
         """
@@ -573,7 +636,7 @@ def generate_random_track(start_point):
         """
         reset_counts()
         total_length = 0
-        xys = []
+        components = []
 
         # We start with a small linear
         initial_tangent = get_random_unit_vector(0,math.pi/8)
@@ -590,7 +653,7 @@ def generate_random_track(start_point):
                 )
         )
         total_length += added_length
-        xys.extend(points_out)
+        register_output(components, points_out)
 
         # Now we want to set checkpoints to pass through:
         goal_points = [(start_point[0] + TrackGenerator.MAX_TRACK_LENGTH * 0.08,
@@ -608,7 +671,7 @@ def generate_random_track(start_point):
 
         # And now we generate towards each goal point
         for goal_point in goal_points:
-                prev_xys = xys
+                prev_components = components
                 
                 # Prepare inputs
                 tangent_in = tangent_out
@@ -617,18 +680,24 @@ def generate_random_track(start_point):
                 point_in   = points_out[-1]
 
                 # Generate from point to point
-                (points_out, tangent_out, normal_out, added_length) = generate_point_to_point(
+                (comps, tangent_out, normal_out, added_length) = generate_point_to_point(
                         point_in,
                         point_out,
                         tangent_in,
                         normal_in,
                         20
                 )
+
+                # This grabs the last component's points.
+                points_out = get_last_comp_points(comps)
                 total_length += added_length
-                xys.extend(points_out)
+                components.extend(comps)
 
                 # Now let's do early-checking for overlaps
-                test = compactify_points([(int(x[0]), int(x[1])) for x in xys])
+                test = compactify_points([
+                        (int(x[0]), int(x[1])) for x 
+                        in get_points_from_component_list(components)
+                ])
                 if check_if_overlap(test): 
                         if TrackGenerator.FAILURE_INFO: 
                                 rospy.logerr("Early Overlap Checking: Failed")
@@ -636,7 +705,7 @@ def generate_random_track(start_point):
                         # Generation failed test, undo last bit
                         fails += 1
                         total_length -= added_length
-                        xys = prev_xys
+                        components = prev_components
 
                         if fails == max_fails:
                                 return (test, 0, 0)
@@ -654,7 +723,7 @@ def generate_random_track(start_point):
         point_in   = points_out[-1]
 
         # Generate from point to point
-        (points_out, tangent_out, normal_out, added_length) = generate_point_to_point(
+        (comps, tangent_out, normal_out, added_length) = generate_point_to_point(
                 point_in,
                 point_out,
                 tangent_in,
@@ -662,7 +731,8 @@ def generate_random_track(start_point):
                 0
         )
         total_length += added_length
-        xys.extend(points_out)
+        components.extend(comps)
+        points_out = get_last_comp_points(comps)
 
 
         # Now we will add a circle to point directly away from start point
@@ -678,7 +748,7 @@ def generate_random_track(start_point):
                 tangent_out,
                 normal_in
         )
-        xys.extend(points_out)
+        register_output(components, points_out)
         
 
         # Sometimes the tangents don't actually match up
@@ -693,7 +763,7 @@ def generate_random_track(start_point):
                 if total_length > TrackGenerator.MAX_TRACK_LENGTH:
                         return generate_random_track(start_point)
 
-        return convert_points_to_all_positive(xys)
+        return convert_components_to_all_positive(components)
 
 
 def generate_point_to_point(point_in,
@@ -716,7 +786,7 @@ def generate_point_to_point(point_in,
         """
 
         added_length = 0
-        xys = []
+        components = []
         
         # We start out by refocusing ourselves towards point_out.
         (points_out, tangent_out, normal_out, delta_length) = (
@@ -728,7 +798,7 @@ def generate_point_to_point(point_in,
                 )
         )
         added_length += delta_length
-        xys.extend(points_out)
+        register_output(components, points_out)
 
         # Prepare data for next component
         point_in   = points_out[-1]
@@ -747,7 +817,7 @@ def generate_point_to_point(point_in,
                         straight_length
                 )
                 added_length += delta_length
-                xys.extend(points_out)
+                register_output(components, points_out)
 
         # If we are far away from the goal, we want to get closer to it in a
         # "random" way to create variance in the track.
@@ -766,7 +836,7 @@ def generate_point_to_point(point_in,
                         straight_length
                 )
                 added_length += delta_length
-                xys.extend(points_out)
+                register_output(components, points_out)
 
                 # Prepare data for next component
                 point_in   = points_out[-1]
@@ -782,7 +852,7 @@ def generate_point_to_point(point_in,
                         )
                 )
                 added_length += delta_length
-                xys.extend(points_out)
+                register_output(components, points_out)
 
                 # Prepare data for next component
                 point_in   = points_out[-1]
@@ -791,7 +861,7 @@ def generate_point_to_point(point_in,
 
                 # Now, we recurse
                 if depth > 0:
-                        (points_out, tangent_out, normal_out, added_length) = (
+                        (comps, tangent_out, normal_out, delta_length) = (
                                 generate_point_to_point(
                                         point_in,
                                         point_out,
@@ -802,26 +872,27 @@ def generate_point_to_point(point_in,
                                 )
                         )
                         added_length += delta_length
-                        xys.extend(points_out)
+                        components.extend(comps)
 
 
-        return (xys, tangent_out, normal_out, added_length)
+        return (components, tangent_out, normal_out, added_length)
 
 
 ####################
 # Micro Generators #
 ####################
 #
-# There are four types of micro generators:
+# There are six types of micro generators (generators can have multiple types):
 #
 # 1: "generic"
 #         These have the signature generic_<type>(point_in,tangent_in,normal_in,params)
-#         and output (points_out, tangent_out, normal_out, added_length)
+#         and output (parametrization_out, tangent_out, normal_out, added_length)
 #
 #         Generics just create a generically random component, with no extra requirements.
 #
 # 2: "refocus"
-#         These have the signature refocus_<type>(point_in,point_out,tangent_in,normal_in,params)
+#         These have the signature 
+#                 refocus_<type>(point_in,point_out,tangent_in,normal_in,params)
 #         with the same output as generics.
 #
 #         Refocusers ensure that the outgoing tangent points towards point_out
@@ -831,11 +902,37 @@ def generate_point_to_point(point_in,
 #                 connector_<type>(point_in,point_out,tangent_in,tangent_out,normal_in,params)
 #         with the same output as generics
 #
-#         Connectors ensure that the component ends at point_out, with outgoing tangent tangent_out
+#         Connectors ensure that the component ends at point_out, 
+#         with outgoing tangent tangent_out
 #
-# 4: "parametric"
+# 4: "linear"
+#         These have the signature:
+#                 linear_<type>(point_in,tangent_in,normal_in,length,params)
+#         with the same output as generics
+#
+#         If we consider the component to end at "point_out", then linear components
+#         guarantee that point_out will lie on the ray emanating from point_in in the
+#         direction of tangent_in.  The outgoing tangent will be guaranteed to be
+#         the same as tangent_in.
+#
+#         The length parameter of the signature can be ommited if the "linearize" option
+#         of the linear_micro decorator is ommitted, provided that one of the params{}
+#         of the component is named "length".
+#
+# 5: "special"
+#         There is no set signature for special micros.  They are identified solely
+#         by the presence of the special_micro decorator.  Special micros delegate to
+#         a special cone-placement function rather than the normal one.
+#
+# 6: "rare"
+#         Similar to special, rare tells the generator that this specific component
+#         is only allowed to appear a couple times.
+#
+# extra: "parametric"
 #         These have variable signatures, but always output a function of one variable
-#         which rangens from 0 to 1, parametrizing the curve they represent in terms of it.
+#         which ranges from 0 to 1, parametrizing the curve they represent in terms of it.
+#
+#         They aren't really micro generators, but are crucial helper functions for them.
 #
 #########################################################
 
@@ -861,7 +958,10 @@ def generic_straight(point_in,
         if "length" in params:
                 length = params["length"]
         else:
-                length = random.uniform(TrackGenerator.MIN_STRAIGHT,TrackGenerator.MAX_STRAIGHT)
+                length = random.uniform(
+                        TrackGenerator.MIN_STRAIGHT,
+                        TrackGenerator.MAX_STRAIGHT
+                )
 
         # Prepare outputs
         straight_func = parametric_straight(tangent_in,point_in,length)
@@ -911,7 +1011,8 @@ def generic_constant_turn(point_in,
         if "circle_percent" in params:
                 circle_percent = params["circle_percent"]
         else: 
-                # Note: if circles turn too much, risk of self-intersection rises dramatically.
+                # Note: if circles turn too much, 
+                # risk of self-intersection rises dramatically.
                 circle_percent = random.uniform(0.1,0.5)
 
         center = add_vectors(point_in, scale_vector(normal_in,radius))
@@ -935,7 +1036,10 @@ def generic_constant_turn(point_in,
         added_length = turn_angle * radius
 
         # Now we want to find the new normal vector, 
-        normal_out = normalize_vec((points_out[-1][0] - center[0], points_out[-1][1] - center[1]))
+        normal_out = normalize_vec((
+                points_out[-1][0] - center[0], 
+                points_out[-1][1] - center[1]
+        ))
 
         # And finally recalculate the tangent:
         tangent_out = calculate_tangent_vector(points_out)
@@ -957,7 +1061,8 @@ def generic_hairpin_turn(point_in,
 
         params["radius"]: radius of the circle
 
-        params["uniform_circles"]: if True, all circles have the same radius (params["radius"])
+        params["uniform_circles"]: if True, all circles have the 
+                                            same radius (params["radius"])
                                    if False, all circles have random radii to add variety.
 
         params["straight_length"]: the length of the straight segments
@@ -1148,7 +1253,7 @@ def refocus_constant_turn(point_in,
                 result_x = cos_a * del_x - sin_a * del_y + cx
                 result_y = sin_a * del_x + cos_a * del_y + cy
                 return (result_x, result_y)
-        circle_func = lambda a: intermediate_point(point_in,center,a)
+        circle_func = Parametrization(lambda a: intermediate_point(point_in,center,a))
 
         # We are going to iteratively walk around the circle until we are facing the right way
         points_out = []
@@ -1193,7 +1298,10 @@ def refocus_constant_turn(point_in,
         added_length = angle*radius
 
         # Now we want to find the new normal vector, 
-        normal_out = normalize_vec((points_out[-1][0] - center[0], points_out[-1][1] - center[1]))
+        normal_out = normalize_vec((
+                points_out[-1][0] - center[0], 
+                points_out[-1][1] - center[1]
+        ))
 
         # And finally recalculate the tangent:
         tangent_out = calculate_tangent_vector(points_out)
@@ -1409,7 +1517,7 @@ def parametric_bezier(control_points):
                         the_sum_x += coefficient * cp[i][0]
                         the_sum_y += coefficient * cp[i][1]
                 return (the_sum_x, the_sum_y)
-        return lambda t: to_return(control_points, t)
+        return Parametrization(lambda t: to_return(control_points, t))
 
 
 
@@ -1417,7 +1525,7 @@ def parametric_straight(slope_vec, start_point, line_length):
         """Returns the parametric function of a line given a slope and start point"""
         def to_return(slope, start, length, t):
                 return add_vectors(start, scale_vector(slope, 1.0 * t * line_length))
-        return lambda t: to_return(slope_vec,start_point, line_length, t)
+        return Parametrization(lambda t: to_return(slope_vec,start_point, line_length, t))
 
 
 
@@ -1439,6 +1547,6 @@ def parametric_circle(start_point, center_point, delta_angle):
                 result_x = cos_a * del_x - sin_a * del_y + cx
                 result_y = sin_a * del_x + cos_a * del_y + cy
                 return (result_x, result_y)
-        return lambda t: output(start_point, center_point, t * delta_angle)
+        return Parametrization(lambda t: output(start_point, center_point, t * delta_angle))
 
 
