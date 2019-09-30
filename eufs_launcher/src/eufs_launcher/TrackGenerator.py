@@ -1124,15 +1124,14 @@ def cone_default(xys, starting = False, track_width = None, slalom = False, prev
                 # Check if normal direction suddenly flipped relative to last iteration.
                 # (And reverse it if it happened)
                 dot_product = (
-                        last_tangent_normal[0] * cur_tangent_normal[0],
+                        last_tangent_normal[0] * cur_tangent_normal[0] +
                         last_tangent_normal[1] * cur_tangent_normal[1]
                 )
 
                 # Tangent flipped!
                 # (As when dot product is negative, vectors are opposite)
-                if dot_product < -0.1:
+                if dot_product < 0:
                         cur_tangent_normal = scale_vector(cur_tangent_normal, -1)
-                        rospy.logerr("Tangents flipped")
 
                 last_tangent_normal = cur_tangent_normal
 
