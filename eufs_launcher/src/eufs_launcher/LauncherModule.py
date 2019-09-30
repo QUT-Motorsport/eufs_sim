@@ -500,7 +500,7 @@ class EufsLauncher(Plugin):
                 self.HAIRPIN_PAIRS  = preset_data["MAX_HAIRPIN_PAIRS"]
                 self.MAX_LENGTH     = preset_data["MAX_LENGTH"]
                 self.LAX_GENERATION = preset_data["LAX_GENERATION"]
-                self.TRACK_WIDTH    = 4
+                self.TRACK_WIDTH    = preset_data["TRACK_WIDTH"]
                 self.LAX_CHECKBOX.setChecked(self.LAX_GENERATION)
 
         def keep_track_of_preset_changes(self):
@@ -654,7 +654,8 @@ class EufsLauncher(Plugin):
                         "MAX_HAIRPIN":self.MAX_HAIRPIN/2,
                         "MAX_HAIRPIN_PAIRS":self.HAIRPIN_PAIRS,
                         "MAX_LENGTH":self.MAX_LENGTH,                                   
-                        "LAX_GENERATION":isLaxGenerator,                                   
+                        "LAX_GENERATION":isLaxGenerator,
+			"TRACK_WIDTH":self.TRACK_WIDTH,
                         "COMPONENTS":component_data
                 }
 
@@ -672,7 +673,6 @@ class EufsLauncher(Plugin):
                                 "png",
                                 "rand",
                                 params = {
-                                        "track width":self.TRACK_WIDTH,
                                         "track data":(xys,twidth,theight)
                                 }
                         )

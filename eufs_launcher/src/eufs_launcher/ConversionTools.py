@@ -11,7 +11,8 @@ import rospy
 import sys
 sys.path.insert(1, os.path.join(rospkg.RosPack().get_path('eufs_gazebo'),'tracks'))
 from track_gen import Track
-from TrackGenerator import compactify_points
+from TrackGenerator import compactify_points, cone_start, CONE_INNER, CONE_OUTER, CONE_ORANGE
+from TrackGenerator import get_cone_function
 import pandas as pd
 
 # Here are all the track formats we care about:
@@ -281,53 +282,27 @@ class ConversionTools:
                 Converts raw track generator output to png.
 
                 which_file:            Output filename
-                params["track width"]: Track width (cone distance)
                 params["track data"]:  The track generator data
                 conversion_suffix:     Additional suffix to append to the output filename.
+
+                Should be called within a GeneratorContext context manager.
                 """
 
                 GENERATED_FILENAME = which_file + conversion_suffix
 
                 # Unpack
                 (components, twidth, theight)    = params["track data"]
-                cone_normal_distance_parameter = params["track width"]
 
-                all_points = compactify_points([
+                xys = compactify_points([
                         (int(x[0]), int(x[1])) for x 
                         in get_points_from_component_list(components)
                 ])
-
-                return ConversionTools.xys_to_png(
-                        GENERATED_FILENAME,
-                        {
-                                "point list":  (all_points, twidth, theight),
-                                "track width": cone_normal_distance_parameter
-                        },
-                        ""
-                )
-
-        @staticmethod
-        def xys_to_png(which_file, params, conversion_suffix = ""):
-                """
-                Converts xys format to png.
-
-                which_file:            Output filename
-                params["track width"]: Track width (cone distance)
-                params["point list"]:  Tuple of: list of points, image width, image height
-                conversion_suffix:     Additional suffix to append to the output filename.
-                """
-
-                GENERATED_FILENAME = which_file + conversion_suffix
-
-                # Unpack
-                (xys, twidth, theight) = params["point list"]
-                cone_normal_distance_parameter = params["track width"]
 
                 # Create image to hold data
                 im = Image.new('RGBA', (twidth, theight), (0, 0, 0, 0)) 
                 draw = ImageDraw.Draw(im)
 
-                # Draw backround:
+                # Draw background:
                 bounding_poly = [
                                  (0,      0      ),
                                  (twidth, 0      ),
@@ -343,10 +318,6 @@ class ConversionTools:
                 draw.line(xys, fill=ConversionTools.track_center_color)
 
                 pixels = im.load()
-
-                # Get a list of integerized points to work well with 
-                # integer-valued pixel locations.
-                compact_xys = compactify_points([(int(xy[0]), int(xy[1])) for xy in xys])
 
                 # We want to calculate direction of car position
                 sx = xys[0][0]
@@ -375,10 +346,6 @@ class ConversionTools:
                 color_for_car = ConversionTools.car_color[:3]+(pixel_value,)
                 draw.line([xys[0], xys[0]], fill=color_for_car)
 
-                def is_track(c):
-                        return (c == ConversionTools.track_outer_color 
-                             or c == ConversionTools.track_inner_color 
-                             or c == ConversionTools.track_center_color)
 
                 # Now we want to make all pixels bordering the track become magenta (255,0,255) -
                 # this will be our 'cone' color
@@ -387,208 +354,174 @@ class ConversionTools:
                 # We will also want to make it such that cones are about 4-6 
                 # away from eachother euclideanly        
 
+                def is_track(c):
+                        return (c == ConversionTools.track_outer_color 
+                             or c == ConversionTools.track_inner_color 
+                             or c == ConversionTools.track_center_color)
 
-                all_points_north = []
-                all_points_south = []
-                prev_points_north = [(-10000, -10000)]
-                prev_points_south = [(-10000, -10000)]
-                print("Placing Cones...")
-                for i in range(len(xys)):
-                        #Skip first part [as hard to calculate tangent]
-                        if i == 0: continue
-                
-                        # The idea here is to place cones along normals to the 
-                        # tangent at any given point, 
-                        # while making sure they aren't too close.
+                cone_locs = []
+                for idx, tup in enumerate(components):
+                        (name, points) = tup
+                        if idx == 0:
+                                cone_locs.extend(cone_start(points))
+                        else:
+                                cone_locs.extend(get_cone_function(name)(points))
 
-                        # Hardcoded parameters (not available in launcher because the set of 
-                        # well-behaved answers is far from dense in the problemspace):
-
-                        # How close can cones be from those on opposite side.
-                        cone_cross_closeness_parameter = cone_normal_distance_parameter * 3 / 4 - 1
-
-                        # Larger numbers makes us check more parts of the track for conflicts.
-                        cone_check_amount = 30
-
-                        # How close can cones be from those on the same side.
-                        cone_adjacent_closeness_parameter = 6
-
-                        # Here we calculate the normal vectors along the track
-                        # As we want cones to be placed along the normal.
-                        cur_point = xys[i]
-                        cur_tangent_angle = calculate_tangent_angle(xys[:(i+1)])
-                        cur_tangent_normal = (
-                            math.ceil(
-                                cone_normal_distance_parameter * math.sin(cur_tangent_angle)
-                            ),
-                            math.ceil(
-                                -cone_normal_distance_parameter * math.cos(cur_tangent_angle)
-                            )
-                        )
-
-                        # This is where the cones will be placed, provided they pass the
-                        # distance checks later.
-                        north_point = (int(cur_point[0] + cur_tangent_normal[0]),
-                                       int(cur_point[1] + cur_tangent_normal[1]))
-                        south_point = (int(cur_point[0] - cur_tangent_normal[0]), 
-                                       int(cur_point[1] - cur_tangent_normal[1]))
-
-                        # Calculates shortest distance to cone on same side of track
-                        difference_from_prev_north = min([
-                                         (north_point[0] - prev_point_north[0])**2
-                                       + (north_point[1] - prev_point_north[1])**2
-                                for prev_point_north in prev_points_north
-                        ])
-                        difference_from_prev_south = min([
-                                         (south_point[0] - prev_point_south[0])**2
-                                       + (south_point[1] - prev_point_south[1])**2
-                                for prev_point_south in prev_points_south
-                        ])
-
-                        # Calculates shortest distance to cone on different side of track
-                        cross_distance_ns = min([
-                                         (north_point[0] - prev_point_south[0])**2
-                                       + (north_point[1] - prev_point_south[1])**2
-                                for prev_point_south in prev_points_south
-                        ])
-                        cross_distance_sn = min([
-                                         (south_point[0] - prev_point_north[0])**2
-                                       + (south_point[1] - prev_point_north[1])**2
-                                for prev_point_north in prev_points_north
-                        ])
-
-                        # Here we ensure cones don't get too close to the track
-                        rel_xys = xys[ 
-                            max([0, i - cone_check_amount]): 
-                            min([len(xys), i + cone_check_amount])  
-                        ]
-                        distance_pn = min([
-                                             (north_point[0] - xy[0])**2
-                                           + (north_point[1] - xy[1])**2 
-                                                for xy in rel_xys
-                        ])
-                        distance_ps = min([
-                                             (south_point[0] - xy[0])**2
-                                           + (south_point[1] - xy[1])**2 
-                                                for xy in rel_xys
-                        ])
-
-                        # And we consider all these factors to see if the cones are viable
-                        north_viable = (
-                              difference_from_prev_north > cone_adjacent_closeness_parameter**2
-                          and cross_distance_ns > cone_cross_closeness_parameter**2
-                          and distance_pn > cone_cross_closeness_parameter**2
-                        )
-                        south_viable = (
-                              difference_from_prev_south > cone_adjacent_closeness_parameter**2
-                          and cross_distance_sn > cone_cross_closeness_parameter**2
-                          and distance_ps > cone_cross_closeness_parameter**2
-                        )
-
-                        # And when they are viable, draw them!
-                        if (
-                            not is_track(pixels[int(north_point[0]), int(north_point[1])]) 
-                            and north_viable
-                        ):
-                                px_x = int(north_point[0])
-                                px_y = int(north_point[1])
-                                pixels[px_x, px_y]=ConversionTools.inner_cone_color
-                                all_points_north.append(north_point)
-                        if (
-                            not is_track(pixels[int(south_point[0]), int(south_point[1])]) 
-                            and south_viable
-                        ):
-                                px_x = int(south_point[0])
-                                px_y = int(south_point[1])
-                                pixels[px_x, px_y]=ConversionTools.inner_cone_color
-                                all_points_south.append(south_point)
-
-                        # Only keep track of last couple of previous cones 
-                        # (and the very first one, for when the loop joins up)
-                        # Specifically, if we assume cone_check_amount is 30, then
-                        # we have prev_points north keep track of the most recent 30 cones,
-                        # and also the very first start cone.
-                        # This is because we want to make sure no cones are too close to eachother,
-                        # but checking all cones would be too expensive.
-                        # The first cone is kept track of because the track is a loop so
-                        # it needs to look ahead a bit.
-                        if len(all_points_north) > cone_check_amount:
-                                prev_points_north = (all_points_north[-cone_check_amount:]
-                                                  + [all_points_north[0]])
-                        elif len(all_points_north) > 0:
-                                prev_points_north = all_points_north
-
-                        if len(all_points_south) > cone_check_amount:
-                                prev_points_south = (all_points_south[-cone_check_amount:]
-                                                  + [all_points_south[0]])
-                        elif len(all_points_south) > 0:
-                                prev_points_south = all_points_south
+                for px, py, color in cone_locs:
+                        if color is CONE_INNER:
+                                true_color = ConversionTools.inner_cone_color
+                        elif color is CONE_OUTER:
+                                true_color = ConversionTools.outer_cone_color
+                        elif color is CONE_ORANGE:
+                                true_color = ConversionTools.orange_cone_color
+                        if (not is_track(pixels[int(px), int(py)])):
+                                pixels[int(px), int(py)] = true_color
 
                 
+
+                # Finally, we just need to place noise.  
+                # At maximal noise, the track should be about 1% covered.
+
+                for i in range(im.size[0]):
+                        for j in range(im.size[1]):
+                                # Don't add noise in margin
+                                if i < 5 or j < 5 or i >= im.size[0] - 5 or j >= im.size[0] - 5: 
+                                        continue
+                                if pixels[i, j] == ConversionTools.background_color:
+                                        # Only 1% should be covered with noise
+                                        if uniform(0, 100) < 1:
+                                                pixels[i, j] = ConversionTools.noise_color
+
+                # Add margins (as specified by the file format)
+                margin = 5
+                im2 = Image.new(
+                                'RGBA', 
+                                (twidth + 2 * margin, theight + 2 * margin), 
+                                (255, 255, 255, 255)
+                ) 
+                pixels2 = im2.load()
+                for x in range(im.size[0]):
+                        for y in range(im.size[1]):
+                                pixels2[x + margin, y + margin] = pixels[x, y]
+
+                # And tag it with the version number
+                loc = ConversionTools.get_metadata_pixel_location(
+                                            4,
+                                            4,
+                                            ConversionTools.BOTTOM_RIGHT,
+                                            im2.size
+                )
+                pixels2[loc[0], loc[1]] = ConversionTools.deconvert_version_metadata(
+                                             ConversionTools.TRACKIMG_VERSION_NUM
+                )[0]
+
+
+                im2.save(
+                        os.path.join(rospkg.RosPack().get_path('eufs_gazebo'),
+                        'randgen_imgs/'+GENERATED_FILENAME+'.png')
+                )
+                return im
+
+        @staticmethod
+        def xys_to_png(which_file, params, conversion_suffix = ""):
+                """
+                Converts xys format to png.
+
+                which_file:            Output filename
+                params["point list"]:  Tuple of: list of points, image width, image height
+                params["track width"]: distance from center of track to cones.
+                                        is optional - if not provided, should be called
+                                        within a GeneratorContext context manager.
+                conversion_suffix:     Additional suffix to append to the output filename.
+
+                Should be called within a GeneratorContext context manager.
+                """
+
+                GENERATED_FILENAME = which_file + conversion_suffix
+
+                # Unpack
+                (xys, twidth, theight) = params["point list"]
+
+                # Create image to hold data
+                im = Image.new('RGBA', (twidth, theight), (0, 0, 0, 0)) 
+                draw = ImageDraw.Draw(im)
+
+                # Draw background:
+                bounding_poly = [
+                                 (0,      0      ),
+                                 (twidth, 0      ),
+                                 (twidth, theight),
+                                 (0,      theight),
+                                 (0,      0      )
+                ]
+                draw.polygon(bounding_poly, fill='white')
+
+                # Draw thick track with colored layers
+                draw.line(xys, fill=ConversionTools.track_outer_color, width=5)
+                draw.line(xys, fill=ConversionTools.track_inner_color, width=3)
+                draw.line(xys, fill=ConversionTools.track_center_color)
+
+                pixels = im.load()
+
+                # We want to calculate direction of car position
+                sx = xys[0][0]
+                sy = xys[0][1]
+                ex = xys[1][0]
+                ey = xys[1][1]
+
+                # So we calculate the angle that the car is facing (the yaw)
+                angle = math.atan2(ey - sy,ex - sx)
+                if angle < 0:
+                        # Angle is on range [-pi,pi] but we want [0,2pi]
+                        # So if it is less than 0, pop it onto the correct range.
+                        angle += 2 * math.pi
+
+                # We convert angles to range [1,255] rather than [0,255]
+                # As if it is 0 then, since it is stored as an alpha value,
+                # optimization techniques for storage may be used by the png
+                # file format to set the whole pixel to some standard value,
+                # such as (0,0,0,0), which is decidedly not what we want as
+                # the rgb values still matter.
+                pixel_value = int(angle / ( 2 * math.pi ) * 254 + 1)
+                if pixel_value > 255: pixel_value = 255
+                if pixel_value <   1: pixel_value =   1
+
+                # Draw car
+                color_for_car = ConversionTools.car_color[:3]+(pixel_value,)
+                draw.line([xys[0], xys[0]], fill=color_for_car)
+
+
+                # Now we want to make all pixels bordering the track become magenta (255,0,255) -
+                # this will be our 'cone' color
+                # To find pixel boardering track, simply find white pixel adjacent to 
+                # a non-white non-magenta pixle
+                # We will also want to make it such that cones are about 4-6 
+                # away from eachother euclideanly        
+
+                def is_track(c):
+                        return (c == ConversionTools.track_outer_color 
+                             or c == ConversionTools.track_inner_color 
+                             or c == ConversionTools.track_center_color)
+
+                if "track width" in params:
+                        cone_locs = cone_start(
+                                xys, 
+                                width = params["track width"]
+                        )
+                else:
+                        cone_locs = cone_start(xys)
+
+                for px, py, color in cone_locs:
+                        if color is CONE_INNER:
+                                true_color = ConversionTools.inner_cone_color
+                        elif color is CONE_OUTER:
+                                true_color = ConversionTools.outer_cone_color
+                        elif color is CONE_ORANGE:
+                                true_color = ConversionTools.orange_cone_color
+                        if (not is_track(pixels[int(px), int(py)])):
+                                pixels[int(px), int(py)] = true_color
+
                 
-                # We want to make the track have differing cone colors - 
-                # yellow on inside, blue on outside
-                # All cones are currently yellow.  
-                # We'll do a "fill-search" for any cones reachable
-                # from (0,0) and call those the 'outside' 
-                # as (0,0) is always blank since the image is padded)
-                # So we will return a list of all points that the search can reach.
-                # Precisely, this is a list of all points adjacent to curpix that
-                # have not already been explored.
-                def get_allowed_adjacents(explolist,curpix):
-                        (i,j) = curpix
-                        allowed = []
-                        if i > 0:
-                                if not((i-1, j) in explolist):
-                                        allowed.append((i-1, j))
-                        if j > 0:
-                                if not((i,j-1) in explolist):
-                                        allowed.append((i, j-1))
-                        if i < twidth-1:
-                                if not((i+1,j) in explolist):
-                                        allowed.append((i+1, j))
-                        if j < theight-1:
-                                if not((i,j+1) in explolist):
-                                        allowed.append((i, j+1))
-                        return allowed
-                print("Coloring cones...")
-
-                # This is the bread-and-butter of the search algorithm.
-                # All it is doing is checking if the points in frontier are
-                # a cone, and if they are then swap it to the correct cone color.
-                # (all cones are inner_cone_color by default, but those on the outside
-                # of the track must be swapped to outer_cone_color).
-                # When we search a pixel, we remove it from the frontier and
-                # add its adjacents to the frontier (provided they are not already explored).
-                # We only do this if the pixel is a background or cone pixel, otherwise
-                # we do not add its adjacents to the frontier.
-                # We don't want the search to be able to pass through track pixels, as then
-                # we would end up on the "inside" of the track, and would wrongfully color
-                # inner_cones as outer_cones.
-                explored_list = set([])
-                frontier = set([(0, 0)])
-                while len(frontier)>0:
-                        new_frontier = set([])
-                        for f in frontier:
-                                (i, j) = f
-                                pix = pixels[i, j]
-                                if pix == ConversionTools.inner_cone_color:
-                                        pixels[i, j] = ConversionTools.outer_cone_color
-                                        new_frontier.update(
-                                                get_allowed_adjacents(explored_list,(i, j))
-                                        )
-                                elif pix == ConversionTools.background_color:
-                                        new_frontier.update(
-                                                get_allowed_adjacents(explored_list,(i, j))
-                                        )
-                                explored_list.add(f)
-                        frontier = new_frontier
-
-                # Add orange start cones
-                (i, j) = all_points_north[0]
-                pixels[int(i), int(j)] = ConversionTools.orange_cone_color
-                (i, j) = all_points_south[0]
-                pixels[int(i), int(j)] = ConversionTools.orange_cone_color
 
                 # Finally, we just need to place noise.  
                 # At maximal noise, the track should be about 1% covered.

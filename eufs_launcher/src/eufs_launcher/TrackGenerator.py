@@ -106,6 +106,7 @@ class TrackGenerator:
         linear_micro_list = []
         special_micro_list = []
         rare_micro_list = []
+        start_micro_list = []
         previous_micro = ""
 
         # The component__weighting_dict stores the weightings for each component
@@ -160,6 +161,7 @@ class TrackGenerator:
                                 "MAX_HAIRPIN_PAIRS":3,
                                 "MAX_LENGTH":1500,
                                 "LAX_GENERATION":False,
+                                "TRACK_WIDTH":4,
                                 "COMPONENTS":{
                                         "STRAIGHT":1,
                                         "CONSTANT_TURN":0.7,
@@ -176,6 +178,7 @@ class TrackGenerator:
                                 "MAX_HAIRPIN_PAIRS":3,
                                 "MAX_LENGTH":700,
                                 "LAX_GENERATION":True,
+                                "TRACK_WIDTH":4,
                                 "COMPONENTS":{
                                         "STRAIGHT":1,
                                         "CONSTANT_TURN":0.7,
@@ -193,6 +196,7 @@ class TrackGenerator:
                                 "MAX_HAIRPIN_PAIRS":3,
                                 "MAX_LENGTH":500,
                                 "LAX_GENERATION":True,
+                                "TRACK_WIDTH":4,
                                 "COMPONENTS":{
                                         "STRAIGHT":1,
                                         "CONSTANT_TURN":0.7,
@@ -210,6 +214,7 @@ class TrackGenerator:
                                 "MAX_HAIRPIN_PAIRS":3,
                                 "MAX_LENGTH":700,
                                 "LAX_GENERATION":True,
+                                "TRACK_WIDTH":4,
                                 "COMPONENTS":{
                                         "STRAIGHT":1,
                                         "CONSTANT_TURN":0.7,
@@ -281,6 +286,7 @@ class TrackGenerator:
                         lambda: 0,
                         values["COMPONENTS"]
                 )
+                TrackGenerator.TRACK_WIDTH = values["TRACK_WIDTH"]
 
         # These three are used as constants for batch generation.
         class GEN_STOP:
@@ -468,7 +474,10 @@ def connector_micro(micro_name,allow_double_placement = False):
                 return decorated_function
         return to_return
 
-def linear_micro(micro_name,allow_double_placement = False, linearize = False):
+def linear_micro(micro_name,
+                 allow_double_placement = False, 
+                 linearize = False,
+                 start = False):
         """
         Decorator for refocus track components 
 
@@ -494,6 +503,8 @@ def linear_micro(micro_name,allow_double_placement = False, linearize = False):
                         )
                 else: 
                         to_append = (micro_name, decorated_function)
+                if start:
+                        TrackGenerator.start_micro_list.append(to_append)
                 TrackGenerator.linear_micro_list.append(to_append)
                 if allow_double_placement:
                         TrackGenerator.double_placement_set.add(micro_name)
@@ -510,21 +521,17 @@ def get_linearized_function(to_linearize):
                 return to_linearize(point_in, tangent_in, normal_in, params = params)
         return linearized_function
 
-def special_micro(micro_name,cone_placer,allow_double_placement = False):
+def special_micro(micro_name,cone_placer):
         """
         Decorator for refocus track components 
 
         micro_name:  The internal name of the micro.  Should be a string.
 
         cone_placer: The function to be used on cone placement.
-
-        allow_double_placement: Allows this component to be placed back-to-back
         """
         def to_return(decorated_function):
-                to_append = (micro_name,decorated_function)
+                to_append = (micro_name, cone_placer)
                 TrackGenerator.special_micro_list.append(to_append)
-                if allow_double_placement:
-                        TrackGenerator.double_placement_set.add(micro_name)
                 return decorated_function
         return to_return
 
@@ -542,6 +549,15 @@ def rare_micro(micro_name, count = 1):
                 return decorated_function
         return to_return
        
+def get_cone_function(micro_name):
+        """
+        Returns the cone placement function utilized by the micro_name micro generator.
+        """
+        for name, placer in TrackGenerator.special_micro_list:
+                if name == micro_name:
+                        return placer
+
+        return cone_default
 
 ####################
 # Macro Generators #
@@ -615,6 +631,10 @@ def get_connector():
 def get_linear():
         """Returns a linear micro & logs it as used"""
         return use_micro(get_random_micro("linear"))
+
+def get_start():
+        """Returns a linear micro & logs it as used"""
+        return use_micro(get_random_micro("start"))
          
 def reset_counts():
         """
@@ -643,7 +663,7 @@ def generate_random_track(start_point):
         tangent_in = initial_tangent
         point_in = start_point
         normal_in = get_normal_vector(tangent_in)
-        (points_out, tangent_out, normal_out, added_length) = get_linear()(
+        (points_out, tangent_out, normal_out, added_length) = get_start()(
                 point_in,
                 tangent_in,
                 normal_in,
@@ -934,6 +954,12 @@ def generate_point_to_point(point_in,
 #
 #         They aren't really micro generators, but are crucial helper functions for them.
 #
+# extra: "cone"
+#         These are used to define cone placements, like cone_default and cone_slalom
+#         They always take in a list of points, and return a list of triples (px, py, color)
+#         of the (px, py) position of a cone of color color that will be placed by the
+#         caller of the function.
+#
 #########################################################
 
 def de_parameterize(func):
@@ -941,8 +967,7 @@ def de_parameterize(func):
         return [func(1.0 * t / (TrackGenerator.FIDELITY - 1)) 
                 for t in range(0 , TrackGenerator.FIDELITY)]
 
-
-@linear_micro("STRAIGHT", linearize = True)
+@linear_micro("STRAIGHT", linearize = True, start = True)
 @generic_micro("STRAIGHT")
 def generic_straight(point_in,
                      tangent_in,
@@ -1550,3 +1575,181 @@ def parametric_circle(start_point, center_point, delta_angle):
         return Parametrization(lambda t: output(start_point, center_point, t * delta_angle))
 
 
+# Flags for cone placement micros
+class CONE_INNER:
+        pass
+class CONE_OUTER:
+        pass
+class CONE_ORANGE:
+        pass
+
+def cone_start(xys, track_width = None):
+        """Wrapper for cone_defualt"""
+        return cone_default(xys, starting = True, track_width = track_width)
+
+def cone_default(xys, starting = False, track_width = None):
+        """
+        Default cone placement algorithm, can be overriden on a micro by using the 
+        special micro decorator.
+
+        Takes in a list of points, returns a list of triples dictating x, y position
+        of cone of color color [(x, y, color)].
+
+        Optionally takes a flag "starting" to make the first pair of cones orange,
+        and optional "track_width" to override TrackGenerator.TRACK_WIDTH, which
+        is useful if accessing ConversionTools.xys_to_png from a non-generator context.
+        """
+
+        all_points_north = []
+        all_points_south = []
+        prev_points_north = [(-10000, -10000)]
+        prev_points_south = [(-10000, -10000)]
+        to_return = []
+
+        if track_width is None:
+                cone_normal_distance_parameter = TrackGenerator.TRACK_WIDTH
+        else:
+                cone_normal_distance_parameter = track_width
+
+        for i in range(len(xys)):
+                #Skip first part [as hard to calculate tangent]
+                if i == 0: continue
+
+                # The idea here is to place cones along normals to the 
+                # tangent at any given point, 
+                # while making sure they aren't too close.
+
+                # Hardcoded parameters (not available in launcher because the set of 
+                # well-behaved answers is far from dense in the problemspace):
+
+                # How close can cones be from those on opposite side.
+                cone_cross_closeness_parameter = cone_normal_distance_parameter * 3 / 4 - 1
+
+                # Larger numbers makes us check more parts of the track for conflicts.
+                cone_check_amount = 30
+
+                # How close can cones be from those on the same side.
+                cone_adjacent_closeness_parameter = 6
+
+                # Here we calculate the normal vectors along the track
+                # As we want cones to be placed along the normal.
+                cur_point = xys[i]
+                cur_tangent_angle = calculate_tangent_angle(xys[:(i+1)])
+                cur_tangent_normal = (
+                    math.ceil(
+                        cone_normal_distance_parameter * math.sin(cur_tangent_angle)
+                    ),
+                    math.ceil(
+                        -cone_normal_distance_parameter * math.cos(cur_tangent_angle)
+                    )
+                )
+
+                # This is where the cones will be placed, provided they pass the
+                # distance checks later.
+                north_point = (int(cur_point[0] + cur_tangent_normal[0]),
+                               int(cur_point[1] + cur_tangent_normal[1]))
+                south_point = (int(cur_point[0] - cur_tangent_normal[0]), 
+                               int(cur_point[1] - cur_tangent_normal[1]))
+
+                # Calculates shortest distance to cone on same side of track
+                difference_from_prev_north = min([
+                                 (north_point[0] - prev_point_north[0])**2
+                               + (north_point[1] - prev_point_north[1])**2
+                        for prev_point_north in prev_points_north
+                ])
+                difference_from_prev_south = min([
+                                 (south_point[0] - prev_point_south[0])**2
+                               + (south_point[1] - prev_point_south[1])**2
+                        for prev_point_south in prev_points_south
+                ])
+
+                # Calculates shortest distance to cone on different side of track
+                cross_distance_ns = min([
+                                 (north_point[0] - prev_point_south[0])**2
+                               + (north_point[1] - prev_point_south[1])**2
+                        for prev_point_south in prev_points_south
+                ])
+                cross_distance_sn = min([
+                                 (south_point[0] - prev_point_north[0])**2
+                               + (south_point[1] - prev_point_north[1])**2
+                        for prev_point_north in prev_points_north
+                ])
+
+                # Here we ensure cones don't get too close to the track
+                rel_xys = xys[ 
+                    max([0, i - cone_check_amount]): 
+                    min([len(xys), i + cone_check_amount])  
+                ]
+                distance_pn = min([
+                                     (north_point[0] - xy[0])**2
+                                   + (north_point[1] - xy[1])**2 
+                                        for xy in rel_xys
+                ])
+                distance_ps = min([
+                                     (south_point[0] - xy[0])**2
+                                   + (south_point[1] - xy[1])**2 
+                                        for xy in rel_xys
+                ])
+
+                # And we consider all these factors to see if the cones are viable
+                north_viable = (
+                      difference_from_prev_north > cone_adjacent_closeness_parameter**2
+                  and cross_distance_ns > cone_cross_closeness_parameter**2
+                  and distance_pn > cone_cross_closeness_parameter**2
+                )
+                south_viable = (
+                      difference_from_prev_south > cone_adjacent_closeness_parameter**2
+                  and cross_distance_sn > cone_cross_closeness_parameter**2
+                  and distance_ps > cone_cross_closeness_parameter**2
+                )
+
+                # And when they are viable, draw them!
+                if (
+                    True#not is_track(pixels[int(north_point[0]), int(north_point[1])]) 
+                    and north_viable
+                ):
+                        px_x = int(north_point[0])
+                        px_y = int(north_point[1])
+                        to_return.append((px_x, px_y, CONE_OUTER))
+                        all_points_north.append(north_point)
+                if (
+                    True#not is_track(pixels[int(south_point[0]), int(south_point[1])]) 
+                    and south_viable
+                ):
+                        px_x = int(south_point[0])
+                        px_y = int(south_point[1])
+                        to_return.append((px_x, px_y, CONE_INNER))
+                        all_points_south.append(south_point)
+
+                # Only keep track of last couple of previous cones 
+                # (and the very first one, for when the loop joins up)
+                # Specifically, if we assume cone_check_amount is 30, then
+                # we have prev_points north keep track of the most recent 30 cones,
+                # and also the very first start cone.
+                # This is because we want to make sure no cones are too close to eachother,
+                # but checking all cones would be too expensive.
+                # The first cone is kept track of because the track is a loop so
+                # it needs to look ahead a bit.
+                if len(all_points_north) > cone_check_amount:
+                        prev_points_north = (all_points_north[-cone_check_amount:]
+                                          + [all_points_north[0]])
+                elif len(all_points_north) > 0:
+                        prev_points_north = all_points_north
+
+                if len(all_points_south) > cone_check_amount:
+                        prev_points_south = (all_points_south[-cone_check_amount:]
+                                          + [all_points_south[0]])
+                elif len(all_points_south) > 0:
+                        prev_points_south = all_points_south
+
+        if starting:
+                # Add orange start cones
+                for point_list in [all_points_north, all_points_south]:
+                        (i, j) = point_list[0]
+                        for idx, tup in enumerate(to_return):
+                                x, y, _ = tup
+                                if x == i and y == j:
+                                        to_return[idx] = (x, y, CONE_ORANGE)
+
+
+        return to_return
