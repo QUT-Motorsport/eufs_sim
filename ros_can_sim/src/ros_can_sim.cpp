@@ -270,10 +270,10 @@ void RosCanSim::publishWheelSpeeds() {
     eufs_msgs::wheelSpeeds msg;
     msg.header.stamp = joint_state_.header.stamp;
     msg.header.frame_id = "base_link";
-    msg.lfSpeed = lf_wheel_rpm;
-    msg.rfSpeed = rf_wheel_rpm;
-    msg.lbSpeed = lb_wheel_rpm;
-    msg.rbSpeed = rb_wheel_rpm;
+    msg.lf_speed = lf_wheel_rpm;
+    msg.rf_speed = rf_wheel_rpm;
+    msg.lb_speed = lb_wheel_rpm;
+    msg.rb_speed = rb_wheel_rpm;
     msg.steering = steering_feedback;
 
     wheel_speed_pub_.publish(msg);
