@@ -129,10 +129,10 @@ from controller_manager_msgs.srv import ListControllers
 from gazebo_msgs.msg import ModelStates
 from sensor_msgs.msg import JointState
 
-from eufs_msgs.msg import driveCommand2
-from eufs_msgs.msg import chassisState
-from eufs_msgs.msg import runstop
-from eufs_msgs.msg import wheelSpeeds
+from eufs_msgs.msg import DriveCommand2
+from eufs_msgs.msg import ChassisState
+from eufs_msgs.msg import Runstop
+from eufs_msgs.msg import WheelSpeeds
 
 
 class AckermannController(object):
@@ -328,10 +328,10 @@ class AckermannController(object):
 
         # don't set up callback until params are initialized
         self.wheelSpeedsPub = rospy.Publisher(
-            self._vehicle_prefix + '/wheelSpeeds', wheelSpeeds, queue_size=1)
+            self._vehicle_prefix + '/wheelSpeeds', WheelSpeeds, queue_size=1)
 
         self.chassisStatePub = rospy.Publisher(
-            self._vehicle_prefix + "/chassisState", chassisState, queue_size=1)
+            self._vehicle_prefix + "/chassisState", ChassisState, queue_size=1)
 
         self.driveCommandSub = dict()
         for cmd, priority in self.commandPriorities:
@@ -341,7 +341,7 @@ class AckermannController(object):
                                  self.driveCommandCb, queue_size=1)
 
         self.runstopSub = rospy.Subscriber(
-            self._vehicle_prefix + "/runstop", runstop, self.runstopCb, queue_size=5)
+            self._vehicle_prefix + "/runstop", Runstop, self.runstopCb, queue_size=5)
 
         self.wheelSpeedSub = rospy.Subscriber(
             self._vehicle_prefix + '/joint_states', JointState, self.wheelSpeedsCb)
@@ -358,8 +358,8 @@ class AckermannController(object):
             # rearBrake = 0.0
             speed_front = 0.0
             speed_rear = 0.0
-            chassisSt = chassisState()
-            chassisSt.runstopMotionEnabled = self.getrunstop()
+            chassisSt = ChassisState()
+            chassisSt.runstop_motion_enabled = self.getrunstop()
             if (self._cmd_timeout > 0.0 and
                     t - self._last_cmd_time > self._cmd_timeout):
                 # Too much time has elapsed since the last command. Stop the
@@ -378,10 +378,10 @@ class AckermannController(object):
                     foundSteering = False
                     accel = 0.0
 
-                    if not chassisSt.runstopMotionEnabled:
+                    if not chassisSt.runstop_motion_enabled:
                         chassisSt.rear_throttle = 0.0
                         chassisSt.front_throttle = 0.0
-                        chassisSt.throttleCommander = 'runstop'
+                        chassisSt.throttle_commander = 'runstop'
                         foundThrottle = True
                     for cmd, priority in self.commandPriorities:
                         # rospy.logwarn("looking for chassis commander %s with priority %d", cmd, priority)
@@ -396,7 +396,7 @@ class AckermannController(object):
                                     self.driveCommands[cmd].steering
                                 steer_ang_vel = 0.0
                                 chassisSt.steering = self.driveCommands[cmd].steering
-                                chassisSt.steeringCommander = self.driveCommands[cmd].sender
+                                chassisSt.steering_commander = self.driveCommands[cmd].sender
                                 foundSteering = True
 
                             if (abs(self.driveCommands[cmd].front_throttle) <= 1.0 or \
@@ -421,7 +421,7 @@ class AckermannController(object):
                                 accel = 0.0
                                 chassisSt.rear_throttle = self.driveCommands[cmd].rear_throttle
                                 chassisSt.front_throttle = self.driveCommands[cmd].front_throttle
-                                chassisSt.throttleCommander = self.driveCommands[cmd].sender
+                                chassisSt.throttle_commander = self.driveCommands[cmd].sender
                                 foundThrottle = True
 
                             # No brakes needed for now
@@ -434,8 +434,8 @@ class AckermannController(object):
                             #     frontBrake = numpy.sign(
                             #         self.wheelSpeedFront)*(-self.front_axle_brake_effort*self.driveCommands[cmd].frontBrake)
                             #     rearBrake = frontBrake
-                            #     chassisSt.frontBrake = self.driveCommands[cmd].frontBrake
-                            #     chassisSt.frontBrakeCommander = self.driveCommands[cmd].sender
+                            #     chassisSt.front_brake = self.driveCommands[cmd].frontBrake
+                            #     chassisSt.front_brake_commander = self.driveCommands[cmd].sender
                             #     foundFrontBrake = True
 
                             # else:
@@ -472,7 +472,7 @@ class AckermannController(object):
         """Chassis command callback
 
           :Parameters:
-              driveCommand : eufs_msgs.msg.driveCommand
+              driveCommand : eufs_msgs.msg.DriveCommand
                              Position to set the control actuators
         """
         with self.driveCommandLock:
@@ -629,27 +629,27 @@ class AckermannController(object):
             return 0.0
 
     def wheelSpeedsCb(self, data):
-        ws = wheelSpeeds()
+        ws = WheelSpeeds()
         ws.header.stamp = rospy.Time.now()
         ws.header.frame_id = ''
 
         # print data
-        ws.lfSpeed = self.getWheelSpeed(
+        ws.lf_speed = self.getWheelSpeed(
             data, self.left_front_name, self.left_front_dia)
-        ws.rfSpeed = self.getWheelSpeed(
+        ws.rf_speed = self.getWheelSpeed(
             data, self.right_front_name, self.right_front_dia)
-        self.wheelSpeedFront = (ws.lfSpeed+ws.rfSpeed)/2.0
+        self.wheelSpeedFront = (ws.lf_speed+ws.rf_speed)/2.0
         
         # steering feedback - average of both front wheel position
         ws.steering = -((self.getSteeringFeedback(data, self.left_steer_name) +
                         self.getSteeringFeedback(data, self.left_steer_name))/2)
 
         # published speeds can't be negative so data mimics the physical platform
-        ws.lfSpeed = abs(ws.lfSpeed)
-        ws.rfSpeed = abs(ws.rfSpeed)
-        ws.lbSpeed = abs(self.getWheelSpeed(
+        ws.lf_speed = abs(ws.lf_speed)
+        ws.rf_speed = abs(ws.rf_speed)
+        ws.lb_speed = abs(self.getWheelSpeed(
             data, self.left_rear_name, self.left_rear_dia))
-        ws.rbSpeed = abs(self.getWheelSpeed(
+        ws.rb_speed = abs(self.getWheelSpeed(
             data, self.right_rear_name, self.right_rear_dia))
 
 

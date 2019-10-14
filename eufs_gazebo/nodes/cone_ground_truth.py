@@ -10,7 +10,7 @@ Subscribed Topics:
         Simulated ground truth odometry for teh car
 
 Published Topics:
-    /ground_truth/cones (eufs_msgs/coneArray)
+    /ground_truth/cones (eufs_msgs/ConeArray)
         Cone locations in the frame of the car
     /ground_truth/cones/viz (visualization_msgs/MarkerArray)
         Cone locations to be displayed in Rviz
@@ -64,7 +64,7 @@ import rospy
 from nav_msgs.msg import Odometry
 from geometry_msgs.msg import Point
 from visualization_msgs.msg import Marker, MarkerArray
-from eufs_msgs.msg import coneArray, pointArray
+from eufs_msgs.msg import ConeArray, PointArray
 
 
 class ConeGroundTruth:
@@ -90,9 +90,9 @@ class ConeGroundTruth:
         self.subscriber = rospy.Subscriber("/ground_truth/state_raw", Odometry, self.odom_cb)
 
         # Publishers
-        self.cone_pub = rospy.Publisher("/ground_truth/cones", coneArray, queue_size=1)
+        self.cone_pub = rospy.Publisher("/ground_truth/cones", ConeArray, queue_size=1)
         self.cone_marker_pub = rospy.Publisher("/ground_truth/cones/viz", MarkerArray, queue_size=1)
-        self.midpoints_pub = rospy.Publisher("/ground_truth/midpoints", pointArray, queue_size=1)
+        self.midpoints_pub = rospy.Publisher("/ground_truth/midpoints", PointArray, queue_size=1)
         self.midpoints_marker_pub = rospy.Publisher("/ground_truth/midpoints/viz", Marker, queue_size=1)
 
     def mul_by_transpose(self, X, size):
@@ -217,7 +217,7 @@ class ConeGroundTruth:
                 self.cone_marker_pub.get_num_connections() > 0):
 
             # Publish cone ground truth locations
-            cone_msg = coneArray()
+            cone_msg = ConeArray()
             cone_msg.header.frame_id = self.CONE_FRAME
             cone_msg.header.stamp = rospy.Time.now()
 
@@ -284,7 +284,7 @@ class ConeGroundTruth:
                 return
 
             if len(closest_midpoints) != 0:
-                midpoint_msg = pointArray()
+                midpoint_msg = PointArray()
                 midpoint_marker_msg = self.get_cone_marker(pose=[0, 0, 0], rgb=(0.2, 1, 0.2), id=0)
                 midpoint_marker_msg.type = Marker.POINTS
                 midpoint_marker_msg.scale.x = 0.5

@@ -21,7 +21,7 @@ based on the location of the car.
 
 #### Publishers
 
-- `/ground_truth/cones` (eufs_msgs/coneArray).
+- `/ground_truth/cones` (eufs_msgs/ConeArray).
         Cone locations in the frame of the car
 - `/ground_truth/cones/viz` (visualization_msgs/MarkerArray).
         Cone locations to be displayed in Rviz

@@ -85,16 +85,16 @@ RosCanSim::RosCanSim() : nh_("~") {
     cmd_sub_ = nh_.subscribe<ackermann_msgs::AckermannDriveStamped>("/cmd_vel_out", 1, &RosCanSim::commandCallback,
                                                                     this);
     flag_sub_ = nh_.subscribe<std_msgs::Bool>("/ros_can/mission_flag", 1, &RosCanSim::flagCallback, this);
-    set_mission_sub_ = nh_.subscribe<eufs_msgs::canState>("/ros_can/set_mission", 1, &RosCanSim::setMission, this);
+    set_mission_sub_ = nh_.subscribe<eufs_msgs::CanState>("/ros_can/set_mission", 1, &RosCanSim::setMission, this);
 
     // Services
     reset_srv_ = nh_.advertiseService("/ros_can/reset", &RosCanSim::resetState, this);
     ebs_srv_ = nh_.advertiseService("/ros_can/ebs", &RosCanSim::requestEBS, this);
 
     // Publishers
-    state_pub_ = nh_.advertise<eufs_msgs::canState>("/ros_can/state", 1);
+    state_pub_ = nh_.advertise<eufs_msgs::CanState>("/ros_can/state", 1);
     state_pub_str_ = nh_.advertise<std_msgs::String>("/ros_can/state_str", 1);
-    wheel_speed_pub_ = nh_.advertise<eufs_msgs::wheelSpeeds>("/ros_can/wheel_speeds", 10);
+    wheel_speed_pub_ = nh_.advertise<eufs_msgs::WheelSpeeds>("/ros_can/wheel_speeds", 10);
 
     // Advertise reference topics for the controllers
     ref_vel_frw_ = nh_.advertise<std_msgs::Float64>(frw_vel_topic_, 50);
@@ -184,33 +184,33 @@ void RosCanSim::UpdateControl() {
     ROS_DEBUG("Published wheel speeds %f rad/s", -ref_speed_joint);
 }
 
-void RosCanSim::setMission(eufs_msgs::canState state) {
-    if (state.as_state == eufs_msgs::canState::AS_DRIVING) {
+void RosCanSim::setMission(eufs_msgs::CanState state) {
+    if (state.as_state == eufs_msgs::CanState::AS_DRIVING) {
         as_state_ = as_state_type::AS_DRIVING;
         driving_flag_ = true;
     }
 
     if (ami_state_ == ami_state_type::AMI_NOT_SELECTED) {
         switch (state.ami_state) {
-            case eufs_msgs::canState::AMI_ACCELERATION:
+            case eufs_msgs::CanState::AMI_ACCELERATION:
                 ami_state_ = ami_state_type::AMI_ACCELERATION;
                 break;
-            case eufs_msgs::canState::AMI_SKIDPAD:
+            case eufs_msgs::CanState::AMI_SKIDPAD:
                 ami_state_ = ami_state_type::AMI_SKIDPAD;
                 break;
-            case eufs_msgs::canState::AMI_AUTOCROSS:
+            case eufs_msgs::CanState::AMI_AUTOCROSS:
                 ami_state_ = ami_state_type::AMI_AUTOCROSS;
                 break;
-            case eufs_msgs::canState::AMI_TRACK_DRIVE:
+            case eufs_msgs::CanState::AMI_TRACK_DRIVE:
                 ami_state_ = ami_state_type::AMI_TRACK_DRIVE;
                 break;
-            case eufs_msgs::canState::AMI_BRAKE_TEST:
+            case eufs_msgs::CanState::AMI_BRAKE_TEST:
                 ami_state_ = ami_state_type::AMI_BRAKE_TEST;
                 break;
-            case eufs_msgs::canState::AMI_INSPECTION:
+            case eufs_msgs::CanState::AMI_INSPECTION:
                 ami_state_ = ami_state_type::AMI_INSPECTION;
                 break;
-            case eufs_msgs::canState::AMI_MANUAL:
+            case eufs_msgs::CanState::AMI_MANUAL:
                 ami_state_ = ami_state_type::AMI_MANUAL;
                 break;
             default:
@@ -267,7 +267,7 @@ void RosCanSim::publishWheelSpeeds() {
     auto lb_wheel_rpm = angularToRPM(-joint_state_.velocity[blw_vel_]);
     auto rb_wheel_rpm = angularToRPM(-joint_state_.velocity[brw_vel_]);
 
-    eufs_msgs::wheelSpeeds msg;
+    eufs_msgs::WheelSpeeds msg;
     msg.header.stamp = joint_state_.header.stamp;
     msg.header.frame_id = "base_link";
     msg.lf_speed = lf_wheel_rpm;
@@ -327,7 +327,7 @@ void RosCanSim::publishState() {
         return; // do nothing
 
     // create message
-    eufs_msgs::canState state_msg;
+    eufs_msgs::CanState state_msg;
     state_msg.as_state = as_state_;
     state_msg.ami_state = ami_state_;
     state_msg.mission_flag = driving_flag_;
@@ -339,7 +339,7 @@ void RosCanSim::publishState() {
         state_pub_str_.publish(makeStateString(state_msg));
 }
 
-std_msgs::String RosCanSim::makeStateString(const eufs_msgs::canState &state) {
+std_msgs::String RosCanSim::makeStateString(const eufs_msgs::CanState &state) {
     std::string str1;
     std::string str2;
     std::string str3;
@@ -348,19 +348,19 @@ std_msgs::String RosCanSim::makeStateString(const eufs_msgs::canState &state) {
     ROS_DEBUG("AMI STATE: %d", state.ami_state);
 
     switch (state.as_state) {
-        case eufs_msgs::canState::AS_OFF:
+        case eufs_msgs::CanState::AS_OFF:
             str1 = "AS:OFF";
             break;
-        case eufs_msgs::canState::AS_READY:
+        case eufs_msgs::CanState::AS_READY:
             str1 = "AS:READY";
             break;
-        case eufs_msgs::canState::AS_DRIVING:
+        case eufs_msgs::CanState::AS_DRIVING:
             str1 = "AS:DRIVING";
             break;
-        case eufs_msgs::canState::AS_FINISHED:
+        case eufs_msgs::CanState::AS_FINISHED:
             str1 = "AS:FINISHED";
             break;
-        case eufs_msgs::canState::AS_EMERGENCY_BRAKE:
+        case eufs_msgs::CanState::AS_EMERGENCY_BRAKE:
             str1 = "AS:EMERGENCY";
             break;
         default:
@@ -368,25 +368,25 @@ std_msgs::String RosCanSim::makeStateString(const eufs_msgs::canState &state) {
     }
 
     switch (state.ami_state) {
-        case eufs_msgs::canState::AMI_NOT_SELECTED:
+        case eufs_msgs::CanState::AMI_NOT_SELECTED:
             str2 = "AMI:NOT_SELECTED";
             break;
-        case eufs_msgs::canState::AMI_ACCELERATION:
+        case eufs_msgs::CanState::AMI_ACCELERATION:
             str2 = "AMI:ACCELERATION";
             break;
-        case eufs_msgs::canState::AMI_SKIDPAD:
+        case eufs_msgs::CanState::AMI_SKIDPAD:
             str2 = "AMI:SKIDPAD";
             break;
-        case eufs_msgs::canState::AMI_AUTOCROSS:
+        case eufs_msgs::CanState::AMI_AUTOCROSS:
             str2 = "AMI:AUTOCROSS";
             break;
-        case eufs_msgs::canState::AMI_TRACK_DRIVE:
+        case eufs_msgs::CanState::AMI_TRACK_DRIVE:
             str2 = "AMI:TRACKDRIVE";
             break;
-        case eufs_msgs::canState::AMI_INSPECTION:
+        case eufs_msgs::CanState::AMI_INSPECTION:
             str2 = "AS:INSPECTION";
             break;
-        case eufs_msgs::canState::AMI_BRAKE_TEST:
+        case eufs_msgs::CanState::AMI_BRAKE_TEST:
             str2 = "AS:BRAKETEST";
             break;
         default:

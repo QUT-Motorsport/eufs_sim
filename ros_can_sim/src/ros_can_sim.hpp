@@ -45,8 +45,8 @@
 #include <std_msgs/Float64.h>
 #include <tf/transform_broadcaster.h>
 #include <ackermann_msgs/AckermannDriveStamped.h>
-#include <eufs_msgs/wheelSpeeds.h>
-#include <eufs_msgs/canState.h>
+#include <eufs_msgs/WheelSpeeds.h>
+#include <eufs_msgs/CanState.h>
 #include <std_msgs/String.h>
 #include <std_msgs/Bool.h>
 #include <std_srvs/Trigger.h>
@@ -220,7 +220,7 @@ private:
     /**
       * Sets the mission of the car. Only available in simulation
       */
-    void setMission(eufs_msgs::canState state);
+    void setMission(eufs_msgs::CanState state);
 
     /**
       * Controls the joints(motors) of the simulated car
@@ -234,14 +234,14 @@ private:
     void updateState();
 
     /**
-      * Publishes internal state and mission in a eufs_msgs/canState.msg format
+      * Publishes internal state and mission in a eufs_msgs/CanState.msg format
       */
     void publishState();
 
     /**
       * Creates a std_msgs/String.msg version of the internal state and mission
       */
-    std_msgs::String makeStateString(const eufs_msgs::canState &state);
+    std_msgs::String makeStateString(const eufs_msgs::CanState &state);
 
 };
 

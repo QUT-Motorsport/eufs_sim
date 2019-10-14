@@ -6,8 +6,8 @@
 
 import rospy
 import math
-from autorally_msgs.msg import chassisCommand
-from autorally_msgs.msg import runstop
+from autorally_msgs.msg import ChassisCommand
+from autorally_msgs.msg import Runstop
 from geometry_msgs.msg import Twist
 import sys, select, termios, tty
 import threading
@@ -15,8 +15,8 @@ import threading
 class Convert:
     def __init__(self):
         self.settings = termios.tcgetattr(sys.stdin)
-        self.publisher = rospy.Publisher('/joystick/chassisCommand', chassisCommand, queue_size=10)
-        self.publisher_runstop = rospy.Publisher('/runstop', runstop, queue_size=10)
+        self.publisher = rospy.Publisher('/joystick/chassisCommand', ChassisCommand, queue_size=10)
+        self.publisher_runstop = rospy.Publisher('/runstop', Runstop, queue_size=10)
         self.max_steering = 1.
         self.min_steering = -1.
         self.max_throttle = 1.
@@ -25,12 +25,12 @@ class Convert:
         self.runstop = False
 
     def callback(self, data):
-        cmd = chassisCommand()
+        cmd = ChassisCommand()
         cmd.header.stamp = rospy.Time.now()
         cmd.sender = "rqt"
         cmd.throttle = data.linear.x
         cmd.steering = data.angular.z
-        cmd.frontBrake = 0.
+        cmd.front_brake = 0.
 
         # impose limits on commanded angle
         if cmd.steering > self.max_steering:
@@ -70,7 +70,7 @@ class Convert:
                 self.runstop = not self.runstop
                 print("Toggling runstop to", self.runstop, input_cmd)
 
-                run_cmd = runstop()
+                run_cmd = Runstop()
                 run_cmd.header.stamp = rospy.Time.now()
                 run_cmd.sender = "rqt"
                 run_cmd.motionEnabled = self.runstop
