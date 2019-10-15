@@ -8,7 +8,7 @@ from python_qt_binding.QtWidgets import QWidget, QComboBox, QPushButton, QLabel
 # ROS
 import rospkg
 import rospy
-from eufs_msgs.msg import canState
+from eufs_msgs.msg import CanState
 from std_srvs.srv import Trigger
 
 
@@ -38,21 +38,21 @@ class RosCanGUI(Plugin):
                 self._widget.windowTitle() + (' (%d)' % context.serial_number()))
 
         # setup states and missions
-        # enumrations taken from canState.msg
-        self.states = {canState.AS_OFF: "OFF",
-                       canState.AS_READY: "READY",
-                       canState.AS_DRIVING: "DRIVING",
-                       canState.AS_EMERGENCY_BRAKE: "EMERGENCY",
-                       canState.AS_FINISHED: "FINISHED"}
+        # enumrations taken from CanState.msg
+        self.states = {CanState.AS_OFF: "OFF",
+                       CanState.AS_READY: "READY",
+                       CanState.AS_DRIVING: "DRIVING",
+                       CanState.AS_EMERGENCY_BRAKE: "EMERGENCY",
+                       CanState.AS_FINISHED: "FINISHED"}
 
-        self.missions = {canState.AMI_NOT_SELECTED: "NOT_SELECTED",
-                         canState.AMI_ACCELERATION: "ACCELERATION",
-                         canState.AMI_SKIDPAD: "SKIDPAD",
-                         canState.AMI_AUTOCROSS: "AUTOCROSS",
-                         canState.AMI_TRACK_DRIVE: "TRAK_DRIVE",
-                         canState.AMI_BRAKE_TEST: "BRAKE_TEST",
-                         canState.AMI_INSPECTION: "INSPECTION",
-                         canState.AMI_MANUAL: "MANUAL"}
+        self.missions = {CanState.AMI_NOT_SELECTED: "NOT_SELECTED",
+                         CanState.AMI_ACCELERATION: "ACCELERATION",
+                         CanState.AMI_SKIDPAD: "SKIDPAD",
+                         CanState.AMI_AUTOCROSS: "AUTOCROSS",
+                         CanState.AMI_TRACK_DRIVE: "TRAK_DRIVE",
+                         CanState.AMI_BRAKE_TEST: "BRAKE_TEST",
+                         CanState.AMI_INSPECTION: "INSPECTION",
+                         CanState.AMI_MANUAL: "MANUAL"}
 
         for mission in self.missions.values():
             self._widget.findChild(
@@ -70,11 +70,11 @@ class RosCanGUI(Plugin):
 
         # Subscribers
         self.state_sub = rospy.Subscriber(
-            "/ros_can/state", canState, self.stateCallback)
+            "/ros_can/state", CanState, self.stateCallback)
 
         # Publishers
         self.set_mission_pub = rospy.Publisher(
-            "/ros_can/set_mission", canState, queue_size=1)
+            "/ros_can/set_mission", CanState, queue_size=1)
 
         # Services
         self.ebs_srv = rospy.ServiceProxy("/ros_can/ebs", Trigger)
@@ -85,7 +85,7 @@ class RosCanGUI(Plugin):
 
     def setMission(self):
         """Sends a mission request to the simulated ros_can
-        The mission request is of message type eufs_msgs/canState
+        The mission request is of message type eufs_msgs/CanState
         where only the ami_mission field is used"""
         mission = self._widget.findChild(
             QComboBox, "MissionSelectMenu").currentText()
@@ -93,7 +93,7 @@ class RosCanGUI(Plugin):
         rospy.logdebug("Sending mission request for " + str(mission))
 
         # create message to be sent
-        mission_msg = canState()
+        mission_msg = CanState()
 
         # find enumerated mission and set
         for enum, mission_name in self.missions.items():
@@ -143,9 +143,9 @@ class RosCanGUI(Plugin):
         """overrides the state machine of the car and just makes it drive"""
 
         # create message to be sent
-        state_msg = canState()
-        state_msg.as_state = canState.AS_DRIVING
-        state_msg.ami_state = canState.AMI_MANUAL
+        state_msg = CanState()
+        state_msg.as_state = CanState.AS_DRIVING
+        state_msg.ami_state = CanState.AMI_MANUAL
 
         self.set_mission_pub.publish(state_msg)
 
