@@ -41,14 +41,14 @@ All colors not listed here will be treated as `Background`
 However the image generator also outputs images with other colors - here is a full list from `LauncherModule.py`:
 
 ```
-self.noisecolor = (0,255,255,255)	#cyan
-self.bgcolor = (255,255,255,255)	#white
-self.conecolor = (255,0,255,255)	#magenta
-self.conecolor2 = (0,0,255,255)     #blue
-self.carcolor = (0,255,0,255)		#green
-self.trackcenter = (0,0,0,255)		#black
-self.trackinner = (255,0,0,255)		#red
-self.trackouter = (255,255,0,255)	#yellow
+self.noisecolor = (0,255,255,255)       #cyan
+self.bgcolor = (255,255,255,255)        #white
+self.conecolor = (255,0,255,255)        #magenta
+self.conecolor2 = (0,0,255,255)         #blue
+self.carcolor = (0,255,0,255)           #green
+self.trackcenter = (0,0,0,255)          #black
+self.trackinner = (255,0,0,255)         #red
+self.trackouter = (255,255,0,255)       #yellow
 ```
 
 Future updates to the image converter may decide to make use of additional data using these colors, 
