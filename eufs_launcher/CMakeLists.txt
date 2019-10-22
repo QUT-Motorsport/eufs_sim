@@ -4,9 +4,10 @@ project(eufs_launcher)
 
 find_package(Boost REQUIRED)
 # Load catkin and all dependencies required for this package
-find_package(catkin REQUIRED COMPONENTS 
-  roscpp 
-  gazebo_ros 
+find_package(catkin REQUIRED COMPONENTS
+  roscpp
+  gazebo_ros
+  roslint
 )
 
 # Depend on system install of Gazebo
@@ -21,9 +22,9 @@ add_library(${PROJECT_NAME} src/simple_world_plugin.cpp)
 target_link_libraries(${PROJECT_NAME} ${catkin_LIBRARIES} ${GAZEBO_LIBRARIES})
 
 catkin_package(
-  DEPENDS 
-    roscpp 
-    gazebo_ros 
+  DEPENDS
+    roscpp
+    gazebo_ros
 )
 
 install(PROGRAMS scripts/rqt_eufs_launcher.py
@@ -43,3 +44,10 @@ install(FILES
   plugin.xml
   DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
 )
+
+#############
+## Roslint ##
+#############
+
+roslint_python()
+roslint_cpp()
