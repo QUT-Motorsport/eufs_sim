@@ -39,6 +39,9 @@ catkin_tools:
 roslint:
   stage: test
   script:
+    - catkin build eufs_gazebo
     - catkin build eufs_gazebo --no-deps --make-args roslint
+    - catkin build eufs_launcher
     - catkin build eufs_launcher --no-deps --make-args roslint
+    - catkin build ros_can_sim
     - catkin build ros_can_sim --no-deps --make-args roslint
