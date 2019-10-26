@@ -109,7 +109,9 @@ class EufsLauncher(Plugin):
                 self.SPEED_RADIO         = self._widget.findChild(QRadioButton,"SpeedRadio")
                 self.TORQUE_RADIO        = self._widget.findChild(QRadioButton,"TorqueRadio")
                 self.PERCEPTION_CHECKBOX = self._widget.findChild(QCheckBox,"PerceptionCheckbox")
-                self.VISUALISATOR_CHECKBOX = self._widget.findChild(QCheckBox,"PerceptionCheckbox")
+                self.VISUALISATOR_CHECKBOX = (
+                        self._widget.findChild(QCheckBox,"VisualisatorCheckbox")
+                )
 
                 self.FILE_FOR_CONVERSION_BOX = self._widget.findChild(
                         QComboBox,
