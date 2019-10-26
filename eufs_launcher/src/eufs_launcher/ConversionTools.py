@@ -876,7 +876,13 @@ class ConversionTools:
                         Used to place the double cones in the beginning.
                         """
 
-                        direction_vector = (math.cos(yaw) * 0.5, math.sin(yaw) * 0.5)
+                        # Determines how close the two models are.  Smaller means closer.
+                        closeness_parameter = scale_data * 0.7
+
+                        direction_vector = (
+                                math.cos(yaw) * 0.5 * closeness_parameter, 
+                                math.sin(yaw) * 0.5 * closeness_parameter
+                        )
 
                         mod_at_p1 =  put_model_at_position(
                                 mod, 
@@ -945,8 +951,6 @@ class ConversionTools:
                                         )
                                 elif p[:3] == ConversionTools.double_orange_cone_color[:3]:
                                         # Double cones!  Need to make use of yaw values.
-                                        rospy.logerr("Yummy biscuits!")
-                                        rospy.logerr(p)
 
                                         # Convert from alpha value to angle
                                         model_yaw = ((p[3] - 1) / 254) * (2 * math.pi)

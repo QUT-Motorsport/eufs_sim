@@ -1243,7 +1243,6 @@ def cone_default(xys, starting = False, track_width = None, slalom = False, prev
                         for idx, tup in enumerate(to_return):
                                 x, y, _ = tup
                                 if int(x) == int(i) and int(y) == int(j):
-                                        rospy.logerr(str(i) + "," + str(j))
                                         to_return[idx] = (x, y, CONE_START)
 
 
