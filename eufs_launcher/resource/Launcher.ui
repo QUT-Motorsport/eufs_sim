@@ -270,6 +270,26 @@
    </property>
   </widget>
 
+  <!--Gazebo Gui Launcher-->
+  <widget class="QCheckBox" name="GazeboGuiCheckbox">
+  <property name="geometry">
+      <rect>
+        <x>610</x>
+        <y>100</y>
+        <width>150</width>
+        <height>30</height>
+      </rect>
+    </property>
+    <property name="text" >
+      <string>Launch Gazebo Gui</string>
+    </property>
+    <property name="font">
+       <font>
+            <pointsize>7</pointsize>
+       </font>
+   </property>
+  </widget>
+
   <widget class="QLabel" name="GeneratorParametersLabel">
    <property name="geometry">
     <rect>
