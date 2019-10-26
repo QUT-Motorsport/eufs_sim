@@ -945,12 +945,18 @@ class ConversionTools:
                                         )
                                 elif p[:3] == ConversionTools.double_orange_cone_color[:3]:
                                         # Double cones!  Need to make use of yaw values.
+                                        rospy.logerr("Yummy biscuits!")
+                                        rospy.logerr(p)
+
+                                        # Convert from alpha value to angle
+                                        model_yaw = ((p[3] - 1) / 254) * (2 * math.pi)
+
                                         sdf_allmodels = doubly_expand_allmodels(
                                                             sdf_allmodels,
                                                             sdf_big_orange_cone_model,
                                                             i,
                                                             j,
-                                                            p[3]
+                                                            model_yaw
                                         )
 
                 # Splice the sdf file back together.

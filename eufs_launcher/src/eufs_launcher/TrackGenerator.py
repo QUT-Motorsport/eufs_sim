@@ -681,7 +681,10 @@ def get_start():
          
 def reset_counts():
         """
-
+        Restarts the counts for each micro
+        (We were keeping track of how many times they've been used because
+        some have maximum allowed uses - this resets them so that we
+        can start a new generation.)
         """
         TrackGenerator.previous_micro = ""
         TrackGenerator.rare_micro_list = [
@@ -1239,7 +1242,8 @@ def cone_default(xys, starting = False, track_width = None, slalom = False, prev
                         (i, j) = point_list[0]
                         for idx, tup in enumerate(to_return):
                                 x, y, _ = tup
-                                if x == i and y == j:
+                                if int(x) == int(i) and int(y) == int(j):
+                                        rospy.logerr(str(i) + "," + str(j))
                                         to_return[idx] = (x, y, CONE_START)
 
 
