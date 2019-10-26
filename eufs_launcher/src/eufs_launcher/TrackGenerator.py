@@ -1017,6 +1017,8 @@ class CONE_OUTER:
         pass
 class CONE_ORANGE:
         pass
+class CONE_START:
+	pass
 
 def cone_start(xys, track_width = None):
         """Wrapper for cone_default with start parameter"""
@@ -1238,7 +1240,7 @@ def cone_default(xys, starting = False, track_width = None, slalom = False, prev
                         for idx, tup in enumerate(to_return):
                                 x, y, _ = tup
                                 if x == i and y == j:
-                                        to_return[idx] = (x, y, CONE_ORANGE)
+                                        to_return[idx] = (x, y, CONE_START)
 
 
         return to_return

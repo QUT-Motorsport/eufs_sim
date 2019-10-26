@@ -11,7 +11,9 @@ import rospy
 import sys
 sys.path.insert(1, os.path.join(rospkg.RosPack().get_path('eufs_gazebo'),'tracks'))
 from track_gen import Track
-from TrackGenerator import compactify_points, cone_start, CONE_INNER, CONE_OUTER, CONE_ORANGE
+from TrackGenerator import (
+        compactify_points, cone_start, CONE_INNER, CONE_OUTER, CONE_ORANGE, CONE_START
+)
 from TrackGenerator import get_cone_function
 import pandas as pd
 
@@ -27,16 +29,18 @@ class ConversionTools:
                 pass
 
         # Define colors for track gen and image reading
-        noise_color =           (0,   255, 255, 255)        #cyan
-        background_color =      (255, 255, 255, 255)        #white
-        inner_cone_color  =     (255, 0,   255, 255)        #magenta, for yellow cones (oops...)
-        outer_cone_color =      (0,   0,   255, 255)        #blue, for blue cones
-        car_color =             (0,   255, 0,   255)        #green
-        track_center_color =    (0,   0,   0,   255)        #black
-        track_inner_color =     (255, 0,   0,   255)        #red
-        track_outer_color =     (255, 255, 0,   255)        #yellow
-        orange_cone_color =     (255, 165, 0,   255)        #orange, for orange cones
-        big_orange_cone_color = (127, 80,  0,   255)        #dark orange, for big orange cones
+        noise_color =             (0,   255, 255, 255)        #cyan
+        background_color =        (255, 255, 255, 255)        #white
+        inner_cone_color  =       (255, 0,   255, 255)        #magenta, for yellow cones (oops...)
+        outer_cone_color =        (0,   0,   255, 255)        #blue, for blue cones
+        car_color =               (0,   255, 0,   255)        #green
+        track_center_color =      (0,   0,   0,   255)        #black
+        track_inner_color =       (255, 0,   0,   255)        #red
+        track_outer_color =       (255, 255, 0,   255)        #yellow
+        orange_cone_color =       (255, 165, 0,   255)        #orange, for orange cones
+        big_orange_cone_color =   (127, 80,  0,   255)        #dark orange, for big orange cones
+
+        double_orange_cone_color = (200, 100, 0,   255)        #for double-orange-cones
 
         # Other various retained parameters
         link_num = -1
@@ -338,12 +342,12 @@ class ConversionTools:
                 # file format to set the whole pixel to some standard value,
                 # such as (0,0,0,0), which is decidedly not what we want as
                 # the rgb values still matter.
-                pixel_value = int(angle / ( 2 * math.pi ) * 254 + 1)
-                if pixel_value > 255: pixel_value = 255
-                if pixel_value <   1: pixel_value =   1
+                yaw_pixel_value = int(angle / ( 2 * math.pi ) * 254 + 1)
+                if yaw_pixel_value > 255: yaw_pixel_value = 255
+                if yaw_pixel_value <   1: yaw_pixel_value =   1
 
                 # Draw car
-                color_for_car = ConversionTools.car_color[:3]+(pixel_value,)
+                color_for_car = ConversionTools.car_color[:3]+(yaw_pixel_value,)
                 draw.line([xys[0], xys[0]], fill=color_for_car)
 
 
@@ -376,6 +380,12 @@ class ConversionTools:
                                 true_color = ConversionTools.outer_cone_color
                         elif color is CONE_ORANGE:
                                 true_color = ConversionTools.orange_cone_color
+                        elif color is CONE_START:
+                                true_color = (
+                                        # Double cones need angle information
+                                        ConversionTools.double_orange_cone_color[:3]
+                                        +(yaw_pixel_value,)
+                                )
 
                         # Only allow orange cones to be placed on the track
                         if (not is_track(pixels[int(px), int(py)]) or color is CONE_ORANGE):
@@ -486,12 +496,12 @@ class ConversionTools:
                 # file format to set the whole pixel to some standard value,
                 # such as (0,0,0,0), which is decidedly not what we want as
                 # the rgb values still matter.
-                pixel_value = int(angle / ( 2 * math.pi ) * 254 + 1)
-                if pixel_value > 255: pixel_value = 255
-                if pixel_value <   1: pixel_value =   1
+                yaw_pixel_value = int(angle / ( 2 * math.pi ) * 254 + 1)
+                if yaw_pixel_value > 255: yaw_pixel_value = 255
+                if yaw_pixel_value <   1: yaw_pixel_value =   1
 
                 # Draw car
-                color_for_car = ConversionTools.car_color[:3]+(pixel_value,)
+                color_for_car = ConversionTools.car_color[:3]+(yaw_pixel_value,)
                 draw.line([xys[0], xys[0]], fill=color_for_car)
 
 
@@ -522,6 +532,12 @@ class ConversionTools:
                                 true_color = ConversionTools.outer_cone_color
                         elif color is CONE_ORANGE:
                                 true_color = ConversionTools.orange_cone_color
+                        elif color is CONE_START:
+                                true_color = (
+                                        # Double cones need angle information
+                                        ConversionTools.double_orange_cone_color[:3]
+                                        +(yaw_pixel_value,)
+                                )
                         if (not is_track(pixels[int(px), int(py)])):
                                 pixels[int(px), int(py)] = true_color
 
@@ -847,6 +863,35 @@ class ConversionTools:
                         mod_at_p =  put_model_at_position(mod, x * scale_data, y * scale_data)
                         return allmods + "\n" + mod_at_p
 
+                def doubly_expand_allmodels(allmods, mod, x, y, yaw):
+                        """
+                        Takes in a model and a pixel location,
+                        converts the pixel location to a raw location,
+                        and places the model inside sdf_allmodels
+
+                        Unlike expand_allmodels, it also takes in an angle and will place
+                        a second model near the first but slightly offset in the direction
+                        of the yaw angle parameter.
+
+                        Used to place the double cones in the beginning.
+                        """
+
+                        direction_vector = (math.cos(yaw) * 0.5, math.sin(yaw) * 0.5)
+
+                        mod_at_p1 =  put_model_at_position(
+                                mod, 
+                                x * scale_data + direction_vector[0], 
+                                y * scale_data + direction_vector[1]
+                        )
+
+                        mod_at_p2 =  put_model_at_position(
+                                mod, 
+                                x * scale_data - direction_vector[0], 
+                                y * scale_data - direction_vector[1]
+                        )
+
+                        return allmods + "\n" + mod_at_p1 + "\n" + mod_at_p2
+
                 def get_random_noise_template(mod_with_collisions):
                         """
                         Gets a template for an arbitrary noise model
@@ -891,11 +936,21 @@ class ConversionTools:
                                                                        j
                                                 )
                                 elif p in color_to_model:
+                                        # Normal cones.
                                         sdf_allmodels = expand_allmodels(
                                                             sdf_allmodels,
                                                             color_to_model[p],
                                                             i,
                                                             j
+                                        )
+                                elif p[:3] == ConversionTools.double_orange_cone_color[:3]:
+                                        # Double cones!  Need to make use of yaw values.
+                                        sdf_allmodels = doubly_expand_allmodels(
+                                                            sdf_allmodels,
+                                                            sdf_big_orange_cone_model,
+                                                            i,
+                                                            j,
+                                                            p[3]
                                         )
 
                 # Splice the sdf file back together.
@@ -1107,16 +1162,16 @@ class ConversionTools:
                         pixels[cone[1], cone[2]] = get_cone_color(cone[0])
 
                 # Calculate the car's yaw's corresponding alpha value
-                pixel_value = int(raw_car_location[3] / (2 * math.pi) * 254 + 1) 
-                if pixel_value > 255: pixel_value = 255
-                if pixel_value <   1: pixel_value =   1
+                yaw_pixel_value = int(raw_car_location[3] / (2 * math.pi) * 254 + 1) 
+                if yaw_pixel_value > 255: yaw_pixel_value = 255
+                if yaw_pixel_value <   1: yaw_pixel_value =   1
 
                 # Finally, add the car
                 pixels[car_x, car_y] = (
                                         ConversionTools.car_color[0],
                                         ConversionTools.car_color[1],
                                         ConversionTools.car_color[2],
-                                        pixel_value
+                                        yaw_pixel_value
                 )
                 
                 # Add scale metadata:
