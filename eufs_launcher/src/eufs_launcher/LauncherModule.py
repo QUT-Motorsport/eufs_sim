@@ -109,8 +109,12 @@ class EufsLauncher(Plugin):
                 self.SPEED_RADIO         = self._widget.findChild(QRadioButton,"SpeedRadio")
                 self.TORQUE_RADIO        = self._widget.findChild(QRadioButton,"TorqueRadio")
                 self.PERCEPTION_CHECKBOX = self._widget.findChild(QCheckBox,"PerceptionCheckbox")
+
                 self.VISUALISATOR_CHECKBOX = (
                         self._widget.findChild(QCheckBox,"VisualisatorCheckbox")
+                )
+                self.GAZEBO_GUI_CHECKBOX   = (
+                        self._widget.findChild(QCheckBox,"GazeboGuiCheckbox")
                 )
 
                 self.FILE_FOR_CONVERSION_BOX = self._widget.findChild(
@@ -218,6 +222,9 @@ class EufsLauncher(Plugin):
                 # Setup Lax Generation button
                 self.LAX_CHECKBOX.setChecked(self.LAX_GENERATION)
                 
+                # Setup Gazebo Gui button
+                self.GAZEBO_GUI_CHECKBOX.setChecked(True)
+
                 # Setup Conversion Tools dropdowns
                 for f in ["launch", "png", "csv"]:
                         self.CONVERT_FROM_MENU.addItem(f)
@@ -813,10 +820,15 @@ class EufsLauncher(Plugin):
                         self.tell_launchella("With Torque Controls")
                         control_method = "controlMethod:=torque"
 
-                # Get perception ifnormation
+                # Get perception information
                 perception_stack = ["launch_group:=no_perception"]
                 if self.PERCEPTION_CHECKBOX.isChecked():
                         perception_stack = []#is on
+
+                # Check if we should launch the gazebo gui!
+                gui_on = "gui:=" + (
+                        "true" if self.GAZEBO_GUI_CHECKBOX.isChecked() else "false"
+                )
 
                 # How we launch the simulation changes depending on whether
                 # we are using the eufs_sim package standalone, or working within
@@ -832,6 +844,7 @@ class EufsLauncher(Plugin):
                                                 launch_location,
                                                 [
                                                         control_method,
+                                                        gui_on,
                                                         "track:="+track_to_launch.split(".")[0]
                                                 ]+perception_stack
                                         )
@@ -842,7 +855,7 @@ class EufsLauncher(Plugin):
                                                         'launch', 
                                                         track_to_launch
                                                 ),
-                                                [control_method]
+                                                [control_method, gui_on]
                                         )
                         
                 # Launch the visualisator if applicable.
