@@ -94,7 +94,7 @@ RosCanSim::RosCanSim() : nh_("~") {
     // Publishers
     state_pub_ = nh_.advertise<eufs_msgs::CanState>("/ros_can/state", 1);
     state_pub_str_ = nh_.advertise<std_msgs::String>("/ros_can/state_str", 1);
-    wheel_speed_pub_ = nh_.advertise<eufs_msgs::WheelSpeeds>("/ros_can/wheel_speeds", 10);
+    wheel_speed_pub_ = nh_.advertise<eufs_msgs::WheelSpeedsStamped>("/ros_can/wheel_speeds", 10);
 
     // Advertise reference topics for the controllers
     ref_vel_frw_ = nh_.advertise<std_msgs::Float64>(frw_vel_topic_, 50);
