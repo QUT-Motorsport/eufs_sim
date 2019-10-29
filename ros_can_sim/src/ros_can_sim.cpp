@@ -268,8 +268,6 @@ void RosCanSim::publishWheelSpeeds() {
     auto rb_wheel_rpm = angularToRPM(-joint_state_.velocity[brw_vel_]);
 
     eufs_msgs::WheelSpeeds msg;
-    msg.header.stamp = joint_state_.header.stamp;
-    msg.header.frame_id = "base_link";
     msg.lf_speed = lf_wheel_rpm;
     msg.rf_speed = rf_wheel_rpm;
     msg.lb_speed = lb_wheel_rpm;
