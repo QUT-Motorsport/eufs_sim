@@ -28,6 +28,8 @@
   <depend>std_msgs</depend>
   <depend>eufs_msgs</depend>
   <depend>std_srvs</depend>
+  <depend>python-numpy</depend>
+  <depend>python-qt-bindings</depend>
 
   <export>
     <rqt_gui plugin="${prefix}/plugin.xml"/>

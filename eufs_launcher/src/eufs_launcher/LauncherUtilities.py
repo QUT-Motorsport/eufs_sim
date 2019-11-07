@@ -1,5 +1,6 @@
 import math
 from random import uniform
+import rospy
 
 def calculate_tangent_angle(xys):
         """
@@ -96,6 +97,43 @@ def convert_points_to_all_positive(xys):
 
         return (new_xys, int(max_x - max_neg_x) + 2 * padding,int(max_y - max_neg_y) + 2 * padding)
 
+def convert_components_to_all_positive(components):
+        """
+        Like convert_points_to_all_positive, but given a list of components rather than points
+
+        If the track dips to the negative side of the x or y axes, shift everything over
+        Returns shifted points tupled with the range over which the points span
+        We also want everything converted to an integer!
+        """
+
+        _xys = [comp[1] for comp in components]
+        xys = []
+        for _xy in _xys:
+                for xy in _xy:
+                        xys.append(xy)
+
+        max_neg_x = 0
+        max_neg_y = 0
+        max_x    = 0
+        max_y    = 0
+
+        for point in xys:
+                (x, y) = point
+                max_neg_x = min(x, max_neg_x)
+                max_neg_y = min(y, max_neg_y)
+                max_x    = max(x, max_x)
+                max_y    = max(y, max_y)
+
+        new_xys = []
+        padding = 10
+        for comp in components:
+                plist = []
+                for point in comp[1]:
+                        (x, y) = point
+                        plist.append(((x - max_neg_x) + padding,(y - max_neg_y) + padding))
+                new_xys.append((comp[0],plist))
+        return (new_xys, int(max_x - max_neg_x) + 2 * padding,int(max_y - max_neg_y) + 2 * padding)
+
 
 def compactify_points(points):
         """
@@ -135,6 +173,39 @@ def check_if_overlap(points):
                 if (manhattan_distance > 1):
                         #moved diagonally, insert an extra point for it at the end!
                         points.append( (sx + 1, sy) if ex > sx else (sx - 1, sy) )
-
         return len(set(points)) != len(points)
+
+def random_choices(list_to_check, weightings):
+        """
+        Chooses a random element from list_to_check based on weightings.
+
+        Same functionality as random.choices, which does not exist in python 2.
+        """
+
+        # We will choose a random number from 0 to the sum of the weightings,
+        # and then loop through the weightings and check partial sums of weightings.
+        # If the partial sum is strictly more than random_value, then we stop and return
+        # the element that pushed the sum over the edge.
+        # Strict inequalities are necessary to avoid 0-weighted things getting chosen.
+        random_value = uniform(0, sum(weightings))
+
+        partial_sum = 0
+        for index, weight in enumerate(weightings):
+                partial_sum += weight
+                if random_value < partial_sum:
+                        return list_to_check[index]
+
+        # As a default, return the last element in the list
+        # This is due to uniform() returning a number inclusive to the bounds, along
+        # with strict inequality testing. (which means it is possible random_value
+        # equals sum(weightings) and thus won't be considered due to strict inequalities.
+        return [x for idx, x in enumerate(list_to_check) if weightings[idx] > 0][-1]
+
+def get_points_from_component_list(comp_list):
+        """Grabs a list of points from a list of components"""
+        flat_list = []
+        for sublist in (points for name, points in comp_list):
+                for item in sublist:
+                        flat_list.append(item)
+        return flat_list
 
