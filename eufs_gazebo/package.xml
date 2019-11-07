@@ -31,7 +31,10 @@
     <depend>std_msgs</depend>
     <depend>std_srvs</depend>
     <depend>tf</depend>
-
+    <depend>python-scipy</depend>
+    <depend>python-pandas</depend>
+    <depend>python-numpy</depend>
+    <depend>python-matplotlib</depend>
 
     <export>
         <gazebo_ros gazebo_plugin_path="${prefix}/plugins" gazebo_model_path="${prefix}/.." />

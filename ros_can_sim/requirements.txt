@@ -1,2 +1,0 @@
-numpy
-python_qt_binding
