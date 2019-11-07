@@ -70,6 +70,25 @@
    </property>
   </widget>
 
+  <widget class="QLabel" name="BasicLauncherSubLabel">
+   <property name="geometry">
+    <rect>
+     <x>60</x>
+     <y>25</y>
+     <width>400</width>
+     <height>27</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>Launches one of our fixed tracks, great for reproducability!</string>
+   </property>
+   <property name="font">
+       <font>
+            <pointsize>8</pointsize>
+       </font>
+   </property>
+  </widget>
+
   <!--Actual Launch Button-->
   <widget class="QPushButton" name="LaunchButton">
    <property name="geometry">
@@ -110,6 +129,25 @@
    </property>
   </widget>
 
+  <widget class="QLabel" name="LauncherParametersSubLabel">
+   <property name="geometry">
+    <rect>
+     <x>525</x>
+     <y>25</y>
+     <width>200</width>
+     <height>27</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>For customizing your experience!</string>
+   </property>
+   <property name="font">
+       <font>
+            <pointsize>8</pointsize>
+       </font>
+   </property>
+  </widget>
+
   <!--Radio Buttons-->
   <!--To toggle between torque and speed controls.-->
   <!--If you add a new buttonGroup, don't forget to add it to the bottom of the file.-->
@@ -134,7 +172,7 @@
   <widget class="QRadioButton" name="SpeedRadio">
     <property name="geometry">
       <rect>
-        <x>500</x>
+        <x>490</x>
         <y>70</y>
         <width>100</width>
         <height>30</height>
@@ -167,9 +205,9 @@
   <widget class="QRadioButton" name="TorqueRadio">
     <property name="geometry">
       <rect>
-        <x>500</x>
+        <x>490</x>
         <y>90</y>
-        <width>100</width>
+        <width>120</width>
         <height>30</height>
       </rect>
     </property>
@@ -180,7 +218,7 @@
       </size>
     </property>
     <property name="text">
-      <string>Torque</string>
+      <string>Torque (Experimental!)</string>
     </property>
     <attribute name="buttonGroup">
       <string>SpeedOrTorque</string>
@@ -196,7 +234,7 @@
   <widget class="QCheckBox" name="VisualisatorCheckbox">
   <property name="geometry">
       <rect>
-        <x>600</x>
+        <x>610</x>
         <y>70</y>
         <width>150</width>
         <height>30</height>
@@ -216,7 +254,7 @@
   <widget class="QCheckBox" name="PerceptionCheckbox">
   <property name="geometry">
       <rect>
-        <x>600</x>
+        <x>610</x>
         <y>85</y>
         <width>150</width>
         <height>30</height>
@@ -224,6 +262,26 @@
     </property>
     <property name="text" >
       <string>Launch Perception Stack</string>
+    </property>
+    <property name="font">
+       <font>
+            <pointsize>7</pointsize>
+       </font>
+   </property>
+  </widget>
+
+  <!--Gazebo Gui Launcher-->
+  <widget class="QCheckBox" name="GazeboGuiCheckbox">
+  <property name="geometry">
+      <rect>
+        <x>610</x>
+        <y>100</y>
+        <width>150</width>
+        <height>30</height>
+      </rect>
+    </property>
+    <property name="text" >
+      <string>Launch Gazebo Gui</string>
     </property>
     <property name="font">
        <font>
@@ -247,6 +305,25 @@
    <property name="font">
        <font>
             <pointsize>14</pointsize>
+       </font>
+   </property>
+  </widget>
+
+  <widget class="QLabel" name="GeneratorParametersSubLabel">
+   <property name="geometry">
+    <rect>
+     <x>490</x>
+     <y>165</y>
+     <width>400</width>
+     <height>27</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>Create and customize your own random tracks!</string>
+   </property>
+   <property name="font">
+       <font>
+            <pointsize>8</pointsize>
        </font>
    </property>
   </widget>
@@ -701,6 +778,25 @@
    </property>
   </widget>
 
+  <widget class="QLabel" name="ImageLauncherSubLabel">
+   <property name="geometry">
+    <rect>
+     <x>55</x>
+     <y>225</y>
+     <width>310</width>
+     <height>27</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>Launches a track image - great for introducing random noise!</string>
+   </property>
+   <property name="font">
+       <font>
+            <pointsize>8</pointsize>
+       </font>
+   </property>
+  </widget>
+
 
   <!--Load From Image Button-->
   <widget class="QPushButton" name="LoadFromImageButton">
@@ -853,6 +949,25 @@
    <property name="font">
        <font>
             <pointsize>14</pointsize>
+       </font>
+   </property>
+  </widget>
+
+  <widget class="QLabel" name="ConversionToolsSubLabel">
+   <property name="geometry">
+    <rect>
+     <x>850</x>
+     <y>25</y>
+     <width>300</width>
+     <height>27</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>Tools to quickly change and parse file formats.</string>
+   </property>
+   <property name="font">
+       <font>
+            <pointsize>8</pointsize>
        </font>
    </property>
   </widget>

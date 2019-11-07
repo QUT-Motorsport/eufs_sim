@@ -51,7 +51,7 @@ roslaunch eufs_launcher eufs_launcher.launch
 
 You shold have something like this:
 
-![Full Gui](https://gitlab.com/eufs/eufs_sim/wikis/uploads/933b243148108ecda8e98327fd84d137/UpdatedLauncher2.png)
+![Full Gui](https://gitlab.com/eufs/eufs_sim/wikis/uploads/eccb0eb3989c8c15a647c68f022bc3e8/LauncherFull_.png)
 
 You can select different tracks from the dropdown menu. Then you can launch the simulation with the top-leftmost **Launch** button
 

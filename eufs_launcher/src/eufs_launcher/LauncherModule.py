@@ -20,7 +20,7 @@ from PIL import ImageDraw
 from random import randrange, uniform
 
 from TrackGenerator import TrackGenerator as Generator
-from TrackGenerator import GenerationFailedException
+from TrackGenerator import GeneratorContext
 
 from ConversionTools import ConversionTools as Converter
 
@@ -109,7 +109,13 @@ class EufsLauncher(Plugin):
                 self.SPEED_RADIO         = self._widget.findChild(QRadioButton,"SpeedRadio")
                 self.TORQUE_RADIO        = self._widget.findChild(QRadioButton,"TorqueRadio")
                 self.PERCEPTION_CHECKBOX = self._widget.findChild(QCheckBox,"PerceptionCheckbox")
-                self.VISUALISATOR_CHECKBOX = self._widget.findChild(QCheckBox,"PerceptionCheckbox")
+
+                self.VISUALISATOR_CHECKBOX = (
+                        self._widget.findChild(QCheckBox,"VisualisatorCheckbox")
+                )
+                self.GAZEBO_GUI_CHECKBOX   = (
+                        self._widget.findChild(QCheckBox,"GazeboGuiCheckbox")
+                )
 
                 self.FILE_FOR_CONVERSION_BOX = self._widget.findChild(
                         QComboBox,
@@ -216,6 +222,9 @@ class EufsLauncher(Plugin):
                 # Setup Lax Generation button
                 self.LAX_CHECKBOX.setChecked(self.LAX_GENERATION)
                 
+                # Setup Gazebo Gui button
+                self.GAZEBO_GUI_CHECKBOX.setChecked(True)
+
                 # Setup Conversion Tools dropdowns
                 for f in ["launch", "png", "csv"]:
                         self.CONVERT_FROM_MENU.addItem(f)
@@ -253,6 +262,7 @@ class EufsLauncher(Plugin):
                 # Get uuid of roslaunch
                 self.uuid = roslaunch.rlutil.get_or_generate_uuid(None, False)
                 roslaunch.configure_logging(self.uuid)
+		self.DEBUG_SHUTDOWN = False
 
         def tell_launchella(self, what):
                 """Display text in feedback box (lower left corner)."""
@@ -500,7 +510,7 @@ class EufsLauncher(Plugin):
                 self.HAIRPIN_PAIRS  = preset_data["MAX_HAIRPIN_PAIRS"]
                 self.MAX_LENGTH     = preset_data["MAX_LENGTH"]
                 self.LAX_GENERATION = preset_data["LAX_GENERATION"]
-                self.TRACK_WIDTH    = 4
+                self.TRACK_WIDTH    = preset_data["TRACK_WIDTH"]
                 self.LAX_CHECKBOX.setChecked(self.LAX_GENERATION)
 
         def keep_track_of_preset_changes(self):
@@ -638,38 +648,42 @@ class EufsLauncher(Plugin):
 
                 isLaxGenerator = self.LAX_CHECKBOX.isChecked()
                 
-                try:
-                        # Prepare and pass in all the parameters of the track
-                        # If track takes too long to generate, this section will
-                        # throw an error, to be handled after this try clause.
-                        if self.PRESET_SELECTOR.currentText() == "Bezier":
-                                the_mode = Generator.BEZIER_MODE
-                        else:
-                                the_mode = Generator.CIRCLE_AND_LINE_MODE
-                        
-                        xys,twidth,theight = Generator.generate({
-                                "MIN_STRAIGHT":self.MIN_STRAIGHT,
-                                "MAX_STRAIGHT":self.MAX_STRAIGHT,
-                                "MIN_CONSTANT_TURN":self.MIN_CTURN,
-                                "MAX_CONSTANT_TURN":self.MAX_CTURN,
-                                "MIN_HAIRPIN":self.MIN_HAIRPIN/2,
-                                "MAX_HAIRPIN":self.MAX_HAIRPIN/2,
-                                "MAX_HAIRPIN_PAIRS":self.HAIRPIN_PAIRS,
-                                "MAX_LENGTH":self.MAX_LENGTH,                                   
-                                "LAX_GENERATION":isLaxGenerator,                                   
-                                "MODE":the_mode
-                        })
+                # Prepare and pass in all the parameters of the track
+                # If track takes too long to generate, this section will
+                # throw an error, to be handled after this try clause.
+                component_data = Generator.get_preset( 
+                        self.PRESET_SELECTOR.currentText()
+                )["COMPONENTS"]
+
+                generator_values = {
+                        "MIN_STRAIGHT":self.MIN_STRAIGHT,
+                        "MAX_STRAIGHT":self.MAX_STRAIGHT,
+                        "MIN_CONSTANT_TURN":self.MIN_CTURN,
+                        "MAX_CONSTANT_TURN":self.MAX_CTURN,
+                        "MIN_HAIRPIN":self.MIN_HAIRPIN/2,
+                        "MAX_HAIRPIN":self.MAX_HAIRPIN/2,
+                        "MAX_HAIRPIN_PAIRS":self.HAIRPIN_PAIRS,
+                        "MAX_LENGTH":self.MAX_LENGTH,                                   
+                        "LAX_GENERATION":isLaxGenerator,
+			"TRACK_WIDTH":self.TRACK_WIDTH,
+                        "COMPONENTS":component_data
+                }
+
+                def failure_function():
+                        self.tell_launchella("Track Gen Failed :(  Try different parameters?")
+
+                with GeneratorContext(generator_values, failure_function):
+                        xys,twidth,theight = Generator.generate()
 
                         # If track is generated successfully, turn it into a track image
                         # and display it to the user.
                         self.tell_launchella("Loading Image...")
                         im = Converter.convert(
-                                "xys",
+                                "comps",
                                 "png",
                                 "rand",
-                                params={
-                                        "track width":self.TRACK_WIDTH,
-                                        "point list":(xys,twidth,theight)
+                                params = {
+                                        "track data":(xys,twidth,theight)
                                 }
                         )
 
@@ -690,12 +704,6 @@ class EufsLauncher(Plugin):
                         self.tell_launchella("Track Gen Complete!")
 
                         im.show()
-                except GenerationFailedException:
-                        rospy.logerr("\nError!  The generator could not generate in time.\n"+
-                                       "Maybe try different parameters?\n"+
-                                       "Turning on Lax Generation and increasing MAX_STRAIGHT"+
-                                       " and MIN_STRAIGHT usually helps.")
-                        self.tell_launchella("Track Gen Failed :(  Try different parameters?")
 
                 self.load_track_and_images()
 
@@ -812,10 +820,15 @@ class EufsLauncher(Plugin):
                         self.tell_launchella("With Torque Controls")
                         control_method = "controlMethod:=torque"
 
-                # Get perception ifnormation
+                # Get perception information
                 perception_stack = ["launch_group:=no_perception"]
                 if self.PERCEPTION_CHECKBOX.isChecked():
                         perception_stack = []#is on
+
+                # Check if we should launch the gazebo gui!
+                gui_on = "gui:=" + (
+                        "true" if self.GAZEBO_GUI_CHECKBOX.isChecked() else "false"
+                )
 
                 # How we launch the simulation changes depending on whether
                 # we are using the eufs_sim package standalone, or working within
@@ -831,6 +844,7 @@ class EufsLauncher(Plugin):
                                                 launch_location,
                                                 [
                                                         control_method,
+                                                        gui_on,
                                                         "track:="+track_to_launch.split(".")[0]
                                                 ]+perception_stack
                                         )
@@ -841,7 +855,7 @@ class EufsLauncher(Plugin):
                                                         'launch', 
                                                         track_to_launch
                                                 ),
-                                                [control_method]
+                                                [control_method, gui_on]
                                         )
                         
                 # Launch the visualisator if applicable.
@@ -857,6 +871,10 @@ class EufsLauncher(Plugin):
                 self.tell_launchella("As I have fulfilled my purpose in guiding you "+
                                      "to launch a track, this launcher will no longer "+
                                      "react to input.")
+
+		# Hide launcher
+		self._widget.setVisible(False)
+		self._widget.window().showMinimized()
 
 
         def launch_node(self,filepath):
@@ -899,7 +917,7 @@ class EufsLauncher(Plugin):
                 extra_nodes.remove("/eufs_launcher")
                 extra_nodes.remove("/rosout")
                 left_open = len(extra_nodes)
-                if (left_open>0):
+                if (left_open>0 and self.DEBUG_SHUTDOWN):
                         rospy.logerr("Warning, after shutting down the launcher, "+
                                      "these nodes are still running: " + str(extra_nodes))
 
@@ -922,7 +940,7 @@ class EufsLauncher(Plugin):
                 extra_nodes = rosnode.get_node_names()
                 extra_nodes.remove("/eufs_launcher")
                 extra_nodes.remove("/rosout")
-                if left_open>0:
+                if left_open>0 and self.DEBUG_SHUTDOWN:
                         rospy.logerr("Pruned to: " + str(extra_nodes))
                 
 
