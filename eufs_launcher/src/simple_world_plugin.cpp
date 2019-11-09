@@ -16,7 +16,7 @@ class WorldPluginTutorial: public WorldPlugin
 
       if (!ros::isInitialized())
       {
-        ROS_FATAL_STREAM("Ros ain't initialized, so it can't load simple_world_plugin.  " +
+        ROS_FATAL_STREAM("Ros ain't initialized, so it can't load simple_world_plugin.  "
                          "Load the Gazebo system plugin 'libgazebo_ros_api_plugin.so' in the gazebo_ros package.");
         return;
       }
