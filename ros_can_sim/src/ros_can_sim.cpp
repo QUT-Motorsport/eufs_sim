@@ -34,6 +34,8 @@
 
 
 #include "ros_can_sim.hpp"
+#include <string>
+#include <vector>
 
 RosCanSim::RosCanSim() : nh_("~")
 {
@@ -116,7 +118,6 @@ int RosCanSim::starting()
     // Initialize joint indexes according to joint names
     if (read_state_)
     {
-        #include <vector>
         std::vector<std::string> joint_names = joint_state_.name;
         frw_vel_ = find(joint_names.begin(), joint_names.end(), std::string(joint_front_right_wheel)) -
                    joint_names.begin();
@@ -368,7 +369,6 @@ void RosCanSim::publishState()
 
 std_msgs::String RosCanSim::makeStateString(const eufs_msgs::CanState &state)
 {
-    #include <string>
     std::string str1;
     std::string str2;
     std::string str3;
