@@ -10,7 +10,7 @@
   <xacro:property name="PI" value="3.1415926535897931"/>
   <xacro:property name="wheel_width" value="0.175" />
   <!-- <xacro:property name="clearance" value="${tire_dia/2.0}" /> -->
-  <xacro:property name="clearance" value="0.25" />
+  <xacro:property name="clearance" value="0.15" />
 
 
   <!-- BASE FOOTPRINT -->
@@ -18,19 +18,9 @@
     <link name="base_footprint">
       <visual>
         <origin xyz="0 0 ${clearance}" rpy="0 0 0" />  <!-- height is the clearance -->
-        <geometry>
-          <box size="0.001 0.001 0.001" />
-        </geometry>
-        <xacro:if value="${hq}">
           <geometry>
-    	      <mesh filename="package://eufs_description/meshes/ads-dv.dae"/>
+            <mesh filename="package://eufs_description/meshes/ads-dv.dae"/>
           </geometry>
-        </xacro:if>
-        <xacro:unless value="${hq}">
-          <geometry>
-    	      <mesh filename="package://eufs_description/meshes/ads-dv.dae"/>
-          </geometry>
-        </xacro:unless>
       </visual>
       <inertial>
         <mass value="125.0" />
