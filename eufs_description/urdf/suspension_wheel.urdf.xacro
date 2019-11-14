@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <robot name="wheel" xmlns:xacro="http://www.ros.org/wiki/xacro">
 
-<!-- 
+<!--
 ADS-DV Specifications as given by IMechE:
 WHEELBASE         :1530mm
 FRONT TRACK       :1201mm
@@ -102,7 +102,7 @@ DIFFERENTIALS     :OPEN DIFF -->
                params="lr_prefix fr_prefix lr_reflect fr_reflect child">
 
     <joint name="${lr_prefix}_${fr_prefix}_shock" type="prismatic">
-      <parent link="base_link"/>
+      <parent link="base_footprint"/>
       <child link="${child}"/>
 
       <origin xyz="${fr_reflect * wheelbase / 2}
