@@ -1,11 +1,11 @@
 <?xml version='1.0'?>
 <sdf version='1.6'>
   <model name='big_track'>
-    
+
 
     <link name='link_0_clone_0'>
       <pose frame=''>-40 0 0.15 0 -0 0</pose>
-      
+
       <collision name="collision">
         <geometry>
           <mesh>
@@ -26,7 +26,7 @@
 
     <link name='link_0_clone_1'>
       <pose frame=''>-40 3 0.15 0 -0 0</pose>
-      
+
       <collision name="collision">
         <geometry>
           <mesh>
@@ -47,7 +47,7 @@
 
     <link name='link_0_clone_2'>
       <pose frame=''>-40 6 0.15 0 -0 0</pose>
-      
+
       <collision name="collision">
         <geometry>
           <mesh>
@@ -68,7 +68,7 @@
 
     <link name='link_0_clone_3'>
       <pose frame=''>-40 8 0.15 0 -0 0</pose>
-      
+
       <collision name="collision">
         <geometry>
           <mesh>
@@ -89,7 +89,7 @@
 
     <link name='link_0_clone_4'>
       <pose frame=''>-40 11 0.15 0 -0 0</pose>
-      
+
       <collision name="collision">
         <geometry>
           <mesh>
@@ -110,7 +110,7 @@
 
     <link name='link_0_clone_5'>
       <pose frame=''>-40 14 0.15 0 -0 0</pose>
-      
+
       <collision name="collision">
         <geometry>
           <mesh>
@@ -131,7 +131,7 @@
 
     <link name='link_0_clone_6'>
       <pose frame=''>-40 18 0.15 0 -0 0</pose>
-      
+
       <collision name="collision">
         <geometry>
           <mesh>
@@ -152,7 +152,7 @@
 
     <link name='link_0_clone_7'>
       <pose frame=''>-40 21 0.15 0 -0 0</pose>
-      
+
       <collision name="collision">
         <geometry>
           <mesh>
@@ -173,7 +173,7 @@
 
     <link name='link_0_clone_8'>
       <pose frame=''>-39 24 0.15 0 -0 0</pose>
-      
+
       <collision name="collision">
         <geometry>
           <mesh>
@@ -194,7 +194,7 @@
 
     <link name='link_0_clone_9'>
       <pose frame=''>-39 27 0.15 0 -0 0</pose>
-      
+
       <collision name="collision">
         <geometry>
           <mesh>
@@ -215,7 +215,7 @@
 
     <link name='link_0_clone_10'>
       <pose frame=''>-38 -2 0.15 0 -0 0</pose>
-      
+
       <collision name="collision">
         <geometry>
           <mesh>
@@ -236,7 +236,7 @@
 
     <link name='link_0_clone_11'>
       <pose frame=''>-38 30 0.15 0 -0 0</pose>
-      
+
       <collision name="collision">
         <geometry>
           <mesh>
@@ -257,7 +257,7 @@
 
     <link name='link_0_clone_12'>
       <pose frame=''>-37 32 0.15 0 -0 0</pose>
-      
+
       <collision name="collision">
         <geometry>
           <mesh>
@@ -278,7 +278,7 @@
 
     <link name='link_0_clone_13'>
       <pose frame=''>-36 4 0.15 0 -0 0</pose>
-      
+
       <collision name="collision">
         <geometry>
           <mesh>
@@ -299,7 +299,7 @@
 
     <link name='link_0_clone_14'>
       <pose frame=''>-36 6 0.15 0 -0 0</pose>
-      
+
       <collision name="collision">
         <geometry>
           <mesh>
@@ -320,7 +320,7 @@
 
     <link name='link_0_clone_15'>
       <pose frame=''>-35 -3 0.15 0 -0 0</pose>
-      
+
       <collision name="collision">
         <geometry>
           <mesh>
@@ -341,7 +341,7 @@
 
     <link name='link_0_clone_16'>
       <pose frame=''>-35 3 0.15 0 -0 0</pose>
-      
+
       <collision name="collision">
         <geometry>
           <mesh>
@@ -362,7 +362,7 @@
 
     <link name='link_0_clone_17'>
       <pose frame=''>-35 4 0.15 0 -0 0</pose>
-      
+
       <collision name="collision">
         <geometry>
           <mesh>
@@ -383,7 +383,7 @@
 
     <link name='link_0_clone_18'>
       <pose frame=''>-35 9 0.15 0 -0 0</pose>
-      
+
       <collision name="collision">
         <geometry>
           <mesh>
@@ -404,7 +404,7 @@
 
     <link name='link_0_clone_19'>
       <pose frame=''>-35 12 0.15 0 -0 0</pose>
-      
+
       <collision name="collision">
         <geometry>
           <mesh>
@@ -425,7 +425,7 @@
 
     <link name='link_0_clone_20'>
       <pose frame=''>-35 15 0.15 0 -0 0</pose>
-      
+
       <collision name="collision">
         <geometry>
           <mesh>
@@ -446,7 +446,7 @@
 
     <link name='link_0_clone_21'>
       <pose frame=''>-35 18 0.15 0 -0 0</pose>
-      
+
       <collision name="collision">
         <geometry>
           <mesh>
@@ -467,7 +467,7 @@
 
     <link name='link_0_clone_22'>
       <pose frame=''>-35 20 0.15 0 -0 0</pose>
-      
+
       <collision name="collision">
         <geometry>
           <mesh>
@@ -488,7 +488,7 @@
 
     <link name='link_0_clone_23'>
       <pose frame=''>-34 -4 0.15 0 -0 0</pose>
-      
+
       <collision name="collision">
         <geometry>
           <mesh>
@@ -509,7 +509,7 @@
 
     <link name='link_0_clone_24'>
       <pose frame=''>-34 23 0.15 0 -0 0</pose>
-      
+
       <collision name="collision">
         <geometry>
           <mesh>
@@ -530,7 +530,7 @@
 
     <link name='link_0_clone_25'>
       <pose frame=''>-34 26 0.15 0 -0 0</pose>
-      
+
       <collision name="collision">
         <geometry>
           <mesh>
@@ -551,7 +551,7 @@
 
     <link name='link_0_clone_26'>
       <pose frame=''>-34 33 0.15 0 -0 0</pose>
-      
+
       <collision name="collision">
         <geometry>
           <mesh>
@@ -572,7 +572,7 @@
 
     <link name='link_0_clone_27'>
       <pose frame=''>-33 3 0.15 0 -0 0</pose>
-      
+
       <collision name="collision">
         <geometry>
           <mesh>
@@ -593,7 +593,7 @@
 
     <link name='link_0_clone_28'>
       <pose frame=''>-33 27 0.15 0 -0 0</pose>
-      
+
       <collision name="collision">
         <geometry>
           <mesh>
@@ -614,7 +614,7 @@
 
     <link name='link_0_clone_29'>
       <pose frame=''>-32 -4 0.15 0 -0 0</pose>
-      
+
       <collision name="collision">
         <geometry>
           <mesh>
@@ -635,7 +635,7 @@
 
     <link name='link_0_clone_30'>
       <pose frame=''>-32 3 0.15 0 -0 0</pose>
-      
+
       <collision name="collision">
         <geometry>
           <mesh>
@@ -656,7 +656,7 @@
 
     <link name='link_0_clone_31'>
       <pose frame=''>-31 -5 0.15 0 -0 0</pose>
-      
+
       <collision name="collision">
         <geometry>
           <mesh>
@@ -677,7 +677,7 @@
 
     <link name='link_0_clone_32'>
       <pose frame=''>-30 -5 0.15 0 -0 0</pose>
-      
+
       <collision name="collision">
         <geometry>
           <mesh>
@@ -698,7 +698,7 @@
 
     <link name='link_0_clone_33'>
       <pose frame=''>-29 -7 0.15 0 -0 0</pose>
-      
+
       <collision name="collision">
         <geometry>
           <mesh>
@@ -719,7 +719,7 @@
 
     <link name='link_0_clone_34'>
       <pose frame=''>-29 -6 0.15 0 -0 0</pose>
-      
+
       <collision name="collision">
         <geometry>
           <mesh>
@@ -740,7 +740,7 @@
 
     <link name='link_0_clone_35'>
       <pose frame=''>-29 1 0.15 0 -0 0</pose>
-      
+
       <collision name="collision">
         <geometry>
           <mesh>
@@ -761,7 +761,7 @@
 
     <link name='link_0_clone_36'>
       <pose frame=''>-29 27 0.15 0 -0 0</pose>
-      
+
       <collision name="collision">
         <geometry>
           <mesh>
@@ -782,7 +782,7 @@
 
     <link name='link_0_clone_37'>
       <pose frame=''>-29 33 0.15 0 -0 0</pose>
-      
+
       <collision name="collision">
         <geometry>
           <mesh>
@@ -803,7 +803,7 @@
 
     <link name='link_0_clone_38'>
       <pose frame=''>-28 -8 0.15 0 -0 0</pose>
-      
+
       <collision name="collision">
         <geometry>
           <mesh>
@@ -824,7 +824,7 @@
 
     <link name='link_0_clone_39'>
       <pose frame=''>-27 -1 0.15 0 -0 0</pose>
-      
+
       <collision name="collision">
         <geometry>
           <mesh>
@@ -845,7 +845,7 @@
 
     <link name='link_0_clone_40'>
       <pose frame=''>-26 -1 0.15 0 -0 0</pose>
-      
+
       <collision name="collision">
         <geometry>
           <mesh>
@@ -866,7 +866,7 @@
 
     <link name='link_0_clone_41'>
       <pose frame=''>-25 -11 0.15 0 -0 0</pose>
-      
+
       <collision name="collision">
         <geometry>
           <mesh>
@@ -887,7 +887,7 @@
 
     <link name='link_0_clone_42'>
       <pose frame=''>-25 -2 0.15 0 -0 0</pose>
-      
+
       <collision name="collision">
         <geometry>
           <mesh>
@@ -908,7 +908,7 @@
 
     <link name='link_0_clone_43'>
       <pose frame=''>-25 27 0.15 0 -0 0</pose>
-      
+
       <collision name="collision">
         <geometry>
           <mesh>
@@ -929,7 +929,7 @@
 
     <link name='link_0_clone_44'>
       <pose frame=''>-25 34 0.15 0 -0 0</pose>
-      
+
       <collision name="collision">
         <geometry>
           <mesh>
@@ -950,7 +950,7 @@
 
     <link name='link_0_clone_45'>
       <pose frame=''>-24 -4 0.15 0 -0 0</pose>
-      
+
       <collision name="collision">
         <geometry>
           <mesh>
@@ -971,7 +971,7 @@
 
     <link name='link_0_clone_46'>
       <pose frame=''>-24 28 0.15 0 -0 0</pose>
-      
+
       <collision name="collision">
         <geometry>
           <mesh>
@@ -992,7 +992,7 @@
 
     <link name='link_0_clone_47'>
       <pose frame=''>-24 34 0.15 0 -0 0</pose>
-      
+
       <collision name="collision">
         <geometry>
           <mesh>
@@ -1013,7 +1013,7 @@
 
     <link name='link_0_clone_48'>
       <pose frame=''>-23 -5 0.15 0 -0 0</pose>
-      
+
       <collision name="collision">
         <geometry>
           <mesh>
@@ -1034,7 +1034,7 @@
 
     <link name='link_0_clone_49'>
       <pose frame=''>-22 -12 0.15 0 -0 0</pose>
-      
+
       <collision name="collision">
         <geometry>
           <mesh>
@@ -1055,7 +1055,7 @@
 
     <link name='link_0_clone_50'>
       <pose frame=''>-22 -5 0.15 0 -0 0</pose>
-      
+
       <collision name="collision">
         <geometry>
           <mesh>
@@ -1076,7 +1076,7 @@
 
     <link name='link_0_clone_51'>
       <pose frame=''>-22 27 0.15 0 -0 0</pose>
-      
+
       <collision name="collision">
         <geometry>
           <mesh>
@@ -1097,7 +1097,7 @@
 
     <link name='link_0_clone_52'>
       <pose frame=''>-21 33 0.15 0 -0 0</pose>
-      
+
       <collision name="collision">
         <geometry>
           <mesh>
@@ -1118,7 +1118,7 @@
 
     <link name='link_0_clone_53'>
       <pose frame=''>-19 -12 0.15 0 -0 0</pose>
-      
+
       <collision name="collision">
         <geometry>
           <mesh>
@@ -1139,7 +1139,7 @@
 
     <link name='link_0_clone_54'>
       <pose frame=''>-19 -5 0.15 0 -0 0</pose>
-      
+
       <collision name="collision">
         <geometry>
           <mesh>
@@ -1160,7 +1160,7 @@
 
     <link name='link_0_clone_55'>
       <pose frame=''>-18 27 0.15 0 -0 0</pose>
-      
+
       <collision name="collision">
         <geometry>
           <mesh>
@@ -1181,7 +1181,7 @@
 
     <link name='link_0_clone_56'>
       <pose frame=''>-18 33 0.15 0 -0 0</pose>
-      
+
       <collision name="collision">
         <geometry>
           <mesh>
@@ -1202,7 +1202,7 @@
 
     <link name='link_0_clone_57'>
       <pose frame=''>-16 -12 0.15 0 -0 0</pose>
-      
+
       <collision name="collision">
         <geometry>
           <mesh>
@@ -1223,7 +1223,7 @@
 
     <link name='link_0_clone_58'>
       <pose frame=''>-16 -5 0.15 0 -0 0</pose>
-      
+
       <collision name="collision">
         <geometry>
           <mesh>
@@ -1244,7 +1244,7 @@
 
     <link name='link_0_clone_59'>
       <pose frame=''>-14 -12 0.15 0 -0 0</pose>
-      
+
       <collision name="collision">
         <geometry>
           <mesh>
@@ -1265,7 +1265,7 @@
 
     <link name='link_0_clone_60'>
       <pose frame=''>-14 -5 0.15 0 -0 0</pose>
-      
+
       <collision name="collision">
         <geometry>
           <mesh>
@@ -1286,7 +1286,7 @@
 
     <link name='link_0_clone_61'>
       <pose frame=''>-14 26 0.15 0 -0 0</pose>
-      
+
       <collision name="collision">
         <geometry>
           <mesh>
@@ -1307,7 +1307,7 @@
 
     <link name='link_0_clone_62'>
       <pose frame=''>-14 32 0.15 0 -0 0</pose>
-      
+
       <collision name="collision">
         <geometry>
           <mesh>
@@ -1328,7 +1328,7 @@
 
     <link name='link_0_clone_63'>
       <pose frame=''>-13 -12 0.15 0 -0 0</pose>
-      
+
       <collision name="collision">
         <geometry>
           <mesh>
@@ -1349,7 +1349,7 @@
 
     <link name='link_0_clone_64'>
       <pose frame=''>-12 -13 0.15 0 -0 0</pose>
-      
+
       <collision name="collision">
         <geometry>
           <mesh>
@@ -1370,7 +1370,7 @@
 
     <link name='link_0_clone_65'>
       <pose frame=''>-12 33 0.15 0 -0 0</pose>
-      
+
       <collision name="collision">
         <geometry>
           <mesh>
@@ -1391,7 +1391,7 @@
 
     <link name='link_0_clone_66'>
       <pose frame=''>-11 -15 0.15 0 -0 0</pose>
-      
+
       <collision name="collision">
         <geometry>
           <mesh>
@@ -1412,7 +1412,7 @@
 
     <link name='link_0_clone_67'>
       <pose frame=''>-11 -5 0.15 0 -0 0</pose>
-      
+
       <collision name="collision">
         <geometry>
           <mesh>
@@ -1433,7 +1433,7 @@
 
     <link name='link_0_clone_68'>
       <pose frame=''>-10 27 0.15 0 -0 0</pose>
-      
+
       <collision name="collision">
         <geometry>
           <mesh>
@@ -1454,7 +1454,7 @@
 
     <link name='link_0_clone_69'>
       <pose frame=''>-9 -18 0.15 0 -0 0</pose>
-      
+
       <collision name="collision">
         <geometry>
           <mesh>
@@ -1475,7 +1475,7 @@
 
     <link name='link_0_clone_70'>
       <pose frame=''>-8 -7 0.15 0 -0 0</pose>
-      
+
       <collision name="collision">
         <geometry>
           <mesh>
@@ -1496,7 +1496,7 @@
 
     <link name='link_0_clone_71'>
       <pose frame=''>-8 34 0.15 0 -0 0</pose>
-      
+
       <collision name="collision">
         <geometry>
           <mesh>
@@ -1517,7 +1517,7 @@
 
     <link name='link_0_clone_72'>
       <pose frame=''>-7 -20 0.15 0 -0 0</pose>
-      
+
       <collision name="collision">
         <geometry>
           <mesh>
@@ -1538,7 +1538,7 @@
 
     <link name='link_0_clone_73'>
       <pose frame=''>-7 -9 0.15 0 -0 0</pose>
-      
+
       <collision name="collision">
         <geometry>
           <mesh>
@@ -1559,7 +1559,7 @@
 
     <link name='link_0_clone_74'>
       <pose frame=''>-6 29 0.15 0 -0 0</pose>
-      
+
       <collision name="collision">
         <geometry>
           <mesh>
@@ -1580,7 +1580,7 @@
 
     <link name='link_0_clone_75'>
       <pose frame=''>-5 -22 0.15 0 -0 0</pose>
-      
+
       <collision name="collision">
         <geometry>
           <mesh>
@@ -1601,7 +1601,7 @@
 
     <link name='link_0_clone_76'>
       <pose frame=''>-5 -12 0.15 0 -0 0</pose>
-      
+
       <collision name="collision">
         <geometry>
           <mesh>
@@ -1622,7 +1622,7 @@
 
     <link name='link_0_clone_77'>
       <pose frame=''>-3 37 0.15 0 -0 0</pose>
-      
+
       <collision name="collision">
         <geometry>
           <mesh>
@@ -1643,7 +1643,7 @@
 
     <link name='link_0_clone_78'>
       <pose frame=''>-2 -25 0.15 0 -0 0</pose>
-      
+
       <collision name="collision">
         <geometry>
           <mesh>
@@ -1664,7 +1664,7 @@
 
     <link name='link_0_clone_79'>
       <pose frame=''>-2 -15 0.15 0 -0 0</pose>
-      
+
       <collision name="collision">
         <geometry>
           <mesh>
@@ -1685,7 +1685,7 @@
 
     <link name='link_0_clone_80'>
       <pose frame=''>-1 -17 0.15 0 -0 0</pose>
-      
+
       <collision name="collision">
         <geometry>
           <mesh>
@@ -1706,7 +1706,7 @@
 
     <link name='link_0_clone_81'>
       <pose frame=''>-1 31 0.15 0 -0 0</pose>
-      
+
       <collision name="collision">
         <geometry>
           <mesh>
@@ -1727,7 +1727,7 @@
 
     <link name='link_0_clone_82'>
       <pose frame=''>0 -28 0.15 0 -0 0</pose>
-      
+
       <collision name="collision">
         <geometry>
           <mesh>
@@ -1748,7 +1748,7 @@
 
     <link name='link_0_clone_83'>
       <pose frame=''>1 -19 0.15 0 -0 0</pose>
-      
+
       <collision name="collision">
         <geometry>
           <mesh>
@@ -1769,7 +1769,7 @@
 
     <link name='link_0_clone_84'>
       <pose frame=''>1 32 0.15 0 -0 0</pose>
-      
+
       <collision name="collision">
         <geometry>
           <mesh>
@@ -1790,7 +1790,7 @@
 
     <link name='link_0_clone_85'>
       <pose frame=''>2 38 0.15 0 -0 0</pose>
-      
+
       <collision name="collision">
         <geometry>
           <mesh>
@@ -1811,7 +1811,7 @@
 
     <link name='link_0_clone_86'>
       <pose frame=''>3 -30 0.15 0 -0 0</pose>
-      
+
       <collision name="collision">
         <geometry>
           <mesh>
@@ -1832,7 +1832,7 @@
 
     <link name='link_0_clone_87'>
       <pose frame=''>4 -22 0.15 0 -0 0</pose>
-      
+
       <collision name="collision">
         <geometry>
           <mesh>
@@ -1853,7 +1853,7 @@
 
     <link name='link_0_clone_88'>
       <pose frame=''>5 -32 0.15 0 -0 0</pose>
-      
+
       <collision name="collision">
         <geometry>
           <mesh>
@@ -1874,7 +1874,7 @@
 
     <link name='link_0_clone_89'>
       <pose frame=''>5 30 0.15 0 -0 0</pose>
-      
+
       <collision name="collision">
         <geometry>
           <mesh>
@@ -1895,7 +1895,7 @@
 
     <link name='link_0_clone_90'>
       <pose frame=''>6 -25 0.15 0 -0 0</pose>
-      
+
       <collision name="collision">
         <geometry>
           <mesh>
@@ -1916,7 +1916,7 @@
 
     <link name='link_0_clone_91'>
       <pose frame=''>7 -35 0.15 0 -0 0</pose>
-      
+
       <collision name="collision">
         <geometry>
           <mesh>
@@ -1937,7 +1937,7 @@
 
     <link name='link_0_clone_92'>
       <pose frame=''>7 -33 0.15 0 -0 0</pose>
-      
+
       <collision name="collision">
         <geometry>
           <mesh>
@@ -1958,7 +1958,7 @@
 
     <link name='link_0_clone_93'>
       <pose frame=''>7 -26 0.15 0 -0 0</pose>
-      
+
       <collision name="collision">
         <geometry>
           <mesh>
@@ -1979,7 +1979,7 @@
 
     <link name='link_0_clone_94'>
       <pose frame=''>7 29 0.15 0 -0 0</pose>
-      
+
       <collision name="collision">
         <geometry>
           <mesh>
@@ -2000,7 +2000,7 @@
 
     <link name='link_0_clone_95'>
       <pose frame=''>7 36 0.15 0 -0 0</pose>
-      
+
       <collision name="collision">
         <geometry>
           <mesh>
@@ -2021,7 +2021,7 @@
 
     <link name='link_0_clone_96'>
       <pose frame=''>8 -28 0.15 0 -0 0</pose>
-      
+
       <collision name="collision">
         <geometry>
           <mesh>
@@ -2042,7 +2042,7 @@
 
     <link name='link_0_clone_97'>
       <pose frame=''>9 -36 0.15 0 -0 0</pose>
-      
+
       <collision name="collision">
         <geometry>
           <mesh>
@@ -2063,7 +2063,7 @@
 
     <link name='link_0_clone_98'>
       <pose frame=''>9 -30 0.15 0 -0 0</pose>
-      
+
       <collision name="collision">
         <geometry>
           <mesh>
@@ -2084,7 +2084,7 @@
 
     <link name='link_0_clone_99'>
       <pose frame=''>10 -30 0.15 0 -0 0</pose>
-      
+
       <collision name="collision">
         <geometry>
           <mesh>
@@ -2105,7 +2105,7 @@
 
     <link name='link_0_clone_100'>
       <pose frame=''>10 34 0.15 0 -0 0</pose>
-      
+
       <collision name="collision">
         <geometry>
           <mesh>
@@ -2126,7 +2126,7 @@
 
     <link name='link_0_clone_101'>
       <pose frame=''>11 -36 0.15 0 -0 0</pose>
-      
+
       <collision name="collision">
         <geometry>
           <mesh>
@@ -2147,7 +2147,7 @@
 
     <link name='link_0_clone_102'>
       <pose frame=''>11 27 0.15 0 -0 0</pose>
-      
+
       <collision name="collision">
         <geometry>
           <mesh>
@@ -2168,7 +2168,7 @@
 
     <link name='link_0_clone_103'>
       <pose frame=''>12 -31 0.15 0 -0 0</pose>
-      
+
       <collision name="collision">
         <geometry>
           <mesh>
@@ -2189,7 +2189,7 @@
 
     <link name='link_0_clone_104'>
       <pose frame=''>13 -36 0.15 0 -0 0</pose>
-      
+
       <collision name="collision">
         <geometry>
           <mesh>
@@ -2210,7 +2210,7 @@
 
     <link name='link_0_clone_105'>
       <pose frame=''>14 -30 0.15 0 -0 0</pose>
-      
+
       <collision name="collision">
         <geometry>
           <mesh>
@@ -2231,7 +2231,7 @@
 
     <link name='link_0_clone_106'>
       <pose frame=''>14 32 0.15 0 -0 0</pose>
-      
+
       <collision name="collision">
         <geometry>
           <mesh>
@@ -2252,7 +2252,7 @@
 
     <link name='link_0_clone_107'>
       <pose frame=''>15 -36 0.15 0 -0 0</pose>
-      
+
       <collision name="collision">
         <geometry>
           <mesh>
@@ -2273,7 +2273,7 @@
 
     <link name='link_0_clone_108'>
       <pose frame=''>15 24 0.15 0 -0 0</pose>
-      
+
       <collision name="collision">
         <geometry>
           <mesh>
@@ -2294,7 +2294,7 @@
 
     <link name='link_0_clone_109'>
       <pose frame=''>16 -29 0.15 0 -0 0</pose>
-      
+
       <collision name="collision">
         <geometry>
           <mesh>
@@ -2315,7 +2315,7 @@
 
     <link name='link_0_clone_110'>
       <pose frame=''>17 -36 0.15 0 -0 0</pose>
-      
+
       <collision name="collision">
         <geometry>
           <mesh>
@@ -2336,7 +2336,7 @@
 
     <link name='link_0_clone_111'>
       <pose frame=''>17 30 0.15 0 -0 0</pose>
-      
+
       <collision name="collision">
         <geometry>
           <mesh>
@@ -2357,7 +2357,7 @@
 
     <link name='link_0_clone_112'>
       <pose frame=''>18 -27 0.15 0 -0 0</pose>
-      
+
       <collision name="collision">
         <geometry>
           <mesh>
@@ -2378,7 +2378,7 @@
 
     <link name='link_0_clone_113'>
       <pose frame=''>18 22 0.15 0 -0 0</pose>
-      
+
       <collision name="collision">
         <geometry>
           <mesh>
@@ -2399,7 +2399,7 @@
 
     <link name='link_0_clone_114'>
       <pose frame=''>19 -34 0.15 0 -0 0</pose>
-      
+
       <collision name="collision">
         <geometry>
           <mesh>
@@ -2420,7 +2420,7 @@
 
     <link name='link_0_clone_115'>
       <pose frame=''>20 -32 0.15 0 -0 0</pose>
-      
+
       <collision name="collision">
         <geometry>
           <mesh>
@@ -2441,7 +2441,7 @@
 
     <link name='link_0_clone_116'>
       <pose frame=''>21 -26 0.15 0 -0 0</pose>
-      
+
       <collision name="collision">
         <geometry>
           <mesh>
@@ -2462,7 +2462,7 @@
 
     <link name='link_0_clone_117'>
       <pose frame=''>21 28 0.15 0 -0 0</pose>
-      
+
       <collision name="collision">
         <geometry>
           <mesh>
@@ -2483,7 +2483,7 @@
 
     <link name='link_0_clone_118'>
       <pose frame=''>22 21 0.15 0 -0 0</pose>
-      
+
       <collision name="collision">
         <geometry>
           <mesh>
@@ -2504,7 +2504,7 @@
 
     <link name='link_0_clone_119'>
       <pose frame=''>23 -33 0.15 0 -0 0</pose>
-      
+
       <collision name="collision">
         <geometry>
           <mesh>
@@ -2525,7 +2525,7 @@
 
     <link name='link_0_clone_120'>
       <pose frame=''>24 -34 0.15 0 -0 0</pose>
-      
+
       <collision name="collision">
         <geometry>
           <mesh>
@@ -2546,7 +2546,7 @@
 
     <link name='link_0_clone_121'>
       <pose frame=''>24 -27 0.15 0 -0 0</pose>
-      
+
       <collision name="collision">
         <geometry>
           <mesh>
@@ -2567,7 +2567,7 @@
 
     <link name='link_0_clone_122'>
       <pose frame=''>25 -37 0.15 0 -0 0</pose>
-      
+
       <collision name="collision">
         <geometry>
           <mesh>
@@ -2588,7 +2588,7 @@
 
     <link name='link_0_clone_123'>
       <pose frame=''>25 26 0.15 0 -0 0</pose>
-      
+
       <collision name="collision">
         <geometry>
           <mesh>
@@ -2609,7 +2609,7 @@
 
     <link name='link_0_clone_124'>
       <pose frame=''>26 -29 0.15 0 -0 0</pose>
-      
+
       <collision name="collision">
         <geometry>
           <mesh>
@@ -2630,7 +2630,7 @@
 
     <link name='link_0_clone_125'>
       <pose frame=''>26 19 0.15 0 -0 0</pose>
-      
+
       <collision name="collision">
         <geometry>
           <mesh>
@@ -2651,7 +2651,7 @@
 
     <link name='link_0_clone_126'>
       <pose frame=''>27 -31 0.15 0 -0 0</pose>
-      
+
       <collision name="collision">
         <geometry>
           <mesh>
@@ -2672,7 +2672,7 @@
 
     <link name='link_0_clone_127'>
       <pose frame=''>28 -39 0.15 0 -0 0</pose>
-      
+
       <collision name="collision">
         <geometry>
           <mesh>
@@ -2693,7 +2693,7 @@
 
     <link name='link_0_clone_128'>
       <pose frame=''>29 -34 0.15 0 -0 0</pose>
-      
+
       <collision name="collision">
         <geometry>
           <mesh>
@@ -2714,7 +2714,7 @@
 
     <link name='link_0_clone_129'>
       <pose frame=''>29 17 0.15 0 -0 0</pose>
-      
+
       <collision name="collision">
         <geometry>
           <mesh>
@@ -2735,7 +2735,7 @@
 
     <link name='link_0_clone_130'>
       <pose frame=''>29 24 0.15 0 -0 0</pose>
-      
+
       <collision name="collision">
         <geometry>
           <mesh>
@@ -2756,7 +2756,7 @@
 
     <link name='link_0_clone_131'>
       <pose frame=''>31 -40 0.15 0 -0 0</pose>
-      
+
       <collision name="collision">
         <geometry>
           <mesh>
@@ -2777,7 +2777,7 @@
 
     <link name='link_0_clone_132'>
       <pose frame=''>32 -35 0.15 0 -0 0</pose>
-      
+
       <collision name="collision">
         <geometry>
           <mesh>
@@ -2798,7 +2798,7 @@
 
     <link name='link_0_clone_133'>
       <pose frame=''>32 22 0.15 0 -0 0</pose>
-      
+
       <collision name="collision">
         <geometry>
           <mesh>
@@ -2819,7 +2819,7 @@
 
     <link name='link_0_clone_134'>
       <pose frame=''>33 15 0.15 0 -0 0</pose>
-      
+
       <collision name="collision">
         <geometry>
           <mesh>
@@ -2840,7 +2840,7 @@
 
     <link name='link_0_clone_135'>
       <pose frame=''>34 -40 0.15 0 -0 0</pose>
-      
+
       <collision name="collision">
         <geometry>
           <mesh>
@@ -2861,7 +2861,7 @@
 
     <link name='link_0_clone_136'>
       <pose frame=''>34 -35 0.15 0 -0 0</pose>
-      
+
       <collision name="collision">
         <geometry>
           <mesh>
@@ -2882,7 +2882,7 @@
 
     <link name='link_0_clone_137'>
       <pose frame=''>34 14 0.15 0 -0 0</pose>
-      
+
       <collision name="collision">
         <geometry>
           <mesh>
@@ -2903,7 +2903,7 @@
 
     <link name='link_0_clone_138'>
       <pose frame=''>36 -35 0.15 0 -0 0</pose>
-      
+
       <collision name="collision">
         <geometry>
           <mesh>
@@ -2924,7 +2924,7 @@
 
     <link name='link_0_clone_139'>
       <pose frame=''>36 12 0.15 0 -0 0</pose>
-      
+
       <collision name="collision">
         <geometry>
           <mesh>
@@ -2945,7 +2945,7 @@
 
     <link name='link_0_clone_140'>
       <pose frame=''>36 20 0.15 0 -0 0</pose>
-      
+
       <collision name="collision">
         <geometry>
           <mesh>
@@ -2966,7 +2966,7 @@
 
     <link name='link_0_clone_141'>
       <pose frame=''>38 -40 0.15 0 -0 0</pose>
-      
+
       <collision name="collision">
         <geometry>
           <mesh>
@@ -2987,7 +2987,7 @@
 
     <link name='link_0_clone_142'>
       <pose frame=''>38 -35 0.15 0 -0 0</pose>
-      
+
       <collision name="collision">
         <geometry>
           <mesh>
@@ -3008,7 +3008,7 @@
 
     <link name='link_0_clone_143'>
       <pose frame=''>38 19 0.15 0 -0 0</pose>
-      
+
       <collision name="collision">
         <geometry>
           <mesh>
@@ -3029,7 +3029,7 @@
 
     <link name='link_0_clone_144'>
       <pose frame=''>39 9 0.15 0 -0 0</pose>
-      
+
       <collision name="collision">
         <geometry>
           <mesh>
@@ -3050,7 +3050,7 @@
 
     <link name='link_0_clone_145'>
       <pose frame=''>41 -32 0.15 0 -0 0</pose>
-      
+
       <collision name="collision">
         <geometry>
           <mesh>
@@ -3071,7 +3071,7 @@
 
     <link name='link_0_clone_146'>
       <pose frame=''>41 0 0.15 0 -0 0</pose>
-      
+
       <collision name="collision">
         <geometry>
           <mesh>
@@ -3092,7 +3092,7 @@
 
     <link name='link_0_clone_147'>
       <pose frame=''>41 4 0.15 0 -0 0</pose>
-      
+
       <collision name="collision">
         <geometry>
           <mesh>
@@ -3113,7 +3113,7 @@
 
     <link name='link_0_clone_148'>
       <pose frame=''>41 6 0.15 0 -0 0</pose>
-      
+
       <collision name="collision">
         <geometry>
           <mesh>
@@ -3134,7 +3134,7 @@
 
     <link name='link_0_clone_149'>
       <pose frame=''>41 16 0.15 0 -0 0</pose>
-      
+
       <collision name="collision">
         <geometry>
           <mesh>
@@ -3155,7 +3155,7 @@
 
     <link name='link_0_clone_150'>
       <pose frame=''>42 -39 0.15 0 -0 0</pose>
-      
+
       <collision name="collision">
         <geometry>
           <mesh>
@@ -3176,7 +3176,7 @@
 
     <link name='link_0_clone_151'>
       <pose frame=''>42 -3 0.15 0 -0 0</pose>
-      
+
       <collision name="collision">
         <geometry>
           <mesh>
@@ -3197,7 +3197,7 @@
 
     <link name='link_0_clone_152'>
       <pose frame=''>43 -30 0.15 0 -0 0</pose>
-      
+
       <collision name="collision">
         <geometry>
           <mesh>
@@ -3218,7 +3218,7 @@
 
     <link name='link_0_clone_153'>
       <pose frame=''>44 -5 0.15 0 -0 0</pose>
-      
+
       <collision name="collision">
         <geometry>
           <mesh>
@@ -3239,7 +3239,7 @@
 
     <link name='link_0_clone_154'>
       <pose frame=''>44 12 0.15 0 -0 0</pose>
-      
+
       <collision name="collision">
         <geometry>
           <mesh>
@@ -3260,7 +3260,7 @@
 
     <link name='link_0_clone_155'>
       <pose frame=''>45 -36 0.15 0 -0 0</pose>
-      
+
       <collision name="collision">
         <geometry>
           <mesh>
@@ -3281,7 +3281,7 @@
 
     <link name='link_0_clone_156'>
       <pose frame=''>45 -27 0.15 0 -0 0</pose>
-      
+
       <collision name="collision">
         <geometry>
           <mesh>
@@ -3302,7 +3302,7 @@
 
     <link name='link_0_clone_157'>
       <pose frame=''>46 -25 0.15 0 -0 0</pose>
-      
+
       <collision name="collision">
         <geometry>
           <mesh>
@@ -3323,7 +3323,7 @@
 
     <link name='link_0_clone_158'>
       <pose frame=''>46 -20 0.15 0 -0 0</pose>
-      
+
       <collision name="collision">
         <geometry>
           <mesh>
@@ -3344,7 +3344,7 @@
 
     <link name='link_0_clone_159'>
       <pose frame=''>46 -16 0.15 0 -0 0</pose>
-      
+
       <collision name="collision">
         <geometry>
           <mesh>
@@ -3365,7 +3365,7 @@
 
     <link name='link_0_clone_160'>
       <pose frame=''>46 8 0.15 0 -0 0</pose>
-      
+
       <collision name="collision">
         <geometry>
           <mesh>
@@ -3386,7 +3386,7 @@
 
     <link name='link_0_clone_161'>
       <pose frame=''>47 -33 0.15 0 -0 0</pose>
-      
+
       <collision name="collision">
         <geometry>
           <mesh>
@@ -3407,7 +3407,7 @@
 
     <link name='link_0_clone_162'>
       <pose frame=''>47 -24 0.15 0 -0 0</pose>
-      
+
       <collision name="collision">
         <geometry>
           <mesh>
@@ -3428,7 +3428,7 @@
 
     <link name='link_0_clone_163'>
       <pose frame=''>47 -14 0.15 0 -0 0</pose>
-      
+
       <collision name="collision">
         <geometry>
           <mesh>
@@ -3449,7 +3449,7 @@
 
     <link name='link_0_clone_164'>
       <pose frame=''>47 -8 0.15 0 -0 0</pose>
-      
+
       <collision name="collision">
         <geometry>
           <mesh>
@@ -3470,7 +3470,7 @@
 
     <link name='link_0_clone_165'>
       <pose frame=''>47 2 0.15 0 -0 0</pose>
-      
+
       <collision name="collision">
         <geometry>
           <mesh>
@@ -3491,7 +3491,7 @@
 
     <link name='link_0_clone_166'>
       <pose frame=''>47 4 0.15 0 -0 0</pose>
-      
+
       <collision name="collision">
         <geometry>
           <mesh>
@@ -3512,7 +3512,7 @@
 
     <link name='link_0_clone_167'>
       <pose frame=''>48 -12 0.15 0 -0 0</pose>
-      
+
       <collision name="collision">
         <geometry>
           <mesh>
@@ -3533,7 +3533,7 @@
 
     <link name='link_0_clone_168'>
       <pose frame=''>48 -1 0.15 0 -0 0</pose>
-      
+
       <collision name="collision">
         <geometry>
           <mesh>
@@ -3554,7 +3554,7 @@
 
     <link name='link_0_clone_169'>
       <pose frame=''>49 -30 0.15 0 -0 0</pose>
-      
+
       <collision name="collision">
         <geometry>
           <mesh>
@@ -3575,7 +3575,7 @@
 
     <link name='link_0_clone_170'>
       <pose frame=''>49 -11 0.15 0 -0 0</pose>
-      
+
       <collision name="collision">
         <geometry>
           <mesh>
@@ -3596,7 +3596,7 @@
 
     <link name='link_0_clone_171'>
       <pose frame=''>49 -10 0.15 0 -0 0</pose>
-      
+
       <collision name="collision">
         <geometry>
           <mesh>
@@ -3617,7 +3617,7 @@
 
     <link name='link_0_clone_172'>
       <pose frame=''>49 -2 0.15 0 -0 0</pose>
-      
+
       <collision name="collision">
         <geometry>
           <mesh>
@@ -3638,7 +3638,7 @@
 
     <link name='link_0_clone_173'>
       <pose frame=''>51 -27 0.15 0 -0 0</pose>
-      
+
       <collision name="collision">
         <geometry>
           <mesh>
@@ -3659,7 +3659,7 @@
 
     <link name='link_0_clone_174'>
       <pose frame=''>51 -21 0.15 0 -0 0</pose>
-      
+
       <collision name="collision">
         <geometry>
           <mesh>
@@ -3680,7 +3680,7 @@
 
     <link name='link_0_clone_175'>
       <pose frame=''>51 -5 0.15 0 -0 0</pose>
-      
+
       <collision name="collision">
         <geometry>
           <mesh>
@@ -3701,7 +3701,7 @@
 
     <link name='link_0_clone_176'>
       <pose frame=''>52 -18 0.15 0 -0 0</pose>
-      
+
       <collision name="collision">
         <geometry>
           <mesh>
@@ -3722,7 +3722,7 @@
 
     <link name='link_0_clone_177'>
       <pose frame=''>52 -16 0.15 0 -0 0</pose>
-      
+
       <collision name="collision">
         <geometry>
           <mesh>
@@ -3743,7 +3743,7 @@
 
     <link name='link_0_clone_178'>
       <pose frame=''>53 -23 0.15 0 -0 0</pose>
-      
+
       <collision name="collision">
         <geometry>
           <mesh>
@@ -3764,7 +3764,7 @@
 
     <link name='link_0_clone_179'>
       <pose frame=''>53 -6 0.15 0 -0 0</pose>
-      
+
       <collision name="collision">
         <geometry>
           <mesh>
@@ -3785,7 +3785,7 @@
 
     <link name='link_0_clone_180'>
       <pose frame=''>54 -14 0.15 0 -0 0</pose>
-      
+
       <collision name="collision">
         <geometry>
           <mesh>
@@ -3806,7 +3806,7 @@
 
     <link name='link_0_clone_181'>
       <pose frame=''>55 -11 0.15 0 -0 0</pose>
-      
+
       <collision name="collision">
         <geometry>
           <mesh>
@@ -3827,7 +3827,7 @@
 
     <link name='link_0_clone_182'>
       <pose frame=''>55 -9 0.15 0 -0 0</pose>
-      
+
       <collision name="collision">
         <geometry>
           <mesh>
@@ -3844,6 +3844,27 @@
         </geometry>
       </visual>
     </link>
+
+    <include>
+        <uri>model://models/big_cone</uri>
+        <pose>-27 27 0 0 0 0</pose>
+        <name>big_cone_0</name>
+    </include>
+    <include>
+        <uri>model://models/big_cone</uri>
+        <pose>-26.6 27 0 0 0 0</pose>
+        <name>big_cone_1</name>
+    </include>
+    <include>
+        <uri>model://models/big_cone</uri>
+        <pose>-27 33 0 0 0 0</pose>
+        <name>big_cone_2</name>
+    </include>
+    <include>
+        <uri>model://models/big_cone</uri>
+        <pose>-26.6 33 0 0 0 0</pose>
+        <name>big_cone_3</name>
+    </include>
 
     <static>0</static>
     <allow_auto_disable>1</allow_auto_disable>
