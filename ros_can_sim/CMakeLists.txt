@@ -15,6 +15,7 @@ find_package(catkin REQUIRED COMPONENTS
         std_msgs
         eufs_msgs
         std_srvs
+        roslint
         )
 
 catkin_package(
@@ -53,4 +54,9 @@ install(FILES
         DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
         )
 
+#############
+## Roslint ##
+#############
 
+roslint_python()
+roslint_cpp()

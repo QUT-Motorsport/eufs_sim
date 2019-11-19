@@ -8,9 +8,11 @@ from LauncherUtilities import *
 import numpy as np
 import collections
 
+
 class GenerationFailedException(Exception):
         """Raised when generator takes too long."""
         pass
+
 
 class GeneratorContext:
         """
@@ -24,7 +26,7 @@ class GeneratorContext:
 
         Meant for use in with-blocks.
         """
-        def __init__(self,values,failure_function = lambda: None):
+        def __init__(self, values, failure_function=lambda: None):
                 self.values = values
                 self.failed = False
                 self.failure_function = failure_function
@@ -56,10 +58,10 @@ class Parametrization:
         So if you had a circle parametrization function, and gave it an input 0.25, it would
         return the point 25% of the way around the circle segment.
         """
-        def __init__(self,func):
+        def __init__(self, func):
                 self._func = func
 
-        def __call__(self,num):
+        def __call__(self, num):
                 return self._func(num)
 
         @staticmethod
@@ -71,6 +73,7 @@ class Parametrization:
 
                 amount = len(others)
                 threshold = 1.0/amount
+
                 def composite(num):
                         # Check out of bounds
                         if num <= 0:
@@ -88,6 +91,7 @@ class Parametrization:
                                         i += 1
                 return Parametrization(composite)
 
+
 class TrackGenerator:
         """
         Handles track generation.
@@ -98,7 +102,7 @@ class TrackGenerator:
 
         # Lists for micro generators
         # These will be expanded by micro generators
-        
+
         double_placement_set = set([])
         generic_micro_list = []
         refocus_micro_list = []
@@ -152,112 +156,112 @@ class TrackGenerator:
                 """
                 return {
                         "Contest Rules": {
-                                "MIN_STRAIGHT":10,
-                                "MAX_STRAIGHT":80,
-                                "MIN_CONSTANT_TURN":10,
-                                "MAX_CONSTANT_TURN":25,
-                                "MIN_HAIRPIN":4.5,
-                                "MAX_HAIRPIN":10,
-                                "MAX_HAIRPIN_PAIRS":3,
-                                "MAX_LENGTH":1500,
-                                "LAX_GENERATION":False,
-                                "TRACK_WIDTH":4,
-                                "COMPONENTS":{
-                                        "STRAIGHT":1,
-                                        "CONSTANT_TURN":0.7,
-                                        "HAIRPIN_TURN":0.3,
+                                "MIN_STRAIGHT": 10,
+                                "MAX_STRAIGHT": 80,
+                                "MIN_CONSTANT_TURN": 10,
+                                "MAX_CONSTANT_TURN": 25,
+                                "MIN_HAIRPIN": 4.5,
+                                "MAX_HAIRPIN": 10,
+                                "MAX_HAIRPIN_PAIRS": 3,
+                                "MAX_LENGTH": 1500,
+                                "LAX_GENERATION": False,
+                                "TRACK_WIDTH": 4,
+                                "COMPONENTS": {
+                                        "STRAIGHT": 1,
+                                        "CONSTANT_TURN": 0.7,
+                                        "HAIRPIN_TURN": 0.3,
                                 }
                         },
                         "Contest Rules Slaloms": {
-                                "MIN_STRAIGHT":10,
-                                "MAX_STRAIGHT":80,
-                                "MIN_CONSTANT_TURN":10,
-                                "MAX_CONSTANT_TURN":25,
-                                "MIN_HAIRPIN":4.5,
-                                "MAX_HAIRPIN":10,
-                                "MAX_HAIRPIN_PAIRS":3,
-                                "MAX_LENGTH":1500,
-                                "LAX_GENERATION":False,
-                                "TRACK_WIDTH":4,
-                                "COMPONENTS":{
-                                        "STRAIGHT":1,
-                                        "CONSTANT_TURN":0.7,
-                                        "HAIRPIN_TURN":0.3,
-                                        "SLALOM":0.3
+                                "MIN_STRAIGHT": 10,
+                                "MAX_STRAIGHT": 80,
+                                "MIN_CONSTANT_TURN": 10,
+                                "MAX_CONSTANT_TURN": 25,
+                                "MIN_HAIRPIN": 4.5,
+                                "MAX_HAIRPIN": 10,
+                                "MAX_HAIRPIN_PAIRS": 3,
+                                "MAX_LENGTH": 1500,
+                                "LAX_GENERATION": False,
+                                "TRACK_WIDTH": 4,
+                                "COMPONENTS": {
+                                        "STRAIGHT": 1,
+                                        "CONSTANT_TURN": 0.7,
+                                        "HAIRPIN_TURN": 0.3,
+                                        "SLALOM": 0.3
                                 }
                         },
                         "Small Straights": {
-                                "MIN_STRAIGHT":5,
-                                "MAX_STRAIGHT":40,
-                                "MIN_CONSTANT_TURN":10,
-                                "MAX_CONSTANT_TURN":25,
-                                "MIN_HAIRPIN":4.5,
-                                "MAX_HAIRPIN":10,
-                                "MAX_HAIRPIN_PAIRS":3,
-                                "MAX_LENGTH":700,
-                                "LAX_GENERATION":True,
-                                "TRACK_WIDTH":4,
-                                "COMPONENTS":{
-                                        "STRAIGHT":1,
-                                        "CONSTANT_TURN":0.7,
-                                        "HAIRPIN_TURN":0.3,
-                                        "LEFT_RIGHT_TURN":2
+                                "MIN_STRAIGHT": 5,
+                                "MAX_STRAIGHT": 40,
+                                "MIN_CONSTANT_TURN": 10,
+                                "MAX_CONSTANT_TURN": 25,
+                                "MIN_HAIRPIN": 4.5,
+                                "MAX_HAIRPIN": 10,
+                                "MAX_HAIRPIN_PAIRS": 3,
+                                "MAX_LENGTH": 700,
+                                "LAX_GENERATION": True,
+                                "TRACK_WIDTH": 4,
+                                "COMPONENTS": {
+                                        "STRAIGHT": 1,
+                                        "CONSTANT_TURN": 0.7,
+                                        "HAIRPIN_TURN": 0.3,
+                                        "LEFT_RIGHT_TURN": 2
                                 }
                         },
                         "Small Straights Slaloms": {
-                                "MIN_STRAIGHT":5,
-                                "MAX_STRAIGHT":40,
-                                "MIN_CONSTANT_TURN":10,
-                                "MAX_CONSTANT_TURN":25,
-                                "MIN_HAIRPIN":4.5,
-                                "MAX_HAIRPIN":10,
-                                "MAX_HAIRPIN_PAIRS":3,
-                                "MAX_LENGTH":700,
-                                "LAX_GENERATION":True,
-                                "TRACK_WIDTH":4,
-                                "COMPONENTS":{
-                                        "STRAIGHT":1,
-                                        "CONSTANT_TURN":0.7,
-                                        "HAIRPIN_TURN":0.3,
-                                        "LEFT_RIGHT_TURN":2,
-                                        "SLALOM":0.3
+                                "MIN_STRAIGHT": 5,
+                                "MAX_STRAIGHT": 40,
+                                "MIN_CONSTANT_TURN": 10,
+                                "MAX_CONSTANT_TURN": 25,
+                                "MIN_HAIRPIN": 4.5,
+                                "MAX_HAIRPIN": 10,
+                                "MAX_HAIRPIN_PAIRS": 3,
+                                "MAX_LENGTH": 700,
+                                "LAX_GENERATION": True,
+                                "TRACK_WIDTH": 4,
+                                "COMPONENTS": {
+                                        "STRAIGHT": 1,
+                                        "CONSTANT_TURN": 0.7,
+                                        "HAIRPIN_TURN": 0.3,
+                                        "LEFT_RIGHT_TURN": 2,
+                                        "SLALOM": 0.3
                                 }
                         },
                         "Computer Friendly": {
-                                "MIN_STRAIGHT":10,
-                                "MAX_STRAIGHT":80,
-                                "MIN_CONSTANT_TURN":5,
-                                "MAX_CONSTANT_TURN":15,
-                                "MIN_HAIRPIN":4.5,
-                                "MAX_HAIRPIN":10,
-                                "MAX_HAIRPIN_PAIRS":3,
-                                "MAX_LENGTH":500,
-                                "LAX_GENERATION":True,
-                                "TRACK_WIDTH":4,
-                                "COMPONENTS":{
-                                        "STRAIGHT":1,
-                                        "CONSTANT_TURN":0.7,
-                                        "HAIRPIN_TURN":0.3,
-                                        "LEFT_RIGHT_TURN":2
+                                "MIN_STRAIGHT": 10,
+                                "MAX_STRAIGHT": 80,
+                                "MIN_CONSTANT_TURN": 5,
+                                "MAX_CONSTANT_TURN": 15,
+                                "MIN_HAIRPIN": 4.5,
+                                "MAX_HAIRPIN": 10,
+                                "MAX_HAIRPIN_PAIRS": 3,
+                                "MAX_LENGTH": 500,
+                                "LAX_GENERATION": True,
+                                "TRACK_WIDTH": 4,
+                                "COMPONENTS": {
+                                        "STRAIGHT": 1,
+                                        "CONSTANT_TURN": 0.7,
+                                        "HAIRPIN_TURN": 0.3,
+                                        "LEFT_RIGHT_TURN": 2
                                 }
                         },
                         "Bezier Small Straights": {
-                                "MIN_STRAIGHT":5,
-                                "MAX_STRAIGHT":40,
-                                "MIN_CONSTANT_TURN":10,
-                                "MAX_CONSTANT_TURN":25,
-                                "MIN_HAIRPIN":4.5,
-                                "MAX_HAIRPIN":10,
-                                "MAX_HAIRPIN_PAIRS":3,
-                                "MAX_LENGTH":700,
-                                "LAX_GENERATION":True,
-                                "TRACK_WIDTH":4,
-                                "COMPONENTS":{
-                                        "STRAIGHT":1,
-                                        "CONSTANT_TURN":0.7,
-                                        "HAIRPIN_TURN":0.3,
-                                        "LEFT_RIGHT_TURN":2,
-                                        "BEZIER":10
+                                "MIN_STRAIGHT": 5,
+                                "MAX_STRAIGHT": 40,
+                                "MIN_CONSTANT_TURN": 10,
+                                "MAX_CONSTANT_TURN": 25,
+                                "MIN_HAIRPIN": 4.5,
+                                "MAX_HAIRPIN": 10,
+                                "MAX_HAIRPIN_PAIRS": 3,
+                                "MAX_LENGTH": 700,
+                                "LAX_GENERATION": True,
+                                "TRACK_WIDTH": 4,
+                                "COMPONENTS": {
+                                        "STRAIGHT": 1,
+                                        "CONSTANT_TURN": 0.7,
+                                        "HAIRPIN_TURN": 0.3,
+                                        "LEFT_RIGHT_TURN": 2,
+                                        "BEZIER": 10
                                 }
                         }
                 }
@@ -303,7 +307,7 @@ class TrackGenerator:
         @staticmethod
         def set_data(values):
                 """
-                Sets up TrackGenerator to use the generation parameters 
+                Sets up TrackGenerator to use the generation parameters
                 specified in the input.
                 """
 
@@ -327,14 +331,16 @@ class TrackGenerator:
 
         # These three are used as constants for batch generation.
         class GEN_STOP:
-                pass
+            pass
+
         class GEN_CONTINUE:
-                pass
+            pass
+
         class GEN_RELEASE:
-                pass
+            pass
 
         @staticmethod
-        def batch(first, subsequent = 0, threshold = None, postprocessing = lambda x: x):
+        def batch(first, subsequent=0, threshold=None, postprocessing=lambda x: x):
                 """
                 A python coroutine that batches up track generations.
 
@@ -360,7 +366,7 @@ class TrackGenerator:
 
                 # We do the priming of the coroutine in this function, hence
                 # the nested functions here!
-                def inner_coroutine(first, subsequent, threshold): 
+                def inner_coroutine(first, subsequent, threshold):
                         # If threshold has no value, set it to check whenever it has
                         # used up "subsequent" generations (so that it is effectively
                         # refilling the batch back up to "first")
@@ -370,7 +376,7 @@ class TrackGenerator:
                                 threshold = -1
 
                         saved_batch = [
-                                postprocessing(TrackGenerator.generate()) 
+                                postprocessing(TrackGenerator.generate())
                                 for x in range(0, first)
                         ]
 
@@ -393,13 +399,12 @@ class TrackGenerator:
                                 # If needs to refill the batch, refill it!
                                 if len(saved_batch) < threshold:
                                         saved_batch = (
-                                                [postprocessing(TrackGenerator.generate()) 
-                                                 for x in range(0, subsequent)]
-                                              + saved_batch
+                                                [postprocessing(TrackGenerator.generate())
+                                                 for x in range(0, subsequent)] + saved_batch
                                         )
                         return
                 to_return = inner_coroutine(first, subsequent, threshold)
-                
+
                 # Prime coroutine
                 next(to_return)
 
@@ -408,78 +413,75 @@ class TrackGenerator:
         @staticmethod
         def generate():
                 """
-                Generates the track as pure data 
+                Generates the track as pure data
                   (a List[Tuple[float,float]] list of points on the track)
 
-                Returns a list of points to define the path of the track, 
+                Returns a list of points to define the path of the track,
                   along with a bounding width & height for how big the track is.
                 """
 
                 xys = []
                 overlapped = False
                 failure_count = 0
-                while overlapped or xys==[]:
+                while overlapped or xys == []:
                         # Re-generate if the track overlaps itself
-                        (xys,twidth,theight) = generate_random_track((0,0))
+                        (xys, twidth, theight) = generate_random_track((0, 0))
                         if twidth == theight and twidth == 0:
                                 overlapped = True
                         else:
                                 xys2 = compactify_points([
-                                        (int(x[0]), int(x[1])) for x 
+                                        (int(x[0]), int(x[1])) for x
                                         in get_points_from_component_list(xys)
                                 ])
                                 overlapped = check_if_overlap(xys2)
                         if overlapped:
-                                if TrackGenerator.FAILURE_INFO: 
-                                        rospy.logerr(
-                                                "Overlap check "
-                                              + str(failure_count)
-                                              + " failed"
-                                        )
-                                failure_count+=1
+                                if TrackGenerator.FAILURE_INFO:
+                                        rospy.logerr("Overlap check " + str(failure_count) + " failed")
+                                failure_count += 1
                         if failure_count > 1000:
                                 raise GenerationFailedException
-                
+
                 # Now let's randomly flip it a bit to spice it up
-                if random.uniform(0,1) < 0.5:
+                if random.uniform(0, 1) < 0.5:
                         # flip xys by x
                         xys = [
                                 (name, [(-x + twidth, y) for (x, y) in pointlist])
                                 for name, pointlist in xys
                         ]
-                if random.uniform(0,1) < 0.5:
+                if random.uniform(0, 1) < 0.5:
                         # flip xys by y
                         xys = [
                                 (name, [(x, -y + theight) for (x, y) in pointlist])
                                 for name, pointlist in xys
                         ]
 
-                return (xys,twidth,theight)
+                return (xys, twidth, theight)
 
 
 ###################################
 # Decorators For Micro Generators #
 ###################################
 
-def generic_micro(micro_name,allow_double_placement = False):
+def generic_micro(micro_name, allow_double_placement=False):
         """
-        Decorator for generic track components 
+        Decorator for generic track components
 
         micro_name: The internal name of the micro.  Should be a string.
 
         allow_double_placement: Allows this component to be placed back-to-back
         """
         def to_return(decorated_function):
-                to_append = (micro_name,decorated_function)
+                to_append = (micro_name, decorated_function)
                 TrackGenerator.generic_micro_list.append(to_append)
                 if allow_double_placement:
                         TrackGenerator.double_placement_set.add(micro_name)
                 return decorated_function
         return to_return
 
-def refocus_micro(micro_name,allow_double_placement = False):
+
+def refocus_micro(micro_name, allow_double_placement=False):
         """
-        Decorator for refocus track components 
+        Decorator for refocus track components
 
         micro_name: The internal name of the micro.  Should be a string.
 
@@ -490,16 +492,17 @@ def refocus_micro(micro_name,allow_double_placement = False):
         an in-depth understanding.
         """
         def to_return(decorated_function):
-                to_append = (micro_name,decorated_function)
+                to_append = (micro_name, decorated_function)
                 TrackGenerator.refocus_micro_list.append(to_append)
                 if allow_double_placement:
                         TrackGenerator.double_placement_set.add(micro_name)
                 return decorated_function
         return to_return
 
-def connector_micro(micro_name,allow_double_placement = False):
+
+def connector_micro(micro_name, allow_double_placement=False):
         """
-        Decorator for refocus track components 
+        Decorator for refocus track components
 
         micro_name: The internal name of the micro.  Should be a string.
 
@@ -510,19 +513,20 @@ def connector_micro(micro_name,allow_double_placement = False):
         an in-depth understanding.
         """
         def to_return(decorated_function):
-                to_append = (micro_name,decorated_function)
+                to_append = (micro_name, decorated_function)
                 TrackGenerator.connector_micro_list.append(to_append)
                 if allow_double_placement:
                         TrackGenerator.double_placement_set.add(micro_name)
                 return decorated_function
         return to_return
 
+
 def linear_micro(micro_name,
-                 allow_double_placement = False, 
-                 linearize = False,
-                 start = False):
+                 allow_double_placement=False,
+                 linearize=False,
+                 start=False):
         """
-        Decorator for refocus track components 
+        Decorator for refocus track components
 
         micro_name: The internal name of the micro.  Should be a string.
 
@@ -541,10 +545,10 @@ def linear_micro(micro_name,
         def to_return(decorated_function):
                 if linearize:
                         to_append = (
-                                micro_name, 
+                                micro_name,
                                 get_linearized_function(decorated_function)
                         )
-                else: 
+                else:
                         to_append = (micro_name, decorated_function)
                 if start:
                         TrackGenerator.start_micro_list.append(to_append)
@@ -552,21 +556,23 @@ def linear_micro(micro_name,
                 if allow_double_placement:
                         TrackGenerator.double_placement_set.add(micro_name)
                 return decorated_function
-                        
+
         return to_return
+
 
 def get_linearized_function(to_linearize):
         """
         Linearizes function according to linearize parameter of linear_micro decorator.
         """
-        def linearized_function(point_in, tangent_in, normal_in, length, params = {}):
+        def linearized_function(point_in, tangent_in, normal_in, length, params={}):
                 params["length"] = length
-                return to_linearize(point_in, tangent_in, normal_in, params = params)
+                return to_linearize(point_in, tangent_in, normal_in, params=params)
         return linearized_function
 
-def special_micro(micro_name,cone_placer):
+
+def special_micro(micro_name, cone_placer):
         """
-        Decorator for refocus track components 
+        Decorator for refocus track components
 
         micro_name:  The internal name of the micro.  Should be a string.
 
@@ -578,9 +584,10 @@ def special_micro(micro_name,cone_placer):
                 return decorated_function
         return to_return
 
-def rare_micro(micro_name, count = 1):
+
+def rare_micro(micro_name, count=1):
         """
-        If a micro is made rare, it will only be allowed 
+        If a micro is made rare, it will only be allowed
         to appear a limited amount of times in a track.
 
         micro_name: name of the micro that is rare
@@ -588,10 +595,12 @@ def rare_micro(micro_name, count = 1):
         count: the amount of times it is allowed to appear
         """
         TrackGenerator.rare_micro_list.append((micro_name, 0, count))
+
         def to_return(decorated_function):
                 return decorated_function
         return to_return
-       
+
+
 def get_cone_function(micro_name):
         """
         Returns the cone placement function utilized by the micro_name micro generator.
@@ -602,19 +611,21 @@ def get_cone_function(micro_name):
 
         return cone_default
 
+
 ####################
 # Macro Generators #
 ####################
 
 def is_used_too_much(micro_name):
         """
-        Prevents a micro from being used too much 
+        Prevents a micro from being used too much
         (can't surpass max_count given in rare_micro_list)
         """
         for name, count, max_count in TrackGenerator.rare_micro_list:
                 if name == micro_name and count >= max_count:
                         return True
         return False
+
 
 def get_random_micro(type_of_micro):
         """
@@ -625,10 +636,9 @@ def get_random_micro(type_of_micro):
         list_to_check = [
                 x for x in TrackGenerator.__dict__[type_of_micro + "_micro_list"]
                 if not (
-                        x[0] == TrackGenerator.previous_micro 
-                    and x[0] not in TrackGenerator.double_placement_set
-                )
-                and not (
+                        x[0] == TrackGenerator.previous_micro and
+                        x[0] not in TrackGenerator.double_placement_set
+                ) and not (
                         is_used_too_much(x[0])
                 )
         ]
@@ -642,11 +652,12 @@ def get_random_micro(type_of_micro):
         # random_choices is defined in LauncherUtilities.py
         return random_choices(list_to_check, weightings)
 
+
 def use_micro(micro_tuple):
         """
-        Takes in a (name,function) tuple like the ones stored in 
+        Takes in a (name,function) tuple like the ones stored in
         TrackGenerator.generic_micro_list
-        
+
         Changes TrackGenerator.previous_micro to the micro, and returns the function so it
         can be used.
         """
@@ -654,31 +665,38 @@ def use_micro(micro_tuple):
         TrackGenerator.previous_micro = micro_tuple[0]
         return micro_tuple[1]
 
+
 def register_output(list_to_register_to, points_out):
         """Registers a collection of points according to the micro generated."""
         to_append = (TrackGenerator.previous_micro, points_out)
         list_to_register_to.append(to_append)
 
+
 def get_generic():
         """Returns a generic micro & logs it as used"""
         return use_micro(get_random_micro("generic"))
+
 
 def get_refocus():
         """Returns a refocus micro & logs it as used"""
         return use_micro(get_random_micro("refocus"))
 
+
 def get_connector():
         """Returns a connector micro & logs it as used"""
         return use_micro(get_random_micro("connector"))
+
 
 def get_linear():
         """Returns a linear micro & logs it as used"""
         return use_micro(get_random_micro("linear"))
 
+
 def get_start():
         """Returns a linear micro & logs it as used"""
         return use_micro(get_random_micro("start"))
-         
+
+
 def reset_counts():
         """
         Restarts the counts for each micro
@@ -688,14 +706,16 @@ def reset_counts():
         """
         TrackGenerator.previous_micro = ""
         TrackGenerator.rare_micro_list = [
-                (name, 0, max_count) for name, cur_count, max_count 
+                (name, 0, max_count) for name, cur_count, max_count
                 in TrackGenerator.rare_micro_list
         ]
+
 
 def get_last_comp_points(comps):
         """Gets last list of point in a list of components"""
         return comps[-1][1]
-       
+
+
 def generate_random_track(start_point):
         """
         Generates a random track given a starting point.
@@ -705,7 +725,7 @@ def generate_random_track(start_point):
         components = []
 
         # We start with a small linear
-        initial_tangent = get_random_unit_vector(0,math.pi/8)
+        initial_tangent = get_random_unit_vector(0, math.pi/8)
         tangent_in = initial_tangent
         point_in = start_point
         normal_in = get_normal_vector(tangent_in)
@@ -728,7 +748,7 @@ def generate_random_track(start_point):
                         start_point[1] + TrackGenerator.MAX_TRACK_LENGTH * 0.08),
                        (start_point[0] - TrackGenerator.MAX_TRACK_LENGTH * 0.03,
                         start_point[1] + TrackGenerator.MAX_TRACK_LENGTH * 0.12)]
-       
+
         # This controls how much it tries to salvage a bad run
         # It turns out that most times it fails, its not salvageable,
         # so I set it to 1 so that as soon as it fails it scraps the run.
@@ -738,12 +758,12 @@ def generate_random_track(start_point):
         # And now we generate towards each goal point
         for goal_point in goal_points:
                 prev_components = components
-                
+
                 # Prepare inputs
                 tangent_in = tangent_out
-                normal_in  = normal_out
-                point_out  = goal_point
-                point_in   = points_out[-1]
+                normal_in = normal_out
+                point_out = goal_point
+                point_in = points_out[-1]
 
                 # Generate from point to point
                 (comps, tangent_out, normal_out, added_length) = generate_point_to_point(
@@ -761,11 +781,11 @@ def generate_random_track(start_point):
 
                 # Now let's do early-checking for overlaps
                 test = compactify_points([
-                        (int(x[0]), int(x[1])) for x 
+                        (int(x[0]), int(x[1])) for x
                         in get_points_from_component_list(components)
                 ])
-                if check_if_overlap(test): 
-                        if TrackGenerator.FAILURE_INFO: 
+                if check_if_overlap(test):
+                        if TrackGenerator.FAILURE_INFO:
                                 rospy.logerr("Early Overlap Checking: Failed")
 
                         # Generation failed test, undo last bit
@@ -784,9 +804,9 @@ def generate_random_track(start_point):
 
         # Prepare inputs
         tangent_in = tangent_out
-        normal_in  = normal_out
-        point_out  = directing_point
-        point_in   = points_out[-1]
+        normal_in = normal_out
+        point_out = directing_point
+        point_in = points_out[-1]
 
         # Generate from point to point
         (comps, tangent_out, normal_out, added_length) = generate_point_to_point(
@@ -800,11 +820,10 @@ def generate_random_track(start_point):
         components.extend(comps)
         points_out = get_last_comp_points(comps)
 
-
         # Now we will add a circle to point directly away from start point
-        tangent_in  = tangent_out
-        normal_in   = normal_out
-        point_in    = points_out[-1]
+        tangent_in = tangent_out
+        normal_in = normal_out
+        point_in = points_out[-1]
         tangent_out = initial_tangent
 
         points_out, tangent_out, normal_out, added_length = get_connector()(
@@ -815,19 +834,16 @@ def generate_random_track(start_point):
                 normal_in
         )
         register_output(components, points_out)
-        
 
         # Sometimes the tangents don't actually match up
         # so if that happens, we throw out the track and start anew.
-        if get_distance(initial_tangent,tangent_out) > 0.01:
+        if get_distance(initial_tangent, tangent_out) > 0.01:
                 return generate_random_track(start_point)
 
-
         if not TrackGenerator.LAX_GENERATION:
-
-                # Check if whole track is too big
-                if total_length > TrackGenerator.MAX_TRACK_LENGTH:
-                        return generate_random_track(start_point)
+            # Check if whole track is too big
+            if total_length > TrackGenerator.MAX_TRACK_LENGTH:
+                return generate_random_track(start_point)
 
         return convert_components_to_all_positive(components)
 
@@ -837,12 +853,12 @@ def generate_point_to_point(point_in,
                             tangent_in,
                             normal_in,
                             fuzz_radius,
-                            depth = 20):
+                            depth=20):
         """
         Generates a track from point_in to point_out with incoming tangent tangent_in,
         and incoming normal normal_in.
 
-        Does not necessarily exactly end at point_out, it merely aims to get 
+        Does not necessarily exactly end at point_out, it merely aims to get
         within fuzz_radius.
 
         depth is the max amout of times it may recurse (this is a recursive function that
@@ -853,7 +869,7 @@ def generate_point_to_point(point_in,
 
         added_length = 0
         components = []
-        
+
         # We start out by refocusing ourselves towards point_out.
         (points_out, tangent_out, normal_out, delta_length) = (
                 get_refocus()(
@@ -867,13 +883,13 @@ def generate_point_to_point(point_in,
         register_output(components, points_out)
 
         # Prepare data for next component
-        point_in   = points_out[-1]
+        point_in = points_out[-1]
         tangent_in = tangent_out
-        normal_in  = normal_out
+        normal_in = normal_out
 
         # Now we want to know how close we are to the goal - if we're close enough
         # to just directly draw a straight path to it.
-        distance_from_end = get_distance(point_in,point_out)
+        distance_from_end = get_distance(point_in, point_out)
         if distance_from_end <= TrackGenerator.MAX_STRAIGHT + fuzz_radius:
                 straight_length = min(distance_from_end, TrackGenerator.MAX_STRAIGHT)
                 (points_out, tangent_out, normal_out, delta_length) = get_linear()(
@@ -905,10 +921,9 @@ def generate_point_to_point(point_in,
                 register_output(components, points_out)
 
                 # Prepare data for next component
-                point_in   = points_out[-1]
+                point_in = points_out[-1]
                 tangent_in = tangent_out
-                normal_in  = normal_out
-                
+                normal_in = normal_out
 
                 (points_out, tangent_out, normal_out, delta_length) = (
                         get_generic()(
@@ -921,9 +936,9 @@ def generate_point_to_point(point_in,
                 register_output(components, points_out)
 
                 # Prepare data for next component
-                point_in   = points_out[-1]
+                point_in = points_out[-1]
                 tangent_in = tangent_out
-                normal_in  = normal_out
+                normal_in = normal_out
 
                 # Now, we recurse
                 if depth > 0:
@@ -934,12 +949,11 @@ def generate_point_to_point(point_in,
                                         tangent_in,
                                         normal_in,
                                         fuzz_radius,
-                                        depth = depth - 1,
+                                        depth=depth - 1,
                                 )
                         )
                         added_length += delta_length
                         components.extend(comps)
-
 
         return (components, tangent_out, normal_out, added_length)
 
@@ -957,7 +971,7 @@ def generate_point_to_point(point_in,
 #         Generics just create a generically random component, with no extra requirements.
 #
 # 2: "refocus"
-#         These have the signature 
+#         These have the signature
 #                 refocus_<type>(point_in,point_out,tangent_in,normal_in,params)
 #         with the same output as generics.
 #
@@ -968,7 +982,7 @@ def generate_point_to_point(point_in,
 #                 connector_<type>(point_in,point_out,tangent_in,tangent_out,normal_in,params)
 #         with the same output as generics
 #
-#         Connectors ensure that the component ends at point_out, 
+#         Connectors ensure that the component ends at point_out,
 #         with outgoing tangent tangent_out
 #
 # 4: "linear"
@@ -1010,42 +1024,52 @@ def generate_point_to_point(point_in,
 
 def de_parameterize(func):
         """Given a parametric function, turn it into a list of points"""
-        return [func(1.0 * t / (TrackGenerator.FIDELITY - 1)) 
-                for t in range(0 , TrackGenerator.FIDELITY)]
+        return [func(1.0 * t / (TrackGenerator.FIDELITY - 1))
+                for t in range(0, TrackGenerator.FIDELITY)]
+
 
 # Flags for cone placement micros
 class CONE_INNER:
-        pass
+    pass
+
+
 class CONE_OUTER:
-        pass
+    pass
+
+
 class CONE_ORANGE:
-        pass
+    pass
+
+
 class CONE_START:
-	pass
+    pass
 
-def cone_start(xys, track_width = None):
-        """Wrapper for cone_default with start parameter"""
-        return cone_default(
-                xys, 
-                starting = True, 
-                track_width = track_width, 
-                slalom = False,
-                prev_points = None
-        )
 
-def cone_slalom(xys, track_width = None, prev_points = None):
+def cone_start(xys, track_width=None):
+    """Wrapper for cone_default with start parameter"""
+    return cone_default(
+            xys,
+            starting=True,
+            track_width=track_width,
+            slalom=False,
+            prev_points=None
+    )
+
+
+def cone_slalom(xys, track_width=None, prev_points=None):
         """Wrapper for cone_default with slalom parameter"""
         return cone_default(
-                xys, 
-                starting = False, 
-                track_width = track_width, 
-                slalom = True,
-                prev_points = prev_points
+                xys,
+                starting=False,
+                track_width=track_width,
+                slalom=True,
+                prev_points=prev_points
         )
 
-def cone_default(xys, starting = False, track_width = None, slalom = False, prev_points = None):
+
+def cone_default(xys, starting=False, track_width=None, slalom=False, prev_points=None):
         """
-        Default cone placement algorithm, can be overriden on a micro by using the 
+        Default cone placement algorithm, can be overriden on a micro by using the
         special micro decorator.
 
         Takes in a list of points, returns a list of triples dictating x, y position
@@ -1061,7 +1085,7 @@ def cone_default(xys, starting = False, track_width = None, slalom = False, prev
         else:
                 cone_normal_distance_parameter = track_width
 
-        # Hardcoded parameters (not available in launcher because the set of 
+        # Hardcoded parameters (not available in launcher because the set of
         # well-behaved answers is far from dense in the problemspace):
 
         # How close can cones be from those on opposite side.
@@ -1090,27 +1114,26 @@ def cone_default(xys, starting = False, track_width = None, slalom = False, prev
                         if c is CONE_INNER
                 ]
                 all_points_south = (
-                        all_points_south[-cone_check_amount:]
-                        + first_orange_cones
+                        all_points_south[-cone_check_amount:] + first_orange_cones
                 )
                 all_points_north = [
                         (x, y) for x, y, c in prev_points
                         if c is CONE_OUTER
                 ]
                 all_points_north = (
-                        all_points_north[-cone_check_amount:]
-                        + first_orange_cones
+                        all_points_north[-cone_check_amount:] + first_orange_cones
                 )
 
         # This is used to check if the yellow and blue cones suddenly swapped.
-        last_tangent_normal = (0,0)
+        last_tangent_normal = (0, 0)
 
         for i in range(len(xys)):
-                #Skip first part [as hard to calculate tangent]
-                if i == 0: continue
+                # Skip first part [as hard to calculate tangent]
+                if i == 0:
+                    continue
 
-                # The idea here is to place cones along normals to the 
-                # tangent at any given point, 
+                # The idea here is to place cones along normals to the
+                # tangent at any given point,
                 # while making sure they aren't too close.
 
                 # Here we calculate the normal vectors along the track
@@ -1144,59 +1167,59 @@ def cone_default(xys, starting = False, track_width = None, slalom = False, prev
                 # distance checks later.
                 north_point = (int(cur_point[0] + cur_tangent_normal[0]),
                                int(cur_point[1] + cur_tangent_normal[1]))
-                south_point = (int(cur_point[0] - cur_tangent_normal[0]), 
+                south_point = (int(cur_point[0] - cur_tangent_normal[0]),
                                int(cur_point[1] - cur_tangent_normal[1]))
 
                 # Calculates shortest distance to cone on same side of track
                 difference_from_prev_north = min([
-                                 (north_point[0] - prev_point_north[0])**2
-                               + (north_point[1] - prev_point_north[1])**2
-                        for prev_point_north in prev_points_north
+                                                  (north_point[0] - prev_point_north[0])**2 +
+                                                  (north_point[1] - prev_point_north[1])**2
+                                                  for prev_point_north in prev_points_north
                 ])
                 difference_from_prev_south = min([
-                                 (south_point[0] - prev_point_south[0])**2
-                               + (south_point[1] - prev_point_south[1])**2
-                        for prev_point_south in prev_points_south
+                                                  (south_point[0] - prev_point_south[0])**2 +
+                                                  (south_point[1] - prev_point_south[1])**2
+                                                  for prev_point_south in prev_points_south
                 ])
 
                 # Calculates shortest distance to cone on different side of track
                 cross_distance_ns = min([
-                                 (north_point[0] - prev_point_south[0])**2
-                               + (north_point[1] - prev_point_south[1])**2
-                        for prev_point_south in prev_points_south
+                                         (north_point[0] - prev_point_south[0])**2 +
+                                         (north_point[1] - prev_point_south[1])**2
+                                         for prev_point_south in prev_points_south
                 ])
                 cross_distance_sn = min([
-                                 (south_point[0] - prev_point_north[0])**2
-                               + (south_point[1] - prev_point_north[1])**2
-                        for prev_point_north in prev_points_north
+                                         (south_point[0] - prev_point_north[0])**2 +
+                                         (south_point[1] - prev_point_north[1])**2
+                                         for prev_point_north in prev_points_north
                 ])
 
                 # Here we ensure cones don't get too close to the track
-                rel_xys = xys[ 
-                    max([0, i - cone_check_amount]): 
-                    min([len(xys), i + cone_check_amount])  
+                rel_xys = xys[
+                    max([0, i - cone_check_amount]):
+                    min([len(xys), i + cone_check_amount])
                 ]
                 distance_pn = min([
-                                     (north_point[0] - xy[0])**2
-                                   + (north_point[1] - xy[1])**2 
-                                        for xy in rel_xys
+                                   (north_point[0] - xy[0])**2 +
+                                   (north_point[1] - xy[1])**2
+                                   for xy in rel_xys
                 ])
                 distance_ps = min([
-                                     (south_point[0] - xy[0])**2
-                                   + (south_point[1] - xy[1])**2 
-                                        for xy in rel_xys
+                                   (south_point[0] - xy[0])**2 +
+                                   (south_point[1] - xy[1])**2
+                                   for xy in rel_xys
                 ])
 
                 # And we consider all these factors to see if the cones are viable
                 north_viable = (
-                      difference_from_prev_north > cone_adjacent_closeness_parameter**2
-                  and cross_distance_ns > cone_cross_closeness_parameter**2
-                  and distance_pn > cone_cross_closeness_parameter**2
+                      difference_from_prev_north > cone_adjacent_closeness_parameter**2 and
+                      cross_distance_ns > cone_cross_closeness_parameter**2 and
+                      distance_pn > cone_cross_closeness_parameter**2
                 )
                 south_viable = (
-                      difference_from_prev_south > cone_adjacent_closeness_parameter**2
-                  and cross_distance_sn > cone_cross_closeness_parameter**2
-                  and distance_ps > cone_cross_closeness_parameter**2
+                                difference_from_prev_south > cone_adjacent_closeness_parameter**2 and
+                                cross_distance_sn > cone_cross_closeness_parameter**2 and
+                                distance_ps > cone_cross_closeness_parameter**2
                 )
 
                 # And when they are viable, draw them!
@@ -1215,7 +1238,7 @@ def cone_default(xys, starting = False, track_width = None, slalom = False, prev
                 if slalom and (north_viable or south_viable):
                         to_return.append((int(cur_point[0]), int(cur_point[1]), CONE_ORANGE))
 
-                # Only keep track of last couple of previous cones 
+                # Only keep track of last couple of previous cones
                 # (and the very first one, for when the loop joins up)
                 # Specifically, if we assume cone_check_amount is 30, then
                 # we have prev_points north keep track of the most recent 30 cones,
@@ -1225,14 +1248,12 @@ def cone_default(xys, starting = False, track_width = None, slalom = False, prev
                 # The first cone is kept track of because the track is a loop so
                 # it needs to look ahead a bit.
                 if len(all_points_north) > cone_check_amount:
-                        prev_points_north = (all_points_north[-cone_check_amount:]
-                                          + [all_points_north[0]])
+                        prev_points_north = (all_points_north[-cone_check_amount:] + [all_points_north[0]])
                 elif len(all_points_north) > 0:
                         prev_points_north = all_points_north
 
                 if len(all_points_south) > cone_check_amount:
-                        prev_points_south = (all_points_south[-cone_check_amount:]
-                                          + [all_points_south[0]])
+                        prev_points_south = (all_points_south[-cone_check_amount:] + [all_points_south[0]])
                 elif len(all_points_south) > 0:
                         prev_points_south = all_points_south
 
@@ -1245,18 +1266,18 @@ def cone_default(xys, starting = False, track_width = None, slalom = False, prev
                                 if int(x) == int(i) and int(y) == int(j):
                                         to_return[idx] = (x, y, CONE_START)
 
-
         return to_return
 
+
 @special_micro("SLALOM", cone_slalom)
-@linear_micro("SLALOM", linearize = True)
+@linear_micro("SLALOM", linearize=True)
 @generic_micro("SLALOM")
-@linear_micro("STRAIGHT", linearize = True, start = True)
+@linear_micro("STRAIGHT", linearize=True, start=True)
 @generic_micro("STRAIGHT")
 def generic_straight(point_in,
                      tangent_in,
                      normal_in,
-                     params = {}):
+                     params={}):
         """
         Creates a straight line micro generator
 
@@ -1273,10 +1294,10 @@ def generic_straight(point_in,
                 )
 
         # Prepare outputs
-        straight_func = parametric_straight(tangent_in,point_in,length)
-        tangent_out   = tangent_in
-        normal_out    = normal_in
-        added_length  = length
+        straight_func = parametric_straight(tangent_in, point_in, length)
+        tangent_out = tangent_in
+        normal_out = normal_in
+        added_length = length
 
         return (
                 de_parameterize(straight_func),
@@ -1285,15 +1306,16 @@ def generic_straight(point_in,
                 added_length
         )
 
-@generic_micro("CONSTANT_TURN",allow_double_placement=True)
+
+@generic_micro("CONSTANT_TURN", allow_double_placement=True)
 def generic_constant_turn(point_in,
                           tangent_in,
                           normal_in,
-                          params = {}):
+                          params={}):
         """
         Creates a circle segment micro generator.
 
-        params["turn_against_normal"]: boolean, when true then the 
+        params["turn_against_normal"]: boolean, when true then the
                                        circle will have the opposite normal.
         params["radius"]: radius of the circle
         params["circle_percent"]: percent of a full turn the circle should undergo
@@ -1303,7 +1325,7 @@ def generic_constant_turn(point_in,
         if "turn_against_normal" in params:
                 turn_against_normal = params["turn_against_normal"]
         else:
-                turn_against_normal = random.uniform(0,1) < 0.5
+                turn_against_normal = random.uniform(0, 1) < 0.5
 
         if turn_against_normal:
                 # We need to flip our reference frame.
@@ -1311,7 +1333,7 @@ def generic_constant_turn(point_in,
 
         if "radius" in params:
                 radius = params["radius"]
-        else: 
+        else:
                 radius = random.uniform(
                         TrackGenerator.MIN_CONSTANT_TURN,
                         TrackGenerator.MAX_CONSTANT_TURN
@@ -1319,12 +1341,12 @@ def generic_constant_turn(point_in,
 
         if "circle_percent" in params:
                 circle_percent = params["circle_percent"]
-        else: 
-                # Note: if circles turn too much, 
+        else:
+                # Note: if circles turn too much,
                 # risk of self-intersection rises dramatically.
-                circle_percent = random.uniform(0.1,0.5)
+                circle_percent = random.uniform(0.1, 0.5)
 
-        center = add_vectors(point_in, scale_vector(normal_in,radius))
+        center = add_vectors(point_in, scale_vector(normal_in, radius))
 
         # We need to calculate which direction to draw the circle, too
         # Traditionally it is drawn counter-clockwise, but it would need to go
@@ -1344,9 +1366,9 @@ def generic_constant_turn(point_in,
         # Calculate total length
         added_length = turn_angle * radius
 
-        # Now we want to find the new normal vector, 
+        # Now we want to find the new normal vector,
         normal_out = normalize_vec((
-                points_out[-1][0] - center[0], 
+                points_out[-1][0] - center[0],
                 points_out[-1][1] - center[1]
         ))
 
@@ -1354,23 +1376,24 @@ def generic_constant_turn(point_in,
         tangent_out = calculate_tangent_vector(points_out)
 
         # Returns a list of points and the new edge of the racetrack and the change in length
-        return (points_out,tangent_out,normal_out,added_length)
-        
-@rare_micro("HAIRPIN_TURN", count = 2)
+        return (points_out, tangent_out, normal_out, added_length)
+
+
+@rare_micro("HAIRPIN_TURN", count=2)
 @generic_micro("HAIRPIN_TURN")
 def generic_hairpin_turn(point_in,
                          tangent_in,
                          normal_in,
-                         params = {}):
+                         params={}):
         """
         Creates a hairpin micro generator.
 
-        params["turn_against_normal"]: boolean, when true then the 
+        params["turn_against_normal"]: boolean, when true then the
                                        hairpin will have the opposite normal.
 
         params["radius"]: radius of the circle
 
-        params["uniform_circles"]: if True, all circles have the 
+        params["uniform_circles"]: if True, all circles have the
                                             same radius (params["radius"])
                                    if False, all circles have random radii to add variety.
 
@@ -1390,7 +1413,7 @@ def generic_hairpin_turn(point_in,
         if "turn_against_normal" in params:
                 turn_against_normal = params["turn_against_normal"]
         else:
-                turn_against_normal = random.uniform(0,1)<0.5
+                turn_against_normal = random.uniform(0, 1) < 0.5
 
         if turn_against_normal:
                 # We need to flip our reference frame.
@@ -1398,7 +1421,7 @@ def generic_hairpin_turn(point_in,
 
         if "radius" in params:
                 radius = params["radius"]
-        else: 
+        else:
                 radius = random.uniform(
                         TrackGenerator.MIN_CONSTANT_TURN,
                         TrackGenerator.MAX_CONSTANT_TURN
@@ -1406,7 +1429,7 @@ def generic_hairpin_turn(point_in,
 
         if "uniform_circles" in params:
                 uniform_circles = params["uniform_circles"]
-        else: 
+        else:
                 uniform_circles = random.uniform(0, 1) < 0.5
 
         if "straight_length" in params:
@@ -1431,7 +1454,7 @@ def generic_hairpin_turn(point_in,
                 )
 
         # We are interested in making sure switchbacks never intersect
-        # If you draw a diagram, this gives you a diamond with angles pi/2,pi/2,L, and pi/2-L 
+        # If you draw a diagram, this gives you a diamond with angles pi/2,pi/2,L, and pi/2-L
         # where L is:
         # ((2*pi*(1-wobbliness))/2)
         # Using trigonometry, we can calculate the radius to intersection
@@ -1454,16 +1477,16 @@ def generic_hairpin_turn(point_in,
                 # Get the desired radius of the circle
                 if not uniform_circles:
                         radius = random.uniform(
-                                TrackGenerator.MIN_CONSTANT_TURN, 
+                                TrackGenerator.MIN_CONSTANT_TURN,
                                 TrackGenerator.MAX_CONSTANT_TURN
                         )
 
                 # Do the circle part
                 (points_out, tangent_out, normal_out, delta_length) = generic_constant_turn(
                         point_in,
-                        tangent_in, 
+                        tangent_in,
                         normal_in,
-                        params = {
+                        params={
                                 "turn_against_normal": True,
                                 "circle_percent":      wobbliness,
                                 "radius":              radius
@@ -1473,16 +1496,16 @@ def generic_hairpin_turn(point_in,
                 xys.extend(points_out)
 
                 # Prepare for next component
-                point_in   = points_out[-1]
+                point_in = points_out[-1]
                 tangent_in = tangent_out
-                normal_in  = normal_out
+                normal_in = normal_out
 
                 # Now tack on the straight
                 (points_out, tangent_out, normal_out, delta_length) = generic_straight(
                         point_in,
                         tangent_in,
                         normal_in,
-                        params = {
+                        params={
                                 "length": straight_length
                         }
                 )
@@ -1492,23 +1515,23 @@ def generic_hairpin_turn(point_in,
                 # Prepare for next component
                 # For hairpins, normals should always flip!
                 # That way they zigzag
-                point_in   = points_out[-1]
+                point_in = points_out[-1]
                 tangent_in = tangent_out
                 normal_in = scale_vector(normal_out, -1)
 
-
         return (xys, tangent_out, normal_out, added_length)
+
 
 @refocus_micro("CONSTANT_TURN")
 def refocus_constant_turn(point_in,
                           point_out,
                           tangent_in,
                           normal_in,
-                          params = {}):
+                          params={}):
         """
         Creates a circle segment micro generator.
 
-        params["turn_against_normal"]: boolean, when true then the 
+        params["turn_against_normal"]: boolean, when true then the
                                        circle will have the opposite normal.
         params["radius"]: radius of the circle
         params["recursed"]: if true, prevent this function from recursing again
@@ -1518,7 +1541,7 @@ def refocus_constant_turn(point_in,
         if "turn_against_normal" in params:
                 turn_against_normal = params["turn_against_normal"]
         else:
-                turn_against_normal = random.uniform(0,1) < 0.5
+                turn_against_normal = random.uniform(0, 1) < 0.5
 
         if turn_against_normal:
                 # We need to flip our reference frame.
@@ -1526,9 +1549,9 @@ def refocus_constant_turn(point_in,
 
         if "radius" in params:
                 radius = params["radius"]
-        else: 
+        else:
                 radius = random.uniform(
-                        TrackGenerator.MIN_CONSTANT_TURN,TrackGenerator.MAX_CONSTANT_TURN
+                        TrackGenerator.MIN_CONSTANT_TURN, TrackGenerator.MAX_CONSTANT_TURN
                 )
 
         if "recursed" in params:
@@ -1536,7 +1559,7 @@ def refocus_constant_turn(point_in,
         else:
                 recursed = False
 
-        center = add_vectors(point_in, scale_vector(normal_in,radius))
+        center = add_vectors(point_in, scale_vector(normal_in, radius))
 
         # We need to calculate which direction to draw the circle, too
         # Traditionally it is drawn counter-clockwise, but it would need to go
@@ -1552,63 +1575,62 @@ def refocus_constant_turn(point_in,
         # Given start S and center C, any point on the circle angle A away is:
         # R_A[S-C] + C
         # Let us box this up in a nice function:
-        def intermediate_point(s,c,a):
-                (sx,sy) = s
-                (cx,cy) = c
-                cos_a    = math.cos(a)
-                sin_a    = math.sin(a)
-                del_x    = sx - cx
-                del_y    = sy - cy
+        def intermediate_point(s, c, a):
+                (sx, sy) = s
+                (cx, cy) = c
+                cos_a = math.cos(a)
+                sin_a = math.sin(a)
+                del_x = sx - cx
+                del_y = sy - cy
                 result_x = cos_a * del_x - sin_a * del_y + cx
                 result_y = sin_a * del_x + cos_a * del_y + cy
                 return (result_x, result_y)
-        circle_func = Parametrization(lambda a: intermediate_point(point_in,center,a))
+        circle_func = Parametrization(lambda a: intermediate_point(point_in, center, a))
 
         # We are going to iteratively walk around the circle until we are facing the right way
         points_out = []
         max_range = TrackGenerator.FIDELITY
         step_size = 1.0 / max_range
         angle = 0
-        for t in range(0,max_range):
+        for t in range(0, max_range):
                 angle = t * step_size * 2 * math.pi
                 points_out.append(
                         circle_func(angle*handedness)
                 )
                 if t != 0:
                         # Check if we're pointing in the right direction
-                        # This equates to checking if end_point lies on the 
+                        # This equates to checking if end_point lies on the
                         # line at points[-1] with the appropriate tangent.
-                        (sx,sy) = points_out[-1]
-                        (ex,ey) = point_out
+                        (sx, sy) = points_out[-1]
+                        (ex, ey) = point_out
                         appropriate_angle = calculate_tangent_angle(points_out)
                         if t > 0.8 * max_range and not recursed:
-                                # Very big turn, we don't like that!  
+                                # Very big turn, we don't like that!
                                 # We'll just turn the other way instead
                                 return refocus_constant_turn(
                                         point_in,
                                         point_out,
                                         tangent_in,
                                         normal_in,
-                                        params = {
-                                                "recursed":True,
-                                                "radius":radius,
-                                                "turn_against_normal":True
+                                        params={
+                                                "recursed": True,
+                                                "radius": radius,
+                                                "turn_against_normal": True
                                         }
                                 )
                         if abs(
-                                cap_angle(appropriate_angle) 
-                               -cap_angle(math.atan2((ey - sy), (ex - sx)))
+                                cap_angle(appropriate_angle) - cap_angle(math.atan2((ey - sy), (ex - sx)))
                         ) < 0.01:
-                                # Would do equality checking but limited precision, 
+                                # Would do equality checking but limited precision,
                                 # we just check if close!
                                 break
 
         # Length of circle is, fortunately, easy!  It's simply radius*angle
         added_length = angle*radius
 
-        # Now we want to find the new normal vector, 
+        # Now we want to find the new normal vector,
         normal_out = normalize_vec((
-                points_out[-1][0] - center[0], 
+                points_out[-1][0] - center[0],
                 points_out[-1][1] - center[1]
         ))
 
@@ -1616,7 +1638,8 @@ def refocus_constant_turn(point_in,
         tangent_out = calculate_tangent_vector(points_out)
 
         # Returns a list of points and the new edge of the racetrack and the change in length
-        return (points_out,tangent_out,normal_out,added_length)
+        return (points_out, tangent_out, normal_out, added_length)
+
 
 @connector_micro("CONSTANT_TURN")
 def connector_constant_turn(point_in,
@@ -1624,7 +1647,7 @@ def connector_constant_turn(point_in,
                             tangent_in,
                             tangent_out,
                             normal_in,
-                            params = {}):
+                            params={}):
         """
         Complicated connector function that attempts to abide by contest regulations.
 
@@ -1634,12 +1657,11 @@ def connector_constant_turn(point_in,
         xys = []
         total_length = 0
         final_tangent_out = tangent_out
-        tangent_out = scale_vector(tangent_out,-1)
+        tangent_out = scale_vector(tangent_out, -1)
 
         # We need to calculate the turn angle (angle between 2 vectors):
         outer_turn_angle = math.acos(
-                - tangent_in[0] * tangent_out[0]
-                - tangent_in[1] * tangent_out[1]
+                - tangent_in[0] * tangent_out[0] - tangent_in[1] * tangent_out[1]
         )
         circle_turn_angle = math.pi - outer_turn_angle
         circle_turn_percent = circle_turn_angle / (2 * math.pi)
@@ -1664,11 +1686,11 @@ def connector_constant_turn(point_in,
 
         # And now we add a half-turn to point us directly back to the start.
         # Radius is calculated by finding distance when projected along the normal
-        tangent_in  = tangent_out
-        normal_in   = normal_out
-        point_in    = points_out[-1]
+        tangent_in = tangent_out
+        normal_in = normal_out
+        point_in = points_out[-1]
         tangent_out = final_tangent_out
-        diff = subtract_vectors(point_in,point_out)
+        diff = subtract_vectors(point_in, point_out)
         circle_radius = (diff[0] * normal_in[0] + diff[1] * normal_in[1])/2
 
         # Now we draw the circle:
@@ -1687,14 +1709,14 @@ def connector_constant_turn(point_in,
 
         # And then add a straight to connect back to the start
         tangent_in = tangent_out
-        normal_in  = normal_out
-        point_in   = points_out[-1]
+        normal_in = normal_out
+        point_in = points_out[-1]
         straight_length = get_distance(point_in, point_out) * 1.1
         (points_out, tangent_out, normal_out, added_length) = generic_straight(
                 point_in,
                 tangent_in,
                 normal_in,
-                params = {
+                params={
                         "length": straight_length
                 }
         )
@@ -1703,11 +1725,12 @@ def connector_constant_turn(point_in,
 
         return (xys, tangent_out, normal_out, total_length)
 
+
 @generic_micro("LEFT_RIGHT_TURN")
 def generic_left_right_turn(point_in,
                             tangent_in,
                             normal_in,
-                            params = {}):
+                            params={}):
         """
         Creates a hairpin micro generator.
 
@@ -1723,8 +1746,8 @@ def generic_left_right_turn(point_in,
                         point_in,
                         tangent_in,
                         normal_in,
-                        params = {
-                                "circle_percent":random.uniform(0.1, 0.3)
+                        params={
+                                "circle_percent": random.uniform(0.1, 0.3)
                         }
                 )
         )
@@ -1732,9 +1755,9 @@ def generic_left_right_turn(point_in,
         xys.extend(points_out)
 
         # Prepare data for next component
-        point_in   = points_out[-1]
+        point_in = points_out[-1]
         tangent_in = tangent_out
-        normal_in  = normal_out
+        normal_in = normal_out
 
         # And now let's add another circle turning the other way
         # so that we make the track more "winding".
@@ -1743,8 +1766,8 @@ def generic_left_right_turn(point_in,
                         point_in,
                         tangent_in,
                         normal_in,
-                        params = {
-                                "circle_percent":random.uniform(0.1, 0.3)
+                        params={
+                                "circle_percent": random.uniform(0.1, 0.3)
                         }
                 )
         )
@@ -1753,13 +1776,14 @@ def generic_left_right_turn(point_in,
 
         return (xys, tangent_out, normal_out, added_length)
 
+
 @connector_micro("BEZIER")
 def connector_bezier(point_in,
-                     point_out, 
+                     point_out,
                      tangent_in,
-                     tangent_out, 
-                     normal_in, 
-                     params = {}):
+                     tangent_out,
+                     normal_in,
+                     params={}):
         """
         Creates a cubic bezier micro generator.
 
@@ -1774,22 +1798,21 @@ def connector_bezier(point_in,
         if "scale_in" in params:
                 scale_in = params["scale_in"]
         else:
-                scale_in = random.uniform(10,100)
+                scale_in = random.uniform(10, 100)
         if "scale_out" in params:
                 scale_out = params["scale_out"]
         else:
-                scale_out = random.uniform(10,100)
-
+                scale_out = random.uniform(10, 100)
 
         # The incoming tangent is the same as the line from P0 to P1
         # Outgoing tangent is the same as the line from P(n-1) to P(n)
         # Where P0, P1, ..., P(n-1), P(n) are the control points
         # All other control points are free to be selected.
-        p0_to_p1 = scale_vector(tangent_in,scale_in)
+        p0_to_p1 = scale_vector(tangent_in, scale_in)
         p0 = point_in
         p1 = (p0[0] + p0_to_p1[0], p0[1] + p0_to_p1[1])
 
-        pn_1_to_pn = scale_vector(tangent_out,scale_out)
+        pn_1_to_pn = scale_vector(tangent_out, scale_out)
         pn = point_out
         pn_1 = (pn[0] - pn_1_to_pn[0], pn[1] - pn_1_to_pn[1])
 
@@ -1806,7 +1829,6 @@ def connector_bezier(point_in,
                 normal_out,
                 added_length
         )
-        
 
 
 def parametric_bezier(control_points):
@@ -1817,7 +1839,7 @@ def parametric_bezier(control_points):
         I made this code match the Bezier curve definition on wikipedia as closely as
         possible (Explicit definition, not the recursive one)
         """
-        def to_return(cp,t):
+        def to_return(cp, t):
                 the_sum_x = 0
                 the_sum_y = 0
                 n = len(cp)
@@ -1829,32 +1851,29 @@ def parametric_bezier(control_points):
         return Parametrization(lambda t: to_return(control_points, t))
 
 
-
 def parametric_straight(slope_vec, start_point, line_length):
         """Returns the parametric function of a line given a slope and start point"""
         def to_return(slope, start, length, t):
                 return add_vectors(start, scale_vector(slope, 1.0 * t * line_length))
-        return Parametrization(lambda t: to_return(slope_vec,start_point, line_length, t))
-
+        return Parametrization(lambda t: to_return(slope_vec, start_point, line_length, t))
 
 
 def parametric_circle(start_point, center_point, delta_angle):
         """
-        Returns a function in terms of t \elem [0,1] to parameterize a circle        
+        Returns a function in terms of t \elem [0,1] to parameterize a circle
 
         We can calculate points on a circle using a rotation matrix
-        R(a)*[S-C]+C gives us any point on a circle starting at S with center C 
+        R(a)*[S-C]+C gives us any point on a circle starting at S with center C
         with counterclockwise angular distance 'a'
         """
         def output(s, c, a):
                 (sx, sy) = s
                 (cx, cy) = c
-                cos_a    = math.cos(a)
-                sin_a    = math.sin(a)
-                del_x    = sx - cx
-                del_y    = sy - cy
+                cos_a = math.cos(a)
+                sin_a = math.sin(a)
+                del_x = sx - cx
+                del_y = sy - cy
                 result_x = cos_a * del_x - sin_a * del_y + cx
                 result_y = sin_a * del_x + cos_a * del_y + cy
                 return (result_x, result_y)
         return Parametrization(lambda t: output(start_point, center_point, t * delta_angle))
-

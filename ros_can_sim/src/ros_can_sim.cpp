@@ -34,8 +34,11 @@
 
 
 #include "ros_can_sim.hpp"
+#include <string>
+#include <vector>
 
-RosCanSim::RosCanSim() : nh_("~") {
+RosCanSim::RosCanSim() : nh_("~")
+{
     ROS_INFO("ros_can_sim :: Starting ");
 
     // Ackermann configuration - traction - topics
@@ -58,7 +61,7 @@ RosCanSim::RosCanSim() : nh_("~") {
     nh_.param<double>("wheelbase", wheelbase_, 1.53);
     nh_.param<double>("wheel_radius", wheel_radius_, 0.505/2);
     nh_.param<double>("max_speed", max_speed_, 20.0);
-    nh_.param<double>("max_steering", max_steering_, 0.523599); // 27.2 degrees
+    nh_.param<double>("max_steering", max_steering_, 0.523599);  // 27.2 degrees
 
     // steering link lengths for the ADS-DV are 0.02534 which are derived
     // from the vehicle specs by Ignat. Derived by inverse solving the
@@ -81,7 +84,8 @@ RosCanSim::RosCanSim() : nh_("~") {
     read_state_ = false;
 
     // Subscribers
-    joint_state_sub_ = nh_.subscribe<sensor_msgs::JointState>("/eufs/joint_states", 1, &RosCanSim::jointStateCallback, this);
+    joint_state_sub_ = nh_.subscribe<sensor_msgs::JointState>("/eufs/joint_states", 1,
+                                                              &RosCanSim::jointStateCallback, this);
     cmd_sub_ = nh_.subscribe<ackermann_msgs::AckermannDriveStamped>("/cmd_vel_out", 1, &RosCanSim::commandCallback,
                                                                     this);
     flag_sub_ = nh_.subscribe<std_msgs::Bool>("/ros_can/mission_flag", 1, &RosCanSim::flagCallback, this);
@@ -105,13 +109,15 @@ RosCanSim::RosCanSim() : nh_("~") {
     ref_pos_flw_ = nh_.advertise<std_msgs::Float64>(flw_pos_topic_, 50);
 }
 
-RosCanSim::~RosCanSim() {
-
+RosCanSim::~RosCanSim()
+{
 }
 
-int RosCanSim::starting() {
+int RosCanSim::starting()
+{
     // Initialize joint indexes according to joint names
-    if (read_state_) {
+    if (read_state_)
+    {
         std::vector<std::string> joint_names = joint_state_.name;
         frw_vel_ = find(joint_names.begin(), joint_names.end(), std::string(joint_front_right_wheel)) -
                    joint_names.begin();
@@ -126,27 +132,34 @@ int RosCanSim::starting() {
         flw_pos_ =
                 find(joint_names.begin(), joint_names.end(), std::string(joint_front_left_steer)) - joint_names.begin();
         return 0;
-    } else {
+    }
+    else
+    {
         ROS_WARN("RosCanSim::starting: joint_states are not being received");
         return -1;
     }
 }
 
-void RosCanSim::UpdateControl() {
+void RosCanSim::UpdateControl()
+{
     // Compute state control actions
     // State feedback error 4 position loops / 4 velocity loops
     // For more details refer to page 30 of http://www.imgeorgiev.com/files/Ignat_MInf1_project.pdf
     double R;
     double steering_ref_left, steering_ref_right;
-    if (std::fabs(steering_ref_) > 1e-06) {  // to avoid division by 0
+    if (std::fabs(steering_ref_) > 1e-06)  // to avoid division by 0
+    {
         R = wheelbase_ / tan(steering_ref_);
         steering_ref_left = atan2(wheelbase_, R - steering_link_length_);
         steering_ref_right = atan2(wheelbase_, R + steering_link_length_);
-        if (steering_ref_ < 0.0) {
+        if (steering_ref_ < 0.0)
+        {
             steering_ref_left = steering_ref_left - PI;
             steering_ref_right = steering_ref_right - PI;
         }
-    } else {
+    }
+    else
+    {
         steering_ref_left = 0.0;
         steering_ref_right = 0.0;
     }
@@ -184,14 +197,18 @@ void RosCanSim::UpdateControl() {
     ROS_DEBUG("Published wheel speeds %f rad/s", -ref_speed_joint);
 }
 
-void RosCanSim::setMission(eufs_msgs::CanState state) {
-    if (state.as_state == eufs_msgs::CanState::AS_DRIVING) {
+void RosCanSim::setMission(eufs_msgs::CanState state)
+{
+    if (state.as_state == eufs_msgs::CanState::AS_DRIVING)
+    {
         as_state_ = as_state_type::AS_DRIVING;
         driving_flag_ = true;
     }
 
-    if (ami_state_ == ami_state_type::AMI_NOT_SELECTED) {
-        switch (state.ami_state) {
+    if (ami_state_ == ami_state_type::AMI_NOT_SELECTED)
+    {
+        switch (state.ami_state)
+        {
             case eufs_msgs::CanState::AMI_ACCELERATION:
                 ami_state_ = ami_state_type::AMI_ACCELERATION;
                 break;
@@ -217,14 +234,17 @@ void RosCanSim::setMission(eufs_msgs::CanState state) {
                 ami_state_ = ami_state_type::AMI_NOT_SELECTED;
                 break;
         }
-    } else {
+    }
+    else
+    {
         ROS_WARN("Failed to set mission as a mission was set previously");
     }
 }
 
-bool RosCanSim::resetState(std_srvs::Trigger::Request& request, std_srvs::Trigger::Response& response) {
-    (void)request;  // suppress unused parameter warning
-    (void)response; // suppress unused parameter warning
+bool RosCanSim::resetState(std_srvs::Trigger::Request& request, std_srvs::Trigger::Response& response)
+{
+    (void)request;   // suppress unused parameter warning
+    (void)response;  // suppress unused parameter warning
     as_state_ = as_state_type::AS_OFF;
     ami_state_ = ami_state_type::AMI_NOT_SELECTED;
     driving_flag_ = false;
@@ -232,9 +252,10 @@ bool RosCanSim::resetState(std_srvs::Trigger::Request& request, std_srvs::Trigge
     return response.success;
 }
 
-bool RosCanSim::requestEBS(std_srvs::Trigger::Request& request, std_srvs::Trigger::Response& response) {
-    (void)request;  // suppress unused parameter warning
-    (void)response; // suppress unused parameter warning
+bool RosCanSim::requestEBS(std_srvs::Trigger::Request& request, std_srvs::Trigger::Response& response)
+{
+    (void)request;   // suppress unused parameter warning
+    (void)response;  // suppress unused parameter warning
     as_state_ = as_state_type::AS_EMERGENCY_BRAKE;
     ami_state_ = ami_state_type::AMI_NOT_SELECTED;
     driving_flag_ = false;
@@ -242,9 +263,10 @@ bool RosCanSim::requestEBS(std_srvs::Trigger::Request& request, std_srvs::Trigge
     return response.success;
 }
 
-void RosCanSim::publishWheelSpeeds() {
-
-    if ((ros::Time::now() - joint_state_.header.stamp).toSec() > joints_state_time_window_) {
+void RosCanSim::publishWheelSpeeds()
+{
+    if ((ros::Time::now() - joint_state_.header.stamp).toSec() > joints_state_time_window_)
+    {
         ROS_WARN_THROTTLE(2, "ros_can_sim :: joint_states are not being received");
         return;
     }
@@ -255,7 +277,8 @@ void RosCanSim::publishWheelSpeeds() {
     float left_steering_feedback = joint_state_.position[flw_pos_];
     float steering_feedback = (right_steering_feedback + left_steering_feedback) / 2.0;
 
-    if (fabs(steering_feedback) > max_steering_) {
+    if (fabs(steering_feedback) > max_steering_)
+    {
         ROS_DEBUG("ros_can_sim :: steering feedback exceeded limit");
         ROS_DEBUG("ros_can_sim :: steering feedback = %f", steering_feedback);
         ROS_DEBUG("ros_can_sim :: max steering = %f", max_steering_);
@@ -277,15 +300,17 @@ void RosCanSim::publishWheelSpeeds() {
     msg.steering = steering_feedback;
 
     wheel_speed_pub_.publish(msg);
-
 }
 
-void RosCanSim::updateState() {
-    using namespace std::literals::chrono_literals;
+void RosCanSim::updateState()
+{
+    using std::chrono_literals::operator""s;
 
-    switch (as_state_) {
+    switch (as_state_)
+    {
         case as_state_type::AS_OFF:
-            if ((ami_state_ != ami_state_type::AMI_NOT_SELECTED) && driving_flag_) {
+            if ((ami_state_ != ami_state_type::AMI_NOT_SELECTED) && driving_flag_)
+            {
                 // first sleep for 5s as is with the real car
                 std::this_thread::sleep_for(5s);
 
@@ -296,14 +321,16 @@ void RosCanSim::updateState() {
             break;
 
         case as_state_type::AS_READY:
-            if (driving_flag_) {
+            if (driving_flag_)
+            {
                 as_state_ = as_state_type::AS_DRIVING;
                 ROS_DEBUG("ros_can_sim :: switching to AS_DRIVING state");
             }
             break;
 
         case as_state_type::AS_DRIVING:
-            if (!driving_flag_) {
+            if (!driving_flag_)
+            {
                 as_state_ = as_state_type::AS_FINISHED;
                 ROS_DEBUG("ros_can_sim :: switching to AS_FINISHED state");
             }
@@ -321,10 +348,11 @@ void RosCanSim::updateState() {
     }
 }
 
-void RosCanSim::publishState() {
+void RosCanSim::publishState()
+{
     if (state_pub_.getNumSubscribers() == 0 &&
             state_pub_str_.getNumSubscribers() == 0)
-        return; // do nothing
+        return;  // do nothing
 
     // create message
     eufs_msgs::CanState state_msg;
@@ -339,7 +367,8 @@ void RosCanSim::publishState() {
         state_pub_str_.publish(makeStateString(state_msg));
 }
 
-std_msgs::String RosCanSim::makeStateString(const eufs_msgs::CanState &state) {
+std_msgs::String RosCanSim::makeStateString(const eufs_msgs::CanState &state)
+{
     std::string str1;
     std::string str2;
     std::string str3;
@@ -347,7 +376,8 @@ std_msgs::String RosCanSim::makeStateString(const eufs_msgs::CanState &state) {
     ROS_DEBUG("AS STATE: %d", state.as_state);
     ROS_DEBUG("AMI STATE: %d", state.ami_state);
 
-    switch (state.as_state) {
+    switch (state.as_state)
+    {
         case eufs_msgs::CanState::AS_OFF:
             str1 = "AS:OFF";
             break;
@@ -367,7 +397,8 @@ std_msgs::String RosCanSim::makeStateString(const eufs_msgs::CanState &state) {
             str1 = "NO_SUCH_MESSAGE";
     }
 
-    switch (state.ami_state) {
+    switch (state.ami_state)
+    {
         case eufs_msgs::CanState::AMI_NOT_SELECTED:
             str2 = "AMI:NOT_SELECTED";
             break;
@@ -393,7 +424,7 @@ std_msgs::String RosCanSim::makeStateString(const eufs_msgs::CanState &state) {
             str2 = "NO_SUCH_MESSAGE";
     }
 
-    if (driving_flag_) 
+    if (driving_flag_)
         str3 = "DRIVING:TRUE";
     else
         str3 = "DRIVING:FALSE";
@@ -403,47 +434,58 @@ std_msgs::String RosCanSim::makeStateString(const eufs_msgs::CanState &state) {
     return msg;
 }
 
-void RosCanSim::flagCallback(std_msgs::Bool msg) {
+void RosCanSim::flagCallback(std_msgs::Bool msg)
+{
     ROS_DEBUG("ros_can_sim :: setting driving flag to %d", msg.data);
     driving_flag_ = msg.data;
 }
 
-void RosCanSim::jointStateCallback(const sensor_msgs::JointStateConstPtr &msg) {
+void RosCanSim::jointStateCallback(const sensor_msgs::JointStateConstPtr &msg)
+{
     ROS_DEBUG("ros_can_sim ::Joint states have been received");
     joint_state_ = *msg;
     read_state_ = true;
 }
 
-void RosCanSim::commandCallback(const ackermann_msgs::AckermannDriveStamped::ConstPtr &msg) {
+void RosCanSim::commandCallback(const ackermann_msgs::AckermannDriveStamped::ConstPtr &msg)
+{
     // set commands only if in AS_DRIVING state
-    if (as_state_ == as_state_type::AS_DRIVING) {
+    if (as_state_ == as_state_type::AS_DRIVING)
+    {
         vel_ref_ = saturation(msg->drive.speed, -max_speed_, max_speed_);
         steering_ref_ = saturation(msg->drive.steering_angle, -max_steering_, max_steering_);
-    } else {
+    }
+    else
+    {
         vel_ref_ = 0.0;
         steering_ref_ = 0.0;
     }
 }
 
-double RosCanSim::saturation(double u, double min, double max) {
+double RosCanSim::saturation(double u, double min, double max)
+{
     if (u > max) u = max;
     if (u < min) u = min;
     return u;
 }
 
-double RosCanSim::angularToRPM(double angular_vel) {
+double RosCanSim::angularToRPM(double angular_vel)
+{
     // RPM = (60 * Omega) / 2 PI
     return (60 * angular_vel) / (2 * PI);
 }
 
-bool RosCanSim::spin() {
+bool RosCanSim::spin()
+{
     ROS_INFO("ros_can_sim::spin()");
     ros::Rate r(desired_freq_);
 
-    while (!ros::isShuttingDown()) // Using ros::isShuttingDown to avoid restarting the node during a shutdown.
+    while (!ros::isShuttingDown())  // Using ros::isShuttingDown to avoid restarting the node during a shutdown.
     {
-        if (starting() == 0) {
-            while (ros::ok() && nh_.ok()) {
+        if (starting() == 0)
+        {
+            while (ros::ok() && nh_.ok())
+            {
                 this->UpdateControl();
                 this->publishWheelSpeeds();
                 this->updateState();
@@ -452,7 +494,9 @@ bool RosCanSim::spin() {
                 r.sleep();
             }
             ROS_INFO("END OF ros::ok() !!!");
-        } else {
+        }
+        else
+        {
             // No need for diagnostic here since a broadcast occurs in start
             // when there is an error.
             usleep(1000000);
@@ -462,7 +506,8 @@ bool RosCanSim::spin() {
     return true;
 }
 
-int main(int argc, char **argv) {
+int main(int argc, char **argv)
+{
     ros::init(argc, argv, "ros_can_sim");
 
     RosCanSim node = RosCanSim();

@@ -8,6 +8,7 @@ import math
 from eufs_msgs.msg import driveCommand2
 from geometry_msgs.msg import Twist
 
+
 class ConvertTwistToDriveCommand2:
     def __init__(self):
         self.publisher = rospy.Publisher('/rqt/command', driveCommand2, queue_size=10)
@@ -28,7 +29,7 @@ class ConvertTwistToDriveCommand2:
 
         # the torque car's steering is flipped relative to the speed car
         # so to keep things consistent we flip the steering here:
-	out_cmd.steering = -out_cmd.steering
+        out_cmd.steering = -out_cmd.steering
 
         # impose limits on commanded angle
         if out_cmd.steering > self.max_steering:
@@ -43,7 +44,7 @@ class ConvertTwistToDriveCommand2:
         self.publisher.publish(out_cmd)
 
     def listener(self):
-	#Sometimes it's weird and the controller wants it to subscribe to /rqt/cmd_vel ???  It flipflops
+        # Sometimes it's weird and the controller wants it to subscribe to /rqt/cmd_vel ???  It flipflops
         rospy.Subscriber("/cmd_vel", Twist, self.callback)
         rospy.Subscriber("/rqt/cmd_vel", Twist, self.callback)
         rospy.spin()
@@ -53,4 +54,5 @@ if __name__ == '__main__':
         rospy.init_node("twistToDriveCommand2Node", anonymous=True)
         cnv = ConvertTwistToDriveCommand2()
         cnv.listener()
-    except rospy.ROSInterruptException: pass
+    except rospy.ROSInterruptException:
+        pass

@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
-# Note that twistToAckermannDrive needs to be mapped to the ros_can_sim/command parameter in the command line ie. rosrun eufs_ros_can_sim twist_to_ackermannDrive.py twistToAckermannDrive:=eufs_ros_can_sim/command
+# Note that twistToAckermannDrive needs to be mapped to the ros_can_sim/command parameter in the command line
+# ie. rosrun eufs_ros_can_sim twist_to_ackermannDrive.py twistToAckermannDrive:=eufs_ros_can_sim/command
 # Publishes to twistToAckermannDrive
 # Subscribes to cmd_vel
 
