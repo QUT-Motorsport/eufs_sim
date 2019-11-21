@@ -1,16 +1,22 @@
 from PIL import Image
 from PIL import ImageDraw
 import math
-from LauncherUtilities import calculate_tangent_angle
+from LauncherUtilities import (calculate_tangent_angle,
+                               get_points_from_component_list,
+                               compactify_points)
 from random import randrange, uniform
 import os
 import rospkg
 import rospy
 import sys
-sys.path.insert(1, os.path.join(rospkg.RosPack().get_path('eufs_gazebo'),'tracks'))
-from track_gen import Track
-from TrackGenerator import compactify_points
 import pandas as pd
+from track_gen import Track
+from TrackGenerator import (
+        compactify_points, cone_start, CONE_INNER, CONE_OUTER, CONE_ORANGE, CONE_START
+)
+from TrackGenerator import get_cone_function
+sys.path.insert(1, os.path.join(rospkg.RosPack().get_path('eufs_gazebo'), 'tracks'))
+
 
 # Here are all the track formats we care about:
 # .launch (well, we actually want the model data, not the .launch, but we'll treat it as wanting the .launch)
@@ -18,30 +24,33 @@ import pandas as pd
 # .png
 # .csv
 # raw_data ("xys",this will be hidden from the user as it is only used to convert into .pngs)
+# raw_data may also be "comps", which is the output of TrackGenerator
 class ConversionTools:
         def __init__():
                 pass
 
         # Define colors for track gen and image reading
-        noise_color =           (0,   255, 255, 255)        #cyan
-        background_color =      (255, 255, 255, 255)        #white
-        inner_cone_color  =     (255, 0,   255, 255)        #magenta, for yellow cones (oops...)
-        outer_cone_color =      (0,   0,   255, 255)        #blue, for blue cones
-        car_color =             (0,   255, 0,   255)        #green
-        track_center_color =    (0,   0,   0,   255)        #black
-        track_inner_color =     (255, 0,   0,   255)        #red
-        track_outer_color =     (255, 255, 0,   255)        #yellow
-        orange_cone_color =     (255, 165, 0,   255)        #orange, for orange cones
-        big_orange_cone_color = (127, 80,  0,   255)        #dark orange, for big orange cones
+        noise_color = (0, 255, 255, 255)                 # cyan
+        background_color = (255, 255, 255, 255)          # white
+        inner_cone_color = (255, 0, 255, 255)            # magenta, for yellow cones (oops...)
+        outer_cone_color = (0, 0, 255, 255)              # blue, for blue cones
+        car_color = (0, 255, 0, 255)                     # green
+        track_center_color = (0, 0, 0, 255)              # black
+        track_inner_color = (255, 0, 0, 255)             # red
+        track_outer_color = (255, 255, 0, 255)           # yellow
+        orange_cone_color = (255, 165, 0, 255)           # orange, for orange cones
+        big_orange_cone_color = (127, 80, 0, 255)        # dark orange, for big orange cones
+
+        double_orange_cone_color = (200, 100, 0, 255)    # for double-orange-cones
 
         # Other various retained parameters
         link_num = -1
         TRACKIMG_VERSION_NUM = 1
 
         # Metadata corner variables
-        TOP_LEFT     = "Top Left"
-        BOTTOM_LEFT  = "Bottom Left"
-        TOP_RIGHT    = "Top Right"
+        TOP_LEFT = "Top Left"
+        BOTTOM_LEFT = "Bottom Left"
+        TOP_RIGHT = "Top Right"
         BOTTOM_RIGHT = "Bottom Right"
 
         #########################################################
@@ -52,7 +61,7 @@ class ConversionTools:
         def get_metadata_pixel(x, y, corner, pixels, size):
                 """
                 Returns the metadata pixel (x,y,corner)'s value.
-                
+
                 x: x position within the corner
                 y: y position within the corner
                 corner: which corner of the image we are in
@@ -68,7 +77,7 @@ class ConversionTools:
                 """Returns the metadata pixel (x,y,corner)'s location on the actual image."""
                 width = size[0]
                 height = size[1]
-                if corner   == ConversionTools.TOP_LEFT:
+                if corner == ConversionTools.TOP_LEFT:
                         return (x, y)
                 elif corner == ConversionTools.BOTTOM_LEFT:
                         return (x, height - 6 + y)
@@ -76,21 +85,20 @@ class ConversionTools:
                         return (width - 6 + x, y)
                 elif corner == ConversionTools.BOTTOM_RIGHT:
                         return (width - 6 + x, height - 6 + y)
-                else: 
+                else:
                         rospy.logerr("Error, not a valid corner!  Typo?: " + corner)
                         return None
-
 
         @staticmethod
         def get_raw_metadata(pixel_value):
                 """
-                This function converts metadata as outlined in the 
+                This function converts metadata as outlined in the
                 specification for Track Images on the team wiki
-                It assumes that handling of the cases (255,255,255,255) and (r,g,b,0) 
+                It assumes that handling of the cases (255,255,255,255) and (r,g,b,0)
                 are done outside this function.
 
                 pixel_value: the (r,g,b,a) value of the pixel
-                                
+
                 """
                 (r, g, b, a) = pixel_value
                 return a - 1 + (b - 1) * 254 + (g - 1) * 254**2 + (r - 1) * 254**3
@@ -110,30 +118,29 @@ class ConversionTools:
         @staticmethod
         def convert_scale_metadata(pixel_values):
                 """
-                This function converts the data obtained from 
+                This function converts the data obtained from
                 scale metadata pixels into actual scale information
                 Output range is from 0.0001 to 100.
-                """                
+                """
 
                 primary_pixel = pixel_values[0]
                 secondary_pixel = pixel_values[1]
 
-                #Check for default pixel values
+                # Check for default pixel values
                 if (primary_pixel == (255, 255, 255, 255) and
                    secondary_pixel == (255, 255, 255, 255)):
                         return 1
 
                 metadata = ConversionTools.get_raw_metadata(primary_pixel)
 
-                # Want to linearly transform the metadata, a range from 0 to 254**4-1, 
+                # Want to linearly transform the metadata, a range from 0 to 254**4-1,
                 # to the range 0.0001 to 100
                 return metadata / (254**4 - 1.0) * (100 - 0.0001) + 0.0001
-
 
         @staticmethod
         def deconvert_scale_metadata(data):
                 """
-                This function converts a raw_ scale value into a 
+                This function converts a raw_ scale value into a
                 list of metadata pixels needed to replicate it.
                 First in list is the primary metadata pixel, second in list is the secondary
                 """
@@ -146,12 +153,13 @@ class ConversionTools:
         @staticmethod
         def convert_version_metadata(pixel_values):
                 """
-                This function converts the data obtained from 
+                This function converts the data obtained from
                 scale metadata pixels into actual scale information
                 Output range is from 0 to 254**4-1
                 """
                 primary_pixel = pixel_values[0]
-                if primary_pixel == (255, 255, 255, 255): return 0
+                if primary_pixel == (255, 255, 255, 255):
+                    return 0
                 metadata = ConversionTools.get_raw_metadata(primary_pixel)
                 return metadata
 
@@ -159,14 +167,13 @@ class ConversionTools:
         def deconvert_version_metadata(data):
                 """This function is the reverse transformation as convert_version_metadata"""
                 return [ConversionTools.unget_raw_metadata(data)]
-                
 
         #########################################################
         #                Main Conversion Method                 #
         #########################################################
 
         @staticmethod
-        def convert(cfrom,cto,which_file,params={},conversion_suffix=""):
+        def convert(cfrom, cto, which_file, params={}, conversion_suffix=""):
                 """
                 Will convert which_file of filetype cfrom to filetype cto with
                 filename which_file+conversion_suffix
@@ -186,114 +193,124 @@ class ConversionTools:
                 desires to do any displaying of the result (otherwise it returns None)
                 """
 
-                if   cfrom=="xys" and cto=="png":
-                        return ConversionTools.xys_to_png(
-                                which_file,
-                                params,
-                                conversion_suffix
-                        )
-                elif cfrom=="png" and cto=="launch":
-                        return ConversionTools.png_to_launch(
-                                which_file,
-                                params,
-                                conversion_suffix
-                        )
-                elif cfrom=="png" and cto=="csv":
-                        ConversionTools.png_to_launch(
-                                which_file,
-                                params,
-                                conversion_suffix
-                        )
-                        new_file_array = which_file.split("/")
-                        new_file_array[-2] = "launch"
-                        which_file = "/".join(new_file_array)
-                        return ConversionTools.launch_to_csv(
-                                 which_file[:-4]+conversion_suffix+".launch",
-                                 params,
-                                 conversion_suffix=""
-                        )
-                elif cfrom=="launch" and cto=="csv":
-                        return ConversionTools.launch_to_csv(
-                                 which_file,
-                                 params,
-                                 conversion_suffix
-                        )
-                elif cfrom=="launch" and cto=="png":
-                        ConversionTools.launch_to_csv(
-                                 which_file,
-                                 params,
-                                 conversion_suffix
-                        )
-                        new_file_array = which_file.split("/")
-                        new_file_array[-2] = "tracks"
-                        which_file = "/".join(new_file_array)
-                        return ConversionTools.csv_to_png(
-                                 which_file[:-7]+conversion_suffix+".csv",
-                                 params,
-                                 conversion_suffix=""
-                        )
-                elif cfrom=="csv" and cto == "launch":
-                        ConversionTools.csv_to_png(
-                                 which_file,
-                                 params,
-                                 conversion_suffix
-                        )
-                        new_file_array = which_file.split("/")
-                        new_file_array[-2] = "randgen_imgs"
-                        which_file = "/".join(new_file_array)
-                        return ConversionTools.png_to_launch(
-                                 which_file[:-4]+conversion_suffix+".png",
-                                 params,
-                                 conversion_suffix=""
-                        )
-                elif cfrom=="csv" and cto == "png":
-                        return ConversionTools.csv_to_png(
-                                 which_file,
-                                 params,
-                                 conversion_suffix
-                        )
+                if cfrom == "xys" and cto == "png":
+                    return ConversionTools.xys_to_png(
+                            which_file,
+                            params,
+                            conversion_suffix
+                    )
+                elif cfrom == "comps" and cto == "png":
+                    return ConversionTools.comps_to_png(
+                            which_file,
+                            params,
+                            conversion_suffix
+                    )
+                elif cfrom == "png" and cto == "launch":
+                    return ConversionTools.png_to_launch(
+                            which_file,
+                            params,
+                            conversion_suffix
+                    )
+                elif cfrom == "png" and cto == "csv":
+                    ConversionTools.png_to_launch(
+                            which_file,
+                            params,
+                            conversion_suffix
+                    )
+                    new_file_array = which_file.split("/")
+                    new_file_array[-2] = "launch"
+                    which_file = "/".join(new_file_array)
+                    return ConversionTools.launch_to_csv(
+                             which_file[:-4]+conversion_suffix+".launch",
+                             params,
+                             conversion_suffix=""
+                    )
+                elif cfrom == "launch" and cto == "csv":
+                    return ConversionTools.launch_to_csv(
+                             which_file,
+                             params,
+                             conversion_suffix
+                    )
+                elif cfrom == "launch" and cto == "png":
+                    ConversionTools.launch_to_csv(
+                             which_file,
+                             params,
+                             conversion_suffix
+                    )
+                    new_file_array = which_file.split("/")
+                    new_file_array[-2] = "tracks"
+                    which_file = "/".join(new_file_array)
+                    return ConversionTools.csv_to_png(
+                             which_file[:-7]+conversion_suffix+".csv",
+                             params,
+                             conversion_suffix=""
+                    )
+                elif cfrom == "csv" and cto == "launch":
+                    ConversionTools.csv_to_png(
+                             which_file,
+                             params,
+                             conversion_suffix
+                    )
+                    new_file_array = which_file.split("/")
+                    new_file_array[-2] = "randgen_imgs"
+                    which_file = "/".join(new_file_array)
+                    return ConversionTools.png_to_launch(
+                             which_file[:-4]+conversion_suffix+".png",
+                             params,
+                             conversion_suffix=""
+                    )
+                elif cfrom == "csv" and cto == "png":
+                    return ConversionTools.csv_to_png(
+                             which_file,
+                             params,
+                             conversion_suffix
+                    )
                 elif cto == "ALL" or cto == "all":
-                        #If something tries to convert to itself it just gets ignored
-                        ConversionTools.convert(cfrom,"launch",which_file,params,conversion_suffix)
-                        ConversionTools.convert(cfrom,"csv",which_file,params,conversion_suffix)
-                        return ConversionTools.convert(
-                                   cfrom,
-                                   "png",
-                                   which_file,
-                                   params,
-                                   conversion_suffix
-                        )
+                    # If something tries to convert to itself it just gets ignored
+                    ConversionTools.convert(cfrom, "launch", which_file, params, conversion_suffix)
+                    ConversionTools.convert(cfrom, "csv", which_file, params, conversion_suffix)
+                    return ConversionTools.convert(
+                               cfrom,
+                               "png",
+                               which_file,
+                               params,
+                               conversion_suffix
+                    )
                 return None
-                        
 
         @staticmethod
-        def xys_to_png(which_file, params, conversion_suffix=""):
+        def comps_to_png(which_file, params, conversion_suffix=""):
                 """
-                Converts xys format to png.
+                Converts raw track generator output to png.
 
                 which_file:            Output filename
-                params["track width"]: Track width (cone distance)
-                params["point list"]:  Tuple of: list of points, image width, image height
+                params["track data"]:  The track generator data
                 conversion_suffix:     Additional suffix to append to the output filename.
+
+                Should be called within a GeneratorContext context manager.
                 """
 
                 GENERATED_FILENAME = which_file + conversion_suffix
 
                 # Unpack
-                (xys,twidth,theight) = params["point list"]
-                cone_normal_distance_parameter = params["track width"]
+                (components, twidth, theight) = params["track data"]
+
+                xys = compactify_points([
+                        (int(x[0]), int(x[1])) for x
+                        in get_points_from_component_list(components)
+                ])
 
                 # Create image to hold data
-                im = Image.new('RGBA', (twidth, theight), (0, 0, 0, 0)) 
+                im = Image.new('RGBA', (twidth, theight), (0, 0, 0, 0))
                 draw = ImageDraw.Draw(im)
 
-                # Draw backround:
+                # Draw background:
                 bounding_poly = [
-                                 (0,      0      ),
-                                 (twidth, 0      ),
+                                 (0, 0),
+                                 (twidth, 0),
                                  (twidth, theight),
-                                 (0,      theight),
-                                 (0,      0      )
+                                 (0, theight),
+                                 (0, 0)
                 ]
                 draw.polygon(bounding_poly, fill='white')
 
@@ -304,10 +321,6 @@ class ConversionTools:
 
                 pixels = im.load()
 
-                # Get a list of integerized points to work well with 
-                # integer-valued pixel locations.
-                compact_xys = compactify_points([(int(xy[0]), int(xy[1])) for xy in xys])
-
                 # We want to calculate direction of car position
                 sx = xys[0][0]
                 sy = xys[0][1]
@@ -315,7 +328,7 @@ class ConversionTools:
                 ey = xys[1][1]
 
                 # So we calculate the angle that the car is facing (the yaw)
-                angle = math.atan2(ey - sy,ex - sx)
+                angle = math.atan2(ey - sy, ex - sx)
                 if angle < 0:
                         # Angle is on range [-pi,pi] but we want [0,2pi]
                         # So if it is less than 0, pop it onto the correct range.
@@ -327,236 +340,62 @@ class ConversionTools:
                 # file format to set the whole pixel to some standard value,
                 # such as (0,0,0,0), which is decidedly not what we want as
                 # the rgb values still matter.
-                pixel_value = int(angle / ( 2 * math.pi ) * 254 + 1)
-                if pixel_value > 255: pixel_value = 255
-                if pixel_value <   1: pixel_value =   1
+                yaw_pixel_value = int(angle / (2 * math.pi) * 254 + 1)
+                if yaw_pixel_value > 255:
+                    yaw_pixel_value = 255
+                if yaw_pixel_value < 1:
+                    yaw_pixel_value = 1
 
                 # Draw car
-                color_for_car = ConversionTools.car_color[:3]+(pixel_value,)
+                color_for_car = ConversionTools.car_color[:3]+(yaw_pixel_value,)
                 draw.line([xys[0], xys[0]], fill=color_for_car)
-
-                def is_track(c):
-                        return (c == ConversionTools.track_outer_color 
-                             or c == ConversionTools.track_inner_color 
-                             or c == ConversionTools.track_center_color)
 
                 # Now we want to make all pixels bordering the track become magenta (255,0,255) -
                 # this will be our 'cone' color
-                # To find pixel boardering track, simply find white pixel adjacent to 
+                # To find pixel boardering track, simply find white pixel adjacent to
                 # a non-white non-magenta pixle
-                # We will also want to make it such that cones are about 4-6 
-                # away from eachother euclideanly        
+                # We will also want to make it such that cones are about 4-6
+                # away from eachother euclideanly
 
+                def is_track(c):
+                        return (c == ConversionTools.track_outer_color or
+                                c == ConversionTools.track_inner_color or
+                                c == ConversionTools.track_center_color)
 
-                all_points_north = []
-                all_points_south = []
-                prev_points_north = [(-10000, -10000)]
-                prev_points_south = [(-10000, -10000)]
-                print("Placing Cones...")
-                for i in range(len(xys)):
-                        #Skip first part [as hard to calculate tangent]
-                        if i == 0: continue
-                
-                        # The idea here is to place cones along normals to the 
-                        # tangent at any given point, 
-                        # while making sure they aren't too close.
+                cone_locs = []
+                for idx, tup in enumerate(components):
+                        (name, points) = tup
+                        if idx == 0:
+                                cone_locs.extend(cone_start(points))
+                        else:
+                                cone_locs.extend(
+                                        get_cone_function(name)(points, prev_points=cone_locs)
+                                )
 
-                        # Hardcoded parameters (not available in launcher because the set of 
-                        # well-behaved answers is far from dense in the problemspace):
+                for px, py, color in cone_locs:
+                        if color is CONE_INNER:
+                                true_color = ConversionTools.inner_cone_color
+                        elif color is CONE_OUTER:
+                                true_color = ConversionTools.outer_cone_color
+                        elif color is CONE_ORANGE:
+                                true_color = ConversionTools.orange_cone_color
+                        elif color is CONE_START:
+                                true_color = (
+                                        # Double cones need angle information
+                                        ConversionTools.double_orange_cone_color[:3] + (yaw_pixel_value,)
+                                )
 
-                        # How close can cones be from those on opposite side.
-                        cone_cross_closeness_parameter = cone_normal_distance_parameter * 3 / 4 - 1
+                        # Only allow orange cones to be placed on the track
+                        if (not is_track(pixels[int(px), int(py)]) or color is CONE_ORANGE):
+                                pixels[int(px), int(py)] = true_color
 
-                        # Larger numbers makes us check more parts of the track for conflicts.
-                        cone_check_amount = 30
-
-                        # How close can cones be from those on the same side.
-                        cone_adjacent_closeness_parameter = 6
-
-                        # Here we calculate the normal vectors along the track
-                        # As we want cones to be placed along the normal.
-                        cur_point = xys[i]
-                        cur_tangent_angle = calculate_tangent_angle(xys[:(i+1)])
-                        cur_tangent_normal = (
-                            math.ceil(
-                                cone_normal_distance_parameter * math.sin(cur_tangent_angle)
-                            ),
-                            math.ceil(
-                                -cone_normal_distance_parameter * math.cos(cur_tangent_angle)
-                            )
-                        )
-
-                        # This is where the cones will be placed, provided they pass the
-                        # distance checks later.
-                        north_point = (int(cur_point[0] + cur_tangent_normal[0]),
-                                       int(cur_point[1] + cur_tangent_normal[1]))
-                        south_point = (int(cur_point[0] - cur_tangent_normal[0]), 
-                                       int(cur_point[1] - cur_tangent_normal[1]))
-
-                        # Calculates shortest distance to cone on same side of track
-                        difference_from_prev_north = min([
-                                         (north_point[0] - prev_point_north[0])**2
-                                       + (north_point[1] - prev_point_north[1])**2
-                                for prev_point_north in prev_points_north
-                        ])
-                        difference_from_prev_south = min([
-                                         (south_point[0] - prev_point_south[0])**2
-                                       + (south_point[1] - prev_point_south[1])**2
-                                for prev_point_south in prev_points_south
-                        ])
-
-                        # Calculates shortest distance to cone on different side of track
-                        cross_distance_ns = min([
-                                         (north_point[0] - prev_point_south[0])**2
-                                       + (north_point[1] - prev_point_south[1])**2
-                                for prev_point_south in prev_points_south
-                        ])
-                        cross_distance_sn = min([
-                                         (south_point[0] - prev_point_north[0])**2
-                                       + (south_point[1] - prev_point_north[1])**2
-                                for prev_point_north in prev_points_north
-                        ])
-
-                        # Here we ensure cones don't get too close to the track
-                        rel_xys = xys[ 
-                            max([0, i - cone_check_amount]): 
-                            min([len(xys), i + cone_check_amount])  
-                        ]
-                        distance_pn = min([
-                                             (north_point[0] - xy[0])**2
-                                           + (north_point[1] - xy[1])**2 
-                                                for xy in rel_xys
-                        ])
-                        distance_ps = min([
-                                             (south_point[0] - xy[0])**2
-                                           + (south_point[1] - xy[1])**2 
-                                                for xy in rel_xys
-                        ])
-
-                        # And we consider all these factors to see if the cones are viable
-                        north_viable = (
-                              difference_from_prev_north > cone_adjacent_closeness_parameter**2
-                          and cross_distance_ns > cone_cross_closeness_parameter**2
-                          and distance_pn > cone_cross_closeness_parameter**2
-                        )
-                        south_viable = (
-                              difference_from_prev_south > cone_adjacent_closeness_parameter**2
-                          and cross_distance_sn > cone_cross_closeness_parameter**2
-                          and distance_ps > cone_cross_closeness_parameter**2
-                        )
-
-                        # And when they are viable, draw them!
-                        if (
-                            not is_track(pixels[int(north_point[0]), int(north_point[1])]) 
-                            and north_viable
-                        ):
-                                px_x = int(north_point[0])
-                                px_y = int(north_point[1])
-                                pixels[px_x, px_y]=ConversionTools.inner_cone_color
-                                all_points_north.append(north_point)
-                        if (
-                            not is_track(pixels[int(south_point[0]), int(south_point[1])]) 
-                            and south_viable
-                        ):
-                                px_x = int(south_point[0])
-                                px_y = int(south_point[1])
-                                pixels[px_x, px_y]=ConversionTools.inner_cone_color
-                                all_points_south.append(south_point)
-
-                        # Only keep track of last couple of previous cones 
-                        # (and the very first one, for when the loop joins up)
-                        # Specifically, if we assume cone_check_amount is 30, then
-                        # we have prev_points north keep track of the most recent 30 cones,
-                        # and also the very first start cone.
-                        # This is because we want to make sure no cones are too close to eachother,
-                        # but checking all cones would be too expensive.
-                        # The first cone is kept track of because the track is a loop so
-                        # it needs to look ahead a bit.
-                        if len(all_points_north) > cone_check_amount:
-                                prev_points_north = (all_points_north[-cone_check_amount:]
-                                                  + [all_points_north[0]])
-                        elif len(all_points_north) > 0:
-                                prev_points_north = all_points_north
-
-                        if len(all_points_south) > cone_check_amount:
-                                prev_points_south = (all_points_south[-cone_check_amount:]
-                                                  + [all_points_south[0]])
-                        elif len(all_points_south) > 0:
-                                prev_points_south = all_points_south
-
-                
-                
-                # We want to make the track have differing cone colors - 
-                # yellow on inside, blue on outside
-                # All cones are currently yellow.  
-                # We'll do a "fill-search" for any cones reachable
-                # from (0,0) and call those the 'outside' 
-                # as (0,0) is always blank since the image is padded)
-                # So we will return a list of all points that the search can reach.
-                # Precisely, this is a list of all points adjacent to curpix that
-                # have not already been explored.
-                def get_allowed_adjacents(explolist,curpix):
-                        (i,j) = curpix
-                        allowed = []
-                        if i > 0:
-                                if not((i-1, j) in explolist):
-                                        allowed.append((i-1, j))
-                        if j > 0:
-                                if not((i,j-1) in explolist):
-                                        allowed.append((i, j-1))
-                        if i < twidth-1:
-                                if not((i+1,j) in explolist):
-                                        allowed.append((i+1, j))
-                        if j < theight-1:
-                                if not((i,j+1) in explolist):
-                                        allowed.append((i, j+1))
-                        return allowed
-                print("Coloring cones...")
-
-                # This is the bread-and-butter of the search algorithm.
-                # All it is doing is checking if the points in frontier are
-                # a cone, and if they are then swap it to the correct cone color.
-                # (all cones are inner_cone_color by default, but those on the outside
-                # of the track must be swapped to outer_cone_color).
-                # When we search a pixel, we remove it from the frontier and
-                # add its adjacents to the frontier (provided they are not already explored).
-                # We only do this if the pixel is a background or cone pixel, otherwise
-                # we do not add its adjacents to the frontier.
-                # We don't want the search to be able to pass through track pixels, as then
-                # we would end up on the "inside" of the track, and would wrongfully color
-                # inner_cones as outer_cones.
-                explored_list = set([])
-                frontier = set([(0, 0)])
-                while len(frontier)>0:
-                        new_frontier = set([])
-                        for f in frontier:
-                                (i, j) = f
-                                pix = pixels[i, j]
-                                if pix == ConversionTools.inner_cone_color:
-                                        pixels[i, j] = ConversionTools.outer_cone_color
-                                        new_frontier.update(
-                                                get_allowed_adjacents(explored_list,(i, j))
-                                        )
-                                elif pix == ConversionTools.background_color:
-                                        new_frontier.update(
-                                                get_allowed_adjacents(explored_list,(i, j))
-                                        )
-                                explored_list.add(f)
-                        frontier = new_frontier
-
-                # Add orange start cones
-                (i, j) = all_points_north[0]
-                pixels[int(i), int(j)] = ConversionTools.orange_cone_color
-                (i, j) = all_points_south[0]
-                pixels[int(i), int(j)] = ConversionTools.orange_cone_color
-
-                # Finally, we just need to place noise.  
+                # Finally, we just need to place noise.
                 # At maximal noise, the track should be about 1% covered.
 
                 for i in range(im.size[0]):
                         for j in range(im.size[1]):
                                 # Don't add noise in margin
-                                if i < 5 or j < 5 or i >= im.size[0] - 5 or j >= im.size[0] - 5: 
+                                if i < 5 or j < 5 or i >= im.size[0] - 5 or j >= im.size[0] - 5:
                                         continue
                                 if pixels[i, j] == ConversionTools.background_color:
                                         # Only 1% should be covered with noise
@@ -566,10 +405,10 @@ class ConversionTools:
                 # Add margins (as specified by the file format)
                 margin = 5
                 im2 = Image.new(
-                                'RGBA', 
-                                (twidth + 2 * margin, theight + 2 * margin), 
+                                'RGBA',
+                                (twidth + 2 * margin, theight + 2 * margin),
                                 (255, 255, 255, 255)
-                ) 
+                )
                 pixels2 = im2.load()
                 for x in range(im.size[0]):
                         for y in range(im.size[1]):
@@ -586,10 +425,156 @@ class ConversionTools:
                                              ConversionTools.TRACKIMG_VERSION_NUM
                 )[0]
 
+                im2.save(
+                        os.path.join(rospkg.RosPack().get_path('eufs_gazebo'),
+                                     'randgen_imgs/'+GENERATED_FILENAME+'.png')
+                )
+                return im
+
+        @staticmethod
+        def xys_to_png(which_file, params, conversion_suffix=""):
+                """
+                Converts xys format to png.
+
+                which_file:            Output filename
+                params["point list"]:  Tuple of: list of points, image width, image height
+                params["track width"]: distance from center of track to cones.
+                                        is optional - if not provided, should be called
+                                        within a GeneratorContext context manager.
+                conversion_suffix:     Additional suffix to append to the output filename.
+
+                Should be called within a GeneratorContext context manager.
+                """
+
+                GENERATED_FILENAME = which_file + conversion_suffix
+
+                # Unpack
+                (xys, twidth, theight) = params["point list"]
+
+                # Create image to hold data
+                im = Image.new('RGBA', (twidth, theight), (0, 0, 0, 0))
+                draw = ImageDraw.Draw(im)
+
+                # Draw background:
+                bounding_poly = [
+                                 (0, 0),
+                                 (twidth, 0),
+                                 (twidth, theight),
+                                 (0, theight),
+                                 (0, 0)
+                ]
+                draw.polygon(bounding_poly, fill='white')
+
+                # Draw thick track with colored layers
+                draw.line(xys, fill=ConversionTools.track_outer_color, width=5)
+                draw.line(xys, fill=ConversionTools.track_inner_color, width=3)
+                draw.line(xys, fill=ConversionTools.track_center_color)
+
+                pixels = im.load()
+
+                # We want to calculate direction of car position
+                sx = xys[0][0]
+                sy = xys[0][1]
+                ex = xys[1][0]
+                ey = xys[1][1]
+
+                # So we calculate the angle that the car is facing (the yaw)
+                angle = math.atan2(ey - sy, ex - sx)
+                if angle < 0:
+                        # Angle is on range [-pi,pi] but we want [0,2pi]
+                        # So if it is less than 0, pop it onto the correct range.
+                        angle += 2 * math.pi
+
+                # We convert angles to range [1,255] rather than [0,255]
+                # As if it is 0 then, since it is stored as an alpha value,
+                # optimization techniques for storage may be used by the png
+                # file format to set the whole pixel to some standard value,
+                # such as (0,0,0,0), which is decidedly not what we want as
+                # the rgb values still matter.
+                yaw_pixel_value = int(angle / (2 * math.pi) * 254 + 1)
+                if yaw_pixel_value > 255:
+                    yaw_pixel_value = 255
+                if yaw_pixel_value < 1:
+                    yaw_pixel_value = 1
+
+                # Draw car
+                color_for_car = ConversionTools.car_color[:3]+(yaw_pixel_value,)
+                draw.line([xys[0], xys[0]], fill=color_for_car)
+
+                # Now we want to make all pixels bordering the track become magenta (255,0,255) -
+                # this will be our 'cone' color
+                # To find pixel boardering track, simply find white pixel adjacent to
+                # a non-white non-magenta pixle
+                # We will also want to make it such that cones are about 4-6
+                # away from eachother euclideanly
+
+                def is_track(c):
+                        return (c == ConversionTools.track_outer_color or
+                                c == ConversionTools.track_inner_color or
+                                c == ConversionTools.track_center_color)
+
+                if "track width" in params:
+                        cone_locs = cone_start(
+                                xys,
+                                width=params["track width"]
+                        )
+                else:
+                        cone_locs = cone_start(xys)
+
+                for px, py, color in cone_locs:
+                        if color is CONE_INNER:
+                                true_color = ConversionTools.inner_cone_color
+                        elif color is CONE_OUTER:
+                                true_color = ConversionTools.outer_cone_color
+                        elif color is CONE_ORANGE:
+                                true_color = ConversionTools.orange_cone_color
+                        elif color is CONE_START:
+                                true_color = (
+                                        # Double cones need angle information
+                                        ConversionTools.double_orange_cone_color[:3] + (yaw_pixel_value,)
+                                )
+                        if (not is_track(pixels[int(px), int(py)])):
+                                pixels[int(px), int(py)] = true_color
+
+                # Finally, we just need to place noise.
+                # At maximal noise, the track should be about 1% covered.
+
+                for i in range(im.size[0]):
+                        for j in range(im.size[1]):
+                                # Don't add noise in margin
+                                if i < 5 or j < 5 or i >= im.size[0] - 5 or j >= im.size[0] - 5:
+                                        continue
+                                if pixels[i, j] == ConversionTools.background_color:
+                                        # Only 1% should be covered with noise
+                                        if uniform(0, 100) < 1:
+                                                pixels[i, j] = ConversionTools.noise_color
+
+                # Add margins (as specified by the file format)
+                margin = 5
+                im2 = Image.new(
+                                'RGBA',
+                                (twidth + 2 * margin, theight + 2 * margin),
+                                (255, 255, 255, 255)
+                )
+                pixels2 = im2.load()
+                for x in range(im.size[0]):
+                        for y in range(im.size[1]):
+                                pixels2[x + margin, y + margin] = pixels[x, y]
+
+                # And tag it with the version number
+                loc = ConversionTools.get_metadata_pixel_location(
+                                            4,
+                                            4,
+                                            ConversionTools.BOTTOM_RIGHT,
+                                            im2.size
+                )
+                pixels2[loc[0], loc[1]] = ConversionTools.deconvert_version_metadata(
+                                             ConversionTools.TRACKIMG_VERSION_NUM
+                )[0]
 
                 im2.save(
                         os.path.join(rospkg.RosPack().get_path('eufs_gazebo'),
-                        'randgen_imgs/'+GENERATED_FILENAME+'.png')
+                                     'randgen_imgs/'+GENERATED_FILENAME+'.png')
                 )
                 return im
 
@@ -609,7 +594,7 @@ class ConversionTools:
                 This is a multistep process - we need:
                         to put %FILENAME%.launch in eufs_gazebo/launch
                         to put %FILENAME%.world in eufs_gazebo/world
-                        to put %FILENAME%/model.config and %FILENAME%/model.sdf 
+                        to put %FILENAME%/model.config and %FILENAME%/model.sdf
                                  in eufs_description/models
 
                 Our template files are stored in eufs_launcher/resource as:
@@ -642,8 +627,8 @@ class ConversionTools:
                         )
                 ])
 
-                # Let's also get the version number - we don't need it, 
-                # but in the future if breaking changes are made to the 
+                # Let's also get the version number - we don't need it,
+                # but in the future if breaking changes are made to the
                 # Track Image specification then it will become important.
                 loc = ConversionTools.get_metadata_pixel_location(
                                                                   4,
@@ -669,23 +654,26 @@ class ConversionTools:
                 # into raw numerical data for the .launch file.
                 def x_coord_transform(x):
                         return x - 50
+
                 def y_coord_transform(y):
                         return y - 50
+
                 def is_car_color(x):
-                        return x[:-1]==ConversionTools.car_color[:-1]
+                        return x[:-1] == ConversionTools.car_color[:-1]
+
                 def rotation_transform(x):
                         return 2 * math.pi * ((x - 1) / 254.0)
 
                 # Find the car's position
                 for i in range(im.size[0]):
                         for j in range(im.size[1]):
-                                p = pixels[i,j]
+                                p = pixels[i, j]
                                 if is_car_color(p):
                                         # Get x data
                                         x_pos = x_coord_transform(i * scale_data)
                                         split_x_data = launch_merged.split("%PLACEX%")
                                         launch_merged = str(x_pos).join(split_x_data)
- 
+
                                         # Get y data
                                         y_pos = y_coord_transform(j * scale_data)
                                         split_y_data = launch_merged.split("%PLACEY%")
@@ -714,7 +702,7 @@ class ConversionTools:
                 world_template = open(world_template_filepath, "r")
 
                 # The world file needs to point to the correct model folder,
-                # which conveniently has the same name as the world file itself. 
+                # which conveniently has the same name as the world file itself.
                 world_merged = "".join(world_template)
                 world_merged = GENERATED_FILENAME.join(world_merged.split("%FILLNAME%"))
 
@@ -742,7 +730,7 @@ class ConversionTools:
                 if not os.path.exists(folder_path):
                         os.mkdir(folder_path)
 
-                # Now let's do the .config 
+                # Now let's do the .config
                 config_template_filepath = os.path.join(
                                                    rospkg.RosPack().get_path('eufs_launcher'),
                                                    'resource/randgen_model_template/model.config'
@@ -778,7 +766,7 @@ class ConversionTools:
                 #        0: Main body of sdf file
                 #        1: Outline of noise mesh visual data
                 #        2: Outline of noise mesh collision data
-                #        3: Noisecube collision data, meant for noise as 
+                #        3: Noisecube collision data, meant for noise as
                 #            a low-complexity collision to prevent falling out the world
                 #        4: Outline of noise mesh visual data for innactive noise
 
@@ -790,36 +778,29 @@ class ConversionTools:
                 #
                 # And the corresponding sdf_ghost_model and sdf_ghost_model_with_collisions
                 # which store inactive (hidden) models.
-                sdf_main                         = sdf_split_again[0]
-                sdf_split_along_collisions       = sdf_split_again[1].split("%FILLCOLLISION%")
+                sdf_main = sdf_split_again[0]
+                sdf_split_along_collisions = sdf_split_again[1].split("%FILLCOLLISION%")
                 sdf_split_along_ghost_collisions = sdf_split_again[4].split("%FILLCOLLISION%")
-                sdf_model                        = sdf_split_again[3].join(
-                                                       sdf_split_along_collisions
-                )
-                sdf_model_with_collisions        = sdf_split_again[2].join(
-                                                       sdf_split_along_collisions
-                )
-                sdf_ghost_model                  = sdf_split_again[3].join(
-                                                       sdf_split_along_ghost_collisions
-                )
-                sdf_ghost_model_with_collisions  = sdf_split_again[2].join(
-                                                       sdf_split_along_ghost_collisions
-                )
+                sdf_model = sdf_split_again[3].join(sdf_split_along_collisions)
+                sdf_model_with_collisions = sdf_split_again[2].join(sdf_split_along_collisions)
+                sdf_ghost_model = sdf_split_again[3].join(sdf_split_along_ghost_collisions)
+                sdf_ghost_model_with_collisions = sdf_split_again[2].join(sdf_split_along_ghost_collisions)
 
                 # Let the sdf file know which launch file it represents.
                 sdf_main = GENERATED_FILENAME.join(sdf_main.split("%FILLNAME%"))
 
                 # Set up a helper function for calculating model data for cones
                 collision_template = sdf_model_with_collisions.split("%MODELNAME%")
+
                 def join_cone_model_data(cone_type):
                         cone_string = "model://eufs_description/meshes/"+cone_type+".dae"
                         return cone_string.join(collision_template)
 
                 # Calculate model data for cones
-                sdf_blue_cone_model =        join_cone_model_data("cone_blue")
-                sdf_yellow_cone_model =      join_cone_model_data("cone_yellow")
-                sdf_orange_cone_model =      join_cone_model_data("cone")
-                sdf_big_orange_cone_model =  join_cone_model_data("cone_big")
+                sdf_blue_cone_model = join_cone_model_data("cone_blue")
+                sdf_yellow_cone_model = join_cone_model_data("cone_yellow")
+                sdf_orange_cone_model = join_cone_model_data("cone")
+                sdf_big_orange_cone_model = join_cone_model_data("cone_big")
 
                 # Now let's load in the noise priorities
                 noise_priority_file = os.path.join(
@@ -829,7 +810,7 @@ class ConversionTools:
                 noise_files = open(noise_priority_file, "r")
                 noise_files = ("".join(noise_files)).split("$===$")[1].strip().split("\n")
                 noise_weightings_ = [line.split("|") for line in noise_files]
-                noise_weightings  = [(float(line[0]),line[1]) for line in noise_weightings_]
+                noise_weightings = [(float(line[0]), line[1]) for line in noise_weightings_]
 
                 # This function will choose a noise model according to weightings
                 # given in the resource/noiseFiles.txt file.
@@ -841,17 +822,18 @@ class ConversionTools:
                         return "model://eufs_description/meshes/NoiseCube.dae"
 
                 # Let's place all the models!
-                # We'll keep track of how many we've placed 
+                # We'll keep track of how many we've placed
                 # so that we can give each a unique name.
                 ConversionTools.link_num = -1
+
                 def put_model_at_position(mod, x, y):
                         """
                         mod: model template to be placed
                         x,y: x and y positions for mod
-                        
+
                         returns model template with x,y, and link_num inserted.
                         """
-                        ConversionTools.link_num+=1
+                        ConversionTools.link_num += 1
                         link_str = str(ConversionTools.link_num)
                         x_str = str(x_coord_transform(x))
                         y_str = str(y_coord_transform(y))
@@ -861,14 +843,50 @@ class ConversionTools:
                         return mod_with_link
 
                 sdf_allmodels = ""
+
                 def expand_allmodels(allmods, mod, x, y):
                         """
                         Takes in a model and a pixel location,
                         converts the pixel location to a raw location,
                         and places the model inside sdf_allmodels
                         """
-                        mod_at_p =  put_model_at_position(mod, x * scale_data, y * scale_data)
+                        mod_at_p = put_model_at_position(mod, x * scale_data, y * scale_data)
                         return allmods + "\n" + mod_at_p
+
+                def doubly_expand_allmodels(allmods, mod, x, y, yaw):
+                        """
+                        Takes in a model and a pixel location,
+                        converts the pixel location to a raw location,
+                        and places the model inside sdf_allmodels
+
+                        Unlike expand_allmodels, it also takes in an angle and will place
+                        a second model near the first but slightly offset in the direction
+                        of the yaw angle parameter.
+
+                        Used to place the double cones in the beginning.
+                        """
+
+                        # Determines how close the two models are.  Smaller means closer.
+                        closeness_parameter = scale_data * 0.7
+
+                        direction_vector = (
+                                math.cos(yaw) * 0.5 * closeness_parameter,
+                                math.sin(yaw) * 0.5 * closeness_parameter
+                        )
+
+                        mod_at_p1 = put_model_at_position(
+                                mod,
+                                x * scale_data + direction_vector[0],
+                                y * scale_data + direction_vector[1]
+                        )
+
+                        mod_at_p2 = put_model_at_position(
+                                mod,
+                                x * scale_data - direction_vector[0],
+                                y * scale_data - direction_vector[1]
+                        )
+
+                        return allmods + "\n" + mod_at_p1 + "\n" + mod_at_p2
 
                 def get_random_noise_template(mod_with_collisions):
                         """
@@ -878,14 +896,13 @@ class ConversionTools:
                                       mod_with_collisions.split("%MODELNAME%")
                         )
 
-
                 # Add all models into a template
                 color_to_model = {
                         ConversionTools.inner_cone_color: sdf_yellow_cone_model,
                         ConversionTools.outer_cone_color: sdf_blue_cone_model,
                         ConversionTools.orange_cone_color: sdf_orange_cone_model,
                         ConversionTools.big_orange_cone_color: sdf_big_orange_cone_model
- 
+
                 }
                 for i in range(im.size[0]):
                         for j in range(im.size[1]):
@@ -914,11 +931,25 @@ class ConversionTools:
                                                                        j
                                                 )
                                 elif p in color_to_model:
+                                        # Normal cones.
                                         sdf_allmodels = expand_allmodels(
                                                             sdf_allmodels,
                                                             color_to_model[p],
                                                             i,
                                                             j
+                                        )
+                                elif p[:3] == ConversionTools.double_orange_cone_color[:3]:
+                                        # Double cones!  Need to make use of yaw values.
+
+                                        # Convert from alpha value to angle
+                                        model_yaw = ((p[3] - 1) / 254) * (2 * math.pi)
+
+                                        sdf_allmodels = doubly_expand_allmodels(
+                                                            sdf_allmodels,
+                                                            sdf_big_orange_cone_model,
+                                                            i,
+                                                            j,
+                                                            model_yaw
                                         )
 
                 # Splice the sdf file back together.
@@ -931,10 +962,9 @@ class ConversionTools:
                                                 GENERATED_FILENAME,
                                                 "model.sdf"
                 )
-                sdf_out = open(sdf_out_filepath,"w")
+                sdf_out = open(sdf_out_filepath, "w")
                 sdf_out.write(sdf_main)
                 sdf_out.close()
-                
 
         @staticmethod
         def launch_to_csv(which_file, params, conversion_suffix=""):
@@ -954,19 +984,18 @@ class ConversionTools:
                 car_data_reader = open(which_file)
                 car_data = car_data_reader.read()
                 car_data_reader.close()
-                car_x   = car_data.split("<arg name=\"x\" default=\"")[1].split("\"")[0]
-                car_y   = car_data.split("<arg name=\"y\" default=\"")[1].split("\"")[0]
+                car_x = car_data.split("<arg name=\"x\" default=\"")[1].split("\"")[0]
+                car_y = car_data.split("<arg name=\"y\" default=\"")[1].split("\"")[0]
                 car_yaw = car_data.split("<arg name=\"yaw\" default=\"")[1].split("\"")[0]
-                midpoints=False
+                midpoints = False
                 if "midpoints" in params:
                         midpoints = params["midpoints"]
                 Track.runConverter(
                                    filename,
                                    midpoints=midpoints,
-                                   car_start_data=("car_start",car_x,car_y,car_yaw),
-                                   conversion_suffix = conversion_suffix
+                                   car_start_data=("car_start", car_x, car_y, car_yaw),
+                                   conversion_suffix=conversion_suffix
                 )
-
 
         @staticmethod
         def csv_to_png(which_file, params, conversion_suffix=""):
@@ -976,7 +1005,7 @@ class ConversionTools:
                 which_file:        The name of the csv file to convert
                                    example: rand.csv
 
-                params:            A dictionary of optional parameters.  
+                params:            A dictionary of optional parameters.
                                    None are used at this time, but it is listed in the
                                    function signature to have a consistent signature for all
                                    the methods of the form a_to_b().
@@ -988,7 +1017,7 @@ class ConversionTools:
 
                 filename = which_file.split("/")[-1].split(".")[0]+conversion_suffix
 
-                # We are going to open up the csv, read through all the lines, 
+                # We are going to open up the csv, read through all the lines,
                 # and round down the point to an integer after taking into account
                 # the scale factor of the csv and potentially scaling accordingly
                 # to avoid massive images.
@@ -996,13 +1025,13 @@ class ConversionTools:
 
                 # First, we read in the csv data into a dataframe
                 df = pd.read_csv(which_file)
-                blue_cones = df[df['tag']=="blue"]
-                yellow_cones = df[df['tag']=="yellow"]
-                orange_cones = df[df['tag']=="orange"]
-                big_orange_cones = df[df['tag']=="big_orange"]
-                active_noise = df[df['tag']=="active_noise"]
-                inactive_noise = df[df['tag']=="inactive_noise"]
-                car_location = df[df['tag']=="car_start"]
+                blue_cones = df[df['tag'] == "blue"]
+                yellow_cones = df[df['tag'] == "yellow"]
+                orange_cones = df[df['tag'] == "orange"]
+                big_orange_cones = df[df['tag'] == "big_orange"]
+                active_noise = df[df['tag'] == "active_noise"]
+                inactive_noise = df[df['tag'] == "inactive_noise"]
+                car_location = df[df['tag'] == "car_start"]
 
                 # Here we parse the data and get a full list of all relevant info of the cones
                 # and the car (type,x,y,yaw)
@@ -1045,12 +1074,12 @@ class ConversionTools:
                 for c in car_location.itertuples():
                         raw_car_location = ("car", c[2], c[3], c[4])
 
-                all_cones = (raw_blue 
-                           + raw_yellow 
-                           + raw_orange 
-                           + raw_big_orange 
-                           + raw_noise 
-                           + [raw_car_location])
+                all_cones = (raw_blue +
+                             raw_yellow +
+                             raw_orange +
+                             raw_big_orange +
+                             raw_noise +
+                             [raw_car_location])
 
                 # Here we convert all positions to positive
                 min_x = 100000
@@ -1058,16 +1087,16 @@ class ConversionTools:
                 max_x = -100000
                 max_y = -100000
                 for cone in all_cones:
-                        if cone[1]<min_x:
+                        if cone[1] < min_x:
                                 min_x = cone[1]
-                        if cone[2]<min_y:
+                        if cone[2] < min_y:
                                 min_y = cone[2]
-                        if cone[1]>max_x:
+                        if cone[1] > max_x:
                                 max_x = cone[1]
-                        if cone[2]>max_y:
+                        if cone[2] > max_y:
                                 max_y = cone[2]
 
-                # Here we figure out the track scaling by calculating 
+                # Here we figure out the track scaling by calculating
                 # the average smallest distance between cones
                 total_x_distance = 0
                 total_y_distance = 0
@@ -1075,23 +1104,28 @@ class ConversionTools:
                         closest_x = 10000
                         closest_y = 10000
                         for cone2 in all_cones:
-                                if cone1 == cone2: continue
+                                if cone1 == cone2:
+                                    continue
                                 dx = abs(cone1[1] - cone2[1])
                                 dy = abs(cone1[2] - cone2[2])
-                                if dx < closest_x: closest_x = dx
-                                if dy < closest_y: closest_y = dy
-                        total_x_distance+=closest_x
-                        total_y_distance+=closest_y
-                
+                                if dx < closest_x:
+                                    closest_x = dx
+                                if dy < closest_y:
+                                    closest_y = dy
+                        total_x_distance += closest_x
+                        total_y_distance += closest_y
+
                 # Our scale will strive to preserve distances when possible.
-                scale_desired = max(total_x_distance,total_y_distance)/(len(all_cones)-1)
-                if scale_desired < 0.0001: scale_desired = 0.0001#Clamp scale to allowed values
-                if scale_desired > 100:    scale_desired = 100
+                scale_desired = max(total_x_distance, total_y_distance)/(len(all_cones)-1)
+                if scale_desired < 0.0001:
+                    scale_desired = 0.0001  # Clamp scale to allowed values
+                if scale_desired > 100:
+                    scale_desired = 100
                 scale_metadata = ConversionTools.deconvert_scale_metadata(scale_desired)
-                
+
                 # Now we store the scaled information inside final_cones/
                 final_cones = []
-                twidth =  int((max_x - min_x + 20) / scale_desired)
+                twidth = int((max_x - min_x + 20) / scale_desired)
                 theight = int((max_y - min_y + 20) / scale_desired)
                 car_x = int((raw_car_location[1] - min_x + 10) / scale_desired)
                 car_y = int((raw_car_location[2] - min_y + 10) / scale_desired)
@@ -1101,7 +1135,7 @@ class ConversionTools:
                         final_cones.append((cone[0], new_x, new_y))
 
                 # Start drawing the track
-                im = Image.new('RGBA', (twidth, theight), (0, 0, 0, 0)) 
+                im = Image.new('RGBA', (twidth, theight), (0, 0, 0, 0))
                 draw = ImageDraw.Draw(im)
 
                 # Convert data to image format
@@ -1112,36 +1146,39 @@ class ConversionTools:
 
                 # Now we are placing the pixels of our output image
                 pixels = im.load()
+
                 def get_cone_color(cone_name):
-                        if   cone_name == "yellow":     
-                                return ConversionTools.inner_cone_color
-                        elif cone_name == "blue":       
-                                return ConversionTools.outer_cone_color
-                        elif cone_name == "orange":     
-                                return ConversionTools.orange_cone_color
-                        elif cone_name == "big_orange": 
-                                return ConversionTools.big_orange_cone_color
-                        elif cone_name == "noise":      
-                                return ConversionTools.noise_color
+                        if cone_name == "yellow":
+                            return ConversionTools.inner_cone_color
+                        elif cone_name == "blue":
+                            return ConversionTools.outer_cone_color
+                        elif cone_name == "orange":
+                            return ConversionTools.orange_cone_color
+                        elif cone_name == "big_orange":
+                            return ConversionTools.big_orange_cone_color
+                        elif cone_name == "noise":
+                            return ConversionTools.noise_color
                         return ConversionTools.inner_cone_color
 
                 # Place the cone pixels
                 for cone in final_cones:
-                        pixels[cone[1], cone[2]] = get_cone_color(cone[0])
+                    pixels[cone[1], cone[2]] = get_cone_color(cone[0])
 
                 # Calculate the car's yaw's corresponding alpha value
-                pixel_value = int(raw_car_location[3] / (2 * math.pi) * 254 + 1) 
-                if pixel_value > 255: pixel_value = 255
-                if pixel_value <   1: pixel_value =   1
+                yaw_pixel_value = int(raw_car_location[3] / (2 * math.pi) * 254 + 1)
+                if yaw_pixel_value > 255:
+                    yaw_pixel_value = 255
+                if yaw_pixel_value < 1:
+                    yaw_pixel_value = 1
 
                 # Finally, add the car
                 pixels[car_x, car_y] = (
                                         ConversionTools.car_color[0],
                                         ConversionTools.car_color[1],
                                         ConversionTools.car_color[2],
-                                        pixel_value
+                                        yaw_pixel_value
                 )
-                
+
                 # Add scale metadata:
                 loc = ConversionTools.get_metadata_pixel_location(
                                                                   0,
@@ -1176,13 +1213,11 @@ class ConversionTools:
                 )
                 im.save(output_path)
                 return im
-                
-
 
         #########################################################
         #                        Copying                        #
         #########################################################
-        
+
         @staticmethod
         def copy_file(fr, to):
                 reader = open(fr, 'r')
@@ -1191,4 +1226,3 @@ class ConversionTools:
                 writer.write(data)
                 reader.close()
                 writer.close()
-                

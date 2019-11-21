@@ -10,6 +10,8 @@
 
     <buildtool_depend>catkin</buildtool_depend>
 
+    <build_depend>roslint</build_depend>
+
     <depend>gazebo_ros</depend>
     <depend>roscpp</depend>
     <depend>rqt_gui_cpp</depend>

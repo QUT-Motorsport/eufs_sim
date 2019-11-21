@@ -1,6 +1,7 @@
 #!/usr/bin/python
 
-# Note that twistToAckermannDrive needs to be mapped to the ros_can_sim/command parameter in the command line ie. rosrun eufs_ros_can_sim twist_to_ackermannDrive.py twistToAckermannDrive:=eufs_ros_can_sim/command
+# Note that twistToAckermannDrive needs to be mapped to the ros_can_sim/command parameter in the command line
+# ie. rosrun eufs_ros_can_sim twist_to_ackermannDrive.py twistToAckermannDrive:=eufs_ros_can_sim/command
 # Publishes to twistToAckermannDrive
 # Subscribes to cmd_vel
 
@@ -9,8 +10,12 @@ import math
 from autorally_msgs.msg import ChassisCommand
 from autorally_msgs.msg import Runstop
 from geometry_msgs.msg import Twist
-import sys, select, termios, tty
+import sys
+import select
+import termios
+import tty
 import threading
+
 
 class Convert:
     def __init__(self):
@@ -85,5 +90,5 @@ if __name__ == '__main__':
         threading.Thread(target=cnv.dealKey).start()
         cnv.listener()
 
-    except rospy.ROSInterruptException: pass
-   
+    except rospy.ROSInterruptException:
+        pass

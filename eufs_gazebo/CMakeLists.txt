@@ -11,6 +11,7 @@ find_package(catkin REQUIRED COMPONENTS
   std_msgs
   std_srvs
   tf
+  roslint
 )
 
 catkin_package()
@@ -32,3 +33,10 @@ install(DIRECTORY config/
 include_directories(
   ${catkin_INCLUDE_DIRS}
 )
+
+#############
+## Roslint ##
+#############
+
+roslint_python()
+roslint_cpp()

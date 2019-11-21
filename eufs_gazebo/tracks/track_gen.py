@@ -36,7 +36,7 @@ class Track:
         self.inactive_noise = None
 
         # Car data in the format of ("car_start", x, y, yaw)
-        # It can be left as ("car_start", 0, 0, 0), only relevant when fed into track_gen through 
+        # It can be left as ("car_start", 0, 0, 0), only relevant when fed into track_gen through
         # `eufs_launcher/ConversionTools`
         # as in that case it needs to preserve car data so that the conversion is fully bijective.
         self.car_start_data = ("car_start", 0.0, 0.0, 0.0)
@@ -57,9 +57,9 @@ class Track:
             print("Please give me a .csv file. Exitting")
             return
 
-        data = pd.read_csv(file_path, names=["tag", "x", "y","direction"], skiprows=1)
+        data = pd.read_csv(file_path, names=["tag", "x", "y", "direction"], skiprows=1)
         self.blue_cones = np.array(data[data.tag == "blue"][["x", "y"]])
-	self.car = np.array(data[data.tag == "car_start"][["x", "y","direction"]])
+        self.car = np.array(data[data.tag == "car_start"][["x", "y", "direction"]])
         self.yellow_cones = np.array(data[data.tag == "yellow"][["x", "y"]])
         self.big_orange_cones = np.array(data[data.tag == "big_orange"][["x", "y"]])
         self.orange_cones = np.array(data[data.tag == "orange"][["x", "y"]])
@@ -126,7 +126,6 @@ class Track:
                 elif "orange_cone" == mesh_str:
                     orange.append(pose)
 
-
         # convert all lists to numpy as arrays for efficiency
         if len(blue) != 0:
             self.blue_cones = np.array(blue, dtype="float64")
@@ -149,11 +148,10 @@ class Track:
             print("No orange cones found")
 
         if len(active_noise) != 0:
-            self.active_noise = np.array(active_noise, dtype = "float64")
+            self.active_noise = np.array(active_noise, dtype="float64")
 
         if len(inactive_noise) != 0:
-            self.inactive_noise = np.array(inactive_noise, dtype = "float64")
-
+            self.inactive_noise = np.array(inactive_noise, dtype="float64")
 
     def generate_tracks(self):
         """Generates blue, yellow and centerline tracks for the course
@@ -278,7 +276,7 @@ class Track:
         if filename.find(".csv") == -1:
             filename = filename + ".csv"
 
-        df = pd.DataFrame(columns=["tag", "x", "y","direction"])
+        df = pd.DataFrame(columns=["tag", "x", "y", "direction"])
 
         # assuming there always are blue and yellow cones
         df["x"] = np.hstack((self.blue_cones[:, 0], self.yellow_cones[:, 0]))
@@ -321,19 +319,19 @@ class Track:
             df["y"] = np.hstack((df["y"].dropna().values, self.inactive_noise[:, 1]))
             df["tag"].iloc[-self.inactive_noise.shape[0]:] = "inactive_noise"
 
-        #Add car data (always ("car_start",0,0,0) unless this file is called from ConversionTools))
-        cardf = pd.DataFrame([self.car_start_data], columns=["tag","x","y","direction"])  
+        # Add car data (always ("car_start",0,0,0) unless this file is called from ConversionTools))
+        cardf = pd.DataFrame([self.car_start_data], columns=["tag", "x", "y", "direction"])
         df["direction"] = 0
         df = df.append(cardf)
 
-        df.to_csv(filename, index=False,columns=["tag","x","y","direction"])
+        df.to_csv(filename, index=False, columns=["tag", "x", "y", "direction"])
         print("Succesfully saved to csv")
 
     def save_sdf(self, model_name):
         cone_meshes = {"yellow": "model://models/yellow_cone",
-                "blue": "model://models/blue_cone",
-                "big": "model://models/big_cone",
-                "orange":"model://models/cone"}
+                       "blue": "model://models/blue_cone",
+                       "big": "model://models/big_cone",
+                       "orange": "model://models/cone"}
 
         root = Element("sdf")
         root.set("version", "1.6")
@@ -389,7 +387,7 @@ class Track:
             Numpy array with point p removed
         """
         points = []
-        for point in ps: 
+        for point in ps:
             if list(p) != list(point):
                 points.append(point)
         return np.array(points)
@@ -458,12 +456,11 @@ class Track:
         out = np.vstack((xx, yy))
         return out.T
 
-
     @staticmethod
     def runConverter(track_name,
                      midpoints=False,
-                     car_start_data=("car_start",0.0,0.0,0.0),
-                     conversion_suffix = ""):
+                     car_start_data=("car_start", 0.0, 0.0, 0.0),
+                     conversion_suffix=""):
         """
         Creates a csv from the sdf passed in (through track_name)
 
@@ -500,19 +497,19 @@ class Track:
         except:
             raise(AssertionError(("Can't find track called {} make sure that it is"
                   "within eufs_description/models/".format(track_name))))
-    
+
         track = Track()
-	track.car_start_data = car_start_data
+        track.car_start_data = car_start_data
         track.load_sdf(track_path)
         if midpoints:
             track.generate_midpoints()
             track.generate_tracks()
-        track.save_csv(os.path.join(rospkg.RosPack().get_path('eufs_gazebo'), "tracks",track_name+conversion_suffix))
+        track.save_csv(os.path.join(rospkg.RosPack().get_path('eufs_gazebo'), "tracks", track_name+conversion_suffix))
 
 if __name__ == "__main__":
-    #Just a heads up, you can run this with a gui by running the launcher:
-    #`roslaunch eufs_launcher eufs_launcher.launch`
-    #And using the "Conversion Tools" section.
+    # Just a heads up, you can run this with a gui by running the launcher:
+    # `roslaunch eufs_launcher eufs_launcher.launch`
+    # And using the "Conversion Tools" section.
     parser = argparse.ArgumentParser(description="Generates a CSV file of cone\
                                      locations based on the SDF Gazebo models")
     parser.add_argument('track_name', metavar='track_name', type=str,
@@ -521,4 +518,4 @@ if __name__ == "__main__":
                         help="If true, midpoints will be generated and saved in the CSV")
 
     args = parser.parse_args()
-    runConverter(args.track_name,args.midpoints)
+    runConverter(args.track_name, args.midpoints)

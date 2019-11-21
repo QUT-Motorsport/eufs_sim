@@ -18,7 +18,7 @@ Published Topics:
         Track midpoints as an array of Points
     /ground_truth/midpoints/viz (visualization_msgs/Marker)
         Track midpoints for visualization in Rviz
-    
+
 Parameters:
     ~view_distance (float, default: 15)
         Only the cones that are within this distance are published
@@ -337,7 +337,7 @@ class ConeGroundTruth:
 
     def load_csv(self, file_path):
         """Loads CSV file of cone location data and store it in the class.
-        CSV file must have a 1 line header and then each row should have 
+        CSV file must have a 1 line header and then each row should have
         the format tag, x, y where tag is either "big", "left" or "right"
 
         Args:

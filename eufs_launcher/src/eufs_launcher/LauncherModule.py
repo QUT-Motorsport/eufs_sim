@@ -8,7 +8,8 @@ import time
 
 from qt_gui.plugin import Plugin
 from python_qt_binding import loadUi
-from python_qt_binding.QtWidgets import QWidget, QComboBox, QPushButton, QSlider, QRadioButton, QCheckBox, QMainWindow, QLabel, QLineEdit, QApplication
+from python_qt_binding.QtWidgets import (QWidget, QComboBox, QPushButton, QSlider, QRadioButton, QCheckBox, QMainWindow,
+                                         QLabel, QLineEdit, QApplication)
 
 from os import listdir
 from os.path import isfile, join
@@ -20,15 +21,16 @@ from PIL import ImageDraw
 from random import randrange, uniform
 
 from TrackGenerator import TrackGenerator as Generator
-from TrackGenerator import GenerationFailedException
+from TrackGenerator import GeneratorContext
 
 from ConversionTools import ConversionTools as Converter
+
 
 class EufsLauncher(Plugin):
 
         def __init__(self, context):
                 """
-                This function handles loading the launcher GUI 
+                This function handles loading the launcher GUI
                 and all the setting-up of the values and buttons displayed.
                 """
                 super(EufsLauncher, self).__init__(context)
@@ -41,8 +43,8 @@ class EufsLauncher(Plugin):
                 parser = ArgumentParser()
                 # Add argument(s) to the parser.
                 parser.add_argument("-q", "--quiet", action="store_true",
-                        dest="quiet",
-                        help="Put plugin in silent mode")
+                                    dest="quiet",
+                                    help="Put plugin in silent mode")
                 args, unknowns = parser.parse_known_args(context.argv())
                 if not args.quiet:
                         print 'arguments: ', args
@@ -53,13 +55,13 @@ class EufsLauncher(Plugin):
 
                 # Get path to UI file which should be in the "resource" folder of this package
                 self.main_ui_file = os.path.join(
-                                                 rospkg.RosPack().get_path('eufs_launcher'), 
+                                                 rospkg.RosPack().get_path('eufs_launcher'),
                                                  'resource',
                                                  'Launcher.ui'
                 )
                 self.sketcher_ui_file = os.path.join(
                                                  rospkg.RosPack().get_path('eufs_launcher'),
-                                                 'resource', 
+                                                 'resource',
                                                  'Sketcher.ui'
                 )
 
@@ -69,14 +71,13 @@ class EufsLauncher(Plugin):
                 # Give QObjects reasonable names
                 self._widget.setObjectName('EufsLauncherUI')
 
-                # Show _widget.windowTitle on left-top of each plugin (when 
-                # it's set in _widget). This is useful when you open multiple 
-                # plugins at once. Also if you open multiple instances of your 
-                # plugin at once, these lines add number to make it easy to 
+                # Show _widget.windowTitle on left-top of each plugin (when
+                # it's set in _widget). This is useful when you open multiple
+                # plugins at once. Also if you open multiple instances of your
+                # plugin at once, these lines add number to make it easy to
                 # tell from pane to pane.
                 if context.serial_number() > 1:
-                        the_title = (self._widget.windowTitle() 
-                                   + (' (%d)' % context.serial_number()))
+                        the_title = (self._widget.windowTitle() + (' (%d)' % context.serial_number()))
                         self._widget.setWindowTitle(the_title)
 
                 # Resize correctly
@@ -86,30 +87,36 @@ class EufsLauncher(Plugin):
                 self.GAZEBO = rospkg.RosPack().get_path('eufs_gazebo')
 
                 # Give widget components permanent names
-                self.PRESET_SELECTOR   = self._widget.findChild(QComboBox,"WhichPreset")
-                self.TRACK_SELECTOR    = self._widget.findChild(QComboBox,"WhichTrack")
-                self.IMAGE_SELECTOR    = self._widget.findChild(QComboBox,"WhichImage")
-                self.LAUNCH_BUTTON     = self._widget.findChild(QPushButton,"LaunchButton")
-                self.GENERATOR_BUTTON  = self._widget.findChild(QPushButton,"GenerateButton")
-                self.LOAD_IMAGE_BUTTON = self._widget.findChild(QPushButton,"LoadFromImageButton")
+                self.PRESET_SELECTOR = self._widget.findChild(QComboBox, "WhichPreset")
+                self.TRACK_SELECTOR = self._widget.findChild(QComboBox, "WhichTrack")
+                self.IMAGE_SELECTOR = self._widget.findChild(QComboBox, "WhichImage")
+                self.LAUNCH_BUTTON = self._widget.findChild(QPushButton, "LaunchButton")
+                self.GENERATOR_BUTTON = self._widget.findChild(QPushButton, "GenerateButton")
+                self.LOAD_IMAGE_BUTTON = self._widget.findChild(QPushButton, "LoadFromImageButton")
 
-                self.CONVERT_BUTTON      = self._widget.findChild(QPushButton,"ConvertButton")
-                self.RENAME_BUTTON       = self._widget.findChild(QPushButton,"RenameButton")
-                self.SKETCHER_BUTTON     = self._widget.findChild(QPushButton,"SketcherButton")
-                self.LAX_CHECKBOX        = self._widget.findChild(QCheckBox,"LaxCheckBox")
-                self.CONVERT_FROM_MENU   = self._widget.findChild(QComboBox,"ConvertFrom")
-                self.CONVERT_TO_MENU     = self._widget.findChild(QComboBox,"ConvertTo")
-                self.MIDPOINT_CHECKBOX   = self._widget.findChild(QCheckBox,"MidpointBox")
+                self.CONVERT_BUTTON = self._widget.findChild(QPushButton, "ConvertButton")
+                self.RENAME_BUTTON = self._widget.findChild(QPushButton, "RenameButton")
+                self.SKETCHER_BUTTON = self._widget.findChild(QPushButton, "SketcherButton")
+                self.LAX_CHECKBOX = self._widget.findChild(QCheckBox, "LaxCheckBox")
+                self.CONVERT_FROM_MENU = self._widget.findChild(QComboBox, "ConvertFrom")
+                self.CONVERT_TO_MENU = self._widget.findChild(QComboBox, "ConvertTo")
+                self.MIDPOINT_CHECKBOX = self._widget.findChild(QCheckBox, "MidpointBox")
 
-                self.SUFFIX_CHECKBOX     = self._widget.findChild(QCheckBox,"SuffixBox")
-                self.USER_FEEDBACK_LABEL = self._widget.findChild(QLabel,"UserFeedbackLabel")
-                self.RENAME_FILE_TEXTBOX = self._widget.findChild(QLineEdit,"RenameFileTextbox")
-                self.RENAME_FILE_HEADER  = self._widget.findChild(QLabel,"RenameFileHeader")
-                self.NOISE_SLIDER        = self._widget.findChild(QSlider,"Noisiness")
-                self.SPEED_RADIO         = self._widget.findChild(QRadioButton,"SpeedRadio")
-                self.TORQUE_RADIO        = self._widget.findChild(QRadioButton,"TorqueRadio")
-                self.PERCEPTION_CHECKBOX = self._widget.findChild(QCheckBox,"PerceptionCheckbox")
-                self.VISUALISATOR_CHECKBOX = self._widget.findChild(QCheckBox,"PerceptionCheckbox")
+                self.SUFFIX_CHECKBOX = self._widget.findChild(QCheckBox, "SuffixBox")
+                self.USER_FEEDBACK_LABEL = self._widget.findChild(QLabel, "UserFeedbackLabel")
+                self.RENAME_FILE_TEXTBOX = self._widget.findChild(QLineEdit, "RenameFileTextbox")
+                self.RENAME_FILE_HEADER = self._widget.findChild(QLabel, "RenameFileHeader")
+                self.NOISE_SLIDER = self._widget.findChild(QSlider, "Noisiness")
+                self.SPEED_RADIO = self._widget.findChild(QRadioButton, "SpeedRadio")
+                self.TORQUE_RADIO = self._widget.findChild(QRadioButton, "TorqueRadio")
+                self.PERCEPTION_CHECKBOX = self._widget.findChild(QCheckBox, "PerceptionCheckbox")
+
+                self.VISUALISATOR_CHECKBOX = (
+                        self._widget.findChild(QCheckBox, "VisualisatorCheckbox")
+                )
+                self.GAZEBO_GUI_CHECKBOX = (
+                        self._widget.findChild(QCheckBox, "GazeboGuiCheckbox")
+                )
 
                 self.FILE_FOR_CONVERSION_BOX = self._widget.findChild(
                         QComboBox,
@@ -128,33 +135,31 @@ class EufsLauncher(Plugin):
                         "FullStackImageButton"
                 )
 
-                self.MIN_STRAIGHT_SLIDER  = self._widget.findChild(QSlider,"Param_MIN_STRAIGHT")
-                self.MAX_STRAIGHT_SLIDER  = self._widget.findChild(QSlider,"Param_MAX_STRAIGHT")
-                self.MIN_CTURN_SLIDER     = self._widget.findChild(QSlider,"Param_MIN_CTURN")
-                self.MAX_CTURN_SLIDER     = self._widget.findChild(QSlider,"Param_MAX_CTURN")
-                self.MIN_HAIRPIN_SLIDER   = self._widget.findChild(QSlider,"Param_MIN_HAIRPIN")
-                self.MAX_HAIRPIN_SLIDER   = self._widget.findChild(QSlider,"Param_MAX_HAIRPIN")
-                self.HAIRPIN_PAIRS_SLIDER = self._widget.findChild(QSlider,"Param_HAIRPIN_PAIRS")
-                self.MAX_LENGTH_SLIDER    = self._widget.findChild(QSlider,"Param_MAX_LENGTH")
-                self.TRACK_WIDTH_SLIDER   = self._widget.findChild(QSlider,"Param_TRACK_WIDTH")
+                self.MIN_STRAIGHT_SLIDER = self._widget.findChild(QSlider, "Param_MIN_STRAIGHT")
+                self.MAX_STRAIGHT_SLIDER = self._widget.findChild(QSlider, "Param_MAX_STRAIGHT")
+                self.MIN_CTURN_SLIDER = self._widget.findChild(QSlider, "Param_MIN_CTURN")
+                self.MAX_CTURN_SLIDER = self._widget.findChild(QSlider, "Param_MAX_CTURN")
+                self.MIN_HAIRPIN_SLIDER = self._widget.findChild(QSlider, "Param_MIN_HAIRPIN")
+                self.MAX_HAIRPIN_SLIDER = self._widget.findChild(QSlider, "Param_MAX_HAIRPIN")
+                self.HAIRPIN_PAIRS_SLIDER = self._widget.findChild(QSlider, "Param_HAIRPIN_PAIRS")
+                self.MAX_LENGTH_SLIDER = self._widget.findChild(QSlider, "Param_MAX_LENGTH")
+                self.TRACK_WIDTH_SLIDER = self._widget.findChild(QSlider, "Param_TRACK_WIDTH")
 
-                self.MIN_STRAIGHT_LABEL   = self._widget.findChild(QLabel,"Label_MIN_STRAIGHT")
-                self.MAX_STRAIGHT_LABEL   = self._widget.findChild(QLabel,"Label_MAX_STRAIGHT")
-                self.MIN_CTURN_LABEL      = self._widget.findChild(QLabel,"Label_MIN_CTURN")
-                self.MAX_CTURN_LABEL      = self._widget.findChild(QLabel,"Label_MAX_CTURN")
-                self.MIN_HAIRPIN_LABEL    = self._widget.findChild(QLabel,"Label_MIN_HAIRPIN")
-                self.MAX_HAIRPIN_LABEL    = self._widget.findChild(QLabel,"Label_MAX_HAIRPIN")
-                self.HAIRPIN_PAIRS_LABEL  = self._widget.findChild(QLabel,"Label_HAIRPIN_PAIRS")
-                self.MAX_LENGTH_LABEL     = self._widget.findChild(QLabel,"Label_MAX_LENGTH")
-                self.TRACK_WIDTH_LABEL    = self._widget.findChild(QLabel,"Label_TRACK_WIDTH")
-
+                self.MIN_STRAIGHT_LABEL = self._widget.findChild(QLabel, "Label_MIN_STRAIGHT")
+                self.MAX_STRAIGHT_LABEL = self._widget.findChild(QLabel, "Label_MAX_STRAIGHT")
+                self.MIN_CTURN_LABEL = self._widget.findChild(QLabel, "Label_MIN_CTURN")
+                self.MAX_CTURN_LABEL = self._widget.findChild(QLabel, "Label_MAX_CTURN")
+                self.MIN_HAIRPIN_LABEL = self._widget.findChild(QLabel, "Label_MIN_HAIRPIN")
+                self.MAX_HAIRPIN_LABEL = self._widget.findChild(QLabel, "Label_MAX_HAIRPIN")
+                self.HAIRPIN_PAIRS_LABEL = self._widget.findChild(QLabel, "Label_HAIRPIN_PAIRS")
+                self.MAX_LENGTH_LABEL = self._widget.findChild(QLabel, "Label_MAX_LENGTH")
+                self.TRACK_WIDTH_LABEL = self._widget.findChild(QLabel, "Label_TRACK_WIDTH")
 
                 # Check the file directory to update drop-down menu
                 self.load_track_and_images()
 
                 # Get presets
                 preset_names = Generator.get_preset_names()
-
 
                 # Add Presets to Preset Selector (always put Computer Friendly first)
                 default_preset = Generator.get_default_preset()
@@ -171,7 +176,6 @@ class EufsLauncher(Plugin):
                 self.CONVERT_BUTTON.clicked.connect(self.convert_button_pressed)
                 self.RENAME_BUTTON.clicked.connect(self.copy_button_pressed)
                 self.SKETCHER_BUTTON.clicked.connect(self.sketcher_button_pressed)
-
 
                 # Create array of running processes
                 self.processes = []
@@ -208,20 +212,23 @@ class EufsLauncher(Plugin):
                 self.keep_track_of_slider_changes()
                 self.keep_track_of_preset_changes()
 
-                # While in the process of changing sliders, 
+                # While in the process of changing sliders,
                 # we don't want our monitor function to be rapidly firing
                 # So we toggle this variable when ready
                 self.ignore_slider_changes = False
 
                 # Setup Lax Generation button
                 self.LAX_CHECKBOX.setChecked(self.LAX_GENERATION)
-                
+
+                # Setup Gazebo Gui button
+                self.GAZEBO_GUI_CHECKBOX.setChecked(True)
+
                 # Setup Conversion Tools dropdowns
                 for f in ["launch", "png", "csv"]:
                         self.CONVERT_FROM_MENU.addItem(f)
                 for f in ["csv", "png", "launch", "ALL"]:
                         self.CONVERT_TO_MENU.addItem(f)
-                        
+
                 self.update_converter_dropdown()
                 self.CONVERT_FROM_MENU.currentTextChanged.connect(self.update_converter_dropdown)
                 self.CONVERT_TO_MENU.currentTextChanged.connect(self.update_midpoints_box)
@@ -253,12 +260,13 @@ class EufsLauncher(Plugin):
                 # Get uuid of roslaunch
                 self.uuid = roslaunch.rlutil.get_or_generate_uuid(None, False)
                 roslaunch.configure_logging(self.uuid)
+                self.DEBUG_SHUTDOWN = False
 
         def tell_launchella(self, what):
                 """Display text in feedback box (lower left corner)."""
 
                 self.USER_FEEDBACK_LABEL.setText(what)
-                QApplication.processEvents() 
+                QApplication.processEvents()
 
         def sketcher_button_pressed(self):
                 """Called when sketcher button is pressed."""
@@ -281,12 +289,12 @@ class EufsLauncher(Plugin):
 
                 # Remove "blacklisted" files (ones that don't define tracks)
                 blacklist_filepath = os.path.join(
-                        self.GAZEBO, 
+                        self.GAZEBO,
                         'launch/blacklist.txt'
                 )
-                blacklist_ = open(blacklist_filepath,"r")
-                blacklist = [f.strip() for f in blacklist_]#remove \n
-                launch_files = [f for f in launch_files if not f in blacklist]
+                blacklist_ = open(blacklist_filepath, "r")
+                blacklist = [f.strip() for f in blacklist_]  # remove \n
+                launch_files = [f for f in launch_files if f not in blacklist]
 
                 # Add Tracks to Track Selector
                 if "small_track.launch" in launch_files:
@@ -297,7 +305,7 @@ class EufsLauncher(Plugin):
 
                 # Get images
                 relevant_path = os.path.join(
-                        self.GAZEBO, 
+                        self.GAZEBO,
                         'randgen_imgs'
                 )
                 image_files = [f for f in listdir(relevant_path) if isfile(join(relevant_path, f))]
@@ -329,7 +337,7 @@ class EufsLauncher(Plugin):
                 # For launch files, we also need to move around the model folders
                 if ending == "launch":
                         model_path = os.path.join(
-                                rospkg.RosPack().get_path('eufs_description'), 
+                                rospkg.RosPack().get_path('eufs_description'),
                                 'models',
                                 raw_name_to
                         )
@@ -344,7 +352,7 @@ class EufsLauncher(Plugin):
                                 "model.sdf"
                         )
                         path_to = os.path.join(
-                                rospkg.RosPack().get_path('eufs_description'), 
+                                rospkg.RosPack().get_path('eufs_description'),
                                 'models',
                                 raw_name_to,
                                 "model.sdf"
@@ -359,16 +367,16 @@ class EufsLauncher(Plugin):
                                 "model.config"
                         )
                         path_to = os.path.join(
-                                rospkg.RosPack().get_path('eufs_description'), 
+                                rospkg.RosPack().get_path('eufs_description'),
                                 'models',
                                 raw_name_to,
                                 "model.config"
                         )
                         Converter.copy_file(path_from, path_to)
-                        
+
                         # Copy launch files
                         path_from = os.path.join(
-                                self.GAZEBO, 
+                                self.GAZEBO,
                                 'launch',
                                 file_to_copy_from
                         )
@@ -396,7 +404,7 @@ class EufsLauncher(Plugin):
                 # Copy csvs
                 elif ending == "csv":
                         path_from = os.path.join(
-                                self.GAZEBO, 
+                                self.GAZEBO,
                                 'tracks',
                                 file_to_copy_from
                         )
@@ -413,7 +421,7 @@ class EufsLauncher(Plugin):
                                 ending,
                                 "ALL",
                                 path_to,
-                                params={"noise":self.get_noise_level()}
+                                params={"noise": self.get_noise_level()}
                         )
 
                 # Update drop-downs with new files in directory
@@ -427,10 +435,10 @@ class EufsLauncher(Plugin):
 
         def update_midpoints_box(self):
                 """
-                Controls the handling of the box that, when ticked, 
+                Controls the handling of the box that, when ticked,
                 tells the to-csv converter to calculate cone midpoints.
                 """
-                #Toggle checkbox
+                # Toggle checkbox
                 convert_to = self.CONVERT_TO_MENU.currentText()
 
         def update_converter_dropdown(self):
@@ -441,43 +449,43 @@ class EufsLauncher(Plugin):
                 if from_type == "launch":
                         # Get tracks from eufs_gazebo package
                         relevant_path = os.path.join(
-                                self.GAZEBO, 
+                                self.GAZEBO,
                                 'launch'
                         )
                         launch_files = [
                                f for f in listdir(relevant_path) if isfile(join(relevant_path, f))
                         ]
-        
+
                         # Remove "blacklisted" files (ones that don't define tracks)
                         blacklist_filepath = os.path.join(
                                 self.GAZEBO,
                                 'launch/blacklist.txt'
                         )
-                        blacklist_ = open(blacklist_filepath,"r")
+                        blacklist_ = open(blacklist_filepath, "r")
                         blacklist = [f.strip() for f in blacklist_]
-                        all_files = [f for f in launch_files if not f in blacklist]
+                        all_files = [f for f in launch_files if f not in blacklist]
                 elif from_type == "png":
                         # Get images
                         relevant_path = os.path.join(
-                                self.GAZEBO, 
+                                self.GAZEBO,
                                 'randgen_imgs'
                         )
                         all_files = [
-                                f for f in listdir(relevant_path) 
+                                f for f in listdir(relevant_path)
                                 if isfile(join(relevant_path, f))
                         ]
                 elif from_type == "csv":
                         # Get csvs
                         relevant_path = os.path.join(
-                                self.GAZEBO, 
+                                self.GAZEBO,
                                 'tracks'
                         )
                         all_files = [
-                                f for f in listdir(relevant_path) 
-                                if isfile(join(relevant_path, f)) and f[-3:]=="csv"
+                                f for f in listdir(relevant_path)
+                                if isfile(join(relevant_path, f)) and f[-3:] == "csv"
                         ]
 
-                #Remove old files from selector
+                # Remove old files from selector
                 the_selector = self.FILE_FOR_CONVERSION_BOX
                 the_selector.clear()
 
@@ -491,16 +499,16 @@ class EufsLauncher(Plugin):
                 """When preset is changed, change the sliders accordingly."""
                 which = self.PRESET_SELECTOR.currentText()
                 preset_data = Generator.get_preset(which)
-                self.MIN_STRAIGHT   = preset_data["MIN_STRAIGHT"]
-                self.MAX_STRAIGHT   = preset_data["MAX_STRAIGHT"]
-                self.MIN_CTURN      = preset_data["MIN_CONSTANT_TURN"]
-                self.MAX_CTURN      = preset_data["MAX_CONSTANT_TURN"]
-                self.MIN_HAIRPIN    = preset_data["MIN_HAIRPIN"] * 2
-                self.MAX_HAIRPIN    = preset_data["MAX_HAIRPIN"] * 2
-                self.HAIRPIN_PAIRS  = preset_data["MAX_HAIRPIN_PAIRS"]
-                self.MAX_LENGTH     = preset_data["MAX_LENGTH"]
+                self.MIN_STRAIGHT = preset_data["MIN_STRAIGHT"]
+                self.MAX_STRAIGHT = preset_data["MAX_STRAIGHT"]
+                self.MIN_CTURN = preset_data["MIN_CONSTANT_TURN"]
+                self.MAX_CTURN = preset_data["MAX_CONSTANT_TURN"]
+                self.MIN_HAIRPIN = preset_data["MIN_HAIRPIN"] * 2
+                self.MAX_HAIRPIN = preset_data["MAX_HAIRPIN"] * 2
+                self.HAIRPIN_PAIRS = preset_data["MAX_HAIRPIN_PAIRS"]
+                self.MAX_LENGTH = preset_data["MAX_LENGTH"]
                 self.LAX_GENERATION = preset_data["LAX_GENERATION"]
-                self.TRACK_WIDTH    = 4
+                self.TRACK_WIDTH = preset_data["TRACK_WIDTH"]
                 self.LAX_CHECKBOX.setChecked(self.LAX_GENERATION)
 
         def keep_track_of_preset_changes(self):
@@ -510,7 +518,7 @@ class EufsLauncher(Plugin):
         def preset_changed(self):
                 """
                 When preset is changed, set everything into motion that needs to happen.
-                
+
                 Updates dropdowns and sliders.
                 """
                 self.ignore_slider_changes = True
@@ -532,24 +540,25 @@ class EufsLauncher(Plugin):
                 self.HAIRPIN_PAIRS_SLIDER.valueChanged.connect(self.slider_changed)
                 self.MAX_LENGTH_SLIDER   .valueChanged.connect(self.slider_changed)
                 self.TRACK_WIDTH_SLIDER  .valueChanged.connect(self.slider_changed)
-                
+
         def slider_changed(self):
                 """When a slider is changed, update the parameters."""
-                if self.ignore_slider_changes: return
+                if self.ignore_slider_changes:
+                    return
                 self.keep_variables_up_to_date()
                 self.keep_params_up_to_date()
 
         def keep_params_up_to_date(self):
                 """This function keeps the labels next to the sliders up to date."""
-                self.MIN_STRAIGHT_LABEL .setText("MIN_STRAIGHT: "  + str(self.MIN_STRAIGHT))
-                self.MAX_STRAIGHT_LABEL .setText("MAX_STRAIGHT: "  + str(self.MAX_STRAIGHT))
-                self.MIN_CTURN_LABEL    .setText("MIN_CTURN: "     + str(self.MIN_CTURN))
-                self.MAX_CTURN_LABEL    .setText("MAX_CTURN: "     + str(self.MAX_CTURN))
-                self.MIN_HAIRPIN_LABEL  .setText("MIN_HAIRPIN: "   + str((self.MIN_HAIRPIN / 2.0)))
-                self.MAX_HAIRPIN_LABEL  .setText("MAX_HAIRPIN: "   + str((self.MAX_HAIRPIN / 2.0)))
+                self.MIN_STRAIGHT_LABEL.setText("MIN_STRAIGHT: " + str(self.MIN_STRAIGHT))
+                self.MAX_STRAIGHT_LABEL.setText("MAX_STRAIGHT: " + str(self.MAX_STRAIGHT))
+                self.MIN_CTURN_LABEL.setText("MIN_CTURN: " + str(self.MIN_CTURN))
+                self.MAX_CTURN_LABEL.setText("MAX_CTURN: " + str(self.MAX_CTURN))
+                self.MIN_HAIRPIN_LABEL.setText("MIN_HAIRPIN: " + str((self.MIN_HAIRPIN / 2.0)))
+                self.MAX_HAIRPIN_LABEL.setText("MAX_HAIRPIN: " + str((self.MAX_HAIRPIN / 2.0)))
                 self.HAIRPIN_PAIRS_LABEL.setText("HAIRPIN_PAIRS: " + str(self.HAIRPIN_PAIRS))
-                self.MAX_LENGTH_LABEL   .setText("MAX_LENGTH: "    + str(self.MAX_LENGTH))
-                self.TRACK_WIDTH_LABEL  .setText("TRACK_WIDTH: "   + str(self.TRACK_WIDTH))
+                self.MAX_LENGTH_LABEL.setText("MAX_LENGTH: " + str(self.MAX_LENGTH))
+                self.TRACK_WIDTH_LABEL.setText("TRACK_WIDTH: " + str(self.TRACK_WIDTH))
 
         def keep_sliders_up_to_date(self):
                 """This function keeps the values of the sliders up to date."""
@@ -565,25 +574,25 @@ class EufsLauncher(Plugin):
 
         def keep_variables_up_to_date(self):
                 """This function keeps LauncherModule's variables up to date."""
-                self.MIN_STRAIGHT  = self.get_slider_value("Param_MIN_STRAIGHT")
-                self.MAX_STRAIGHT  = self.get_slider_value("Param_MAX_STRAIGHT")
-                self.MIN_CTURN     = self.get_slider_value("Param_MIN_CTURN")
-                self.MAX_CTURN     = self.get_slider_value("Param_MAX_CTURN")
-                self.MIN_HAIRPIN   = self.get_slider_value("Param_MIN_HAIRPIN")
-                self.MAX_HAIRPIN   = self.get_slider_value("Param_MAX_HAIRPIN")
+                self.MIN_STRAIGHT = self.get_slider_value("Param_MIN_STRAIGHT")
+                self.MAX_STRAIGHT = self.get_slider_value("Param_MAX_STRAIGHT")
+                self.MIN_CTURN = self.get_slider_value("Param_MIN_CTURN")
+                self.MAX_CTURN = self.get_slider_value("Param_MAX_CTURN")
+                self.MIN_HAIRPIN = self.get_slider_value("Param_MIN_HAIRPIN")
+                self.MAX_HAIRPIN = self.get_slider_value("Param_MAX_HAIRPIN")
                 self.HAIRPIN_PAIRS = self.get_slider_value("Param_HAIRPIN_PAIRS")
-                self.MAX_LENGTH    = self.get_slider_value("Param_MAX_LENGTH")
-                self.TRACK_WIDTH   = self.get_slider_value("Param_TRACK_WIDTH")
+                self.MAX_LENGTH = self.get_slider_value("Param_MAX_LENGTH")
+                self.TRACK_WIDTH = self.get_slider_value("Param_TRACK_WIDTH")
 
         def set_slider_ranges(self):
                 """
                 This function specifies the bounds of the sliders.
 
-                The following values are entirely arbitrary: 
+                The following values are entirely arbitrary:
                                 Straights are between 0 and 150
                                 Turns are between 0 and 50
-                                Hairpins are between 0 and 20, 
-                                     and have half-step rather than integer step 
+                                Hairpins are between 0 and 20,
+                                     and have half-step rather than integer step
                                      (hence scaling by 2s)
                                 Hairpin pairs are between 0 and 5
                                 Max Length is between 200 and 2000
@@ -612,7 +621,7 @@ class EufsLauncher(Plugin):
                 self.set_slider_data("Param_HAIRPIN_PAIRS", min_hairpin_pairs, max_hairpin_pairs)
                 self.set_slider_data("Param_MAX_LENGTH", min_max_length, max_max_length)
                 self.set_slider_data("Param_TRACK_WIDTH", min_width, max_width)
-                
+
         def get_slider_value(self, slidername):
                 """Returns the value of the specified slider."""
                 slider = self._widget.findChild(QSlider, slidername)
@@ -628,8 +637,6 @@ class EufsLauncher(Plugin):
                 slider = self._widget.findChild(QSlider, slidername)
                 slider.setMinimum(slidermin)
                 slider.setMaximum(slidermax)
-               
-                
 
         def generator_button_pressed(self):
                 """Handles random track generation."""
@@ -637,39 +644,43 @@ class EufsLauncher(Plugin):
                 self.tell_launchella("Generating Track...")
 
                 isLaxGenerator = self.LAX_CHECKBOX.isChecked()
-                
-                try:
-                        # Prepare and pass in all the parameters of the track
-                        # If track takes too long to generate, this section will
-                        # throw an error, to be handled after this try clause.
-                        if self.PRESET_SELECTOR.currentText() == "Bezier":
-                                the_mode = Generator.BEZIER_MODE
-                        else:
-                                the_mode = Generator.CIRCLE_AND_LINE_MODE
-                        
-                        xys,twidth,theight = Generator.generate({
-                                "MIN_STRAIGHT":self.MIN_STRAIGHT,
-                                "MAX_STRAIGHT":self.MAX_STRAIGHT,
-                                "MIN_CONSTANT_TURN":self.MIN_CTURN,
-                                "MAX_CONSTANT_TURN":self.MAX_CTURN,
-                                "MIN_HAIRPIN":self.MIN_HAIRPIN/2,
-                                "MAX_HAIRPIN":self.MAX_HAIRPIN/2,
-                                "MAX_HAIRPIN_PAIRS":self.HAIRPIN_PAIRS,
-                                "MAX_LENGTH":self.MAX_LENGTH,                                   
-                                "LAX_GENERATION":isLaxGenerator,                                   
-                                "MODE":the_mode
-                        })
+
+                # Prepare and pass in all the parameters of the track
+                # If track takes too long to generate, this section will
+                # throw an error, to be handled after this try clause.
+                component_data = Generator.get_preset(
+                        self.PRESET_SELECTOR.currentText()
+                )["COMPONENTS"]
+
+                generator_values = {
+                                    "MIN_STRAIGHT": self.MIN_STRAIGHT,
+                                    "MAX_STRAIGHT": self.MAX_STRAIGHT,
+                                    "MIN_CONSTANT_TURN": self.MIN_CTURN,
+                                    "MAX_CONSTANT_TURN": self.MAX_CTURN,
+                                    "MIN_HAIRPIN": self.MIN_HAIRPIN/2,
+                                    "MAX_HAIRPIN": self.MAX_HAIRPIN/2,
+                                    "MAX_HAIRPIN_PAIRS": self.HAIRPIN_PAIRS,
+                                    "MAX_LENGTH": self.MAX_LENGTH,
+                                    "LAX_GENERATION": isLaxGenerator,
+                                    "TRACK_WIDTH": self.TRACK_WIDTH,
+                                    "COMPONENTS": component_data
+                }
+
+                def failure_function():
+                        self.tell_launchella("Track Gen Failed :(  Try different parameters?")
+
+                with GeneratorContext(generator_values, failure_function):
+                        xys, twidth, theight = Generator.generate()
 
                         # If track is generated successfully, turn it into a track image
                         # and display it to the user.
                         self.tell_launchella("Loading Image...")
                         im = Converter.convert(
-                                "xys",
+                                "comps",
                                 "png",
                                 "rand",
                                 params={
-                                        "track width":self.TRACK_WIDTH,
-                                        "point list":(xys,twidth,theight)
+                                        "track data": (xys, twidth, theight)
                                 }
                         )
 
@@ -677,38 +688,32 @@ class EufsLauncher(Plugin):
                         track_generator_full_stack = self.FULL_STACK_TRACK_GEN_BUTTON
                         if track_generator_full_stack.isChecked():
                                 img_path = os.path.join(
-                                        self.GAZEBO, 
+                                        self.GAZEBO,
                                         'randgen_imgs/rand.png'
                                 )
                                 Converter.convert(
                                         "png",
                                         "ALL",
                                         img_path,
-                                        params={"noise":self.get_noise_level()}
+                                        params={"noise": self.get_noise_level()}
                                 )
 
                         self.tell_launchella("Track Gen Complete!")
 
                         im.show()
-                except GenerationFailedException:
-                        rospy.logerr("\nError!  The generator could not generate in time.\n"+
-                                       "Maybe try different parameters?\n"+
-                                       "Turning on Lax Generation and increasing MAX_STRAIGHT"+
-                                       " and MIN_STRAIGHT usually helps.")
-                        self.tell_launchella("Track Gen Failed :(  Try different parameters?")
 
                 self.load_track_and_images()
 
         def track_from_image_button_pressed(self):
                 """
-                Converts .png to .launch by interfacing with ConversionTools, 
+                Converts .png to .launch by interfacing with ConversionTools,
                 then launches said .launch.
                 """
 
                 self.tell_launchella("Preparing to launch image as a track... ")
                 filename = self.IMAGE_SELECTOR.currentText()
                 filename_full = os.path.join(
-                        self.GAZEBO, 
+                        self.GAZEBO,
                         'randgen_imgs/'+filename
                 )
                 image_launcher_full_stack = self.FULL_STACK_IMAGE_BUTTON
@@ -717,21 +722,19 @@ class EufsLauncher(Plugin):
                                 "png",
                                 "ALL",
                                 filename_full,
-                                params={"noise":self.get_noise_level()}
+                                params={"noise": self.get_noise_level()}
                         )
                 else:
                         Converter.convert(
                                 "png",
                                 "launch",
                                 filename_full,
-                                params={"noise":self.get_noise_level()}
+                                params={"noise": self.get_noise_level()}
                         )
 
                 self.launch_file_override = filename[:-4] + ".launch"
                 self.load_track_and_images()
                 self.launch_button_pressed()
-
-        
 
         def get_noise_level(self):
                 """Returns the noise slider's noise level."""
@@ -746,10 +749,10 @@ class EufsLauncher(Plugin):
 
                 # Get info from launcher gui
                 from_type = self.CONVERT_FROM_MENU.currentText()
-                to_type   = self.CONVERT_TO_MENU.currentText()
+                to_type = self.CONVERT_TO_MENU.currentText()
                 filename = self.FILE_FOR_CONVERSION_BOX.currentText()
-                self.tell_launchella("Conversion Button Pressed!  From: " 
-                                    + from_type + " To: " + to_type + " For: " + filename)
+                self.tell_launchella("Conversion Button Pressed!  From: " + from_type +
+                                     " To: " + to_type + " For: " + filename)
                 midpoint_widget = self.MIDPOINT_CHECKBOX
 
                 # Calculate correct full filepath for file to convert
@@ -770,14 +773,14 @@ class EufsLauncher(Plugin):
                         to_type,
                         filename,
                         params={
-                                "noise":self.get_noise_level(),
-                                "midpoints":use_midpoints
+                                "noise": self.get_noise_level(),
+                                "midpoints": use_midpoints
                         },
                         conversion_suffix=suffix
                 )
                 self.load_track_and_images()
-                self.tell_launchella("Conversion Succeeded!  From: " 
-                                    + from_type + " To: " + to_type + " For: " + filename)
+                self.tell_launchella("Conversion Succeeded!  From: " + from_type +
+                                     " To: " + to_type + " For: " + filename)
 
         def launch_button_pressed(self):
                 """Launches Gazebo."""
@@ -789,12 +792,12 @@ class EufsLauncher(Plugin):
 
                 self.tell_launchella("--------------------------")
                 self.tell_launchella("\t\t\tLaunching Nodes...")
-             
+
                 # If we have set a specific file to run regardless of selected file,
                 # which may happen when we launch from an image,
                 # we make sure to launch the overriding track instead.
                 track_to_launch = self.launch_file_override
-                self.launch_file_override = None          
+                self.launch_file_override = None
                 if not track_to_launch:
                         track_to_launch = self.TRACK_SELECTOR.currentText()
 
@@ -802,7 +805,7 @@ class EufsLauncher(Plugin):
                 self.tell_launchella("Launching " + track_to_launch)
                 noise_level = self.get_noise_level()
                 self.tell_launchella("With Noise Level: " + str(noise_level))
-                
+
                 # Get control information
                 control_method = "controlMethod:=speed"
                 if self.SPEED_RADIO.isChecked():
@@ -812,10 +815,15 @@ class EufsLauncher(Plugin):
                         self.tell_launchella("With Torque Controls")
                         control_method = "controlMethod:=torque"
 
-                # Get perception ifnormation
+                # Get perception information
                 perception_stack = ["launch_group:=no_perception"]
                 if self.PERCEPTION_CHECKBOX.isChecked():
-                        perception_stack = []#is on
+                        perception_stack = []  # is on
+
+                # Check if we should launch the gazebo gui!
+                gui_on = "gui:=" + (
+                        "true" if self.GAZEBO_GUI_CHECKBOX.isChecked() else "false"
+                )
 
                 # How we launch the simulation changes depending on whether
                 # we are using the eufs_sim package standalone, or working within
@@ -823,27 +831,28 @@ class EufsLauncher(Plugin):
                 dir_to_check = os.path.dirname(os.path.dirname(os.path.dirname(self.GAZEBO)))
                 if dir_to_check.split("/")[-1] == "eufs-master":
                         launch_location = os.path.join(
-                                                dir_to_check, 
-                                                'launch', 
+                                                dir_to_check,
+                                                'launch',
                                                 'simulation.launch'
                         )
                         self.popen_process = self.launch_node_with_args(
                                                 launch_location,
                                                 [
                                                         control_method,
-                                                        "track:="+track_to_launch.split(".")[0]
-                                                ]+perception_stack
+                                                        gui_on,
+                                                        "track:=" + track_to_launch.split(".")[0]
+                                                ] + perception_stack
                                         )
                 else:
                         self.popen_process = self.launch_node_with_args(
                                                 os.path.join(
                                                         self.GAZEBO,
-                                                        'launch', 
+                                                        'launch',
                                                         track_to_launch
                                                 ),
-                                                [control_method]
+                                                [control_method, gui_on]
                                         )
-                        
+
                 # Launch the visualisator if applicable.
                 if self.VISUALISATOR_CHECKBOX.isChecked():
                         self.tell_launchella("And With LIDAR Data Visualisator.")
@@ -854,24 +863,27 @@ class EufsLauncher(Plugin):
                         )
                         self.launch_node(node_path)
 
-                self.tell_launchella("As I have fulfilled my purpose in guiding you "+
-                                     "to launch a track, this launcher will no longer "+
+                self.tell_launchella("As I have fulfilled my purpose in guiding you " +
+                                     "to launch a track, this launcher will no longer " +
                                      "react to input.")
 
+        # Hide launcher
+        self._widget.setVisible(False)
+        self._widget.window().showMinimized()
 
-        def launch_node(self,filepath):
+        def launch_node(self, filepath):
                 """Wrapper for launch_node_with_args"""
-                self.launch_node_with_args(filepath,[])
+                self.launch_node_with_args(filepath, [])
 
-        def launch_node_with_args(self,filepath,args):
+        def launch_node_with_args(self, filepath, args):
                 """
                 Launches ros node.
 
-                If arguments are supplied, it has to use Popen 
+                If arguments are supplied, it has to use Popen
                 rather than the default launch method.
                 """
                 if len(args) > 0:
-                        process = Popen(["roslaunch",filepath]+args)
+                        process = Popen(["roslaunch", filepath] + args)
                         self.popens.append(process)
                         return process
                 else:
@@ -884,35 +896,35 @@ class EufsLauncher(Plugin):
                 """Unregister all publishers, kill all nodes."""
                 self.tell_launchella("Shutdown Engaged...")
 
-                #(Stop all processes)
+                # (Stop all processes)
                 for p in self.processes:
-                        p.stop()
+                    p.stop()
 
                 for l in self.launches:
-                        l.shutdown()
+                    l.shutdown()
 
                 for p in self.popens:
-                        p.kill()
+                    p.kill()
 
-                #Manual node killer (needs to be used on nodes opened by Popen):
-                extra_nodes= rosnode.get_node_names()
+                # Manual node killer (needs to be used on nodes opened by Popen):
+                extra_nodes = rosnode.get_node_names()
                 extra_nodes.remove("/eufs_launcher")
                 extra_nodes.remove("/rosout")
                 left_open = len(extra_nodes)
-                if (left_open>0):
-                        rospy.logerr("Warning, after shutting down the launcher, "+
+                if (left_open > 0 and self.DEBUG_SHUTDOWN):
+                        rospy.logerr("Warning, after shutting down the launcher, " +
                                      "these nodes are still running: " + str(extra_nodes))
 
-                nodes_to_kill = [       
-                                        "/cone_ground_truth",
-                                        "/eufs/controller_spawner",
-                                        "/gazebo",
-                                        "/gazebo_gui",
-                                        "/robot_state_publisher",
-                                        "/ros_can_sim",
-                                        "/twist_to_ackermannDrive",
-                                        "/spawn_platform",
-                                        "/eufs_sim_rqt",
+                nodes_to_kill = [
+                                    "/cone_ground_truth",
+                                    "/eufs/controller_spawner",
+                                    "/gazebo",
+                                    "/gazebo_gui",
+                                    "/robot_state_publisher",
+                                    "/ros_can_sim",
+                                    "/twist_to_ackermannDrive",
+                                    "/spawn_platform",
+                                    "/eufs_sim_rqt",
                                 ]
                 for bad_node in extra_nodes:
                         if bad_node in nodes_to_kill:
@@ -922,10 +934,5 @@ class EufsLauncher(Plugin):
                 extra_nodes = rosnode.get_node_names()
                 extra_nodes.remove("/eufs_launcher")
                 extra_nodes.remove("/rosout")
-                if left_open>0:
+                if left_open > 0 and self.DEBUG_SHUTDOWN:
                         rospy.logerr("Pruned to: " + str(extra_nodes))
-                
-
-
-
-

@@ -16,6 +16,8 @@
 
   <buildtool_depend>catkin</buildtool_depend>
 
+  <build_depend>roslint</build_depend>
+
   <depend>roscpp</depend>
   <depend>tf</depend>
   <depend>rqt_gui</depend>
@@ -26,6 +28,8 @@
   <depend>std_msgs</depend>
   <depend>eufs_msgs</depend>
   <depend>std_srvs</depend>
+  <depend>python-numpy</depend>
+  <depend>python-qt-bindings</depend>
 
   <export>
     <rqt_gui plugin="${prefix}/plugin.xml"/>

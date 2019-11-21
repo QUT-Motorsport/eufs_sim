@@ -2,7 +2,7 @@
 
 """ackermann_controller.py
 
-This is a script to simulate the conrol of the ADS-DV car provided by 
+This is a script to simulate the conrol of the ADS-DV car provided by
 Formula Student UK. It is derived from the ackermann_vehicle_gazebo ROS package
 https://github.com/jbpassot/ackermann_vehicle
 
@@ -144,7 +144,6 @@ class AckermannController(object):
     def __init__(self, namespace='eufs/controller_manager'):
         """Initialize this AckermannController."""
 
-
         rospy.init_node("ackermann_controller")
         # Wheels
         (left_steer_link_name, left_steer_ctrlr_name,
@@ -163,9 +162,8 @@ class AckermannController(object):
         list_ctrlrs = rospy.ServiceProxy(namespace + '/list_controllers',
                                          ListControllers)
 
-        #It reaches this line and then never continues :(
+        # It reaches this line and then never continues :(
         list_ctrlrs.wait_for_service()
-
 
         # Shock absorbers
         shock_param_list = rospy.get_param("~shock_absorbers", [])
@@ -194,11 +192,10 @@ class AckermannController(object):
             rospy.logwarn("The specified list of shock absorbers is invalid. "
                           "No shock absorbers will be used.")
 
-
         # Max steering angle
         try:
             self._max_steering_angle = float(rospy.get_param("~max_steering_angle",
-                                                self._DEF_MAX_STEERING_ANGLE))
+                                                             self._DEF_MAX_STEERING_ANGLE))
         except:
             rospy.logwarn("The specified max steering angel value is invalid. "
                           "The default value will be used instead.")
@@ -207,12 +204,11 @@ class AckermannController(object):
         # Effective track
         try:
             self._effective_track = float(rospy.get_param("~effective_track",
-                                                self._DEF_EFFECTIVE_TRACK))
+                                                          self._DEF_EFFECTIVE_TRACK))
         except:
             rospy.logwarn("The specified effective track value is invalid. "
                           "The default value will be used instead.")
             self._effective_track = self._DEF_EFFECTIVE_TRACK
-
 
         # Command timeout
         try:
@@ -244,7 +240,6 @@ class AckermannController(object):
                           "The default frequency will be used instead.")
             pub_freq = self._DEF_PUB_FREQ
         self._sleep_timer = rospy.Rate(pub_freq)
-
 
         # _last_cmd_time is the time at which the most recent Ackermann
         # driving command was received.
@@ -302,7 +297,6 @@ class AckermannController(object):
             _create_cmd_pub(list_ctrlrs, left_steer_ctrlr_name)
         self._right_steer_cmd_pub = \
             _create_cmd_pub(list_ctrlrs, right_steer_ctrlr_name)
-
 
         self._left_front_axle_cmd_pub = \
             _create_axle_cmd_pub(list_ctrlrs, left_front_axle_ctrlr_name)
@@ -387,7 +381,7 @@ class AckermannController(object):
                         # rospy.logwarn("looking for chassis commander %s with priority %d", cmd, priority)
                         if cmd in self.driveCommands:
                             # rospy.loginfo("Found command from %s", cmd)
-                            #print(self.driveCommands[cmd])
+                            # print(self.driveCommands[cmd])
                             if abs(self.driveCommands[cmd].steering) <= 1.0 and \
                                (rospy.Time.now()-self.driveCommands[cmd].header.stamp) < \
                                rospy.Duration.from_sec(0.2):
@@ -399,7 +393,7 @@ class AckermannController(object):
                                 chassisSt.steering_commander = self.driveCommands[cmd].sender
                                 foundSteering = True
 
-                            if (abs(self.driveCommands[cmd].front_throttle) <= 1.0 or \
+                            if (abs(self.driveCommands[cmd].front_throttle) <= 1.0 or
                                 abs(self.driveCommands[cmd].front_throttle) <= 1.0) and \
                                (rospy.Time.now()-self.driveCommands[cmd].header.stamp) < \
                                rospy.Duration.from_sec(0.2) and not foundThrottle:
@@ -451,7 +445,7 @@ class AckermannController(object):
                 chassisSt.header.stamp = rospy.Time.now()
                 self.chassisStatePub.publish(chassisSt)
 
-                #rospy.loginfo("Torque front %6f, Torque rear %6f", speed_front, speed_rear)
+                # rospy.loginfo("Torque front %6f, Torque rear %6f", speed_front, speed_rear)
                 self._left_steer_cmd_pub.publish(self._theta_left)
                 self._right_steer_cmd_pub.publish(self._theta_right)
                 if self._left_front_axle_cmd_pub:
@@ -639,7 +633,7 @@ class AckermannController(object):
         ws.rf_speed = self.getWheelSpeed(
             data, self.right_front_name, self.right_front_dia)
         self.wheelSpeedFront = (ws.lf_speed+ws.rf_speed)/2.0
-        
+
         # steering feedback - average of both front wheel position
         ws.steering = -((self.getSteeringFeedback(data, self.left_steer_name) +
                         self.getSteeringFeedback(data, self.left_steer_name))/2)
@@ -651,7 +645,6 @@ class AckermannController(object):
             data, self.left_rear_name, self.left_rear_dia))
         ws.rb_speed = abs(self.getWheelSpeed(
             data, self.right_rear_name, self.right_rear_dia))
-
 
         if self.wheelSpeedsPub:
             self.wheelSpeedsPub.publish(ws)
@@ -712,8 +705,8 @@ def _create_axle_cmd_pub(list_ctrlrs, axle_ctrlr_name):
 def _create_cmd_pub(list_ctrlrs, ctrlr_name):
     # Create a command publisher.
     _wait_for_ctrlr(list_ctrlrs, ctrlr_name)
-    #I had to manually add the eufs/ here to get it to work :/
-    #The namespace is all over the place
+    # I had to manually add the eufs/ here to get it to work :/
+    # The namespace is all over the place
     return rospy.Publisher("eufs/" + ctrlr_name + "/command", Float64, queue_size=1)
 
 
