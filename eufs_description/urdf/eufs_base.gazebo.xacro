@@ -11,12 +11,12 @@
         <!-- controlPeriod>0.003</controlPeriod -->
         <controlPeriod>0.001</controlPeriod>
 	    <robotSimType>gazebo_ros_control/DefaultRobotHWSim</robotSimType>
-      <legacyModeNS>true</legacyModeNS>      
+      <legacyModeNS>true</legacyModeNS>
       </plugin>
     </gazebo>
 	</xacro:macro>
 
-  <gazebo>	
+  <gazebo>
     <plugin name="p3d_base_controller" filename="libgazebo_ros_p3d.so">
         <alwaysOn>true</alwaysOn>
         <updateRate>200.0</updateRate>
@@ -29,12 +29,12 @@
         <rpyOffset>0 0 0</rpyOffset>
     </plugin>
   </gazebo>
-	
+
   <!-- No Ackermann steering plugin -->
-	  
-  <gazebo reference="base_footprint">
+
+  <!-- <gazebo reference="base_footprint">
     <material>Gazebo/Green</material>
-  </gazebo>
-  
+  </gazebo> -->
+
 
 </robot>

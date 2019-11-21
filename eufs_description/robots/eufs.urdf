@@ -80,11 +80,23 @@
   <!-- BASE FOOTPRINT -->
   <link name="base_footprint">
     <visual>
-      <origin rpy="0 0 0" xyz="0 0 0"/>
+      <origin rpy="0 0 0" xyz="0 0 0.15"/>
       <geometry>
         <box size="0.001 0.001 0.001"/>
+        <mesh filename="package://eufs_description/meshes/chassis.dae"/>
       </geometry>
     </visual>
+    <inertial>
+      <mass value="125.0"/>
+      <origin xyz="0 0 0.15"/>
+      <inertia ixx="1.391" ixy="0.004" ixz="0.0" iyy="6.853" iyz="0.0" izz="6.125"/>
+    </inertial>
+    <collision>
+      <origin rpy="0 0 0" xyz="0 0 0.15"/>
+      <geometry>
+        <mesh filename="package://eufs_description/meshes/chassis_collision.dae"/>
+      </geometry>
+    </collision>
     <!--
       <collision>
           <origin xyz="0 0 0" rpy="0 0 0" />
@@ -93,33 +105,6 @@
           </geometry>
       </collision>
 -->
-  </link>
-  <joint name="base_footprint_joint" type="fixed">
-    <origin rpy="0 0 0" xyz="0 0 0.150"/>
-    <!-- height is the clearance -->
-    <parent link="base_footprint"/>
-    <child link="base_link"/>
-  </joint>
-  <!-- BASE_LINK -->
-  <link name="base_link">
-    <inertial>
-      <mass value="125.0"/>
-      <origin xyz="0 0 0"/>
-      <inertia ixx="1.391" ixy="0.004" ixz="0.0" iyy="6.853" iyz="0.0" izz="6.125"/>
-    </inertial>
-    <visual>
-      <origin rpy="0 0 0" xyz="0 0 0"/>
-      <geometry>
-        <mesh filename="package://eufs_description/meshes/chassis.dae"/>
-      </geometry>
-    </visual>
-    <collision>
-      <origin rpy="0 0 0 " xyz="0 0 0"/>
-      <geometry>
-        <mesh filename="package://eufs_description/meshes/chassis_collision.dae"/>
-      </geometry>
-    </collision>
-  </link>
   <!-- Gazebo ros control pluggins -->
   <gazebo>
     <plugin filename="libgazebo_ros_control.so" name="ros_control">
@@ -128,7 +113,7 @@
       <!-- controlPeriod>0.003</controlPeriod -->
       <controlPeriod>0.001</controlPeriod>
       <robotSimType>gazebo_ros_control/DefaultRobotHWSim</robotSimType>
-      <legacyModeNS>true</legacyModeNS>      
+      <legacyModeNS>true</legacyModeNS>
     </plugin>
   </gazebo>
   <!-- Gazebo skid steering pluggins -->
@@ -136,9 +121,9 @@
   <!-- WHEELS -->
   <!-- Wheels -->
   <joint name="left_front_shock" type="prismatic">
-    <parent link="base_link"/>
+    <parent link="base_footprint"/>
     <child link="left_steering_link"/>
-    <origin xyz="0.825                    0.33                    0.0"/>
+    <origin xyz="0.825                    0.33                    0.15"/>
     <axis xyz="0 0 -1"/>
     <limit effort="100" lower="-0.05" upper="0.05" velocity="1000"/>
   </joint>
@@ -258,9 +243,9 @@
     <material>Gazebo/Black</material>
   </gazebo>
   <joint name="right_front_shock" type="prismatic">
-    <parent link="base_link"/>
+    <parent link="base_footprint"/>
     <child link="right_steering_link"/>
-    <origin xyz="0.825                    -0.33                    0.0"/>
+    <origin xyz="0.825                    -0.33                    0.15"/>
     <axis xyz="0 0 -1"/>
     <limit effort="100" lower="-0.05" upper="0.05" velocity="1000"/>
   </joint>
@@ -380,9 +365,9 @@
     <material>Gazebo/Black</material>
   </gazebo>
   <joint name="left_rear_shock" type="prismatic">
-    <parent link="base_link"/>
+    <parent link="base_footprint"/>
     <child link="left_rear_axle_carrier"/>
-    <origin xyz="-0.825                    0.33                    0.0"/>
+    <origin xyz="-0.825                    0.33                    0.15"/>
     <axis xyz="0 0 -1"/>
     <limit effort="100" lower="-0.05" upper="0.05" velocity="1000"/>
   </joint>
@@ -463,9 +448,9 @@
     <material>Gazebo/Black</material>
   </gazebo>
   <joint name="right_rear_shock" type="prismatic">
-    <parent link="base_link"/>
+    <parent link="base_footprint"/>
     <child link="right_rear_axle_carrier"/>
-    <origin xyz="-0.825                    -0.33                    0.0"/>
+    <origin xyz="-0.825                    -0.33                    0.15"/>
     <axis xyz="0 0 -1"/>
     <limit effort="100" lower="-0.05" upper="0.05" velocity="1000"/>
   </joint>
@@ -548,25 +533,25 @@
   <!-- SENSORS -->
   <joint name="hokuyo3d_laser_joint" type="fixed">
     <origin rpy="0 0 0" xyz="0.95 0.0 0.1"/>
-    <parent link="base_link"/>
+    <parent link="base_footprint"/>
     <child link="hokuyo3d_laser_link"/>
   </joint>
   <link name="hokuyo3d_laser_link">
     <collision>
-      <origin rpy="0 0 0" xyz="0 0 0"/>
+      <origin rpy="0 0 0" xyz="0 0 0.15"/>
       <geometry>
         <box size="0.1 0.1 0.08"/>
       </geometry>
     </collision>
     <visual>
-      <origin rpy="0 0 0" xyz="0 0 0"/>
+      <origin rpy="0 0 0" xyz="0 0 0.15"/>
       <geometry>
         <mesh filename="package://eufs_description/meshes/sensors/hokuyo3d.dae"/>
       </geometry>
     </visual>
     <inertial>
       <mass value="1e-5"/>
-      <origin rpy="0 0 0" xyz="0 0 0"/>
+      <origin rpy="0 0 0" xyz="0 0 0.15"/>
       <inertia ixx="1e-6" ixy="0" ixz="0" iyy="1e-6" iyz="0" izz="1e-6"/>
     </inertial>
   </link>
@@ -610,8 +595,8 @@
   </gazebo> -->
 
 
-  <xacro:sensor_hokuyo_utm30lx name="hokuyo" parent="base_link" prefix_topic="eufs">
-		<origin xyz="0.0 0.0 0.33" rpy="0 0 0"/>
+  <xacro:sensor_hokuyo_utm30lx name="hokuyo" parent="base_footprint" prefix_topic="eufs">
+		<origin xyz="0.0 0.0 0.48" rpy="0 0 0"/>
 	</xacro:sensor_hokuyo_utm30lx>
   <!--
 	<xacro:sensor_hokuyo_urg04lx name="hokuyo1" parent="base_link">
@@ -650,4 +635,3 @@
   </gazebo -->
   <!-- ros control plugin -->
 </robot>
-
