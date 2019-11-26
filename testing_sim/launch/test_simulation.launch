@@ -8,11 +8,11 @@
   <arg name="controlMethod" default="speed"/>
 
   <!-- Whether or not to launch the gui-->
-  <arg name="gui" default="true"/>
+  <arg name="gui" default="false"/>
 
   <!-- Which group of launch files to use for the state_machine node.
        Set to 'no_perception' to turn off the perception code and use ground truth cones. -->
-  <arg name="launch_group" default="default" />
+  <arg name="launch_group" default="no_perception" />
 
   <!-- Launch the simulation -->
   <include file="$(find eufs_gazebo)/launch/$(arg track).launch">

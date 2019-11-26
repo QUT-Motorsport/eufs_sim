@@ -22,13 +22,11 @@ class SimulationTestClass(unittest.TestCase):
         while not rospy.is_shutdown() and self.lap_count == -1:
             count += 1
 
-        self.assertEqual(self.lap_count, -1)
+        self.assertNotEqual(self.lap_count, -1)
 
 if __name__ == '__main__':
 
     rospy.init_node('test_lapcount')
-
-    state = 0
 
     pub = rospy.Publisher('/ros_can/set_mission', CanState, queue_size=1)
 
@@ -39,5 +37,6 @@ if __name__ == '__main__':
     mission_msg.ami_state = 13
     mission_msg.mission_flag = False
     pub.publish(mission_msg)
+
 
     rostest.rosrun('testing_sim', 'test_simulation', SimulationTestClass)
