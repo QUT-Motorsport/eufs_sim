@@ -200,6 +200,3 @@ include_directories(
 
 ## Add folders to be run by python nosetests
 # catkin_add_nosetests(test)
-
-find_package(rostest REQUIRED)
-add_rostest(launch/test_simulation.test)
