@@ -6,6 +6,7 @@ import rostest
 from time import sleep
 
 from std_msgs.msg import Int16
+from eufs_msgs.msg import CanState
 
 class SimulationTestClass(unittest.TestCase):
 
@@ -15,7 +16,6 @@ class SimulationTestClass(unittest.TestCase):
         self.lap_count = msg.data
 
     def test_lapcount(self):
-        rospy.init_node('test_lapcount')
         rospy.Subscriber('/finish_line_detector/completed_laps', Int16, self.callback)
 
         count = 0
@@ -25,4 +25,14 @@ class SimulationTestClass(unittest.TestCase):
         self.assertNotEqual(self.lap_count, -1)
 
 if __name__ == '__main__':
+
+    rospy.init_node('test_lapcount')
+
+    pub = rospy.Publisher('/ros_can/set_mission', CanState, queue_size=1)
+    mission_msg = CanState()
+    mission_msg.as_state = 0
+    mission_msg.ami_state = 13
+    mission_msg.mission_flag = False
+    pub.publish(mission_msg)
+
     rostest.rosrun('testing_sim', 'test_simulation', SimulationTestClass)

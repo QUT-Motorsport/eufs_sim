@@ -1,4 +1,29 @@
 <launch>
+  <!-- ARGUMENTS -->
 
-  <test test-name="test_simulation" pkg="testing_sim" type="test_simulation.py" time-limit="10.0"/>
+  <!-- Which track to launch. Must correspond to a launch file in eufs_gazebo -->
+  <arg name="track" default="small_track"/>
+
+  <!-- Which control method to use (speed or torque) -->
+  <arg name="controlMethod" default="speed"/>
+
+  <!-- Whether or not to launch the gui-->
+  <arg name="gui" default="true"/>
+
+  <!-- Which group of launch files to use for the state_machine node.
+       Set to 'no_perception' to turn off the perception code and use ground truth cones. -->
+  <arg name="launch_group" default="default" />
+
+  <!-- Launch the simulation -->
+  <include file="$(find eufs_gazebo)/launch/$(arg track).launch">
+      <arg name="controlMethod" value="$(arg controlMethod)"/>
+      <arg name="gui" value="$(arg gui)"/>
+  </include>
+
+  <!-- Launch the state_machine module -->
+  <include file="$(find car_meta)/launch/state_machine.launch" >
+      <arg name="launch_group" value="$(arg launch_group)"/>
+  </include>
+
+  <test test-name="test_simulation" pkg="testing_sim" type="test_simulation.py" time-limit="100.0"/>
 </launch>
