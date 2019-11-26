@@ -1,0 +1,4 @@
+<launch>
+
+  <test test-name="test_simulation" pkg="testing_sim" type="test_simulation.py" time-limit="10.0"/>
+</launch>
