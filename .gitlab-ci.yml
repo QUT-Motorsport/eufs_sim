@@ -49,4 +49,4 @@ roslint:
 rostest:
   stage: test
   script:
-    - catkin run_tests
+    - rostest testing_sim test_simulation.launch
