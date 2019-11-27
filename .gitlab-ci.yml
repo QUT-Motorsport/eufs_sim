@@ -50,5 +50,6 @@ rostest:
   stage: test
   script:
     - catkin build
-    - source  devel/setup.bash
+    - pwd
+    - source devel/setup.bash
     - rostest testing_sim test_simulation.launch
