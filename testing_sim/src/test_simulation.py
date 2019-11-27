@@ -11,18 +11,24 @@ from eufs_msgs.msg import CanState
 class SimulationTestClass(unittest.TestCase):
 
     lap_count = -1
+    as_state = 0
 
-    def callback(self, msg):
+    def laps_callback(self, msg):
         self.lap_count = msg.data
 
+    def state_callback(self, msg):
+        self.as_state = msg.as_state
+
     def test_lapcount(self):
-        rospy.Subscriber('/finish_line_detector/completed_laps', Int16, self.callback)
+        rospy.Subscriber('/finish_line_detector/completed_laps', Int16, self.laps_callback)
+        rospy.Subscriber('/ros_can/state', CanState, self.state_callback)
 
-        count = 0
-        while not rospy.is_shutdown() and self.lap_count == -1:
-            count += 1
+        while not rospy.is_shutdown() and self.lap_count != 1 and self.as_state != 4:
+            continue
 
-        self.assertNotEqual(self.lap_count, -1)
+        self.assertEqual(self.lap_count, 1)
+        self.assertEqual(self.as_state, 4)
+
 
 if __name__ == '__main__':
 
