@@ -49,7 +49,13 @@ roslint:
 rostest:
   stage: test
   script:
+    - pwd
+    - ls
     - catkin build
     - pwd
+    - ls
+    - cd ~
+    - pwd
+    - ls
     - source devel/setup.bash
     - rostest testing_sim test_simulation.launch
