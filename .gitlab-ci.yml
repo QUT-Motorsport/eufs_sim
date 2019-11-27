@@ -54,7 +54,7 @@ rostest:
     - catkin build
     - pwd
     - ls
-    - cd ~
+    - cd ~/
     - pwd
     - ls
     - source devel/setup.bash
