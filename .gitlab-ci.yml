@@ -54,8 +54,5 @@ rostest:
     - catkin build
     - pwd
     - ls
-    - cd ~/
-    - pwd
-    - ls
     - source devel/setup.bash
     - rostest testing_sim test_simulation.launch
