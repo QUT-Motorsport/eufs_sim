@@ -23,7 +23,7 @@ class SimulationTestClass(unittest.TestCase):
         rospy.Subscriber('/finish_line_detector/completed_laps', Int16, self.laps_callback)
         rospy.Subscriber('/ros_can/state', CanState, self.state_callback)
 
-        while not rospy.is_shutdown() and self.lap_count != 1 and self.as_state != 4:
+        while not rospy.is_shutdown() and (self.lap_count != 1 or self.as_state != 4):
             continue
 
         self.assertEqual(self.lap_count, 1)
