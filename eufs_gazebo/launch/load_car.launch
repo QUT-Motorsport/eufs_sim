@@ -15,6 +15,7 @@
 
     <!-- Control Method Argument -->
     <arg name="controlMethod" default="speed"/>
+    <arg name="show_rqt_gui" default="true"/>
 
     <!-- Load the URDF into the ROS Parameter Server -->
     <group if="$(eval arg('controlMethod')=='speed')">
@@ -28,7 +29,9 @@
         <node pkg="ros_can_sim" name="twist_to_ackermannDrive" type="twist_to_ackermannDrive.py" args="twistToAckermannDrive:=eufsa_control/teleop_vel_out"/>
 
         <!-- start rqt robot steering module -->
-        <node name="eufs_sim_rqt" pkg="rqt_gui" type="rqt_gui" respawn="false" output="screen" args="--perspective-file $(find eufs_gazebo)/config/eufs_sim.perspective"/>
+        <group if="$(eval arg('show_rqt_gui'))">
+          <node name="eufs_sim_rqt" pkg="rqt_gui" type="rqt_gui" respawn="false" output="screen" args="--perspective-file $(find eufs_gazebo)/config/eufs_sim.perspective"/>
+        </group>
 
     </group>
     <group if="$(eval arg('controlMethod')=='torque')">

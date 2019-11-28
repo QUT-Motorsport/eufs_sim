@@ -6,6 +6,7 @@
 
   <!-- Which control method to use (speed or torque) -->
   <arg name="controlMethod" default="speed"/>
+  <arg name="show_rqt_gui" default="false"/>
 
   <!-- Whether or not to launch the gui-->
   <arg name="gui" default="false"/>
@@ -17,6 +18,7 @@
   <!-- Launch the simulation -->
   <include file="$(find eufs_gazebo)/launch/$(arg track).launch">
       <arg name="controlMethod" value="$(arg controlMethod)"/>
+      <arg name="show_rqt_gui" default="$(arg show_rqt_gui)"/>
       <arg name="gui" value="$(arg gui)"/>
   </include>
 
