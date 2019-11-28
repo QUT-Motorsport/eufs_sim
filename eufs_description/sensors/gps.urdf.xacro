@@ -49,9 +49,9 @@
                 <referenceHeading>90</referenceHeading>
                 <velocityTopicName>gps_velocity</velocityTopicName>
                 <drift>0.0 0.0 0.0</drift>
-                <gaussianNoise>0.1 0.1 0.1</gaussianNoise>
-                <velocityDrift>0.00001 0.00001 0.00001</velocityDrift>
-                <velocityGaussianNoise>0.00001 0.00001 0.00001</velocityGaussianNoise>
+                <gaussianNoise>0 0 0</gaussianNoise>
+                <velocityDrift>0 0 0</velocityDrift>
+                <velocityGaussianNoise>0 0 0</velocityGaussianNoise>
             </plugin>
         </gazebo>
     </xacro:macro>
