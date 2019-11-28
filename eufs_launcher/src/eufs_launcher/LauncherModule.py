@@ -867,6 +867,19 @@ class EufsLauncher(Plugin):
                                      "to launch a track, this launcher will no longer " +
                                      "react to input.")
 
+                # Launch SBG Simulator Node
+                self.launch_node_with_args(
+                        os.path.join(
+                                self.GAZEBO,
+                                "launch",
+                                "sbg_raw_data_simulator.launch"
+                        ),
+                        [
+                                "_imu_hz:=200",
+                                "_gps_hz:=5"
+                        ]
+                )
+
                 # Hide launcher
                 self._widget.setVisible(False)
                 self._widget.window().showMinimized()
