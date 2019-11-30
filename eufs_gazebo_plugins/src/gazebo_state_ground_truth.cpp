@@ -22,21 +22,18 @@
 
 #include "eufs_gazebo_plugins/gazebo_state_ground_truth.hpp"
 
-namespace gazebo
-{
+namespace gazebo {
 GZ_REGISTER_MODEL_PLUGIN(GazeboStateGroundTruth);
 
 ////////////////////////////////////////////////////////////////////////////////
 // Constructor
-GazeboStateGroundTruth::GazeboStateGroundTruth()
-{
+GazeboStateGroundTruth::GazeboStateGroundTruth() {
   this->seed = 0;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 // Destructor
-GazeboStateGroundTruth::~GazeboStateGroundTruth()
-{
+GazeboStateGroundTruth::~GazeboStateGroundTruth() {
   this->update_connection_.reset();
   // Finalize the controller
   this->rosnode_->shutdown();
@@ -48,8 +45,7 @@ GazeboStateGroundTruth::~GazeboStateGroundTruth()
 
 ////////////////////////////////////////////////////////////////////////////////
 // Load the controller
-void GazeboStateGroundTruth::Load(physics::ModelPtr _parent, sdf::ElementPtr _sdf)
-{
+void GazeboStateGroundTruth::Load(physics::ModelPtr _parent, sdf::ElementPtr _sdf) {
   // Get the world name.
   this->world_ = _parent->GetWorld();
   this->model_ = _parent;
@@ -60,60 +56,49 @@ void GazeboStateGroundTruth::Load(physics::ModelPtr _parent, sdf::ElementPtr _sd
     this->robot_namespace_ =
         _sdf->GetElement("robotNamespace")->Get<std::string>() + "/";
 
-  if (!_sdf->HasElement("bodyName"))
-  {
+  if (!_sdf->HasElement("bodyName")) {
     ROS_FATAL_NAMED("state_ground_truth", "state_ground_truth plugin missing <bodyName>, cannot proceed");
     return;
-  }
-  else
+  } else
     this->link_name_ = _sdf->GetElement("bodyName")->Get<std::string>();
 
   this->link_ = _parent->GetLink(this->link_name_);
-  if (!this->link_)
-  {
+  if (!this->link_) {
     ROS_FATAL_NAMED("state_ground_truth", "state_ground_truth plugin error: bodyName: %s does not exist\n",
                     this->link_name_.c_str());
     return;
   }
 
-  if (!_sdf->HasElement("topicName"))
-  {
+  if (!_sdf->HasElement("topicName")) {
     ROS_FATAL_NAMED("state_ground_truth", "state_ground_truth plugin missing <topicName>, cannot proceed");
     return;
-  }
-  else
+  } else
     this->topic_name_ = _sdf->GetElement("topicName")->Get<std::string>();
 
-  if (!_sdf->HasElement("frameName"))
-  {
+  if (!_sdf->HasElement("frameName")) {
     ROS_DEBUG_NAMED("state_ground_truth", "state_ground_truth plugin missing <frameName>, defaults to world");
     this->frame_name_ = "world";
-  }
-  else
+  } else
     this->frame_name_ = _sdf->GetElement("frameName")->Get<std::string>();
 
-  if (!_sdf->HasElement("gaussianNoise"))
-  {
+  if (!_sdf->HasElement("gaussianNoise")) {
     ROS_DEBUG_NAMED("state_ground_truth", "state_ground_truth plugin missing <gaussianNoise>, defaults to 0.0");
     this->gaussian_noise_ = 0;
-  }
-  else
+  } else
     this->gaussian_noise_ = _sdf->GetElement("gaussianNoise")->Get<double>();
 
-  if (!_sdf->HasElement("updateRate"))
-  {
+  if (!_sdf->HasElement("updateRate")) {
     ROS_DEBUG_NAMED("state_ground_truth", "state_ground_truth plugin missing <updateRate>, defaults to 0.0"
-                           " (as fast as possible)");
+                                          " (as fast as possible)");
     this->update_rate_ = 0;
-  }
-  else
+  } else
     this->update_rate_ = _sdf->GetElement("updateRate")->Get<double>();
 
   // Make sure the ROS node for Gazebo has already been initialized
-  if (!ros::isInitialized())
-  {
-    ROS_FATAL_STREAM_NAMED("state_ground_truth", "A ROS node for Gazebo has not been initialized, unable to load plugin. "
-        << "Load the Gazebo system plugin 'libgazebo_ros_api_plugin.so' in the gazebo_ros package)");
+  if (!ros::isInitialized()) {
+    ROS_FATAL_STREAM_NAMED("state_ground_truth",
+                           "A ROS node for Gazebo has not been initialized, unable to load plugin. "
+                               << "Load the Gazebo system plugin 'libgazebo_ros_api_plugin.so' in the gazebo_ros package)");
     return;
   }
 
@@ -127,8 +112,7 @@ void GazeboStateGroundTruth::Load(physics::ModelPtr _parent, sdf::ElementPtr _sd
   this->rosnode_->getParam(std::string("tf_prefix"), prefix);
   this->tf_frame_name_ = tf::resolve(prefix, this->frame_name_);
 
-  if (this->topic_name_ != "")
-  {
+  if (this->topic_name_ != "") {
     this->pub_Queue = this->pmq.addPub<nav_msgs::Odometry>();
     this->pub_ =
         this->rosnode_->advertise<nav_msgs::Odometry>(this->topic_name_, 1);
@@ -155,20 +139,17 @@ void GazeboStateGroundTruth::Load(physics::ModelPtr _parent, sdf::ElementPtr _sd
   if (this->frame_name_ != "/world" &&
       this->frame_name_ != "world" &&
       this->frame_name_ != "/map" &&
-      this->frame_name_ != "map")
-  {
+      this->frame_name_ != "map") {
     this->reference_link_ = this->model_->GetLink(this->frame_name_);
-    if (!this->reference_link_)
-    {
+    if (!this->reference_link_) {
       ROS_ERROR_NAMED("state_ground_truth", "state_ground_truth plugin: frameName: %s does not exist, will"
-                             " not publish pose\n", this->frame_name_.c_str());
+                                            " not publish pose\n", this->frame_name_.c_str());
       return;
     }
   }
 
   // init reference frame state
-  if (this->reference_link_)
-  {
+  if (this->reference_link_) {
     ROS_DEBUG_NAMED("state_ground_truth", "got body %s", this->reference_link_->GetName().c_str());
     this->frame_apos_ = 0;
     this->frame_aeul_ = 0;
@@ -194,20 +175,23 @@ void GazeboStateGroundTruth::Load(physics::ModelPtr _parent, sdf::ElementPtr _sd
 
 ////////////////////////////////////////////////////////////////////////////////
 // Update the controller
-void GazeboStateGroundTruth::UpdateChild()
-{
+void GazeboStateGroundTruth::UpdateChild() {
 
   if (!this->link_)
     return;
 
-  if (!this->got_offset_){
+  if (!this->got_offset_) {
     // init reference position (aka. offset)
 #if GAZEBO_MAJOR_VERSION >= 8
     this->offset_ = this->link_->WorldPose();
 #else
     this->offset_ = this->link_->GetWorldPose().Ign();
 #endif
-    ROS_DEBUG_NAMED("state_ground_truth","Got starting offset %f %f %f", this->offset_.Pos()[0], this->offset_.Pos()[1], this->offset_.Pos()[2]);
+    ROS_DEBUG_NAMED("state_ground_truth",
+                    "Got starting offset %f %f %f",
+                    this->offset_.Pos()[0],
+                    this->offset_.Pos()[1],
+                    this->offset_.Pos()[2]);
     this->got_offset_ = true;
   }
 
@@ -217,27 +201,23 @@ void GazeboStateGroundTruth::UpdateChild()
   common::Time cur_time = this->world_->GetSimTime();
 #endif
 
-  if (cur_time < this->last_time_)
-  {
+  if (cur_time < this->last_time_) {
     ROS_WARN_NAMED("p3d", "Negative update time difference detected.");
     this->last_time_ = cur_time;
   }
 
   // rate control
   if (this->update_rate_ > 0 &&
-      (cur_time-this->last_time_).Double() < (1.0/this->update_rate_))
+      (cur_time - this->last_time_).Double() < (1.0 / this->update_rate_))
     return;
 
-  if (this->pub_.getNumSubscribers() > 0)
-  {
+  if (this->pub_.getNumSubscribers() > 0) {
     // differentiate to get accelerations
     double tmp_dt = cur_time.Double() - this->last_time_.Double();
-    if (tmp_dt != 0)
-    {
+    if (tmp_dt != 0) {
       this->lock.lock();
 
-      if (this->topic_name_ != "")
-      {
+      if (this->topic_name_ != "") {
         // copy data into pose message
         this->pose_msg_.header.frame_id = this->tf_frame_name_;
         this->pose_msg_.header.stamp.sec = cur_time.sec;
@@ -264,8 +244,7 @@ void GazeboStateGroundTruth::UpdateChild()
 #endif
 
         // Apply Reference Frame
-        if (this->reference_link_)
-        {
+        if (this->reference_link_) {
           // convert to relative pose, rates
 #if GAZEBO_MAJOR_VERSION >= 8
           frame_pose = this->reference_link_->WorldPose();
@@ -288,7 +267,7 @@ void GazeboStateGroundTruth::UpdateChild()
         // apply xyz offsets and get position and rotation components
         pose.Pos() = pose.Pos() - this->offset_.Pos();
         // apply rpy offsets
-        pose.Rot() = pose.Rot()*this->offset_.Rot();
+        pose.Rot() = pose.Rot() * this->offset_.Rot();
         pose.Rot().Normalize();
 
         // compute accelerations (not used)
@@ -303,20 +282,20 @@ void GazeboStateGroundTruth::UpdateChild()
         this->last_frame_veul_ = frame_veul;
 
         // Fill out pose part of message
-        this->pose_msg_.pose.pose.position.x    = pose.Pos().X();
-        this->pose_msg_.pose.pose.position.y    = pose.Pos().Y();
-        this->pose_msg_.pose.pose.position.z    = pose.Pos().Z();
+        this->pose_msg_.pose.pose.position.x = pose.Pos().X();
+        this->pose_msg_.pose.pose.position.y = pose.Pos().Y();
+        this->pose_msg_.pose.pose.position.z = pose.Pos().Z();
 
         this->pose_msg_.pose.pose.orientation.x = pose.Rot().X();
         this->pose_msg_.pose.pose.orientation.y = pose.Rot().Y();
         this->pose_msg_.pose.pose.orientation.z = pose.Rot().Z();
         this->pose_msg_.pose.pose.orientation.w = pose.Rot().W();
 
-        this->pose_msg_.twist.twist.linear.x  = vpos.X() +
+        this->pose_msg_.twist.twist.linear.x = vpos.X() +
             this->GaussianKernel(0, this->gaussian_noise_);
-        this->pose_msg_.twist.twist.linear.y  = vpos.Y() +
+        this->pose_msg_.twist.twist.linear.y = vpos.Y() +
             this->GaussianKernel(0, this->gaussian_noise_);
-        this->pose_msg_.twist.twist.linear.z  = vpos.Z() +
+        this->pose_msg_.twist.twist.linear.z = vpos.Z() +
             this->GaussianKernel(0, this->gaussian_noise_);
         this->pose_msg_.twist.twist.angular.x = veul.X() +
             this->GaussianKernel(0, this->gaussian_noise_);
@@ -330,15 +309,17 @@ void GazeboStateGroundTruth::UpdateChild()
         auto q1 = this->pose_msg_.pose.pose.orientation.x;
         auto q2 = this->pose_msg_.pose.pose.orientation.y;
         auto q3 = this->pose_msg_.pose.pose.orientation.z;
-        auto yaw = atan2(2*q1*q2 + 2*q0*q3, q1*q1 + q0*q0 - q3*q3 - q2*q2);
-        auto new_x_vel = cos(yaw)*this->pose_msg_.twist.twist.linear.x + sin(yaw)*this->pose_msg_.twist.twist.linear.y;
-        auto new_y_vel = -sin(yaw)*this->pose_msg_.twist.twist.linear.x + cos(yaw)*this->pose_msg_.twist.twist.linear.y;
+        auto yaw = atan2(2 * q1 * q2 + 2 * q0 * q3, q1 * q1 + q0 * q0 - q3 * q3 - q2 * q2);
+        auto new_x_vel =
+            cos(yaw) * this->pose_msg_.twist.twist.linear.x + sin(yaw) * this->pose_msg_.twist.twist.linear.y;
+        auto new_y_vel =
+            -sin(yaw) * this->pose_msg_.twist.twist.linear.x + cos(yaw) * this->pose_msg_.twist.twist.linear.y;
         this->pose_msg_.twist.twist.linear.x = new_x_vel;
         this->pose_msg_.twist.twist.linear.y = new_y_vel;
 
         // fill in covariance matrix
         /// @todo: let user set separate linear and angular covariance values.
-        double gn2 = this->gaussian_noise_*this->gaussian_noise_;
+        double gn2 = this->gaussian_noise_ * this->gaussian_noise_;
         this->pose_msg_.pose.covariance[0] = gn2;
         this->pose_msg_.pose.covariance[7] = gn2;
         this->pose_msg_.pose.covariance[14] = gn2;
@@ -367,8 +348,7 @@ void GazeboStateGroundTruth::UpdateChild()
 
 //////////////////////////////////////////////////////////////////////////////
 // Utility for adding noise
-double GazeboStateGroundTruth::GaussianKernel(double mu, double sigma)
-{
+double GazeboStateGroundTruth::GaussianKernel(double mu, double sigma) {
   // using Box-Muller transform to generate two independent standard
   // normally disbributed normal variables see wikipedia
 
@@ -380,7 +360,7 @@ double GazeboStateGroundTruth::GaussianKernel(double mu, double sigma)
   double V = static_cast<double>(rand_r(&this->seed)) /
       static_cast<double>(RAND_MAX);
 
-  double X = sqrt(-2.0 * ::log(U)) * cos(2.0*M_PI * V);
+  double X = sqrt(-2.0 * ::log(U)) * cos(2.0 * M_PI * V);
   // double Y = sqrt(-2.0 * ::log(U)) * sin(2.0*M_PI * V);
 
   // there are 2 indep. vars, we'll just use X
@@ -391,12 +371,10 @@ double GazeboStateGroundTruth::GaussianKernel(double mu, double sigma)
 
 ////////////////////////////////////////////////////////////////////////////////
 // Put laser data to the interface
-void GazeboStateGroundTruth::P3DQueueThread()
-{
+void GazeboStateGroundTruth::P3DQueueThread() {
   static const double timeout = 0.01;
 
-  while (this->rosnode_->ok())
-  {
+  while (this->rosnode_->ok()) {
     this->p3d_queue_.callAvailable(ros::WallDuration(timeout));
   }
 }

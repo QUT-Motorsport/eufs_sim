@@ -44,92 +44,91 @@
 
 #include <gazebo_plugins/PubQueue.h>
 
-namespace gazebo
-{
-class GazeboStateGroundTruth : public ModelPlugin
-{
+namespace gazebo {
+class GazeboStateGroundTruth : public ModelPlugin {
+  
+ public:
   /// \brief Constructor
- public: GazeboStateGroundTruth();
-
-  /// \brief Destructor
- public: virtual ~GazeboStateGroundTruth();
+  GazeboStateGroundTruth();
+  virtual ~GazeboStateGroundTruth();
 
   /// \brief Load the controller
- public: void Load(physics::ModelPtr _parent, sdf::ElementPtr _sdf);
+  void Load(physics::ModelPtr _parent, sdf::ElementPtr _sdf);
 
+ protected:
   /// \brief Update the controller
- protected: virtual void UpdateChild();
+  virtual void UpdateChild();
 
- private: physics::WorldPtr world_;
- private: physics::ModelPtr model_;
+ private:
+  physics::WorldPtr world_;
+  physics::ModelPtr model_;
 
   /// \brief The parent Model
- private: physics::LinkPtr link_;
+  physics::LinkPtr link_;
 
   /// \brief The body of the frame to display pose, twist
- private: physics::LinkPtr reference_link_;
-
+  physics::LinkPtr reference_link_;
 
   /// \brief pointer to ros node
- private: ros::NodeHandle* rosnode_;
- private: ros::Publisher pub_;
- private: PubQueue<nav_msgs::Odometry>::Ptr pub_Queue;
+  ros::NodeHandle *rosnode_;
+  ros::Publisher pub_;
+  PubQueue<nav_msgs::Odometry>::Ptr pub_Queue;
 
   /// \brief ros message
- private: nav_msgs::Odometry pose_msg_;
+  nav_msgs::Odometry pose_msg_;
 
   /// \brief store bodyname
- private: std::string link_name_;
+  std::string link_name_;
 
   /// \brief topic name
- private: std::string topic_name_;
+  std::string topic_name_;
 
   /// \brief frame transform name, should match link name
   /// FIXME: extract link name directly?
- private: std::string frame_name_;
- private: std::string tf_frame_name_;
+  std::string frame_name_;
+  std::string tf_frame_name_;
 
   /// \brief allow specifying constant xyz and rpy offsets
- private: bool got_offset_;
- private: ignition::math::Pose3d offset_;
+  bool got_offset_;
+  ignition::math::Pose3d offset_;
 
   /// \brief mutex to lock access to fields used in message callbacks
- private: boost::mutex lock;
+  boost::mutex lock;
 
   /// \brief save last_time
- private: common::Time last_time_;
- private: ignition::math::Vector3d last_vpos_;
- private: ignition::math::Vector3d last_veul_;
- private: ignition::math::Vector3d apos_;
- private: ignition::math::Vector3d aeul_;
- private: ignition::math::Vector3d last_frame_vpos_;
- private: ignition::math::Vector3d last_frame_veul_;
- private: ignition::math::Vector3d frame_apos_;
- private: ignition::math::Vector3d frame_aeul_;
+  common::Time last_time_;
+  ignition::math::Vector3d last_vpos_;
+  ignition::math::Vector3d last_veul_;
+  ignition::math::Vector3d apos_;
+  ignition::math::Vector3d aeul_;
+  ignition::math::Vector3d last_frame_vpos_;
+  ignition::math::Vector3d last_frame_veul_;
+  ignition::math::Vector3d frame_apos_;
+  ignition::math::Vector3d frame_aeul_;
 
   // rate control
- private: double update_rate_;
+  double update_rate_;
 
   /// \brief Gaussian noise
- private: double gaussian_noise_;
+  double gaussian_noise_;
 
   /// \brief Gaussian noise generator
- private: double GaussianKernel(double mu, double sigma);
+  double GaussianKernel(double mu, double sigma);
 
   /// \brief for setting ROS name space
- private: std::string robot_namespace_;
+  std::string robot_namespace_;
 
- private: ros::CallbackQueue p3d_queue_;
- private: void P3DQueueThread();
- private: boost::thread callback_queue_thread_;
+  ros::CallbackQueue p3d_queue_;
+  void P3DQueueThread();
+  boost::thread callback_queue_thread_;
 
   // Pointer to the update event connection
- private: event::ConnectionPtr update_connection_;
+  event::ConnectionPtr update_connection_;
 
- private: unsigned int seed;
+  unsigned int seed;
 
   // ros publish multi queue, prevents publish() blocking
- private: PubMultiQueue pmq;
+  PubMultiQueue pmq;
 };
 }
 #endif
