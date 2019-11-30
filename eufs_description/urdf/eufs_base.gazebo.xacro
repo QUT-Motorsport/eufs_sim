@@ -19,12 +19,10 @@
     <plugin name="state_ground_truth" filename="libgazebo_state_ground_truth.so">
         <alwaysOn>true</alwaysOn>
         <updateRate>200.0</updateRate>
-        <bodyName>odom_ground_truth</bodyName>
+        <bodyName>base_footprint</bodyName>
         <topicName>ground_truth/state_raw</topicName>
         <gaussianNoise>0.00</gaussianNoise>
         <frameName>world</frameName>
-        <xyzOffset>0.0 0.0 0</xyzOffset>
-        <rpyOffset>0 0 0</rpyOffset>
     </plugin>
   </gazebo>
 
