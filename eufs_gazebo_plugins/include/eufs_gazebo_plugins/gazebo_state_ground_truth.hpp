@@ -90,6 +90,7 @@ class GazeboStateGroundTruth : public ModelPlugin
  private: std::string tf_frame_name_;
 
   /// \brief allow specifying constant xyz and rpy offsets
+ private: bool got_offset_;
  private: ignition::math::Pose3d offset_;
 
   /// \brief mutex to lock access to fields used in message callbacks

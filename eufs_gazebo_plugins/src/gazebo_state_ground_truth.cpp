@@ -62,7 +62,7 @@ void GazeboStateGroundTruth::Load(physics::ModelPtr _parent, sdf::ElementPtr _sd
 
   if (!_sdf->HasElement("bodyName"))
   {
-    ROS_FATAL_NAMED("p3d", "p3d plugin missing <bodyName>, cannot proceed");
+    ROS_FATAL_NAMED("state_ground_truth", "state_ground_truth plugin missing <bodyName>, cannot proceed");
     return;
   }
   else
@@ -71,14 +71,14 @@ void GazeboStateGroundTruth::Load(physics::ModelPtr _parent, sdf::ElementPtr _sd
   this->link_ = _parent->GetLink(this->link_name_);
   if (!this->link_)
   {
-    ROS_FATAL_NAMED("p3d", "gazebo_ros_p3d plugin error: bodyName: %s does not exist\n",
+    ROS_FATAL_NAMED("state_ground_truth", "state_ground_truth plugin error: bodyName: %s does not exist\n",
                     this->link_name_.c_str());
     return;
   }
 
   if (!_sdf->HasElement("topicName"))
   {
-    ROS_FATAL_NAMED("p3d", "p3d plugin missing <topicName>, cannot proceed");
+    ROS_FATAL_NAMED("state_ground_truth", "state_ground_truth plugin missing <topicName>, cannot proceed");
     return;
   }
   else
@@ -86,31 +86,15 @@ void GazeboStateGroundTruth::Load(physics::ModelPtr _parent, sdf::ElementPtr _sd
 
   if (!_sdf->HasElement("frameName"))
   {
-    ROS_DEBUG_NAMED("p3d", "p3d plugin missing <frameName>, defaults to world");
+    ROS_DEBUG_NAMED("state_ground_truth", "state_ground_truth plugin missing <frameName>, defaults to world");
     this->frame_name_ = "world";
   }
   else
     this->frame_name_ = _sdf->GetElement("frameName")->Get<std::string>();
 
-  if (!_sdf->HasElement("xyzOffset"))
-  {
-    ROS_DEBUG_NAMED("p3d", "p3d plugin missing <xyzOffset>, defaults to 0s");
-    this->offset_.Pos() = ignition::math::Vector3d(0, 0, 0);
-  }
-  else
-    this->offset_.Pos() = _sdf->GetElement("xyzOffset")->Get<ignition::math::Vector3d>();
-
-  if (!_sdf->HasElement("rpyOffset"))
-  {
-    ROS_DEBUG_NAMED("p3d", "p3d plugin missing <rpyOffset>, defaults to 0s");
-    this->offset_.Rot() = ignition::math::Quaterniond(ignition::math::Vector3d(0, 0, 0));
-  }
-  else
-    this->offset_.Rot() = ignition::math::Quaterniond(_sdf->GetElement("rpyOffset")->Get<ignition::math::Vector3d>());
-
   if (!_sdf->HasElement("gaussianNoise"))
   {
-    ROS_DEBUG_NAMED("p3d", "p3d plugin missing <gaussianNoise>, defaults to 0.0");
+    ROS_DEBUG_NAMED("state_ground_truth", "state_ground_truth plugin missing <gaussianNoise>, defaults to 0.0");
     this->gaussian_noise_ = 0;
   }
   else
@@ -118,7 +102,7 @@ void GazeboStateGroundTruth::Load(physics::ModelPtr _parent, sdf::ElementPtr _sd
 
   if (!_sdf->HasElement("updateRate"))
   {
-    ROS_DEBUG_NAMED("p3d", "p3d plugin missing <updateRate>, defaults to 0.0"
+    ROS_DEBUG_NAMED("state_ground_truth", "state_ground_truth plugin missing <updateRate>, defaults to 0.0"
                            " (as fast as possible)");
     this->update_rate_ = 0;
   }
@@ -128,7 +112,7 @@ void GazeboStateGroundTruth::Load(physics::ModelPtr _parent, sdf::ElementPtr _sd
   // Make sure the ROS node for Gazebo has already been initialized
   if (!ros::isInitialized())
   {
-    ROS_FATAL_STREAM_NAMED("p3d", "A ROS node for Gazebo has not been initialized, unable to load plugin. "
+    ROS_FATAL_STREAM_NAMED("state_ground_truth", "A ROS node for Gazebo has not been initialized, unable to load plugin. "
         << "Load the Gazebo system plugin 'libgazebo_ros_api_plugin.so' in the gazebo_ros package)");
     return;
   }
@@ -176,7 +160,7 @@ void GazeboStateGroundTruth::Load(physics::ModelPtr _parent, sdf::ElementPtr _sd
     this->reference_link_ = this->model_->GetLink(this->frame_name_);
     if (!this->reference_link_)
     {
-      ROS_ERROR_NAMED("p3d", "gazebo_ros_p3d plugin: frameName: %s does not exist, will"
+      ROS_ERROR_NAMED("state_ground_truth", "state_ground_truth plugin: frameName: %s does not exist, will"
                              " not publish pose\n", this->frame_name_.c_str());
       return;
     }
@@ -185,7 +169,7 @@ void GazeboStateGroundTruth::Load(physics::ModelPtr _parent, sdf::ElementPtr _sd
   // init reference frame state
   if (this->reference_link_)
   {
-    ROS_DEBUG_NAMED("p3d", "got body %s", this->reference_link_->GetName().c_str());
+    ROS_DEBUG_NAMED("state_ground_truth", "got body %s", this->reference_link_->GetName().c_str());
     this->frame_apos_ = 0;
     this->frame_aeul_ = 0;
 #if GAZEBO_MAJOR_VERSION >= 8
@@ -196,7 +180,6 @@ void GazeboStateGroundTruth::Load(physics::ModelPtr _parent, sdf::ElementPtr _sd
     this->last_frame_veul_ = this->reference_link_->GetWorldAngularVel().Ign();
 #endif
   }
-
 
   // start custom queue for p3d
   this->callback_queue_thread_ = boost::thread(
@@ -213,8 +196,20 @@ void GazeboStateGroundTruth::Load(physics::ModelPtr _parent, sdf::ElementPtr _sd
 // Update the controller
 void GazeboStateGroundTruth::UpdateChild()
 {
+
   if (!this->link_)
     return;
+
+  if (!this->got_offset_){
+    // init reference position (aka. offset)
+#if GAZEBO_MAJOR_VERSION >= 8
+    this->offset_ = this->link_->WorldPose();
+#else
+    this->offset_ = this->link_->GetWorldPose().Ign();
+#endif
+    ROS_DEBUG_NAMED("state_ground_truth","Got starting offset %f %f %f", this->offset_.Pos()[0], this->offset_.Pos()[1], this->offset_.Pos()[2]);
+    this->got_offset_ = true;
+  }
 
 #if GAZEBO_MAJOR_VERSION >= 8
   common::Time cur_time = this->world_->SimTime();
@@ -291,9 +286,9 @@ void GazeboStateGroundTruth::UpdateChild()
 
         // Apply Constant Offsets
         // apply xyz offsets and get position and rotation components
-        pose.Pos() = pose.Pos() + this->offset_.Pos();
+        pose.Pos() = pose.Pos() - this->offset_.Pos();
         // apply rpy offsets
-        pose.Rot() = this->offset_.Rot()*pose.Rot();
+        pose.Rot() = pose.Rot()*this->offset_.Rot();
         pose.Rot().Normalize();
 
         // compute accelerations (not used)
@@ -316,9 +311,6 @@ void GazeboStateGroundTruth::UpdateChild()
         this->pose_msg_.pose.pose.orientation.y = pose.Rot().Y();
         this->pose_msg_.pose.pose.orientation.z = pose.Rot().Z();
         this->pose_msg_.pose.pose.orientation.w = pose.Rot().W();
-
-        // Transform in the correct frame
-        geometry_msgs::TransformStamped transform = poseToTransformStamped(this->pose_msg_.pose.pose);
 
         this->pose_msg_.twist.twist.linear.x  = vpos.X() +
             this->GaussianKernel(0, this->gaussian_noise_);
