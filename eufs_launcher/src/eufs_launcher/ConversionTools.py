@@ -10,12 +10,12 @@ import rospkg
 import rospy
 import sys
 import pandas as pd
+sys.path.insert(1, os.path.join(rospkg.RosPack().get_path('eufs_gazebo'), 'tracks'))  # nopep8
 from track_gen import Track
 from TrackGenerator import (
         compactify_points, cone_start, CONE_INNER, CONE_OUTER, CONE_ORANGE, CONE_START
 )
 from TrackGenerator import get_cone_function
-sys.path.insert(1, os.path.join(rospkg.RosPack().get_path('eufs_gazebo'), 'tracks'))
 
 
 # Here are all the track formats we care about:
