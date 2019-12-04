@@ -1,33 +1,39 @@
 <?xml version="1.0"?>
 <robot xmlns:xacro="http://www.ros.org/wiki/xacro">
-<arg name="publish_tf" default="false"/>
+  <xacro:arg name="publish_tf" default="false"/>
 
-  <!-- ros control plugin -->
+  <!-- ROS control plugin which controls all actuators in the simulation
+  This effectively looks in the namespace of the robot, finds the controller
+  interfaces based on a .yaml file (eufs_gazebo/config/eufs_control.yaml) -->
   <xacro:macro name="ros_control">
     <gazebo>
       <plugin name="ros_control" filename="libgazebo_ros_control.so">
         <robotNamespace>/eufs</robotNamespace>
         <robotParam>robot_description</robotParam>
         <controlPeriod>0.001</controlPeriod>
-	    <robotSimType>gazebo_ros_control/DefaultRobotHWSim</robotSimType>
-      <legacyModeNS>true</legacyModeNS>
+        <robotSimType>gazebo_ros_control/DefaultRobotHWSim</robotSimType>
+        <legacyModeNS>true</legacyModeNS>
       </plugin>
     </gazebo>
-	</xacro:macro>
+  </xacro:macro>
 
+  <!-- Custom ROS plugin to simulate ground truth state in simulation.
+  This node publishes nav_msgs/Odometry and eufs_msgs/CarState messages
+  with added noise via parameters below. This node can additionally publish
+  a transfrom from referenceFrame to robotFrame -->
   <gazebo>
     <plugin name="state_ground_truth" filename="libgazebo_state_ground_truth.so">
-        <alwaysOn>true</alwaysOn>
-        <updateRate>200.0</updateRate>
-        <referenceFrame>map</referenceFrame>
-        <robotFrame>base_footprint</robotFrame>
-        <publishTransform>$(arg publish_tf)</publishTransform> <!-- TODO: Parametarise from launch file -->
-        <odometryTopicName>/ground_truth/odom</odometryTopicName>
-        <stateTopicName>/ground_truth/state</stateTopicName>
-        <positionNoise>0.0 0.0 0.0</positionNoise>
-        <orientationNoise>0.0 0.0 0.0</orientationNoise>
-        <linearVelocityNoise>0.0 0.0 0.0</linearVelocityNoise>
-        <angularVelocityNoise>0.0 0.0 0.0</angularVelocityNoise>
+      <alwaysOn>true</alwaysOn>
+      <updateRate>200.0</updateRate>
+      <referenceFrame>map</referenceFrame>
+      <robotFrame>base_footprint</robotFrame>
+      <publishTransform>$(arg publish_tf)</publishTransform>
+      <odometryTopicName>/ground_truth/odom</odometryTopicName>
+      <stateTopicName>/ground_truth/state</stateTopicName>
+      <positionNoise>0.0 0.0 0.0</positionNoise>
+      <orientationNoise>0.0 0.0 0.0</orientationNoise>
+      <linearVelocityNoise>0.0 0.0 0.0</linearVelocityNoise>
+      <angularVelocityNoise>0.0 0.0 0.0</angularVelocityNoise>
     </plugin>
   </gazebo>
 
