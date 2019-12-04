@@ -24,14 +24,15 @@
 #ifndef GAZEBO_ROS_P3D_HH
 #define GAZEBO_ROS_P3D_HH
 
-#include <string>
-
 #include <boost/thread.hpp>
 #include <boost/thread/mutex.hpp>
 
 #include <ros/ros.h>
 #include <nav_msgs/Odometry.h>
+#include <eufs_msgs/CarState.h>
 #include <geometry_msgs/TransformStamped.h>
+#include <tf2/convert.h>
+#include <tf2_ros/transform_broadcaster.h>
 
 #include <ros/callback_queue.h>
 #include <ros/advertise_options.h>
@@ -71,22 +72,35 @@ class GazeboStateGroundTruth : public ModelPlugin {
 
   /// \brief pointer to ros node
   ros::NodeHandle *rosnode_;
-  ros::Publisher pub_;
-  PubQueue<nav_msgs::Odometry>::Ptr pub_Queue;
+  ros::Publisher odom_pub_;
+  ros::Publisher state_pub_;
+  PubQueue<nav_msgs::Odometry>::Ptr odom_pub_queue_;
+  PubQueue<eufs_msgs::CarState>::Ptr state_pub_queue_;
+
+  // Noise parameters
+  std::vector<double> position_noise_;
+  std::vector<double> orientation_noise_;
+  std::vector<double> orientation_quat_noise_;
+  std::vector<double> linear_velocity_noise_;
+  std::vector<double> angular_velocity_noise_;
 
   /// \brief ros message
-  nav_msgs::Odometry pose_msg_;
+  nav_msgs::Odometry odom_msg_;
 
   /// \brief store bodyname
   std::string link_name_;
 
-  /// \brief topic name
-  std::string topic_name_;
+  /// \brief topic name for nav_msgs/Odometry
+  std::string odom_topic_name_;
+
+  /// \brief topic name for eufs_msgs/CarState
+  std::string state_topic_name_;
 
   /// \brief frame transform name, should match link name
-  /// FIXME: extract link name directly?
   std::string frame_name_;
   std::string tf_frame_name_;
+  bool publish_tf_;
+  tf2_ros::TransformBroadcaster tf_broadcaster_;
 
   /// \brief allow specifying constant xyz and rpy offsets
   bool got_offset_;
@@ -109,16 +123,17 @@ class GazeboStateGroundTruth : public ModelPlugin {
   // rate control
   double update_rate_;
 
-  /// \brief Gaussian noise
-  double gaussian_noise_;
-
   /// \brief Gaussian noise generator
   double GaussianKernel(double mu, double sigma);
+
+  void PublishTransform(const nav_msgs::Odometry& odom_msg);
+
+  std::vector<double> ToQuaternion(std::vector<double>& euler);
 
   /// \brief for setting ROS name space
   std::string robot_namespace_;
 
-  ros::CallbackQueue p3d_queue_;
+  ros::CallbackQueue ground_truth_queue_;
   void P3DQueueThread();
   boost::thread callback_queue_thread_;
 

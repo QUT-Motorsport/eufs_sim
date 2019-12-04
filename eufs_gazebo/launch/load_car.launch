@@ -4,6 +4,7 @@
     <!-- roslaunch arguments -->
     <arg name="namespace" default=""/>
     <arg name="cmd_timeout" default="0.5"/>
+    <arg name="publish_gt_tf" default="false"/>
 
     <!-- Vehicle pose -->
     <arg name="x" default="0"/>
@@ -19,7 +20,7 @@
     <!-- Load the URDF into the ROS Parameter Server -->
     <group if="$(eval arg('controlMethod')=='speed')">
 
-        <param command="$(find xacro)/xacro '$(find eufs_description)/robots/ads-dv.urdf.xacro' --inorder" name="robot_description"/>
+        <param command="$(find xacro)/xacro --inorder '$(find eufs_description)/robots/ads-dv.urdf.xacro' publish_tf:=$(arg publish_gt_tf) " name="robot_description"/>
 
         <!-- start ros_can_sim node -->
         <include file="$(find ros_can_sim)/launch/ros_can_sim.launch"/>

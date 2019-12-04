@@ -20,7 +20,7 @@
   <depend>roscpp</depend>
   <depend>nodelet</depend>
   <depend>nav_msgs</depend>
-  <depend>tf</depend>
+  <depend>eufs_msgs</depend>
   <depend>tf2_ros</depend>
   <depend>std_msgs</depend>
 

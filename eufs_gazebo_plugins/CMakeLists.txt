@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 2.8.3)
 project(eufs_gazebo_plugins)
 
-add_definitions(-std=c++11)
+add_compile_options(-std=c++11)
 
 find_package(catkin REQUIRED COMPONENTS
         gazebo_dev
@@ -11,7 +11,7 @@ find_package(catkin REQUIRED COMPONENTS
         nodelet
         geometry_msgs
         nav_msgs
-        tf
+        eufs_msgs
         tf2_ros
         )
 
@@ -42,7 +42,7 @@ catkin_package(
         nodelet
         geometry_msgs
         nav_msgs
-        tf
+        eufs_msgs
         tf2_ros
 )
 

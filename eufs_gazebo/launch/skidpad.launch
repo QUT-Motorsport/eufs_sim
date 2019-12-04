@@ -19,6 +19,7 @@
   
   <!-- eufs_control launch file -->
   <include file="$(find eufs_gazebo)/launch/eufs_control.launch"/>
+  <arg name="publish_gt_tf" default="false"/>
 
   <!-- Gazebo -->
   <include file="$(find gazebo_ros)/launch/empty_world.launch">
@@ -44,6 +45,7 @@
      <arg name="yaw" default="$(arg yaw)"/>
      <arg name="controlMethod" default="$(arg controlMethod)"/>
      <arg name="cmd_timeout" value="$(arg cmd_timeout)"/>
+     <arg name="publish_gt_tf" value="$(arg publish_gt_tf)"/>
   </include>
   
   <!-- start ros_can_sim node -->

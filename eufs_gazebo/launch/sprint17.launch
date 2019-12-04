@@ -33,6 +33,7 @@
 
   <!-- Control Method Argument -->
   <arg name="controlMethod" default="speed"/>
+  <arg name="publish_gt_tf" default="false"/>
 
   <!--Launch car & controller.-->
   <include file="$(find eufs_gazebo)/launch/load_car.launch">
@@ -45,6 +46,7 @@
      <arg name="yaw" default="$(arg yaw)"/>
      <arg name="controlMethod" default="$(arg controlMethod)"/>
      <arg name="cmd_timeout" value="$(arg cmd_timeout)"/>
+     <arg name="publish_gt_tf" value="$(arg publish_gt_tf)"/>
   </include>
 
     <node name="cone_ground_truth" pkg="eufs_gazebo" type="cone_ground_truth.py" output="screen">

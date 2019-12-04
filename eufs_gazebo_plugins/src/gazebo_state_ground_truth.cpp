@@ -6,6 +6,7 @@
  * You may obtain a copy of the License at
  *
  *     http://www.apache.org/licenses/LICENSE-2.0
+
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -14,11 +15,6 @@
  * limitations under the License.
  *
 */
-
-#include <string>
-#include <stdlib.h>
-#include <tf/tf.h>
-#include <tf2/convert.h>
 
 #include "eufs_gazebo_plugins/gazebo_state_ground_truth.hpp"
 
@@ -37,8 +33,8 @@ GazeboStateGroundTruth::~GazeboStateGroundTruth() {
   this->update_connection_.reset();
   // Finalize the controller
   this->rosnode_->shutdown();
-  this->p3d_queue_.clear();
-  this->p3d_queue_.disable();
+  this->ground_truth_queue_.clear();
+  this->ground_truth_queue_.disable();
   this->callback_queue_thread_.join();
   delete this->rosnode_;
 }
@@ -56,36 +52,93 @@ void GazeboStateGroundTruth::Load(physics::ModelPtr _parent, sdf::ElementPtr _sd
     this->robot_namespace_ =
         _sdf->GetElement("robotNamespace")->Get<std::string>() + "/";
 
-  if (!_sdf->HasElement("bodyName")) {
-    ROS_FATAL_NAMED("state_ground_truth", "state_ground_truth plugin missing <bodyName>, cannot proceed");
+  if (!_sdf->HasElement("robotFrame")) {
+    ROS_FATAL_NAMED("state_ground_truth", "state_ground_truth plugin missing <robotFrame>, cannot proceed");
     return;
   } else
-    this->link_name_ = _sdf->GetElement("bodyName")->Get<std::string>();
+    this->link_name_ = _sdf->GetElement("robotFrame")->Get<std::string>();
 
   this->link_ = _parent->GetLink(this->link_name_);
   if (!this->link_) {
-    ROS_FATAL_NAMED("state_ground_truth", "state_ground_truth plugin error: bodyName: %s does not exist\n",
+    ROS_FATAL_NAMED("state_ground_truth", "state_ground_truth plugin error: robotFrame: %s does not exist\n",
                     this->link_name_.c_str());
     return;
   }
 
-  if (!_sdf->HasElement("topicName")) {
-    ROS_FATAL_NAMED("state_ground_truth", "state_ground_truth plugin missing <topicName>, cannot proceed");
+  if (!_sdf->HasElement("referenceFrame")) {
+    ROS_DEBUG_NAMED("state_ground_truth", "state_ground_truth plugin missing <referenceFrame>, defaults to map");
+    this->frame_name_ = "map";
+  } else
+    this->frame_name_ = _sdf->GetElement("referenceFrame")->Get<std::string>();
+
+  if (!_sdf->HasElement("publishTransform")) {
+    ROS_DEBUG_NAMED("state_ground_truth", "state_ground_truth plugin missing <publishTransform>, defaults to false");
+    this->publish_tf_ = false;
+  } else
+    this->publish_tf_ = _sdf->GetElement("publishTransform")->Get<bool>();
+
+  if (!_sdf->HasElement("odometryTopicName")) {
+    ROS_FATAL_NAMED("state_ground_truth", "state_ground_truth plugin missing <odometryTopicName>, cannot proceed");
     return;
   } else
-    this->topic_name_ = _sdf->GetElement("topicName")->Get<std::string>();
+    this->odom_topic_name_ = _sdf->GetElement("odometryTopicName")->Get<std::string>();
 
-  if (!_sdf->HasElement("frameName")) {
-    ROS_DEBUG_NAMED("state_ground_truth", "state_ground_truth plugin missing <frameName>, defaults to world");
-    this->frame_name_ = "world";
+  if (!_sdf->HasElement("stateTopicName")) {
+    ROS_FATAL_NAMED("state_ground_truth", "state_ground_truth plugin missing <carStateTopicName>, cannot proceed");
+    return;
   } else
-    this->frame_name_ = _sdf->GetElement("frameName")->Get<std::string>();
+    this->state_topic_name_ = _sdf->GetElement("stateTopicName")->Get<std::string>();
 
-  if (!_sdf->HasElement("gaussianNoise")) {
-    ROS_DEBUG_NAMED("state_ground_truth", "state_ground_truth plugin missing <gaussianNoise>, defaults to 0.0");
-    this->gaussian_noise_ = 0;
-  } else
-    this->gaussian_noise_ = _sdf->GetElement("gaussianNoise")->Get<double>();
+  if (!_sdf->HasElement("positionNoise")) {
+    ROS_DEBUG_NAMED("state_ground_truth",
+                    "state_ground_truth plugin missing <positionNoise>, defaults to 0.0, 0.0, 0.0");
+    this->position_noise_ = {0.0, 0.0, 0.0};
+  } else {
+    auto temp = _sdf->GetElement("positionNoise")->Get<ignition::math::Vector3d>();
+    this->position_noise_ = {temp.X(), temp.Y(), temp.Z()};
+  }
+
+  if (this->position_noise_.size() != 3)
+    ROS_FATAL_NAMED("state_ground_truth", "positionNoise parameter vector is not of size 3");
+
+  if (!_sdf->HasElement("orientationNoise")) {
+    ROS_DEBUG_NAMED("state_ground_truth",
+                    "state_ground_truth plugin missing <orientationNoise>, defaults to 0.0, 0.0, 0.0");
+    this->orientation_noise_ = {0.0, 0.0, 0.0};
+  } else {
+    auto temp = _sdf->GetElement("orientationNoise")->Get<ignition::math::Vector3d>();
+    this->orientation_noise_ = {temp.X(), temp.Y(), temp.Z()};
+  }
+
+  if (this->orientation_noise_.size() != 3)
+    ROS_FATAL_NAMED("state_ground_truth", "orientationNoise parameter vector is not of size 3");
+
+  // convert orientation to quaternion
+  this->orientation_quat_noise_ = this->ToQuaternion(this->orientation_noise_);
+
+  if (!_sdf->HasElement("linearVelocityNoise")) {
+    ROS_DEBUG_NAMED("state_ground_truth",
+                    "state_ground_truth plugin missing <linearVelocityNoise>, defaults to 0.0, 0.0, 0.0");
+    this->linear_velocity_noise_ = {0.0, 0.0, 0.0};
+  } else {
+    auto temp = _sdf->GetElement("linearVelocityNoise")->Get<ignition::math::Vector3d>();
+    this->linear_velocity_noise_ = {temp.X(), temp.Y(), temp.Z()};
+  }
+
+  if (this->linear_velocity_noise_.size() != 3)
+    ROS_FATAL_NAMED("state_ground_truth", "linearVelocityNoise parameter vector is not of size 3");
+
+  if (!_sdf->HasElement("angularVelocityNoise")) {
+    ROS_DEBUG_NAMED("state_ground_truth",
+                    "state_ground_truth plugin missing <angularVelocityNoise>, defaults to 0.0, 0.0, 0.0");
+    this->angular_velocity_noise_ = {0.0, 0.0, 0.0};
+  } else {
+    auto temp = _sdf->GetElement("angularVelocityNoise")->Get<ignition::math::Vector3d>();
+    this->angular_velocity_noise_ = {temp.X(), temp.Y(), temp.Z()};
+  }
+
+  if (this->angular_velocity_noise_.size() != 3)
+    ROS_FATAL_NAMED("state_ground_truth", "angularVelocityNoise parameter vector is not of size 3");
 
   if (!_sdf->HasElement("updateRate")) {
     ROS_DEBUG_NAMED("state_ground_truth", "state_ground_truth plugin missing <updateRate>, defaults to 0.0"
@@ -110,12 +163,13 @@ void GazeboStateGroundTruth::Load(physics::ModelPtr _parent, sdf::ElementPtr _sd
   // resolve tf prefix
   std::string prefix;
   this->rosnode_->getParam(std::string("tf_prefix"), prefix);
-  this->tf_frame_name_ = tf::resolve(prefix, this->frame_name_);
+//  this->tf_frame_name_ = tf::resolve(prefix, this->frame_name_);
 
-  if (this->topic_name_ != "") {
-    this->pub_Queue = this->pmq.addPub<nav_msgs::Odometry>();
-    this->pub_ =
-        this->rosnode_->advertise<nav_msgs::Odometry>(this->topic_name_, 1);
+  if (this->odom_topic_name_ != "" && this->state_topic_name_ != "") {
+    this->odom_pub_queue_ = this->pmq.addPub<nav_msgs::Odometry>();
+    this->state_pub_queue_ = this->pmq.addPub<eufs_msgs::CarState>();
+    this->odom_pub_ = this->rosnode_->advertise<nav_msgs::Odometry>(this->odom_topic_name_, 1);
+    this->state_pub_ = this->rosnode_->advertise<nav_msgs::Odometry>(this->state_topic_name_, 1);
   }
 
 #if GAZEBO_MAJOR_VERSION >= 8
@@ -211,19 +265,19 @@ void GazeboStateGroundTruth::UpdateChild() {
       (cur_time - this->last_time_).Double() < (1.0 / this->update_rate_))
     return;
 
-  if (this->pub_.getNumSubscribers() > 0) {
+  if (this->odom_pub_.getNumSubscribers() > 0 || this->publish_tf_) {
     // differentiate to get accelerations
     double tmp_dt = cur_time.Double() - this->last_time_.Double();
     if (tmp_dt != 0) {
       this->lock.lock();
 
-      if (this->topic_name_ != "") {
+      if (this->odom_topic_name_ != "") {
         // copy data into pose message
-        this->pose_msg_.header.frame_id = this->tf_frame_name_;
-        this->pose_msg_.header.stamp.sec = cur_time.sec;
-        this->pose_msg_.header.stamp.nsec = cur_time.nsec;
+        this->odom_msg_.header.frame_id = this->frame_name_;
+        this->odom_msg_.header.stamp.nsec = cur_time.nsec;
+        this->odom_msg_.header.stamp.sec = cur_time.sec;
 
-        this->pose_msg_.child_frame_id = this->link_name_;
+        this->odom_msg_.child_frame_id = this->link_name_;
 
         ignition::math::Pose3d pose, frame_pose;
         ignition::math::Vector3d frame_vpos;
@@ -282,60 +336,62 @@ void GazeboStateGroundTruth::UpdateChild() {
         this->last_frame_veul_ = frame_veul;
 
         // Fill out pose part of message
-        this->pose_msg_.pose.pose.position.x = pose.Pos().X();
-        this->pose_msg_.pose.pose.position.y = pose.Pos().Y();
-        this->pose_msg_.pose.pose.position.z = pose.Pos().Z();
+        this->odom_msg_.pose.pose.position.x = pose.Pos().X() + this->GaussianKernel(0, this->position_noise_[0]);
+        this->odom_msg_.pose.pose.position.y = pose.Pos().Y() + this->GaussianKernel(0, this->position_noise_[1]);
+        this->odom_msg_.pose.pose.position.z = pose.Pos().Z() + this->GaussianKernel(0, this->position_noise_[2]);
 
-        this->pose_msg_.pose.pose.orientation.x = pose.Rot().X();
-        this->pose_msg_.pose.pose.orientation.y = pose.Rot().Y();
-        this->pose_msg_.pose.pose.orientation.z = pose.Rot().Z();
-        this->pose_msg_.pose.pose.orientation.w = pose.Rot().W();
+        this->odom_msg_.pose.pose.orientation.x = pose.Rot().X() + this->GaussianKernel(0, this->orientation_noise_[0]);
+        this->odom_msg_.pose.pose.orientation.y = pose.Rot().Y() + this->GaussianKernel(0, this->orientation_noise_[1]);
+        this->odom_msg_.pose.pose.orientation.z = pose.Rot().Z() + this->GaussianKernel(0, this->orientation_noise_[2]);
+        this->odom_msg_.pose.pose.orientation.w = pose.Rot().W() + this->GaussianKernel(0, this->orientation_noise_[3]);
 
-        this->pose_msg_.twist.twist.linear.x = vpos.X() +
-            this->GaussianKernel(0, this->gaussian_noise_);
-        this->pose_msg_.twist.twist.linear.y = vpos.Y() +
-            this->GaussianKernel(0, this->gaussian_noise_);
-        this->pose_msg_.twist.twist.linear.z = vpos.Z() +
-            this->GaussianKernel(0, this->gaussian_noise_);
-        this->pose_msg_.twist.twist.angular.x = veul.X() +
-            this->GaussianKernel(0, this->gaussian_noise_);
-        this->pose_msg_.twist.twist.angular.y = veul.Y() +
-            this->GaussianKernel(0, this->gaussian_noise_);
-        this->pose_msg_.twist.twist.angular.z = veul.Z() +
-            this->GaussianKernel(0, this->gaussian_noise_);
+        this->odom_msg_.twist.twist.linear.x = vpos.X() +
+            this->GaussianKernel(0, this->linear_velocity_noise_[0]);
+        this->odom_msg_.twist.twist.linear.y = vpos.Y() +
+            this->GaussianKernel(0, this->linear_velocity_noise_[1]);
+        this->odom_msg_.twist.twist.linear.z = vpos.Z() +
+            this->GaussianKernel(0, this->linear_velocity_noise_[2]);
+        this->odom_msg_.twist.twist.angular.x = veul.X() +
+            this->GaussianKernel(0, this->angular_velocity_noise_[0]);
+        this->odom_msg_.twist.twist.angular.y = veul.Y() +
+            this->GaussianKernel(0, this->angular_velocity_noise_[1]);
+        this->odom_msg_.twist.twist.angular.z = veul.Z() +
+            this->GaussianKernel(0, this->angular_velocity_noise_[2]);
 
         // now rotate linear velocities to correct orientation
-        auto q0 = this->pose_msg_.pose.pose.orientation.w;
-        auto q1 = this->pose_msg_.pose.pose.orientation.x;
-        auto q2 = this->pose_msg_.pose.pose.orientation.y;
-        auto q3 = this->pose_msg_.pose.pose.orientation.z;
+        auto q0 = this->odom_msg_.pose.pose.orientation.w;
+        auto q1 = this->odom_msg_.pose.pose.orientation.x;
+        auto q2 = this->odom_msg_.pose.pose.orientation.y;
+        auto q3 = this->odom_msg_.pose.pose.orientation.z;
         auto yaw = atan2(2 * q1 * q2 + 2 * q0 * q3, q1 * q1 + q0 * q0 - q3 * q3 - q2 * q2);
         auto new_x_vel =
-            cos(yaw) * this->pose_msg_.twist.twist.linear.x + sin(yaw) * this->pose_msg_.twist.twist.linear.y;
+            cos(yaw) * this->odom_msg_.twist.twist.linear.x + sin(yaw) * this->odom_msg_.twist.twist.linear.y;
         auto new_y_vel =
-            -sin(yaw) * this->pose_msg_.twist.twist.linear.x + cos(yaw) * this->pose_msg_.twist.twist.linear.y;
-        this->pose_msg_.twist.twist.linear.x = new_x_vel;
-        this->pose_msg_.twist.twist.linear.y = new_y_vel;
+            -sin(yaw) * this->odom_msg_.twist.twist.linear.x + cos(yaw) * this->odom_msg_.twist.twist.linear.y;
+        this->odom_msg_.twist.twist.linear.x = new_x_vel;
+        this->odom_msg_.twist.twist.linear.y = new_y_vel;
 
         // fill in covariance matrix
-        /// @todo: let user set separate linear and angular covariance values.
-        double gn2 = this->gaussian_noise_ * this->gaussian_noise_;
-        this->pose_msg_.pose.covariance[0] = gn2;
-        this->pose_msg_.pose.covariance[7] = gn2;
-        this->pose_msg_.pose.covariance[14] = gn2;
-        this->pose_msg_.pose.covariance[21] = gn2;
-        this->pose_msg_.pose.covariance[28] = gn2;
-        this->pose_msg_.pose.covariance[35] = gn2;
+        this->odom_msg_.pose.covariance[0] = pow(this->position_noise_[0], 2);
+        this->odom_msg_.pose.covariance[7] = pow(this->position_noise_[1], 2);
+        this->odom_msg_.pose.covariance[14] = pow(this->position_noise_[2], 2);
+        this->odom_msg_.pose.covariance[21] = pow(this->orientation_noise_[1], 2);
+        this->odom_msg_.pose.covariance[28] = pow(this->orientation_noise_[1], 2);
+        this->odom_msg_.pose.covariance[35] = pow(this->orientation_noise_[2], 2);
 
-        this->pose_msg_.twist.covariance[0] = gn2;
-        this->pose_msg_.twist.covariance[7] = gn2;
-        this->pose_msg_.twist.covariance[14] = gn2;
-        this->pose_msg_.twist.covariance[21] = gn2;
-        this->pose_msg_.twist.covariance[28] = gn2;
-        this->pose_msg_.twist.covariance[35] = gn2;
+        this->odom_msg_.twist.covariance[0] = pow(this->linear_velocity_noise_[0], 2);
+        this->odom_msg_.twist.covariance[7] = pow(this->linear_velocity_noise_[1], 2);
+        this->odom_msg_.twist.covariance[14] = pow(this->linear_velocity_noise_[2], 2);
+        this->odom_msg_.twist.covariance[21] = pow(this->angular_velocity_noise_[0], 2);
+        this->odom_msg_.twist.covariance[28] = pow(this->angular_velocity_noise_[1], 2);
+        this->odom_msg_.twist.covariance[35] = pow(this->angular_velocity_noise_[2], 2);
 
         // publish to ros
-        this->pub_Queue->push(this->pose_msg_, this->pub_);
+        this->odom_pub_queue_->push(this->odom_msg_, this->odom_pub_);
+
+        if (publish_tf_) {
+          this->PublishTransform(this->odom_msg_);
+        }
       }
 
       this->lock.unlock();
@@ -369,13 +425,47 @@ double GazeboStateGroundTruth::GaussianKernel(double mu, double sigma) {
   return X;
 }
 
+void GazeboStateGroundTruth::PublishTransform(const nav_msgs::Odometry &odom_msg) {
+  geometry_msgs::TransformStamped transform;
+  transform.header = odom_msg.header;
+  transform.child_frame_id = odom_msg.child_frame_id;
+  transform.transform.translation.x = odom_msg.pose.pose.position.x;
+  transform.transform.translation.y = odom_msg.pose.pose.position.y;
+  transform.transform.translation.z = odom_msg.pose.pose.position.z;
+  transform.transform.rotation.x = odom_msg.pose.pose.orientation.x;
+  transform.transform.rotation.y = odom_msg.pose.pose.orientation.y;
+  transform.transform.rotation.z = odom_msg.pose.pose.orientation.z;
+  transform.transform.rotation.w = odom_msg.pose.pose.orientation.w;
+  ROS_INFO("Publishing transform");
+  this->tf_broadcaster_.sendTransform(transform);
+}
+
+std::vector<double> GazeboStateGroundTruth::ToQuaternion(std::vector<double> &euler) {
+  // Abbreviations for the various angular functions
+  double cy = cos(euler[0] * 0.5);
+  double sy = sin(euler[0] * 0.5);
+  double cp = cos(euler[1] * 0.5);
+  double sp = sin(euler[1] * 0.5);
+  double cr = cos(euler[2] * 0.5);
+  double sr = sin(euler[2] * 0.5);
+
+  std::vector<double> q;
+  q.reserve(4);
+  q[0] = cy * cp * cr + sy * sp * sr;
+  q[1] = cy * cp * sr - sy * sp * cr;
+  q[2] = sy * cp * sr + cy * sp * cr;
+  q[3] = sy * cp * cr - cy * sp * sr;
+
+  return q;
+}
+
 ////////////////////////////////////////////////////////////////////////////////
 // Put laser data to the interface
 void GazeboStateGroundTruth::P3DQueueThread() {
   static const double timeout = 0.01;
 
   while (this->rosnode_->ok()) {
-    this->p3d_queue_.callAvailable(ros::WallDuration(timeout));
+    this->ground_truth_queue_.callAvailable(ros::WallDuration(timeout));
   }
 }
 }
