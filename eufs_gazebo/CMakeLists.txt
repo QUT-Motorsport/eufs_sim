@@ -16,10 +16,6 @@ find_package(catkin REQUIRED COMPONENTS
 
 catkin_package()
 
-install(PROGRAMS
-  nodes/ground_truth_republisher.py
-  DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})
-
 install(DIRECTORY launch/
    DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}/launch
    FILES_MATCHING PATTERN "*.launch" PATTERN "*.machine" PATTERN "*.yaml" PATTERN "*.urdf"
