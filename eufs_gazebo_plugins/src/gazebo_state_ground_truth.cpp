@@ -1,46 +1,57 @@
-/*
- * Copyright 2013 Open Source Robotics Foundation
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
+/*MIT License
+*
+* Copyright (c) 2019 Edinburgh University Formula Student (EUFS)
+*
+* Permission is hereby granted, free of charge, to any person obtaining a copy
+*         of this software and associated documentation files (the "Software"), to deal
+* in the Software without restriction, including without limitation the rights
+*         to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+*         copies of the Software, and to permit persons to whom the Software is
+* furnished to do so, subject to the following conditions:
+*
+* The above copyright notice and this permission notice shall be included in all
+*         copies or substantial portions of the Software.
+*
+* THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+* IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+* FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+*         AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+* LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+* OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+* SOFTWARE.*/
 
+/**
+ * @file gazebo_state_ground_truth.cpp
+ * @author Ignat Georgiev <ignat.m.georgiev@gmail.com>
+ * @date Dec 05, 2019
+ * @copyright 2019 Edinburgh University Formula Student (EUFS)
+ * @brief ground truth state Gazebo plugin
  *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- *
-*/
+ * @details Provides ground truth state in simulation in the form of nav_msgs/Odometry and
+ * eufs_msgs/CarState. Additionally can publish transform.
+ **/
 
 #include "eufs_gazebo_plugins/gazebo_state_ground_truth.hpp"
 
 namespace gazebo {
 GZ_REGISTER_MODEL_PLUGIN(GazeboStateGroundTruth);
 
-////////////////////////////////////////////////////////////////////////////////
-// Constructor
 GazeboStateGroundTruth::GazeboStateGroundTruth() {
   this->seed = 0;
 }
 
-////////////////////////////////////////////////////////////////////////////////
-// Destructor
 GazeboStateGroundTruth::~GazeboStateGroundTruth() {
   this->update_connection_.reset();
-  // Finalize the controller
   this->rosnode_->shutdown();
-  this->ground_truth_queue_.clear();
-  this->ground_truth_queue_.disable();
-  this->callback_queue_thread_.join();
+  this->odom_queue_.clear();
+  this->odom_queue_.disable();
+  this->odom_queue_thread_.join();
+  this->state_queue_.clear();
+  this->state_queue_.disable();
+  this->state_queue_thread_.join();
   delete this->rosnode_;
 }
 
-////////////////////////////////////////////////////////////////////////////////
-// Load the controller
 void GazeboStateGroundTruth::Load(physics::ModelPtr _parent, sdf::ElementPtr _sdf) {
   // Get the world name.
   this->world_ = _parent->GetWorld();
@@ -56,12 +67,12 @@ void GazeboStateGroundTruth::Load(physics::ModelPtr _parent, sdf::ElementPtr _sd
     ROS_FATAL_NAMED("state_ground_truth", "state_ground_truth plugin missing <robotFrame>, cannot proceed");
     return;
   } else
-    this->link_name_ = _sdf->GetElement("robotFrame")->Get<std::string>();
+    this->robot_link_name_ = _sdf->GetElement("robotFrame")->Get<std::string>();
 
-  this->link_ = _parent->GetLink(this->link_name_);
-  if (!this->link_) {
+  this->robot_link_ = _parent->GetLink(this->robot_link_name_);
+  if (!this->robot_link_) {
     ROS_FATAL_NAMED("state_ground_truth", "state_ground_truth plugin error: robotFrame: %s does not exist\n",
-                    this->link_name_.c_str());
+                    this->robot_link_name_.c_str());
     return;
   }
 
@@ -140,12 +151,30 @@ void GazeboStateGroundTruth::Load(physics::ModelPtr _parent, sdf::ElementPtr _sd
   if (this->angular_velocity_noise_.size() != 3)
     ROS_FATAL_NAMED("state_ground_truth", "angularVelocityNoise parameter vector is not of size 3");
 
+  if (!_sdf->HasElement("linearAccelerationNoise")) {
+    ROS_DEBUG_NAMED("state_ground_truth",
+                    "state_ground_truth plugin missing <linearAccelerationNoise>, defaults to 0.0, 0.0, 0.0");
+    this->linear_acceleration_noise_ = {0.0, 0.0, 0.0};
+  } else {
+    auto temp = _sdf->GetElement("linearAccelerationNoise")->Get<ignition::math::Vector3d>();
+    this->linear_acceleration_noise_ = {temp.X(), temp.Y(), temp.Z()};
+  }
+
+  if (this->linear_acceleration_noise_.size() != 3)
+    ROS_FATAL_NAMED("state_ground_truth", "linearAccelerationNoise parameter vector is not of size 3");
+
   if (!_sdf->HasElement("updateRate")) {
     ROS_DEBUG_NAMED("state_ground_truth", "state_ground_truth plugin missing <updateRate>, defaults to 0.0"
                                           " (as fast as possible)");
     this->update_rate_ = 0;
   } else
     this->update_rate_ = _sdf->GetElement("updateRate")->Get<double>();
+
+  // Initialise the static fields of publishes messages
+  this->odom_msg_.header.frame_id = this->frame_name_;
+  this->odom_msg_.child_frame_id = this->robot_link_name_;
+  this->state_msg_.header.frame_id = this->frame_name_;
+  this->state_msg_.child_frame_id = this->robot_link_name_;
 
   // Make sure the ROS node for Gazebo has already been initialized
   if (!ros::isInitialized()) {
@@ -163,7 +192,6 @@ void GazeboStateGroundTruth::Load(physics::ModelPtr _parent, sdf::ElementPtr _sd
   // resolve tf prefix
   std::string prefix;
   this->rosnode_->getParam(std::string("tf_prefix"), prefix);
-//  this->tf_frame_name_ = tf::resolve(prefix, this->frame_name_);
 
   if (this->odom_topic_name_ != "" && this->state_topic_name_ != "") {
     this->odom_pub_queue_ = this->pmq.addPub<nav_msgs::Odometry>();
@@ -179,11 +207,11 @@ void GazeboStateGroundTruth::Load(physics::ModelPtr _parent, sdf::ElementPtr _sd
 #endif
   // initialize body
 #if GAZEBO_MAJOR_VERSION >= 8
-  this->last_vpos_ = this->link_->WorldLinearVel();
-  this->last_veul_ = this->link_->WorldAngularVel();
+  this->last_vpos_ = this->robot_link_->WorldLinearVel();
+  this->last_veul_ = this->robot_link_->WorldAngularVel();
 #else
-  this->last_vpos_ = this->link_->GetWorldLinearVel().Ign();
-  this->last_veul_ = this->link_->GetWorldAngularVel().Ign();
+  this->last_vpos_ = this->robot_link_->GetWorldLinearVel().Ign();
+  this->last_veul_ = this->robot_link_->GetWorldAngularVel().Ign();
 #endif
   this->apos_ = 0;
   this->aeul_ = 0;
@@ -217,8 +245,11 @@ void GazeboStateGroundTruth::Load(physics::ModelPtr _parent, sdf::ElementPtr _sd
   }
 
   // start custom queue for p3d
-  this->callback_queue_thread_ = boost::thread(
-      boost::bind(&GazeboStateGroundTruth::P3DQueueThread, this));
+  this->odom_queue_thread_ = boost::thread(
+      boost::bind(&GazeboStateGroundTruth::OdomQueueThread, this));
+
+  this->state_queue_thread_ = boost::thread(
+      boost::bind(&GazeboStateGroundTruth::StateQueueThread, this));
 
   // New Mechanism for Updating every World Cycle
   // Listen to the update event. This event is broadcast every
@@ -227,19 +258,18 @@ void GazeboStateGroundTruth::Load(physics::ModelPtr _parent, sdf::ElementPtr _sd
       boost::bind(&GazeboStateGroundTruth::UpdateChild, this));
 }
 
-////////////////////////////////////////////////////////////////////////////////
 // Update the controller
 void GazeboStateGroundTruth::UpdateChild() {
 
-  if (!this->link_)
+  if (!this->robot_link_)
     return;
 
   if (!this->got_offset_) {
     // init reference position (aka. offset)
 #if GAZEBO_MAJOR_VERSION >= 8
-    this->offset_ = this->link_->WorldPose();
+    this->offset_ = this->robot_link_->WorldPose();
 #else
-    this->offset_ = this->link_->GetWorldPose().Ign();
+    this->offset_ = this->robot_link_->GetWorldPose().Ign();
 #endif
     ROS_DEBUG_NAMED("state_ground_truth",
                     "Got starting offset %f %f %f",
@@ -265,7 +295,7 @@ void GazeboStateGroundTruth::UpdateChild() {
       (cur_time - this->last_time_).Double() < (1.0 / this->update_rate_))
     return;
 
-  if (this->odom_pub_.getNumSubscribers() > 0 || this->publish_tf_) {
+  if (this->odom_pub_.getNumSubscribers() > 0 || this->state_pub_.getNumSubscribers() > 0 || this->publish_tf_) {
     // differentiate to get accelerations
     double tmp_dt = cur_time.Double() - this->last_time_.Double();
     if (tmp_dt != 0) {
@@ -273,11 +303,8 @@ void GazeboStateGroundTruth::UpdateChild() {
 
       if (this->odom_topic_name_ != "") {
         // copy data into pose message
-        this->odom_msg_.header.frame_id = this->frame_name_;
         this->odom_msg_.header.stamp.nsec = cur_time.nsec;
         this->odom_msg_.header.stamp.sec = cur_time.sec;
-
-        this->odom_msg_.child_frame_id = this->link_name_;
 
         ignition::math::Pose3d pose, frame_pose;
         ignition::math::Vector3d frame_vpos;
@@ -286,15 +313,13 @@ void GazeboStateGroundTruth::UpdateChild() {
         // get inertial Rates
         // Get Pose/Orientation
 #if GAZEBO_MAJOR_VERSION >= 8
-        ignition::math::Vector3d vpos = this->link_->WorldLinearVel();
-        ignition::math::Vector3d veul = this->link_->WorldAngularVel();
-
-        pose = this->link_->WorldPose();
+        ignition::math::Vector3d vpos = this->robot_link_->WorldLinearVel();
+        ignition::math::Vector3d veul = this->robot_link_->WorldAngularVel();
+        pose = this->robot_link_->WorldPose();
 #else
-        ignition::math::Vector3d vpos = this->link_->GetWorldLinearVel().Ign();
-        ignition::math::Vector3d veul = this->link_->GetWorldAngularVel().Ign();
-
-        pose = this->link_->GetWorldPose().Ign();
+        ignition::math::Vector3d vpos = this->robot_link_->GetWorldLinearVel().Ign();
+        ignition::math::Vector3d veul = this->robot_link_->GetWorldAngularVel().Ign();
+        pose = this->robot_link_->GetWorldPose().Ign();
 #endif
 
         // Apply Reference Frame
@@ -324,7 +349,7 @@ void GazeboStateGroundTruth::UpdateChild() {
         pose.Rot() = pose.Rot() * this->offset_.Rot();
         pose.Rot().Normalize();
 
-        // compute accelerations (not used)
+        // compute accelerations
         this->apos_ = (this->last_vpos_ - vpos) / tmp_dt;
         this->aeul_ = (this->last_veul_ - veul) / tmp_dt;
         this->last_vpos_ = vpos;
@@ -335,7 +360,7 @@ void GazeboStateGroundTruth::UpdateChild() {
         this->last_frame_vpos_ = frame_vpos;
         this->last_frame_veul_ = frame_veul;
 
-        // Fill out pose part of message
+        // Create nav_msgs/Odometry . It is always needed
         this->odom_msg_.pose.pose.position.x = pose.Pos().X() + this->GaussianKernel(0, this->position_noise_[0]);
         this->odom_msg_.pose.pose.position.y = pose.Pos().Y() + this->GaussianKernel(0, this->position_noise_[1]);
         this->odom_msg_.pose.pose.position.z = pose.Pos().Z() + this->GaussianKernel(0, this->position_noise_[2]);
@@ -386,8 +411,37 @@ void GazeboStateGroundTruth::UpdateChild() {
         this->odom_msg_.twist.covariance[28] = pow(this->angular_velocity_noise_[1], 2);
         this->odom_msg_.twist.covariance[35] = pow(this->angular_velocity_noise_[2], 2);
 
-        // publish to ros
-        this->odom_pub_queue_->push(this->odom_msg_, this->odom_pub_);
+        // publish Odometry message only if necessary
+        if (this->odom_pub_.getNumSubscribers() > 0)
+          this->odom_pub_queue_->push(this->odom_msg_, this->odom_pub_);
+
+        // Now make a eufs_msgs/CarState message if necessary
+        if (this->state_pub_.getNumSubscribers() > 0) {
+          this->state_msg_.header.stamp = this->odom_msg_.header.stamp;
+          this->state_msg_.pose = this->odom_msg_.pose;
+          this->state_msg_.twist = this->state_msg_.twist;
+
+          // Handle accelerations
+          this->state_msg_.linear_acceleration.x =
+              this->apos_.X() + this->GaussianKernel(0, this->linear_acceleration_noise_[0]);
+          this->state_msg_.linear_acceleration.y =
+              this->apos_.Y() + this->GaussianKernel(0, this->linear_acceleration_noise_[1]);
+          this->state_msg_.linear_acceleration.z =
+              this->apos_.Z() + this->GaussianKernel(0, this->linear_acceleration_noise_[2]);
+          this->state_msg_.linear_acceleration_covariance[0] = pow(this->linear_acceleration_noise_[0], 2);
+          this->state_msg_.linear_acceleration_covariance[4] = pow(this->linear_acceleration_noise_[1], 2);
+          this->state_msg_.linear_acceleration_covariance[8] = pow(this->linear_acceleration_noise_[2], 2);
+
+          // Calculate slip angle
+          this->state_msg_.slip_angle =
+              -atan2(this->state_msg_.twist.twist.linear.y, this->state_msg_.twist.twist.linear.x);
+
+          // Battery charge is currently not simulated so just put in incorrect values
+          this->state_msg_.state_of_charge = 99999;
+
+          // publish to ros
+          this->state_pub_queue_->push(this->state_msg_, this->state_pub_);
+        }
 
         if (publish_tf_) {
           this->PublishTransform(this->odom_msg_);
@@ -402,11 +456,9 @@ void GazeboStateGroundTruth::UpdateChild() {
   }
 }
 
-//////////////////////////////////////////////////////////////////////////////
-// Utility for adding noise
 double GazeboStateGroundTruth::GaussianKernel(double mu, double sigma) {
   // using Box-Muller transform to generate two independent standard
-  // normally disbributed normal variables see wikipedia
+  // normally distributed normal variables see wikipedia
 
   // normalized uniform random variable
   double U = static_cast<double>(rand_r(&this->seed)) /
@@ -436,7 +488,6 @@ void GazeboStateGroundTruth::PublishTransform(const nav_msgs::Odometry &odom_msg
   transform.transform.rotation.y = odom_msg.pose.pose.orientation.y;
   transform.transform.rotation.z = odom_msg.pose.pose.orientation.z;
   transform.transform.rotation.w = odom_msg.pose.pose.orientation.w;
-  ROS_INFO("Publishing transform");
   this->tf_broadcaster_.sendTransform(transform);
 }
 
@@ -459,13 +510,20 @@ std::vector<double> GazeboStateGroundTruth::ToQuaternion(std::vector<double> &eu
   return q;
 }
 
-////////////////////////////////////////////////////////////////////////////////
-// Put laser data to the interface
-void GazeboStateGroundTruth::P3DQueueThread() {
+void GazeboStateGroundTruth::OdomQueueThread() {
   static const double timeout = 0.01;
 
   while (this->rosnode_->ok()) {
-    this->ground_truth_queue_.callAvailable(ros::WallDuration(timeout));
+    this->odom_queue_.callAvailable(ros::WallDuration(timeout));
   }
 }
+
+void GazeboStateGroundTruth::StateQueueThread() {
+  static const double timeout = 0.01;
+
+  while (this->rosnode_->ok()) {
+    this->state_queue_.callAvailable(ros::WallDuration(timeout));
+  }
+}
+
 }

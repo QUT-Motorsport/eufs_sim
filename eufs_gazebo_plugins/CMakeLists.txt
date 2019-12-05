@@ -34,7 +34,6 @@ link_directories(
 catkin_package(
         INCLUDE_DIRS include
         LIBRARIES gazebo_state_ground_truth
-
         CATKIN_DEPENDS
         message_runtime
         gazebo_msgs
@@ -59,7 +58,7 @@ install(TARGETS gazebo_state_ground_truth
 # Tests
 # These need to be run with -j1 flag because gazebo can't be run
 # in parallel.
-if (CATKIN_ENABLE_TESTING)
- find_package(rostest REQUIRED)
- # TODO
-endif()
+#if (CATKIN_ENABLE_TESTING)
+#    find_package(rostest REQUIRED)
+#    # TODO
+#endif ()
