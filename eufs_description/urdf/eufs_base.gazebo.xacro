@@ -34,6 +34,7 @@
       <orientationNoise>0.0 0.0 0.0</orientationNoise>
       <linearVelocityNoise>0.0 0.0 0.0</linearVelocityNoise>
       <angularVelocityNoise>0.0 0.0 0.0</angularVelocityNoise>
+      <linearAccelerationNoise>0.0 0.0 0.0</linearAccelerationNoise>
     </plugin>
   </gazebo>
 
