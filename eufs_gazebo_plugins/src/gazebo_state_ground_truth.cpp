@@ -197,7 +197,7 @@ void GazeboStateGroundTruth::Load(physics::ModelPtr _parent, sdf::ElementPtr _sd
     this->odom_pub_queue_ = this->pmq.addPub<nav_msgs::Odometry>();
     this->state_pub_queue_ = this->pmq.addPub<eufs_msgs::CarState>();
     this->odom_pub_ = this->rosnode_->advertise<nav_msgs::Odometry>(this->odom_topic_name_, 1);
-    this->state_pub_ = this->rosnode_->advertise<nav_msgs::Odometry>(this->state_topic_name_, 1);
+    this->state_pub_ = this->rosnode_->advertise<eufs_msgs::CarState>(this->state_topic_name_, 1);
   }
 
 #if GAZEBO_MAJOR_VERSION >= 8
