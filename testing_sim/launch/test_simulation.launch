@@ -11,5 +11,7 @@
       <arg name="launch_group" value="no_perception"/>
   </include>
 
+  <!-- Run the simulation test -->
   <test test-name="test_simulation" pkg="testing_sim" type="test_simulation.py" time-limit="300.0"/>
+
 </launch>
