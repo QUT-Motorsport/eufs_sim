@@ -7,16 +7,16 @@ Evaluates the ekf by comparing its outputs to the ground truth
 
 It listens messages the following messages:
 
+EKF Message:
 `/ekf/output/here` (of type `ekf/output/type/here`)
 
 Ground truths:
-`/wheel_odometry/odom` (of type `nav_msgs/Odometry`)
-`/gps_velocity` (of type `geometry_msgs/Vector3Stamped`)
 `/imu` (of type `sensor_msgs/Imu`)
+`/gps_velocity` (of type `geometry_msgs/Vector3Stamped`)
 
 It publishes a message:
 
-`/ekf/evaluation` (of type `determine/type/soon`)
+`/ekf/evaluation` (of type `std_msgs/Float64MultiArray`)
 
 
 
@@ -27,7 +27,8 @@ import math
 import rospy
 from sensor_msgs.msg import Imu
 from geometry_msgs.msg import Vector3Stamped
-from nav_msgs.msg import Odometry
+from std_msgs.msg import Float64MultiArray
+import tf
 
 
 class EKFEvaluator(object):
@@ -45,16 +46,23 @@ class EKFEvaluator(object):
 
         # Don't publish anything if not received messages yet
         self.got_ekf = False
-        self.got_truth_odom = False
-        self.got_truth_gps = False
         self.got_truth_imu = False
+        self.got_truth_gps = False
 
 
         # The input message, stored
-        self.in_msgs = EKF_OUTPUT_MESSAGE_TYPE_HERE()
+        self.ekf = EKF_OUTPUT_MESSAGE_TYPE_HERE()
+        self.imu = Imu()
+        self.gps = Vector3Stamped()
+        
 
         # The output message
-        self.out_msg = OUR_MESSAGE_TYPE_HERE()
+        self.out_msg = Float64MultiArray()
+        self.out_msg.layout = MultiArrayLayout()
+        self.out_msg.layout.data_offset = 0
+        self.out_msg.layout.dim[0].label = "height"
+        self.out_msg.layout.dim[0].stride = 5
+        self.out_msg.layout.dim[0].size = 5
 
 
         # Read in the parameters
@@ -68,15 +76,14 @@ class EKFEvaluator(object):
         # Set the timer to output info
         rospy.Timer(
             rospy.Duration(self.OUTPUT_INTERVAL),
-            lambda x: self.out.publish(self.out_msg)
+            lambda x: self.evaluate()
         )
 
 
         # Subscribe to channels
         self.ekf_sub = rospy.Subscriber("/ekf/output/here", EKF_MESSAGE_TYPE_HERE, self.ekf_receiver)
-        self.odom_sub = rospy.Subscriber("/wheel_odometry/odom", "nav_msgs/Odometry", self.ground_truth_receiver)
-        self.gps_sub = rospy.Subscriber("/gps_velocity", "geometry_msgs/Vector3Stamped", self.ground_truth_receiver)
         self.imu_sub = rospy.Subscriber("/imu", "sensor_msgs/Imu", self.ground_truth_receiver)
+        self.gps_sub = rospy.Subscriber("/gps_velocity", "geometry_msgs/Vector3Stamped", self.ground_truth_receiver)
 
 
     def ekf_receiver(self, msg):
@@ -90,17 +97,42 @@ This node currently listens to robot_localisation inputs and outputs, but it act
 ground truth.  So we need a way to grab the ground truth as well
 """
 
+    def evaluate(self):
+        """Does the actual evaluation of the ekf, called at a consistent rate"""
+        if not self.got_ekf:
+            return
+        
+        # We care about the dynamic state - namely:
+        # x/y velocity (from gps), x/y acceleration, yaw rate (from imu)
+        gpsdata = [-1000,-1000]
+        if self.got_truth_gps:
+            gpsdata = [self.gps.vector.x, self.gps.vector.y]
+            # TODO compare with ekf info
+        
+        imudata = [-1000,-1000,-1000]
+        if self.got_truth_imu:
+            quat = self.imu.orientation
+            euler = tf.transformations.euler_from_quaternion(quat)
+            imuddata = [self.imu.linear_acceleration.x, self.imu.linear_acceleration.y, euler[2]]
+            # TODO compare with ekf info
+            
+        self.out_msg.data = gpsdata + imudata
+            
+        self.out.publish(self.out_msg)
+
         
     def ground_truth_receiver(self, msg):
         """Receives ground truth from the simulation"""
         
-        if str(msg._type) == "nav_msgs/Odometry":
-            self.got_truth_odom = True
-            # Compare to self.ekf
+        if str(msg._type) == "sensor_msgs/Imu":
+            self.got_truth_imu = True
+            self.imu = msg
         elif str(msg._type) == "geometry_msgs/Vector3Stamped":
             self.got_truth_gps = True
-        elif str(msg._type) == "sensor_msgs/Imu":
-            self.got_truth_imu = True
+            self.gps = msg
+
+            
+            
 
 
 
