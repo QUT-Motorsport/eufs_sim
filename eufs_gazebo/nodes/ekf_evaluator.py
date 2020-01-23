@@ -70,7 +70,7 @@ class EKFEvaluator(object):
 
 
         # Set up output publisher
-        self.out = rospy.Publisher("/ekf/evaluation", EVALUATION_MESSAGE_TYPE_HERE,  queue_size=1)
+        self.out = rospy.Publisher("/ekf/evaluation", Float64MultiArray,  queue_size=1)
 
 
         # Set the timer to output info
