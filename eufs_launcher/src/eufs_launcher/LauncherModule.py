@@ -118,6 +118,10 @@ class EufsLauncher(Plugin):
                         self._widget.findChild(QCheckBox, "GazeboGuiCheckbox")
                 )
 
+                self.PUBLISH_GT_TF = (
+                        self._widget.findChild(QCheckBox, "GroundTruthTransform")
+                )
+
                 self.FILE_FOR_CONVERSION_BOX = self._widget.findChild(
                         QComboBox,
                         "FileForConversion"
@@ -825,6 +829,11 @@ class EufsLauncher(Plugin):
                         "true" if self.GAZEBO_GUI_CHECKBOX.isChecked() else "false"
                 )
 
+                # Check if we need ground truth odom
+                publish_gt_tf = "publish_gt_tf:=" + (
+                        "true" if self.PUBLISH_GT_TF.isChecked() else "false"
+                )
+
                 # How we launch the simulation changes depending on whether
                 # we are using the eufs_sim package standalone, or working within
                 # the eufs-master ecosystem.
@@ -840,6 +849,7 @@ class EufsLauncher(Plugin):
                                                 [
                                                         control_method,
                                                         gui_on,
+                                                        publish_gt_tf,
                                                         "track:=" + track_to_launch.split(".")[0]
                                                 ] + perception_stack
                                         )

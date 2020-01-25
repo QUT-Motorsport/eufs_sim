@@ -1,8 +1,10 @@
 <?xml version="1.0"?>
 <robot name="eufs" xmlns:xacro="http://www.ros.org/wiki/xacro">
+  <xacro:arg name="publish_tf" default="false"/>
 
-
-  <xacro:include filename="$(find eufs_description)/urdf/eufs_base.gazebo.xacro" />
+  <xacro:include filename="$(find eufs_description)/urdf/eufs_base.gazebo.xacro">
+    <arg name="publish_tf" value="$(arg publish_tf)"/>
+  </xacro:include>
 
   <xacro:macro name="eufs_base" params="name publish_bf hq">
 
