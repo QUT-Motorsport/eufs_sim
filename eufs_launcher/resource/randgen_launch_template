@@ -19,10 +19,11 @@
   
   <!-- Control Method Argument -->
   <arg name="controlMethod" default="speed"/>
+  <arg name="show_rqt_gui" default="true"/>
+  <arg name="publish_gt_tf" default="false"/>
 
   <!-- eufs_control launch file -->
   <include file="$(find eufs_gazebo)/launch/eufs_control.launch"/>
-  <arg name="publish_gt_tf" default="false"/>
 
   <!-- Gazebo -->
   <include file="$(find gazebo_ros)/launch/empty_world.launch">
