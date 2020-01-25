@@ -47,5 +47,6 @@ install(FILES
 #############
 
 roslint_python()
-# roslint_cpp() # removed as there currently is no cpp in this package
 
+# Uncomment the line below when C++ files are added to this package
+# roslint_cpp()

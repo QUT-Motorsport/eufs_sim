@@ -1,0 +1,13 @@
+<?xml version="1.0"?>
+<launch>
+  <arg name="_imu_hz" default="200"/>
+  <arg name="_gps_hz" default="5" />
+  <node name="sbg_raw_data_simulator" 
+          pkg="eufs_gazebo" type="sbg_raw_data_simulator.py" output="screen">
+      <param name="_imu_hz" value="$(arg _imu_hz)"/>
+      <param name="_gps_hz" value="$(arg _gps_hz)"/>
+  </node>
+
+
+</launch>
+
