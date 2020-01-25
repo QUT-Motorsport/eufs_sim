@@ -24,7 +24,7 @@
   <gazebo>
     <plugin name="state_ground_truth" filename="libgazebo_state_ground_truth.so">
       <alwaysOn>true</alwaysOn>
-      <updateRate>200.0</updateRate>
+      <updateRate>15.0</updateRate>
       <referenceFrame>map</referenceFrame>
       <robotFrame>base_footprint</robotFrame>
       <publishTransform>$(arg publish_tf)</publishTransform>
