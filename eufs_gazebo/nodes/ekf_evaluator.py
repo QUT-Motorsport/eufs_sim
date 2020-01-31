@@ -8,11 +8,14 @@ Evaluates the ekf by comparing its outputs to the ground truth
 It listens messages the following messages:
 
 EKF Message:
-`/ekf/output/here` (of type `ekf/output/type/here`)
+`/odometry/filtered` (of type `nav_msgs/Odometry`)
+`/accel/filtered` (of type `geometry_msgs/AccelWithCovarianceStamped`)
 
 Ground truths:
 `/imu` (of type `sensor_msgs/Imu`)
 `/gps_velocity` (of type `geometry_msgs/Vector3Stamped`)
+Note: CarState is a message we want to look into, not sure if ever
+being published though
 
 It publishes a message:
 
@@ -26,8 +29,9 @@ import numpy as np
 import math
 import rospy
 from sensor_msgs.msg import Imu
-from geometry_msgs.msg import Vector3Stamped
+from geometry_msgs.msg import Vector3Stamped, AccelWithCovarianceStamped
 from std_msgs.msg import Float64MultiArray
+from nav_msgs.msg impory Odometry
 import tf
 
 
@@ -45,13 +49,15 @@ class EKFEvaluator(object):
 
 
         # Don't publish anything if not received messages yet
-        self.got_ekf = False
+        self.got_ekf_odom = False
+        self.got_ekf_accel = False
         self.got_truth_imu = False
         self.got_truth_gps = False
 
 
         # The input message, stored
-        self.ekf = EKF_OUTPUT_MESSAGE_TYPE_HERE()
+        self.ekf_odom = Odometry()
+        self.ekf_accel = AccelWithCovarianceStamped()
         self.imu = Imu()
         self.gps = Vector3Stamped()
         
@@ -81,15 +87,28 @@ class EKFEvaluator(object):
 
 
         # Subscribe to channels
-        self.ekf_sub = rospy.Subscriber("/ekf/output/here", EKF_MESSAGE_TYPE_HERE, self.ekf_receiver)
-        self.imu_sub = rospy.Subscriber("/imu", "sensor_msgs/Imu", self.ground_truth_receiver)
-        self.gps_sub = rospy.Subscriber("/gps_velocity", "geometry_msgs/Vector3Stamped", self.ground_truth_receiver)
+        self.ekf_odom_sub = rospy.Subscriber("/odometry/filtered", Odometry, self.ekf_receiver)
+        self.ekf_accel_sub = rospy.Subscriber(
+            "/accel/filtered",
+            AccelWithCovarianceStamped,
+            self.ekf_receiver
+        )
+        self.imu_sub = rospy.Subscriber("/imu", Imu, self.ground_truth_receiver)
+        self.gps_sub = rospy.Subscriber(
+            "/gps_velocity",
+            Vector3Stamped,
+            self.ground_truth_receiver
+        )
 
 
     def ekf_receiver(self, msg):
         """Receives the ekf outputs"""
-        self.got_ekf = True
-        self.ekf = msg
+        if str(msg._type) == "nav_msgs/Odometry":
+            self.got_ekf_odom = True
+            self.ekf_odom = msg
+        elif str(msg._type) == "geometry_msgs/AccelWithCovarianceStamped":
+            self.got_ekf_accel = True
+            self.ekf_accel = msg
 
 """
 Note to self:
@@ -99,27 +118,34 @@ ground truth.  So we need a way to grab the ground truth as well
 
     def evaluate(self):
         """Does the actual evaluation of the ekf, called at a consistent rate"""
-        if not self.got_ekf:
+        if not (self.got_ekf_odom and self.got_ekf_accel):
+            return
+
+        if not (self.got_truth_gps and self.got_truth_imu):
             return
         
         # We care about the dynamic state - namely:
         # x/y velocity (from gps), x/y acceleration, yaw rate (from imu)
-        gpsdata = [-1000,-1000]
-        if self.got_truth_gps:
-            gpsdata = [self.gps.vector.x, self.gps.vector.y]
-            # TODO compare with ekf info
+
+        gps_data = [self.gps.vector.x, self.gps.vector.y]
+        ekf_gps_data = [self.ekf_odom.twist.twist.linear.x, self.ekf_odom.twist.twist.linear.y]
         
-        imudata = [-1000,-1000,-1000]
-        if self.got_truth_imu:
-            quat = self.imu.orientation
-            euler = tf.transformations.euler_from_quaternion(quat)
-            imuddata = [self.imu.linear_acceleration.x, self.imu.linear_acceleration.y, euler[2]]
-            # TODO compare with ekf info
-            
-        self.out_msg.data = gpsdata + imudata
+        quat = self.imu.orientation
+        euler = tf.transformations.euler_from_quaternion(quat)
+        imu_data = [self.imu.linear_acceleration.x, self.imu.linear_acceleration.y, euler[2]]
+        # Note: yaw is the 3rd component of rpy, so it's the "z" component in the Vector3
+        ekf_imu_data = [
+            self.ekf_accel.accel.accel.linear.x,
+            self.ekf_accel.accel.accel.linear.y,
+            self.ekf_odom.twist.twist.angular.z
+        ]
+
+        self.out_msg.data = compare(gps_data + imu_data, ekf_gps_data + ekf_imu_data)
             
         self.out.publish(self.out_msg)
 
+    def compare(vec1, vec2):
+        return [math.sqrt(v1**2 + v2**2) for v1, v2 in zip(vec1, vec2)]
         
     def ground_truth_receiver(self, msg):
         """Receives ground truth from the simulation"""
