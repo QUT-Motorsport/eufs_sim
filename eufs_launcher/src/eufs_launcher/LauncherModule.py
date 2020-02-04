@@ -952,6 +952,8 @@ class EufsLauncher(Plugin):
                                     "/twist_to_ackermannDrive",
                                     "/spawn_platform",
                                     "/eufs_sim_rqt",
+                                    "/wheel_odometry",
+                                    "/sbg_raw_data_simulator"
                                 ]
                 for bad_node in extra_nodes:
                         if bad_node in nodes_to_kill:
