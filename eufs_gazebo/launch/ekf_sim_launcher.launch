@@ -1,0 +1,16 @@
+<?xml version="1.0"?>
+<launch>
+  
+  <!-- roslaunch arguments -->
+  <arg name="namespace" default="eufs"/>
+  <arg name="launch_evaluator" default="false"/>
+
+  
+  <!-- eufs_control launch file -->
+  <include file="$(find eufs_gazebo)/launch/sbg_raw_data_simulator.launch"/>
+  <include file="$(find localisation)/launch/wheel_odometry.launch"/>
+
+
+  
+
+</launch>
