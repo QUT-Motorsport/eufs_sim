@@ -8,10 +8,9 @@
   
   <!-- Launch simulated ground truths -->
   <include file="$(find eufs_gazebo)/launch/sbg_raw_data_simulator.launch"/>
-  <include file="$(find localisation)/launch/wheel_odometry.launch"/>
-
+  <include file="$(find wheel_odometry)/launch/wheel_odometry.launch"/>
   <!-- Launch evaluator-->
-  <group if="$(arg('launch_evaluator'))">
+  <group if="$(eval arg('launch_evaluator') == 'true' )">
       <include file="$(find eufs_gazebo)/launch/ekf_launcher.launch"/>
   </group>
   
