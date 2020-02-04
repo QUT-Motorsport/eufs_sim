@@ -887,11 +887,10 @@ class EufsLauncher(Plugin):
                                 os.path.join(
                                         self.GAZEBO,
                                         "launch",
-                                        "sbg_raw_data_simulator.launch"
+                                        "ekf_sim_launcher.launch"
                                 ),
                                 [
-                                        "_imu_hz:=200",
-                                        "_gps_hz:=5"
+                                        "launch_evaluator:=true"
                                 ]
                         )
 
