@@ -110,6 +110,7 @@ class EufsLauncher(Plugin):
                 self.SPEED_RADIO = self._widget.findChild(QRadioButton, "SpeedRadio")
                 self.TORQUE_RADIO = self._widget.findChild(QRadioButton, "TorqueRadio")
                 self.PERCEPTION_CHECKBOX = self._widget.findChild(QCheckBox, "PerceptionCheckbox")
+                self.EKF_CHECKBOX = self._widget.findChild(QCheckBox, "EkfCheckbox")
 
                 self.VISUALISATOR_CHECKBOX = (
                         self._widget.findChild(QCheckBox, "VisualisatorCheckbox")
@@ -879,6 +880,20 @@ class EufsLauncher(Plugin):
                                 "_gps_hz:=5"
                         ]
                 )
+                
+                # Launch EKF Simulator Node
+                if self.EKF_CHECKBOX.isChecked():
+                        self.launch_node_with_args(
+                                os.path.join(
+                                        self.GAZEBO,
+                                        "launch",
+                                        "sbg_raw_data_simulator.launch"
+                                ),
+                                [
+                                        "_imu_hz:=200",
+                                        "_gps_hz:=5"
+                                ]
+                        )
 
                 # Hide launcher
                 self._widget.setVisible(False)
