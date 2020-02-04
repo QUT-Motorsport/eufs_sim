@@ -254,6 +254,11 @@ class EufsLauncher(Plugin):
                 # Copier full stack checkbox
                 copier_full_stack = self.FULL_STACK_COPY_BUTTON
                 copier_full_stack.setChecked(True)
+                
+                # ekf_checkbox
+                ekf_checkbox = self.EKF_CHECKBOX
+                ekf_checkbox.setChecked(True)
+
 
                 # Change label to show current selected file for the copier
                 self.update_copier()
