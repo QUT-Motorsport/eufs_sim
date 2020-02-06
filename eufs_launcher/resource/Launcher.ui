@@ -290,14 +290,9 @@
    </property>
   </widget>
 
-<<<<<<< HEAD
 
   <!--Ground truth transformr-->
   <widget class="QCheckBox" name="GroundTruthTransform">
-=======
-  <!--EKF Launcher-->
-  <widget class="QCheckBox" name="EkfCheckbox">
->>>>>>> 46cb06694fb1217a606c8c34ba6bb04e7326118a
   <property name="geometry">
       <rect>
         <x>610</x>
@@ -307,11 +302,26 @@
       </rect>
     </property>
     <property name="text" >
-<<<<<<< HEAD
       <string>Use Ground Truth TF</string>
-=======
+    </property>
+    <property name="font">
+       <font>
+            <pointsize>7</pointsize>
+       </font>
+   </property>
+  </widget>
+  <!--EKF Launcher-->
+  <widget class="QCheckBox" name="EkfCheckbox">
+  <property name="geometry">
+      <rect>
+        <x>610</x>
+        <y>130</y>
+        <width>150</width>
+        <height>30</height>
+      </rect>
+    </property>
+    <property name="text" >
       <string>Launch EKF</string>
->>>>>>> 46cb06694fb1217a606c8c34ba6bb04e7326118a
     </property>
     <property name="font">
        <font>
