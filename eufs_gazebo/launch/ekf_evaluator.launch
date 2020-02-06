@@ -1,0 +1,10 @@
+<?xml version="1.0"?>
+<launch>
+  <arg name="_output_interval" default="5"/>
+  <node name="ekf_evaluator" 
+          pkg="eufs_gazebo" type="ekf_evaluator.py" output="screen">
+      <param name="_output_interval" value="$(arg _output_interval)"/>
+  </node>
+
+
+</launch>

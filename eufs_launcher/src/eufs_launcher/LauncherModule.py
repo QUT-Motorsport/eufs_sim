@@ -110,6 +110,7 @@ class EufsLauncher(Plugin):
                 self.SPEED_RADIO = self._widget.findChild(QRadioButton, "SpeedRadio")
                 self.TORQUE_RADIO = self._widget.findChild(QRadioButton, "TorqueRadio")
                 self.PERCEPTION_CHECKBOX = self._widget.findChild(QCheckBox, "PerceptionCheckbox")
+                self.EKF_CHECKBOX = self._widget.findChild(QCheckBox, "EkfCheckbox")
 
                 self.VISUALISATOR_CHECKBOX = (
                         self._widget.findChild(QCheckBox, "VisualisatorCheckbox")
@@ -257,6 +258,11 @@ class EufsLauncher(Plugin):
                 # Copier full stack checkbox
                 copier_full_stack = self.FULL_STACK_COPY_BUTTON
                 copier_full_stack.setChecked(True)
+                
+                # ekf_checkbox
+                ekf_checkbox = self.EKF_CHECKBOX
+                ekf_checkbox.setChecked(True)
+
 
                 # Change label to show current selected file for the copier
                 self.update_copier()
@@ -889,6 +895,19 @@ class EufsLauncher(Plugin):
                                 "_gps_hz:=5"
                         ]
                 )
+                
+                # Launch EKF Simulator Node
+                if self.EKF_CHECKBOX.isChecked():
+                        self.launch_node_with_args(
+                                os.path.join(
+                                        self.GAZEBO,
+                                        "launch",
+                                        "ekf_sim_launcher.launch"
+                                ),
+                                [
+                                        "launch_evaluator:=true"
+                                ]
+                        )
 
                 # Hide launcher
                 self._widget.setVisible(False)
@@ -948,6 +967,8 @@ class EufsLauncher(Plugin):
                                     "/twist_to_ackermannDrive",
                                     "/spawn_platform",
                                     "/eufs_sim_rqt",
+                                    "/wheel_odometry",
+                                    "/sbg_raw_data_simulator"
                                 ]
                 for bad_node in extra_nodes:
                         if bad_node in nodes_to_kill:
