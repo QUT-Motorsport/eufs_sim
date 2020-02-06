@@ -224,8 +224,17 @@ void RosCanSim::setMission(eufs_msgs::CanState state)
             case eufs_msgs::CanState::AMI_BRAKE_TEST:
                 ami_state_ = ami_state_type::AMI_BRAKE_TEST;
                 break;
-            case eufs_msgs::CanState::AMI_INSPECTION:
-                ami_state_ = ami_state_type::AMI_INSPECTION;
+            case eufs_msgs::CanState::AMI_ADS_INSPECTION:
+                ami_state_ = ami_state_type::AMI_ADS_INSPECTION;
+                break;
+            case eufs_msgs::CanState::AMI_ADS_EBS:
+                ami_state_ = ami_state_type::AMI_ADS_EBS;
+                break;
+            case eufs_msgs::CanState::AMI_DDT_INSPECTION_A:
+                ami_state_ = ami_state_type::AMI_DDT_INSPECTION_A;
+                break;
+            case eufs_msgs::CanState::AMI_DDT_INSPECTION_B:
+                ami_state_ = ami_state_type::AMI_DDT_INSPECTION_B;
                 break;
             case eufs_msgs::CanState::AMI_MANUAL:
                 ami_state_ = ami_state_type::AMI_MANUAL;
@@ -414,8 +423,17 @@ std_msgs::String RosCanSim::makeStateString(const eufs_msgs::CanState &state)
         case eufs_msgs::CanState::AMI_TRACK_DRIVE:
             str2 = "AMI:TRACKDRIVE";
             break;
-        case eufs_msgs::CanState::AMI_INSPECTION:
-            str2 = "AS:INSPECTION";
+        case eufs_msgs::CanState::AMI_ADS_INSPECTION:
+            str2 = "AS:ADS_INSPECTION";
+            break;
+        case eufs_msgs::CanState::AMI_ADS_EBS:
+            str2 = "AS:ADS_EBS";
+            break;
+        case eufs_msgs::CanState::AMI_DDT_INSPECTION_A:
+            str2 = "AS:DDT_INSPECTION_A";
+            break;
+        case eufs_msgs::CanState::AMI_DDT_INSPECTION_B:
+            str2 = "AS:DDT_INSPECTION_B";
             break;
         case eufs_msgs::CanState::AMI_BRAKE_TEST:
             str2 = "AS:BRAKETEST";
