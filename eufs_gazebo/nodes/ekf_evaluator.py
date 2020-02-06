@@ -125,7 +125,7 @@ class EKFEvaluator(object):
         ekf_gps_data = [self.ekf_odom.twist.twist.linear.x, self.ekf_odom.twist.twist.linear.y]
         
         quat = self.imu.orientation
-        euler = tf.transformations.euler_from_quaternion(quat)
+        euler = tf.transformations.euler_from_quaternion((quat.x, quat.y, quat.z, quat.w))
         imu_data = [self.imu.linear_acceleration.x, self.imu.linear_acceleration.y, euler[2]]
         # Note: yaw is the 3rd component of rpy, so it's the "z" component in the Vector3
         ekf_imu_data = [
@@ -134,11 +134,11 @@ class EKFEvaluator(object):
             self.ekf_odom.twist.twist.angular.z
         ]
 
-        self.out_msg.data = compare(gps_data + imu_data, ekf_gps_data + ekf_imu_data)
+        self.out_msg.data = self.compare(gps_data + imu_data, ekf_gps_data + ekf_imu_data)
             
         self.out.publish(self.out_msg)
 
-    def compare(vec1, vec2):
+    def compare(self, vec1, vec2):
         return [math.sqrt(v1**2 + v2**2) for v1, v2 in zip(vec1, vec2)]
         
     def ground_truth_receiver(self, msg):
