@@ -12,7 +12,7 @@
   <include file="$(find localisation_meta)/launch/localization.launch"/>
   <!-- Launch evaluator-->
   <group if="$(eval arg('launch_evaluator') == 'true' )">
-      <include file="$(find eufs_gazebo)/launch/ekf_launcher.launch"/>
+      <include file="$(find eufs_gazebo)/launch/ekf_evaluator.launch"/>
   </group>
   
 
