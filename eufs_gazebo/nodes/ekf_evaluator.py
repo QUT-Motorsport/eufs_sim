@@ -30,8 +30,8 @@ import math
 import rospy
 from sensor_msgs.msg import Imu
 from geometry_msgs.msg import Vector3Stamped, AccelWithCovarianceStamped
-from std_msgs.msg import Float64MultiArray
-from nav_msgs.msg impory Odometry
+from std_msgs.msg import Float64MultiArray, MultiArrayLayout
+from nav_msgs.msg import Odometry
 import tf
 
 
@@ -66,9 +66,9 @@ class EKFEvaluator(object):
         self.out_msg = Float64MultiArray()
         self.out_msg.layout = MultiArrayLayout()
         self.out_msg.layout.data_offset = 0
-        self.out_msg.layout.dim[0].label = "height"
-        self.out_msg.layout.dim[0].stride = 5
-        self.out_msg.layout.dim[0].size = 5
+        # self.out_msg.layout.dim[0].label = "height"
+        # self.out_msg.layout.dim[0].stride = 5
+        # self.out_msg.layout.dim[0].size = 5
 
 
         # Read in the parameters
@@ -87,7 +87,7 @@ class EKFEvaluator(object):
 
 
         # Subscribe to channels
-        self.ekf_odom_sub = rospy.Subscriber("/odometry/filtered", Odometry, self.ekf_receiver)
+        self.ekf_odom_sub = rospy.Subscriber("/odometry/new", Odometry, self.ekf_receiver)
         self.ekf_accel_sub = rospy.Subscriber(
             "/accel/filtered",
             AccelWithCovarianceStamped,
@@ -109,12 +109,6 @@ class EKFEvaluator(object):
         elif str(msg._type) == "geometry_msgs/AccelWithCovarianceStamped":
             self.got_ekf_accel = True
             self.ekf_accel = msg
-
-"""
-Note to self:
-This node currently listens to robot_localisation inputs and outputs, but it actually is not listening to the
-ground truth.  So we need a way to grab the ground truth as well
-"""
 
     def evaluate(self):
         """Does the actual evaluation of the ekf, called at a consistent rate"""
