@@ -271,7 +271,7 @@ class EufsLauncher(Plugin):
                                         (lambda: self.launch_node_with_args(filepath, cur_cbox_args))
                                 ))
                         setattr(self, checkboxes[key]["name"].upper(), cur_cbox)
-                        cur_ypos += 15
+                        cur_ypos = 15 * (int(checkboxes[key]["priority"]) - 1)
 
 
                 # Change label to show current selected file for the copier
