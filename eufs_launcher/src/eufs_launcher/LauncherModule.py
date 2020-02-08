@@ -263,11 +263,9 @@ class EufsLauncher(Plugin):
                                         checkboxes[key]["location"]
                                 )
                                 if "args" in checkboxes[key]:
-                                        rospy.logerr(self.arg_to_list(checkboxes[key]["args"]))
                                         cur_cbox_args = self.arg_to_list(checkboxes[key]["args"])
                                 else:
                                         cur_cbox_args = []
-                                rospy.logerr(filepath)
                                 self.checkbox_effect_mapping.append((
                                         cur_cbox,
                                         (lambda: self.launch_node_with_args(filepath, cur_cbox_args))
@@ -452,11 +450,11 @@ class EufsLauncher(Plugin):
 
 
         def arg_to_list(self, d):
-            """Converts yaml arg dict to parameter list"""
-            to_return = []
-            for k, v in d.items():
-                to_return.append(str(k))
-            return to_return
+                """Converts yaml arg dict to parameter list"""
+                to_return = []
+                for k, v in d.items():
+                        to_return.append(str(k))
+                return list(to_return)
 
         def update_copier(self):
                 """Change label to show current selected file for the copier"""
@@ -888,10 +886,8 @@ class EufsLauncher(Plugin):
                                 ),
                                 [control_method, gui_on]
                         )
-                rospy.logerr(self.checkbox_effect_mapping)        
                 for checkbox, effect in self.checkbox_effect_mapping:
                         if checkbox.isChecked():
-                                rospy.logerr(checkbox.isChecked())
                                 effect()
                         
                 # Auto-launch scripts in yaml
@@ -902,10 +898,10 @@ class EufsLauncher(Plugin):
                                 scripts[key]["location"]
                         )
                         if "args" in scripts[key]:
-                                cur_script_args = scripts[key]["args"]
+                                cur_script_args = self.arg_to_list(scripts[key]["args"])
                         else:
                                 cur_script_args = []
-                        self.launch_node_with_args(filename, cur_script_args)
+                        self.launch_node_with_args(filepath, cur_script_args)
                 
                 self.tell_launchella("As I have fulfilled my purpose in guiding you " +
                                      "to launch a track, this launcher will no longer " +
@@ -927,6 +923,7 @@ class EufsLauncher(Plugin):
                 rather than the default launch method.
                 """
                 if len(args) > 0:
+                        rospy.logerr(args)
                         process = Popen(["roslaunch", filepath] + args)
                         self.popens.append(process)
                         return process
