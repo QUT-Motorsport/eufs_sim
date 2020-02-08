@@ -251,6 +251,7 @@ class EufsLauncher(Plugin):
                 # Add buttons from yaml file
                 checkboxes = self.default_config["eufs_launcher"]["checkboxes"]
                 self.checkbox_effect_mapping = []
+                self.checkbox_parameter_mapping = []
                 cur_xpos = 610
                 cur_ypos = 70
                 for key, value in checkboxes.items():
@@ -258,6 +259,8 @@ class EufsLauncher(Plugin):
                         cur_cbox.setChecked(checkboxes[key]["checked_on_default"])
                         cur_cbox.setGeometry(cur_xpos, cur_ypos, 150, 30)
                         if "package" in checkboxes[key] and "location" in checkboxes[key]:
+                                # This handles any launch files that the checkbox will launch
+                                # if selected.
                                 filepath = os.path.join(
                                         rospkg.RosPack().get_path(checkboxes[key]["package"]),
                                         checkboxes[key]["location"]
@@ -269,6 +272,15 @@ class EufsLauncher(Plugin):
                                 self.checkbox_effect_mapping.append((
                                         cur_cbox,
                                         (lambda: self.launch_node_with_args(filepath, cur_cbox_args))
+                                ))
+                        if "parameter_triggering" in checkboxes[key]:
+                                # This handles parameter details that will be passed to the
+                                # `simulation.launch` backbone file depending on whether the
+                                # checkbox is on or off
+                                self.checkbox_parameter_mapping.append((
+                                        cur_cbox,
+                                        self.arg_to_list(checkboxes[key]["parameter_triggering"]["if_on"])
+                                        self.arg_to_list(checkboxes[key]["parameter_triggering"]["if_off"])
                                 ))
                         setattr(self, checkboxes[key]["name"].upper(), cur_cbox)
                         cur_ypos = 15 * (int(checkboxes[key]["priority"]) - 1)
@@ -843,20 +855,13 @@ class EufsLauncher(Plugin):
                         self.tell_launchella("With Torque Controls")
                         control_method = "controlMethod:=torque"
 
-                # Get perception information
-                perception_stack = ["launch_group:=no_perception"]
-                if self.PERCEPTION_CHECKBOX.isChecked():
-                        perception_stack = []  # is on
-
-                # Check if we should launch the gazebo gui!
-                gui_on = "gui:=" + (
-                        "true" if self.GAZEBO_GUI_CHECKBOX.isChecked() else "false"
-                )
-
-                # Check if we need ground truth odom
-                publish_gt_tf = "publish_gt_tf:=" + (
-                        "true" if self.GROUND_TRUTH_TRANSFORM.isChecked() else "false"
-                )
+                # Get checkbox parameter information
+                parameters_to_pass = [control_method, "track:=" + track_to_launch.split(".")[0]]
+                for checkbox, param_if_on, param_if_off in self.checkbox_parameter_mapping:
+                        if checkbox.isChecked():
+                                parameters_to_pass.extend(param_if_on)
+                        else:
+                                parameters_to_pass.extend(param_if_off)
 
                 # How we launch the simulation changes depending on whether
                 # we are using the eufs_sim package standalone, or working within
@@ -870,12 +875,7 @@ class EufsLauncher(Plugin):
                         )
                         self.popen_process = self.launch_node_with_args(
                                 launch_location,
-                                [
-                                        control_method,
-                                        gui_on,
-                                        publish_gt_tf,
-                                        "track:=" + track_to_launch.split(".")[0]
-                                ] + perception_stack
+                                parameters_to_pass
                         )
                 else:
                         self.popen_process = self.launch_node_with_args(
@@ -884,7 +884,7 @@ class EufsLauncher(Plugin):
                                         'launch',
                                         track_to_launch
                                 ),
-                                [control_method, gui_on]
+                                parameters_to_pass
                         )
                 for checkbox, effect in self.checkbox_effect_mapping:
                         if checkbox.isChecked():
