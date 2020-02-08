@@ -10,9 +10,8 @@ eufs_launcher:
             location: "launch/sbg_raw_data_simulator.launch"
             args: {"_imu_hz:=200", "_gps_hz:=5"}
        
-    # Checkboxes to have in the config section.  `eufs_launcher` handles layout. 
-    # Currently this section can only handle buttons that launch single nodes
-    # Buttons that do other things have to be hardcoded.
+    # Checkboxes to have in the config section.  
+    # `eufs_launcher` handles layout based on priority set.
     checkboxes:
         visualisator:
             priority: 1
@@ -24,25 +23,31 @@ eufs_launcher:
             checked_on_default: No
             
         perception:
-            # This button has hardcoded effects.
             priority: 2
             name: "Perception_Checkbox"
             label: "Launch Perception Stack"
             checked_on_default: No
+            parameter_triggering:
+                if_on: {}
+                if_off: {"launch_group:=no_perception"}
             
         gazebo_gui:
-            # This button has hardcoded effects.
             priority: 3
             name: "Gazebo_GUI_Checkbox"
             label: "Launch Gazebo GUI"
             checked_on_default: Yes
+            parameter_triggering:
+                if_on: {"gui:=true"}
+                if_off: {"gui:=false"}
             
         ground_truth_transform:
-            # This button has hardcoded effects
             priority: 4
             name: "Ground_Truth_Transform"
             label: "Use Ground Truth TF"
             checked_on_default: No
+            parameter_triggering:
+                if_on: {"publish_gt_tf:=true"}
+                if_off: {"publish_gt_tf:=false"}
             
         ekf:
             priority: 5
