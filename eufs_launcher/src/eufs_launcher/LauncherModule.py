@@ -455,12 +455,7 @@ class EufsLauncher(Plugin):
             """Converts yaml arg dict to parameter list"""
             to_return = []
             for k, v in d.items():
-                v_string = str(v)
-                if v_string == "True":
-                    v_string = "true"
-                elif v_string == "False":
-                    v_string = "false"
-                to_return.append(str(k)+":="+v_string)
+                to_return.append(str(k))
             return to_return
 
         def update_copier(self):
