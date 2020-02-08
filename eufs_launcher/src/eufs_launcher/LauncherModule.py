@@ -5,6 +5,7 @@ import roslaunch
 import rosnode
 import math
 import time
+import yaml
 
 from qt_gui.plugin import Plugin
 from python_qt_binding import loadUi
@@ -50,6 +51,19 @@ class EufsLauncher(Plugin):
                         print 'arguments: ', args
                         print 'unknowns: ', unknowns
 
+                # Load in eufs_launcher parameters
+                yaml_loc = os.path.join(
+                        rospkg.RosPack().get_path('eufs_launcher'),
+                        'resource',
+                        'eufs_launcher.yaml'
+                )
+                with open(yaml_loc, 'r') as stream:
+                    try:
+                        default_config = yaml.safe_load(stream)
+                    except yaml.YAMLError as exc:
+                        print(exc)
+                        return
+
                 # Create QWidget
                 self._widget = QWidget()
 
@@ -58,11 +72,6 @@ class EufsLauncher(Plugin):
                                                  rospkg.RosPack().get_path('eufs_launcher'),
                                                  'resource',
                                                  'Launcher.ui'
-                )
-                self.sketcher_ui_file = os.path.join(
-                                                 rospkg.RosPack().get_path('eufs_launcher'),
-                                                 'resource',
-                                                 'Sketcher.ui'
                 )
 
                 # Extend the widget with all attributes and children from UI file
@@ -109,19 +118,19 @@ class EufsLauncher(Plugin):
                 self.NOISE_SLIDER = self._widget.findChild(QSlider, "Noisiness")
                 self.SPEED_RADIO = self._widget.findChild(QRadioButton, "SpeedRadio")
                 self.TORQUE_RADIO = self._widget.findChild(QRadioButton, "TorqueRadio")
-                self.PERCEPTION_CHECKBOX = self._widget.findChild(QCheckBox, "PerceptionCheckbox")
-                self.EKF_CHECKBOX = self._widget.findChild(QCheckBox, "EkfCheckbox")
+                #self.PERCEPTION_CHECKBOX = self._widget.findChild(QCheckBox, "PerceptionCheckbox")
+                #self.EKF_CHECKBOX = self._widget.findChild(QCheckBox, "EkfCheckbox")
 
-                self.VISUALISATOR_CHECKBOX = (
-                        self._widget.findChild(QCheckBox, "VisualisatorCheckbox")
-                )
-                self.GAZEBO_GUI_CHECKBOX = (
-                        self._widget.findChild(QCheckBox, "GazeboGuiCheckbox")
-                )
+                #self.VISUALISATOR_CHECKBOX = (
+                #        self._widget.findChild(QCheckBox, "VisualisatorCheckbox")
+                #)
+                #self.GAZEBO_GUI_CHECKBOX = (
+                #        self._widget.findChild(QCheckBox, "GazeboGuiCheckbox")
+                #)
 
-                self.PUBLISH_GT_TF = (
-                        self._widget.findChild(QCheckBox, "GroundTruthTransform")
-                )
+                #self.PUBLISH_GT_TF = (
+                #        self._widget.findChild(QCheckBox, "GroundTruthTransform")
+                #)
 
                 self.FILE_FOR_CONVERSION_BOX = self._widget.findChild(
                         QComboBox,
@@ -180,7 +189,6 @@ class EufsLauncher(Plugin):
                 self.LOAD_IMAGE_BUTTON.clicked.connect(self.track_from_image_button_pressed)
                 self.CONVERT_BUTTON.clicked.connect(self.convert_button_pressed)
                 self.RENAME_BUTTON.clicked.connect(self.copy_button_pressed)
-                self.SKETCHER_BUTTON.clicked.connect(self.sketcher_button_pressed)
 
                 # Create array of running processes
                 self.processes = []
@@ -199,9 +207,6 @@ class EufsLauncher(Plugin):
 
                 # Space the load track button better
                 self.LOAD_IMAGE_BUTTON.setText("Load Track\nFrom Image")
-
-                # Hide track draw button as not currently working
-                self.SKETCHER_BUTTON.setVisible(False)
 
                 # Set up the Generator Params
                 self.update_preset()
@@ -226,7 +231,7 @@ class EufsLauncher(Plugin):
                 self.LAX_CHECKBOX.setChecked(self.LAX_GENERATION)
 
                 # Setup Gazebo Gui button
-                self.GAZEBO_GUI_CHECKBOX.setChecked(True)
+                #self.GAZEBO_GUI_CHECKBOX.setChecked(True)
 
                 # Setup Conversion Tools dropdowns
                 for f in ["launch", "png", "csv"]:
@@ -260,8 +265,35 @@ class EufsLauncher(Plugin):
                 copier_full_stack.setChecked(True)
                 
                 # ekf_checkbox
-                ekf_checkbox = self.EKF_CHECKBOX
-                ekf_checkbox.setChecked(True)
+                #ekf_checkbox = self.EKF_CHECKBOX
+                #ekf_checkbox.setChecked(True)
+
+                # Add buttons from yaml file
+                checkboxes = default_config["eufs_launcher"]["checkboxes"]
+                self.checkbox_effect_mapping = []
+                cur_xpos = 610
+                cur_ypos = 70
+                for key, value in checkboxes.items():
+                        cur_cbox = QCheckBox(checkboxes[key]["name"], self._widget)
+                        cur_cbox.setChecked(ckeckboxes[key]["checked_on_default"])
+                        cur_cbox.setLabel(checkboxes[key]["label"])
+                        cur_cbox.setGeometry(cur_xpos, cur_ypos, 150, 30)
+                        if "package" in checkboxes[key] and "location" in checkboxes[key]:
+                                filepath = os.path.join(
+                                        rospkg.RosPack().get_path(checkboxes[key]["package"]),
+                                        checkboxes[key]["location"]
+                                )
+                                self.checkbox_effect_mapping.append((cur_box, filepath))
+                                if "args" in checkboxes[key]:
+                                        cur_cbox_args = checkboxes[key]["args"]
+                                else:
+                                        cur_cbox_args = []
+                                self.checkbox_effect_mapping.append((
+                                        cur_box,
+                                        lambda: self.launch_node_with_args(filepath, cur_cbox_args)
+                                ))
+                        setattr(self, upper(checkboxes[key]["name"]), cur_cbox)
+                        cur_ypos += 15
 
 
                 # Change label to show current selected file for the copier
@@ -868,7 +900,7 @@ class EufsLauncher(Plugin):
                                                 ),
                                                 [control_method, gui_on]
                                         )
-
+                """
                 # Launch the visualisator if applicable.
                 if self.VISUALISATOR_CHECKBOX.isChecked():
                         self.tell_launchella("And With LIDAR Data Visualisator.")
@@ -878,11 +910,30 @@ class EufsLauncher(Plugin):
                                 "visualisator.launch"
                         )
                         self.launch_node(node_path)
-
+                """
+                
+                for checkbox, effect in self.checkbox_effect_mapping:
+                    if checkbox.isChecked():
+                        effect()
+                        
+                # Auto-launch scripts in yaml
+                scripts = default_config["eufs_launcher"]["on_startup"]
+                for key, value in scripts.items():
+                        filepath = os.path.join(
+                                rospkg.RosPack().get_path(scripts[key]["package"]),
+                                scripts[key]["location"]
+                        )
+                        if "args" in scripts[key]:
+                                cur_script_args = scripts[key]["args"]
+                        else:
+                                cur_script_args = []
+                        self.launch_node_with_args(filepath, cur_cbox_args)
+                
                 self.tell_launchella("As I have fulfilled my purpose in guiding you " +
                                      "to launch a track, this launcher will no longer " +
                                      "react to input.")
-
+                
+                """
                 # Launch SBG Simulator Node
                 self.launch_node_with_args(
                         os.path.join(
@@ -894,8 +945,9 @@ class EufsLauncher(Plugin):
                                 "_imu_hz:=200",
                                 "_gps_hz:=5"
                         ]
-                )
+                )"""
                 
+                """
                 # Launch EKF Simulator Node
                 if self.EKF_CHECKBOX.isChecked():
                         self.launch_node_with_args(
@@ -908,6 +960,7 @@ class EufsLauncher(Plugin):
                                         "launch_evaluator:=true"
                                 ]
                         )
+                """
 
                 # Hide launcher
                 self._widget.setVisible(False)
