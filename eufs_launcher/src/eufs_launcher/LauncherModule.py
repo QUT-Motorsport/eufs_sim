@@ -255,24 +255,24 @@ class EufsLauncher(Plugin):
                 cur_ypos = 70
                 for key, value in checkboxes.items():
                         cur_cbox = QCheckBox(checkboxes[key]["name"], self._widget)
-                        cur_cbox.setChecked(ckeckboxes[key]["checked_on_default"])
-                        cur_cbox.setLabel(checkboxes[key]["label"])
+                        cur_cbox.setChecked(checkboxes[key]["checked_on_default"])
+                        # cur_cbox.setLabel(checkboxes[key]["label"])
                         cur_cbox.setGeometry(cur_xpos, cur_ypos, 150, 30)
                         if "package" in checkboxes[key] and "location" in checkboxes[key]:
                                 filepath = os.path.join(
                                         rospkg.RosPack().get_path(checkboxes[key]["package"]),
                                         checkboxes[key]["location"]
                                 )
-                                self.checkbox_effect_mapping.append((cur_box, filepath))
+                                self.checkbox_effect_mapping.append((cur_cbox, filepath))
                                 if "args" in checkboxes[key]:
                                         cur_cbox_args = checkboxes[key]["args"]
                                 else:
                                         cur_cbox_args = []
                                 self.checkbox_effect_mapping.append((
-                                        cur_box,
+                                        cur_cbox,
                                         lambda: self.launch_node_with_args(filepath, cur_cbox_args)
                                 ))
-                        setattr(self, upper(checkboxes[key]["name"]), cur_cbox)
+                        setattr(self, checkboxes[key]["name"].upper(), cur_cbox)
                         cur_ypos += 15
 
 
@@ -848,6 +848,7 @@ class EufsLauncher(Plugin):
                 )
 
                 # Check if we need ground truth odom
+                rospy.logerr(dir(self))
                 publish_gt_tf = "publish_gt_tf:=" + (
                         "true" if self.PUBLISH_GT_TF.isChecked() else "false"
                 )
