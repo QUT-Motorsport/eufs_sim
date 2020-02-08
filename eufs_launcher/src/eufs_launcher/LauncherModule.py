@@ -460,7 +460,7 @@ class EufsLauncher(Plugin):
                     v_string = "true"
                 elif v_string == "False":
                     v_string = "false"
-                to_return.append(str(k)+":="+str(v))
+                to_return.append(str(k)+":="+v_string)
             return to_return
 
         def update_copier(self):
