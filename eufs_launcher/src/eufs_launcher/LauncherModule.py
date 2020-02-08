@@ -59,7 +59,7 @@ class EufsLauncher(Plugin):
                 )
                 with open(yaml_loc, 'r') as stream:
                     try:
-                        default_config = yaml.safe_load(stream)
+                        self.default_config = yaml.safe_load(stream)
                     except yaml.YAMLError as exc:
                         print(exc)
                         return
@@ -249,7 +249,7 @@ class EufsLauncher(Plugin):
                 copier_full_stack.setChecked(True)
 
                 # Add buttons from yaml file
-                checkboxes = default_config["eufs_launcher"]["checkboxes"]
+                checkboxes = self.default_config["eufs_launcher"]["checkboxes"]
                 self.checkbox_effect_mapping = []
                 cur_xpos = 610
                 cur_ypos = 70
@@ -262,14 +262,15 @@ class EufsLauncher(Plugin):
                                         rospkg.RosPack().get_path(checkboxes[key]["package"]),
                                         checkboxes[key]["location"]
                                 )
-                                self.checkbox_effect_mapping.append((cur_cbox, filepath))
                                 if "args" in checkboxes[key]:
-                                        cur_cbox_args = checkboxes[key]["args"]
+                                        rospy.logerr(checkboxes[key]["args"])
+                                        cur_cbox_args = list(checkboxes[key]["args"])
                                 else:
                                         cur_cbox_args = []
+                                rospy.logerr(filepath)
                                 self.checkbox_effect_mapping.append((
                                         cur_cbox,
-                                        lambda: self.launch_node_with_args(filepath, cur_cbox_args)
+                                        (lambda: self.launch_node_with_args(filepath, cur_cbox_args))
                                 ))
                         setattr(self, checkboxes[key]["name"].upper(), cur_cbox)
                         cur_ypos += 15
@@ -879,13 +880,14 @@ class EufsLauncher(Plugin):
                                 ),
                                 [control_method, gui_on]
                         )
-                
+                rospy.logerr(self.checkbox_effect_mapping)        
                 for checkbox, effect in self.checkbox_effect_mapping:
-                    if checkbox.isChecked():
-                        effect()
+                        if checkbox.isChecked():
+                                rospy.logerr(checkbox.isChecked())
+                                effect()
                         
                 # Auto-launch scripts in yaml
-                scripts = default_config["eufs_launcher"]["on_startup"]
+                scripts = self.default_config["eufs_launcher"]["on_startup"]
                 for key, value in scripts.items():
                         filepath = os.path.join(
                                 rospkg.RosPack().get_path(scripts[key]["package"]),
@@ -895,7 +897,7 @@ class EufsLauncher(Plugin):
                                 cur_script_args = scripts[key]["args"]
                         else:
                                 cur_script_args = []
-                        self.launch_node_with_args(filepath, cur_cbox_args)
+                        self.launch_node_with_args(filename, cur_script_args)
                 
                 self.tell_launchella("As I have fulfilled my purpose in guiding you " +
                                      "to launch a track, this launcher will no longer " +
@@ -949,7 +951,7 @@ class EufsLauncher(Plugin):
                         rospy.logerr("Warning, after shutting down the launcher, " +
                                      "these nodes are still running: " + str(extra_nodes))
 
-                nodes_to_kill = default_config["eufs_launcher"]["nodes_to_kill"]
+                nodes_to_kill = self.default_config["eufs_launcher"]["nodes_to_kill"]
                 for bad_node in extra_nodes:
                         if bad_node in nodes_to_kill:
                                 Popen(["rosnode", "kill", bad_node])
