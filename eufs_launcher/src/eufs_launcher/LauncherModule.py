@@ -254,9 +254,8 @@ class EufsLauncher(Plugin):
                 cur_xpos = 610
                 cur_ypos = 70
                 for key, value in checkboxes.items():
-                        cur_cbox = QCheckBox(checkboxes[key]["name"], self._widget)
+                        cur_cbox = QCheckBox(checkboxes[key]["label"], self._widget)
                         cur_cbox.setChecked(checkboxes[key]["checked_on_default"])
-                        # cur_cbox.setLabel(checkboxes[key]["label"])
                         cur_cbox.setGeometry(cur_xpos, cur_ypos, 150, 30)
                         if "package" in checkboxes[key] and "location" in checkboxes[key]:
                                 filepath = os.path.join(
@@ -848,7 +847,6 @@ class EufsLauncher(Plugin):
                 )
 
                 # Check if we need ground truth odom
-                rospy.logerr(dir(self))
                 publish_gt_tf = "publish_gt_tf:=" + (
                         "true" if self.GROUND_TRUTH_TRANSFORM.isChecked() else "false"
                 )
