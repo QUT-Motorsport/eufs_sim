@@ -8,7 +8,7 @@ eufs_launcher:
         sbg_raw_data_simulator:
             package: "eufs_gazebo"
             location: "launch/sbg_raw_data_simulator.launch"
-            args: {"_imu_hz:=200", "_gps_hz:=5"}
+            args: {_imu_hz:200, _gps_hz:5}
        
     # Checkboxes to have in the config section.  `eufs_launcher` handles layout. 
     # Currently this section can only handle buttons that launch single nodes
@@ -50,7 +50,7 @@ eufs_launcher:
             label: "Launch EKF"
             package: "eufs_gazebo"
             location: "launch/ekf_sim_launcher.launch"
-            args: {"launch_evaluator:=true"}
+            args: {launch_evaluator:Yes}
             checked_on_default: Yes
        
     # Some nodes fail to shutdown
