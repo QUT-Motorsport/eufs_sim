@@ -850,7 +850,7 @@ class EufsLauncher(Plugin):
                 # Check if we need ground truth odom
                 rospy.logerr(dir(self))
                 publish_gt_tf = "publish_gt_tf:=" + (
-                        "true" if self.PUBLISH_GT_TF.isChecked() else "false"
+                        "true" if self.GROUND_TRUTH_TRANSFORM.isChecked() else "false"
                 )
 
                 # How we launch the simulation changes depending on whether
