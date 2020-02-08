@@ -950,19 +950,7 @@ class EufsLauncher(Plugin):
                         rospy.logerr("Warning, after shutting down the launcher, " +
                                      "these nodes are still running: " + str(extra_nodes))
 
-                nodes_to_kill = [
-                                    "/cone_ground_truth",
-                                    "/eufs/controller_spawner",
-                                    "/gazebo",
-                                    "/gazebo_gui",
-                                    "/robot_state_publisher",
-                                    "/ros_can_sim",
-                                    "/twist_to_ackermannDrive",
-                                    "/spawn_platform",
-                                    "/eufs_sim_rqt",
-                                    "/wheel_odometry",
-                                    "/sbg_raw_data_simulator"
-                                ]
+                nodes_to_kill = default_config["eufs_launcher"]["nodes_to_kill"]
                 for bad_node in extra_nodes:
                         if bad_node in nodes_to_kill:
                                 Popen(["rosnode", "kill", bad_node])
