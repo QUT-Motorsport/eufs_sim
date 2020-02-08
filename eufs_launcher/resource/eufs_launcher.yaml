@@ -1,0 +1,66 @@
+# Configures what nodes get automatically launched on startup, along with
+# what config checkboxes exist and their default values.
+
+eufs_launcher:
+    
+    # Launch files to launch no matter what after the launch button is pressed
+    on_startup:
+        sbg_raw_data_simulator:
+            package: "eufs_gazebo"
+            location: "launch/sbg_raw_data_simulator.launch"
+       
+    # Checkboxes to have in the config section.  `eufs_launcher` handles layout. 
+    # Currently this section can only handle buttons that launch single nodes
+    # Buttons that do other things have to be hardcoded.
+    checkboxes:
+        visualisator:
+            priority: 1
+            name: "Visualisator_Checkbox"
+            package: "eufs_description"
+            location: "launch/visualisator.launch"
+            checked_on_default: No
+            
+        perception:
+            # This button has hardcoded effects.
+            priority: 2
+            name: "Perception_Checkbox"
+            checked_on_default: No
+            
+        gazebo_gui:
+            # This button has hardcoded effects.
+            priority: 3
+            name: "Gazebo_GUI_Checkbox"
+            checked_on_default: Yes
+            
+        ground_truth_transform:
+            # This button has hardcoded effects
+            priority: 4
+            name: "Ground_Truth_Transform"
+            checked_on_default: No
+            
+        ekf:
+            priority: 5
+            name: "EKF_Checkbox"
+            package: "eufs_gazebo"
+            location: "launch/ekf_sim_launcher.launch"
+            checked_on_default: Yes
+       
+    # Some nodes fail to shutdown
+    # I have some theories as to why that is, but for now the solution is
+    # just to manually kill all nodes that fail to quit.
+    # I believe it has to do with how the launcher is launching some nodes
+    # via Popen and not through the ROS API.  This was a necessity in Kinetic,
+    # but now that we're in Melodic it is possible to go through the ROS API.
+    nodes_to_kill: {
+        "/cone_ground_truth",
+        "/eufs/controller_spawner",
+        "/gazebo",
+        "/gazebo_gui",
+        "/robot_state_publisher",
+        "/ros_can_sim",
+        "/twist_to_ackermannDrive",
+        "/spawn_platform",
+        "/eufs_sim_rqt",
+        "/wheel_odometry",
+        "/sbg_raw_data_simulator"
+    }
