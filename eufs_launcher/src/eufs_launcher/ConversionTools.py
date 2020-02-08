@@ -1040,39 +1040,39 @@ class ConversionTools:
                 raw_orange = []
                 raw_big_orange = []
                 raw_noise = []
-                raw_car_location = (0, 0, 0, 0)
+                raw_car_location = (0, 0, 0, 0, 0)
                 for bluecone in blue_cones.itertuples():
                         x = (bluecone[2])
                         y = (bluecone[3])
-                        raw_blue.append(("blue", x, y, 0))
+                        raw_blue.append(("blue", x, y, 0, 0))
 
                 for yellowcone in yellow_cones.itertuples():
                         x = (yellowcone[2])
                         y = (yellowcone[3])
-                        raw_yellow.append(("yellow", x, y, 0))
+                        raw_yellow.append(("yellow", x, y, 0, 0))
 
                 for orangecone in orange_cones.itertuples():
                         x = (orangecone[2])
                         y = (orangecone[3])
-                        raw_orange.append(("orange", x, y, 0))
+                        raw_orange.append(("orange", x, y, 0, 0))
 
                 for big_orangecone in big_orange_cones.itertuples():
                         x = (big_orangecone[2])
                         y = (big_orangecone[3])
-                        raw_big_orange.append(("big_orange", x, y, 0))
+                        raw_big_orange.append(("big_orange", x, y, 0, 0))
 
                 for noise in active_noise.itertuples():
                         x = (noise[2])
                         y = (noise[3])
-                        raw_noise.append(("noise", x, y, 0))
+                        raw_noise.append(("noise", x, y, 0, 0))
 
                 for noise in inactive_noise.itertuples():
                         x = (noise[2])
                         y = (noise[3])
-                        raw_noise.append(("noise", x, y, 0))
+                        raw_noise.append(("noise", x, y, 0, 0))
 
                 for c in car_location.itertuples():
-                        raw_car_location = ("car", c[2], c[3], c[4])
+                        raw_car_location = ("car", c[2], c[3], c[4], 0)
 
                 all_cones = (raw_blue +
                              raw_yellow +
