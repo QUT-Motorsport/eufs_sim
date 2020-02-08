@@ -863,34 +863,24 @@ class EufsLauncher(Plugin):
                         else:
                                 parameters_to_pass.extend(param_if_off)
 
-                # How we launch the simulation changes depending on whether
-                # we are using the eufs_sim package standalone, or working within
-                # the eufs-master ecosystem.
-                dir_to_check = os.path.dirname(os.path.dirname(os.path.dirname(self.GAZEBO)))
-                if dir_to_check.split("/")[-1] == "eufs-master":
-                        launch_location = os.path.join(
-                                                dir_to_check,
-                                                'launch',
-                                                'simulation.launch'
-                        )
-                        self.popen_process = self.launch_node_with_args(
-                                launch_location,
-                                parameters_to_pass
-                        )
-                else:
-                        self.popen_process = self.launch_node_with_args(
-                                os.path.join(
-                                        self.GAZEBO,
-                                        'launch',
-                                        track_to_launch
-                                ),
-                                parameters_to_pass
-                        )
+                # Here we launch the backbone script, `simulation.launch`.
+                dir_to_launch = os.path.dirname(os.path.dirname(os.path.dirname(self.GAZEBO)))
+                launch_location = os.path.join(
+                        dir_to_launch,
+                        'launch',
+                        'simulation.launch'
+                )
+                self.popen_process = self.launch_node_with_args(
+                        launch_location,
+                        parameters_to_pass
+                )
+                
+                # Trogger launch files hooked to checkboxes
                 for checkbox, effect in self.checkbox_effect_mapping:
                         if checkbox.isChecked():
                                 effect()
                         
-                # Auto-launch scripts in yaml
+                # Auto-launch default scripts in yaml
                 scripts = self.default_config["eufs_launcher"]["on_startup"]
                 for key, value in scripts.items():
                         filepath = os.path.join(
