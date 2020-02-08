@@ -118,19 +118,6 @@ class EufsLauncher(Plugin):
                 self.NOISE_SLIDER = self._widget.findChild(QSlider, "Noisiness")
                 self.SPEED_RADIO = self._widget.findChild(QRadioButton, "SpeedRadio")
                 self.TORQUE_RADIO = self._widget.findChild(QRadioButton, "TorqueRadio")
-                #self.PERCEPTION_CHECKBOX = self._widget.findChild(QCheckBox, "PerceptionCheckbox")
-                #self.EKF_CHECKBOX = self._widget.findChild(QCheckBox, "EkfCheckbox")
-
-                #self.VISUALISATOR_CHECKBOX = (
-                #        self._widget.findChild(QCheckBox, "VisualisatorCheckbox")
-                #)
-                #self.GAZEBO_GUI_CHECKBOX = (
-                #        self._widget.findChild(QCheckBox, "GazeboGuiCheckbox")
-                #)
-
-                #self.PUBLISH_GT_TF = (
-                #        self._widget.findChild(QCheckBox, "GroundTruthTransform")
-                #)
 
                 self.FILE_FOR_CONVERSION_BOX = self._widget.findChild(
                         QComboBox,
@@ -230,9 +217,6 @@ class EufsLauncher(Plugin):
                 # Setup Lax Generation button
                 self.LAX_CHECKBOX.setChecked(self.LAX_GENERATION)
 
-                # Setup Gazebo Gui button
-                #self.GAZEBO_GUI_CHECKBOX.setChecked(True)
-
                 # Setup Conversion Tools dropdowns
                 for f in ["launch", "png", "csv"]:
                         self.CONVERT_FROM_MENU.addItem(f)
@@ -263,10 +247,6 @@ class EufsLauncher(Plugin):
                 # Copier full stack checkbox
                 copier_full_stack = self.FULL_STACK_COPY_BUTTON
                 copier_full_stack.setChecked(True)
-                
-                # ekf_checkbox
-                #ekf_checkbox = self.EKF_CHECKBOX
-                #ekf_checkbox.setChecked(True)
 
                 # Add buttons from yaml file
                 checkboxes = default_config["eufs_launcher"]["checkboxes"]
@@ -883,34 +863,23 @@ class EufsLauncher(Plugin):
                                                 'simulation.launch'
                         )
                         self.popen_process = self.launch_node_with_args(
-                                                launch_location,
-                                                [
-                                                        control_method,
-                                                        gui_on,
-                                                        publish_gt_tf,
-                                                        "track:=" + track_to_launch.split(".")[0]
-                                                ] + perception_stack
-                                        )
+                                launch_location,
+                                [
+                                        control_method,
+                                        gui_on,
+                                        publish_gt_tf,
+                                        "track:=" + track_to_launch.split(".")[0]
+                                ] + perception_stack
+                        )
                 else:
                         self.popen_process = self.launch_node_with_args(
-                                                os.path.join(
-                                                        self.GAZEBO,
-                                                        'launch',
-                                                        track_to_launch
-                                                ),
-                                                [control_method, gui_on]
-                                        )
-                """
-                # Launch the visualisator if applicable.
-                if self.VISUALISATOR_CHECKBOX.isChecked():
-                        self.tell_launchella("And With LIDAR Data Visualisator.")
-                        node_path = os.path.join(
-                                rospkg.RosPack().get_path('eufs_description'),
-                                "launch",
-                                "visualisator.launch"
+                                os.path.join(
+                                        self.GAZEBO,
+                                        'launch',
+                                        track_to_launch
+                                ),
+                                [control_method, gui_on]
                         )
-                        self.launch_node(node_path)
-                """
                 
                 for checkbox, effect in self.checkbox_effect_mapping:
                     if checkbox.isChecked():
@@ -932,35 +901,6 @@ class EufsLauncher(Plugin):
                 self.tell_launchella("As I have fulfilled my purpose in guiding you " +
                                      "to launch a track, this launcher will no longer " +
                                      "react to input.")
-                
-                """
-                # Launch SBG Simulator Node
-                self.launch_node_with_args(
-                        os.path.join(
-                                self.GAZEBO,
-                                "launch",
-                                "sbg_raw_data_simulator.launch"
-                        ),
-                        [
-                                "_imu_hz:=200",
-                                "_gps_hz:=5"
-                        ]
-                )"""
-                
-                """
-                # Launch EKF Simulator Node
-                if self.EKF_CHECKBOX.isChecked():
-                        self.launch_node_with_args(
-                                os.path.join(
-                                        self.GAZEBO,
-                                        "launch",
-                                        "ekf_sim_launcher.launch"
-                                ),
-                                [
-                                        "launch_evaluator:=true"
-                                ]
-                        )
-                """
 
                 # Hide launcher
                 self._widget.setVisible(False)
