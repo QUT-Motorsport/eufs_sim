@@ -263,8 +263,8 @@ class EufsLauncher(Plugin):
                                         checkboxes[key]["location"]
                                 )
                                 if "args" in checkboxes[key]:
-                                        rospy.logerr(checkboxes[key]["args"])
-                                        cur_cbox_args = list(checkboxes[key]["args"])
+                                        rospy.logerr(self.arg_to_list(checkboxes[key]["args"]))
+                                        cur_cbox_args = self.arg_to_list(checkboxes[key]["args"])
                                 else:
                                         cur_cbox_args = []
                                 rospy.logerr(filepath)
@@ -449,6 +449,19 @@ class EufsLauncher(Plugin):
                 # Update drop-downs with new files in directory
                 self.load_track_and_images()
                 self.tell_launchella("Copy Succeeded!")
+
+
+        def arg_to_list(self, d):
+            """Converts yaml arg dict to parameter list"""
+            to_return = []
+            for k, v in d.items():
+                v_string = str(v)
+                if v_string == "True":
+                    v_string = "true"
+                elif v_string == "False":
+                    v_string = "false"
+                to_return.append(str(k)+":="+str(v))
+            return to_return
 
         def update_copier(self):
                 """Change label to show current selected file for the copier"""
@@ -951,7 +964,7 @@ class EufsLauncher(Plugin):
                         rospy.logerr("Warning, after shutting down the launcher, " +
                                      "these nodes are still running: " + str(extra_nodes))
 
-                nodes_to_kill = self.default_config["eufs_launcher"]["nodes_to_kill"]
+                nodes_to_kill = self.arg_to_list(self.default_config["eufs_launcher"]["nodes_to_kill"])
                 for bad_node in extra_nodes:
                         if bad_node in nodes_to_kill:
                                 Popen(["rosnode", "kill", bad_node])
