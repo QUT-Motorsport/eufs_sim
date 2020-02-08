@@ -16,6 +16,7 @@ eufs_launcher:
         visualisator:
             priority: 1
             name: "Visualisator_Checkbox"
+            label: "Launch LIDAR Visualisator"
             package: "eufs_description"
             location: "launch/visualisator.launch"
             checked_on_default: No
@@ -24,23 +25,27 @@ eufs_launcher:
             # This button has hardcoded effects.
             priority: 2
             name: "Perception_Checkbox"
+            label: "Launch Perception Stack"
             checked_on_default: No
             
         gazebo_gui:
             # This button has hardcoded effects.
             priority: 3
             name: "Gazebo_GUI_Checkbox"
+            label: "Launch Gazebo GUI"
             checked_on_default: Yes
             
         ground_truth_transform:
             # This button has hardcoded effects
             priority: 4
             name: "Ground_Truth_Transform"
+            label: "Use Ground Truth TF"
             checked_on_default: No
             
         ekf:
             priority: 5
             name: "EKF_Checkbox"
+            label: "Launch EKF"
             package: "eufs_gazebo"
             location: "launch/ekf_sim_launcher.launch"
             checked_on_default: Yes
