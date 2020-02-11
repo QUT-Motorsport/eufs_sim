@@ -95,8 +95,8 @@ class EufsLauncher(Plugin):
                 # self._widget.setFixedWidth(1200)
 
                 # Enable DPI scaling
-                QApplication.setAttribute(QtCore.Qt.AA_EnableHighDpiScaling, True)
-                QApplication.setAttribute(QtCore.Qt.AA_UseHighDpiPixmaps, True)
+                #QApplication.setAttribute(QtCore.Qt.AA_EnableHighDpiScaling, True)
+                #QApplication.setAttribute(QtCore.Qt.AA_UseHighDpiPixmaps, True)
 
                 # Store gazebo's path as it is used quite a lot:
                 self.GAZEBO = rospkg.RosPack().get_path('eufs_gazebo')
