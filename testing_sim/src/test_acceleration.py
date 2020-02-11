@@ -10,25 +10,19 @@ from eufs_msgs.msg import CanState
 
 class SimulationTestClass(unittest.TestCase):
 
-    # lap_count = -1
     as_state = 0
-
-    # def laps_callback(self, msg):
-    #     self.lap_count = msg.data
 
     def state_callback(self, msg):
         self.as_state = msg.as_state
 
     def test_lapcount(self):
-        # rospy.Subscriber('/finish_line_detector/completed_laps', Int16, self.laps_callback)
         rospy.Subscriber('/ros_can/state', CanState, self.state_callback)
 
         # Wait until the mission is completed or ros is shutdown
         # There is a timeout in the launch file
-        while not rospy.is_shutdown() and not self.as_state == 4: # (self.lap_count == 10 and self.as_state == 4):
+        while not rospy.is_shutdown() and not self.as_state == 4:
             rospy.sleep(0.1)
 
-        self.assertEqual(self.lap_count, 10)
         self.assertEqual(self.as_state, 4)
 
 
