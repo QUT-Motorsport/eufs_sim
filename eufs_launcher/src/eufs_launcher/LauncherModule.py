@@ -291,10 +291,7 @@ class EufsLauncher(Plugin):
 
                 # looping over all widgest to fix scaling issue Hacky fix
                 rec = QApplication.desktop().screenGeometry()
-                # rospy.logerr(rec.height())
-                # rospy.logerr(rec.width())
                 scaler_multiplier = rec.width()/1700.0
-                rospy.logerr(scaler_multiplier)
                 for widget in self._widget.children():
                         if hasattr(widget, 'geometry'):
                                 k = widget.geometry() # of type qrect
