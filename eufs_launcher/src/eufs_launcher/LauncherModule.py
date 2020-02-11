@@ -92,7 +92,7 @@ class EufsLauncher(Plugin):
                         self._widget.setWindowTitle(the_title)
 
                 # Resize correctly
-                self._widget.setFixedWidth(1200)
+                # self._widget.setFixedWidth(1200)
 
                 # Enable DPI scaling
                 QApplication.setAttribute(QtCore.Qt.AA_EnableHighDpiScaling, True)
@@ -288,13 +288,18 @@ class EufsLauncher(Plugin):
                 self.uuid = roslaunch.rlutil.get_or_generate_uuid(None, False)
                 roslaunch.configure_logging(self.uuid)
                 self.DEBUG_SHUTDOWN = False
-                
+
                 # looping over all widgest to fix scaling issue Hacky fix
+                rec = QApplication.desktop().screenGeometry()
+                # rospy.logerr(rec.height())
+                # rospy.logerr(rec.width())
+                scaler_multiplier = rec.width()/1700.0
+                rospy.logerr(scaler_multiplier)
                 for widget in self._widget.children():
                         if hasattr(widget, 'geometry'):
-                                scaler_multiplier = 1.455
                                 k = widget.geometry() # of type qrect
-                                widget.setGeometry(k.x()*scaler_multiplier, k.y()*scaler_multiplier, k.width()*scaler_multiplier, k.height()*scaler_multiplier)
+                                new_width = k.width()*(scaler_multiplier) if not isinstance(widget, QLabel) else(k.width()*(scaler_multiplier**2))
+                                widget.setGeometry(k.x()*scaler_multiplier, k.y()*scaler_multiplier, new_width, k.height()*(scaler_multiplier))
                                 
                         
 
