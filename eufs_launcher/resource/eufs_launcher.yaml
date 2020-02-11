@@ -16,7 +16,7 @@ eufs_launcher:
         visualisator:
             priority: 1
             name: "Visualisator_Checkbox"
-            label: "Launch LIDAR Visualisator"
+            label: "LIDAR Visualisator"
             package: "eufs_description"
             location: "launch/visualisator.launch"
             args: {}
@@ -25,7 +25,7 @@ eufs_launcher:
         perception:
             priority: 2
             name: "Perception_Checkbox"
-            label: "Launch Perception Stack"
+            label: "Perception Stack"
             checked_on_default: No
             parameter_triggering:
                 if_on: {}
@@ -34,7 +34,7 @@ eufs_launcher:
         gazebo_gui:
             priority: 3
             name: "Gazebo_GUI_Checkbox"
-            label: "Launch Gazebo GUI"
+            label: "Gazebo GUI"
             checked_on_default: Yes
             parameter_triggering:
                 if_on: {"gui:=true"}
@@ -43,7 +43,7 @@ eufs_launcher:
         ground_truth_transform:
             priority: 4
             name: "Ground_Truth_Transform"
-            label: "Use Ground Truth TF"
+            label: "Ground Truth TF"
             checked_on_default: No
             parameter_triggering:
                 if_on: {"publish_gt_tf:=true"}
@@ -52,7 +52,7 @@ eufs_launcher:
         ekf:
             priority: 5
             name: "EKF_Checkbox"
-            label: "Launch EKF"
+            label: "EKF"
             package: "eufs_gazebo"
             location: "launch/ekf_sim_launcher.launch"
             args: {"launch_evaluator:=true"}
@@ -63,7 +63,7 @@ eufs_launcher:
     # just to manually kill all nodes that fail to quit.
     # I believe it has to do with how the launcher is launching some nodes
     # via Popen and not through the ROS API.  This was a necessity in Kinetic,
-    # but now that we're in Melodic it is possible to go through the ROS API.
+    # but now that we're in Melodic it is potentially possible to go through the ROS API.
     nodes_to_kill: {
         "/cone_ground_truth",
         "/eufs/controller_spawner",

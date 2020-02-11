@@ -12,6 +12,7 @@ from python_qt_binding import loadUi
 from python_qt_binding.QtWidgets import (QWidget, QComboBox, QPushButton, QSlider, QRadioButton, QCheckBox, QMainWindow,
                                          QLabel, QLineEdit, QApplication)
 import python_qt_binding.QtCore as QtCore
+from python_qt_binding.QtGui import QFont
 
 from os import listdir
 from os.path import isfile, join
@@ -259,10 +260,11 @@ class EufsLauncher(Plugin):
                 self.checkbox_parameter_mapping = []
                 cur_xpos = 610
                 for key, value in checkboxes.items():
-                        cur_ypos = 70 + 15 * (int(checkboxes[key]["priority"]) - 1)
+                        cur_ypos = 50 + 15 * (int(checkboxes[key]["priority"]) - 1)
                         cur_cbox = QCheckBox(checkboxes[key]["label"], self._widget)
                         cur_cbox.setChecked(checkboxes[key]["checked_on_default"])
-                        cur_cbox.setGeometry(cur_xpos, cur_ypos, 150, 30)
+                        cur_cbox.setGeometry(cur_xpos, cur_ypos, 300, 30)
+                        cur_cbox.setFont(QFont("Sans Serif", 7))
                         if "package" in checkboxes[key] and "location" in checkboxes[key]:
                                 # This handles any launch files that the checkbox will launch
                                 # if selected.
