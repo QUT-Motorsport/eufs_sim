@@ -174,7 +174,6 @@ class EufsLauncher(Plugin):
                 # Hook up buttons to onclick functions
                 self.LAUNCH_BUTTON.clicked.connect(self.launch_button_pressed)
                 self.GENERATOR_BUTTON.clicked.connect(self.generator_button_pressed)
-                self.LOAD_IMAGE_BUTTON.clicked.connect(self.track_from_image_button_pressed)
                 self.CONVERT_BUTTON.clicked.connect(self.convert_button_pressed)
                 self.RENAME_BUTTON.clicked.connect(self.copy_button_pressed)
 
@@ -193,8 +192,6 @@ class EufsLauncher(Plugin):
                 self.launch_file_override = None
                 self.popen_process = None
 
-                # Space the load track button better
-                self.LOAD_IMAGE_BUTTON.setText("Load Track\nFrom Image")
 
                 # Set up the Generator Params
                 self.update_preset()
@@ -241,9 +238,6 @@ class EufsLauncher(Plugin):
                 track_generator_full_stack = self.FULL_STACK_TRACK_GEN_BUTTON
                 track_generator_full_stack.setChecked(True)
 
-                # Image full stack checkbox
-                image_launcher_full_stack = self.FULL_STACK_IMAGE_BUTTON
-                image_launcher_full_stack.setChecked(True)
 
                 # Copier full stack checkbox
                 copier_full_stack = self.FULL_STACK_COPY_BUTTON
@@ -345,8 +339,8 @@ class EufsLauncher(Plugin):
                 )
                 csv_files = [f for f in listdir(relevant_path) if isfile(join(relevant_path, f))]
 
-                # Add Csvs to Image Selector
-                for f in image_files:
+                # Add Csvs to csvs Selector
+                for f in csv_files:
                         if f[-3:] == "csv":
                                 self.IMAGE_SELECTOR.addItem(f)
 
