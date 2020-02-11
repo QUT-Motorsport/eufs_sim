@@ -288,7 +288,15 @@ class EufsLauncher(Plugin):
                 self.uuid = roslaunch.rlutil.get_or_generate_uuid(None, False)
                 roslaunch.configure_logging(self.uuid)
                 self.DEBUG_SHUTDOWN = False
-
+                
+                # looping over all widgest to fix scaling issue Hacky fix
+                for widget in self._widget.children():
+                        if hasattr(widget, 'geometry'):
+                                scaler_multiplier = 1.455
+                                k = widget.geometry() # of type qrect
+                                widget.setGeometry(k.x()*scaler_multiplier, k.y()*scaler_multiplier, k.width()*scaler_multiplier, k.height()*scaler_multiplier)
+                                
+                        
 
         def tell_launchella(self, what):
                 """Display text in feedback box (lower left corner)."""
