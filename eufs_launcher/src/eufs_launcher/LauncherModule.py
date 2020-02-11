@@ -279,7 +279,7 @@ class EufsLauncher(Plugin):
                                 # checkbox is on or off
                                 self.checkbox_parameter_mapping.append((
                                         cur_cbox,
-                                        self.arg_to_list(checkboxes[key]["parameter_triggering"]["if_on"])
+                                        self.arg_to_list(checkboxes[key]["parameter_triggering"]["if_on"]),
                                         self.arg_to_list(checkboxes[key]["parameter_triggering"]["if_off"])
                                 ))
                         setattr(self, checkboxes[key]["name"].upper(), cur_cbox)
