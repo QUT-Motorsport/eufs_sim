@@ -11,6 +11,7 @@ from qt_gui.plugin import Plugin
 from python_qt_binding import loadUi
 from python_qt_binding.QtWidgets import (QWidget, QComboBox, QPushButton, QSlider, QRadioButton, QCheckBox, QMainWindow,
                                          QLabel, QLineEdit, QApplication)
+import python_qt_binding.QtCore as QtCore
 
 from os import listdir
 from os.path import isfile, join
@@ -91,6 +92,10 @@ class EufsLauncher(Plugin):
 
                 # Resize correctly
                 self._widget.setFixedWidth(1200)
+
+                # Enable DPI scaling
+                QApplication.setAttribute(QtCore.Qt.AA_EnableHighDpiScaling, True)
+                QApplication.setAttribute(QtCore.Qt.AA_UseHighDpiPixmaps, True)
 
                 # Store gazebo's path as it is used quite a lot:
                 self.GAZEBO = rospkg.RosPack().get_path('eufs_gazebo')
@@ -253,8 +258,8 @@ class EufsLauncher(Plugin):
                 self.checkbox_effect_mapping = []
                 self.checkbox_parameter_mapping = []
                 cur_xpos = 610
-                cur_ypos = 70
                 for key, value in checkboxes.items():
+                        cur_ypos = 70 + 15 * (int(checkboxes[key]["priority"]) - 1)
                         cur_cbox = QCheckBox(checkboxes[key]["label"], self._widget)
                         cur_cbox.setChecked(checkboxes[key]["checked_on_default"])
                         cur_cbox.setGeometry(cur_xpos, cur_ypos, 150, 30)
@@ -283,7 +288,6 @@ class EufsLauncher(Plugin):
                                         self.arg_to_list(checkboxes[key]["parameter_triggering"]["if_off"])
                                 ))
                         setattr(self, checkboxes[key]["name"].upper(), cur_cbox)
-                        cur_ypos = 15 * (int(checkboxes[key]["priority"]) - 1)
 
 
                 # Change label to show current selected file for the copier
@@ -293,6 +297,7 @@ class EufsLauncher(Plugin):
                 self.uuid = roslaunch.rlutil.get_or_generate_uuid(None, False)
                 roslaunch.configure_logging(self.uuid)
                 self.DEBUG_SHUTDOWN = False
+
 
         def tell_launchella(self, what):
                 """Display text in feedback box (lower left corner)."""
