@@ -104,10 +104,9 @@ class EufsLauncher(Plugin):
                 # Give widget components permanent names
                 self.PRESET_SELECTOR = self._widget.findChild(QComboBox, "WhichPreset")
                 self.TRACK_SELECTOR = self._widget.findChild(QComboBox, "WhichTrack")
-                self.IMAGE_SELECTOR = self._widget.findChild(QComboBox, "WhichImage")
+                self.IMAGE_SELECTOR = self._widget.findChild(QComboBox, "WhichCSV")
                 self.LAUNCH_BUTTON = self._widget.findChild(QPushButton, "LaunchButton")
                 self.GENERATOR_BUTTON = self._widget.findChild(QPushButton, "GenerateButton")
-                self.LOAD_IMAGE_BUTTON = self._widget.findChild(QPushButton, "LoadFromImageButton")
 
                 self.CONVERT_BUTTON = self._widget.findChild(QPushButton, "ConvertButton")
                 self.RENAME_BUTTON = self._widget.findChild(QPushButton, "RenameButton")
@@ -137,10 +136,6 @@ class EufsLauncher(Plugin):
                         QCheckBox,
                         "FullStackTrackGenButton"
                 )
-                self.FULL_STACK_IMAGE_BUTTON = self._widget.findChild(
-                        QCheckBox,
-                        "FullStackImageButton"
-                )
 
                 self.MIN_STRAIGHT_SLIDER = self._widget.findChild(QSlider, "Param_MIN_STRAIGHT")
                 self.MAX_STRAIGHT_SLIDER = self._widget.findChild(QSlider, "Param_MAX_STRAIGHT")
@@ -163,7 +158,7 @@ class EufsLauncher(Plugin):
                 self.TRACK_WIDTH_LABEL = self._widget.findChild(QLabel, "Label_TRACK_WIDTH")
 
                 # Check the file directory to update drop-down menu
-                self.load_track_and_images()
+                self.load_track_dropdowns()
 
                 # Get presets
                 preset_names = Generator.get_preset_names()
@@ -463,7 +458,7 @@ class EufsLauncher(Plugin):
                         )
 
                 # Update drop-downs with new files in directory
-                self.load_track_and_images()
+                self.load_track_dropdowns()
                 self.tell_launchella("Copy Succeeded!")
 
 
@@ -748,7 +743,7 @@ class EufsLauncher(Plugin):
 
                         im.show()
 
-                self.load_track_and_images()
+                self.load_track_dropdowns()
 
         def track_from_image_button_pressed(self):
                 """
@@ -779,7 +774,7 @@ class EufsLauncher(Plugin):
                         )
 
                 self.launch_file_override = filename[:-4] + ".launch"
-                self.load_track_and_images()
+                self.load_track_dropdowns()
                 self.launch_button_pressed()
 
         def get_noise_level(self):
@@ -824,7 +819,7 @@ class EufsLauncher(Plugin):
                         },
                         conversion_suffix=suffix
                 )
-                self.load_track_and_images()
+                self.load_track_dropdowns()
                 self.tell_launchella("Conversion Succeeded!  From: " + from_type +
                                      " To: " + to_type + " For: " + filename)
 
