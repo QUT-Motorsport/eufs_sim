@@ -311,8 +311,9 @@ class EufsLauncher(Plugin):
                 """Called when sketcher button is pressed."""
 
                 loadUi(self.sketcher_ui_file, self._widget)
+                
 
-        def load_track_and_images(self):
+        def load_track_dropdowns(self):
                 """
                 Peruses file system for files to add to the drop-down menus of the launcher.
                 """
@@ -342,18 +343,16 @@ class EufsLauncher(Plugin):
                         if f != "small_track.launch":
                                 self.TRACK_SELECTOR.addItem(f)
 
-                # Get images
+                # Get csvs
                 relevant_path = os.path.join(
                         self.GAZEBO,
-                        'randgen_imgs'
+                        'tracks'
                 )
-                image_files = [f for f in listdir(relevant_path) if isfile(join(relevant_path, f))]
+                csv_files = [f for f in listdir(relevant_path) if isfile(join(relevant_path, f))]
 
-                # Add Images to Image Selector (always put rand.png first)
-                if "rand.png" in image_files:
-                        self.IMAGE_SELECTOR.addItem("rand.png")
+                # Add Csvs to Image Selector
                 for f in image_files:
-                        if f != "rand.png" and f[-3:] == "png":
+                        if f[-3:] == "csv":
                                 self.IMAGE_SELECTOR.addItem(f)
 
         def copy_button_pressed(self):
