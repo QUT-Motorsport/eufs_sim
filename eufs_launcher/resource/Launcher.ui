@@ -701,8 +701,8 @@
   </widget>
  
 
-  <!-- Image launcher! -->
-  <widget class="QLabel" name="ImageLauncherLabel">
+  <!-- FastSLAM Pre-Loader Maps -->
+  <widget class="QLabel" name="FastSLAMPreLoadLabel">
    <property name="geometry">
     <rect>
      <x>130</x>
@@ -712,7 +712,7 @@
     </rect>
    </property>
    <property name="text">
-    <string>Image Launcher</string>
+    <string>FastSLAM Prepared Maps</string>
    </property>
    <property name="font">
        <font>
@@ -721,7 +721,7 @@
    </property>
   </widget>
 
-  <widget class="QLabel" name="ImageLauncherSubLabel">
+  <widget class="QLabel" name="FastSLAMPreLoadSubLabel">
    <property name="geometry">
     <rect>
      <x>55</x>
@@ -731,7 +731,7 @@
     </rect>
    </property>
    <property name="text">
-    <string>Launches a track image - great for introducing random noise!</string>
+    <string>Pre-loads a map for FastSLAM</string>
    </property>
    <property name="font">
        <font>
@@ -742,7 +742,7 @@
 
 
   <!--Load From Image Button-->
-  <widget class="QPushButton" name="LoadFromImageButton">
+  <!--<widget class="QPushButton" name="LoadFromImageButton">
    <property name="geometry">
     <rect>
      <x>130</x>
@@ -759,10 +759,10 @@
             <pointsize>7</pointsize>
        </font>
    </property>
-  </widget>
+  </widget>-->
 
   <!--Full Stack for Image Button -->
-  <widget class="QCheckBox" name="FullStackImageButton">
+  <!--<widget class="QCheckBox" name="FullStackImageButton">
   <property name="geometry">
       <rect>
         <x>60</x>
@@ -779,27 +779,7 @@
             <pointsize>7</pointsize>
        </font>
    </property>
-  </widget>
-
-  <!-- Image Sketcher! -->
-  <widget class="QPushButton" name="SketcherButton">
-   <property name="geometry">
-    <rect>
-     <x>60</x>
-     <y>330</y>
-     <width>50</width>
-     <height>30</height>
-    </rect>
-   </property>
-   <property name="text" >
-      <string>Draw!</string>
-    </property>
-    <property name="font">
-       <font>
-            <pointsize>7</pointsize>
-       </font>
-   </property>
-  </widget>
+  </widget>-->
 
   <!--Slider-->
   <!--This handles terrain noise generation-->
