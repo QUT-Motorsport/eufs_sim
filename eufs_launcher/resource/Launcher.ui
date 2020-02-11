@@ -840,7 +840,7 @@
        </font>
    </property>
   </widget>
-  <widget class="QComboBox" name="WhichImage">
+  <widget class="QComboBox" name="WhichCSV">
    <property name="geometry">
     <rect>
      <x>90</x>
