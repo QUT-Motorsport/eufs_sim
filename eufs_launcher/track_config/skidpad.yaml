@@ -1,0 +1,5 @@
+# Launcher Config file for the Track Generator.
+
+skidpad:
+    fastslam_map: "skidpad"
+    default_noise: 0

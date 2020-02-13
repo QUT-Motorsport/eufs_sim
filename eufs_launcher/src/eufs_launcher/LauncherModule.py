@@ -249,7 +249,7 @@ class EufsLauncher(Plugin):
                 self.checkbox_parameter_mapping = []
                 cur_xpos = 610
                 for key, value in checkboxes.items():
-                        cur_ypos = 50 + 15 * (int(checkboxes[key]["priority"]) - 1)
+                        cur_ypos = 60 + 15 * (int(checkboxes[key]["priority"]) - 1)
                         cur_cbox = QCheckBox(checkboxes[key]["label"], self._widget)
                         cur_cbox.setChecked(checkboxes[key]["checked_on_default"])
                         cur_cbox.setGeometry(cur_xpos, cur_ypos, 300, 30)

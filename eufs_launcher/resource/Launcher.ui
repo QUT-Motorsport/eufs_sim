@@ -151,11 +151,11 @@
   <!--Radio Buttons-->
   <!--To toggle between torque and speed controls.-->
   <!--If you add a new buttonGroup, don't forget to add it to the bottom of the file.-->
-  <widget class="QLabel" name="NoiseLabel">
+  <widget class="QLabel" name="ControlLabel">
     <property name="geometry">
        <rect>
          <x>500</x>
-         <y>50</y>
+         <y>60</y>
          <width>150</width>
          <height>30</height>
        </rect>
@@ -173,7 +173,7 @@
     <property name="geometry">
       <rect>
         <x>490</x>
-        <y>70</y>
+        <y>80</y>
         <width>100</width>
         <height>30</height>
       </rect>
@@ -206,7 +206,7 @@
     <property name="geometry">
       <rect>
         <x>490</x>
-        <y>90</y>
+        <y>100</y>
         <width>120</width>
         <height>30</height>
       </rect>
@@ -230,6 +230,45 @@
    </property>
   </widget>
 
+
+  <!--Slider-->
+  <!--This handles terrain noise generation-->
+  <widget class="QLabel" name="NoiseLabel">
+   <property name="geometry">
+    <rect>
+     <x>470</x>
+     <y>45</y>
+     <width>50</width>
+     <height>27</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>Noise:</string>
+   </property>
+   <property name="font">
+       <font>
+            <pointsize>7</pointsize>
+       </font>
+   </property>
+  </widget>
+  <widget class="QSlider" name="Noisiness">
+   <property name="geometry">
+    <rect>
+     <x>500</x>
+     <y>45</y>
+     <width>250</width>
+     <height>30</height>
+    </rect>
+   </property>
+   <property name="orientation">
+      <enum>Qt::Horizontal</enum>
+    </property>
+    <property name="font">
+       <font>
+            <pointsize>7</pointsize>
+       </font>
+   </property>
+  </widget>
 
  
 
@@ -781,44 +820,6 @@
    </property>
   </widget>-->
 
-  <!--Slider-->
-  <!--This handles terrain noise generation-->
-  <widget class="QLabel" name="NoiseLabel">
-   <property name="geometry">
-    <rect>
-     <x>60</x>
-     <y>240</y>
-     <width>50</width>
-     <height>27</height>
-    </rect>
-   </property>
-   <property name="text">
-    <string>Noise:</string>
-   </property>
-   <property name="font">
-       <font>
-            <pointsize>7</pointsize>
-       </font>
-   </property>
-  </widget>
-  <widget class="QSlider" name="Noisiness">
-   <property name="geometry">
-    <rect>
-     <x>90</x>
-     <y>240</y>
-     <width>250</width>
-     <height>30</height>
-    </rect>
-   </property>
-   <property name="orientation">
-      <enum>Qt::Horizontal</enum>
-    </property>
-    <property name="font">
-       <font>
-            <pointsize>7</pointsize>
-       </font>
-   </property>
-  </widget>
 
   <!--Drop-Down Box: Options added in code, impossible in a .ui file.-->
   <!--This handles image selection.-->
