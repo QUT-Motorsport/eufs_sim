@@ -903,6 +903,17 @@ class EufsLauncher(Plugin):
                 self.tell_launchella("--------------------------")
                 self.tell_launchella("\t\t\tLaunching Nodes...")
 
+                """
+                TO-DO:
+                Copy track_to_launch to new file "LAST_LAUNCH.launch" using ConversionTools
+                This should auto-create LAST_LAUNCH/model.sdf in eufs_description
+                Edit that by killing ghost links with the probability specified by the noise slider
+                Then, launch LAST_LAUNCH.launch
+                As an aside, LAST_LAUNCH should be in blacklist.txt
+                Finally, a button should be added, default yes, on whether or not to load a pre-made map
+                despite whatever the yaml says.
+                """
+
                 # If we have set a specific file to run regardless of selected file,
                 # which may happen when we launch from an image,
                 # we make sure to launch the overriding track instead.
