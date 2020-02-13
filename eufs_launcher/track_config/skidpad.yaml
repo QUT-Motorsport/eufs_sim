@@ -1,5 +1,4 @@
-# Launcher Config file for the Track Generator.
+# Launcher Config file for the eufs_launcher.
 
-skidpad:
-    fastslam_map: "skidpad"
-    default_noise: 0
+fastslam_map: "skidpad"
+default_noise: 0

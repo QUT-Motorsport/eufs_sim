@@ -289,28 +289,79 @@ class EufsLauncher(Plugin):
                 roslaunch.configure_logging(self.uuid)
                 self.DEBUG_SHUTDOWN = False
 
-                # looping over all widgest to fix scaling issue Hacky fix
+                # Looping over all widgest to fix scaling issue via manual scaling
+                # Scaling done via magically comparing the width to the 'default' 1700 pixels
                 rec = QApplication.desktop().screenGeometry()
-                scaler_multiplier = rec.width()/1700.0
+                scaler_multiplier = rec.width() / 1700.0
                 for widget in self._widget.children():
                         if hasattr(widget, 'geometry'):
-                                k = widget.geometry() # of type qrect
-                                new_width = k.width()*(scaler_multiplier) if not isinstance(widget, QLabel) else(k.width()*(scaler_multiplier**2))
-                                widget.setGeometry(k.x()*scaler_multiplier, k.y()*scaler_multiplier, new_width, k.height()*(scaler_multiplier))
+                                geom = widget.geometry()
+                                new_width = (
+                                        geom.width() * (scaler_multiplier) if not isinstance(widget, QLabel) 
+                                        else geom.width() * (scaler_multiplier**2)
+                                )
+                                widget.setGeometry(
+                                        geom.x() * scaler_multiplier,
+                                        geom.y() * scaler_multiplier,
+                                        new_width,
+                                        geom.height() * (scaler_multiplier)
+                                )
+
+                # Prepare the default configs defined in the track yaml files.
+                self.TRACK_SELECTOR.currentTextChanged.connect(self.read_launch_configs)
+                self.read_launch_configs()
+                self.fastslam_map_to_launch = None
                                 
-                        
+        def read_launch_configs(self):
+                """
+                Reads in the default config associated with the selected launch file.
+                """
+
+                # First we get the name of the current launch file
+                yaml_needed = self.TRACK_SELECTOR.currentText().split(".")[0] + ".yaml"
+
+                # Now we check if it exists:
+                relevant_path = os.path.join(
+                        rospkg.RosPack().get_path('eufs_launcher'),
+                        'track_config'
+                )
+                config_files = [
+                        f for f in listdir(relevant_path)
+                        if isfile(join(relevant_path, f)) and f == yaml_needed
+                ]
+                rospy.logerr("Debug Print - Should not show up once merge request ready.")
+                rospy.logerr(config_files)
+
+                # If there is a config file, grab it and load!
+                if len(config_files) == 0:
+                        return
+                config_file = os.path.join(
+                        relevant_path,
+                        config_files[0]
+                )
+                with open(config_file, 'r') as stream:
+                    try:
+                        the_yaml = yaml.safe_load(stream)
+                    except yaml.YAMLError as exc:
+                        print(exc)
+                        return
+                
+                # Update csv to launch for fastslam
+                self.fastslam_map_to_launch = (
+                        the_yaml["fastslam_map"].split(".")[0]+".csv" if "fastslam_map" in the_yaml else None
+                )
+
+                # Update default noise levels
+                default_noise = (
+                        the_yaml["default_noise"] if "default_noise" in the_yaml else self.get_noise_level()
+                )
+                self.set_noise_level(default_noise)
 
         def tell_launchella(self, what):
                 """Display text in feedback box (lower left corner)."""
 
                 self.USER_FEEDBACK_LABEL.setText(what)
                 QApplication.processEvents()
-
-        def sketcher_button_pressed(self):
-                """Called when sketcher button is pressed."""
-
-                loadUi(self.sketcher_ui_file, self._widget)
-                
 
         def load_track_dropdowns(self):
                 """
@@ -788,6 +839,20 @@ class EufsLauncher(Plugin):
                 numerator = (1.0 * (noise_level_widget.value() - noise_level_widget.minimum()))
                 denominator = (noise_level_widget.maximum() - noise_level_widget.minimum())
                 return numerator/denominator
+
+        def set_noise_level(self, new_noise_level):
+                """
+                Sets the noise slider's level.
+                Code may look complicated, but it's really just inverting get_noise_level to solve
+                for `noise_level_widget.value()`
+                """
+                noise_level_widget = self.NOISE_SLIDER
+                denominator = (noise_level_widget.maximum() - noise_level_widget.minimum())
+                numerator = new_noise_level * denominator
+                new_value = numerator + noise_level_widget.minimum()
+                noise_level_widget.setValue(
+                        new_value
+                )
 
         def convert_button_pressed(self):
                 """Handles interfacing with ConversionTools."""
