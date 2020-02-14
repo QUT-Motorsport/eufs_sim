@@ -2,6 +2,10 @@
 # what config checkboxes exist and their default values.
 
 eufs_launcher:
+
+    # Default launch file to be selected in the launcher drop-down menu
+    # Make sure to add the .launch suffix, i.e. "small_track.launch"
+    base_track: "small_track.launch"
     
     # Launch files to launch no matter what after the launch button is pressed
     on_startup:

@@ -398,10 +398,11 @@ class EufsLauncher(Plugin):
                 launch_files = [f for f in launch_files if f not in blacklist]
 
                 # Add Tracks to Track Selector
-                if "small_track.launch" in launch_files:
-                        self.TRACK_SELECTOR.addItem("small_track.launch")
+                base_track = self.default_config["eufs_launcher"]["base_track"]
+                if base_track in launch_files:
+                        self.TRACK_SELECTOR.addItem(base_track)
                 for f in launch_files:
-                        if f != "small_track.launch":
+                        if f != base_track:
                                 self.TRACK_SELECTOR.addItem(f)
 
 
