@@ -66,7 +66,7 @@ eufs_launcher:
             label: "EKF"
             package: "eufs_gazebo"
             location: "launch/ekf_sim_launcher.launch"
-            args: {"launch_evaluator:=true"}
+            args: {"launch_evaluator:=True"}
             checked_on_default: Yes
 
         fastslam:

@@ -3,7 +3,7 @@
   
   <!-- roslaunch arguments -->
   <arg name="namespace" default="eufs"/>
-  <arg name="launch_evaluator" default="false"/>
+  <arg name="launch_evaluator" default="False"/>
 
   
   <!-- Launch simulated ground truths -->
@@ -11,7 +11,7 @@
   <include file="$(find wheel_odometry)/launch/wheel_odometry.launch"/>
   <include file="$(find robot_localisation)/launch/localization.launch"/>
   <!-- Launch evaluator-->
-  <group if="$(eval arg('launch_evaluator') == 'true' )">
+  <group if="$(eval arg('launch_evaluator'))">
       <include file="$(find eufs_gazebo)/launch/ekf_evaluator.launch"/>
   </group>
   
