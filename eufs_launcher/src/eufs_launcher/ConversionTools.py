@@ -173,7 +173,7 @@ class ConversionTools:
         #########################################################
 
         @staticmethod
-        def convert(cfrom, cto, which_file, params={}, conversion_suffix=""):
+        def convert(cfrom, cto, which_file, params={}, conversion_suffix="", override_name=None):
                 """
                 Will convert which_file of filetype cfrom to filetype cto with
                 filename which_file+conversion_suffix
@@ -197,25 +197,29 @@ class ConversionTools:
                     return ConversionTools.xys_to_png(
                             which_file,
                             params,
-                            conversion_suffix
+                            conversion_suffix,
+                            override_name
                     )
                 elif cfrom == "comps" and cto == "png":
                     return ConversionTools.comps_to_png(
                             which_file,
                             params,
-                            conversion_suffix
+                            conversion_suffix,
+                            override_name
                     )
                 elif cfrom == "png" and cto == "launch":
                     return ConversionTools.png_to_launch(
                             which_file,
                             params,
-                            conversion_suffix
+                            conversion_suffix,
+                            override_name
                     )
                 elif cfrom == "png" and cto == "csv":
                     ConversionTools.png_to_launch(
                             which_file,
                             params,
-                            conversion_suffix
+                            conversion_suffix,
+                            override_name
                     )
                     new_file_array = which_file.split("/")
                     new_file_array[-2] = "launch"
@@ -223,19 +227,22 @@ class ConversionTools:
                     return ConversionTools.launch_to_csv(
                              which_file[:-4]+conversion_suffix+".launch",
                              params,
-                             conversion_suffix=""
+                             conversion_suffix="",
+                             override_name=override_name
                     )
                 elif cfrom == "launch" and cto == "csv":
                     return ConversionTools.launch_to_csv(
                              which_file,
                              params,
-                             conversion_suffix
+                             conversion_suffix,
+                             override_name
                     )
                 elif cfrom == "launch" and cto == "png":
                     ConversionTools.launch_to_csv(
                              which_file,
                              params,
-                             conversion_suffix
+                             conversion_suffix,
+                             override_name
                     )
                     new_file_array = which_file.split("/")
                     new_file_array[-2] = "tracks"
@@ -243,13 +250,15 @@ class ConversionTools:
                     return ConversionTools.csv_to_png(
                              which_file[:-7]+conversion_suffix+".csv",
                              params,
-                             conversion_suffix=""
+                             conversion_suffix="",
+                             override_name=override_name
                     )
                 elif cfrom == "csv" and cto == "launch":
                     ConversionTools.csv_to_png(
                              which_file,
                              params,
-                             conversion_suffix
+                             conversion_suffix,
+                             override_name
                     )
                     new_file_array = which_file.split("/")
                     new_file_array[-2] = "randgen_imgs"
@@ -257,29 +266,46 @@ class ConversionTools:
                     return ConversionTools.png_to_launch(
                              which_file[:-4]+conversion_suffix+".png",
                              params,
-                             conversion_suffix=""
+                             conversion_suffix="",
+                             override_name=override_name
                     )
                 elif cfrom == "csv" and cto == "png":
                     return ConversionTools.csv_to_png(
                              which_file,
                              params,
-                             conversion_suffix
+                             conversion_suffix,
+                             override_name
                     )
                 elif cto == "ALL" or cto == "all":
                     # If something tries to convert to itself it just gets ignored
-                    ConversionTools.convert(cfrom, "launch", which_file, params, conversion_suffix)
-                    ConversionTools.convert(cfrom, "csv", which_file, params, conversion_suffix)
+                    ConversionTools.convert(
+                            cfrom,
+                            "launch",
+                            which_file,
+                            params,
+                            conversion_suffix,
+                            override_name
+                    )
+                    ConversionTools.convert(
+                            cfrom,
+                            "csv",
+                            which_file,
+                            params,
+                            conversion_suffix,
+                            override_name
+                    )
                     return ConversionTools.convert(
-                               cfrom,
-                               "png",
-                               which_file,
-                               params,
-                               conversion_suffix
+                            cfrom,
+                            "png",
+                            which_file,
+                            params,
+                            conversion_suffix,
+                            override_name
                     )
                 return None
 
         @staticmethod
-        def comps_to_png(which_file, params, conversion_suffix=""):
+        def comps_to_png(which_file, params, conversion_suffix="", override_name=None):
                 """
                 Converts raw track generator output to png.
 
@@ -291,6 +317,8 @@ class ConversionTools:
                 """
 
                 GENERATED_FILENAME = which_file + conversion_suffix
+                if override_name is not None:
+                    GENERATED_FILENAME = override_name
 
                 # Unpack
                 (components, twidth, theight) = params["track data"]
@@ -432,7 +460,7 @@ class ConversionTools:
                 return im
 
         @staticmethod
-        def xys_to_png(which_file, params, conversion_suffix=""):
+        def xys_to_png(which_file, params, conversion_suffix="", override_name=None):
                 """
                 Converts xys format to png.
 
@@ -447,6 +475,8 @@ class ConversionTools:
                 """
 
                 GENERATED_FILENAME = which_file + conversion_suffix
+                if override_name is not None:
+                    GENERATED_FILENAME = override_name
 
                 # Unpack
                 (xys, twidth, theight) = params["point list"]
@@ -579,7 +609,7 @@ class ConversionTools:
                 return im
 
         @staticmethod
-        def png_to_launch(which_file, params, conversion_suffix=""):
+        def png_to_launch(which_file, params, conversion_suffix="", override_name=None):
                 """
                 Converts a .png to a .launch with .world, model.sdf, model.config files.
 
@@ -604,8 +634,10 @@ class ConversionTools:
                         randgen_model_template/model.sdf
                 """
                 GENERATED_FILENAME = which_file.split('/')[-1][:-4]+conversion_suffix
+                if override_name is not None:
+                    GENERATED_FILENAME = override_name
                 im = Image.open(which_file)
-                noise_level = params["noise"]
+                noise_level = params["noise"] if "noise" in params else 0
                 pixels = im.load()
 
                 # Let's get the scale metadata from the png:
@@ -967,7 +999,7 @@ class ConversionTools:
                 sdf_out.close()
 
         @staticmethod
-        def launch_to_csv(which_file, params, conversion_suffix=""):
+        def launch_to_csv(which_file, params, conversion_suffix="", override_name=None):
                 """
                 Converts a .launch to a .csv
 
@@ -994,28 +1026,31 @@ class ConversionTools:
                                    filename,
                                    midpoints=midpoints,
                                    car_start_data=("car_start", car_x, car_y, car_yaw),
-                                   conversion_suffix=conversion_suffix
+                                   conversion_suffix=conversion_suffix,
+                                   override_name=override_name
                 )
 
         @staticmethod
-        def csv_to_png(which_file, params, conversion_suffix=""):
+        def csv_to_png(which_file, params, conversion_suffix="", override_name=None):
                 """
                 Converts a .csv to a .png
 
                 which_file:        The name of the csv file to convert
                                    example: rand.csv
 
-                params:            A dictionary of optional parameters.
-                                   None are used at this time, but it is listed in the
-                                   function signature to have a consistent signature for all
-                                   the methods of the form a_to_b().
+                params["keep_all_noise"]: True if inactive noise should be put in csv
+                                          Defaults to True
 
                 conversion_suffix: Something to append to the output filename
                                    So if it is "foo", rand.png becomes randfoo.launch.
 
                 """
 
+                keep_all_noise = params["keep_all_noise"] if "keep_all_noise" in params else True
+
                 filename = which_file.split("/")[-1].split(".")[0]+conversion_suffix
+                if override_name is not None:
+                    filename = override_name
 
                 # We are going to open up the csv, read through all the lines,
                 # and round down the point to an integer after taking into account
@@ -1066,10 +1101,11 @@ class ConversionTools:
                         y = (noise[3])
                         raw_noise.append(("noise", x, y, 0, 0))
 
-                for noise in inactive_noise.itertuples():
-                        x = (noise[2])
-                        y = (noise[3])
-                        raw_noise.append(("noise", x, y, 0, 0))
+                if keep_all_noise:
+                        for noise in inactive_noise.itertuples():
+                                x = (noise[2])
+                                y = (noise[3])
+                                raw_noise.append(("noise", x, y, 0, 0))
 
                 for c in car_location.itertuples():
                         raw_car_location = ("car", c[2], c[3], c[4], 0)

@@ -28,6 +28,9 @@ from TrackGenerator import GeneratorContext
 
 from ConversionTools import ConversionTools as Converter
 
+import pandas as pd
+from random import uniform
+
 
 class EufsLauncher(Plugin):
 
@@ -905,27 +908,70 @@ class EufsLauncher(Plugin):
 
                 """
                 TO-DO:
-                Copy track_to_launch to new file "LAST_LAUNCH.launch" using ConversionTools
-                This should auto-create LAST_LAUNCH/model.sdf in eufs_description
-                Edit that by killing ghost links with the probability specified by the noise slider
-                Then, launch LAST_LAUNCH.launch
-                As an aside, LAST_LAUNCH should be in blacklist.txt
                 Finally, a button should be added, default yes, on whether or not to load a pre-made map
                 despite whatever the yaml says.
                 """
 
-                # If we have set a specific file to run regardless of selected file,
-                # which may happen when we launch from an image,
-                # we make sure to launch the overriding track instead.
-                track_to_launch = self.launch_file_override
-                self.launch_file_override = None
-                if not track_to_launch:
-                        track_to_launch = self.TRACK_SELECTOR.currentText()
+                """
+                Here is our pre-launch process:
+                1: Create csv from track_to_launch
+                2: Kill random noise tiles in accordance with the noise value
+                3: Convert that to "LAST_LAUNCH.launch"
+                Launch LAST_LAUNCH.launch
+                """
+
+                # Create csv from track_to_launch
+                self.tell_launchella("Creating csv...")
+                track_to_launch = self.TRACK_SELECTOR.currentText()
+                full_path = os.path.join(
+                        self.GAZEBO,
+                        'launch',
+                        track_to_launch
+                )
+                Converter.convert(
+                        "launch",
+                        "csv",
+                        full_path,
+                        override_name = "LAST_LAUNCH"
+                )
 
                 # Get noise level
                 self.tell_launchella("Launching " + track_to_launch)
                 noise_level = self.get_noise_level()
                 self.tell_launchella("With Noise Level: " + str(noise_level))
+
+                # Remove relevant random noise tiles from the csv
+                csv_path = os.path.join(
+                        self.GAZEBO,
+                        'tracks',
+                        "LAST_LAUNCH.csv"
+                )
+                loaded_csv = pd.read_csv(
+                        csv_path,
+                        names=["tag", "x", "y", "direction"],
+                        skiprows=1
+                )
+                loaded_csv = loaded_csv[
+                        (
+                                (loaded_csv["tag"] != "inactive_noise")
+                                & (loaded_csv["tag"] != "active_noise")
+                        )
+                        | (uniform(0, 1) < noise_level)
+                ]
+                for idx, val in loaded_csv.iterrows():
+                        if loaded_csv.loc[idx, "tag"] == "inactive_noise":
+                                loaded_csv.loc[idx, "tag"] = "active_noise"
+                loaded_csv.to_csv(csv_path, index=False, columns=["tag", "x", "y", "direction"])
+
+                # Convert csv to launch file
+                Converter.convert(
+                        "csv",
+                        "launch",
+                        csv_path,
+                        params = {"keep_all_noise": False, "noise": 1},
+                        override_name = "LAST_LAUNCH"
+                )
+                track_to_launch = "LAST_LAUNCH.launch"
 
                 # Get control information
                 control_method = "controlMethod:=speed"

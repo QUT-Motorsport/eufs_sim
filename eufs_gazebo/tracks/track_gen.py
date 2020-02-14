@@ -460,7 +460,8 @@ class Track:
     def runConverter(track_name,
                      midpoints=False,
                      car_start_data=("car_start", 0.0, 0.0, 0.0),
-                     conversion_suffix=""):
+                     conversion_suffix="",
+                     override_name=None):
         """
         Creates a csv from the sdf passed in (through track_name)
 
@@ -504,7 +505,8 @@ class Track:
         if midpoints:
             track.generate_midpoints()
             track.generate_tracks()
-        track.save_csv(os.path.join(rospkg.RosPack().get_path('eufs_gazebo'), "tracks", track_name+conversion_suffix))
+        out_name = track_name+conversion_suffix if override_name is None else override_name
+        track.save_csv(os.path.join(rospkg.RosPack().get_path('eufs_gazebo'), "tracks", out_name))
 
 if __name__ == "__main__":
     # Just a heads up, you can run this with a gui by running the launcher:
