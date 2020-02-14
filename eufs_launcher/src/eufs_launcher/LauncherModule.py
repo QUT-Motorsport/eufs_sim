@@ -1038,8 +1038,6 @@ class EufsLauncher(Plugin):
                 rather than the default launch method.
                 """
                 if len(args) > 0:
-                        rospy.logerr("=====")
-                        rospy.logerr(args)
                         process = Popen(["roslaunch", filepath] + args)
                         self.popens.append(process)
                         return process
