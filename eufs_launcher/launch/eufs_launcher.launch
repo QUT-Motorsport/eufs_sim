@@ -1,6 +1,12 @@
 <?xml version="1.0"?>
 <launch>
   
- <node name="eufs_launcher" pkg="eufs_launcher" type="eufs_launcher"/>
+  <arg name="config" default="eufs_launcher"/>
+  <arg name="gui" default="True"/>
+
+  <node name="eufs_launcher" pkg="eufs_launcher" type="eufs_launcher">
+    <param name="config" value="$(arg config)"/>
+    <param name="gui" value="$(arg gui)"/>
+  </node>
 
 </launch>

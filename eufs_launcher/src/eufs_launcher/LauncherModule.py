@@ -58,10 +58,15 @@ class EufsLauncher(Plugin):
                         print 'unknowns: ', unknowns
 
                 # Load in eufs_launcher parameters
+                # yaml_to_load is a special variable that is set by `eufs_launcher.py`
+                # in `eufs_launcher/scripts`.  It defaults to `eufs_launcher.yaml`, but
+                # can be passed in using the `config` param.  Example:
+                # `roslaunch eufs_launcher eufs_launcher.launch config:=example.yaml`
+                # Will load in example.yaml instead.
                 yaml_loc = os.path.join(
                         rospkg.RosPack().get_path('eufs_launcher'),
                         'resource',
-                        'eufs_launcher.yaml'
+                        yaml_to_load.split(".")[0] + ".yaml"
                 )
                 with open(yaml_loc, 'r') as stream:
                     try:
@@ -327,6 +332,11 @@ class EufsLauncher(Plugin):
                                         new_width,
                                         geom.height() * (scaler_multiplier)
                                 )
+
+                # If use_gui is false, we jump straight into launching the track
+                # use_gui is a special variable set by `eufs_launcher.py`
+                if not use_gui:
+                        self.launch_button_pressed()
 
         def tell_launchella(self, what):
                 """Display text in feedback box (lower left corner)."""
@@ -1005,7 +1015,11 @@ class EufsLauncher(Plugin):
 
                 # Hide launcher
                 self._widget.setVisible(False)
-                self._widget.window().showMinimized()
+                rospy.Timer(
+                        rospy.Duration(0.1),
+                        lambda x: self._widget.window().showMinimized(),
+                        oneshot = True
+                )
 
         def launch_node(self, filepath):
                 """Wrapper for launch_node_with_args"""

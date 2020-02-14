@@ -4,7 +4,16 @@ import sys
 
 from eufs_launcher import LauncherModule
 from rqt_gui.main import Main
+import rospy
 
+LauncherModule.yaml_to_load = rospy.get_param(
+    "/eufs_launcher/config",
+    default = "eufs_launcher.yaml"
+)
+LauncherModule.use_gui = rospy.get_param(
+    "/eufs_launcher/gui",
+    default = "True"
+)
 plugin = 'eufs_launcher'
 main = Main(filename=plugin)
 sys.exit(main.main(standalone=plugin))
