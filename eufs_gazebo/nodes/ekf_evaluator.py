@@ -87,7 +87,7 @@ class EKFEvaluator(object):
 
 
         # Subscribe to channels
-        self.ekf_odom_sub = rospy.Subscriber("/odometry/new", Odometry, self.ekf_receiver)
+        self.ekf_odom_sub = rospy.Subscriber("/odometry/filtered", Odometry, self.ekf_receiver)
         self.ekf_accel_sub = rospy.Subscriber(
             "/accel/filtered",
             AccelWithCovarianceStamped,
