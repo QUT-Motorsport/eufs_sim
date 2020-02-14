@@ -50,12 +50,29 @@ eufs_launcher:
                 if_off: {"publish_gt_tf:=false"}
             
         ekf:
-            priority: 5
+            priority: 6
             name: "EKF_Checkbox"
             label: "EKF"
             package: "eufs_gazebo"
             location: "launch/ekf_sim_launcher.launch"
             args: {"launch_evaluator:=true"}
+            checked_on_default: Yes
+
+        fastslam:
+            # Not implemented yet
+            priority: 5
+            name: "FastSLAM_Checkbox"
+            label: "FastSLAM"
+            checked_on_default: Yes
+
+        fastslam_map:
+            # Not implemented yet
+            # Will also need some degree of hardcoding since it
+            # can only launch a map if self.fastslam_map_to_launch is not None
+            # (as that variable is the one that keeps track of which map to launch.)
+            priority: 7
+            name: "FastSLAM_Preloaded_Map_Checkbox"
+            label: "Preload SLAM Map"
             checked_on_default: Yes
        
     # Some nodes fail to shutdown

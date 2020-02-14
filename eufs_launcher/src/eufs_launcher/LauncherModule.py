@@ -30,6 +30,7 @@ from ConversionTools import ConversionTools as Converter
 
 import pandas as pd
 from random import uniform
+from collections import OrderedDict
 
 
 class EufsLauncher(Plugin):
@@ -107,7 +108,6 @@ class EufsLauncher(Plugin):
                 # Give widget components permanent names
                 self.PRESET_SELECTOR = self._widget.findChild(QComboBox, "WhichPreset")
                 self.TRACK_SELECTOR = self._widget.findChild(QComboBox, "WhichTrack")
-                self.IMAGE_SELECTOR = self._widget.findChild(QComboBox, "WhichCSV")
                 self.LAUNCH_BUTTON = self._widget.findChild(QPushButton, "LaunchButton")
                 self.GENERATOR_BUTTON = self._widget.findChild(QPushButton, "GenerateButton")
 
@@ -247,12 +247,20 @@ class EufsLauncher(Plugin):
                 copier_full_stack.setChecked(True)
 
                 # Add buttons from yaml file
-                checkboxes = self.default_config["eufs_launcher"]["checkboxes"]
+                checkboxes = OrderedDict(
+                        sorted(
+                                self.default_config["eufs_launcher"]["checkboxes"].items(),
+                                key = lambda x: x[1]["priority"]
+                        )
+                )
                 self.checkbox_effect_mapping = []
                 self.checkbox_parameter_mapping = []
-                cur_xpos = 610
+                starting_xpos = 570
+                starting_ypos = 60
+                counter = 0
                 for key, value in checkboxes.items():
-                        cur_ypos = 60 + 15 * (int(checkboxes[key]["priority"]) - 1)
+                        cur_xpos = starting_xpos + 100 * (counter % 2)
+                        cur_ypos = starting_ypos + 15 * (counter // 2)
                         cur_cbox = QCheckBox(checkboxes[key]["label"], self._widget)
                         cur_cbox.setChecked(checkboxes[key]["checked_on_default"])
                         cur_cbox.setGeometry(cur_xpos, cur_ypos, 300, 30)
@@ -282,6 +290,7 @@ class EufsLauncher(Plugin):
                                         self.arg_to_list(checkboxes[key]["parameter_triggering"]["if_off"])
                                 ))
                         setattr(self, checkboxes[key]["name"].upper(), cur_cbox)
+                        counter += 1
 
 
                 # Change label to show current selected file for the copier
@@ -373,7 +382,6 @@ class EufsLauncher(Plugin):
 
                 # Clear the dropdowns
                 self.TRACK_SELECTOR.clear()
-                self.IMAGE_SELECTOR.clear()
                 # Get tracks from eufs_gazebo package
                 relevant_path = os.path.join(self.GAZEBO, 'launch')
                 launch_files = [
@@ -396,17 +404,6 @@ class EufsLauncher(Plugin):
                         if f != "small_track.launch":
                                 self.TRACK_SELECTOR.addItem(f)
 
-                # Get csvs
-                relevant_path = os.path.join(
-                        self.GAZEBO,
-                        'tracks'
-                )
-                csv_files = [f for f in listdir(relevant_path) if isfile(join(relevant_path, f))]
-
-                # Add Csvs to csvs Selector
-                for f in csv_files:
-                        if f[-3:] == "csv":
-                                self.IMAGE_SELECTOR.addItem(f)
 
         def copy_button_pressed(self):
                 """When copy button is pressed, launch ConversionTools"""
@@ -802,38 +799,6 @@ class EufsLauncher(Plugin):
                         im.show()
 
                 self.load_track_dropdowns()
-
-        def track_from_image_button_pressed(self):
-                """
-                Converts .png to .launch by interfacing with ConversionTools,
-                then launches said .launch.
-                """
-
-                self.tell_launchella("Preparing to launch image as a track... ")
-                filename = self.IMAGE_SELECTOR.currentText()
-                filename_full = os.path.join(
-                        self.GAZEBO,
-                        'randgen_imgs/'+filename
-                )
-                image_launcher_full_stack = self.FULL_STACK_IMAGE_BUTTON
-                if image_launcher_full_stack.isChecked():
-                        Converter.convert(
-                                "png",
-                                "ALL",
-                                filename_full,
-                                params={"noise": self.get_noise_level()}
-                        )
-                else:
-                        Converter.convert(
-                                "png",
-                                "launch",
-                                filename_full,
-                                params={"noise": self.get_noise_level()}
-                        )
-
-                self.launch_file_override = filename[:-4] + ".launch"
-                self.load_track_dropdowns()
-                self.launch_button_pressed()
 
         def get_noise_level(self):
                 """Returns the noise slider's noise level."""
