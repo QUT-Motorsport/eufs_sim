@@ -31,6 +31,7 @@ from ConversionTools import ConversionTools as Converter
 import pandas as pd
 from random import uniform
 from collections import OrderedDict
+import math
 
 
 class EufsLauncher(Plugin):
@@ -100,12 +101,8 @@ class EufsLauncher(Plugin):
                         the_title = (self._widget.windowTitle() + (' (%d)' % context.serial_number()))
                         self._widget.setWindowTitle(the_title)
 
-                # Resize correctly
-                # self._widget.setFixedWidth(1200)
-
-                # Enable DPI scaling
-                #QApplication.setAttribute(QtCore.Qt.AA_EnableHighDpiScaling, True)
-                #QApplication.setAttribute(QtCore.Qt.AA_UseHighDpiPixmaps, True)
+                # Set the magic number for the maximum cone noise allowed
+                self.MAX_CONE_NOISE = 0.4
 
                 # Store gazebo's path as it is used quite a lot:
                 self.GAZEBO = rospkg.RosPack().get_path('eufs_gazebo')
@@ -798,7 +795,7 @@ class EufsLauncher(Plugin):
                 noise_level_widget = self.CONE_NOISE_SLIDER
                 numerator = (1.0 * (noise_level_widget.value() - noise_level_widget.minimum()))
                 denominator = (noise_level_widget.maximum() - noise_level_widget.minimum())
-                return 0.2 * numerator/denominator
+                return self.MAX_CONE_NOISE * numerator/denominator
 
         def set_cone_noise_level(self, new_noise_level):
                 """
@@ -808,7 +805,7 @@ class EufsLauncher(Plugin):
                 """
                 noise_level_widget = self.CONE_NOISE_SLIDER
                 denominator = (noise_level_widget.maximum() - noise_level_widget.minimum())
-                numerator = new_noise_level * denominator / 0.2
+                numerator = new_noise_level * denominator / self.MAX_CONE_NOISE
                 new_value = numerator + noise_level_widget.minimum()
                 noise_level_widget.setValue(
                         new_value
@@ -864,16 +861,11 @@ class EufsLauncher(Plugin):
                 self.tell_launchella("\t\t\tLaunching Nodes...")
 
                 """
-                TO-DO:
-                Finally, a button should be added, default yes, on whether or not to load a pre-made map
-                despite whatever the yaml says.
-                """
-
-                """
                 Here is our pre-launch process:
                 1: Create csv from track_to_launch
                 2: Kill random noise tiles in accordance with the noise value
-                3: Convert that to "LAST_LAUNCH.launch"
+                3: Shuffle cone positions slightly in accordance with cone noise value
+                4: Convert that to "LAST_LAUNCH.launch"
                 Launch LAST_LAUNCH.launch
                 """
 
@@ -895,6 +887,7 @@ class EufsLauncher(Plugin):
                 # Get noise level
                 self.tell_launchella("Launching " + track_to_launch)
                 noise_level = self.get_noise_level()
+                cone_noise_level = self.get_cone_noise_level()
                 self.tell_launchella("With Noise Level: " + str(noise_level))
 
                 # Remove relevant random noise tiles from the csv
@@ -924,8 +917,20 @@ class EufsLauncher(Plugin):
                         | (uniform(0, 1) < noise_level)
                 ]
                 for idx, val in loaded_csv.iterrows():
+                        # Activate remaining noise
                         if loaded_csv.loc[idx, "tag"] == "inactive_noise":
                                 loaded_csv.loc[idx, "tag"] = "active_noise"
+
+                        # Shuffle cones
+                        cone_types = ["blue", "yellow", "orange", "big_orange"]
+                        if loaded_csv.loc[idx, "tag"] in cone_types:
+                                uniform_angle = uniform(0, 2 * math.pi)
+                                uniform_radius = uniform(0, cone_noise_level)
+                                del_x = uniform_radius * math.cos(uniform_angle)
+                                del_y = uniform_radius * math.sin(uniform_angle)
+                                loaded_csv.loc[idx, "x"] = float(loaded_csv.loc[idx, "x"]) + del_x
+                                loaded_csv.loc[idx, "y"] = float(loaded_csv.loc[idx, "y"]) + del_y
+
                 loaded_csv.to_csv(
                         csv_path,
                         index=False,

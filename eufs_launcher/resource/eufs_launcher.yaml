@@ -11,7 +11,7 @@ eufs_launcher:
     object_noise_default: 0
 
     # radius in meters where cones may be placed away from ground truth
-    # Range in launcher is between 0 and 0.2
+    # Range in launcher is between 0 and 0.4
     cone_noise_default: 0.05
     
     # Launch files to launch no matter what after the launch button is pressed
