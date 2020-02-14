@@ -124,6 +124,7 @@ class EufsLauncher(Plugin):
                 self.RENAME_FILE_TEXTBOX = self._widget.findChild(QLineEdit, "RenameFileTextbox")
                 self.RENAME_FILE_HEADER = self._widget.findChild(QLabel, "RenameFileHeader")
                 self.NOISE_SLIDER = self._widget.findChild(QSlider, "Noisiness")
+                self.CONE_NOISE_SLIDER = self._widget.findChild(QSlider, "ConeNoisiness")
                 self.SPEED_RADIO = self._widget.findChild(QRadioButton, "SpeedRadio")
                 self.TORQUE_RADIO = self._widget.findChild(QRadioButton, "TorqueRadio")
 
@@ -256,7 +257,7 @@ class EufsLauncher(Plugin):
                 self.checkbox_effect_mapping = []
                 self.checkbox_parameter_mapping = []
                 starting_xpos = 570
-                starting_ypos = 60
+                starting_ypos = 75
                 counter = 0
                 for key, value in checkboxes.items():
                         cur_xpos = starting_xpos + 100 * (counter % 2)
@@ -292,6 +293,14 @@ class EufsLauncher(Plugin):
                         setattr(self, checkboxes[key]["name"].upper(), cur_cbox)
                         counter += 1
 
+                # Read in default noise levels
+                self.set_noise_level(
+                        float(self.default_config["eufs_launcher"]["object_noise_default"])
+                )
+                self.set_cone_noise_level(
+                        float(self.default_config["eufs_launcher"]["cone_noise_default"])
+                )
+
 
                 # Change label to show current selected file for the copier
                 self.update_copier()
@@ -318,56 +327,6 @@ class EufsLauncher(Plugin):
                                         new_width,
                                         geom.height() * (scaler_multiplier)
                                 )
-
-                # Prepare the default configs defined in the track yaml files.
-                self.TRACK_SELECTOR.currentTextChanged.connect(self.read_launch_configs)
-                self.read_launch_configs()
-                self.fastslam_map_to_launch = None
-                                
-        def read_launch_configs(self):
-                """
-                Reads in the default config associated with the selected launch file.
-                """
-
-                # First we get the name of the current launch file
-                yaml_needed = self.TRACK_SELECTOR.currentText().split(".")[0] + ".yaml"
-
-                # Now we check if it exists:
-                relevant_path = os.path.join(
-                        rospkg.RosPack().get_path('eufs_launcher'),
-                        'track_config'
-                )
-                config_files = [
-                        f for f in listdir(relevant_path)
-                        if isfile(join(relevant_path, f)) and f == yaml_needed
-                ]
-                rospy.logerr("Debug Print - Should not show up once merge request ready.")
-                rospy.logerr(config_files)
-
-                # If there is a config file, grab it and load!
-                if len(config_files) == 0:
-                        return
-                config_file = os.path.join(
-                        relevant_path,
-                        config_files[0]
-                )
-                with open(config_file, 'r') as stream:
-                    try:
-                        the_yaml = yaml.safe_load(stream)
-                    except yaml.YAMLError as exc:
-                        print(exc)
-                        return
-                
-                # Update csv to launch for fastslam
-                self.fastslam_map_to_launch = (
-                        the_yaml["fastslam_map"].split(".")[0]+".csv" if "fastslam_map" in the_yaml else None
-                )
-
-                # Update default noise levels
-                default_noise = (
-                        the_yaml["default_noise"] if "default_noise" in the_yaml else self.get_noise_level()
-                )
-                self.set_noise_level(default_noise)
 
         def tell_launchella(self, what):
                 """Display text in feedback box (lower left corner)."""
@@ -802,7 +761,7 @@ class EufsLauncher(Plugin):
                 self.load_track_dropdowns()
 
         def get_noise_level(self):
-                """Returns the noise slider's noise level."""
+                """Returns the object noise slider's noise level."""
 
                 noise_level_widget = self.NOISE_SLIDER
                 numerator = (1.0 * (noise_level_widget.value() - noise_level_widget.minimum()))
@@ -811,13 +770,35 @@ class EufsLauncher(Plugin):
 
         def set_noise_level(self, new_noise_level):
                 """
-                Sets the noise slider's level.
+                Sets the object noise slider's level.
                 Code may look complicated, but it's really just inverting get_noise_level to solve
                 for `noise_level_widget.value()`
                 """
                 noise_level_widget = self.NOISE_SLIDER
                 denominator = (noise_level_widget.maximum() - noise_level_widget.minimum())
                 numerator = new_noise_level * denominator
+                new_value = numerator + noise_level_widget.minimum()
+                noise_level_widget.setValue(
+                        new_value
+                )
+
+        def get_cone_noise_level(self):
+                """Returns the cone noise slider's noise level."""
+
+                noise_level_widget = self.CONE_NOISE_SLIDER
+                numerator = (1.0 * (noise_level_widget.value() - noise_level_widget.minimum()))
+                denominator = (noise_level_widget.maximum() - noise_level_widget.minimum())
+                return 0.2 * numerator/denominator
+
+        def set_cone_noise_level(self, new_noise_level):
+                """
+                Sets the cone noise slider's level.
+                Code may look complicated, but it's really just inverting get_cone_noise_level to solve
+                for `cone_noise_level_widget.value()`
+                """
+                noise_level_widget = self.CONE_NOISE_SLIDER
+                denominator = (noise_level_widget.maximum() - noise_level_widget.minimum())
+                numerator = new_noise_level * denominator / 0.2
                 new_value = numerator + noise_level_widget.minimum()
                 noise_level_widget.setValue(
                         new_value
