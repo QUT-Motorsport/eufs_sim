@@ -85,7 +85,18 @@ eufs_launcher:
             name: "FastSLAM_Preloaded_Map_Checkbox"
             label: "Preload SLAM Map"
             checked_on_default: Yes
-       
+
+    # Lets the launcher know which csv file (right) goes with which launch file (left)
+    # If the launch file isn't listed here, it defaults to the csv file with the same
+    # name as the launch file.
+    # If no such csv file exists, crashes are likely - but the onus for that is on
+    # FastSLAM, Not the launcher, as the launcher merely passes the csv's name to FastSLAM.
+    # As a note, FastSLAM only preloads a map if the fastslam_map button is checked.
+    fastslam_linkage:
+            acceleration: "acceleration_FASTSLAM"
+            skidpad: "skidpad_FASTSLAM"
+
+
     # Some nodes fail to shutdown
     # I have some theories as to why that is, but for now the solution is
     # just to manually kill all nodes that fail to quit.

@@ -1,4 +1,0 @@
-# Launcher Config file for the eufs_launcher.
-
-fastslam_map: "skidpad"
-default_noise: 0
