@@ -57,7 +57,19 @@ class Track:
             print("Please give me a .csv file. Exitting")
             return
 
-        data = pd.read_csv(file_path, names=["tag", "x", "y", "direction"], skiprows=1)
+        data = pd.read_csv(
+            file_path,
+            names = [
+                "tag",
+                "x",
+                "y",
+                "direction",
+                "x_variance",
+                "y_variance",
+                "xy_covariance"
+            ],
+            skiprows=1
+        )
         self.blue_cones = np.array(data[data.tag == "blue"][["x", "y"]])
         self.car = np.array(data[data.tag == "car_start"][["x", "y", "direction"]])
         self.yellow_cones = np.array(data[data.tag == "yellow"][["x", "y"]])
@@ -276,7 +288,9 @@ class Track:
         if filename.find(".csv") == -1:
             filename = filename + ".csv"
 
-        df = pd.DataFrame(columns=["tag", "x", "y", "direction"])
+        df = pd.DataFrame(
+            columns=["tag", "x", "y", "direction", "x_variance", "y_variance", "xy_covariance"]
+        )
 
         # assuming there always are blue and yellow cones
         df["x"] = np.hstack((self.blue_cones[:, 0], self.yellow_cones[:, 0]))
@@ -319,12 +333,37 @@ class Track:
             df["y"] = np.hstack((df["y"].dropna().values, self.inactive_noise[:, 1]))
             df["tag"].iloc[-self.inactive_noise.shape[0]:] = "inactive_noise"
 
-        # Add car data (always ("car_start",0,0,0) unless this file is called from ConversionTools))
-        cardf = pd.DataFrame([self.car_start_data], columns=["tag", "x", "y", "direction"])
+        # Add car data (always ("car_start",0,0,0,0,0,0) unless this file is called from ConversionTools))
+        cardf = pd.DataFrame(
+            [self.car_start_data],
+            columns = [
+                "tag",
+                "x",
+                "y",
+                "direction",
+                "x_variance",
+                "y_variance",
+                "xy_covariance"
+            ]
+        )
         df["direction"] = 0
+        df["x_variance"] = 0.01
+        df["y_variance"] = 0.01
+        df["xy_covariance"] = 0
         df = df.append(cardf)
 
-        df.to_csv(filename, index=False, columns=["tag", "x", "y", "direction"])
+        df.to_csv(filename,
+            index = False,
+            columns = [
+                "tag",
+                "x",
+                "y",
+                "direction",
+                "x_variance",
+                "y_variance",
+                "xy_covariance"
+            ]
+        )
         print("Succesfully saved to csv")
 
     def save_sdf(self, model_name):
@@ -459,7 +498,7 @@ class Track:
     @staticmethod
     def runConverter(track_name,
                      midpoints=False,
-                     car_start_data=("car_start", 0.0, 0.0, 0.0),
+                     car_start_data=("car_start", 0.0, 0.0, 0.0, 0.0, 0.0, 0.0),
                      conversion_suffix="",
                      override_name=None):
         """

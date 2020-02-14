@@ -948,7 +948,15 @@ class EufsLauncher(Plugin):
                 )
                 loaded_csv = pd.read_csv(
                         csv_path,
-                        names=["tag", "x", "y", "direction"],
+                        names=[
+                                "tag",
+                                "x",
+                                "y",
+                                "direction",
+                                "x_variance",
+                                "y_variance",
+                                "xy_covariance"
+                        ],
                         skiprows=1
                 )
                 loaded_csv = loaded_csv[
@@ -961,7 +969,19 @@ class EufsLauncher(Plugin):
                 for idx, val in loaded_csv.iterrows():
                         if loaded_csv.loc[idx, "tag"] == "inactive_noise":
                                 loaded_csv.loc[idx, "tag"] = "active_noise"
-                loaded_csv.to_csv(csv_path, index=False, columns=["tag", "x", "y", "direction"])
+                loaded_csv.to_csv(
+                        csv_path,
+                        index=False,
+                        columns=[
+                                "tag",
+                                "x",
+                                "y",
+                                "direction",
+                                "x_variance",
+                                "y_variance",
+                                "xy_covariance"
+                        ]
+                )
 
                 # Convert csv to launch file
                 Converter.convert(

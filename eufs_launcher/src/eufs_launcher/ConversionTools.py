@@ -1025,7 +1025,7 @@ class ConversionTools:
                 Track.runConverter(
                                    filename,
                                    midpoints=midpoints,
-                                   car_start_data=("car_start", car_x, car_y, car_yaw),
+                                   car_start_data=("car_start", car_x, car_y, car_yaw, 0.0, 0.0, 0.0),
                                    conversion_suffix=conversion_suffix,
                                    override_name=override_name
                 )
