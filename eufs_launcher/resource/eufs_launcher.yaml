@@ -61,41 +61,24 @@ eufs_launcher:
                 if_off: {"publish_gt_tf:=false"}
             
         ekf:
-            priority: 6
+            # Note: we need to change things slightly so that
+            # the simulation isn't responsible for launching the EKF,
+            # just the nodes that the EKF needs to launch and the evaluator
+            priority: 5
             name: "EKF_Checkbox"
-            label: "EKF"
+            label: "EKF Testing"
             package: "eufs_gazebo"
             location: "launch/ekf_sim_launcher.launch"
             args: {"launch_evaluator:=True"}
             checked_on_default: Yes
 
         fastslam:
-            priority: 5
-            name: "FastSLAM_Checkbox"
-            label: "FastSLAM"
-            #package: "fast_slam"
-            #location: "launch/fast_slam.launch"
-            checked_on_default: Yes
-
-        fastslam_map:
             # Not implemented yet
-            # Will also need some degree of hardcoding since it
-            # passes a parameter to the other fastslam button
-            # before it launches.
-            priority: 7
-            name: "FastSLAM_Preloaded_Map_Checkbox"
-            label: "Preload SLAM Map"
+            priority: 6
+            name: "FastSLAM_Checkbox"
+            label: "FastSLAM Testing"
             checked_on_default: Yes
 
-    # Lets the launcher know which csv file (right) goes with which launch file (left)
-    # If the launch file isn't listed here, it defaults to the csv file with the same
-    # name as the launch file.
-    # If no such csv file exists, crashes are likely - but the onus for that is on
-    # FastSLAM, Not the launcher, as the launcher merely passes the csv's name to FastSLAM.
-    # As a note, FastSLAM only preloads a map if the fastslam_map button is checked.
-    fastslam_linkage:
-            acceleration: "acceleration_FASTSLAM"
-            skidpad: "skidpad_FASTSLAM"
 
 
     # Some nodes fail to shutdown
