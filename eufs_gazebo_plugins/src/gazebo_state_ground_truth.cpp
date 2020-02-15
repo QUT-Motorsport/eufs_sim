@@ -433,7 +433,7 @@ void GazeboStateGroundTruth::UpdateChild() {
           this->state_msg_.linear_acceleration_covariance[8] = pow(this->linear_acceleration_noise_[2], 2);
 
           // Calculate slip angle
-          this->state_msg_.slip_angle =
+          this->state_msg_.slip_ratio =
               -atan2(this->state_msg_.twist.twist.linear.y, this->state_msg_.twist.twist.linear.x);
 
           // Battery charge is currently not simulated so just put in incorrect values
