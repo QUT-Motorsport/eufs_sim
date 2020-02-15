@@ -955,6 +955,21 @@ class EufsLauncher(Plugin):
                 )
                 track_to_launch = "LAST_LAUNCH.launch"
 
+                # Re-create csv file because the csv-to-launch file re-centers the data
+                # A different fix would be to add another metapixel to trackimages that stores
+                # What the car's position should be.
+                # But this will work for now
+                Converter.convert(
+                        "launch",
+                        "csv",
+                        os.path.join(
+                                self.GAZEBO,
+                                'launch',
+                                "LAST_LAUNCH.launch"
+                        ),
+                        conversion_suffix = ""
+                )
+
                 # Get control information
                 control_method = "controlMethod:=speed"
                 if self.SPEED_RADIO.isChecked():
