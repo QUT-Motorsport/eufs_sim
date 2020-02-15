@@ -70,17 +70,18 @@ eufs_launcher:
             checked_on_default: Yes
 
         fastslam:
-            # Not implemented yet
             priority: 5
             name: "FastSLAM_Checkbox"
             label: "FastSLAM"
+            #package: "fast_slam"
+            #location: "launch/fast_slam.launch"
             checked_on_default: Yes
 
         fastslam_map:
             # Not implemented yet
             # Will also need some degree of hardcoding since it
-            # can only launch a map if self.fastslam_map_to_launch is not None
-            # (as that variable is the one that keeps track of which map to launch.)
+            # passes a parameter to the other fastslam button
+            # before it launches.
             priority: 7
             name: "FastSLAM_Preloaded_Map_Checkbox"
             label: "Preload SLAM Map"
