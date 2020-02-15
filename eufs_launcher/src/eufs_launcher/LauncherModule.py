@@ -988,18 +988,6 @@ class EufsLauncher(Plugin):
                 for checkbox, effect in self.checkbox_effect_mapping:
                         if checkbox.isChecked():
                                 effect()
-
-                # Hardcoded button effect - load FASTSLAM map
-                if self.FASTSLAM_PRELOADED_MAP_CHECKBOX.isChecked():
-
-                        # First, we check if we already have a specified csv file to load:
-                        fastslam_dict = self.default_config["eufs_launcher"]["fastslam_linkage"]
-                        track = self.TRACK_SELECTOR.currentText().split(".")[0]
-                        if track in fastslam_dict:
-                                fastslam_csv = fastslam_dict[track] + ".csv"
-                        else:
-                                fastslam_csv = track + ".csv"
-                        rospy.logerr("[DEBUG] Launching the preloaded map: " + fastslam_csv)
                         
                 # Auto-launch default scripts in yaml
                 scripts = self.default_config["eufs_launcher"]["on_startup"]
