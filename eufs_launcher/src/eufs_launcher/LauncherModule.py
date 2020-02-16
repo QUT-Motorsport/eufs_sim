@@ -1066,8 +1066,10 @@ class EufsLauncher(Plugin):
 
                 # Manual node killer (needs to be used on nodes opened by Popen):
                 extra_nodes = rosnode.get_node_names()
-                extra_nodes.remove("/eufs_launcher")
-                extra_nodes.remove("/rosout")
+                if "/eufs_launcher" in extra_nodes: 
+                        extra_nodes.remove("/eufs_launcher")
+                if "/rosout" in extra_nodes:                
+                        extra_nodes.remove("/rosout")
                 left_open = len(extra_nodes)
                 if (left_open > 0 and self.DEBUG_SHUTDOWN):
                         rospy.logerr("Warning, after shutting down the launcher, " +
@@ -1080,7 +1082,9 @@ class EufsLauncher(Plugin):
                 Popen(["killall", "-9", "gzserver"])
                 time.sleep(0.25)
                 extra_nodes = rosnode.get_node_names()
-                extra_nodes.remove("/eufs_launcher")
-                extra_nodes.remove("/rosout")
+                if "/eufs_launcher" in extra_nodes: 
+                        extra_nodes.remove("/eufs_launcher")
+                if "/rosout" in extra_nodes:                
+                        extra_nodes.remove("/rosout")
                 if left_open > 0 and self.DEBUG_SHUTDOWN:
                         rospy.logerr("Pruned to: " + str(extra_nodes))

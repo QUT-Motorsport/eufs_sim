@@ -4,7 +4,7 @@
     
 
     <link name='link_0_clone_%LINKNUM%'>
-      <pose frame=''>-40.0097143511 -28.2030131296 0.15 0 -0 0</pose>
+      <pose frame=''>-40.185029098 -28.2880946714 0.15 0 -0 0</pose>
       
       <collision name="collision">
         <geometry>
@@ -25,7 +25,7 @@
 
 
     <link name='link_0_clone_%LINKNUM%'>
-      <pose frame=''>-39.7069784223 -30.6249005597 0.15 0 -0 0</pose>
+      <pose frame=''>-39.8876057373 -30.6674815567 0.15 0 -0 0</pose>
       
       <collision name="collision">
         <geometry>
@@ -46,7 +46,7 @@
 
 
     <link name='link_0_clone_%LINKNUM%'>
-      <pose frame=''>-39.7069784223 -25.4783897708 0.15 0 -0 0</pose>
+      <pose frame=''>-39.5901823767 -25.6112844254 0.15 0 -0 0</pose>
       
       <collision name="collision">
         <geometry>
@@ -67,7 +67,7 @@
 
 
     <link name='link_0_clone_%LINKNUM%'>
-      <pose frame=''>-39.4042424936 -33.954995776 0.15 0 -0 0</pose>
+      <pose frame=''>-39.292759016 -34.2365618847 0.15 0 -0 0</pose>
       
       <collision name="collision">
         <geometry>
@@ -88,7 +88,7 @@
 
 
     <link name='link_0_clone_%LINKNUM%'>
-      <pose frame=''>-39.4042424936 -23.0565023408 0.15 0 -0 0</pose>
+      <pose frame=''>-39.292759016 -22.9344741794 0.15 0 -0 0</pose>
       
       <collision name="collision">
         <geometry>
@@ -109,7 +109,7 @@
 
 
     <link name='link_0_clone_%LINKNUM%'>
-      <pose frame=''>-39.1015065648 -20.0291430532 0.15 0 -0 0</pose>
+      <pose frame=''>-38.9953356553 -19.9602405727 0.15 0 -0 0</pose>
       
       <collision name="collision">
         <geometry>
@@ -130,7 +130,7 @@
 
 
     <link name='link_0_clone_%LINKNUM%'>
-      <pose frame=''>-39.1015065648 -16.6990478369 0.15 0 -0 0</pose>
+      <pose frame=''>-38.9953356553 -16.6885836054 0.15 0 -0 0</pose>
       
       <collision name="collision">
         <geometry>
@@ -151,7 +151,7 @@
 
 
     <link name='link_0_clone_%LINKNUM%'>
-      <pose frame=''>-37.8905628498 -13.3689526206 0.15 0 -0 0</pose>
+      <pose frame=''>-37.8056422127 -13.4169266381 0.15 0 -0 0</pose>
       
       <collision name="collision">
         <geometry>
@@ -172,7 +172,7 @@
 
 
     <link name='link_0_clone_%LINKNUM%'>
-      <pose frame=''>-37.587826921 -36.376883206 0.15 0 -0 0</pose>
+      <pose frame=''>-37.508218852 -36.3185254094 0.15 0 -0 0</pose>
       
       <collision name="collision">
         <geometry>
@@ -193,7 +193,7 @@
 
 
     <link name='link_0_clone_%LINKNUM%'>
-      <pose frame=''>-36.376883206 -11.2498011193 0.15 0 -0 0</pose>
+      <pose frame=''>-36.3185254094 -11.3349631134 0.15 0 -0 0</pose>
       
       <collision name="collision">
         <geometry>
@@ -214,7 +214,7 @@
 
 
     <link name='link_0_clone_%LINKNUM%'>
-      <pose frame=''>-35.7714113485 -37.8905628498 0.15 0 -0 0</pose>
+      <pose frame=''>-35.723678688 -38.1030655734 0.15 0 -0 0</pose>
       
       <collision name="collision">
         <geometry>
@@ -235,28 +235,7 @@
 
 
     <link name='link_0_clone_%LINKNUM%'>
-      <pose frame=''>-35.4686754198 -28.8084849871 0.15 0 -0 0</pose>
-      
-      <collision name="collision">
-        <geometry>
-          <mesh>
-            <uri>model://eufs_description/meshes/cone_yellow.dae</uri>
-          </mesh>
-        </geometry>
-      </collision>
-
-      <visual name="visual">
-        <geometry>
-          <mesh>
-            <uri>model://eufs_description/meshes/cone_yellow.dae</uri>
-          </mesh>
-        </geometry>
-      </visual>
-    </link>
-
-
-    <link name='link_0_clone_%LINKNUM%'>
-      <pose frame=''>-35.165939491 -32.1385802034 0.15 0 -0 0</pose>
+      <pose frame=''>-35.4262553274 -28.8829413927 0.15 0 -0 0</pose>
       
       <collision name="collision">
         <geometry>
@@ -277,7 +256,7 @@
 
 
     <link name='link_0_clone_%LINKNUM%'>
-      <pose frame=''>-35.165939491 -25.4783897708 0.15 0 -0 0</pose>
+      <pose frame=''>-35.1288319667 -32.15459836 0.15 0 -0 0</pose>
       
       <collision name="collision">
         <geometry>
@@ -298,7 +277,7 @@
 
 
     <link name='link_0_clone_%LINKNUM%'>
-      <pose frame=''>-34.8632035622 -23.0565023408 0.15 0 -0 0</pose>
+      <pose frame=''>-35.1288319667 -25.6112844254 0.15 0 -0 0</pose>
       
       <collision name="collision">
         <geometry>
@@ -319,7 +298,7 @@
 
 
     <link name='link_0_clone_%LINKNUM%'>
-      <pose frame=''>-34.5604676335 -20.0291430532 0.15 0 -0 0</pose>
+      <pose frame=''>-34.831408606 -22.9344741794 0.15 0 -0 0</pose>
       
       <collision name="collision">
         <geometry>
@@ -340,7 +319,7 @@
 
 
     <link name='link_0_clone_%LINKNUM%'>
-      <pose frame=''>-34.5604676335 -17.3045196944 0.15 0 -0 0</pose>
+      <pose frame=''>-34.5339852454 -19.9602405727 0.15 0 -0 0</pose>
       
       <collision name="collision">
         <geometry>
@@ -361,7 +340,28 @@
 
 
     <link name='link_0_clone_%LINKNUM%'>
-      <pose frame=''>-33.954995776 -10.3415933331 0.15 0 -0 0</pose>
+      <pose frame=''>-34.5339852454 -17.2834303267 0.15 0 -0 0</pose>
+      
+      <collision name="collision">
+        <geometry>
+          <mesh>
+            <uri>model://eufs_description/meshes/cone_yellow.dae</uri>
+          </mesh>
+        </geometry>
+      </collision>
+
+      <visual name="visual">
+        <geometry>
+          <mesh>
+            <uri>model://eufs_description/meshes/cone_yellow.dae</uri>
+          </mesh>
+        </geometry>
+      </visual>
+    </link>
+
+
+    <link name='link_0_clone_%LINKNUM%'>
+      <pose frame=''>-33.939138524 -10.4426930314 0.15 0 -0 0</pose>
       
       <collision name="collision">
         <geometry>
@@ -382,7 +382,7 @@
 
 
     <link name='link_0_clone_%LINKNUM%'>
-      <pose frame=''>-33.3495239185 -39.7069784223 0.15 0 -0 0</pose>
+      <pose frame=''>-33.3442918027 -39.5901823767 0.15 0 -0 0</pose>
       
       <collision name="collision">
         <geometry>
@@ -403,7 +403,7 @@
 
 
     <link name='link_0_clone_%LINKNUM%'>
-      <pose frame=''>-33.3495239185 -34.5604676335 0.15 0 -0 0</pose>
+      <pose frame=''>-33.3442918027 -34.831408606 0.15 0 -0 0</pose>
       
       <collision name="collision">
         <geometry>
@@ -424,7 +424,7 @@
 
 
     <link name='link_0_clone_%LINKNUM%'>
-      <pose frame=''>-33.3495239185 -15.4881041219 0.15 0 -0 0</pose>
+      <pose frame=''>-33.3442918027 -15.4988901627 0.15 0 -0 0</pose>
       
       <collision name="collision">
         <geometry>
@@ -445,7 +445,7 @@
 
 
     <link name='link_0_clone_%LINKNUM%'>
-      <pose frame=''>-31.2303724172 -14.5798963356 0.15 0 -0 0</pose>
+      <pose frame=''>-31.262328278 -14.6066200807 0.15 0 -0 0</pose>
       
       <collision name="collision">
         <geometry>
@@ -466,7 +466,7 @@
 
 
     <link name='link_0_clone_%LINKNUM%'>
-      <pose frame=''>-31.2303724172 -10.0388574043 0.15 0 -0 0</pose>
+      <pose frame=''>-31.262328278 -10.1452696707 0.15 0 -0 0</pose>
       
       <collision name="collision">
         <geometry>
@@ -487,7 +487,7 @@
 
 
     <link name='link_0_clone_%LINKNUM%'>
-      <pose frame=''>-30.9276364884 -35.7714113485 0.15 0 -0 0</pose>
+      <pose frame=''>-30.9649049174 -35.723678688 0.15 0 -0 0</pose>
       
       <collision name="collision">
         <geometry>
@@ -508,7 +508,7 @@
 
 
     <link name='link_0_clone_%LINKNUM%'>
-      <pose frame=''>-30.9276364884 -14.5798963356 0.15 0 -0 0</pose>
+      <pose frame=''>-30.6674815567 -14.6066200807 0.15 0 -0 0</pose>
       
       <collision name="collision">
         <geometry>
@@ -529,7 +529,7 @@
 
 
     <link name='link_0_clone_%LINKNUM%'>
-      <pose frame=''>-30.9276364884 -10.0388574043 0.15 0 -0 0</pose>
+      <pose frame=''>-30.6674815567 -10.1452696707 0.15 0 -0 0</pose>
       
       <collision name="collision">
         <geometry>
@@ -550,7 +550,7 @@
 
 
     <link name='link_0_clone_%LINKNUM%'>
-      <pose frame=''>-30.6249005597 -40.0097143511 0.15 0 -0 0</pose>
+      <pose frame=''>-30.370058196 -40.185029098 0.15 0 -0 0</pose>
       
       <collision name="collision">
         <geometry>
@@ -571,28 +571,7 @@
 
 
     <link name='link_0_clone_%LINKNUM%'>
-      <pose frame=''>-28.8084849871 -35.165939491 0.15 0 -0 0</pose>
-      
-      <collision name="collision">
-        <geometry>
-          <mesh>
-            <uri>model://eufs_description/meshes/cone_yellow.dae</uri>
-          </mesh>
-        </geometry>
-      </collision>
-
-      <visual name="visual">
-        <geometry>
-          <mesh>
-            <uri>model://eufs_description/meshes/cone_yellow.dae</uri>
-          </mesh>
-        </geometry>
-      </visual>
-    </link>
-
-
-    <link name='link_0_clone_%LINKNUM%'>
-      <pose frame=''>-28.2030131296 -14.5798963356 0.15 0 -0 0</pose>
+      <pose frame=''>-28.8829413927 -35.1288319667 0.15 0 -0 0</pose>
       
       <collision name="collision">
         <geometry>
@@ -613,49 +592,7 @@
 
 
     <link name='link_0_clone_%LINKNUM%'>
-      <pose frame=''>-28.2030131296 -10.0388574043 0.15 0 -0 0</pose>
-      
-      <collision name="collision">
-        <geometry>
-          <mesh>
-            <uri>model://eufs_description/meshes/cone_blue.dae</uri>
-          </mesh>
-        </geometry>
-      </collision>
-
-      <visual name="visual">
-        <geometry>
-          <mesh>
-            <uri>model://eufs_description/meshes/cone_blue.dae</uri>
-          </mesh>
-        </geometry>
-      </visual>
-    </link>
-
-
-    <link name='link_0_clone_%LINKNUM%'>
-      <pose frame=''>-26.9920694146 -39.1015065648 0.15 0 -0 0</pose>
-      
-      <collision name="collision">
-        <geometry>
-          <mesh>
-            <uri>model://eufs_description/meshes/cone_blue.dae</uri>
-          </mesh>
-        </geometry>
-      </collision>
-
-      <visual name="visual">
-        <geometry>
-          <mesh>
-            <uri>model://eufs_description/meshes/cone_blue.dae</uri>
-          </mesh>
-        </geometry>
-      </visual>
-    </link>
-
-
-    <link name='link_0_clone_%LINKNUM%'>
-      <pose frame=''>-26.3865975571 -33.6522598472 0.15 0 -0 0</pose>
+      <pose frame=''>-27.9906713107 -14.6066200807 0.15 0 -0 0</pose>
       
       <collision name="collision">
         <geometry>
@@ -676,7 +613,49 @@
 
 
     <link name='link_0_clone_%LINKNUM%'>
-      <pose frame=''>-25.1756538421 -14.5798963356 0.15 0 -0 0</pose>
+      <pose frame=''>-27.9906713107 -9.84784631006 0.15 0 -0 0</pose>
+      
+      <collision name="collision">
+        <geometry>
+          <mesh>
+            <uri>model://eufs_description/meshes/cone_blue.dae</uri>
+          </mesh>
+        </geometry>
+      </collision>
+
+      <visual name="visual">
+        <geometry>
+          <mesh>
+            <uri>model://eufs_description/meshes/cone_blue.dae</uri>
+          </mesh>
+        </geometry>
+      </visual>
+    </link>
+
+
+    <link name='link_0_clone_%LINKNUM%'>
+      <pose frame=''>-27.0984012287 -38.9953356553 0.15 0 -0 0</pose>
+      
+      <collision name="collision">
+        <geometry>
+          <mesh>
+            <uri>model://eufs_description/meshes/cone_blue.dae</uri>
+          </mesh>
+        </geometry>
+      </collision>
+
+      <visual name="visual">
+        <geometry>
+          <mesh>
+            <uri>model://eufs_description/meshes/cone_blue.dae</uri>
+          </mesh>
+        </geometry>
+      </visual>
+    </link>
+
+
+    <link name='link_0_clone_%LINKNUM%'>
+      <pose frame=''>-26.2061311467 -33.6417151634 0.15 0 -0 0</pose>
       
       <collision name="collision">
         <geometry>
@@ -697,49 +676,7 @@
 
 
     <link name='link_0_clone_%LINKNUM%'>
-      <pose frame=''>-25.1756538421 -9.73612147556 0.15 0 -0 0</pose>
-      
-      <collision name="collision">
-        <geometry>
-          <mesh>
-            <uri>model://eufs_description/meshes/cone_blue.dae</uri>
-          </mesh>
-        </geometry>
-      </collision>
-
-      <visual name="visual">
-        <geometry>
-          <mesh>
-            <uri>model://eufs_description/meshes/cone_blue.dae</uri>
-          </mesh>
-        </geometry>
-      </visual>
-    </link>
-
-
-    <link name='link_0_clone_%LINKNUM%'>
-      <pose frame=''>-23.6619741983 -36.9823550635 0.15 0 -0 0</pose>
-      
-      <collision name="collision">
-        <geometry>
-          <mesh>
-            <uri>model://eufs_description/meshes/cone_blue.dae</uri>
-          </mesh>
-        </geometry>
-      </collision>
-
-      <visual name="visual">
-        <geometry>
-          <mesh>
-            <uri>model://eufs_description/meshes/cone_blue.dae</uri>
-          </mesh>
-        </geometry>
-      </visual>
-    </link>
-
-
-    <link name='link_0_clone_%LINKNUM%'>
-      <pose frame=''>-23.3592382695 -31.5331083459 0.15 0 -0 0</pose>
+      <pose frame=''>-25.3138610647 -14.6066200807 0.15 0 -0 0</pose>
       
       <collision name="collision">
         <geometry>
@@ -760,7 +697,49 @@
 
 
     <link name='link_0_clone_%LINKNUM%'>
-      <pose frame=''>-21.2400867683 -14.5798963356 0.15 0 -0 0</pose>
+      <pose frame=''>-25.3138610647 -9.55042294939 0.15 0 -0 0</pose>
+      
+      <collision name="collision">
+        <geometry>
+          <mesh>
+            <uri>model://eufs_description/meshes/cone_blue.dae</uri>
+          </mesh>
+        </geometry>
+      </collision>
+
+      <visual name="visual">
+        <geometry>
+          <mesh>
+            <uri>model://eufs_description/meshes/cone_blue.dae</uri>
+          </mesh>
+        </geometry>
+      </visual>
+    </link>
+
+
+    <link name='link_0_clone_%LINKNUM%'>
+      <pose frame=''>-23.8267442614 -36.9133721307 0.15 0 -0 0</pose>
+      
+      <collision name="collision">
+        <geometry>
+          <mesh>
+            <uri>model://eufs_description/meshes/cone_blue.dae</uri>
+          </mesh>
+        </geometry>
+      </collision>
+
+      <visual name="visual">
+        <geometry>
+          <mesh>
+            <uri>model://eufs_description/meshes/cone_blue.dae</uri>
+          </mesh>
+        </geometry>
+      </visual>
+    </link>
+
+
+    <link name='link_0_clone_%LINKNUM%'>
+      <pose frame=''>-23.23189754 -31.5597516387 0.15 0 -0 0</pose>
       
       <collision name="collision">
         <geometry>
@@ -781,49 +760,7 @@
 
 
     <link name='link_0_clone_%LINKNUM%'>
-      <pose frame=''>-21.2400867683 -9.73612147556 0.15 0 -0 0</pose>
-      
-      <collision name="collision">
-        <geometry>
-          <mesh>
-            <uri>model://eufs_description/meshes/cone_blue.dae</uri>
-          </mesh>
-        </geometry>
-      </collision>
-
-      <visual name="visual">
-        <geometry>
-          <mesh>
-            <uri>model://eufs_description/meshes/cone_blue.dae</uri>
-          </mesh>
-        </geometry>
-      </visual>
-    </link>
-
-
-    <link name='link_0_clone_%LINKNUM%'>
-      <pose frame=''>-19.7264071245 -34.8632035622 0.15 0 -0 0</pose>
-      
-      <collision name="collision">
-        <geometry>
-          <mesh>
-            <uri>model://eufs_description/meshes/cone_blue.dae</uri>
-          </mesh>
-        </geometry>
-      </collision>
-
-      <visual name="visual">
-        <geometry>
-          <mesh>
-            <uri>model://eufs_description/meshes/cone_blue.dae</uri>
-          </mesh>
-        </geometry>
-      </visual>
-    </link>
-
-
-    <link name='link_0_clone_%LINKNUM%'>
-      <pose frame=''>-19.4236711957 -29.7166927734 0.15 0 -0 0</pose>
+      <pose frame=''>-21.1499340154 -14.6066200807 0.15 0 -0 0</pose>
       
       <collision name="collision">
         <geometry>
@@ -844,7 +781,49 @@
 
 
     <link name='link_0_clone_%LINKNUM%'>
-      <pose frame=''>-17.6072556232 -14.2771604069 0.15 0 -0 0</pose>
+      <pose frame=''>-21.1499340154 -9.84784631006 0.15 0 -0 0</pose>
+      
+      <collision name="collision">
+        <geometry>
+          <mesh>
+            <uri>model://eufs_description/meshes/cone_blue.dae</uri>
+          </mesh>
+        </geometry>
+      </collision>
+
+      <visual name="visual">
+        <geometry>
+          <mesh>
+            <uri>model://eufs_description/meshes/cone_blue.dae</uri>
+          </mesh>
+        </geometry>
+      </visual>
+    </link>
+
+
+    <link name='link_0_clone_%LINKNUM%'>
+      <pose frame=''>-19.662817212 -34.831408606 0.15 0 -0 0</pose>
+      
+      <collision name="collision">
+        <geometry>
+          <mesh>
+            <uri>model://eufs_description/meshes/cone_blue.dae</uri>
+          </mesh>
+        </geometry>
+      </collision>
+
+      <visual name="visual">
+        <geometry>
+          <mesh>
+            <uri>model://eufs_description/meshes/cone_blue.dae</uri>
+          </mesh>
+        </geometry>
+      </visual>
+    </link>
+
+
+    <link name='link_0_clone_%LINKNUM%'>
+      <pose frame=''>-19.3653938514 -29.7752114747 0.15 0 -0 0</pose>
       
       <collision name="collision">
         <geometry>
@@ -865,28 +844,7 @@
 
 
     <link name='link_0_clone_%LINKNUM%'>
-      <pose frame=''>-17.6072556232 -9.13064961805 0.15 0 -0 0</pose>
-      
-      <collision name="collision">
-        <geometry>
-          <mesh>
-            <uri>model://eufs_description/meshes/cone_blue.dae</uri>
-          </mesh>
-        </geometry>
-      </collision>
-
-      <visual name="visual">
-        <geometry>
-          <mesh>
-            <uri>model://eufs_description/meshes/cone_blue.dae</uri>
-          </mesh>
-        </geometry>
-      </visual>
-    </link>
-
-
-    <link name='link_0_clone_%LINKNUM%'>
-      <pose frame=''>-16.6990478369 -28.2030131296 0.15 0 -0 0</pose>
+      <pose frame=''>-17.5808536874 -14.3091967201 0.15 0 -0 0</pose>
       
       <collision name="collision">
         <geometry>
@@ -907,7 +865,7 @@
 
 
     <link name='link_0_clone_%LINKNUM%'>
-      <pose frame=''>-16.0935759794 -33.0467879897 0.15 0 -0 0</pose>
+      <pose frame=''>-17.5808536874 -9.25299958873 0.15 0 -0 0</pose>
       
       <collision name="collision">
         <geometry>
@@ -928,28 +886,7 @@
 
 
     <link name='link_0_clone_%LINKNUM%'>
-      <pose frame=''>-13.9744244781 -26.9920694146 0.15 0 -0 0</pose>
-      
-      <collision name="collision">
-        <geometry>
-          <mesh>
-            <uri>model://eufs_description/meshes/cone_yellow.dae</uri>
-          </mesh>
-        </geometry>
-      </collision>
-
-      <visual name="visual">
-        <geometry>
-          <mesh>
-            <uri>model://eufs_description/meshes/cone_yellow.dae</uri>
-          </mesh>
-        </geometry>
-      </visual>
-    </link>
-
-
-    <link name='link_0_clone_%LINKNUM%'>
-      <pose frame=''>-13.9744244781 -13.0662166919 0.15 0 -0 0</pose>
+      <pose frame=''>-16.3911602447 -28.2880946714 0.15 0 -0 0</pose>
       
       <collision name="collision">
         <geometry>
@@ -970,7 +907,7 @@
 
 
     <link name='link_0_clone_%LINKNUM%'>
-      <pose frame=''>-13.9744244781 -8.22244183178 0.15 0 -0 0</pose>
+      <pose frame=''>-16.0937368841 -33.046868442 0.15 0 -0 0</pose>
       
       <collision name="collision">
         <geometry>
@@ -991,28 +928,7 @@
 
 
     <link name='link_0_clone_%LINKNUM%'>
-      <pose frame=''>-13.0662166919 -31.5331083459 0.15 0 -0 0</pose>
-      
-      <collision name="collision">
-        <geometry>
-          <mesh>
-            <uri>model://eufs_description/meshes/cone_blue.dae</uri>
-          </mesh>
-        </geometry>
-      </collision>
-
-      <visual name="visual">
-        <geometry>
-          <mesh>
-            <uri>model://eufs_description/meshes/cone_blue.dae</uri>
-          </mesh>
-        </geometry>
-      </visual>
-    </link>
-
-
-    <link name='link_0_clone_%LINKNUM%'>
-      <pose frame=''>-11.8552729768 -25.7811256996 0.15 0 -0 0</pose>
+      <pose frame=''>-14.0117733594 -26.800977868 0.15 0 -0 0</pose>
       
       <collision name="collision">
         <geometry>
@@ -1033,28 +949,7 @@
 
 
     <link name='link_0_clone_%LINKNUM%'>
-      <pose frame=''>-11.5525370481 -7.01149811676 0.15 0 -0 0</pose>
-      
-      <collision name="collision">
-        <geometry>
-          <mesh>
-            <uri>model://eufs_description/meshes/cone_blue.dae</uri>
-          </mesh>
-        </geometry>
-      </collision>
-
-      <visual name="visual">
-        <geometry>
-          <mesh>
-            <uri>model://eufs_description/meshes/cone_blue.dae</uri>
-          </mesh>
-        </geometry>
-      </visual>
-    </link>
-
-
-    <link name='link_0_clone_%LINKNUM%'>
-      <pose frame=''>-10.6443292618 -12.1580089056 0.15 0 -0 0</pose>
+      <pose frame=''>-14.0117733594 -13.1195032774 0.15 0 -0 0</pose>
       
       <collision name="collision">
         <geometry>
@@ -1075,7 +970,7 @@
 
 
     <link name='link_0_clone_%LINKNUM%'>
-      <pose frame=''>-10.0388574043 -29.7166927734 0.15 0 -0 0</pose>
+      <pose frame=''>-14.0117733594 -8.36072950673 0.15 0 -0 0</pose>
       
       <collision name="collision">
         <geometry>
@@ -1096,28 +991,7 @@
 
 
     <link name='link_0_clone_%LINKNUM%'>
-      <pose frame=''>-9.13064961805 -24.5701819846 0.15 0 -0 0</pose>
-      
-      <collision name="collision">
-        <geometry>
-          <mesh>
-            <uri>model://eufs_description/meshes/cone_yellow.dae</uri>
-          </mesh>
-        </geometry>
-      </collision>
-
-      <visual name="visual">
-        <geometry>
-          <mesh>
-            <uri>model://eufs_description/meshes/cone_yellow.dae</uri>
-          </mesh>
-        </geometry>
-      </visual>
-    </link>
-
-
-    <link name='link_0_clone_%LINKNUM%'>
-      <pose frame=''>-8.82791368929 -5.80055440174 0.15 0 -0 0</pose>
+      <pose frame=''>-12.8220799167 -31.5597516387 0.15 0 -0 0</pose>
       
       <collision name="collision">
         <geometry>
@@ -1138,7 +1012,7 @@
 
 
     <link name='link_0_clone_%LINKNUM%'>
-      <pose frame=''>-8.22244183178 -11.2498011193 0.15 0 -0 0</pose>
+      <pose frame=''>-11.6323864741 -25.908707786 0.15 0 -0 0</pose>
       
       <collision name="collision">
         <geometry>
@@ -1159,7 +1033,28 @@
 
 
     <link name='link_0_clone_%LINKNUM%'>
-      <pose frame=''>-7.61696997427 -23.0565023408 0.15 0 -0 0</pose>
+      <pose frame=''>-11.6323864741 -7.17103606406 0.15 0 -0 0</pose>
+      
+      <collision name="collision">
+        <geometry>
+          <mesh>
+            <uri>model://eufs_description/meshes/cone_blue.dae</uri>
+          </mesh>
+        </geometry>
+      </collision>
+
+      <visual name="visual">
+        <geometry>
+          <mesh>
+            <uri>model://eufs_description/meshes/cone_blue.dae</uri>
+          </mesh>
+        </geometry>
+      </visual>
+    </link>
+
+
+    <link name='link_0_clone_%LINKNUM%'>
+      <pose frame=''>-10.7401163921 -12.2272331954 0.15 0 -0 0</pose>
       
       <collision name="collision">
         <geometry>
@@ -1180,7 +1075,7 @@
 
 
     <link name='link_0_clone_%LINKNUM%'>
-      <pose frame=''>-7.01149811676 -28.2030131296 0.15 0 -0 0</pose>
+      <pose frame=''>-10.1452696707 -29.7752114747 0.15 0 -0 0</pose>
       
       <collision name="collision">
         <geometry>
@@ -1201,28 +1096,7 @@
 
 
     <link name='link_0_clone_%LINKNUM%'>
-      <pose frame=''>-6.1032903305 -21.542822697 0.15 0 -0 0</pose>
-      
-      <collision name="collision">
-        <geometry>
-          <mesh>
-            <uri>model://eufs_description/meshes/cone_yellow.dae</uri>
-          </mesh>
-        </geometry>
-      </collision>
-
-      <visual name="visual">
-        <geometry>
-          <mesh>
-            <uri>model://eufs_description/meshes/cone_yellow.dae</uri>
-          </mesh>
-        </geometry>
-      </visual>
-    </link>
-
-
-    <link name='link_0_clone_%LINKNUM%'>
-      <pose frame=''>-6.1032903305 -11.8552729768 0.15 0 -0 0</pose>
+      <pose frame=''>-8.95557622806 -24.4215909827 0.15 0 -0 0</pose>
       
       <collision name="collision">
         <geometry>
@@ -1243,7 +1117,7 @@
 
 
     <link name='link_0_clone_%LINKNUM%'>
-      <pose frame=''>-6.1032903305 -6.40602625925 0.15 0 -0 0</pose>
+      <pose frame=''>-8.6581528674 -5.9813426214 0.15 0 -0 0</pose>
       
       <collision name="collision">
         <geometry>
@@ -1264,28 +1138,7 @@
 
 
     <link name='link_0_clone_%LINKNUM%'>
-      <pose frame=''>-5.49781847299 -19.4236711957 0.15 0 -0 0</pose>
-      
-      <collision name="collision">
-        <geometry>
-          <mesh>
-            <uri>model://eufs_description/meshes/cone_yellow.dae</uri>
-          </mesh>
-        </geometry>
-      </collision>
-
-      <visual name="visual">
-        <geometry>
-          <mesh>
-            <uri>model://eufs_description/meshes/cone_yellow.dae</uri>
-          </mesh>
-        </geometry>
-      </visual>
-    </link>
-
-
-    <link name='link_0_clone_%LINKNUM%'>
-      <pose frame=''>-4.58961068672 -17.0017837657 0.15 0 -0 0</pose>
+      <pose frame=''>-8.06330614606 -11.3349631134 0.15 0 -0 0</pose>
       
       <collision name="collision">
         <geometry>
@@ -1306,7 +1159,7 @@
 
 
     <link name='link_0_clone_%LINKNUM%'>
-      <pose frame=''>-4.58961068672 -13.9744244781 0.15 0 -0 0</pose>
+      <pose frame=''>-7.46845942473 -22.9344741794 0.15 0 -0 0</pose>
       
       <collision name="collision">
         <geometry>
@@ -1327,7 +1180,7 @@
 
 
     <link name='link_0_clone_%LINKNUM%'>
-      <pose frame=''>-3.98413882921 -26.0838616283 0.15 0 -0 0</pose>
+      <pose frame=''>-6.8736127034 -28.2880946714 0.15 0 -0 0</pose>
       
       <collision name="collision">
         <geometry>
@@ -1348,7 +1201,49 @@
 
 
     <link name='link_0_clone_%LINKNUM%'>
-      <pose frame=''>-3.68140290046 -7.61696997427 0.15 0 -0 0</pose>
+      <pose frame=''>-6.27876598207 -11.6323864741 0.15 0 -0 0</pose>
+      
+      <collision name="collision">
+        <geometry>
+          <mesh>
+            <uri>model://eufs_description/meshes/cone_yellow.dae</uri>
+          </mesh>
+        </geometry>
+      </collision>
+
+      <visual name="visual">
+        <geometry>
+          <mesh>
+            <uri>model://eufs_description/meshes/cone_yellow.dae</uri>
+          </mesh>
+        </geometry>
+      </visual>
+    </link>
+
+
+    <link name='link_0_clone_%LINKNUM%'>
+      <pose frame=''>-5.9813426214 -21.447357376 0.15 0 -0 0</pose>
+      
+      <collision name="collision">
+        <geometry>
+          <mesh>
+            <uri>model://eufs_description/meshes/cone_yellow.dae</uri>
+          </mesh>
+        </geometry>
+      </collision>
+
+      <visual name="visual">
+        <geometry>
+          <mesh>
+            <uri>model://eufs_description/meshes/cone_yellow.dae</uri>
+          </mesh>
+        </geometry>
+      </visual>
+    </link>
+
+
+    <link name='link_0_clone_%LINKNUM%'>
+      <pose frame=''>-5.9813426214 -6.57618934273 0.15 0 -0 0</pose>
       
       <collision name="collision">
         <geometry>
@@ -1369,7 +1264,70 @@
 
 
     <link name='link_0_clone_%LINKNUM%'>
-      <pose frame=''>-2.16772325668 -23.0565023408 0.15 0 -0 0</pose>
+      <pose frame=''>-5.38649590007 -19.662817212 0.15 0 -0 0</pose>
+      
+      <collision name="collision">
+        <geometry>
+          <mesh>
+            <uri>model://eufs_description/meshes/cone_yellow.dae</uri>
+          </mesh>
+        </geometry>
+      </collision>
+
+      <visual name="visual">
+        <geometry>
+          <mesh>
+            <uri>model://eufs_description/meshes/cone_yellow.dae</uri>
+          </mesh>
+        </geometry>
+      </visual>
+    </link>
+
+
+    <link name='link_0_clone_%LINKNUM%'>
+      <pose frame=''>-4.49422581807 -16.986006966 0.15 0 -0 0</pose>
+      
+      <collision name="collision">
+        <geometry>
+          <mesh>
+            <uri>model://eufs_description/meshes/cone_yellow.dae</uri>
+          </mesh>
+        </geometry>
+      </collision>
+
+      <visual name="visual">
+        <geometry>
+          <mesh>
+            <uri>model://eufs_description/meshes/cone_yellow.dae</uri>
+          </mesh>
+        </geometry>
+      </visual>
+    </link>
+
+
+    <link name='link_0_clone_%LINKNUM%'>
+      <pose frame=''>-4.49422581807 -14.0117733594 0.15 0 -0 0</pose>
+      
+      <collision name="collision">
+        <geometry>
+          <mesh>
+            <uri>model://eufs_description/meshes/cone_yellow.dae</uri>
+          </mesh>
+        </geometry>
+      </collision>
+
+      <visual name="visual">
+        <geometry>
+          <mesh>
+            <uri>model://eufs_description/meshes/cone_yellow.dae</uri>
+          </mesh>
+        </geometry>
+      </visual>
+    </link>
+
+
+    <link name='link_0_clone_%LINKNUM%'>
+      <pose frame=''>-3.89937909674 -26.2061311467 0.15 0 -0 0</pose>
       
       <collision name="collision">
         <geometry>
@@ -1390,7 +1348,7 @@
 
 
     <link name='link_0_clone_%LINKNUM%'>
-      <pose frame=''>-1.86498732792 -9.4333855468 0.15 0 -0 0</pose>
+      <pose frame=''>-3.60195573607 -7.7658827854 0.15 0 -0 0</pose>
       
       <collision name="collision">
         <geometry>
@@ -1411,7 +1369,7 @@
 
 
     <link name='link_0_clone_%LINKNUM%'>
-      <pose frame=''>-1.25951547041 -20.6346149107 0.15 0 -0 0</pose>
+      <pose frame=''>-2.11483893274 -22.9344741794 0.15 0 -0 0</pose>
       
       <collision name="collision">
         <geometry>
@@ -1432,7 +1390,7 @@
 
 
     <link name='link_0_clone_%LINKNUM%'>
-      <pose frame=''>-0.351307684149 -17.6072556232 0.15 0 -0 0</pose>
+      <pose frame=''>-1.81741557207 -9.25299958873 0.15 0 -0 0</pose>
       
       <collision name="collision">
         <geometry>
@@ -1453,7 +1411,7 @@
 
 
     <link name='link_0_clone_%LINKNUM%'>
-      <pose frame=''>-0.351307684149 -11.2498011193 0.15 0 -0 0</pose>
+      <pose frame=''>-1.22256885074 -20.8525106547 0.15 0 -0 0</pose>
       
       <collision name="collision">
         <geometry>
@@ -1474,7 +1432,49 @@
 
 
     <link name='link_0_clone_%LINKNUM%'>
-      <pose frame=''>0.254164173362 -14.2771604069 0.15 0 -0 0</pose>
+      <pose frame=''>-0.330298768742 -11.3349631134 0.15 0 -0 0</pose>
+      
+      <collision name="collision">
+        <geometry>
+          <mesh>
+            <uri>model://eufs_description/meshes/cone_blue.dae</uri>
+          </mesh>
+        </geometry>
+      </collision>
+
+      <visual name="visual">
+        <geometry>
+          <mesh>
+            <uri>model://eufs_description/meshes/cone_blue.dae</uri>
+          </mesh>
+        </geometry>
+      </visual>
+    </link>
+
+
+    <link name='link_0_clone_%LINKNUM%'>
+      <pose frame=''>-0.0328754080756 -17.878277048 0.15 0 -0 0</pose>
+      
+      <collision name="collision">
+        <geometry>
+          <mesh>
+            <uri>model://eufs_description/meshes/cone_blue.dae</uri>
+          </mesh>
+        </geometry>
+      </collision>
+
+      <visual name="visual">
+        <geometry>
+          <mesh>
+            <uri>model://eufs_description/meshes/cone_blue.dae</uri>
+          </mesh>
+        </geometry>
+      </visual>
+    </link>
+
+
+    <link name='link_0_clone_%LINKNUM%'>
+      <pose frame=''>0.264547952591 -14.3091967201 0.15 0 -0 0</pose>
       
       <collision name="collision">
         <geometry>

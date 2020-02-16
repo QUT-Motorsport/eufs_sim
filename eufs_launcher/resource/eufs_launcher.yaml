@@ -20,6 +20,10 @@ eufs_launcher:
             package: "eufs_gazebo"
             location: "launch/sbg_raw_data_simulator.launch"
             args: {"_imu_hz:=200", "_gps_hz:=5"}
+
+        wheel_odometry:
+            package: "wheel_odometry"
+            location: "launch/wheel_odometry.launch"
        
     # Checkboxes to have in the config section.  
     # `eufs_launcher` handles layout based on priority set.
@@ -61,15 +65,11 @@ eufs_launcher:
                 if_off: {"publish_gt_tf:=false"}
             
         ekf:
-            # Note: we need to change things slightly so that
-            # the simulation isn't responsible for launching the EKF,
-            # just the nodes that the EKF needs to launch and the evaluator
             priority: 5
             name: "EKF_Checkbox"
             label: "EKF Testing"
             package: "eufs_gazebo"
-            location: "launch/ekf_sim_launcher.launch"
-            args: {"launch_evaluator:=True"}
+            location: "launch/ekf_evaluator.launch"
             checked_on_default: Yes
 
         fastslam:
