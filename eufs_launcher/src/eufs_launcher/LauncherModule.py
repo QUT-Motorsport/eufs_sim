@@ -321,7 +321,7 @@ class EufsLauncher(Plugin):
                                 geom = widget.geometry()
                                 new_width = (
                                         geom.width() * (scaler_multiplier) if not isinstance(widget, QLabel) 
-                                        else geom.width() * (scaler_multiplier**2)
+                                        else geom.width() * (scaler_multiplier) + 200
                                 )
                                 widget.setGeometry(
                                         geom.x() * scaler_multiplier,
