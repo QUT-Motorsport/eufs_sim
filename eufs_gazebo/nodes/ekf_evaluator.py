@@ -134,7 +134,17 @@ class EKFEvaluator(object):
             self.ekf_odom.twist.twist.angular.z
         ]
 
-        self.out_msg.data = self.compare(gps_data + imu_data, ekf_gps_data + ekf_imu_data)
+        # Now we get x/y velo var, x/y accel var, yaw var
+        variance_info = [
+            self.ekf_odom.twist.covariance[0],
+            self.ekf_odom.twist.covariance[7],
+            self.ekf_accel.accel.covariance[0],
+            self.ekf_accel.accel.covariance[7],
+            self.ekf_odom.twist.covariance[35]
+        ]
+
+        compared_data = self.compare(gps_data + imu_data, ekf_gps_data + ekf_imu_data)
+        self.out_msg.data = compared_data + variance_info
             
         self.out.publish(self.out_msg)
 
