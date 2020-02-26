@@ -73,6 +73,8 @@ class ConeGroundTruth:
 
     def __init__(self):
         rospy.init_node("cone_ground_truth")
+        self.trans = None
+        self.yaw = None
         self.blue_cones = None
         self.yellow_cones = None
         self.big_orange_cones = None
@@ -94,6 +96,108 @@ class ConeGroundTruth:
         self.cone_marker_pub = rospy.Publisher("/ground_truth/cones/viz", MarkerArray, queue_size=1)
         self.midpoints_pub = rospy.Publisher("/ground_truth/midpoints", PointArray, queue_size=1)
         self.midpoints_marker_pub = rospy.Publisher("/ground_truth/midpoints/viz", Marker, queue_size=1)
+
+    def pub_ground_truth(self):
+        # If translations and yaw are none, exit
+        if (self.trans == None or self.yaw == None):
+            rospy.logdebug("The translation and yaw have not been set. Doing nothing")
+            return
+
+        # If no subscribers to any topics, exit
+        if (self.cone_pub.get_num_connections() == 0 and
+                self.cone_marker_pub.get_num_connections() == 0 and
+                self.midpoints_pub.get_num_connections() == 0 and
+                self.midpoints_marker_pub.get_num_connections() == 0):
+            rospy.logdebug("Nobody is listening to cone_ground_truth. Doing nothing")
+            return
+
+        # Publish the cone data
+        if (self.cone_pub.get_num_connections() > 0 or
+                self.cone_marker_pub.get_num_connections() > 0):
+
+            # Publish cone ground truth locations
+            cone_msg = ConeArray()
+            cone_msg.header.frame_id = self.CONE_FRAME
+            cone_msg.header.stamp = rospy.Time.now()
+
+            cone_markers = MarkerArray()
+            marker_id = 0  # IDs are needed for the marker to work
+
+            try:
+                blue_closest_cones = self.process_cones(self.blue_cones, self.yaw, self.trans)
+                if len(blue_closest_cones) != 0:
+                    for cone in np.reshape(blue_closest_cones, (-1, 2)):
+                        cone_msg.blue_cones.append(Point(cone[0], cone[1], 0))
+                        marker = self.get_cone_marker(pose=cone, rgb=(0.2, 0.2, 1), id=marker_id)
+                        marker_id += 1
+                        cone_markers.markers.append(marker)
+            except Exception as e:
+                rospy.logerr("Couldn't process blue cones.", e)
+
+            try:
+                yellow_closest_cones = self.process_cones(self.yellow_cones, self.yaw, self.trans)
+                if len(yellow_closest_cones) != 0:
+                    for cone in np.reshape(yellow_closest_cones, (-1, 2)):
+                        cone_msg.yellow_cones.append(Point(cone[0], cone[1], 0))
+                        marker = self.get_cone_marker(pose=cone, rgb=(1, 1, 0), id=marker_id)
+                        marker_id += 1
+                        cone_markers.markers.append(marker)
+            except Exception as e:
+                rospy.logwarn("Couldn't process yellow cones.", e)
+
+            try:
+                orange_closest_cones = self.process_cones(self.orange_cones, self.yaw, self.trans)
+                if len(orange_closest_cones) != 0:
+                    for cone in np.reshape(orange_closest_cones, (-1, 2)):
+                        cone_msg.orange_cones.append(Point(cone[0], cone[1], 0))
+                        marker = self.get_cone_marker(pose=cone, rgb=(1, 0.549, 0), id=marker_id)
+                        marker_id += 1
+                        cone_markers.markers.append(marker)
+            except Exception as e:
+                rospy.logwarn("Couldn't process orange cones.", e)
+
+            try:
+                big_orange_closest_cones = self.process_cones(self.big_orange_cones, self.yaw, self.trans)
+                if len(big_orange_closest_cones) != 0:
+                    for cone in np.reshape(big_orange_closest_cones, (-1, 2)):
+                        cone_msg.big_orange_cones.append(Point(cone[0], cone[1], 0))
+                        marker = self.get_cone_marker(pose=cone, rgb=(1, 0.271, 0), id=marker_id, big=True)
+                        marker_id += 1
+                        cone_markers.markers.append(marker)
+            except Exception as e:
+                rospy.logwarn("Couldn't process big orange cones.", e)
+
+            # Publish topics
+            self.cone_pub.publish(cone_msg)
+            self.cone_marker_pub.publish(cone_markers)
+
+        # Midpoints
+        # Process only if there are midpoints and subscribers
+        if (self.midpoints is not None and
+                (self.midpoints_pub.get_num_connections() > 0 or
+                 self.midpoints_marker_pub.get_num_connections() > 0)):
+            try:
+                closest_midpoints = self.process_cones(self.midpoints, self.yaw, self.trans)
+            except Exception as e:
+                rospy.logwarn("Couldn't process midpoints.", e)
+                return
+
+            if len(closest_midpoints) != 0:
+                midpoint_msg = PointArray()
+                midpoint_marker_msg = self.get_cone_marker(pose=[0, 0, 0], rgb=(0.2, 1, 0.2), id=0)
+                midpoint_marker_msg.type = Marker.POINTS
+                midpoint_marker_msg.scale.x = 0.5
+                midpoint_marker_msg.scale.y = 0.5
+                midpoint_marker_msg.scale.z = 0.5
+                for cone in np.reshape(closest_midpoints, (-1, 2)):
+                    p = Point(cone[0], cone[1], 0)
+                    midpoint_msg.points.append(p)
+                    midpoint_marker_msg.points.append(p)
+
+                if self.midpoints_pub.get_num_connections() > 0:
+                    self.midpoints_pub.publish(midpoint_msg)
+                if self.midpoints_marker_pub.get_num_connections() > 0:
+                    self.midpoints_marker_pub.publish(midpoint_marker_msg)
 
     def mul_by_transpose(self, X, size):
         """Helper function for self.dists().
@@ -200,105 +304,10 @@ class ConeGroundTruth:
             Nothing
         """
 
-        # If no subscribers to any topics, exit
-        if (self.cone_pub.get_num_connections() == 0 and
-                self.cone_marker_pub.get_num_connections() == 0 and
-                self.midpoints_pub.get_num_connections() == 0 and
-                self.midpoints_marker_pub.get_num_connections() == 0):
-            rospy.logdebug("Nobody is listening to cone_ground_truth. Doing nothing")
-            return
-
         # get translation and yaw
         pos = msg.pose.pose.position
-        trans = np.array([pos.x, pos.y, pos.z])
-        yaw = self.yaw_from_quat(msg.pose.pose.orientation)
-
-        if (self.cone_pub.get_num_connections() > 0 or
-                self.cone_marker_pub.get_num_connections() > 0):
-
-            # Publish cone ground truth locations
-            cone_msg = ConeArray()
-            cone_msg.header.frame_id = self.CONE_FRAME
-            cone_msg.header.stamp = rospy.Time.now()
-
-            cone_markers = MarkerArray()
-            marker_id = 0  # IDs are needed for the marker to work
-
-            try:
-                blue_closest_cones = self.process_cones(self.blue_cones, yaw, trans)
-                if len(blue_closest_cones) != 0:
-                    for cone in np.reshape(blue_closest_cones, (-1, 2)):
-                        cone_msg.blue_cones.append(Point(cone[0], cone[1], 0))
-                        marker = self.get_cone_marker(pose=cone, rgb=(0.2, 0.2, 1), id=marker_id)
-                        marker_id += 1
-                        cone_markers.markers.append(marker)
-            except Exception as e:
-                rospy.logerr("Couldn't process blue cones.", e)
-
-            try:
-                yellow_closest_cones = self.process_cones(self.yellow_cones, yaw, trans)
-                if len(yellow_closest_cones) != 0:
-                    for cone in np.reshape(yellow_closest_cones, (-1, 2)):
-                        cone_msg.yellow_cones.append(Point(cone[0], cone[1], 0))
-                        marker = self.get_cone_marker(pose=cone, rgb=(1, 1, 0), id=marker_id)
-                        marker_id += 1
-                        cone_markers.markers.append(marker)
-            except Exception as e:
-                rospy.logwarn("Couldn't process yellow cones.", e)
-
-            try:
-                orange_closest_cones = self.process_cones(self.orange_cones, yaw, trans)
-                if len(orange_closest_cones) != 0:
-                    for cone in np.reshape(orange_closest_cones, (-1, 2)):
-                        cone_msg.orange_cones.append(Point(cone[0], cone[1], 0))
-                        marker = self.get_cone_marker(pose=cone, rgb=(1, 0.549, 0), id=marker_id)
-                        marker_id += 1
-                        cone_markers.markers.append(marker)
-            except Exception as e:
-                rospy.logwarn("Couldn't process orange cones.", e)
-
-            try:
-                big_orange_closest_cones = self.process_cones(self.big_orange_cones, yaw, trans)
-                if len(big_orange_closest_cones) != 0:
-                    for cone in np.reshape(big_orange_closest_cones, (-1, 2)):
-                        cone_msg.big_orange_cones.append(Point(cone[0], cone[1], 0))
-                        marker = self.get_cone_marker(pose=cone, rgb=(1, 0.271, 0), id=marker_id, big=True)
-                        marker_id += 1
-                        cone_markers.markers.append(marker)
-            except Exception as e:
-                rospy.logwarn("Couldn't process big orange cones.", e)
-
-            # Publish topics
-            self.cone_pub.publish(cone_msg)
-            self.cone_marker_pub.publish(cone_markers)
-
-        # Midpoints
-        # Process only if there are midpoints and subscribers
-        if (self.midpoints is not None and
-                (self.midpoints_pub.get_num_connections() > 0 or
-                 self.midpoints_marker_pub.get_num_connections() > 0)):
-            try:
-                closest_midpoints = self.process_cones(self.midpoints, yaw, trans)
-            except Exception as e:
-                rospy.logwarn("Couldn't process midpoints.", e)
-                return
-
-            if len(closest_midpoints) != 0:
-                midpoint_msg = PointArray()
-                midpoint_marker_msg = self.get_cone_marker(pose=[0, 0, 0], rgb=(0.2, 1, 0.2), id=0)
-                midpoint_marker_msg.type = Marker.POINTS
-                midpoint_marker_msg.scale.x = 0.5
-                midpoint_marker_msg.scale.y = 0.5
-                midpoint_marker_msg.scale.z = 0.5
-                for cone in np.reshape(closest_midpoints, (-1, 2)):
-                    p = Point(cone[0], cone[1], 0)
-                    midpoint_msg.points.append(p)
-                    midpoint_marker_msg.points.append(p)
-
-                if self.midpoints_pub.get_num_connections() > 0:
-                    self.midpoints_pub.publish(midpoint_msg)
-                if self.midpoints_marker_pub.get_num_connections() > 0:
-                    self.midpoints_marker_pub.publish(midpoint_marker_msg)
+        self.trans = np.array([pos.x, pos.y, pos.z])
+        self.yaw = self.yaw_from_quat(msg.pose.pose.orientation)
 
     def get_cone_marker(self, pose, rgb, id, big=False):
         """Prepares a Marker for publishing
@@ -361,4 +370,13 @@ class ConeGroundTruth:
 
 if __name__ == "__main__":
     node = ConeGroundTruth()
-    rospy.spin()
+
+    frequency = rospy.rospy.get_param("~loop_rate", default=25)
+    rate = rospy.Rate(frequency)
+
+    while not rospy.is_shutdown():
+        # Spin state machine
+        node.pub_ground_truth()
+
+        # Sleep - to run a the frequency
+        rate.sleep()
