@@ -3,7 +3,7 @@
 """ Node that simulates cone locations as they would have been received
 by the team's cone detection stack. This reads a CSV file generated
 from the track files and then publishes the appropriate cone detections
-based on the location of the car.
+based on the location of the car at a certain frequency.
 
 Subscribed Topics:
     /ground_truth/state_raw (nav_msgs/Odometry)
@@ -26,6 +26,8 @@ Parameters:
         Field of view in front of the car
     ~track_path (string)
         Path to the track csv file
+    ~loop_rate (float, default: 25)
+        Frequency at which the data is published
 
 
 The MIT License
@@ -375,7 +377,7 @@ if __name__ == "__main__":
     rate = rospy.Rate(frequency)
 
     while not rospy.is_shutdown():
-        # Spin state machine
+        # Publish the most recent data
         node.pub_ground_truth()
 
         # Sleep - to run a the frequency

@@ -6,13 +6,14 @@ This is the main simulation package which contains the simulation model of the c
 Node that simulates cone locations as they would have been received
 by the team's cone detection stack. This reads a CSV file generated
 from the track files and then publishes the appropriate cone detections
-based on the location of the car.
+based on the location of the car at a certain frequency.
 
 #### Parameters
 
 - `~view_distance` (float, default: 15). Only the cones that are within this distance are published.
 - `~fov` (float, default: 1.91986). Field of view in front of the car
 - `~track_path` (string). Path to the track csv file.
+- `~loop_rate` (float, default: 25). Frequency at which the data is published
 
 #### Subscribers
 
@@ -39,11 +40,11 @@ from ground truth odometry.
 ## Launches
 
 - `acceleration.launch` - Launches a simulation of the acceleration event at competition. 50m straight track.
-- `big_track.launch` - Launches a simulation of a relatively big arteficially created track (100x100m).
+- `big_track.launch` - Launches a simulation of a relatively big artificially created track (100x100m).
 - `empty.launch` - Launches a simulation which only has the car without anything else.
 - `eufs_control.launch` - Launches the joint controller for the robot. This is also included in all other simulation launches. Without this the car can't move.
 - `skidpad.launch` - Launches a simulation of the skidpad event at competition. It's quite literally a figuire of 8.
-- `small_track.launch` - Launches a simulation of an arteficially created small track. Better run this if you don't have a good performing computing.
+- `small_track.launch` - Launches a simulation of an artificially created small track. Better run this if you don't have a good performing computing.
 - `sprint17.launch` - Launches a simulation of the 2017 FSUK sprint event. This is the biggest simulation by far and will probably wreck your computer. Also nobody has bothered so far to colour code the cones on it.
 
 ## Notes
