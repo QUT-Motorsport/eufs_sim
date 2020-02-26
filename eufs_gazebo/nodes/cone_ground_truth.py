@@ -105,6 +105,9 @@ class ConeGroundTruth:
             rospy.logdebug("The translation and yaw have not been set. Doing nothing")
             return
 
+        trans = self.trans
+        yaw = self.yaw
+
         # If no subscribers to any topics, exit
         if (self.cone_pub.get_num_connections() == 0 and
                 self.cone_marker_pub.get_num_connections() == 0 and
@@ -126,7 +129,7 @@ class ConeGroundTruth:
             marker_id = 0  # IDs are needed for the marker to work
 
             try:
-                blue_closest_cones = self.process_cones(self.blue_cones, self.yaw, self.trans)
+                blue_closest_cones = self.process_cones(self.blue_cones, yaw, trans)
                 if len(blue_closest_cones) != 0:
                     for cone in np.reshape(blue_closest_cones, (-1, 2)):
                         cone_msg.blue_cones.append(Point(cone[0], cone[1], 0))
@@ -137,7 +140,7 @@ class ConeGroundTruth:
                 rospy.logerr("Couldn't process blue cones.", e)
 
             try:
-                yellow_closest_cones = self.process_cones(self.yellow_cones, self.yaw, self.trans)
+                yellow_closest_cones = self.process_cones(self.yellow_cones, yaw, trans)
                 if len(yellow_closest_cones) != 0:
                     for cone in np.reshape(yellow_closest_cones, (-1, 2)):
                         cone_msg.yellow_cones.append(Point(cone[0], cone[1], 0))
@@ -148,7 +151,7 @@ class ConeGroundTruth:
                 rospy.logwarn("Couldn't process yellow cones.", e)
 
             try:
-                orange_closest_cones = self.process_cones(self.orange_cones, self.yaw, self.trans)
+                orange_closest_cones = self.process_cones(self.orange_cones, yaw, trans)
                 if len(orange_closest_cones) != 0:
                     for cone in np.reshape(orange_closest_cones, (-1, 2)):
                         cone_msg.orange_cones.append(Point(cone[0], cone[1], 0))
@@ -159,7 +162,7 @@ class ConeGroundTruth:
                 rospy.logwarn("Couldn't process orange cones.", e)
 
             try:
-                big_orange_closest_cones = self.process_cones(self.big_orange_cones, self.yaw, self.trans)
+                big_orange_closest_cones = self.process_cones(self.big_orange_cones, yaw, trans)
                 if len(big_orange_closest_cones) != 0:
                     for cone in np.reshape(big_orange_closest_cones, (-1, 2)):
                         cone_msg.big_orange_cones.append(Point(cone[0], cone[1], 0))
@@ -179,7 +182,7 @@ class ConeGroundTruth:
                 (self.midpoints_pub.get_num_connections() > 0 or
                  self.midpoints_marker_pub.get_num_connections() > 0)):
             try:
-                closest_midpoints = self.process_cones(self.midpoints, self.yaw, self.trans)
+                closest_midpoints = self.process_cones(self.midpoints, yaw, trans)
             except Exception as e:
                 rospy.logwarn("Couldn't process midpoints.", e)
                 return
