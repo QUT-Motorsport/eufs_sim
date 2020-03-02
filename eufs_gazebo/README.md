@@ -31,12 +31,6 @@ based on the location of the car at a certain frequency.
 - `/ground_truth/midpoints/viz` (visualization_msgs/Marker).
         Track midpoints for visualization in Rviz
 
-
-### ground_truth_republisher.py
-This takes the ground truth from the simulation as input and rotates it in correct direction of the car.
-Not used but kept here in case someone needs to publish transforms
-from ground truth odometry.
-
 ## Launches
 
 - `acceleration.launch` - Launches a simulation of the acceleration event at competition. 50m straight track.

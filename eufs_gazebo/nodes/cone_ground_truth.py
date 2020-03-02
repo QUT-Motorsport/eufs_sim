@@ -63,7 +63,7 @@ import math
 # ROS
 import tf
 import rospy
-from nav_msgs.msg import Odometry
+from eufs_msgs.msg import CarState
 from geometry_msgs.msg import Point
 from visualization_msgs.msg import Marker, MarkerArray
 from eufs_msgs.msg import ConeArray, PointArray
@@ -86,12 +86,17 @@ class ConeGroundTruth:
         self.fov = rospy.get_param("~fov", default=1.91986)  # 120 degrees
         self.CONE_FRAME = "/base_footprint"  # frame of topics to be published
 
+        # starting position to be added as an offset to the pose
+        self.x_init = rospy.get_param("~x_init", default=0.0)
+        self.y_init = rospy.get_param("~y_init", default=0.0)
+        self.yaw_init = rospy.get_param("~yaw_init", default=0.0)
+
         # Load cone locations from CSV file
         track_path = rospy.get_param("~track_path")
         self.load_csv(track_path)
 
         # Main subscriber and callback
-        self.subscriber = rospy.Subscriber("/ground_truth/state_raw", Odometry, self.odom_cb)
+        self.subscriber = rospy.Subscriber("/ground_truth/state", CarState, self.odom_cb)
 
         # Publishers
         self.cone_pub = rospy.Publisher("/ground_truth/cones", ConeArray, queue_size=1)

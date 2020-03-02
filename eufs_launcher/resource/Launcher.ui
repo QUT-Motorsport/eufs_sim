@@ -290,6 +290,27 @@
    </property>
   </widget>
 
+
+  <!--Ground truth transformr-->
+  <widget class="QCheckBox" name="GroundTruthTransform">
+  <property name="geometry">
+      <rect>
+        <x>610</x>
+        <y>115</y>
+        <width>150</width>
+        <height>30</height>
+      </rect>
+    </property>
+    <property name="text" >
+      <string>Use Ground Truth TF</string>
+    </property>
+    <property name="font">
+       <font>
+            <pointsize>7</pointsize>
+       </font>
+   </property>
+  </widget>
+
   <widget class="QLabel" name="GeneratorParametersLabel">
    <property name="geometry">
     <rect>
