@@ -106,7 +106,7 @@ class ConeGroundTruth:
 
     def pub_ground_truth(self):
         # If translations and yaw are none, exit
-        if (self.trans == None or self.yaw == None):
+        if (self.trans is None or self.yaw is None):
             rospy.logdebug("The translation and yaw have not been set. Doing nothing")
             return
 
@@ -381,7 +381,7 @@ class ConeGroundTruth:
 if __name__ == "__main__":
     node = ConeGroundTruth()
 
-    frequency = rospy.rospy.get_param("~loop_rate", default=25)
+    frequency = rospy.get_param("~loop_rate", default=25)
     rate = rospy.Rate(frequency)
 
     while not rospy.is_shutdown():
