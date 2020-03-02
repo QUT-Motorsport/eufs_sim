@@ -316,8 +316,8 @@ class ConeGroundTruth:
 
         # get translation and yaw
         pos = msg.pose.pose.position
-        self.trans = np.array([pos.x, pos.y, pos.z])
-        self.yaw = self.yaw_from_quat(msg.pose.pose.orientation)
+        self.trans = np.array([pos.x + self.x_init, pos.y + self.y_init, pos.z])
+        self.yaw = self.yaw_from_quat(msg.pose.pose.orientation) + self.yaw_init
 
     def get_cone_marker(self, pose, rgb, id, big=False):
         """Prepares a Marker for publishing
