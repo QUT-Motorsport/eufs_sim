@@ -105,6 +105,12 @@ class ConeGroundTruth:
         self.midpoints_marker_pub = rospy.Publisher("/ground_truth/midpoints/viz", Marker, queue_size=1)
 
     def pub_ground_truth(self):
+        """Function that translates the cone locations and publishes them.
+
+        Returns:
+            Nothing
+        """
+
         # If translations and yaw are none, exit
         if (self.trans is None or self.yaw is None):
             rospy.logdebug("The translation and yaw have not been set. Doing nothing")
@@ -304,8 +310,7 @@ class ConeGroundTruth:
         return yaw
 
     def odom_cb(self, msg):
-        """Callback function that translates the cone locations
-            and publishes them.
+        """Callback function that updates the stored yaw and trans of the car.
 
         Args:
             msg (nav_msgs/Odometry): subscriber message
