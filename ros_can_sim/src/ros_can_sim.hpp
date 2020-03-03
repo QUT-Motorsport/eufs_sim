@@ -93,8 +93,11 @@ private:
         AMI_AUTOCROSS = 13,
         AMI_TRACK_DRIVE = 14,
         AMI_BRAKE_TEST = 15,
-        AMI_INSPECTION = 16,
-        AMI_MANUAL = 17,
+        AMI_ADS_INSPECTION = 16,
+        AMI_ADS_EBS = 17,
+        AMI_DDT_INSPECTION_A = 18,
+        AMI_DDT_INSPECTION_B = 19,
+        AMI_MANUAL = 20
     } ami_state_type;
 
     ami_state_type ami_state_;  ///< mission status
