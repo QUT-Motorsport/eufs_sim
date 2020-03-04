@@ -51,7 +51,10 @@ class RosCanGUI(Plugin):
                          CanState.AMI_AUTOCROSS: "AUTOCROSS",
                          CanState.AMI_TRACK_DRIVE: "TRAK_DRIVE",
                          CanState.AMI_BRAKE_TEST: "BRAKE_TEST",
-                         CanState.AMI_INSPECTION: "INSPECTION",
+                         CanState.AMI_ADS_INSPECTION: "ADS_INSPECTION",
+                         CanState.AMI_ADS_EBS: "ADS_EBS",
+                         CanState.AMI_DDT_INSPECTION_A: "DDT_INSPECTION_A",
+                         CanState.AMI_DDT_INSPECTION_B: "DDT_INSPECTION_B",
                          CanState.AMI_MANUAL: "MANUAL"}
 
         for mission in self.missions.values():
