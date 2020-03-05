@@ -149,7 +149,7 @@ class EKFEvaluator(object):
         self.out.publish(self.out_msg)
 
     def compare(self, vec1, vec2):
-        return [math.sqrt(v1**2 + v2**2) for v1, v2 in zip(vec1, vec2)]
+        return [math.sqrt((v1 - v2)**2) for v1, v2 in zip(vec1, vec2)]
         
     def ground_truth_receiver(self, msg):
         """Receives ground truth from the simulation"""
