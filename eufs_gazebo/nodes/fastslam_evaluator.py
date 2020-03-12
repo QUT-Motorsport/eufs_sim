@@ -133,6 +133,13 @@ class SLAMEval(object):
     def compare(self, vec1, vec2):
         return [math.sqrt((v1 - v2) ** 2) for v1, v2 in zip(vec1, vec2)]
 
+    """
+    Compares the estimated map by doing the following:
+        1. Creates an image of the ground-truth track and the estimated map.
+        2. Count the number of pixels which are set in both maps. Count the number of pixels which
+           are set in either the ground truth map or the estimated map.
+        3. Divide the first result in 2 by the second result in 2. (also known as intersection over union)
+    """
     def compare_cones(self, cones1, cones2):
         max_x, min_x, max_y, min_y = self.get_max_min(cones1["blue_cones"],
                                                       cones2["blue_cones"] + cones2["yellow_cones"])
@@ -164,6 +171,9 @@ class SLAMEval(object):
             self.got_truth_map = True
             self.ground_truth_map = msg
 
+    """
+    Returns the maximum and minimum values of x and y.
+    """
     def get_max_min(self, cones1, cones2):
         max_x, max_y = -math.inf, -math.inf
         min_x, min_y = math.inf, math.inf
@@ -178,6 +188,9 @@ class SLAMEval(object):
                 max_y = cone.y
         return max_x, min_x, max_y, min_y
 
+    """
+    Rescales coordinates to lie in between our map image.
+    """
     def rescale(self, cones, max_x, min_x, max_y, min_y):
         res = np.array(
             [[(point.y - min_y) / (max_y - min_y) * self.map_shape[0],
@@ -185,6 +198,9 @@ class SLAMEval(object):
              for point in cones])
         return res
 
+    """
+    Orders cones according to the distance to the previous cone in our new ordered_cones array.
+    """
     def order_cones(self, cones):
         ordered_cones = np.zeros(cones.shape)
         ordered_cones[0] = cones[0]
@@ -202,7 +218,7 @@ class SLAMEval(object):
 
     def draw_map(self, cones):
         new_map = np.zeros(self.map_shape + (3,), "uint8")
-        rr, cc = polygon(cones[:, 0], cones[:, 1], new_map.shape)
+        rr, cc = polygon(cones[:, 0], cones[:, 1], new_map.shape) # rr, cc = row coordinates, column coordinates
         new_map[rr, cc] = 255
         return new_map
 
