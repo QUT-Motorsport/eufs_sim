@@ -98,6 +98,16 @@ class SLAMEval(object):
             self.got_slam_map = True
             self.slam_map = msg
 
+    def ground_truth_receiver(self, msg):
+        """Receives ground truth from the simulation"""
+
+        if str(msg._type) == "eufs_msgs/CarState":
+            self.got_truth_pose = True
+            self.ground_truth_pose = msg.pose.pose
+        elif str(msg._type) == "eufs_msgs/ConeArray":
+            self.got_truth_map = True
+            self.ground_truth_map = msg
+
     def evaluate(self):
         """Does the actual evaluation of SLAM, called at a consistent rate"""
         if not (self.got_slam_map and self.got_slam_pose):
@@ -109,8 +119,20 @@ class SLAMEval(object):
         # We are comparing the ground truth pose with the estimated pose of FastSLAM and the ground truth cones with
         # the estimated cones from SLAM
 
-        true_pose_data = [self.ground_truth_pose.position, self.ground_truth_pose.orientation]
-        slam_pose_data = [self.slam_pose.position, self.slam_pose.position]
+        true_pose_data = [self.ground_truth_pose.position.x,
+                          self.ground_truth_pose.position.y,
+                          self.ground_truth_pose.position.z,
+                          self.ground_truth_pose.orientation.x,
+                          self.ground_truth_pose.orientation.y,
+                          self.ground_truth_pose.orientation.z,
+                          self.ground_truth_pose.orientation.w]
+        slam_pose_data = [self.slam_pose.position.x,
+                          self.slam_pose.position.y,
+                          self.slam_pose.position.z,
+                          self.slam_pose.orientation.x,
+                          self.slam_pose.orientation.y,
+                          self.slam_pose.orientation.z,
+                          self.slam_pose.orientation.w]
 
         true_cones = {"blue_cones": self.ground_truth_map.blue_cones,
                       "yellow_cones": self.ground_truth_map.yellow_cones,
@@ -161,22 +183,12 @@ class SLAMEval(object):
         union = est_map | correct_map
         return np.sum(intersection, dtype=np.float64) / np.sum(union, dtype=np.float64)
 
-    def ground_truth_receiver(self, msg):
-        """Receives ground truth from the simulation"""
-
-        if str(msg._type) == "eufs_msgs/CarState":
-            self.got_truth_pose = True
-            self.ground_truth_pose = msg.pose
-        elif str(msg._type) == "eufs_msgs/ConeArray":
-            self.got_truth_map = True
-            self.ground_truth_map = msg
-
     """
     Returns the maximum and minimum values of x and y.
     """
     def get_max_min(self, cones1, cones2):
-        max_x, max_y = -math.inf, -math.inf
-        min_x, min_y = math.inf, math.inf
+        max_x, max_y = -np.inf, -np.inf
+        min_x, min_y = np.inf, np.inf
         for cone in cones1 + cones2:
             if cone.x < min_x:
                 min_x = cone.x
@@ -206,7 +218,7 @@ class SLAMEval(object):
         ordered_cones[0] = cones[0]
         included_idxs = {0}
         for i in range(1, len(cones)):
-            closest_dist = math.inf
+            closest_dist = np.inf
             closest_idx = i
             for j in range(len(cones)):
                 if j not in included_idxs and np.linalg.norm(ordered_cones[i - 1] - cones[j]) < closest_dist:
