@@ -24,6 +24,8 @@ It publishes a message:
 
 import math
 import rospy
+import numpy as np
+from skimage.draw import polygon
 from std_msgs.msg import Float64MultiArray, MultiArrayLayout
 from geometry_msgs.msg import Pose
 from eufs_msgs.msg import ConeArray, CarState
@@ -54,7 +56,6 @@ class SLAMEval(object):
         self.ground_truth_pose = Pose()
         self.ground_truth_map = ConeArray()
 
-
         # The output message
         self.out_msg = Float64MultiArray()
         self.out_msg.layout = MultiArrayLayout()
@@ -79,12 +80,14 @@ class SLAMEval(object):
             ConeArray,
             self.slam_receiver
         )
-        self.imu_sub = rospy.Subscriber("/ground_truth/cones", ConeArray, self.ground_truth_receiver)
-        self.gps_sub = rospy.Subscriber(
+        self.map_sub = rospy.Subscriber("/ground_truth/cones", ConeArray, self.ground_truth_receiver)
+        self.pose_sub = rospy.Subscriber(
             "/ground_truth/state",
             CarState,
             self.ground_truth_receiver
         )
+
+        self.map_shape = (1000, 1000)
 
     def slam_receiver(self, msg):
         """Receives the ekf outputs"""
@@ -121,18 +124,35 @@ class SLAMEval(object):
                       "big_orange_cones": self.slam_map.big_orange_cones,
                       "unknown_color_cones": self.slam_map.unknown_color_cones}
 
-
-        compared_poses = self.compare(true_pose_data, slam_pose_data)
-        compared_maps = self.compare_cones(true_cones, slam_cones)
-        self.out_msg.data = compared_poses + compared_maps
+        pose_err = self.compare(true_pose_data, slam_pose_data)
+        map_err = self.compare_cones(true_cones, slam_cones)
+        self.out_msg.data = pose_err + map_err
 
         self.out.publish(self.out_msg)
 
     def compare(self, vec1, vec2):
-        return [math.sqrt((v1 - v2)**2) for v1, v2 in zip(vec1, vec2)]
+        return [math.sqrt((v1 - v2) ** 2) for v1, v2 in zip(vec1, vec2)]
 
     def compare_cones(self, cones1, cones2):
-
+        max_x, min_x, max_y, min_y = self.get_max_min(cones1["blue_cones"],
+                                                      cones2["blue_cones"] + cones2["yellow_cones"])
+        true_blue = self.rescale(cones1["blue_cones"], max_x, min_x, max_y, min_y)
+        true_yellow = self.rescale(cones1["yellow_cones"], max_x, min_x, max_y, min_y)
+        est_blue = self.rescale(cones2["blue_cones"], max_x, min_x, max_y, min_y)
+        est_yellow = self.rescale(cones2["yellow_cones"], max_x, min_x, max_y, min_y)
+        true_blue = self.order_cones(true_blue)
+        true_yellow = self.order_cones(true_yellow)
+        est_blue = self.order_cones(est_blue)
+        est_yellow = self.order_cones(est_yellow)
+        true_in_circle = self.draw_map(true_yellow)
+        true_out_circle = self.draw_map(true_blue)
+        est_in_circle = self.draw_map(est_yellow)
+        est_out_circle = self.draw_map(est_blue)
+        correct_map = true_in_circle ^ true_out_circle
+        est_map = est_in_circle ^ est_out_circle
+        intersection = correct_map & est_map
+        union = est_map | correct_map
+        return np.sum(intersection, dtype=np.float64) / np.sum(union, dtype=np.float64)
 
     def ground_truth_receiver(self, msg):
         """Receives ground truth from the simulation"""
@@ -143,6 +163,48 @@ class SLAMEval(object):
         elif str(msg._type) == "eufs_msgs/ConeArray":
             self.got_truth_map = True
             self.ground_truth_map = msg
+
+    def get_max_min(self, cones1, cones2):
+        max_x, max_y = -math.inf, -math.inf
+        min_x, min_y = math.inf, math.inf
+        for cone in cones1 + cones2:
+            if cone.x < min_x:
+                min_x = cone.x
+            elif cone.x > max_x:
+                max_x = cone.x
+            if cone.y < min_y:
+                min_y = cone.y
+            elif cone.y > max_y:
+                max_y = cone.y
+        return max_x, min_x, max_y, min_y
+
+    def rescale(self, cones, max_x, min_x, max_y, min_y):
+        res = np.array(
+            [[(point.y - min_y) / (max_y - min_y) * self.map_shape[0],
+              (point.x - min_x) / (max_x - min_x) * self.map_shape[1]]
+             for point in cones])
+        return res
+
+    def order_cones(self, cones):
+        ordered_cones = np.zeros(cones.shape)
+        ordered_cones[0] = cones[0]
+        included_idxs = {0}
+        for i in range(1, len(cones)):
+            closest_dist = math.inf
+            closest_idx = i
+            for j in range(len(cones)):
+                if j not in included_idxs and np.linalg.norm(ordered_cones[i - 1] - cones[j]) < closest_dist:
+                    closest_idx = j
+                    closest_dist = np.linalg.norm(ordered_cones[i - 1] - cones[j])
+            ordered_cones[i] = cones[closest_idx]
+            included_idxs.add(closest_idx)
+        return cones
+
+    def draw_map(self, cones):
+        new_map = np.zeros(self.shape + (3,), "uint8")
+        rr, cc = polygon(cones[:, 0], cones[:, 1], new_map.shape)
+        new_map[rr, cc] = 255
+        return new_map
 
 
 if __name__ == "__main__":
