@@ -55,8 +55,8 @@ class EufsLauncher(Plugin):
                                     help="Put plugin in silent mode")
                 args, unknowns = parser.parse_known_args(context.argv())
                 if not args.quiet:
-                        print 'arguments: ', args
-                        print 'unknowns: ', unknowns
+                        print('arguments: ', args)
+                        print('unknowns: ', unknowns)
 
                 # Load in eufs_launcher parameters
                 # yaml_to_load is a special variable that is set by `eufs_launcher.py`

@@ -25,7 +25,15 @@ eufs_launcher:
         wheel_odometry:
             package: "wheel_odometry"
             location: "launch/wheel_odometry.launch"
-       
+
+        ekf_evaluator:
+            package: "eufs_gazebo"
+            location: "launch/ekf_evaluator.launch"
+
+        slam_evaluator:
+            package: "eufs_gazebo"
+            location: "launch/fastslam_evaluator.launch"
+
     # Checkboxes to have in the config section.  
     # `eufs_launcher` handles layout based on priority set.
     checkboxes:
@@ -64,22 +72,6 @@ eufs_launcher:
             parameter_triggering:
                 if_on: {"publish_gt_tf:=true"}
                 if_off: {"publish_gt_tf:=false"}
-            
-        ekf:
-            priority: 5
-            name: "EKF_Checkbox"
-            label: "EKF Testing"
-            package: "eufs_gazebo"
-            location: "launch/ekf_evaluator.launch"
-            checked_on_default: Yes
-
-        fastslam:
-            # Not implemented yet
-            priority: 6
-            name: "FastSLAM_Checkbox"
-            label: "FastSLAM Testing"
-            checked_on_default: Yes
-
 
 
     # Some nodes fail to shutdown
