@@ -201,7 +201,7 @@ class SLAMEval(object):
         return cones
 
     def draw_map(self, cones):
-        new_map = np.zeros(self.shape + (3,), "uint8")
+        new_map = np.zeros(self.map_shape + (3,), "uint8")
         rr, cc = polygon(cones[:, 0], cones[:, 1], new_map.shape)
         new_map[rr, cc] = 255
         return new_map
