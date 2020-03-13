@@ -38,4 +38,8 @@
     </plugin>
   </gazebo>
 
+  <gazebo>
+    <plugin name="cone_ground_truth" filename="libgazebo_cone_ground_truth.so"/>
+  </gazebo>
+
 </robot>
