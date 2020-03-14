@@ -50,6 +50,7 @@
 #include <ros/ros.h>
 
 #include <eufs_msgs/ConeArray.h>
+#include <eufs_msgs/PointArray.h>
 #include <eufs_msgs/CarState.h>
 #include <geometry_msgs/Point.h>
 #include <visualization_msgs/Marker.h>
@@ -68,35 +69,77 @@ namespace gazebo {
 
     GazeboConeGroundTruth();
 
+    // Gazebo plugin functions
+
     void Load(physics::ModelPtr _parent, sdf::ElementPtr _sdf);
 
     void UpdateChild();
 
-    void addConeToConeArray(eufs_msgs::ConeArray &cone_array, physics::LinkPtr link);
+    // Getting the cone arrays
+    eufs_msgs::ConeArray getConeArrayMessage();
 
-    std::vector <geometry_msgs::Point> processCones(std::vector <geometry_msgs::Point> points);
+    void addConeToConeArray(eufs_msgs::ConeArray &ground_truth_cone_array, physics::LinkPtr link);
+
+    void processCones(std::vector <geometry_msgs::Point> &points);
 
     GazeboConeGroundTruth::ConeType getConeType(physics::LinkPtr link);
 
+    // Getting the cone marker array
+    visualization_msgs::MarkerArray getConeMarkerArrayMessage(eufs_msgs::ConeArray &cone_array_message);
 
+    int addConeMarkers(std::vector <visualization_msgs::Marker> &marker_array, int marker_id,
+                       std::vector <geometry_msgs::Point> cones, float red, float green, float blue, bool big);
+
+    // Add noise to the cone arrays
+    eufs_msgs::ConeArray getConeArrayMessageWithNoise(eufs_msgs::ConeArray &ground_truth_cone_array_message, ignition::math::Vector3d noise);
+
+    void addNoiseToConeArray(std::vector<geometry_msgs::Point> &cone_array, ignition::math::Vector3d noise);
+
+    double GaussianKernel(double mu, double sigma);
+
+      // Helper function for parameters
+    bool getBoolParameter(sdf::ElementPtr _sdf, const char* element, bool default_value, const char* default_description);
+    double getDoubleParameter(sdf::ElementPtr _sdf, const char* element, double default_value, const char* default_description);
+    std::string getStringParameter(sdf::ElementPtr _sdf, const char* element, std::string default_value, const char* default_description);
+    ignition::math::Vector3d getVector3dParameter(sdf::ElementPtr _sdf, const char* element, ignition::math::Vector3d default_value, const char* default_description);
+
+    // Publishers
+    ros::Publisher ground_truth_cone_pub_;
+    ros::Publisher ground_truth_cone_marker_pub_;
+
+    ros::Publisher camera_cone_pub_;
+    ros::Publisher camera_cone_marker_pub_;
+
+    ros::Publisher lidar_cone_pub_;
+    ros::Publisher lidar_cone_marker_pub_;
+
+    // Gazebo variables
     physics::ModelPtr track_model;
-    eufs_msgs::ConeArray cone_array_message;
-
     physics::LinkPtr car_link;
     ignition::math::Pose3d car_pos;
 
-    float view_distance;
-    float fov;
+    // Parameters
 
+    double view_distance;
+    double fov;
+
+    double update_rate_;
+    ros::Time time_last_published;
+
+    std::string cone_frame_;
+
+    bool simulate_camera_;
+    bool simulate_lidar_;
+
+    ignition::math::Vector3d camera_noise_;
+    ignition::math::Vector3d lidar_noise_;
+
+    // Required ROS gazebo plugin variables
     event::ConnectionPtr update_connection_;
 
     ros::NodeHandle *rosnode_;
 
-    ros::Publisher cone_pub_;
-    ros::Publisher cone_marker_pub_;
-
-    int addConeMarkers(std::vector <visualization_msgs::Marker> &marker_array, int marker_id,
-                       std::vector <geometry_msgs::Point> cones, float red, float green, float blue, bool big);
+    unsigned int seed;
 
   };
 }
