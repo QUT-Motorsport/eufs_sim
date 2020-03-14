@@ -164,7 +164,7 @@ namespace gazebo {
       ground_truth_cone_array_message = getConeArrayMessage();
     }
 
-    // TODO: Publish midpoints
+    // TODO: Publish midpoints (look at eufs_gazebo/tracks/track_gen.py, generate_midpoints)
 
     if (this->simulate_camera_ && (this->camera_cone_pub_.getNumSubscribers() > 0 || this->camera_cone_marker_pub_.getNumSubscribers() > 0)) {
       eufs_msgs::ConeArray camera_cone_array_message = getConeArrayMessageWithNoise(ground_truth_cone_array_message, camera_noise_);
