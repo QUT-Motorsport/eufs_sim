@@ -47,14 +47,10 @@
       <coneFrame>base_footprint</coneFrame>
       <groundTruthConesTopicName>/ground_truth/cones</groundTruthConesTopicName>
       <groundTruthConeMarkersTopicName>/ground_truth/cones/viz</groundTruthConeMarkersTopicName>
-      <simulateCamera>true</simulateCamera>
-      <cameraConesTopicName>/darknet_ros/cones</cameraConesTopicName>
-      <cameraConeMarkersTopicName>/darknet_ros/cones/viz</cameraConeMarkersTopicName>
-      <simulateLidar>true</simulateLidar>
-      <lidarConesTopicName>/lidar/cones</lidarConesTopicName>
-      <lidarConeMarkersTopicName>/lidar/cones/viz</lidarConeMarkersTopicName>
-      <cameraNoise>0.2 0.2 0.0</cameraNoise>
-      <lidarNoise>0.2 0.2 0.0</lidarNoise>
+      <simulatePerception>true</simulatePerception>
+      <perceptionConesTopicName>/fusion/cones</perceptionConesTopicName>
+      <perceptionConeMarkersTopicName>/fusion/cones/viz</perceptionConeMarkersTopicName>
+      <perceptionNoise>0.2 0.2 0.0</perceptionNoise>
     </plugin>
   </gazebo>
 

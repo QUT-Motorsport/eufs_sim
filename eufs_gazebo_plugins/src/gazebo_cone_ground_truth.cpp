@@ -56,18 +56,15 @@ namespace gazebo {
 
     this->cone_frame_ = getStringParameter(_sdf, "coneFrame", "base_footprint", "base_footprint");
 
-    this->simulate_camera_ = getBoolParameter(_sdf, "simulateCamera", false, "false");
-    this->simulate_lidar_ = getBoolParameter(_sdf, "simulateLidar", false, "false");
+    this->simulate_perception_ = getBoolParameter(_sdf, "simulatePerception", false, "false");
 
-    this->camera_noise_ = getVector3dParameter(_sdf, "cameraNoise", {0.0, 0.0, 0.0}, "0.0, 0.0, 0.0 (no noise)");
-    this->lidar_noise_ = getVector3dParameter(_sdf, "lidarNoise", {0.0, 0.0, 0.0}, "0.0, 0.0, 0.0 (no noise)");
+    this->perception_noise_ = getVector3dParameter(_sdf, "perceptionNoise", {0.0, 0.0, 0.0}, "0.0, 0.0, 0.0 (no noise)");
 
     this->rosnode_ = new ros::NodeHandle("");
 
     // Setup the publishers
 
     // Ground truth cone publisher
-    std::string ground_truth_cone_topic_name_;
     if (!_sdf->HasElement("groundTruthConesTopicName")) {
       ROS_FATAL_NAMED("state_ground_truth", "state_ground_truth plugin missing <groundTruthConesTopicName>, cannot proceed");
       return;
@@ -77,7 +74,6 @@ namespace gazebo {
     }
 
     // Ground truth cone marker publisher
-    std::string ground_truth_cone_marker_topic_name_;
     if (!_sdf->HasElement("groundTruthConeMarkersTopicName")) {
       ROS_FATAL_NAMED("state_ground_truth", "state_ground_truth plugin missing <groundTruthConeMarkersTopicName>, cannot proceed");
       return;
@@ -86,51 +82,25 @@ namespace gazebo {
       this->ground_truth_cone_marker_pub_ = this->rosnode_->advertise<visualization_msgs::MarkerArray>(topic_name_, 1);
     }
 
-    if (simulate_camera_) {
+    if (simulate_perception_) {
       // Camera cone publisher
-      std::string ground_truth_cone_topic_name_;
-      if (!_sdf->HasElement("cameraConesTopicName")) {
+      if (!_sdf->HasElement("perceptionConesTopicName")) {
         ROS_FATAL_NAMED("state_ground_truth",
-                        "state_ground_truth plugin missing <cameraConesTopicName>, cannot proceed");
+                        "state_ground_truth plugin missing <perceptionConesTopicName>, cannot proceed");
         return;
       } else {
-        std::string topic_name_ = _sdf->GetElement("cameraConesTopicName")->Get<std::string>();
-        this->camera_cone_pub_ = this->rosnode_->advertise<eufs_msgs::ConeArray>(topic_name_, 1);
+        std::string topic_name_ = _sdf->GetElement("perceptionConesTopicName")->Get<std::string>();
+        this->perception_cone_pub_ = this->rosnode_->advertise<eufs_msgs::ConeArray>(topic_name_, 1);
       }
 
       // Camera cone marker publisher
-      std::string ground_truth_cone_marker_topic_name_;
-      if (!_sdf->HasElement("cameraConeMarkersTopicName")) {
+      if (!_sdf->HasElement("perceptionConeMarkersTopicName")) {
         ROS_FATAL_NAMED("state_ground_truth",
-                        "state_ground_truth plugin missing <cameraConeMarkersTopicName>, cannot proceed");
+                        "state_ground_truth plugin missing <perceptionConeMarkersTopicName>, cannot proceed");
         return;
       } else {
-        std::string topic_name_ = _sdf->GetElement("cameraConeMarkersTopicName")->Get<std::string>();
-        this->camera_cone_marker_pub_ = this->rosnode_->advertise<visualization_msgs::MarkerArray>(topic_name_, 1);
-      }
-    }
-
-    if (simulate_lidar_) {
-      // Lidar cone publisher
-      std::string ground_truth_cone_topic_name_;
-      if (!_sdf->HasElement("lidarConesTopicName")) {
-        ROS_FATAL_NAMED("state_ground_truth",
-                        "state_ground_truth plugin missing <lidarConesTopicName>, cannot proceed");
-        return;
-      } else {
-        std::string topic_name_ = _sdf->GetElement("lidarConesTopicName")->Get<std::string>();
-        this->lidar_cone_pub_ = this->rosnode_->advertise<eufs_msgs::ConeArray>(topic_name_, 1);
-      }
-
-      // Lidar cone marker publisher
-      std::string ground_truth_cone_marker_topic_name_;
-      if (!_sdf->HasElement("lidarConeMarkersTopicName")) {
-        ROS_FATAL_NAMED("state_ground_truth",
-                        "state_ground_truth plugin missing <lidarConeMarkersTopicName>, cannot proceed");
-        return;
-      } else {
-        std::string topic_name_ = _sdf->GetElement("lidarConeMarkersTopicName")->Get<std::string>();
-        this->lidar_cone_marker_pub_ = this->rosnode_->advertise<visualization_msgs::MarkerArray>(topic_name_, 1);
+        std::string topic_name_ = _sdf->GetElement("perceptionConeMarkersTopicName")->Get<std::string>();
+        this->perception_cone_marker_pub_ = this->rosnode_->advertise<visualization_msgs::MarkerArray>(topic_name_, 1);
       }
     }
 
@@ -143,8 +113,7 @@ namespace gazebo {
     }
 
     if (this->ground_truth_cone_pub_.getNumSubscribers() == 0 && this->ground_truth_cone_marker_pub_.getNumSubscribers() == 0
-        && this->camera_cone_pub_.getNumSubscribers() == 0 && this->camera_cone_marker_pub_.getNumSubscribers() == 0
-        && this->lidar_cone_pub_.getNumSubscribers() == 0 && this->lidar_cone_marker_pub_.getNumSubscribers() == 0) {
+        && this->perception_cone_pub_.getNumSubscribers() == 0 && this->perception_cone_marker_pub_.getNumSubscribers() == 0) {
       ROS_DEBUG_NAMED("cone_ground_truth", "Nobody is listening to cone_ground_truth. Doing nothing");
       return;
     }
@@ -159,32 +128,22 @@ namespace gazebo {
 
       this->ground_truth_cone_pub_.publish(ground_truth_cone_array_message);
       this->ground_truth_cone_marker_pub_.publish(ground_truth_cone_marker_array_message);
-    } else if ((this->simulate_camera_ && (this->camera_cone_pub_.getNumSubscribers() > 0 || this->camera_cone_marker_pub_.getNumSubscribers() > 0))
-                || (this->simulate_lidar_ && (this->lidar_cone_pub_.getNumSubscribers() > 0 || this->lidar_cone_marker_pub_.getNumSubscribers() > 0))) {
+    } else if (this->simulate_perception_ && (this->perception_cone_pub_.getNumSubscribers() > 0 || this->perception_cone_marker_pub_.getNumSubscribers() > 0)) {
       ground_truth_cone_array_message = getConeArrayMessage();
     }
 
     // TODO: Publish midpoints (look at eufs_gazebo/tracks/track_gen.py, generate_midpoints)
 
-    if (this->simulate_camera_ && (this->camera_cone_pub_.getNumSubscribers() > 0 || this->camera_cone_marker_pub_.getNumSubscribers() > 0)) {
-      eufs_msgs::ConeArray camera_cone_array_message = getConeArrayMessageWithNoise(ground_truth_cone_array_message, camera_noise_);
-      visualization_msgs::MarkerArray camera_cone_marker_array_message = getConeMarkerArrayMessage(camera_cone_array_message);
+    if (this->simulate_perception_ && (this->perception_cone_pub_.getNumSubscribers() > 0 || this->perception_cone_marker_pub_.getNumSubscribers() > 0)) {
+      eufs_msgs::ConeArray perception_cone_array_message = getConeArrayMessageWithNoise(ground_truth_cone_array_message, perception_noise_);
+      visualization_msgs::MarkerArray perception_cone_marker_array_message = getConeMarkerArrayMessage(perception_cone_array_message);
 
-      this->camera_cone_pub_.publish(camera_cone_array_message);
-      this->camera_cone_marker_pub_.publish(camera_cone_marker_array_message);
-    }
-
-    if (this->simulate_lidar_ && (this->lidar_cone_pub_.getNumSubscribers() > 0 || this->lidar_cone_marker_pub_.getNumSubscribers() > 0)) {
-      eufs_msgs::ConeArray lidar_cone_array_message = getConeArrayMessageWithNoise(ground_truth_cone_array_message, lidar_noise_);
-      visualization_msgs::MarkerArray lidar_cone_marker_array_message = getConeMarkerArrayMessage(lidar_cone_array_message);
-
-      this->lidar_cone_pub_.publish(lidar_cone_array_message);
-      this->lidar_cone_marker_pub_.publish(lidar_cone_marker_array_message);
+      this->perception_cone_pub_.publish(perception_cone_array_message);
+      this->perception_cone_marker_pub_.publish(perception_cone_marker_array_message);
     }
 
     this->time_last_published = ros::Time::now();
   }
-
 
   // Getting the cone arrays
   eufs_msgs::ConeArray GazeboConeGroundTruth::getConeArrayMessage() {

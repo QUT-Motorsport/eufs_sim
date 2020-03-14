@@ -107,11 +107,8 @@ namespace gazebo {
     ros::Publisher ground_truth_cone_pub_;
     ros::Publisher ground_truth_cone_marker_pub_;
 
-    ros::Publisher camera_cone_pub_;
-    ros::Publisher camera_cone_marker_pub_;
-
-    ros::Publisher lidar_cone_pub_;
-    ros::Publisher lidar_cone_marker_pub_;
+    ros::Publisher perception_cone_pub_;
+    ros::Publisher perception_cone_marker_pub_;
 
     // Gazebo variables
     physics::ModelPtr track_model;
@@ -128,11 +125,9 @@ namespace gazebo {
 
     std::string cone_frame_;
 
-    bool simulate_camera_;
-    bool simulate_lidar_;
+    bool simulate_perception_;
 
-    ignition::math::Vector3d camera_noise_;
-    ignition::math::Vector3d lidar_noise_;
+    ignition::math::Vector3d perception_noise_;
 
     // Required ROS gazebo plugin variables
     event::ConnectionPtr update_connection_;
