@@ -1,6 +1,7 @@
 <?xml version="1.0"?>
 <robot xmlns:xacro="http://www.ros.org/wiki/xacro">
   <xacro:arg name="publish_tf" default="false"/>
+  <xacro:arg name="simulate_perception" default="false"/>
 
   <!-- ROS control plugin which controls all actuators in the simulation
   This effectively looks in the namespace of the robot, finds the controller
@@ -47,7 +48,7 @@
       <coneFrame>base_footprint</coneFrame>
       <groundTruthConesTopicName>/ground_truth/cones</groundTruthConesTopicName>
       <groundTruthConeMarkersTopicName>/ground_truth/cones/viz</groundTruthConeMarkersTopicName>
-      <simulatePerception>true</simulatePerception>
+      <simulatePerception>$(arg simulate_perception)</simulatePerception>
       <perceptionConesTopicName>/fusion/cones</perceptionConesTopicName>
       <perceptionConeMarkersTopicName>/fusion/cones/viz</perceptionConeMarkersTopicName>
       <perceptionNoise>0.2 0.2 0.0</perceptionNoise>
