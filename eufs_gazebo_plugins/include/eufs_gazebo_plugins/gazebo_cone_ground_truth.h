@@ -27,9 +27,8 @@
  * @copyright 2020 Edinburgh University Formula Student (EUFS)
  * @brief ground truth cone Gazebo plugin
  *
- * @details TODO:
- * Provides ground truth state in simulation in the form of nav_msgs/Odometry and
- * eufs_msgs/CarState. Additionally can publish transform.P
+ * @details Provides ground truth cones in simulation in the form of `eufs_msgs/ConeArray`.
+ * Can also simulate the perception stack by publishing cones with noise.
  **/
 
 

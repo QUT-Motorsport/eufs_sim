@@ -42,7 +42,7 @@
   <gazebo>
     <plugin name="cone_ground_truth" filename="libgazebo_cone_ground_truth.so">
       <alwaysOn>true</alwaysOn>
-      <updateRate>15.0</updateRate>
+      <updateRate>25.0</updateRate>
       <viewDistance>15</viewDistance>
       <fov>1.91986</fov>
       <coneFrame>base_footprint</coneFrame>

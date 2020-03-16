@@ -27,9 +27,8 @@
  * @copyright 2020 Edinburgh University Formula Student (EUFS)
  * @brief ground truth cone Gazebo plugin
  *
- * @details TODO:
- * Provides ground truth state in simulation in the form of nav_msgs/Odometry and
- * eufs_msgs/CarState. Additionally can publish transform.P
+ * @details Provides ground truth cones in simulation in the form of `eufs_msgs/ConeArray`.
+ * Can also simulate the perception stack by publishing cones with noise.
  **/
 
 #include "../include/eufs_gazebo_plugins/gazebo_cone_ground_truth.h"
@@ -108,10 +107,15 @@ namespace gazebo {
   }
 
   void GazeboConeGroundTruth::UpdateChild() {
-    if (ros::Time::now().toSec() - time_last_published.toSec() < (1.0 / 25.0)) {
+    // Check if it is time to pubilsh new data
+    if (ros::Time::now().toSec() - time_last_published.toSec() < (1.0 / this->update_rate_)) {
       return;
     }
 
+    // Update the time (This is here so that the time to publish all the messages does not affect the update rate)
+    this->time_last_published = ros::Time::now();
+
+    // Check if there is a reason to publish the data
     if (this->ground_truth_cone_pub_.getNumSubscribers() == 0 && this->ground_truth_cone_marker_pub_.getNumSubscribers() == 0
         && this->perception_cone_pub_.getNumSubscribers() == 0 && this->perception_cone_marker_pub_.getNumSubscribers() == 0) {
       ROS_DEBUG_NAMED("cone_ground_truth", "Nobody is listening to cone_ground_truth. Doing nothing");
@@ -122,6 +126,7 @@ namespace gazebo {
 
     eufs_msgs::ConeArray ground_truth_cone_array_message;
 
+    // Publish the ground truth if it has subscribers
     if (this->ground_truth_cone_pub_.getNumSubscribers() > 0 || this->ground_truth_cone_marker_pub_.getNumSubscribers() > 0) {
       ground_truth_cone_array_message = getConeArrayMessage();
       visualization_msgs::MarkerArray ground_truth_cone_marker_array_message = getConeMarkerArrayMessage(ground_truth_cone_array_message);
@@ -132,8 +137,7 @@ namespace gazebo {
       ground_truth_cone_array_message = getConeArrayMessage();
     }
 
-    // TODO: Publish midpoints (look at eufs_gazebo/tracks/track_gen.py, generate_midpoints)
-
+    // Publish the simulated perception cones if it has subscribers
     if (this->simulate_perception_ && (this->perception_cone_pub_.getNumSubscribers() > 0 || this->perception_cone_marker_pub_.getNumSubscribers() > 0)) {
       eufs_msgs::ConeArray perception_cone_array_message = getConeArrayMessageWithNoise(ground_truth_cone_array_message, perception_noise_);
       visualization_msgs::MarkerArray perception_cone_marker_array_message = getConeMarkerArrayMessage(perception_cone_array_message);
@@ -141,11 +145,10 @@ namespace gazebo {
       this->perception_cone_pub_.publish(perception_cone_array_message);
       this->perception_cone_marker_pub_.publish(perception_cone_marker_array_message);
     }
-
-    this->time_last_published = ros::Time::now();
   }
 
   // Getting the cone arrays
+
   eufs_msgs::ConeArray GazeboConeGroundTruth::getConeArrayMessage() {
     eufs_msgs::ConeArray ground_truth_cone_array_message;
 
@@ -198,15 +201,18 @@ namespace gazebo {
       float x = points[i].x - this->car_pos.Pos().X();
       float y = points[i].y - this->car_pos.Pos().Y();
 
+      // If the cone is withing viewing distance
       if ((x * x) + (y * y) < (view_distance * view_distance)) {
-        // Rotate the points using the yaw of the car
-        float yaw = this->car_pos.Rot().Yaw() * (-1);
+        float yaw = this->car_pos.Rot().Yaw();
 
-        points[i].x = (cos(yaw) * x) - (sin(yaw) * y);
-        points[i].y = (sin(yaw) * x) + (cos(yaw) * y);
+        // Rotate the points using the yaw of the car (x and y are the other way around)
+        points[i].y = (cos(yaw) * y) - (sin(yaw) * x);
+        points[i].x = (sin(yaw) * y) + (cos(yaw) * x);
 
+        // Angle between the direction of the car and the cone
         float angle = atan2(points[i].y, points[i].x);
 
+        // If the cone is inside the field of view
         if (abs(angle) < (this->fov / 2)) {
           points_in_view.push_back(points[i]);
         }
@@ -235,8 +241,8 @@ namespace gazebo {
     ROS_ERROR("Unknown link in model: %s", link_name.c_str());
   }
 
-
   // Getting the cone marker array
+
   visualization_msgs::MarkerArray GazeboConeGroundTruth::getConeMarkerArrayMessage(eufs_msgs::ConeArray &ground_truth_cone_array_message) {
     visualization_msgs::MarkerArray ground_truth_cone_marker_array;
 
