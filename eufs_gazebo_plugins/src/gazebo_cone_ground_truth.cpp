@@ -44,7 +44,6 @@ namespace gazebo {
   // Gazebo plugin functions
 
   void GazeboConeGroundTruth::Load(physics::ModelPtr _parent, sdf::ElementPtr _sdf) {
-    // TODO(Niklas): This needs to be different for different gazebo versions
     this->track_model = _parent->GetWorld()->ModelByName("track");
     this->car_link = _parent->GetLink("base_footprint");
 
@@ -122,7 +121,11 @@ namespace gazebo {
       return;
     }
 
+#if GAZEBO_MAJOR_VERSION >= 8
     this->car_pos = this->car_link->WorldPose();
+#else
+    this->car_pos = this->car_link->GetWorldPose().Ign();
+#endif
 
     eufs_msgs::ConeArray ground_truth_cone_array_message;
 
@@ -170,9 +173,14 @@ namespace gazebo {
 
   void GazeboConeGroundTruth::addConeToConeArray(eufs_msgs::ConeArray &ground_truth_cone_array, physics::LinkPtr link) {
     geometry_msgs::Point point;
-    // TODO(Niklas): This needs to be different for different gazebo versions
+
+#if GAZEBO_MAJOR_VERSION >= 8
     point.x = link->WorldPose().Pos().X();
     point.y = link->WorldPose().Pos().Y();
+#else
+    point.x = link->GetWorldPose().Ign().Pos().X();
+    point.y = link->GetWorldPose().Ign().Pos().Y();
+#endif
     point.z = 0;
 
     ConeType cone_type = this->getConeType(link);
