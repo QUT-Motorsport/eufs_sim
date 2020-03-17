@@ -44,7 +44,11 @@ namespace gazebo {
   // Gazebo plugin functions
 
   void GazeboConeGroundTruth::Load(physics::ModelPtr _parent, sdf::ElementPtr _sdf) {
+#if GAZEBO_MAJOR_VERSION >= 8
     this->track_model = _parent->GetWorld()->ModelByName("track");
+#else
+    this->track_model = _parent->GetWorld()->GetModelByName("track");
+#endif
     this->car_link = _parent->GetLink("base_footprint");
 
     this->update_rate_ = getDoubleParameter(_sdf, "updateRate", 0, "0.0 (as fast as possible)");
