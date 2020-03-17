@@ -47,7 +47,7 @@ namespace gazebo {
 #if GAZEBO_MAJOR_VERSION >= 8
     this->track_model = _parent->GetWorld()->ModelByName("track");
 #else
-    this->track_model = _parent->GetWorld()->GetModelByName("track");
+    this->track_model = _parent->GetWorld()->GetModel("track");
 #endif
     this->car_link = _parent->GetLink("base_footprint");
 
