@@ -51,7 +51,7 @@
       <simulatePerception>$(arg simulate_perception)</simulatePerception>
       <perceptionConesTopicName>/fusion/cones</perceptionConesTopicName>
       <perceptionConeMarkersTopicName>/fusion/cones/viz</perceptionConeMarkersTopicName>
-      <perceptionNoise>0.2 0.2 0.0</perceptionNoise>
+      <perceptionNoise>0.0 0.0 0.0</perceptionNoise>
     </plugin>
   </gazebo>
 
