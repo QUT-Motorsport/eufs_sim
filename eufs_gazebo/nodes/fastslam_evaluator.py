@@ -19,6 +19,9 @@ Ground truths:
 It publishes a message:
 
 `/slam/evaluation` (of type `std_msgs/Float64MultiArray`)
+The first 3 elements are the position erros in x, y and z dimension. The following four are the orientation errors. Those
+are euclidean distance errors. The last one is the map error, which can be interpreted as a percentage of how well our
+estimated map represents the actual map.
 
 """
 
