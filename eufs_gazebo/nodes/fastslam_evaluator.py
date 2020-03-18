@@ -165,16 +165,21 @@ class SLAMEval(object):
            are set in either the ground truth map or the estimated map.
         3. Divide the first result in 2 by the second result in 2. (also known as intersection over union)
     """
-    def compare_cones(self, cones1, cones2):
-        max_x, min_x, max_y, min_y = self.get_max_min(cones1["blue_cones"],
-                                                      cones2["blue_cones"] + cones2["yellow_cones"])
-        true_blue = self.rescale(cones1["blue_cones"], max_x, min_x, max_y, min_y)
-        true_yellow = self.rescale(cones1["yellow_cones"], max_x, min_x, max_y, min_y)
-        est_blue = self.rescale(cones2["blue_cones"], max_x, min_x, max_y, min_y)
-        est_yellow = self.rescale(cones2["yellow_cones"], max_x, min_x, max_y, min_y)
+    def compare_cones(self, gt_cones, est_cones):
+        max_x, min_x, max_y, min_y = self.get_max_min(gt_cones["blue_cones"] +
+                                                      est_cones["blue_cones"] + est_cones["yellow_cones"])
+        true_blue = self.rescale(gt_cones["blue_cones"], max_x, min_x, max_y, min_y)
+        true_yellow = self.rescale(gt_cones["yellow_cones"], max_x, min_x, max_y, min_y)
+        est_blue = self.rescale(est_cones["blue_cones"], max_x, min_x, max_y, min_y)
+        #rospy.logerr(true_blue)
+        #rospy.logerr("ESTIMATED BLUE CONES BEFORE REORDERING")
+        #rospy.logerr(est_blue)
+        est_yellow = self.rescale(est_cones["yellow_cones"], max_x, min_x, max_y, min_y)
         true_blue = self.order_cones(true_blue)
         true_yellow = self.order_cones(true_yellow)
         est_blue = self.order_cones(est_blue)
+        #rospy.logerr("ESTIMATED BLUE CONES AFTER REORDERING")
+        #rospy.logerr(est_blue)
         est_yellow = self.order_cones(est_yellow)
         true_in_circle = self.draw_map(true_yellow)
         true_out_circle = self.draw_map(true_blue)
@@ -189,18 +194,18 @@ class SLAMEval(object):
     """
     Returns the maximum and minimum values of x and y.
     """
-    def get_max_min(self, cones1, cones2):
+    def get_max_min(self, point):
         max_x, max_y = -np.inf, -np.inf
         min_x, min_y = np.inf, np.inf
-        for cone in cones1 + cones2:
-            if cone.x < min_x:
-                min_x = cone.x
-            elif cone.x > max_x:
-                max_x = cone.x
-            if cone.y < min_y:
-                min_y = cone.y
-            elif cone.y > max_y:
-                max_y = cone.y
+        for points in point:
+            if points.x < min_x:
+                min_x = points.x
+            elif points.x > max_x:
+                max_x = points.x
+            if points.y < min_y:
+                min_y = points.y
+            elif points.y > max_y:
+                max_y = points.y
         return max_x, min_x, max_y, min_y
 
     """
