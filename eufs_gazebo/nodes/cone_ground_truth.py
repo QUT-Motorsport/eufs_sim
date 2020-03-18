@@ -18,6 +18,8 @@ Published Topics:
         Track midpoints as an array of Points
     /ground_truth/midpoints/viz (visualization_msgs/Marker)
         Track midpoints for visualization in Rviz
+    /ground_truth/all_cones (of type `eufs_msgs/ConeArray`)
+        Publishes the whole map
 
 Parameters:
     ~view_distance (float, default: 15)
@@ -78,6 +80,7 @@ class ConeGroundTruth:
         self.big_orange_cones = None
         self.orange_cones = None
         self.midpoints = None
+        self.all_cones = ConeArray()
         self.distance = rospy.get_param("~view_distance", default=15.)
         self.fov = rospy.get_param("~fov", default=1.91986)  # 120 degrees
         self.CONE_FRAME = "/base_footprint"  # frame of topics to be published
@@ -99,6 +102,7 @@ class ConeGroundTruth:
         self.cone_marker_pub = rospy.Publisher("/ground_truth/cones/viz", MarkerArray, queue_size=1)
         self.midpoints_pub = rospy.Publisher("/ground_truth/midpoints", PointArray, queue_size=1)
         self.midpoints_marker_pub = rospy.Publisher("/ground_truth/midpoints/viz", Marker, queue_size=1)
+        self.all_cones_pub = rospy.Publisher("/ground_truth/all_cones", ConeArray, queue_size=1)
 
     def mul_by_transpose(self, X, size):
         """Helper function for self.dists().
@@ -225,6 +229,9 @@ class ConeGroundTruth:
             cone_msg = ConeArray()
             cone_msg.header.frame_id = self.CONE_FRAME
             cone_msg.header.stamp = rospy.Time.now()
+            self.all_cones.header.frame_id = self.CONE_FRAME
+            self.all_cones.header.stamp = rospy.Time.now()
+
 
             cone_markers = MarkerArray()
             marker_id = 0  # IDs are needed for the marker to work
@@ -275,6 +282,7 @@ class ConeGroundTruth:
 
             # Publish topics
             self.cone_pub.publish(cone_msg)
+            self.all_cones_pub.publish(self.all_cones)
             self.cone_marker_pub.publish(cone_markers)
 
         # Midpoints
@@ -362,6 +370,10 @@ class ConeGroundTruth:
         self.big_orange_cones = np.array(data[data.tag == "big_orange"][["x", "y"]])
         self.orange_cones = np.array(data[data.tag == "orange"][["x", "y"]])
         self.midpoints = np.array(data[data.tag == "midpoint"][["x", "y"]])
+        self.all_cones.blue_cones = [Point(cone[0], cone[1], 0) for cone in self.blue_cones]
+        self.all_cones.yellow_cones = [Point(cone[0], cone[1], 0) for cone in self.yellow_cones]
+        self.all_cones.big_orange_cones = [Point(cone[0], cone[1], 0) for cone in self.big_orange_cones]
+        self.all_cones.orange_cones = [Point(cone[0], cone[1], 0) for cone in self.orange_cones]
 
 
 if __name__ == "__main__":
