@@ -33,7 +33,6 @@ from skimage.draw import polygon
 from std_msgs.msg import Float64MultiArray, MultiArrayLayout
 from geometry_msgs.msg import Pose
 from eufs_msgs.msg import ConeArray, CarState
-import tf
 
 
 class SLAMEval(object):
