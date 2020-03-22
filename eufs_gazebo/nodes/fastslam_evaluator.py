@@ -173,7 +173,6 @@ class SLAMEval(object):
         max_x, min_x, max_y, min_y = self.get_max_min(est_cones["blue_cones"] + est_cones["yellow_cones"])
         est_blue = self.rescale(est_cones["blue_cones"], max_x, min_x, max_y, min_y)
         est_yellow = self.rescale(est_cones["yellow_cones"], max_x, min_x, max_y, min_y)
-        est_blue, est_yellow = np.unique(est_blue, axis=0), np.unique(est_yellow, axis=0)
 
         true_blue = self.order_points(true_blue)
         true_yellow = self.order_points(true_yellow)
