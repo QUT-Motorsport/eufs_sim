@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 
+
 """
 fastslam_evaluator.py
 
@@ -83,7 +84,7 @@ class SLAMEval(object):
             ConeArray,
             self.slam_receiver
         )
-        self.map_sub = rospy.Subscriber("/ground_truth/cones", ConeArray, self.ground_truth_receiver)
+        self.map_sub = rospy.Subscriber("/ground_truth/all_cones", ConeArray, self.ground_truth_receiver)
         self.pose_sub = rospy.Subscriber(
             "/ground_truth/state",
             CarState,
@@ -171,15 +172,16 @@ class SLAMEval(object):
         true_blue = self.rescale(gt_cones["blue_cones"], max_x, min_x, max_y, min_y)
         true_yellow = self.rescale(gt_cones["yellow_cones"], max_x, min_x, max_y, min_y)
         est_blue = self.rescale(est_cones["blue_cones"], max_x, min_x, max_y, min_y)
-        #rospy.logerr(true_blue)
-        #rospy.logerr("ESTIMATED BLUE CONES BEFORE REORDERING")
-        #rospy.logerr(est_blue)
         est_yellow = self.rescale(est_cones["yellow_cones"], max_x, min_x, max_y, min_y)
+        est_blue, est_yellow = np.unique(est_blue, axis=0), np.unique(est_yellow, axis=0)
+
         true_blue = self.order_cones(true_blue)
         true_yellow = self.order_cones(true_yellow)
         est_blue = self.order_cones(est_blue)
-        #rospy.logerr("ESTIMATED BLUE CONES AFTER REORDERING")
-        #rospy.logerr(est_blue)
+        rospy.logerr("ESTIMATED BLUE CONES AFTER REORDERING")
+        rospy.logerr(est_blue)
+        rospy.logerr("GT BLUE CONES AFTER REORDERING")
+        rospy.logerr(true_blue)
         est_yellow = self.order_cones(est_yellow)
         true_in_circle = self.draw_map(true_yellow)
         true_out_circle = self.draw_map(true_blue)
@@ -189,6 +191,8 @@ class SLAMEval(object):
         est_map = est_in_circle ^ est_out_circle
         intersection = correct_map & est_map
         union = est_map | correct_map
+        #rospy.logerr("LEN EST BLUE {} TRUE BLUE {} TRUE YELLOW {} EST YELLOW {}".format(len(est_blue), len(true_blue), len(true_yellow), len(est_yellow)))
+        #rospy.logerr("SCORE {}".format(np.sum(intersection, dtype=np.float64) / np.sum(union, dtype=np.float64)))
         return np.sum(intersection, dtype=np.float64) / np.sum(union, dtype=np.float64)
 
     """
@@ -234,8 +238,11 @@ class SLAMEval(object):
                     closest_dist = np.linalg.norm(ordered_cones[i - 1] - cones[j])
             ordered_cones[i] = cones[closest_idx]
             included_idxs.add(closest_idx)
-        return cones
+        return ordered_cones
 
+    """
+    Takes an array of cones and draws the polygon in an image by setting pixels in the polygon to 255.
+    """
     def draw_map(self, cones):
         new_map = np.zeros(self.map_shape + (3,), "uint8")
         rr, cc = polygon(cones[:, 0], cones[:, 1], new_map.shape) # rr, cc = row coordinates, column coordinates
