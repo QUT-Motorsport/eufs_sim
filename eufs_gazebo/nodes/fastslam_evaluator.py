@@ -152,7 +152,7 @@ class SLAMEval(object):
 
         pose_err = self.compare(true_pose_data, slam_pose_data)
         map_err = self.compare_cones(true_cones, slam_cones)
-        self.out_msg.data = pose_err + map_err
+        self.out_msg.data = pose_err + [map_err]
 
         self.out.publish(self.out_msg)
 
@@ -167,10 +167,10 @@ class SLAMEval(object):
         3. Divide the first result in 2 by the second result in 2. (also known as intersection over union)
     """
     def compare_cones(self, gt_cones, est_cones):
-        max_x, min_x, max_y, min_y = self.get_max_min(gt_cones["blue_cones"] +
-                                                      est_cones["blue_cones"] + est_cones["yellow_cones"])
+        max_x, min_x, max_y, min_y = self.get_max_min(gt_cones["blue_cones"]) #first max_min of the GT map
         true_blue = self.rescale(gt_cones["blue_cones"], max_x, min_x, max_y, min_y)
         true_yellow = self.rescale(gt_cones["yellow_cones"], max_x, min_x, max_y, min_y)
+        max_x, min_x, max_y, min_y = self.get_max_min(est_cones["blue_cones"] + est_cones["yellow_cones"])
         est_blue = self.rescale(est_cones["blue_cones"], max_x, min_x, max_y, min_y)
         est_yellow = self.rescale(est_cones["yellow_cones"], max_x, min_x, max_y, min_y)
         est_blue, est_yellow = np.unique(est_blue, axis=0), np.unique(est_yellow, axis=0)
@@ -178,10 +178,6 @@ class SLAMEval(object):
         true_blue = self.order_points(true_blue)
         true_yellow = self.order_points(true_yellow)
         est_blue = self.order_points(est_blue)
-        rospy.logerr("ESTIMATED BLUE CONES AFTER REORDERING")
-        rospy.logerr(est_blue)
-        rospy.logerr("GT BLUE CONES AFTER REORDERING")
-        rospy.logerr(true_blue)
         est_yellow = self.order_points(est_yellow)
         true_in_circle = self.draw_map(true_yellow)
         true_out_circle = self.draw_map(true_blue)
@@ -191,17 +187,15 @@ class SLAMEval(object):
         est_map = est_in_circle ^ est_out_circle
         intersection = correct_map & est_map
         union = est_map | correct_map
-        #rospy.logerr("LEN EST BLUE {} TRUE BLUE {} TRUE YELLOW {} EST YELLOW {}".format(len(est_blue), len(true_blue), len(true_yellow), len(est_yellow)))
-        #rospy.logerr("SCORE {}".format(np.sum(intersection, dtype=np.float64) / np.sum(union, dtype=np.float64)))
         return np.sum(intersection, dtype=np.float64) / np.sum(union, dtype=np.float64)
 
     """
-    Returns the maximum and minimum values of x and y.
+    Returns the maximum and minimum values of x and y for cones.
     """
-    def get_max_min(self, point):
+    def get_max_min(self, cones):
         max_x, max_y = -np.inf, -np.inf
         min_x, min_y = np.inf, np.inf
-        for points in point:
+        for points in cones:
             if points.x < min_x:
                 min_x = points.x
             elif points.x > max_x:
@@ -213,7 +207,7 @@ class SLAMEval(object):
         return max_x, min_x, max_y, min_y
 
     """
-    Rescales coordinates to lie in between our map image.
+    Rescales cone coordinates to lie in between our map image.
     """
     def rescale(self, cones, max_x, min_x, max_y, min_y):
         res = np.array(
