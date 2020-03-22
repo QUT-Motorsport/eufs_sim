@@ -175,14 +175,14 @@ class SLAMEval(object):
         est_yellow = self.rescale(est_cones["yellow_cones"], max_x, min_x, max_y, min_y)
         est_blue, est_yellow = np.unique(est_blue, axis=0), np.unique(est_yellow, axis=0)
 
-        true_blue = self.order_cones(true_blue)
-        true_yellow = self.order_cones(true_yellow)
-        est_blue = self.order_cones(est_blue)
+        true_blue = self.order_points(true_blue)
+        true_yellow = self.order_points(true_yellow)
+        est_blue = self.order_points(est_blue)
         rospy.logerr("ESTIMATED BLUE CONES AFTER REORDERING")
         rospy.logerr(est_blue)
         rospy.logerr("GT BLUE CONES AFTER REORDERING")
         rospy.logerr(true_blue)
-        est_yellow = self.order_cones(est_yellow)
+        est_yellow = self.order_points(est_yellow)
         true_in_circle = self.draw_map(true_yellow)
         true_out_circle = self.draw_map(true_blue)
         est_in_circle = self.draw_map(est_yellow)
@@ -223,22 +223,22 @@ class SLAMEval(object):
         return res
 
     """
-    Orders cones according to the distance to the previous cone in our new ordered_cones array.
+    Orders points according to the distance to the previous point in our new ordered_points array.
     """
-    def order_cones(self, cones):
-        ordered_cones = np.zeros(cones.shape)
-        ordered_cones[0] = cones[0]
+    def order_points(self, points):
+        ordered_points = np.zeros(points.shape)
+        ordered_points[0] = points[0]
         included_idxs = {0}
-        for i in range(1, len(cones)):
+        for i in range(1, len(points)):
             closest_dist = np.inf
             closest_idx = i
-            for j in range(len(cones)):
-                if j not in included_idxs and np.linalg.norm(ordered_cones[i - 1] - cones[j]) < closest_dist:
+            for j in range(len(points)):
+                if j not in included_idxs and np.linalg.norm(ordered_points[i - 1] - points[j]) < closest_dist:
                     closest_idx = j
-                    closest_dist = np.linalg.norm(ordered_cones[i - 1] - cones[j])
-            ordered_cones[i] = cones[closest_idx]
+                    closest_dist = np.linalg.norm(ordered_points[i - 1] - points[j])
+            ordered_points[i] = points[closest_idx]
             included_idxs.add(closest_idx)
-        return ordered_cones
+        return ordered_points
 
     """
     Takes an array of cones and draws the polygon in an image by setting pixels in the polygon to 255.
