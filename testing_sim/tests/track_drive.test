@@ -1,0 +1,20 @@
+<launch>
+
+  <arg name="launch_group" default="no_perception"/>
+  <arg name="gui" default="false"/>
+
+  <!-- Launch the simulation -->
+  <include file="$(find eufs_gazebo)/launch/small_track.launch">
+      <arg name="show_rqt_gui" value="false"/>
+      <arg name="gui" value="$(arg gui)"/>
+  </include>
+
+  <!-- Launch the state_machine module -->
+  <include file="$(find car_meta)/launch/state_machine.launch" >
+      <arg name="launch_group" value="$(arg launch_group)"/>
+  </include>
+
+  <!-- Run the track drive test (30 min time limit) -->
+  <test test-name="test_track_drive" pkg="testing_sim" type="test_track_drive.py" time-limit="1800.0"/>
+
+</launch>

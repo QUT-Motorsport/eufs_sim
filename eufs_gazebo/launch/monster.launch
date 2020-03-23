@@ -52,7 +52,9 @@
 
   <node name="cone_ground_truth" pkg="eufs_gazebo" type="cone_ground_truth.py" output="screen">
     <param name="view_distance" value="15"/>
+    <param name="fov" value="1.91986"/>
     <param name="track_path" value="$(find eufs_gazebo)/tracks/monster.csv"/>
+    <param name="loop_rate" value="25"/>
     <param name="x_init" value="$(arg x)"/>
     <param name="y_init" value="$(arg y)"/>
     <param name="yaw_init" value="$(arg yaw)"/>

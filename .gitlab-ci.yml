@@ -34,6 +34,9 @@ catkin_tools:
   stage: build
   script:
     - catkin build --summarize --no-status --force-color
+  only:
+    - merge_requests
+    - master
 
 # roslint
 roslint:
@@ -45,3 +48,7 @@ roslint:
     - catkin build eufs_launcher --no-deps --make-args roslint
     - catkin build ros_can_sim
     - catkin build ros_can_sim --no-deps --make-args roslint
+  only:
+    - merge_requests
+    - master
+
