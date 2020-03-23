@@ -139,6 +139,8 @@ class ConeGroundTruth:
             cone_msg = ConeArray()
             cone_msg.header.frame_id = self.CONE_FRAME
             cone_msg.header.stamp = rospy.Time.now()
+            self.all_cones.header.frame_id = self.CONE_FRAME
+            self.all_cones.header.stamp = rospy.Time.now()
 
             cone_markers = MarkerArray()
             marker_id = 0  # IDs are needed for the marker to work
@@ -189,6 +191,7 @@ class ConeGroundTruth:
 
             # Publish topics
             self.cone_pub.publish(cone_msg)
+            self.all_cones_pub.publish(self.all_cones)
             self.cone_marker_pub.publish(cone_markers)
 
         # Midpoints
