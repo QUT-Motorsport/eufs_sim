@@ -35,7 +35,7 @@ eufs_launcher:
             location: "launch/fastslam_evaluator.launch"
 
         ekf_node:
-            package: "robot_localisation"
+            package: "ekf"
             location: "launch/localization.launch"
 
         fastslam_node:
