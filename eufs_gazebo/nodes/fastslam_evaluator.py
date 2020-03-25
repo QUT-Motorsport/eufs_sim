@@ -146,11 +146,11 @@ class SLAMEval(object):
                       "unknown_color_cones": self.slam_map.unknown_color_cones}
 
         pose_err = self.compare(true_pose_data, slam_pose_data)
-        map_err = self.compare_cones(true_cones, slam_cones)
+        map_sim = self.compare_cones(true_cones, slam_cones)
         self.out_msg.x_err, self.out_msg.y_err, self.out_msg.z_err = pose_err[:3]
         self.out_msg.x_orient_err, self.out_msg.y_orient_err, self.out_msg.z_orient_err, self.out_msg.w_orient_err = \
             pose_err[3:]
-        self.out_msg.map_err = map_err
+        self.out_msg.map_similarity = map_sim
         self.out_msg.header.stamp = rospy.Time.now()
         self.out.publish(self.out_msg)
 
