@@ -30,8 +30,8 @@ import math
 import rospy
 from sensor_msgs.msg import Imu
 from geometry_msgs.msg import Vector3Stamped, AccelWithCovarianceStamped
-from std_msgs.msg import Float64MultiArray, MultiArrayLayout
 from nav_msgs.msg import Odometry
+from eufs_msgs.msg import EKFErr
 import tf
 
 
@@ -63,20 +63,14 @@ class EKFEvaluator(object):
         
 
         # The output message
-        self.out_msg = Float64MultiArray()
-        self.out_msg.layout = MultiArrayLayout()
-        self.out_msg.layout.data_offset = 0
-        # self.out_msg.layout.dim[0].label = "height"
-        # self.out_msg.layout.dim[0].stride = 5
-        # self.out_msg.layout.dim[0].size = 5
-
+        self.out_msg = EKFErr()
 
         # Read in the parameters
         self.OUTPUT_INTERVAL = rospy.get_param("~output_interval", default=1)
 
 
         # Set up output publisher
-        self.out = rospy.Publisher("/ekf/evaluation", Float64MultiArray,  queue_size=1)
+        self.out = rospy.Publisher("/ekf/evaluation", EKFErr,  queue_size=1)
 
 
         # Set the timer to output info
@@ -134,18 +128,18 @@ class EKFEvaluator(object):
             self.ekf_odom.twist.twist.angular.z
         ]
 
-        # Now we get x/y velo var, x/y accel var, yaw var
-        variance_info = [
-            self.ekf_odom.twist.covariance[0],
-            self.ekf_odom.twist.covariance[7],
-            self.ekf_accel.accel.covariance[0],
-            self.ekf_accel.accel.covariance[7],
-            self.ekf_odom.twist.covariance[35]
-        ]
-
         compared_data = self.compare(gps_data + imu_data, ekf_gps_data + ekf_imu_data)
-        self.out_msg.data = compared_data + variance_info
-            
+        self.out_msg.gps_x_vel_err, self.out_msg.gps_y_vel_err, self.out_msg.imu_x_acc_err = compared_data[:3]
+        self.out_msg.imu_y_acc_err, self.out_msg.imu_yaw_err = compared_data[3:]
+
+        # Now we get x/y velo var, x/y accel var, yaw var
+        self.ekf_x_vel_var = self.ekf_odom.twist.covariance[0]
+        self.ekf_y_vel_var = self.ekf_odom.twist.covariance[7]
+        self.ekf_x_acc_var = self.ekf_accel.accel.covariance[0]
+        self.ekf_y_acc_var = self.ekf_accel.accel.covariance[7]
+        self.ekf_yaw_var = self.ekf_odom.twist.covariance[35]
+
+        self.out_msg.header.stamp = rospy.Time.now()
         self.out.publish(self.out_msg)
 
     def compare(self, vec1, vec2):
