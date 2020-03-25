@@ -32,8 +32,7 @@ import numpy as np
 from skimage.draw import polygon
 from std_msgs.msg import Float64MultiArray, MultiArrayLayout
 from geometry_msgs.msg import Pose
-from eufs_msgs.msg import ConeArray, CarState
-
+from eufs_msgs.msg import ConeArray, CarState, SlamEval
 
 class SLAMEval(object):
 
@@ -60,15 +59,13 @@ class SLAMEval(object):
         self.ground_truth_map = ConeArray()
 
         # The output message
-        self.out_msg = Float64MultiArray()
-        self.out_msg.layout = MultiArrayLayout()
-        self.out_msg.layout.data_offset = 0
+        self.out_msg = SlamEval()
 
         # Read in the parameters
         self.OUTPUT_INTERVAL = rospy.get_param("~output_interval", default=1)
 
         # Set up output publisher
-        self.out = rospy.Publisher("/slam/evaluation", Float64MultiArray, queue_size=1)
+        self.out = rospy.Publisher("/slam/evaluation", SlamEval, queue_size=1)
 
         # Set the timer to output info
         rospy.Timer(
@@ -151,8 +148,11 @@ class SLAMEval(object):
 
         pose_err = self.compare(true_pose_data, slam_pose_data)
         map_err = self.compare_cones(true_cones, slam_cones)
-        self.out_msg.data = pose_err + [map_err]
-
+        self.out_msg.x_err, self.out_msg.y_err, self.out_msg.z_err = pose_err[:3]
+        self.out_msg.x_orient_err, self.out_msg.y_orient_err, self.out_msg.z_orient_err, self.out_msg.w_orient_err = \
+            pose_err[3:]
+        self.out_msg.map_err = map_err
+        self.out_msg.header.stamp = rospy.Time.now()
         self.out.publish(self.out_msg)
 
     def compare(self, vec1, vec2):
