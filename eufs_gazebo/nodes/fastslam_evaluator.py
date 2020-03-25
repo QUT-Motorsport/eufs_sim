@@ -30,9 +30,8 @@ import math
 import rospy
 import numpy as np
 from skimage.draw import polygon
-from std_msgs.msg import Float64MultiArray, MultiArrayLayout
 from geometry_msgs.msg import Pose
-from eufs_msgs.msg import ConeArray, CarState, SlamEval
+from eufs_msgs.msg import ConeArray, CarState, SlamErr
 
 class SLAMEval(object):
 
@@ -59,13 +58,13 @@ class SLAMEval(object):
         self.ground_truth_map = ConeArray()
 
         # The output message
-        self.out_msg = SlamEval()
+        self.out_msg = SlamErr()
 
         # Read in the parameters
         self.OUTPUT_INTERVAL = rospy.get_param("~output_interval", default=1)
 
         # Set up output publisher
-        self.out = rospy.Publisher("/slam/evaluation", SlamEval, queue_size=1)
+        self.out = rospy.Publisher("/slam/evaluation", SlamErr, queue_size=1)
 
         # Set the timer to output info
         rospy.Timer(
