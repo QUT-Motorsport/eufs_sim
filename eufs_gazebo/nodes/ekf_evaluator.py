@@ -19,7 +19,7 @@ being published though
 
 It publishes a message:
 
-`/ekf/evaluation` (of type `std_msgs/Float64MultiArray`)
+`/ekf/evaluation` (of type `eufs_msgs/EKFErr`)
 
 
 

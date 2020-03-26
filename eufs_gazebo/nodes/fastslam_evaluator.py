@@ -19,7 +19,7 @@ Ground truths:
 
 It publishes a message:
 
-`/slam/evaluation` (of type `std_msgs/Float64MultiArray`)
+`/slam/evaluation` (of type `eufs_msgs/SLAMErr`)
 The first 3 elements are the position erros in x, y and z dimension. The following four are the orientation errors. Those
 are euclidean distance errors. The last one is the map error, which can be interpreted as a percentage of how well our
 estimated map represents the actual map.
@@ -31,7 +31,7 @@ import rospy
 import numpy as np
 from skimage.draw import polygon
 from geometry_msgs.msg import Pose
-from eufs_msgs.msg import ConeArray, CarState, SlamErr
+from eufs_msgs.msg import ConeArray, CarState, SLAMErr
 
 class SLAMEval(object):
 
@@ -64,7 +64,7 @@ class SLAMEval(object):
         self.OUTPUT_INTERVAL = rospy.get_param("~output_interval", default=1)
 
         # Set up output publisher
-        self.out = rospy.Publisher("/slam/evaluation", SlamErr, queue_size=1)
+        self.out = rospy.Publisher("/slam/evaluation", SLAMErr, queue_size=1)
 
         # Set the timer to output info
         rospy.Timer(
