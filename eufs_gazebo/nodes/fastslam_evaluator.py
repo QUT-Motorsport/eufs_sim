@@ -4,8 +4,8 @@
 """
 fastslam_evaluator.py
 
-Evaluates FastSLAM by comparing its outputs to the ground truth. For additional landmarks, which are not
-in the ground truth map, we give a certain penalty.
+Evaluates FastSLAM by comparing its outputs to the ground truth. For additional landmarks,
+which are not in the ground truth map, we give a certain penalty.
 
 It listens messages the following messages:
 
@@ -20,8 +20,10 @@ Ground truths:
 It publishes a message:
 
 `/slam/evaluation` (of type `eufs_msgs/SLAMErr`)
-The first 3 elements are the position erros in x, y and z dimension. The following four are the orientation errors. Those
-are euclidean distance errors. The last one is the map error, which can be interpreted as a percentage of how well our
+The first 3 elements are the position erros in x, y and z dimension.
+The following four are the orientation errors. Those
+are euclidean distance errors. The last one is the map error,
+which can be interpreted as a percentage of how well our
 estimated map represents the actual map.
 
 """
@@ -32,6 +34,7 @@ import numpy as np
 from skimage.draw import polygon
 from geometry_msgs.msg import Pose
 from eufs_msgs.msg import ConeArray, CarState, SLAMErr
+
 
 class SLAMEval(object):
 
@@ -157,15 +160,17 @@ class SLAMEval(object):
     def compare(self, vec1, vec2):
         return [math.sqrt((v1 - v2) ** 2) for v1, v2 in zip(vec1, vec2)]
 
-    """
-    Compares the estimated map by doing the following:
+    def compare_cones(self, gt_cones, est_cones):
+        """
+        Compares the estimated map by doing the following:
         1. Creates an image of the ground-truth track and the estimated map.
         2. Count the number of pixels which are set in both maps. Count the number of pixels which
            are set in either the ground truth map or the estimated map.
         3. Divide the first result in 2 by the second result in 2. (also known as intersection over union)
-    """
-    def compare_cones(self, gt_cones, est_cones):
-        max_x, min_x, max_y, min_y = self.get_max_min(gt_cones["blue_cones"]) #first max_min of the GT map
+        """
+
+        # first max_min of the GT map
+        max_x, min_x, max_y, min_y = self.get_max_min(gt_cones["blue_cones"])
         true_blue = self.rescale(gt_cones["blue_cones"], max_x, min_x, max_y, min_y)
         true_yellow = self.rescale(gt_cones["yellow_cones"], max_x, min_x, max_y, min_y)
         max_x, min_x, max_y, min_y = self.get_max_min(est_cones["blue_cones"] + est_cones["yellow_cones"])
@@ -186,10 +191,11 @@ class SLAMEval(object):
         union = est_map | correct_map
         return np.sum(intersection, dtype=np.float64) / np.sum(union, dtype=np.float64)
 
-    """
-    Returns the maximum and minimum values of x and y for cones.
-    """
     def get_max_min(self, cones):
+        """
+        Returns the maximum and minimum values of x and y for cones.
+        """
+
         max_x, max_y = -np.inf, -np.inf
         min_x, min_y = np.inf, np.inf
         for points in cones:
@@ -203,20 +209,22 @@ class SLAMEval(object):
                 max_y = points.y
         return max_x, min_x, max_y, min_y
 
-    """
-    Rescales cone coordinates to lie in between our map image.
-    """
     def rescale(self, cones, max_x, min_x, max_y, min_y):
+        """
+        Rescales cone coordinates to lie in between our map image.
+        """
+
         res = np.array(
             [[(point.y - min_y) / (max_y - min_y) * self.map_shape[0],
               (point.x - min_x) / (max_x - min_x) * self.map_shape[1]]
              for point in cones])
         return res
 
-    """
-    Orders points according to the distance to the previous point in our new ordered_points array.
-    """
     def order_points(self, points):
+        """
+        Orders points according to the distance to the previous point in our new ordered_points array.
+        """
+
         ordered_points = np.zeros(points.shape)
         ordered_points[0] = points[0]
         included_idxs = {0}
@@ -231,12 +239,15 @@ class SLAMEval(object):
             included_idxs.add(closest_idx)
         return ordered_points
 
-    """
-    Takes an array of cones and draws the polygon in an image by setting pixels in the polygon to 255.
-    """
     def draw_map(self, cones):
+        """
+        Takes an array of cones and draws the polygon in an image by setting pixels in the polygon to 255.
+        """
+
         new_map = np.zeros(self.map_shape + (3,), "uint8")
-        rr, cc = polygon(cones[:, 0], cones[:, 1], new_map.shape) # rr, cc = row coordinates, column coordinates
+
+        # rr, cc = row coordinates, column coordinates
+        rr, cc = polygon(cones[:, 0], cones[:, 1], new_map.shape)
         new_map[rr, cc] = 255
         return new_map
 

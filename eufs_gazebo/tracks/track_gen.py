@@ -59,7 +59,7 @@ class Track:
 
         data = pd.read_csv(
             file_path,
-            names = [
+            names=[
                 "tag",
                 "x",
                 "y",
@@ -336,7 +336,7 @@ class Track:
         # Add car data (always ("car_start",0,0,0,0,0,0) unless this file is called from ConversionTools))
         cardf = pd.DataFrame(
             [self.car_start_data],
-            columns = [
+            columns=[
                 "tag",
                 "x",
                 "y",
@@ -352,9 +352,10 @@ class Track:
         df["xy_covariance"] = 0
         df = df.append(cardf)
 
-        df.to_csv(filename,
-            index = False,
-            columns = [
+        df.to_csv(
+            filename,
+            index=False,
+            columns=[
                 "tag",
                 "x",
                 "y",

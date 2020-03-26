@@ -47,20 +47,17 @@ class EKFEvaluator(object):
 
         rospy.init_node("ekf_evaluator", anonymous=True)
 
-
         # Don't publish anything if not received messages yet
         self.got_ekf_odom = False
         self.got_ekf_accel = False
         self.got_truth_imu = False
         self.got_truth_gps = False
 
-
         # The input message, stored
         self.ekf_odom = Odometry()
         self.ekf_accel = AccelWithCovarianceStamped()
         self.imu = Imu()
         self.gps = Vector3Stamped()
-        
 
         # The output message
         self.out_msg = EKFErr()
@@ -68,17 +65,14 @@ class EKFEvaluator(object):
         # Read in the parameters
         self.OUTPUT_INTERVAL = rospy.get_param("~output_interval", default=1)
 
-
         # Set up output publisher
         self.out = rospy.Publisher("/ekf/evaluation", EKFErr,  queue_size=1)
-
 
         # Set the timer to output info
         rospy.Timer(
             rospy.Duration(self.OUTPUT_INTERVAL),
             lambda x: self.evaluate()
         )
-
 
         # Subscribe to channels
         self.ekf_odom_sub = rospy.Subscriber("/odometry/filtered", Odometry, self.ekf_receiver)
@@ -93,7 +87,6 @@ class EKFEvaluator(object):
             Vector3Stamped,
             self.ground_truth_receiver
         )
-
 
     def ekf_receiver(self, msg):
         """Receives the ekf outputs"""
@@ -111,13 +104,13 @@ class EKFEvaluator(object):
 
         if not (self.got_truth_gps and self.got_truth_imu):
             return
-        
+
         # We care about the dynamic state - namely:
         # x/y velocity (from gps), x/y acceleration, yaw rate (from imu)
 
         gps_data = [self.gps.vector.x, self.gps.vector.y]
         ekf_gps_data = [self.ekf_odom.twist.twist.linear.x, self.ekf_odom.twist.twist.linear.y]
-        
+
         quat = self.imu.orientation
         euler = tf.transformations.euler_from_quaternion((quat.x, quat.y, quat.z, quat.w))
         imu_data = [self.imu.linear_acceleration.x, self.imu.linear_acceleration.y, euler[2]]
@@ -144,21 +137,16 @@ class EKFEvaluator(object):
 
     def compare(self, vec1, vec2):
         return [math.sqrt((v1 - v2)**2) for v1, v2 in zip(vec1, vec2)]
-        
+
     def ground_truth_receiver(self, msg):
         """Receives ground truth from the simulation"""
-        
+
         if str(msg._type) == "sensor_msgs/Imu":
             self.got_truth_imu = True
             self.imu = msg
         elif str(msg._type) == "geometry_msgs/Vector3Stamped":
             self.got_truth_gps = True
             self.gps = msg
-
-            
-            
-
-
 
 if __name__ == "__main__":
     ekf_evaluator = EKFEvaluator()
