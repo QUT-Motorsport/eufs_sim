@@ -198,7 +198,6 @@ class EufsLauncher(Plugin):
                 self.launch_file_override = None
                 self.popen_process = None
 
-
                 # Set up the Generator Params
                 self.update_preset()
 
@@ -244,7 +243,6 @@ class EufsLauncher(Plugin):
                 track_generator_full_stack = self.FULL_STACK_TRACK_GEN_BUTTON
                 track_generator_full_stack.setChecked(True)
 
-
                 # Copier full stack checkbox
                 copier_full_stack = self.FULL_STACK_COPY_BUTTON
                 copier_full_stack.setChecked(True)
@@ -253,7 +251,7 @@ class EufsLauncher(Plugin):
                 checkboxes = OrderedDict(
                         sorted(
                                 self.default_config["eufs_launcher"]["checkboxes"].items(),
-                                key = lambda x: x[1]["priority"]
+                                key=lambda x: x[1]["priority"]
                         )
                 )
                 self.checkbox_effect_mapping = []
@@ -303,7 +301,6 @@ class EufsLauncher(Plugin):
                         float(self.default_config["eufs_launcher"]["cone_noise_default"])
                 )
 
-
                 # Change label to show current selected file for the copier
                 self.update_copier()
 
@@ -320,7 +317,7 @@ class EufsLauncher(Plugin):
                         if hasattr(widget, 'geometry'):
                                 geom = widget.geometry()
                                 new_width = (
-                                        geom.width() * (scaler_multiplier) if not isinstance(widget, QLabel) 
+                                        geom.width() * (scaler_multiplier) if not isinstance(widget, QLabel)
                                         else geom.width() * (scaler_multiplier) + 200
                                 )
                                 widget.setGeometry(
@@ -370,7 +367,6 @@ class EufsLauncher(Plugin):
                 for f in launch_files:
                         if f != base_track:
                                 self.TRACK_SELECTOR.addItem(f)
-
 
         def copy_button_pressed(self):
                 """When copy button is pressed, launch ConversionTools"""
@@ -482,7 +478,6 @@ class EufsLauncher(Plugin):
                 # Update drop-downs with new files in directory
                 self.load_track_dropdowns()
                 self.tell_launchella("Copy Succeeded!")
-
 
         def arg_to_list(self, d):
                 """Converts yaml arg dict to parameter list"""
@@ -881,7 +876,7 @@ class EufsLauncher(Plugin):
                         "launch",
                         "csv",
                         full_path,
-                        override_name = "LAST_LAUNCH"
+                        override_name="LAST_LAUNCH"
                 )
 
                 # Get noise level
@@ -911,10 +906,10 @@ class EufsLauncher(Plugin):
                 )
                 loaded_csv = loaded_csv[
                         (
-                                (loaded_csv["tag"] != "inactive_noise")
-                                & (loaded_csv["tag"] != "active_noise")
-                        )
-                        | (uniform(0, 1) < noise_level)
+                                (loaded_csv["tag"] != "inactive_noise") &
+                                (loaded_csv["tag"] != "active_noise")
+                        ) |
+                        (uniform(0, 1) < noise_level)
                 ]
                 for idx, val in loaded_csv.iterrows():
                         # Activate remaining noise
@@ -950,8 +945,8 @@ class EufsLauncher(Plugin):
                         "csv",
                         "launch",
                         csv_path,
-                        params = {"keep_all_noise": False, "noise": 1},
-                        override_name = "LAST_LAUNCH"
+                        params={"keep_all_noise": False, "noise": 1},
+                        override_name="LAST_LAUNCH"
                 )
                 track_to_launch = "LAST_LAUNCH.launch"
 
@@ -967,7 +962,7 @@ class EufsLauncher(Plugin):
                                 'launch',
                                 "LAST_LAUNCH.launch"
                         ),
-                        conversion_suffix = ""
+                        conversion_suffix=""
                 )
 
                 # Get control information
@@ -998,12 +993,12 @@ class EufsLauncher(Plugin):
                         launch_location,
                         parameters_to_pass
                 )
-                
+
                 # Trigger launch files hooked to checkboxes
                 for checkbox, effect in self.checkbox_effect_mapping:
                         if checkbox.isChecked():
                                 effect()
-                        
+
                 # Auto-launch default scripts in yaml
                 scripts = self.default_config["eufs_launcher"]["on_startup"]
                 for key, value in scripts.items():
@@ -1016,7 +1011,7 @@ class EufsLauncher(Plugin):
                         else:
                                 cur_script_args = []
                         self.launch_node_with_args(filepath, cur_script_args)
-                
+
                 self.tell_launchella("As I have fulfilled my purpose in guiding you " +
                                      "to launch a track, this launcher will no longer " +
                                      "react to input.")
@@ -1026,7 +1021,7 @@ class EufsLauncher(Plugin):
                 rospy.Timer(
                         rospy.Duration(0.1),
                         lambda x: self._widget.window().showMinimized(),
-                        oneshot = True
+                        oneshot=True
                 )
 
         def launch_node(self, filepath):
@@ -1066,9 +1061,9 @@ class EufsLauncher(Plugin):
 
                 # Manual node killer (needs to be used on nodes opened by Popen):
                 extra_nodes = rosnode.get_node_names()
-                if "/eufs_launcher" in extra_nodes: 
+                if "/eufs_launcher" in extra_nodes:
                         extra_nodes.remove("/eufs_launcher")
-                if "/rosout" in extra_nodes:                
+                if "/rosout" in extra_nodes:
                         extra_nodes.remove("/rosout")
                 left_open = len(extra_nodes)
                 if (left_open > 0 and self.DEBUG_SHUTDOWN):
@@ -1082,9 +1077,9 @@ class EufsLauncher(Plugin):
                 Popen(["killall", "-9", "gzserver"])
                 time.sleep(0.25)
                 extra_nodes = rosnode.get_node_names()
-                if "/eufs_launcher" in extra_nodes: 
+                if "/eufs_launcher" in extra_nodes:
                         extra_nodes.remove("/eufs_launcher")
-                if "/rosout" in extra_nodes:                
+                if "/rosout" in extra_nodes:
                         extra_nodes.remove("/rosout")
                 if left_open > 0 and self.DEBUG_SHUTDOWN:
                         rospy.logerr("Pruned to: " + str(extra_nodes))
