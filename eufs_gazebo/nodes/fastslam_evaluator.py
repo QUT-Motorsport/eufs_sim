@@ -58,7 +58,7 @@ class SLAMEval(object):
         self.ground_truth_map = ConeArray()
 
         # The output message
-        self.out_msg = SlamErr()
+        self.out_msg = SLAMErr()
 
         # Read in the parameters
         self.OUTPUT_INTERVAL = rospy.get_param("~output_interval", default=1)
