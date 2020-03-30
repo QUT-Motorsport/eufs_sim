@@ -376,7 +376,8 @@ class ConversionTools:
 
                 # Draw car
                 color_for_car = ConversionTools.car_color[:3]+(yaw_pixel_value,)
-                draw.line([xys[0], xys[0]], fill=color_for_car)
+                car_pos_to_place = (sx, sy)
+                draw.line([car_pos_to_place, car_pos_to_place], fill=color_for_car)
 
                 # Now we want to make all pixels bordering the track become magenta (255,0,255) -
                 # this will be our 'cone' color

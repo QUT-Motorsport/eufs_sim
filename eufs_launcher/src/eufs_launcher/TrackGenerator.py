@@ -1127,6 +1127,9 @@ def cone_default(xys, starting=False, track_width=None, slalom=False, prev_point
         # This is used to check if the yellow and blue cones suddenly swapped.
         last_tangent_normal = (0, 0)
 
+        # Used to make sure orange cones start ahead of the car
+        orig_tangent = (0, 0)
+
         for i in range(len(xys)):
                 # Skip first part [as hard to calculate tangent]
                 if i == 0:
@@ -1140,6 +1143,8 @@ def cone_default(xys, starting=False, track_width=None, slalom=False, prev_point
                 # As we want cones to be placed along the normal.
                 cur_point = xys[i]
                 cur_tangent_angle = calculate_tangent_angle(xys[:(i+1)])
+                if i == 1:
+                    orig_tangent = (math.cos(cur_tangent_angle), math.sin(cur_tangent_angle))
                 cur_tangent_normal = (
                     math.ceil(
                         cone_normal_distance_parameter * math.sin(cur_tangent_angle)
@@ -1264,7 +1269,7 @@ def cone_default(xys, starting=False, track_width=None, slalom=False, prev_point
                         for idx, tup in enumerate(to_return):
                                 x, y, _ = tup
                                 if int(x) == int(i) and int(y) == int(j):
-                                        to_return[idx] = (x, y, CONE_START)
+                                        to_return[idx] = ((x + point_list[1][0])/2, (y + point_list[1][1])/2, CONE_START)
 
         return to_return
 

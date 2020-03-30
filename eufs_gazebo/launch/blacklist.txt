@@ -10,3 +10,4 @@ ekf_sim_launcher.launch
 fastslam_evaluator.launch
 ekf_evaluator.launch
 LAST_LAUNCH.launch
+empty.launch
