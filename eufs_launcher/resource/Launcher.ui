@@ -155,7 +155,7 @@
     <property name="geometry">
        <rect>
          <x>460</x>
-         <y>75</y>
+         <y>90</y>
          <width>150</width>
          <height>30</height>
        </rect>
@@ -173,7 +173,7 @@
     <property name="geometry">
       <rect>
         <x>450</x>
-        <y>95</y>
+        <y>110</y>
         <width>100</width>
         <height>30</height>
       </rect>
@@ -206,7 +206,7 @@
     <property name="geometry">
       <rect>
         <x>450</x>
-        <y>115</y>
+        <y>130</y>
         <width>120</width>
         <height>30</height>
       </rect>
@@ -308,6 +308,43 @@
    </property>
   </widget>
 
+  <!--This handles cone color noise generation-->
+  <widget class="QLabel" name="ConeColorNoiseLabel">
+   <property name="geometry">
+    <rect>
+     <x>450</x>
+     <y>75</y>
+     <width>50</width>
+     <height>27</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>Color Noise:</string>
+   </property>
+   <property name="font">
+       <font>
+            <pointsize>7</pointsize>
+       </font>
+   </property>
+  </widget>
+  <widget class="QSlider" name="ConeColorNoisiness">
+   <property name="geometry">
+    <rect>
+     <x>500</x>
+     <y>75</y>
+     <width>250</width>
+     <height>30</height>
+    </rect>
+   </property>
+   <property name="orientation">
+      <enum>Qt::Horizontal</enum>
+    </property>
+    <property name="font">
+       <font>
+            <pointsize>7</pointsize>
+       </font>
+   </property>
+  </widget>
  
 
   <widget class="QLabel" name="GeneratorParametersLabel">

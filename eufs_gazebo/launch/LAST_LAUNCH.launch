@@ -10,8 +10,8 @@
   <arg name="cmd_timeout" default="0.5"/>
   
   <!-- Vehicle pose -->
-  <arg name="x" default="7.9489976341"/>
-  <arg name="y" default="-29.18000085"/>
+  <arg name="x" default="-34.3170095262"/>
+  <arg name="y" default="-12.7159094397"/>
   <arg name="z" default="0.1"/>
   <arg name="roll" default="0.0"/>
   <arg name="pitch" default="0.0"/>

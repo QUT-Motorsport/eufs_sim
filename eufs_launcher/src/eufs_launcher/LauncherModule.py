@@ -103,6 +103,7 @@ class EufsLauncher(Plugin):
 
                 # Set the magic number for the maximum cone noise allowed
                 self.MAX_CONE_NOISE = 0.4
+                self.MAX_COLOR_NOISE = 1.0
 
                 # Store gazebo's path as it is used quite a lot:
                 self.GAZEBO = rospkg.RosPack().get_path('eufs_gazebo')
@@ -127,6 +128,7 @@ class EufsLauncher(Plugin):
                 self.RENAME_FILE_HEADER = self._widget.findChild(QLabel, "RenameFileHeader")
                 self.NOISE_SLIDER = self._widget.findChild(QSlider, "Noisiness")
                 self.CONE_NOISE_SLIDER = self._widget.findChild(QSlider, "ConeNoisiness")
+                self.COLOR_NOISE_SLIDER = self._widget.findChild(QSlider, "ConeColorNoisiness")
                 self.SPEED_RADIO = self._widget.findChild(QRadioButton, "SpeedRadio")
                 self.TORQUE_RADIO = self._widget.findChild(QRadioButton, "TorqueRadio")
 
@@ -257,7 +259,7 @@ class EufsLauncher(Plugin):
                 self.checkbox_effect_mapping = []
                 self.checkbox_parameter_mapping = []
                 starting_xpos = 570
-                starting_ypos = 75
+                starting_ypos = 90
                 counter = 0
                 for key, value in checkboxes.items():
                         cur_xpos = starting_xpos + 100 * (counter % 2)
@@ -279,7 +281,8 @@ class EufsLauncher(Plugin):
                                         cur_cbox_args = []
                                 self.checkbox_effect_mapping.append((
                                         cur_cbox,
-                                        (lambda: self.launch_node_with_args(filepath, cur_cbox_args))
+                                        (lambda: self.launch_node_with_args(filepath, cur_cbox_args)),
+                                        (lambda: None)
                                 ))
                         if "parameter_triggering" in checkboxes[key]:
                                 # This handles parameter details that will be passed to the
@@ -290,6 +293,15 @@ class EufsLauncher(Plugin):
                                         self.arg_to_list(checkboxes[key]["parameter_triggering"]["if_on"]),
                                         self.arg_to_list(checkboxes[key]["parameter_triggering"]["if_off"])
                                 ))
+                        if "ros_param_triggering" in checkboxes[key]:
+                                # This handles ros parameters that need to be set
+                                check = checkboxes[key]["ros_param_triggering"]
+                                self.checkbox_effect_mapping.append((
+                                        cur_cbox,
+                                        (lambda: rospy.set_param(check["param_name"], check["if_on"])),
+                                        (lambda: rospy.set_param(check["param_name"], check["if_off"]))
+                                ))
+                                
                         setattr(self, checkboxes[key]["name"].upper(), cur_cbox)
                         counter += 1
 
@@ -299,6 +311,9 @@ class EufsLauncher(Plugin):
                 )
                 self.set_cone_noise_level(
                         float(self.default_config["eufs_launcher"]["cone_noise_default"])
+                )
+                self.set_color_noise_level(
+                        float(self.default_config["eufs_launcher"]["color_noise_default"])
                 )
 
                 # Change label to show current selected file for the copier
@@ -806,6 +821,28 @@ class EufsLauncher(Plugin):
                         new_value
                 )
 
+        def get_color_noise_level(self):
+                """Returns the color noise slider's noise level."""
+
+                noise_level_widget = self.COLOR_NOISE_SLIDER
+                numerator = (1.0 * (noise_level_widget.value() - noise_level_widget.minimum()))
+                denominator = (noise_level_widget.maximum() - noise_level_widget.minimum())
+                return self.MAX_COLOR_NOISE * numerator/denominator
+
+        def set_color_noise_level(self, new_noise_level):
+                """
+                Sets the color noise slider's level.
+                Code may look complicated, but it's really just inverting get_color_noise_level to solve
+                for `color_noise_level_widget.value()`
+                """
+                noise_level_widget = self.COLOR_NOISE_SLIDER
+                denominator = (noise_level_widget.maximum() - noise_level_widget.minimum())
+                numerator = new_noise_level * denominator / self.MAX_COLOR_NOISE
+                new_value = numerator + noise_level_widget.minimum()
+                noise_level_widget.setValue(
+                        new_value
+                )
+
         def convert_button_pressed(self):
                 """Handles interfacing with ConversionTools."""
 
@@ -883,6 +920,7 @@ class EufsLauncher(Plugin):
                 self.tell_launchella("Launching " + track_to_launch)
                 noise_level = self.get_noise_level()
                 cone_noise_level = self.get_cone_noise_level()
+                color_noise_level = self.get_color_noise_level()
                 self.tell_launchella("With Noise Level: " + str(noise_level))
 
                 # Remove relevant random noise tiles from the csv
@@ -995,9 +1033,55 @@ class EufsLauncher(Plugin):
                 )
 
                 # Trigger launch files hooked to checkboxes
-                for checkbox, effect in self.checkbox_effect_mapping:
+                for checkbox, effect_on, effect_off in self.checkbox_effect_mapping:
                         if checkbox.isChecked():
-                                effect()
+                                effect_on()
+                        else:
+                                effect_off()
+
+                # Hard-Coded Map Effect
+                if self.FAST_SLAM_LOAD_MAP.isChecked():
+                        in_path = os.path.join(
+                                self.GAZEBO,
+                                'tracks',
+                                "LAST_LAUNCH.csv"
+                        )
+                        the_csv = pd.read_csv(
+                                in_path,
+                                names=[
+                                        "tag",
+                                        "x",
+                                        "y",
+                                        "direction",
+                                        "x_variance",
+                                        "y_variance",
+                                        "xy_covariance"
+                                ],
+                                skiprows=1
+                        )
+                        cone_types = ["blue", "yellow", "orange", "big_orange"]
+                        for index, row in the_csv.iterrows():
+                                if uniform(0, 1) < color_noise_level and row["tag"] in cone_types:
+                                        the_csv.at[index, "tag"] = "unknown_color"
+                        out_path = os.path.join(
+                                self.GAZEBO,
+                                'tracks',
+                                "FAST_SLAM_PRELOADED_MAP.csv"
+                        )
+                        the_csv.to_csv(
+                                out_path,
+                                index=False,
+                                columns=[
+                                        "tag",
+                                        "x",
+                                        "y",
+                                        "direction",
+                                        "x_variance",
+                                        "y_variance",
+                                        "xy_covariance"
+                                ]
+                        )
+                        rospy.set_param("/slam/map_path", out_path)
 
                 # Auto-launch default scripts in yaml
                 scripts = self.default_config["eufs_launcher"]["on_startup"]
