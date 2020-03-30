@@ -1269,7 +1269,11 @@ def cone_default(xys, starting=False, track_width=None, slalom=False, prev_point
                         for idx, tup in enumerate(to_return):
                                 x, y, _ = tup
                                 if int(x) == int(i) and int(y) == int(j):
-                                        to_return[idx] = ((x + point_list[1][0])/2, (y + point_list[1][1])/2, CONE_START)
+                                        to_return[idx] = (
+                                                (x + point_list[1][0])/2,
+                                                (y + point_list[1][1])/2,
+                                                CONE_START
+                                        )
 
         return to_return
 
