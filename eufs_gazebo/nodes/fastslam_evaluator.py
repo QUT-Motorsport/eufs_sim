@@ -155,8 +155,12 @@ class SLAMEval(object):
         pose_err = self.compare(true_pose_data, slam_pose_data)
         map_sim = self.compare_cones(true_cones, slam_cones)
         self.out_msg.x_err, self.out_msg.y_err, self.out_msg.z_err = pose_err[:3]
-        self.out_msg.x_orient_err, self.out_msg.y_orient_err, self.out_msg.z_orient_err, self.out_msg.w_orient_err = \
-            pose_err[3:]
+        (
+            self.out_msg.x_orient_err,
+            self.out_msg.y_orient_err,
+            self.out_msg.z_orient_err,
+            self.out_msg.w_orient_err
+        ) = pose_err[3:]
         self.out_msg.map_similarity = map_sim
         self.out_msg.header.stamp = rospy.Time.now()
         self.out.publish(self.out_msg)
@@ -174,8 +178,8 @@ class SLAMEval(object):
         """
 
         # Cones come with covariance - we don't use that data so we get rid of it:
-        gt_points = [x.point for x in gt_cones]
-        est_points = [x.point for x in est_cones]
+        gt_points = {idx: [x.point for x in val] for idx, val in gt_cones.items()}
+        est_points = {idx: [x.point for x in val] for idx, val in est_cones.items()}
 
         # first max_min of the GT map
         max_x, min_x, max_y, min_y = self.get_max_min(gt_points["blue_cones"])
