@@ -70,9 +70,9 @@ class PerceptionSensorsSimulator(object):
         for cone_list in cone_lists_to_check:
             for cone in cone_list:
                if self.lidar_can_see(cone.point):
-                   cones_in_lidar_view.append(cone.point)
+                   cones_in_lidar_view.append(cone)
                if self.camera_can_see(cone.point):
-                   cones_in_camera_view.append(cone.point)
+                   cones_in_camera_view.append(cone)
         
         # Now we remove or uncolor out-of-view cones
         # Uncolored if only visible by lidar, removed if visible in neither
@@ -82,19 +82,19 @@ class PerceptionSensorsSimulator(object):
         ]
         out_message.blue_cones = [
             cone for cone in out_message.blue_cones
-            if cone in cones_in_camera_view + cones_in_lidar_view
+            if cone in cones_in_camera_view
         ]
         out_message.yellow_cones = [
             cone for cone in out_message.yellow_cones
-            if cone in cones_in_camera_view + cones_in_lidar_view
+            if cone in cones_in_camera_view
         ]
         out_message.orange_cones = [
             cone for cone in out_message.orange_cones
-            if cone in cones_in_camera_view + cones_in_lidar_view
+            if cone in cones_in_camera_view
         ]
         out_message.big_orange_cones = [
             cone for cone in out_message.big_orange_cones
-            if cone in cones_in_camera_view + cones_in_lidar_view
+            if cone in cones_in_camera_view
         ]
         
             
