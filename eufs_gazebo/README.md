@@ -22,7 +22,7 @@ based on the location of the car at a certain frequency.
 
 #### Publishers
 
-- `/ground_truth/cones` (eufs_msgs/ConeArray).
+- `/ground_truth/cones` (eufs_msgs/ConeArrayWithCovariance).
         Cone locations in the frame of the car
 - `/ground_truth/cones/viz` (visualization_msgs/MarkerArray).
         Cone locations to be displayed in Rviz
