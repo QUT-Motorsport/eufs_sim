@@ -11,7 +11,7 @@ It outputs messages the following messages:
 
 Listens to:
 
-`ground_truth/cones` (of type `eufs_msgs::ConeArray`)
+`ground_truth/all_cones` (of type `eufs_msgs::ConeArray`)
 `ground_truth/state_raw` (of type `nav_msgs::Odometry`)
 
 """
@@ -57,12 +57,62 @@ class PerceptionSensorsSimulator(object):
         # First we convert our input ConeArray into a ConeArrayWithCovariance
         out_message = self.convert_to_have_covariance(msg)
 
+        # Now we loop through all the cones
+        cones_in_lidar_view = []
+        cones_in_camera_view = []
+        cone_lists_to_check = [
+            out_message.blue_cones,
+            out_message.yellow_cones,
+            out_message.orange_cones,
+            out_message.big_orange_cones,
+            out_message.unknown_color_cones
+        ]
+        for cone_list in cone_lists_to_check:
+            for cone in cone_list:
+               if self.lidar_can_see(cone.point):
+                   cones_in_lidar_view.append(cone.point)
+               if self.camera_can_see(cone.point):
+                   cones_in_camera_view.append(cone.point)
+        
+        # Now we remove or uncolor out-of-view cones
+        # Uncolored if only visible by lidar, removed if visible in neither
+        out_message.unknown_color_cones = [
+            cone for cone in sum(cone_lists_to_check)
+            if cone not in cones_in_camera_view and cone in cones_in_lidar_view
+        ]
+        out_message.blue_cones = [
+            cone for cone in out_message.blue_cones
+            if cone in cones_in_camera_view + cones_in_lidar_view
+        ]
+        out_message.yellow_cones = [
+            cone for cone in out_message.yellow_cones
+            if cone in cones_in_camera_view + cones_in_lidar_view
+        ]
+        out_message.orange_cones = [
+            cone for cone in out_message.orange_cones
+            if cone in cones_in_camera_view + cones_in_lidar_view
+        ]
+        out_message.big_orange_cones = [
+            cone for cone in out_message.big_orange_cones
+            if cone in cones_in_camera_view + cones_in_lidar_view
+        ]
+        
+            
+
         self.cones_out.publish(out_message)
 
     def position_update(self, msg):
         """Keeps this node's opinion on the car's position up to date."""
         self.has_received_position = True
         self.position = msg
+
+    def lidar_can_see(self, point):
+        """Checks if point is in the FOV of the LiDAR"""
+        return True
+
+    def camera_can_see(self, point):
+        """Checks if point is in the FOV of the Camera"""
+        return False
 
     def convert_to_have_covariance(self, msg):
         """

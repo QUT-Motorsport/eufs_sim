@@ -72,7 +72,7 @@ Node that applies the noise profile of perception sensors onto the ground truth
 cone output received from `cone_ground_truth.py`
 
 #### Subscribers:
-`ground_truth/cones` (of type `eufs_msgs/ConeArray`)
+`ground_truth/all_cones` (of type `eufs_msgs/ConeArray`)
 `ground_truth/state_raw` (of type `nav_msgs/Odometry`)
 
 #### Publishers:
