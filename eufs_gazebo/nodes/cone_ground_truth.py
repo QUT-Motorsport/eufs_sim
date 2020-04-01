@@ -12,6 +12,8 @@ Subscribed Topics:
 Published Topics:
     /ground_truth/cones (eufs_msgs/ConeArray)
         Cone locations in the frame of the car
+    /ground_truth/cones_with_covariance (eufs_msgs/ConeArrayWithCovariance)
+        Cone locations in the frame of the car
     /ground_truth/cones/viz (visualization_msgs/MarkerArray)
         Cone locations to be displayed in Rviz
     /ground_truth/midpoints (eufs_msgs/pointsArray)
@@ -66,7 +68,7 @@ import rospy
 from eufs_msgs.msg import CarState
 from geometry_msgs.msg import Point
 from visualization_msgs.msg import Marker, MarkerArray
-from eufs_msgs.msg import ConeArray, PointArray
+from eufs_msgs.msg import ConeArray, PointArray, ConeArrayWithCovariance, ConeWithCovariance
 
 
 class ConeGroundTruth:
@@ -100,6 +102,11 @@ class ConeGroundTruth:
 
         # Publishers
         self.cone_pub = rospy.Publisher("/ground_truth/cones", ConeArray, queue_size=1)
+        self.cone_with_covariance_pub = rospy.Publisher(
+            "/ground_truth/cones_with_covariance",
+            ConeArrayWithCovariance,
+            queue_size=1
+        )
         self.cone_marker_pub = rospy.Publisher("/ground_truth/cones/viz", MarkerArray, queue_size=1)
         self.midpoints_pub = rospy.Publisher("/ground_truth/midpoints", PointArray, queue_size=1)
         self.midpoints_marker_pub = rospy.Publisher("/ground_truth/midpoints/viz", Marker, queue_size=1)
@@ -121,6 +128,7 @@ class ConeGroundTruth:
 
         # If no subscribers to any topics, exit
         if (self.cone_pub.get_num_connections() == 0 and
+                self.cone_with_covariance_pub.get_num_connections() == 0 and
                 self.cone_marker_pub.get_num_connections() == 0 and
                 self.midpoints_pub.get_num_connections() == 0 and
                 self.midpoints_marker_pub.get_num_connections() == 0):
@@ -129,13 +137,16 @@ class ConeGroundTruth:
 
         # Publish the cone data
         if (self.cone_pub.get_num_connections() > 0 or
-                self.cone_marker_pub.get_num_connections() > 0):
+                self.cone_marker_pub.get_num_connections() > 0 or
+                self.cone_with_covariance_pub.get_num_connections() > 0):
 
             # Publish cone ground truth locations
             cone_msg = ConeArray()
+            cone_with_covariance_msg = ConeArrayWithCovariance()
             cone_msg.header.frame_id = self.CONE_FRAME
             cone_msg.header.stamp = rospy.Time.now()
-
+            cone_with_covariance_msg.header = cone_msg.header
+            default_covariance = [-1, -1, -1, -1]
             cone_markers = MarkerArray()
             marker_id = 0  # IDs are needed for the marker to work
 
@@ -143,18 +154,27 @@ class ConeGroundTruth:
                 blue_closest_cones = self.process_cones(self.blue_cones, yaw, trans)
                 if len(blue_closest_cones) != 0:
                     for cone in np.reshape(blue_closest_cones, (-1, 2)):
-                        cone_msg.blue_cones.append(Point(cone[0], cone[1], 0))
+                        the_point = Point(cone[0], cone[1], 0)
+                        cone_msg.blue_cones.append(the_point)
+                        cone_with_covariance_msg.blue_cones.append(
+                            make_cone_with_covariance(the_point, default_covariance)
+                        )
                         marker = self.get_cone_marker(pose=cone, rgb=(0.2, 0.2, 1), id=marker_id)
                         marker_id += 1
                         cone_markers.markers.append(marker)
             except Exception as e:
+                rospy.logerr(e)
                 rospy.logerr("Couldn't process blue cones.", e)
 
             try:
                 yellow_closest_cones = self.process_cones(self.yellow_cones, yaw, trans)
                 if len(yellow_closest_cones) != 0:
                     for cone in np.reshape(yellow_closest_cones, (-1, 2)):
-                        cone_msg.yellow_cones.append(Point(cone[0], cone[1], 0))
+                        the_point = Point(cone[0], cone[1], 0)
+                        cone_msg.yellow_cones.append(the_point)
+                        cone_with_covariance_msg.yellow_cones.append(
+                            make_cone_with_covariance(the_point, default_covariance)
+                        )
                         marker = self.get_cone_marker(pose=cone, rgb=(1, 1, 0), id=marker_id)
                         marker_id += 1
                         cone_markers.markers.append(marker)
@@ -165,7 +185,11 @@ class ConeGroundTruth:
                 orange_closest_cones = self.process_cones(self.orange_cones, yaw, trans)
                 if len(orange_closest_cones) != 0:
                     for cone in np.reshape(orange_closest_cones, (-1, 2)):
-                        cone_msg.orange_cones.append(Point(cone[0], cone[1], 0))
+                        the_point = Point(cone[0], cone[1], 0)
+                        cone_msg.orange_cones.append(the_point)
+                        cone_with_covariance_msg.orange_cones.append(
+                            make_cone_with_covariance(the_point, default_covariance)
+                        )
                         marker = self.get_cone_marker(pose=cone, rgb=(1, 0.549, 0), id=marker_id)
                         marker_id += 1
                         cone_markers.markers.append(marker)
@@ -176,7 +200,11 @@ class ConeGroundTruth:
                 big_orange_closest_cones = self.process_cones(self.big_orange_cones, yaw, trans)
                 if len(big_orange_closest_cones) != 0:
                     for cone in np.reshape(big_orange_closest_cones, (-1, 2)):
-                        cone_msg.big_orange_cones.append(Point(cone[0], cone[1], 0))
+                        the_point = Point(cone[0], cone[1], 0)
+                        cone_msg.big_orange_cones.append(the_point)
+                        cone_with_covariance_msg.big_orange_cones.append(
+                            make_cone_with_covariance(the_point, default_covariance)
+                        )
                         marker = self.get_cone_marker(pose=cone, rgb=(1, 0.271, 0), id=marker_id, big=True)
                         marker_id += 1
                         cone_markers.markers.append(marker)
@@ -185,6 +213,7 @@ class ConeGroundTruth:
 
             # Publish topics
             self.cone_pub.publish(cone_msg)
+            self.cone_with_covariance_pub.publish(cone_with_covariance_msg)
             self.cone_marker_pub.publish(cone_markers)
 
         # Midpoints
@@ -381,6 +410,13 @@ class ConeGroundTruth:
         self.big_orange_cones = np.array(data[data.tag == "big_orange"][["x", "y"]])
         self.orange_cones = np.array(data[data.tag == "orange"][["x", "y"]])
         self.midpoints = np.array(data[data.tag == "midpoint"][["x", "y"]])
+
+def make_cone_with_covariance(point, cov):
+    """Creates a ConeWithCovariance msg from given point and covariance"""
+    to_return = ConeWithCovariance()
+    to_return.point = point
+    to_return.covariance = cov
+    return to_return
 
 
 if __name__ == "__main__":
