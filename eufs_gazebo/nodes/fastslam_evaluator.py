@@ -11,10 +11,10 @@ It listens messages the following messages:
 
 SLAM Message:
 `fast_slam/pose` (of type `geometry_msgs/Pose`)
-`/fast_slam/map` (of type `eufs_msgs/ConeArray`)
+`/fast_slam/map` (of type `eufs_msgs/ConeArrayWithCovariance`)
 
 Ground truths:
-`/ground_truth/cones` (of type `eufs_msgs/ConeArray`)
+`/ground_truth/cones` (of type `eufs_msgs/ConeArrayWithCovariance`)
 `/ground_truth/state ` (of type `eufs_msgs/CarState`)
 
 It publishes a message:
@@ -33,7 +33,7 @@ import rospy
 import numpy as np
 from skimage.draw import polygon
 from geometry_msgs.msg import Pose
-from eufs_msgs.msg import ConeArray, CarState, SLAMErr
+from eufs_msgs.msg import ConeArrayWithCovariance, CarState, SLAMErr
 
 
 class SLAMEval(object):
@@ -56,9 +56,9 @@ class SLAMEval(object):
 
         # The input message, stored
         self.slam_pose = Pose()
-        self.slam_map = ConeArray()
+        self.slam_map = ConeArrayWithCovariance()
         self.ground_truth_pose = Pose()
-        self.ground_truth_map = ConeArray()
+        self.ground_truth_map = ConeArrayWithCovariance()
 
         # The output message
         self.out_msg = SLAMErr()
@@ -79,10 +79,14 @@ class SLAMEval(object):
         self.slam_pose_sub = rospy.Subscriber("fast_slam/pose", Pose, self.slam_receiver)
         self.slam_map_sub = rospy.Subscriber(
             "/fast_slam/map",
-            ConeArray,
+            ConeArrayWithCovariance,
             self.slam_receiver
         )
-        self.map_sub = rospy.Subscriber("/ground_truth/all_cones", ConeArray, self.ground_truth_receiver)
+        self.map_sub = rospy.Subscriber(
+            "/ground_truth/all_cones",
+            ConeArrayWithCovariance,
+            self.ground_truth_receiver
+        )
         self.pose_sub = rospy.Subscriber(
             "/ground_truth/state",
             CarState,
@@ -96,7 +100,7 @@ class SLAMEval(object):
         if str(msg._type) == "geometry_msgs/Pose":
             self.got_slam_pose = True
             self.slam_pose = msg
-        elif str(msg._type) == "eufs_msgs/ConeArray":
+        elif str(msg._type) == "eufs_msgs/ConeArrayWithCovariance":
             self.got_slam_map = True
             self.slam_map = msg
 
@@ -106,7 +110,7 @@ class SLAMEval(object):
         if str(msg._type) == "eufs_msgs/CarState":
             self.got_truth_pose = True
             self.ground_truth_pose = msg.pose.pose
-        elif str(msg._type) == "eufs_msgs/ConeArray":
+        elif str(msg._type) == "eufs_msgs/ConeArrayWithCovariance":
             self.got_truth_map = True
             self.ground_truth_map = msg
 
@@ -169,13 +173,17 @@ class SLAMEval(object):
         3. Divide the first result in 2 by the second result in 2. (also known as intersection over union)
         """
 
+        # Cones come with covariance - we don't use that data so we get rid of it:
+        gt_points = [x.point for x in gt_cones]
+        est_points = [x.point for x in est_cones]
+
         # first max_min of the GT map
-        max_x, min_x, max_y, min_y = self.get_max_min(gt_cones["blue_cones"])
-        true_blue = self.rescale(gt_cones["blue_cones"], max_x, min_x, max_y, min_y)
-        true_yellow = self.rescale(gt_cones["yellow_cones"], max_x, min_x, max_y, min_y)
-        max_x, min_x, max_y, min_y = self.get_max_min(est_cones["blue_cones"] + est_cones["yellow_cones"])
-        est_blue = self.rescale(est_cones["blue_cones"], max_x, min_x, max_y, min_y)
-        est_yellow = self.rescale(est_cones["yellow_cones"], max_x, min_x, max_y, min_y)
+        max_x, min_x, max_y, min_y = self.get_max_min(gt_points["blue_cones"])
+        true_blue = self.rescale(gt_points["blue_cones"], max_x, min_x, max_y, min_y)
+        true_yellow = self.rescale(gt_points["yellow_cones"], max_x, min_x, max_y, min_y)
+        max_x, min_x, max_y, min_y = self.get_max_min(est_points["blue_cones"] + est_points["yellow_cones"])
+        est_blue = self.rescale(est_points["blue_cones"], max_x, min_x, max_y, min_y)
+        est_yellow = self.rescale(est_points["yellow_cones"], max_x, min_x, max_y, min_y)
 
         true_blue = self.order_points(true_blue)
         true_yellow = self.order_points(true_yellow)
