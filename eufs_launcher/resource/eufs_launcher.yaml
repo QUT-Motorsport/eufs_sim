@@ -45,6 +45,10 @@ eufs_launcher:
             package: "fast_slam"
             location: "launch/fast_slam.launch"
 
+        perception_sensors_simulator:
+            package: "eufs_gazebo"
+            location: "launch/perception_sensors_simulator.launch"
+
     # Checkboxes to have in the config section.  
     # `eufs_launcher` handles layout based on priority set.
     checkboxes:
@@ -94,6 +98,7 @@ eufs_launcher:
                 param_name: "slam/map_load"
                 if_on: "true"
                 if_off: "false"
+
 
 
     # Some nodes fail to shutdown
