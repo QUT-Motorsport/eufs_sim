@@ -68,7 +68,7 @@ import rospy
 from eufs_msgs.msg import CarState
 from geometry_msgs.msg import Point
 from visualization_msgs.msg import Marker, MarkerArray
-from eufs_msgs.msg import ConeArrayWithCovariance, PointArray
+from eufs_msgs.msg import ConeArrayWithCovariance, PointArray, ConeWithCovariance
 
 
 class ConeGroundTruth:
