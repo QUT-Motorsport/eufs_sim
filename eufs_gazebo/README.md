@@ -31,6 +31,53 @@ based on the location of the car at a certain frequency.
 - `/ground_truth/midpoints/viz` (visualization_msgs/Marker).
         Track midpoints for visualization in Rviz
 
+### sbg_raw_simulator.py
+Node that simulates the outputs of our sbg sensor
+
+#### Subscribers:
+`/imu` (of type `sensor_msgs/Imu`)
+`/gps`    (of type `sensor_msgs/NavSatFix`)
+
+#### Publishers:
+`/imu/nav_sat_fix` (of type `sensor_msgs/NavSatFix`)
+`/imu/data`    (of type `sensor_msgs/Imu`)
+
+### ekf_evaluator.py
+Node that listens to ground truth and the ekf outputs and compares their accuracy
+
+#### Subscribers:
+`/odometry/filtered` (of type `nav_msgs/Odometry`)
+`/accel/filtered` (of type `geometry_msgs/AccelWithCovarianceStamped`)
+`/imu` (of type `sensor_msgs/Imu`)
+`/gps_velocity` (of type `geometry_msgs/Vector3Stamped`)
+
+#### Publishers:
+`/ekf/evaluation` (of type `eufs_msgs/EKFErr`)
+
+### fastslam_evaluator.py
+Node that listens to ground truth and fastslam outputs and compares their accuracy
+
+#### Subscribers:
+`fast_slam/pose` (of type `geometry_msgs/Pose`)
+`/fast_slam/map` (of type `eufs_msgs/ConeArray`)
+`/ground_truth/cones` (of type `eufs_msgs/ConeArray`)
+`/ground_truth/state ` (of type `eufs_msgs/CarState`)
+
+
+#### Publishers:
+`/slam/evaluation` (of type `eufs_msgs/SLAMErr`)
+
+### perception_sensors_simulator.py
+Node that applies the noise profile of perception sensors onto the ground truth
+cone output received from `cone_ground_truth.py`
+
+#### Subscribers:
+`ground_truth/cones` (of type `eufs_msgs/ConeArray`)
+`ground_truth/state_raw` (of type `nav_msgs/Odometry`)
+
+#### Publishers:
+`/perception_sim/cones` (of type `eufs_msgs/ConeArrayWithCovariance`)
+
 ## Launches
 
 - `acceleration.launch` - Launches a simulation of the acceleration event at competition. 50m straight track.
