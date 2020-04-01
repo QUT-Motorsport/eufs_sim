@@ -25,7 +25,7 @@ from nav_msgs.msg import Odometry
 from tf.transformations import *
 
 
-class SbgRawDataSimulator(object):
+class PerceptionSensorsSimulator(object):
 
     def __init__(self, namespace='perception_sensors_simulator'):
         """
@@ -77,6 +77,7 @@ class SbgRawDataSimulator(object):
             to_return = ConeWithCovariance()
             to_return.point = p
             to_return.covariance = [-1, -1, -1, -1]
+            return to_return
 
         out_message.blue_cones = [point_to_cone(point) for point in msg.blue_cones]
         out_message.yellow_cones = [point_to_cone(point) for point in msg.yellow_cones]
@@ -90,5 +91,5 @@ class SbgRawDataSimulator(object):
 
 
 if __name__ == "__main__":
-    sbg_raw_data_simulator = SbgRawDataSimulator()
+    perception_sensors_simulator = PerceptionSensorsSimulator()
     rospy.spin()
