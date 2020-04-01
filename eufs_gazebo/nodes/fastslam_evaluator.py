@@ -78,7 +78,7 @@ class SLAMEval(object):
         # Subscribe to channels
         self.slam_pose_sub = rospy.Subscriber("fast_slam/pose", Pose, self.slam_receiver)
         self.slam_map_sub = rospy.Subscriber(
-            "/fast_slam/map",
+            "/fast_slam/map_with_covariance",
             ConeArrayWithCovariance,
             self.slam_receiver
         )
