@@ -77,7 +77,7 @@ class PerceptionSensorsSimulator(object):
         # Now we remove or uncolor out-of-view cones
         # Uncolored if only visible by lidar, removed if visible in neither
         out_message.unknown_color_cones = [
-            cone for cone in sum(cone_lists_to_check)
+            cone for cone in sum(cone_lists_to_check, [])
             if cone not in cones_in_camera_view and cone in cones_in_lidar_view
         ]
         out_message.blue_cones = [
