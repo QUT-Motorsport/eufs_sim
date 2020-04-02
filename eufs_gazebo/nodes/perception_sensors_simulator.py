@@ -77,8 +77,6 @@ class PerceptionSensorsSimulator(object):
         self.camera_max_square_dist = self.camera_max_dist**2
         self.camera_fov_radians_half = self.camera_fov_radians/2
         self.lidar_variance = self.lidar_std_dev**2
-        self.camera_orthogonal_error = self.lidar_std_dev
-        self.camera_orthogonal_variance = self.camera_orthogonal_error**2
 
         # For testing purposes, set one of these to false!
         self.camera_active = True
@@ -168,8 +166,9 @@ class PerceptionSensorsSimulator(object):
             camera_depth_std = self.get_camera_depth_error(
                 math.sqrt(self.square_dist(cone.point))
             )
+            camera_orthogonal_std = camera_depth_std / 5
             unrotated_error_x = np.random.normal(0, camera_depth_std)
-            unrotated_error_y = np.random.normal(self.camera_orthogonal_error)
+            unrotated_error_y = np.random.normal(0, camera_orthogonal_std)
             off_angle = -self.angular_dist(cone.point)
             sin_ = math.sin(off_angle)
             cos_ = math.cos(off_angle)
@@ -183,7 +182,7 @@ class PerceptionSensorsSimulator(object):
             # Since it's orthonormal, its inverse is its transpose
             eigenvector_matrix = np.array([[cos_, -sin_], [sin_, cos_]])
             eigenvalue_matrix = np.array(
-                [[camera_depth_std**2, 0], [0, self.camera_orthogonal_variance]]
+                [[camera_depth_std**2, 0], [0, camera_orthogonal_std**2]]
             )
             inverted_eigenvector_matrix = np.array([[cos_, sin_], [-sin_, cos_]])
             out_mat = np.matmul(
