@@ -82,7 +82,7 @@ class PerceptionSensorsSimulator(object):
 
         # For testing purposes, set one of these to false!
         self.camera_active = True
-        self.lidar_active = True
+        self.lidar_active = False
 
         # Set up publisher and subscriber
         self.cones_out = rospy.Publisher(
@@ -178,15 +178,21 @@ class PerceptionSensorsSimulator(object):
             cone.point.x += rotated_error_x
             cone.point.y += rotated_error_y
 
-            # We calculate covariance by rotating covariance matrix!
-            base_covariance = np.array(
+            # We calculate covariance matrix, check wiki for details
+            # hey, cool!  it just happens to be a rotation matrix...
+            # Since it's orthonormal, its inverse is its transpose
+            eigenvector_matrix = np.array([[cos_, -sin_], [sin_, cos_]])
+            eigenvalue_matrix = np.array(
                 [[camera_depth_std**2, 0], [0, self.camera_orthogonal_variance]]
             )
-            R = np.array([[cos_, -sin_], [sin_, cos_]])
-            rotated_covariance = np.matmul(R, base_covariance)
+            inverted_eigenvector_matrix = np.array([[cos_, sin_], [-sin_, cos_]])
+            out_mat = np.matmul(
+                np.matmul(eigenvector_matrix, eigenvalue_matrix),
+                inverted_eigenvector_matrix
+            )
             cone.covariance = [
-                rotated_covariance[0, 0], rotated_covariance[1, 0],
-                rotated_covariance[0, 1], rotated_covariance[1, 1]
+                out_mat[0, 0], out_mat[1, 0],
+                out_mat[0, 1], out_mat[1, 1]
             ]
 
         return cone
