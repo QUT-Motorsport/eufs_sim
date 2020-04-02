@@ -57,6 +57,8 @@ class PerceptionSensorsSimulator(object):
         self.lidar_min_y_dist = 1
         self.lidar_max_x_dist = 20
         self.lidar_max_y_dist = 10
+        self.camera_error_coefficient_a = 0.0184
+        self.camera_error_coefficient_b = 0.2106
 
         # Derived parameters
         self.lidar_min_square_dist = self.lidar_min_dist**2
@@ -66,6 +68,12 @@ class PerceptionSensorsSimulator(object):
         self.camera_max_square_dist = self.camera_max_dist**2
         self.camera_fov_radians_half = self.camera_fov_radians/2
         self.lidar_variance = self.lidar_std_dev**2
+        self.camera_orthogonal_error = self.lidar_std_dev
+        self.camera_orthogonal_variance = self.camera_orthogonal_error**2
+
+        # For testing purposes, set one of these to false!
+        self.camera_active = True
+        self.lidar_active = True
 
         # Set up publisher and subscriber
         self.cones_out = rospy.Publisher(
@@ -148,12 +156,36 @@ class PerceptionSensorsSimulator(object):
             cone.covariance = [self.lidar_variance, 0, 0, self.lidar_variance]
 
         elif in_camera:
-            pass
+            camera_depth_std = self.get_camera_depth_error(
+                math.sqrt(self.square_dist(cone.point))
+            )
+            unrotated_error_x = np.random.normal(0, camera_depth_std)
+            unrotated_error_y = np.random.normal(self.camera_orthogonal_error)
+            off_angle = -self.angular_dist(cone.point)
+            sin_ = math.sin(off_angle)
+            cos_ = math.cos(off_angle)
+            rotated_error_x = unrotated_error_x * cos_ - unrotated_error_y * sin_
+            rotated_error_y = unrotated_error_x * sin_ + unrotated_error_x * cos_
+            cone.point.x += rotated_error_x
+            cone.point.y += rotated_error_y
+
+            # We calculate covariance by rotating covariance matrix!
+            base_covariance = np.array(
+                [[camera_depth_std**2, 0], [0, self.camera_orthogonal_variance]]
+            )
+            R = np.array([[cos_, -sin_], [sin_, cos_]])
+            rotated_covariance = np.matmul(R, base_covariance)
+            cone.covariance = [
+                rotated_covariance[0, 0], rotated_covariance[1, 0],
+                rotated_covariance[0, 1], rotated_covariance[1, 1]
+            ]
 
         return cone
 
     def lidar_can_see(self, point):
         """Checks if point is in the FOV of the LiDAR"""
+        if not self.lidar_active:
+            return False
         distance = self.square_dist(point)
         angle_distance = self.angular_dist(point)
         car_loc = self.car_state.pose.pose.position
@@ -170,6 +202,8 @@ class PerceptionSensorsSimulator(object):
 
     def camera_can_see(self, point):
         """Checks if point is in the FOV of the Camera"""
+        if not self.camera_active:
+            return False
         distance = self.square_dist(point)
         angle_distance = self.angular_dist(point)
         satisfies_distance_requirement = (
@@ -233,6 +267,10 @@ class PerceptionSensorsSimulator(object):
         ]
 
         return out_message
+
+    def get_camera_depth_error(self, depth):
+        """Estimates the std deviation given a distance from the car"""
+        return self.camera_error_coefficient_a * math.exp(self.camera_error_coefficient_a * depth)
 
 
 if __name__ == "__main__":
