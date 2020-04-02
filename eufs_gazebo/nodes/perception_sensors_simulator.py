@@ -43,14 +43,15 @@ class PerceptionSensorsSimulator(object):
         self.has_received_car_state = False
 
         # Initialize the parameters
-        # Note - limit both max dists to 30, multibly lidar fov by 30/360 to see
+        # Note - limit both max dists to 30, make lidar fov by math.pi/6 to see
         # an example of FastSLAM struggling!
+        # Set lidar_max_dist to 15 to see how it worked before I made this node
         self.lidar_min_dist = 1
         self.lidar_max_dist = 100
         self.lidar_fov_radians = 2*math.pi
         self.camera_min_dist = 1
-        self.camera_max_dist = 100
-        self.camera_fov_radians = 120 * (math.pi / 180)
+        self.camera_max_dist = 15
+        self.camera_fov_radians = 110 * (math.pi / 180)
 
         # Derived parameters
         self.lidar_min_square_dist = self.lidar_min_dist**2
