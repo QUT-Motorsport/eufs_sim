@@ -178,6 +178,12 @@ class PerceptionSensorsSimulator(object):
             cone.point.y += rotated_error_y
 
             # We calculate covariance matrix, check wiki for details
+            # First order of business is recalculating the angle based off of our
+            # error-introduced position
+            off_angle = -self.angular_dist(cone.point)
+            sin_ = math.sin(off_angle)
+            cos_ = math.cos(off_angle)
+
             # hey, cool!  it just happens to be a rotation matrix...
             # Since it's orthonormal, its inverse is its transpose
             eigenvector_matrix = np.array([[cos_, -sin_], [sin_, cos_]])
