@@ -21,6 +21,7 @@ import math
 import rospy
 import tf
 from eufs_msgs.msg import ConeWithCovariance, ConeArray, ConeArrayWithCovariance, CarState
+from geometry_msgs.msg import Point
 from tf.transformations import *
 
 
@@ -79,9 +80,14 @@ class PerceptionSensorsSimulator(object):
         self.camera_fov_radians_half = self.camera_fov_radians/2
         self.lidar_variance = self.lidar_std_dev**2
 
+        # Positional parameters, used in ground_truth too
+        self.x_init = rospy.get_param("~x_init", default=0.0)
+        self.y_init = rospy.get_param("~y_init", default=0.0)
+        self.yaw_init = rospy.get_param("~yaw_init", default=0.0)
+
         # For testing purposes, set one of these to false!
         self.camera_active = True
-        self.lidar_active = False
+        self.lidar_active = True
 
         # Set up publisher and subscriber
         self.cones_out = rospy.Publisher(
@@ -154,11 +160,15 @@ class PerceptionSensorsSimulator(object):
         """Keeps this node's opinion on the car's state up to date."""
         self.has_received_car_state = True
         self.car_state = msg
-        self.car_position = self.car_state.pose.pose.position
+        self.car_position = Point()
+        self.car_position.x = self.car_state.pose.pose.position.x + self.x_init
+        self.car_position.y = self.car_state.pose.pose.position.y + self.y_init
+        self.car_position.z = 0
         car_orientation = self.car_state.pose.pose.orientation
         _, _, self.car_yaw = tf.transformations.euler_from_quaternion(
             [car_orientation.x, car_orientation.y, car_orientation.z, car_orientation.w]
         )
+        self.car_yaw += self.yaw_init
 
     def add_error(self, cone, in_camera, in_lidar):
         """Adds a noise profile to the cone"""
@@ -189,6 +199,9 @@ class PerceptionSensorsSimulator(object):
             # We calculate covariance matrix, check wiki for details
             # First order of business is recalculating the angle based off of our
             # error-introduced position
+            # To be honest I'm not sure why we add 90 degrees, when I do the math
+            # it isn't necessary!  But it undeniably works, so I must be making
+            # a math error.
             off_angle = math.pi/2 + math.atan2(
                 self.car_position.y - cone.point.y,
                 self.car_position.x - cone.point.x
@@ -223,10 +236,10 @@ class PerceptionSensorsSimulator(object):
         satisfies_distance_requirement = (
             self.lidar_min_square_dist < distance and
             distance < self.lidar_max_square_dist and
-            abs(point.x - self.car_position.x) < self.lidar_max_x_dist and
-            self.lidar_min_x_dist < abs(point.x - self.car_position.x) and
-            abs(point.y - self.car_position.y) < self.lidar_max_y_dist and
-            self.lidar_min_y_dist < abs(point.y - self.car_position.y)
+            abs(point.x) < self.lidar_max_x_dist and
+            self.lidar_min_x_dist < abs(point.x) and
+            abs(point.y) < self.lidar_max_y_dist and
+            self.lidar_min_y_dist < abs(point.y)
         )
         satisfies_fov_requirement = abs(angle_distance) < self.lidar_fov_radians_half
         return satisfies_distance_requirement and satisfies_fov_requirement
@@ -245,7 +258,7 @@ class PerceptionSensorsSimulator(object):
 
     def square_dist(self, point):
         """Calculates the square distance from point to car"""
-        return (point.x - self.car_position.x)**2 + (point.y - self.car_position.y)**2
+        return (point.x)**2 + (point.y)**2
 
     def angular_dist(self, point):
         """
@@ -255,7 +268,7 @@ class PerceptionSensorsSimulator(object):
         """
 
         # Get unit A
-        A_ = np.array([point.x - self.car_position.x, point.y - self.car_position.y])
+        A_ = np.array([point.x, point.y])
         A_norm = np.linalg.norm(A_)
         if A_norm == 0:
             return 0
