@@ -52,6 +52,7 @@ class PerceptionSensorsSimulator(object):
         self.camera_min_dist = 1
         self.camera_max_dist = 15
         self.camera_fov_radians = 110 * (math.pi / 180)
+        self.lidar_std_dev = 0.03
 
         # Derived parameters
         self.lidar_min_square_dist = self.lidar_min_dist**2
@@ -60,6 +61,7 @@ class PerceptionSensorsSimulator(object):
         self.camera_min_square_dist = self.camera_min_dist**2
         self.camera_max_square_dist = self.camera_max_dist**2
         self.camera_fov_radians_half = self.camera_fov_radians/2
+        self.lidar_variance = self.lidar_std_dev**2
 
         # Set up publisher and subscriber
         self.cones_out = rospy.Publisher(
@@ -96,23 +98,28 @@ class PerceptionSensorsSimulator(object):
         # Now we remove or uncolor out-of-view cones
         # Uncolored if only visible by lidar, removed if visible in neither
         out_message.unknown_color_cones = [
-            cone for cone in sum(cone_lists_to_check, [])
+            self.add_error(cone, cone in cones_in_camera_view, cone in cones_in_lidar_view)
+            for cone in sum(cone_lists_to_check, [])
             if cone not in cones_in_camera_view and cone in cones_in_lidar_view
         ]
         out_message.blue_cones = [
-            cone for cone in out_message.blue_cones
+            self.add_error(cone, cone in cones_in_camera_view, cone in cones_in_lidar_view)
+            for cone in out_message.blue_cones
             if cone in cones_in_camera_view
         ]
         out_message.yellow_cones = [
-            cone for cone in out_message.yellow_cones
+            self.add_error(cone, cone in cones_in_camera_view, cone in cones_in_lidar_view)
+            for cone in out_message.yellow_cones
             if cone in cones_in_camera_view
         ]
         out_message.orange_cones = [
-            cone for cone in out_message.orange_cones
+            self.add_error(cone, cone in cones_in_camera_view, cone in cones_in_lidar_view)
+            for cone in out_message.orange_cones
             if cone in cones_in_camera_view
         ]
         out_message.big_orange_cones = [
-            cone for cone in out_message.big_orange_cones
+            self.add_error(cone, cone in cones_in_camera_view, cone in cones_in_lidar_view)
+            for cone in out_message.big_orange_cones
             if cone in cones_in_camera_view
         ]
         
@@ -124,6 +131,22 @@ class PerceptionSensorsSimulator(object):
         """Keeps this node's opinion on the car's state up to date."""
         self.has_received_car_state = True
         self.car_state = msg
+
+    def add_error(self, cone, in_camera, in_lidar):
+        """Adds a noise profile to the cone"""
+
+        # If can be seen by both, it's same as only being seen by lidar
+        # (so camera adds no new information here, is just a backup in case
+        # of no LiDAR)
+        if in_lidar:
+            cone.point.x = np.random.normal(cone.point.x, self.lidar_std_dev)
+            cone.point.y = np.random.normal(cone.point.y, self.lidar_std_dev)
+            cone.covariance = [self.lidar_variance, 0, 0, self.lidar_variance]
+
+        elif in_camera:
+            pass
+
+        return cone
 
     def lidar_can_see(self, point):
         """Checks if point is in the FOV of the LiDAR"""
