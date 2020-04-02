@@ -39,8 +39,26 @@ class PerceptionSensorsSimulator(object):
         rospy.init_node("perception_sensors_simulator", anonymous=True)
 
         # Initialize persistent variables
-        self.position = Odometry()
-        self.has_received_position = False
+        self.car_state = Odometry()
+        self.has_received_car_state = False
+
+        # Initialize the parameters
+        # Note - limit both max dists to 30, multibly lidar fov by 30/360 to see
+        # an example of FastSLAM struggling!
+        self.lidar_min_dist = 1
+        self.lidar_max_dist = 100
+        self.lidar_fov_radians = 2*math.pi
+        self.camera_min_dist = 1
+        self.camera_max_dist = 100
+        self.camera_fov_radians = 120 * (math.pi / 180)
+
+        # Derived parameters
+        self.lidar_min_square_dist = self.lidar_min_dist**2
+        self.lidar_max_square_dist = self.lidar_max_dist**2
+        self.lidar_fov_radians_half = self.lidar_fov_radians/2
+        self.camera_min_square_dist = self.camera_min_dist**2
+        self.camera_max_square_dist = self.camera_max_dist**2
+        self.camera_fov_radians_half = self.camera_fov_radians/2
 
         # Set up publisher and subscriber
         self.cones_out = rospy.Publisher(
@@ -49,7 +67,7 @@ class PerceptionSensorsSimulator(object):
             queue_size=1
         )
         self.cones_in = rospy.Subscriber("/ground_truth/all_cones", ConeArray, self.receiver)
-        self.position = rospy.Subscriber("/ground_truth/state_raw", Odometry, self.position_update)
+        self.car_sub = rospy.Subscriber("/ground_truth/state_raw", Odometry, self.car_update)
 
     def receiver(self, msg):
         """Receives ground truth and outputs converted info"""
@@ -101,18 +119,61 @@ class PerceptionSensorsSimulator(object):
 
         self.cones_out.publish(out_message)
 
-    def position_update(self, msg):
-        """Keeps this node's opinion on the car's position up to date."""
-        self.has_received_position = True
-        self.position = msg
+    def car_update(self, msg):
+        """Keeps this node's opinion on the car's state up to date."""
+        self.has_received_car_state = True
+        self.car_state = msg
 
     def lidar_can_see(self, point):
         """Checks if point is in the FOV of the LiDAR"""
-        return True
+        distance = self.square_dist(point)
+        angle_distance = self.angular_dist(point)
+        satisfies_distance_requirement = (
+            self.lidar_min_square_dist < distance and distance < self.lidar_max_square_dist
+        )
+        satisfies_fov_requirement = abs(angle_distance) < self.lidar_fov_radians_half
+        return satisfies_distance_requirement and satisfies_fov_requirement
 
     def camera_can_see(self, point):
         """Checks if point is in the FOV of the Camera"""
-        return False
+        distance = self.square_dist(point)
+        angle_distance = self.angular_dist(point)
+        satisfies_distance_requirement = (
+            self.camera_min_square_dist < distance and distance < self.camera_max_square_dist
+        )
+        satisfies_fov_requirement = abs(angle_distance) < self.camera_fov_radians_half
+        return satisfies_distance_requirement and satisfies_fov_requirement
+
+    def square_dist(self, point):
+        """Calculates the square distance from point to car"""
+        car_loc = self.car_state.pose.pose.position
+        return (point.x - car_loc.x)**2 + (point.y - car_loc.y)**2
+
+    def angular_dist(self, point):
+        """
+        Calculates angular distance between vectors A&B with origin being the car position, where;
+        A is the vector to the input point
+        B is the vector along which the car faces
+        """
+        car_loc = self.car_state.pose.pose.position
+        car_orientation = self.car_state.pose.pose.orientation
+        _, _, car_angle = tf.transformations.euler_from_quaternion(
+            [car_orientation.x, car_orientation.y, car_orientation.z, car_orientation.w]
+        )
+
+        # Get unit A
+        A_ = np.array([point.x - car_loc.x, point.y - car_loc.y])
+        A_norm = np.linalg.norm(A_)
+        if A_norm == 0:
+            return True
+        A = A_/A_norm
+
+        # Get unit B
+        B = np.array([math.cos(car_angle), math.sin(car_angle)])
+        
+        # Calculate angle: arccos(A @ B)
+        return math.acos(A[0]*B[0] + A[1]*B[1])
+    
 
     def convert_to_have_covariance(self, msg):
         """

@@ -311,7 +311,11 @@ class ConeGroundTruth:
                                     [-np.sin(yaw), np.cos(yaw)]])
 
         if len(closest_cones) > 0:
-            translated_cones = closest_cones - np.repeat(np.array(transform), np.shape(closest_cones)[0], axis=0)
+            translated_cones = closest_cones - np.repeat(
+                np.array(transform),
+                np.shape(closest_cones)[0],
+                axis=0
+            )
             cones_rotated = np.dot(rotation_matrix, translated_cones.T).T
 
             cones_in_view = []
