@@ -127,18 +127,21 @@ class ConeGroundTruth:
         if (self.cone_pub.get_num_connections() == 0 and
                 self.cone_marker_pub.get_num_connections() == 0 and
                 self.midpoints_pub.get_num_connections() == 0 and
-                self.midpoints_marker_pub.get_num_connections() == 0):
+                self.midpoints_marker_pub.get_num_connections() == 0 and
+                self.all_cones_pub.get_num_connections() == 0):
             rospy.logdebug("Nobody is listening to cone_ground_truth. Doing nothing")
             return
 
         # Publish the cone data
         if (self.cone_pub.get_num_connections() > 0 or
-                self.cone_marker_pub.get_num_connections() > 0):
+                self.cone_marker_pub.get_num_connections() > 0 or
+                self.all_cones_pub.get_num_connections() > 0):
 
             # Publish cone ground truth locations
             cone_msg = ConeArray()
             cone_msg.header.frame_id = self.CONE_FRAME
             cone_msg.header.stamp = rospy.Time.now()
+            self.all_cones = ConeArray()
             self.all_cones.header.frame_id = self.CONE_FRAME
             self.all_cones.header.stamp = rospy.Time.now()
 
@@ -153,6 +156,10 @@ class ConeGroundTruth:
                         marker = self.get_cone_marker(pose=cone, rgb=(0.2, 0.2, 1), id=marker_id)
                         marker_id += 1
                         cone_markers.markers.append(marker)
+                blue_all_cones = self.process_cones(self.blue_cones, yaw, trans, let_all_in=True)
+                if len(blue_all_cones) != 0:
+                    for cone in np.reshape(blue_all_cones, (-1, 2)):
+                        self.all_cones.blue_cones.append(Point(cone[0], cone[1], 0))
             except Exception as e:
                 rospy.logerr("Couldn't process blue cones.", e)
 
@@ -164,6 +171,10 @@ class ConeGroundTruth:
                         marker = self.get_cone_marker(pose=cone, rgb=(1, 1, 0), id=marker_id)
                         marker_id += 1
                         cone_markers.markers.append(marker)
+                yellow_all_cones = self.process_cones(self.yellow_cones, yaw, trans, let_all_in=True)
+                if len(yellow_all_cones) != 0:
+                    for cone in np.reshape(yellow_all_cones, (-1, 2)):
+                        self.all_cones.yellow_cones.append(Point(cone[0], cone[1], 0))
             except Exception as e:
                 rospy.logwarn("Couldn't process yellow cones.", e)
 
@@ -175,6 +186,12 @@ class ConeGroundTruth:
                         marker = self.get_cone_marker(pose=cone, rgb=(1, 0.549, 0), id=marker_id)
                         marker_id += 1
                         cone_markers.markers.append(marker)
+                orange_all_cones = self.process_cones(
+                    self.orange_cones, yaw, trans, let_all_in=True
+                )
+                if len(blue_all_cones) != 0:
+                    for cone in np.reshape(orange_all_cones, (-1, 2)):
+                        self.all_cones.orange_cones.append(Point(cone[0], cone[1], 0))
             except Exception as e:
                 rospy.logwarn("Couldn't process orange cones.", e)
 
@@ -183,9 +200,17 @@ class ConeGroundTruth:
                 if len(big_orange_closest_cones) != 0:
                     for cone in np.reshape(big_orange_closest_cones, (-1, 2)):
                         cone_msg.big_orange_cones.append(Point(cone[0], cone[1], 0))
-                        marker = self.get_cone_marker(pose=cone, rgb=(1, 0.271, 0), id=marker_id, big=True)
+                        marker = self.get_cone_marker(
+                            pose=cone, rgb=(1, 0.271, 0), id=marker_id, big=True
+                        )
                         marker_id += 1
                         cone_markers.markers.append(marker)
+                big_orange_all_cones = self.process_cones(
+                    self.big_orange_cones, yaw, trans, let_all_in=True
+                )
+                if len(big_orange_all_cones) != 0:
+                    for cone in np.reshape(big_orange_all_cones, (-1, 2)):
+                        self.all_cones.big_orange_cones.append(Point(cone[0], cone[1], 0))
             except Exception as e:
                 rospy.logwarn("Couldn't process big orange cones.", e)
 
@@ -260,7 +285,7 @@ class ConeGroundTruth:
         else:
             return np.array([[]])
 
-    def process_cones(self, cones_list, yaw, trans):
+    def process_cones(self, cones_list, yaw, trans, let_all_in = False):
         """Rotates the cones by the current yaw of the car
             and filters them according to the distance provided
             and the Field of View (FOV).
@@ -269,6 +294,7 @@ class ConeGroundTruth:
             cones_list (np.array): 2D list of cones where each row is a cone
             yaw                  : current yaw of the car
             trans (np.array)     : translation of the car in the map frame
+            let_all_in           : if True, disregards max distance and fov
 
         Returns:
             List of filtered cones in the base_footprint frame.
@@ -278,7 +304,7 @@ class ConeGroundTruth:
 
         closest_cones = []
         for i in range(len(cones_dists[0])):
-            if cones_dists[0][i] < np.power(self.distance, 2):
+            if cones_dists[0][i] < np.power(self.distance, 2) or let_all_in:
                 closest_cones.append(cones_list[i])
 
         rotation_matrix = np.array([[np.cos(yaw), np.sin(yaw)],
@@ -293,7 +319,7 @@ class ConeGroundTruth:
             for cone in cones_rotated:
                 # convert to polar coordinates
                 angle = np.arctan2(cone[1], cone[0])
-                if np.abs(angle) < self.fov/2:
+                if np.abs(angle) < self.fov/2 or let_all_in:
                     cones_in_view.append(cone)
             return cones_in_view
         else:

@@ -48,7 +48,7 @@ class PerceptionSensorsSimulator(object):
             ConeArrayWithCovariance,
             queue_size=1
         )
-        self.cones_in = rospy.Subscriber("/ground_truth/cones", ConeArray, self.receiver)
+        self.cones_in = rospy.Subscriber("/ground_truth/all_cones", ConeArray, self.receiver)
         self.position = rospy.Subscriber("/ground_truth/state_raw", Odometry, self.position_update)
 
     def receiver(self, msg):
