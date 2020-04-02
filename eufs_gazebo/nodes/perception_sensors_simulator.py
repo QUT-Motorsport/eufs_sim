@@ -12,7 +12,7 @@ It outputs messages the following messages:
 Listens to:
 
 `ground_truth/all_cones` (of type `eufs_msgs::ConeArray`)
-`ground_truth/state_raw` (of type `nav_msgs::Odometry`)
+`ground_truth/state` (of type `eufs_msgs::CarState`)
 
 """
 
@@ -20,8 +20,7 @@ import numpy as np
 import math
 import rospy
 import tf
-from eufs_msgs.msg import ConeWithCovariance, ConeArray, ConeArrayWithCovariance
-from nav_msgs.msg import Odometry
+from eufs_msgs.msg import ConeWithCovariance, ConeArray, ConeArrayWithCovariance, CarState
 from tf.transformations import *
 
 
@@ -39,8 +38,10 @@ class PerceptionSensorsSimulator(object):
         rospy.init_node("perception_sensors_simulator", anonymous=True)
 
         # Initialize persistent variables
-        self.car_state = Odometry()
+        self.car_state = CarState()
         self.has_received_car_state = False
+        self.car_position = None
+        self.car_yaw = None
 
         # Initialize the parameters
         # Note - perception doesn't actually use a radius to keep points,
@@ -89,10 +90,13 @@ class PerceptionSensorsSimulator(object):
             queue_size=1
         )
         self.cones_in = rospy.Subscriber("/ground_truth/all_cones", ConeArray, self.receiver)
-        self.car_sub = rospy.Subscriber("/ground_truth/state_raw", Odometry, self.car_update)
+        self.car_sub = rospy.Subscriber("/ground_truth/state", CarState, self.car_update)
 
     def receiver(self, msg):
         """Receives ground truth and outputs converted info"""
+
+        if not self.has_received_car_state:
+            return
 
         # First we convert our input ConeArray into a ConeArrayWithCovariance
         out_message = self.convert_to_have_covariance(msg)
@@ -150,6 +154,11 @@ class PerceptionSensorsSimulator(object):
         """Keeps this node's opinion on the car's state up to date."""
         self.has_received_car_state = True
         self.car_state = msg
+        self.car_position = self.car_state.pose.pose.position
+        car_orientation = self.car_state.pose.pose.orientation
+        _, _, self.car_yaw = tf.transformations.euler_from_quaternion(
+            [car_orientation.x, car_orientation.y, car_orientation.z, car_orientation.w]
+        )
 
     def add_error(self, cone, in_camera, in_lidar):
         """Adds a noise profile to the cone"""
@@ -180,7 +189,10 @@ class PerceptionSensorsSimulator(object):
             # We calculate covariance matrix, check wiki for details
             # First order of business is recalculating the angle based off of our
             # error-introduced position
-            off_angle = -self.angular_dist(cone.point)
+            off_angle = math.pi/2 + math.atan2(
+                self.car_position.y - cone.point.y,
+                self.car_position.x - cone.point.x
+            )
             sin_ = math.sin(off_angle)
             cos_ = math.cos(off_angle)
 
@@ -190,7 +202,7 @@ class PerceptionSensorsSimulator(object):
             eigenvalue_matrix = np.array(
                 [[camera_depth_std**2, 0], [0, camera_orthogonal_std**2]]
             )
-            inverted_eigenvector_matrix = np.array([[cos_, sin_], [-sin_, cos_]])
+            inverted_eigenvector_matrix = np.transpose(eigenvector_matrix)
             out_mat = np.matmul(
                 np.matmul(eigenvector_matrix, eigenvalue_matrix),
                 inverted_eigenvector_matrix
@@ -208,14 +220,13 @@ class PerceptionSensorsSimulator(object):
             return False
         distance = self.square_dist(point)
         angle_distance = self.angular_dist(point)
-        car_loc = self.car_state.pose.pose.position
         satisfies_distance_requirement = (
             self.lidar_min_square_dist < distance and
             distance < self.lidar_max_square_dist and
-            abs(point.x - car_loc.x) < self.lidar_max_x_dist and
-            self.lidar_min_x_dist < abs(point.x - car_loc.x) and
-            abs(point.y - car_loc.y) < self.lidar_max_y_dist and
-            self.lidar_min_y_dist < abs(point.y - car_loc.y)
+            abs(point.x - self.car_position.x) < self.lidar_max_x_dist and
+            self.lidar_min_x_dist < abs(point.x - self.car_position.x) and
+            abs(point.y - self.car_position.y) < self.lidar_max_y_dist and
+            self.lidar_min_y_dist < abs(point.y - self.car_position.y)
         )
         satisfies_fov_requirement = abs(angle_distance) < self.lidar_fov_radians_half
         return satisfies_distance_requirement and satisfies_fov_requirement
@@ -234,8 +245,7 @@ class PerceptionSensorsSimulator(object):
 
     def square_dist(self, point):
         """Calculates the square distance from point to car"""
-        car_loc = self.car_state.pose.pose.position
-        return (point.x - car_loc.x)**2 + (point.y - car_loc.y)**2
+        return (point.x - self.car_position.x)**2 + (point.y - self.car_position.y)**2
 
     def angular_dist(self, point):
         """
@@ -243,24 +253,19 @@ class PerceptionSensorsSimulator(object):
         A is the vector to the input point
         B is the vector along which the car faces
         """
-        car_loc = self.car_state.pose.pose.position
-        car_orientation = self.car_state.pose.pose.orientation
-        _, _, car_angle = tf.transformations.euler_from_quaternion(
-            [car_orientation.x, car_orientation.y, car_orientation.z, car_orientation.w]
-        )
 
         # Get unit A
-        A_ = np.array([point.x - car_loc.x, point.y - car_loc.y])
+        A_ = np.array([point.x - self.car_position.x, point.y - self.car_position.y])
         A_norm = np.linalg.norm(A_)
         if A_norm == 0:
-            return True
+            return 0
         A = A_/A_norm
 
         # Get unit B
-        B = np.array([math.cos(car_angle), math.sin(car_angle)])
+        B = np.array([math.cos(self.car_yaw), math.sin(self.car_yaw)])
         
         # Calculate angle: arccos(A @ B)
-        return math.acos(A[0]*B[0] + A[1]*B[1])
+        return math.acos(np.clip(np.dot(A, B), -1, 1))
     
 
     def convert_to_have_covariance(self, msg):

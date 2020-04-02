@@ -6,7 +6,7 @@ from the track files and then publishes the appropriate cone detections
 based on the location of the car at a certain frequency.
 
 Subscribed Topics:
-    /ground_truth/state_raw (nav_msgs/Odometry)
+    /ground_truth/state (nav_msgs/Odometry)
         Simulated ground truth odometry for teh car
 
 Published Topics:

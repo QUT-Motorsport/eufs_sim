@@ -17,7 +17,7 @@ based on the location of the car at a certain frequency.
 
 #### Subscribers
 
-- `/ground_truth/state_raw` (nav_msgs/Odometry).
+- `/ground_truth/state` (eufs_msgs/CarState).
         Simulated ground truth odometry for the car
 
 #### Publishers
@@ -73,7 +73,7 @@ cone output received from `cone_ground_truth.py`
 
 #### Subscribers:
 `ground_truth/all_cones` (of type `eufs_msgs/ConeArray`)
-`ground_truth/state_raw` (of type `nav_msgs/Odometry`)
+`ground_truth/state` (of type `nav_msgs/Odometry`)
 
 #### Publishers:
 `/perception_sim/cones` (of type `eufs_msgs/ConeArrayWithCovariance`)
