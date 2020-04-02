@@ -202,9 +202,9 @@ class PerceptionSensorsSimulator(object):
             # To be honest I'm not sure why we add 90 degrees, when I do the math
             # it isn't necessary!  But it undeniably works, so I must be making
             # a math error.
-            off_angle = math.pi/2 + math.atan2(
-                self.car_position.y - cone.point.y,
-                self.car_position.x - cone.point.x
+            off_angle = math.pi / 2 + math.atan2(
+                cone.point.y,
+                cone.point.x
             )
             sin_ = math.sin(off_angle)
             cos_ = math.cos(off_angle)
