@@ -46,19 +46,28 @@ class PerceptionSensorsSimulator(object):
         # Note - perception doesn't actually use a radius to keep points,
         # but rather compares absolute differences of components, with
         # a different threshold for x & y.  So we run both tests.
-        self.lidar_min_dist = 1
-        self.lidar_max_dist = 100
-        self.lidar_fov_radians = 2*math.pi
-        self.camera_min_dist = 1
-        self.camera_max_dist = 15
-        self.camera_fov_radians = 110 * (math.pi / 180)
-        self.lidar_std_dev = 0.03
-        self.lidar_min_x_dist = 1
-        self.lidar_min_y_dist = 1
-        self.lidar_max_x_dist = 20
-        self.lidar_max_y_dist = 10
-        self.camera_error_coefficient_a = 0.0184
-        self.camera_error_coefficient_b = 0.2106
+        self.lidar_min_dist = rospy.get_param("~lidar_min_dist", default=1)
+        self.lidar_max_dist = rospy.get_param("~lidar_max_dist", default=100)
+        self.lidar_fov_radians = rospy.get_param("~lidar_fov_radians", default=2*math.pi)
+        self.camera_min_dist = rospy.get_param("~camera_min_dist", default=1)
+        self.camera_max_dist = rospy.get_param("~camera_max_dist", default=15)
+        self.camera_fov_radians = rospy.get_param(
+            "~camera_fov_radians",
+            default=110 * (math.pi / 180)
+        )
+        self.lidar_std_dev = rospy.get_param("~lidar_std_dev", default=0.03)
+        self.lidar_min_x_dist = rospy.get_param("~lidar_min_x_dist", default=1)
+        self.lidar_min_y_dist = rospy.get_param("~lidar_min_y_dist", default=1)
+        self.lidar_max_x_dist = rospy.get_param("~lidar_max_x_dist", default=20)
+        self.lidar_max_y_dist = rospy.get_param("~lidar_max_y_dist", default=10)
+        self.camera_error_coefficient_a = rospy.get_param(
+            "~camera_error_coefficient_a",
+            default=0.0184
+        )
+        self.camera_error_coefficient_b = rospy.get_param(
+            "~camera_error_coefficient_b",
+            default=0.2106
+        )
 
         # Derived parameters
         self.lidar_min_square_dist = self.lidar_min_dist**2
