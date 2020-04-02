@@ -43,9 +43,9 @@ class PerceptionSensorsSimulator(object):
         self.has_received_car_state = False
 
         # Initialize the parameters
-        # Note - limit both max dists to 30, make lidar fov by math.pi/6 to see
-        # an example of FastSLAM struggling!
-        # Set lidar_max_dist to 15 to see how it worked before I made this node
+        # Note - perception doesn't actually use a radius to keep points,
+        # but rather compares absolute differences of components, with
+        # a different threshold for x & y.  So we run both tests.
         self.lidar_min_dist = 1
         self.lidar_max_dist = 100
         self.lidar_fov_radians = 2*math.pi
@@ -53,6 +53,10 @@ class PerceptionSensorsSimulator(object):
         self.camera_max_dist = 15
         self.camera_fov_radians = 110 * (math.pi / 180)
         self.lidar_std_dev = 0.03
+        self.lidar_min_x_dist = 1
+        self.lidar_min_y_dist = 1
+        self.lidar_max_x_dist = 20
+        self.lidar_max_y_dist = 10
 
         # Derived parameters
         self.lidar_min_square_dist = self.lidar_min_dist**2
@@ -152,8 +156,14 @@ class PerceptionSensorsSimulator(object):
         """Checks if point is in the FOV of the LiDAR"""
         distance = self.square_dist(point)
         angle_distance = self.angular_dist(point)
+        car_loc = self.car_state.pose.pose.position
         satisfies_distance_requirement = (
-            self.lidar_min_square_dist < distance and distance < self.lidar_max_square_dist
+            self.lidar_min_square_dist < distance and
+            distance < self.lidar_max_square_dist and
+            abs(point.x - car_loc.x) < self.lidar_max_x_dist and
+            self.lidar_min_x_dist < abs(point.x - car_loc.x) and
+            abs(point.y - car_loc.y) < self.lidar_max_y_dist and
+            self.lidar_min_y_dist < abs(point.y - car_loc.y)
         )
         satisfies_fov_requirement = abs(angle_distance) < self.lidar_fov_radians_half
         return satisfies_distance_requirement and satisfies_fov_requirement
