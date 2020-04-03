@@ -169,13 +169,7 @@ class PerceptionSensorsSimulator(object):
             # We calculate covariance matrix, check wiki for details
             # First order of business is recalculating the angle based off of our
             # error-introduced position
-            # To be honest I'm not sure why we add 90 degrees, when I do the math
-            # it isn't necessary!  But it undeniably works, so I must be making
-            # a math error.
-            off_angle = math.pi / 2 + math.atan2(
-                cone.point.y,
-                cone.point.x
-            )
+            off_angle = self.angular_dist(cone.point)
             sin_ = math.sin(off_angle)
             cos_ = math.cos(off_angle)
 
@@ -232,23 +226,13 @@ class PerceptionSensorsSimulator(object):
 
     def angular_dist(self, point):
         """
-        Calculates angular distance between vectors A&B with origin being the car position, where;
-        A is the vector to the input point
-        B is the vector along which the car faces
+        Calculates angular distance from where the car is facing
         """
 
-        # Get unit A
-        A_ = np.array([point.x, point.y])
-        A_norm = np.linalg.norm(A_)
-        if A_norm == 0:
-            return 0
-        A = A_/A_norm
-
-        # Get unit B
-        B = np.array([1, 0])
-        
-        # Calculate angle: arccos(A @ B)
-        return math.acos(np.clip(np.dot(A, B), -1, 1))
+        return math.atan2(
+            point.y,
+            point.x
+        )
     
 
     def convert_to_have_covariance(self, msg):
