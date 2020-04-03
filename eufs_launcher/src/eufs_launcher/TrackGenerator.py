@@ -1044,6 +1044,9 @@ class CONE_START:
 class CONE_BIG_ORANGE:
     pass
 
+class NOISE:
+    pass
+
 
 def cone_start(xys, track_width=None):
     """Wrapper for cone_default with start parameter"""

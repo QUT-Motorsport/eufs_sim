@@ -17,7 +17,7 @@ from TrackGenerator import (
         compactify_points, cone_start,
         CONE_INNER, CONE_OUTER,
         CONE_ORANGE, CONE_BIG_ORANGE,
-        CONE_START
+        CONE_START, NOISE
 )
 from TrackGenerator import get_cone_function
 
@@ -359,18 +359,7 @@ class ConversionTools:
                 # Now we get the car position
                 car_x, car_y = (sx, sy)
 
-                # Now we want to make all pixels bordering the track become magenta (255,0,255) -
-                # this will be our 'cone' color
-                # To find pixel boardering track, simply find white pixel adjacent to
-                # a non-white non-magenta pixle
-                # We will also want to make it such that cones are about 4-6
-                # away from eachother euclideanly
-
-                def is_track(c):
-                        return (c == ConversionTools.track_outer_color or
-                                c == ConversionTools.track_inner_color or
-                                c == ConversionTools.track_center_color)
-
+                # And now the cone locations
                 cone_locs = []
                 for idx, tup in enumerate(components):
                         (name, points) = tup
@@ -381,7 +370,7 @@ class ConversionTools:
                                         get_cone_function(name)(points, prev_points=cone_locs)
                                 )
 
-                # Convert it into the output csv
+                # Get the right csv tags
                 def name_from_color(c):
                     if c == CONE_START or c == CONE_BIG_ORANGE:
                         return "big_orange"
@@ -391,6 +380,8 @@ class ConversionTools:
                         return "yellow"
                     elif c == CONE_INNER:
                         return "blue"
+                    elif c == NOISE:
+                        return "inactive_noise"
                     else:
                         return "ERROR"
 
@@ -420,7 +411,12 @@ class ConversionTools:
 
                 # Add noise pixels
                 im_to_display = ConversionTools.comps_to_png(GENERATED_FILENAME, params)
-                # TBA
+                pixels = im_to_display.load()
+                for i in range(im_to_display.size[0]):
+                        for j in range(im_to_display.size[1]):
+                                p = pixels[i, j]
+                                if p == ConversionTools.noise_color:
+                                    cone_locs.append((1.0 * i, 1.0 * j, NOISE))
 
                 # Save it
                 output = OrderedDict([
