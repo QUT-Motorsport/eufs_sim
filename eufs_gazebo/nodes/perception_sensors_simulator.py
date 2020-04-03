@@ -275,7 +275,7 @@ class PerceptionSensorsSimulator(object):
         A = A_/A_norm
 
         # Get unit B
-        B = np.array([math.cos(self.car_yaw), math.sin(self.car_yaw)])
+        B = np.array([1, 0])
         
         # Calculate angle: arccos(A @ B)
         return math.acos(np.clip(np.dot(A, B), -1, 1))
