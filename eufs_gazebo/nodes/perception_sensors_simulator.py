@@ -12,7 +12,6 @@ It outputs messages the following messages:
 Listens to:
 
 `ground_truth/all_cones` (of type `eufs_msgs::ConeArray`)
-`ground_truth/state` (of type `eufs_msgs::CarState`)
 
 """
 
@@ -37,12 +36,6 @@ class PerceptionSensorsSimulator(object):
         """
 
         rospy.init_node("perception_sensors_simulator", anonymous=True)
-
-        # Initialize persistent variables
-        self.car_state = CarState()
-        self.has_received_car_state = False
-        self.car_position = None
-        self.car_yaw = None
 
         # Initialize the parameters
         # Note - perception doesn't actually use a radius to keep points,
@@ -80,11 +73,6 @@ class PerceptionSensorsSimulator(object):
         self.camera_fov_radians_half = self.camera_fov_radians/2
         self.lidar_variance = self.lidar_std_dev**2
 
-        # Positional parameters, used in ground_truth too
-        self.x_init = rospy.get_param("~x_init", default=0.0)
-        self.y_init = rospy.get_param("~y_init", default=0.0)
-        self.yaw_init = rospy.get_param("~yaw_init", default=0.0)
-
         # For testing purposes, set one of these to false!
         self.camera_active = True
         self.lidar_active = True
@@ -96,13 +84,9 @@ class PerceptionSensorsSimulator(object):
             queue_size=1
         )
         self.cones_in = rospy.Subscriber("/ground_truth/all_cones", ConeArray, self.receiver)
-        self.car_sub = rospy.Subscriber("/ground_truth/state", CarState, self.car_update)
 
     def receiver(self, msg):
         """Receives ground truth and outputs converted info"""
-
-        if not self.has_received_car_state:
-            return
 
         # First we convert our input ConeArray into a ConeArrayWithCovariance
         out_message = self.convert_to_have_covariance(msg)
@@ -155,20 +139,6 @@ class PerceptionSensorsSimulator(object):
             
 
         self.cones_out.publish(out_message)
-
-    def car_update(self, msg):
-        """Keeps this node's opinion on the car's state up to date."""
-        self.has_received_car_state = True
-        self.car_state = msg
-        self.car_position = Point()
-        self.car_position.x = self.car_state.pose.pose.position.x + self.x_init
-        self.car_position.y = self.car_state.pose.pose.position.y + self.y_init
-        self.car_position.z = 0
-        car_orientation = self.car_state.pose.pose.orientation
-        _, _, self.car_yaw = tf.transformations.euler_from_quaternion(
-            [car_orientation.x, car_orientation.y, car_orientation.z, car_orientation.w]
-        )
-        self.car_yaw += self.yaw_init
 
     def add_error(self, cone, in_camera, in_lidar):
         """Adds a noise profile to the cone"""

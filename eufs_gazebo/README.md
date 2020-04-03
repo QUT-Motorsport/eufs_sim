@@ -73,7 +73,6 @@ cone output received from `cone_ground_truth.py`
 
 #### Subscribers:
 `ground_truth/all_cones` (of type `eufs_msgs/ConeArray`)
-`ground_truth/state` (of type `nav_msgs/Odometry`)
 
 #### Publishers:
 `/perception_sim/cones` (of type `eufs_msgs/ConeArrayWithCovariance`)
