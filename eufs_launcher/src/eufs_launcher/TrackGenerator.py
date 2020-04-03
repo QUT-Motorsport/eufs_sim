@@ -1095,7 +1095,7 @@ def cone_default(xys, starting=False, track_width=None, slalom=False, prev_point
         cone_check_amount = 30
 
         # How close can cones be from those on the same side.
-        cone_adjacent_closeness_parameter = 6
+        cone_adjacent_closeness_parameter = 4
 
         all_points_north = []
         all_points_south = []
