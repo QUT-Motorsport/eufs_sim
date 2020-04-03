@@ -165,7 +165,7 @@ class TrackGenerator:
                                 "MAX_HAIRPIN_PAIRS": 3,
                                 "MAX_LENGTH": 1500,
                                 "LAX_GENERATION": False,
-                                "TRACK_WIDTH": 3,
+                                "TRACK_WIDTH": 3.5,
                                 "COMPONENTS": {
                                         "STRAIGHT": 1,
                                         "CONSTANT_TURN": 0.7,
@@ -182,7 +182,7 @@ class TrackGenerator:
                                 "MAX_HAIRPIN_PAIRS": 3,
                                 "MAX_LENGTH": 1500,
                                 "LAX_GENERATION": False,
-                                "TRACK_WIDTH": 3,
+                                "TRACK_WIDTH": 3.5,
                                 "COMPONENTS": {
                                         "STRAIGHT": 1,
                                         "CONSTANT_TURN": 0.7,
@@ -200,7 +200,7 @@ class TrackGenerator:
                                 "MAX_HAIRPIN_PAIRS": 3,
                                 "MAX_LENGTH": 700,
                                 "LAX_GENERATION": True,
-                                "TRACK_WIDTH": 3,
+                                "TRACK_WIDTH": 3.5,
                                 "COMPONENTS": {
                                         "STRAIGHT": 1,
                                         "CONSTANT_TURN": 0.7,
@@ -218,7 +218,7 @@ class TrackGenerator:
                                 "MAX_HAIRPIN_PAIRS": 3,
                                 "MAX_LENGTH": 700,
                                 "LAX_GENERATION": True,
-                                "TRACK_WIDTH": 3,
+                                "TRACK_WIDTH": 3.5,
                                 "COMPONENTS": {
                                         "STRAIGHT": 1,
                                         "CONSTANT_TURN": 0.7,
@@ -237,7 +237,7 @@ class TrackGenerator:
                                 "MAX_HAIRPIN_PAIRS": 3,
                                 "MAX_LENGTH": 500,
                                 "LAX_GENERATION": True,
-                                "TRACK_WIDTH": 3,
+                                "TRACK_WIDTH": 3.5,
                                 "COMPONENTS": {
                                         "STRAIGHT": 1,
                                         "CONSTANT_TURN": 0.7,
@@ -255,7 +255,7 @@ class TrackGenerator:
                                 "MAX_HAIRPIN_PAIRS": 3,
                                 "MAX_LENGTH": 700,
                                 "LAX_GENERATION": True,
-                                "TRACK_WIDTH": 3,
+                                "TRACK_WIDTH": 3.5,
                                 "COMPONENTS": {
                                         "STRAIGHT": 1,
                                         "CONSTANT_TURN": 0.7,

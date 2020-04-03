@@ -581,7 +581,7 @@ class EufsLauncher(Plugin):
                 self.HAIRPIN_PAIRS = preset_data["MAX_HAIRPIN_PAIRS"]
                 self.MAX_LENGTH = preset_data["MAX_LENGTH"]
                 self.LAX_GENERATION = preset_data["LAX_GENERATION"]
-                self.TRACK_WIDTH = preset_data["TRACK_WIDTH"]
+                self.TRACK_WIDTH = self.deconvert_track_width(preset_data["TRACK_WIDTH"])
                 self.LAX_CHECKBOX.setChecked(self.LAX_GENERATION)
 
         def keep_track_of_preset_changes(self):
@@ -631,7 +631,9 @@ class EufsLauncher(Plugin):
                 self.MAX_HAIRPIN_LABEL.setText("MAX_HAIRPIN: " + str((self.MAX_HAIRPIN / 2.0)))
                 self.HAIRPIN_PAIRS_LABEL.setText("HAIRPIN_PAIRS: " + str(self.HAIRPIN_PAIRS))
                 self.MAX_LENGTH_LABEL.setText("MAX_LENGTH: " + str(self.MAX_LENGTH))
-                self.TRACK_WIDTH_LABEL.setText("TRACK_WIDTH: " + str(self.TRACK_WIDTH))
+                self.TRACK_WIDTH_LABEL.setText(
+                    "TRACK_WIDTH: " + str(self.convert_track_width(self.TRACK_WIDTH))
+                )
 
         def keep_sliders_up_to_date(self):
                 """This function keeps the values of the sliders up to date."""
@@ -683,8 +685,8 @@ class EufsLauncher(Plugin):
                 max_hairpin_pairs = 5
                 min_max_length = 200
                 max_max_length = 2000
-                min_width = 2
-                max_width = 10
+                min_width = 0
+                max_width = 5
                 self.set_slider_data("Param_MIN_STRAIGHT", min_straight, max_straight)
                 self.set_slider_data("Param_MAX_STRAIGHT", min_straight, max_straight)
                 self.set_slider_data("Param_MIN_CTURN", min_turn, max_turn)
@@ -694,6 +696,21 @@ class EufsLauncher(Plugin):
                 self.set_slider_data("Param_HAIRPIN_PAIRS", min_hairpin_pairs, max_hairpin_pairs)
                 self.set_slider_data("Param_MAX_LENGTH", min_max_length, max_max_length)
                 self.set_slider_data("Param_TRACK_WIDTH", min_width, max_width)
+
+        def convert_track_width(self, w):
+                """
+                Track width officially between 0 and 5,
+                but it's really between 2.5 and 5
+                """
+                return w/2.0 + 2.5
+
+        def deconvert_track_width(self, w):
+                """
+                Track width officially between 0 and 5,
+                but it's really between 2.5 and 5
+                This is inverse of convert_track_width
+                """
+                return (w - 2.5) * 2.0
 
         def get_slider_value(self, slidername):
                 """Returns the value of the specified slider."""
@@ -735,7 +752,7 @@ class EufsLauncher(Plugin):
                                     "MAX_HAIRPIN_PAIRS": self.HAIRPIN_PAIRS,
                                     "MAX_LENGTH": self.MAX_LENGTH,
                                     "LAX_GENERATION": isLaxGenerator,
-                                    "TRACK_WIDTH": self.TRACK_WIDTH,
+                                    "TRACK_WIDTH": self.convert_track_width(self.TRACK_WIDTH),
                                     "COMPONENTS": component_data
                 }
 
