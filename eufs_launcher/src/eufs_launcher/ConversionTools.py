@@ -14,7 +14,10 @@ from collections import OrderedDict
 sys.path.insert(1, os.path.join(rospkg.RosPack().get_path('eufs_gazebo'), 'tracks'))  # nopep8
 from track_gen import Track
 from TrackGenerator import (
-        compactify_points, cone_start, CONE_INNER, CONE_OUTER, CONE_ORANGE, CONE_START
+        compactify_points, cone_start,
+        CONE_INNER, CONE_OUTER,
+        CONE_ORANGE, CONE_BIG_ORANGE,
+        CONE_START
 )
 from TrackGenerator import get_cone_function
 
@@ -53,6 +56,9 @@ class ConversionTools:
         BOTTOM_LEFT = "Bottom Left"
         TOP_RIGHT = "Top Right"
         BOTTOM_RIGHT = "Bottom Right"
+
+        # Double cone closeness, how close do we place the doubled-up starting cones?
+        DOUBLE_CONE_CLOSENESS = 0.7
 
         #########################################################
         #              Handle Track Image Metadata              #
@@ -377,7 +383,7 @@ class ConversionTools:
 
                 # Convert it into the output csv
                 def name_from_color(c):
-                    if c == CONE_START:
+                    if c == CONE_START or c == CONE_BIG_ORANGE:
                         return "big_orange"
                     elif c == CONE_ORANGE:
                         return "orange"
@@ -387,6 +393,32 @@ class ConversionTools:
                         return "blue"
                     else:
                         return "ERROR"
+
+                # Add 2 cones at the cone start
+                to_remove = []
+                for cone in cone_locs:
+                    px, py, color = cone
+                    if color == CONE_START:
+                        direction_vector = (
+                                math.cos(angle) * 0.5 * ConversionTools.DOUBLE_CONE_CLOSENESS,
+                                math.sin(angle) * 0.5 * ConversionTools.DOUBLE_CONE_CLOSENESS
+                        )
+                        new_cone1 = (
+                            cone[0] - direction_vector[0],
+                            cone[1] - direction_vector[1],
+                            CONE_BIG_ORANGE
+                        )
+                        new_cone2 = (
+                            cone[0] + direction_vector[0],
+                            cone[1] + direction_vector[1],
+                            CONE_BIG_ORANGE
+                        )
+                        cone_locs.append(new_cone1)
+                        cone_locs.append(new_cone2)
+                        to_remove.append(cone)
+                [cone_locs.remove(x) for x in to_remove]
+
+                # Save it
                 output = OrderedDict([
                     ("tag", [name_from_color(color) for px, py, color in cone_locs] +
                         ["car_start"]),
@@ -1068,7 +1100,7 @@ class ConversionTools:
                         """
 
                         # Determines how close the two models are.  Smaller means closer.
-                        closeness_parameter = scale_data * 0.7
+                        closeness_parameter = scale_data * ConversionTools.DOUBLE_CONE_CLOSENESS
 
                         direction_vector = (
                                 math.cos(yaw) * 0.5 * closeness_parameter,
