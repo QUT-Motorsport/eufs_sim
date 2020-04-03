@@ -53,6 +53,11 @@ class ConversionTools:
         TOP_RIGHT = "Top Right"
         BOTTOM_RIGHT = "Bottom Right"
 
+        # Random track produces tracks that are too wide, so we add a scaling
+        # factor to de-widify it.  (The too-wide error is due to everything
+        # getting discretized in the conversion to png)
+        RANDOM_TRACK_SCALE_FACTOR = 0.75
+
         #########################################################
         #              Handle Track Image Metadata              #
         #########################################################
@@ -452,6 +457,17 @@ class ConversionTools:
                 )
                 pixels2[loc[0], loc[1]] = ConversionTools.deconvert_version_metadata(
                                              ConversionTools.TRACKIMG_VERSION_NUM
+                )[0]
+
+                # Tag it with scale data
+                loc = ConversionTools.get_metadata_pixel_location(
+                                            0,
+                                            0,
+                                            ConversionTools.TOP_LEFT,
+                                            im2.size
+                )
+                pixels2[loc[0], loc[1]] = ConversionTools.deconvert_scale_metadata(
+                    ConversionTools.RANDOM_TRACK_SCALE_FACTOR
                 )[0]
 
                 im2.save(
