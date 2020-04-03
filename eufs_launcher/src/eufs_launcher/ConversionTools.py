@@ -418,6 +418,10 @@ class ConversionTools:
                         to_remove.append(cone)
                 [cone_locs.remove(x) for x in to_remove]
 
+                # Add noise pixels
+                im_to_display = ConversionTools.comps_to_png(GENERATED_FILENAME, params)
+                # TBA
+
                 # Save it
                 output = OrderedDict([
                     ("tag", [name_from_color(color) for px, py, color in cone_locs] +
@@ -437,7 +441,7 @@ class ConversionTools:
                     ),
                     index=False
                 )
-                im_to_display = ConversionTools.comps_to_png(GENERATED_FILENAME, params)
+
                 return im_to_display
 
                 """for px, py, color in cone_locs:

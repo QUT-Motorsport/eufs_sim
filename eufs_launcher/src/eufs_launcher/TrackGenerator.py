@@ -1170,10 +1170,10 @@ def cone_default(xys, starting=False, track_width=None, slalom=False, prev_point
 
                 # This is where the cones will be placed, provided they pass the
                 # distance checks later.
-                north_point = (int(cur_point[0] + cur_tangent_normal[0]),
-                               int(cur_point[1] + cur_tangent_normal[1]))
-                south_point = (int(cur_point[0] - cur_tangent_normal[0]),
-                               int(cur_point[1] - cur_tangent_normal[1]))
+                north_point = ((cur_point[0] + cur_tangent_normal[0]),
+                               (cur_point[1] + cur_tangent_normal[1]))
+                south_point = ((cur_point[0] - cur_tangent_normal[0]),
+                               (cur_point[1] - cur_tangent_normal[1]))
 
                 # Calculates shortest distance to cone on same side of track
                 difference_from_prev_north = min([
@@ -1229,19 +1229,19 @@ def cone_default(xys, starting=False, track_width=None, slalom=False, prev_point
 
                 # And when they are viable, draw them!
                 if (north_viable):
-                        px_x = int(north_point[0])
-                        px_y = int(north_point[1])
+                        px_x = (north_point[0])
+                        px_y = (north_point[1])
                         to_return.append((px_x, px_y, CONE_OUTER))
                         all_points_north.append(north_point)
                 if (south_viable):
-                        px_x = int(south_point[0])
-                        px_y = int(south_point[1])
+                        px_x = (south_point[0])
+                        px_y = (south_point[1])
                         to_return.append((px_x, px_y, CONE_INNER))
                         all_points_south.append(south_point)
 
                 # Handle placement of slalom cones
                 if slalom and (north_viable or south_viable):
-                        to_return.append((int(cur_point[0]), int(cur_point[1]), CONE_ORANGE))
+                        to_return.append(((cur_point[0]), (cur_point[1]), CONE_ORANGE))
 
                 # Only keep track of last couple of previous cones
                 # (and the very first one, for when the loop joins up)
