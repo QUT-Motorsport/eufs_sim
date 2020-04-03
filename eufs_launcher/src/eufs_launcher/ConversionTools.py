@@ -10,6 +10,7 @@ import rospkg
 import rospy
 import sys
 import pandas as pd
+from collections import OrderedDict
 sys.path.insert(1, os.path.join(rospkg.RosPack().get_path('eufs_gazebo'), 'tracks'))  # nopep8
 from track_gen import Track
 from TrackGenerator import (
@@ -212,6 +213,13 @@ class ConversionTools:
                             conversion_suffix,
                             override_name
                     )
+                elif cfrom == "comps" and cto == "csv":
+                    return ConversionTools.comps_to_csv(
+                            which_file,
+                            params,
+                            conversion_suffix,
+                            override_name
+                    )
                 elif cfrom == "png" and cto == "launch":
                     return ConversionTools.png_to_launch(
                             which_file,
@@ -308,6 +316,166 @@ class ConversionTools:
                             override_name
                     )
                 return None
+
+        @staticmethod
+        def comps_to_csv(which_file, params, conversion_suffix="", override_name=None):
+                """
+                Converts raw track generator output to csv.
+
+                which_file:            Output filename
+                params["track data"]:  The track generator data
+                conversion_suffix:     Additional suffix to append to the output filename.
+
+                Should be called within a GeneratorContext context manager.
+                """
+
+                GENERATED_FILENAME = which_file + conversion_suffix
+                if override_name is not None:
+                    GENERATED_FILENAME = override_name
+
+                # Unpack
+                (components, twidth, theight) = params["track data"]
+
+                xys = compactify_points([
+                        (int(x[0]), int(x[1])) for x
+                        in get_points_from_component_list(components)
+                ])
+
+
+                # We want to calculate direction of car position
+                sx = xys[0][0]
+                sy = xys[0][1]
+                ex = xys[1][0]
+                ey = xys[1][1]
+
+                # So we calculate the angle that the car is facing (the yaw)
+                angle = math.atan2(ey - sy, ex - sx)
+                if angle < 0:
+                        # Angle is on range [-pi,pi] but we want [0,2pi]
+                        # So if it is less than 0, pop it onto the correct range.
+                        angle += 2 * math.pi
+
+                # Now we get the car position
+                car_x, car_y = (sx, sy)
+
+                # Now we want to make all pixels bordering the track become magenta (255,0,255) -
+                # this will be our 'cone' color
+                # To find pixel boardering track, simply find white pixel adjacent to
+                # a non-white non-magenta pixle
+                # We will also want to make it such that cones are about 4-6
+                # away from eachother euclideanly
+
+                def is_track(c):
+                        return (c == ConversionTools.track_outer_color or
+                                c == ConversionTools.track_inner_color or
+                                c == ConversionTools.track_center_color)
+
+                cone_locs = []
+                for idx, tup in enumerate(components):
+                        (name, points) = tup
+                        if idx == 0:
+                                cone_locs.extend(cone_start(points))
+                        else:
+                                cone_locs.extend(
+                                        get_cone_function(name)(points, prev_points=cone_locs)
+                                )
+
+                # Convert it into the output csv
+                def name_from_color(c):
+                    if c == CONE_START:
+                        return "big_orange"
+                    elif c == CONE_ORANGE:
+                        return "orange"
+                    elif c == CONE_OUTER:
+                        return "yellow"
+                    elif c == CONE_INNER:
+                        return "blue"
+                    else:
+                        return "ERROR"
+                output = OrderedDict([
+                    ("tag", [name_from_color(color) for px, py, color in cone_locs] +
+                        ["car_start"]),
+                    ("x", [px for px, py, color in cone_locs] + [car_x]),
+                    ("y", [py for px, py, color in cone_locs] + [car_y]),
+                    ("direction", [0 for x in cone_locs] + [angle]),
+                    ("x_variance", [0 for x in cone_locs] + [0]),
+                    ("y_variance", [0 for x in cone_locs] + [0]),
+                    ("xy_covariance", [0 for x in cone_locs] + [0])
+                ])
+                df = pd.DataFrame(output, columns=output.keys())
+                df.to_csv(
+                    os.path.join(
+                        rospkg.RosPack().get_path('eufs_gazebo'),
+                        'tracks/'+GENERATED_FILENAME+'.csv'
+                    ),
+                    index=False
+                )
+                im_to_display = ConversionTools.comps_to_png(GENERATED_FILENAME, params)
+                return im_to_display
+
+                """for px, py, color in cone_locs:
+                        if color is CONE_INNER:
+                                true_color = ConversionTools.inner_cone_color
+                        elif color is CONE_OUTER:
+                                true_color = ConversionTools.outer_cone_color
+                        elif color is CONE_ORANGE:
+                                true_color = ConversionTools.orange_cone_color
+                        elif color is CONE_START:
+                                true_color = ConversionTools.double_orange_cone_color"""
+
+
+                """# Finally, we just need to place noise.
+                # At maximal noise, the track should be about 1% covered.
+
+                for i in range(im.size[0]):
+                        for j in range(im.size[1]):
+                                # Don't add noise in margin
+                                if i < 5 or j < 5 or i >= im.size[0] - 5 or j >= im.size[0] - 5:
+                                        continue
+                                if pixels[i, j] == ConversionTools.background_color:
+                                        # Only 1% should be covered with noise
+                                        if uniform(0, 100) < 1:
+                                                pixels[i, j] = ConversionTools.noise_color"""
+
+                """# Add margins (as specified by the file format)
+                margin = 5
+                im2 = Image.new(
+                                'RGBA',
+                                (twidth + 2 * margin, theight + 2 * margin),
+                                (255, 255, 255, 255)
+                )
+                pixels2 = im2.load()
+                for x in range(im.size[0]):
+                        for y in range(im.size[1]):
+                                pixels2[x + margin, y + margin] = pixels[x, y]
+
+                # And tag it with the version number
+                loc = ConversionTools.get_metadata_pixel_location(
+                                            4,
+                                            4,
+                                            ConversionTools.BOTTOM_RIGHT,
+                                            im2.size
+                )
+                pixels2[loc[0], loc[1]] = ConversionTools.deconvert_version_metadata(
+                                             ConversionTools.TRACKIMG_VERSION_NUM
+                )[0]
+
+                # Tag it with scale data
+                loc = ConversionTools.get_metadata_pixel_location(
+                                            0,
+                                            0,
+                                            ConversionTools.TOP_LEFT,
+                                            im2.size
+                )
+                pixels2[loc[0], loc[1]] = ConversionTools.deconvert_scale_metadata(
+                    ConversionTools.RANDOM_TRACK_SCALE_FACTOR
+                )[0]
+
+                im2.save(
+                        os.path.join(rospkg.RosPack().get_path('eufs_gazebo'),
+                                     'randgen_imgs/'+GENERATED_FILENAME+'.png')
+                )
+                return im"""
 
         @staticmethod
         def comps_to_png(which_file, params, conversion_suffix="", override_name=None):
@@ -1096,36 +1264,36 @@ class ConversionTools:
                 for bluecone in blue_cones.itertuples():
                         x = (bluecone[2])
                         y = (bluecone[3])
-                        raw_blue.append(("blue", x, y, 0, 0))
+                        raw_blue.append(("blue", 1.0 * x, 1.0 * y, 0, 0))
 
                 for yellowcone in yellow_cones.itertuples():
                         x = (yellowcone[2])
                         y = (yellowcone[3])
-                        raw_yellow.append(("yellow", x, y, 0, 0))
+                        raw_yellow.append(("yellow", 1.0 * x, 1.0 * y, 0, 0))
 
                 for orangecone in orange_cones.itertuples():
                         x = (orangecone[2])
                         y = (orangecone[3])
-                        raw_orange.append(("orange", x, y, 0, 0))
+                        raw_orange.append(("orange", 1.0 * x, 1.0 * y, 0, 0))
 
                 for big_orangecone in big_orange_cones.itertuples():
                         x = (big_orangecone[2])
                         y = (big_orangecone[3])
-                        raw_big_orange.append(("big_orange", x, y, 0, 0))
+                        raw_big_orange.append(("big_orange", 1.0 * x, 1.0 * y, 0, 0))
 
                 for noise in active_noise.itertuples():
                         x = (noise[2])
                         y = (noise[3])
-                        raw_noise.append(("noise", x, y, 0, 0))
+                        raw_noise.append(("noise", 1.0 * x, 1.0 * y, 0, 0))
 
                 if keep_all_noise:
                         for noise in inactive_noise.itertuples():
                                 x = (noise[2])
                                 y = (noise[3])
-                                raw_noise.append(("noise", x, y, 0, 0))
+                                raw_noise.append(("noise", 1.0 * x, 1.0 * y, 0, 0))
 
                 for c in car_location.itertuples():
-                        raw_car_location = ("car", c[2], c[3], c[4], 0)
+                        raw_car_location = ("car", 1.0 * c[2], 1.0 * c[3], c[4], 0)
 
                 all_cones = (raw_blue +
                              raw_yellow +

@@ -750,7 +750,7 @@ class EufsLauncher(Plugin):
                         self.tell_launchella("Loading Image...")
                         im = Converter.convert(
                                 "comps",
-                                "png",
+                                "csv",
                                 "rand",
                                 params={
                                         "track data": (xys, twidth, theight)
@@ -760,14 +760,14 @@ class EufsLauncher(Plugin):
                         # If full stack selected, convert into csv and launch as well
                         track_generator_full_stack = self.FULL_STACK_TRACK_GEN_BUTTON
                         if track_generator_full_stack.isChecked():
-                                img_path = os.path.join(
+                                csv_path = os.path.join(
                                         self.GAZEBO,
-                                        'randgen_imgs/rand.png'
+                                        'tracks/rand.csv'
                                 )
                                 Converter.convert(
-                                        "png",
+                                        "csv",
                                         "ALL",
-                                        img_path,
+                                        csv_path,
                                         params={"noise": self.get_noise_level()}
                                 )
 
