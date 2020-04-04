@@ -1027,6 +1027,13 @@ class ConversionTools:
                         cone_string = "model://eufs_description/meshes/"+cone_type+".dae"
                         return cone_string.join(collision_template)
 
+                def setup_covariance(x, y, xy):
+                        covariance_template = sdf_split_again[5]
+                        output = str(x).join(covariance_template.split("%XCOV%"))
+                        output = str(y).join(output.split("%YCOV%"))
+                        output = str(xy).join(output.split("%XYCOV%"))
+                        return output
+
                 # Calculate model data for cones
                 sdf_blue_cone_model = join_cone_model_data("cone_blue")
                 sdf_yellow_cone_model = join_cone_model_data("cone_yellow")
@@ -1057,7 +1064,7 @@ class ConversionTools:
                 # so that we can give each a unique name.
                 ConversionTools.link_num = -1
 
-                def put_model_at_position(mod, x, y):
+                def put_model_at_position(mod, x, y, x_cov=0.1, y_cov=0.1, xy_cov=0):
                         """
                         mod: model template to be placed
                         x,y: x and y positions for mod
@@ -1071,7 +1078,13 @@ class ConversionTools:
                         mod_with_y = y_str.join(mod.split("%PLACEY%"))
                         mod_with_x = x_str.join(mod_with_y.split("%PLACEX%"))
                         mod_with_link = link_str.join(mod_with_x.split("%LINKNUM%"))
-                        return mod_with_link
+                        x_cov_str = str(x_cov)
+                        y_cov_str = str(y_cov)
+                        xy_cov_str = str(xy_cov)
+                        mod_with_cov = setup_covariance(x_cov_str, y_cov_str, xy_cov_str).join(
+                                mod_with_link.split("%FILLCOVARIANCE%")
+                        )
+                        return mod_with_cov
 
                 sdf_allmodels = ""
 
@@ -1721,6 +1734,16 @@ class ConversionTools:
                         cone_string = "model://eufs_description/meshes/"+cone_type+".dae"
                         return cone_string.join(collision_template)
 
+                def setup_covariance(x, y, xy):
+                        if not keep_all_noise:
+                                # Throw out covariance if directly launching track
+                                return ""
+                        covariance_template = sdf_split_again[5]
+                        output = str(x).join(covariance_template.split("%XCOV%"))
+                        output = str(y).join(output.split("%YCOV%"))
+                        output = str(xy).join(output.split("%XYCOV%"))
+                        return output
+
                 # Calculate model data for cones
                 sdf_blue_cone_model = join_cone_model_data("cone_blue")
                 sdf_yellow_cone_model = join_cone_model_data("cone_yellow")
@@ -1751,7 +1774,7 @@ class ConversionTools:
                 # so that we can give each a unique name.
                 ConversionTools.link_num = -1
 
-                def put_model_at_position(mod, x, y):
+                def put_model_at_position(mod, x, y, x_cov=0.1, y_cov=0.1, xy_cov=0):
                         """
                         mod: model template to be placed
                         x,y: x and y positions for mod
@@ -1765,7 +1788,13 @@ class ConversionTools:
                         mod_with_y = y_str.join(mod.split("%PLACEY%"))
                         mod_with_x = x_str.join(mod_with_y.split("%PLACEX%"))
                         mod_with_link = link_str.join(mod_with_x.split("%LINKNUM%"))
-                        return mod_with_link
+                        x_cov_str = str(x_cov)
+                        y_cov_str = str(y_cov)
+                        xy_cov_str = str(xy_cov)
+                        mod_with_cov = setup_covariance(x_cov_str, y_cov_str, xy_cov_str).join(
+                                mod_with_link.split("%FILLCOVARIANCE%")
+                        )
+                        return mod_with_cov
 
                 sdf_allmodels = ""
 

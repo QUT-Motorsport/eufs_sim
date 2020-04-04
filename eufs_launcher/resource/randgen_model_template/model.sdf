@@ -9,6 +9,7 @@
 $===$
     <link name='link_0_clone_%LINKNUM%'>
       <pose frame=''>%PLACEX% %PLACEY% 0.15 0 -0 0</pose>
+      %FILLCOVARIANCE%
       %FILLCOLLISION%
       <visual name="visual">
         <geometry>
@@ -37,6 +38,7 @@ $===$
 $===$
     <ghostlink name='link_0_clone_%LINKNUM%'>
       <pose frame=''>%PLACEX% %PLACEY% 0.15 0 -0 0</pose>
+      %FILLCOVARIANCE%
       %FILLCOLLISION%
       <visual name="visual">
         <geometry>
@@ -46,3 +48,5 @@ $===$
         </geometry>
       </visual>
     </ghostlink>
+$===$
+      <covariance x="%XCOV%" y="%YCOV%" xy="%XYCOV%"/>
