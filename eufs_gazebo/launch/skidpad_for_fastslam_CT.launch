@@ -10,8 +10,8 @@
   <arg name="cmd_timeout" default="0.5"/>
   
   <!-- Vehicle pose -->
-  <arg name="x" default="-20.1461553418"/>
-  <arg name="y" default="-40.0063725683"/>
+  <arg name="x" default="-20.1800071107"/>
+  <arg name="y" default="-40.0040023836"/>
   <arg name="z" default="0.1"/>
   <arg name="roll" default="0.0"/>
   <arg name="pitch" default="0.0"/>
@@ -27,7 +27,7 @@
 
   <!-- Gazebo -->
   <include file="$(find gazebo_ros)/launch/empty_world.launch">
-    <arg name="world_name" value="$(find eufs_gazebo)/worlds/skidpad_for_fastslam.world"/>
+    <arg name="world_name" value="$(find eufs_gazebo)/worlds/skidpad_for_fastslam_CT.world"/>
     <arg name="debug" value="$(arg debug)"/>
     <arg name="gui" value="$(arg gui)"/>
     <arg name="paused" value="false"/>
@@ -53,7 +53,7 @@
   <node name="cone_ground_truth" pkg="eufs_gazebo" type="cone_ground_truth.py" output="screen">
     <param name="view_distance" value="15"/>
     <param name="fov" value="1.91986"/>
-    <param name="track_path" value="$(find eufs_gazebo)/tracks/skidpad_for_fastslam.csv"/>
+    <param name="track_path" value="$(find eufs_gazebo)/tracks/skidpad_for_fastslam_CT.csv"/>
     <param name="loop_rate" value="25"/>
     <param name="x_init" value="$(arg x)"/>
     <param name="y_init" value="$(arg y)"/>

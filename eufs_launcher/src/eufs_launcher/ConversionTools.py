@@ -1036,6 +1036,9 @@ class ConversionTools:
                 sdf_orange_cone_model = join_cone_model_data("cone")
                 sdf_big_orange_cone_model = join_cone_model_data("cone_big")
 
+                # We also load in lap counter data, although no such model exists
+                sdf_lap_counter_model = join_cone_model_data("lap_counter")
+
                 # Now let's load in the noise priorities
                 noise_priority_file = os.path.join(
                                                    rospkg.RosPack().get_path('eufs_launcher'),
@@ -1132,11 +1135,10 @@ class ConversionTools:
 
                 # Add all models into a template
                 color_to_model = {
-                        ConversionTools.inner_cone_color: sdf_yellow_cone_model,
-                        ConversionTools.outer_cone_color: sdf_blue_cone_model,
-                        ConversionTools.orange_cone_color: sdf_orange_cone_model,
-                        ConversionTools.big_orange_cone_color: sdf_big_orange_cone_model
-
+                        ConversionTools.inner_cone_color[:3]: sdf_yellow_cone_model,
+                        ConversionTools.outer_cone_color[:3]: sdf_blue_cone_model,
+                        ConversionTools.orange_cone_color[:3]: sdf_orange_cone_model,
+                        ConversionTools.big_orange_cone_color[:3]: sdf_big_orange_cone_model
                 }
                 for i in range(im.size[0]):
                         for j in range(im.size[1]):
@@ -1164,11 +1166,11 @@ class ConversionTools:
                                                                        i,
                                                                        j
                                                 )
-                                elif p in color_to_model:
+                                elif p[:3] in color_to_model:
                                         # Normal cones.
                                         sdf_allmodels = expand_allmodels(
                                                             sdf_allmodels,
-                                                            color_to_model[p],
+                                                            color_to_model[p[:3]],
                                                             i,
                                                             j
                                         )
@@ -1184,6 +1186,14 @@ class ConversionTools:
                                                             i,
                                                             j,
                                                             model_yaw
+                                        )
+                                elif p[:3] == ConversionTools.lap_counter_color[:3]:
+                                        # Lap counter!
+                                        sdf_allmodels = expand_allmodels(
+                                                            sdf_allmodels,
+                                                            sdf_lap_counter_model,
+                                                            i,
+                                                            j
                                         )
 
                 # Splice the sdf file back together.
