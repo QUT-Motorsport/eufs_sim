@@ -1541,7 +1541,7 @@ class ConversionTools:
                 raw_orange = []
                 raw_big_orange = []
                 raw_noise = []
-                raw_car_location = (0, 0, 0, 0, 0)
+                raw_car_location = (0, 0, 0, 0, 0, 0, 0, 0)
                 raw_lap_counters = []
 
                 # Note that the indexing may be confusing, pandas has inserted an "index" column,
@@ -1549,42 +1549,59 @@ class ConversionTools:
                 for bluecone in blue_cones.itertuples():
                         x = (bluecone[2])
                         y = (bluecone[3])
-                        raw_blue.append(("blue", 1.0 * x, 1.0 * y, 0))
+                        x_cov = bluecone[5]
+                        y_cov = bluecone[6]
+                        xy_cov = bluecone[7]
+                        raw_blue.append(("blue", 1.0 * x, 1.0 * y, 0, x_cov, y_cov, xy_cov))
 
                 for yellowcone in yellow_cones.itertuples():
                         x = (yellowcone[2])
                         y = (yellowcone[3])
-                        raw_yellow.append(("yellow", 1.0 * x, 1.0 * y, 0))
+                        x_cov = bluecone[5]
+                        y_cov = bluecone[6]
+                        xy_cov = bluecone[7]
+                        raw_yellow.append(("yellow", 1.0 * x, 1.0 * y, 0, x_cov, y_cov, xy_cov))
 
                 for orangecone in orange_cones.itertuples():
                         x = (orangecone[2])
                         y = (orangecone[3])
-                        raw_orange.append(("orange", 1.0 * x, 1.0 * y, 0))
+                        x_cov = bluecone[5]
+                        y_cov = bluecone[6]
+                        xy_cov = bluecone[7]
+                        raw_orange.append(("orange", 1.0 * x, 1.0 * y, 0, x_cov, y_cov, xy_cov))
 
                 for big_orangecone in big_orange_cones.itertuples():
                         x = (big_orangecone[2])
                         y = (big_orangecone[3])
-                        raw_big_orange.append(("big_orange", 1.0 * x, 1.0 * y, 0))
+                        x_cov = bluecone[5]
+                        y_cov = bluecone[6]
+                        xy_cov = bluecone[7]
+                        raw_big_orange.append(
+                                ("big_orange", 1.0 * x, 1.0 * y, 0, x_cov, y_cov, xy_cov)
+                        )
 
                 for noise in active_noise.itertuples():
                         x = (noise[2])
                         y = (noise[3])
-                        raw_noise.append(("noise", 1.0 * x, 1.0 * y, 0))
+                        x_cov = bluecone[5]
+                        y_cov = bluecone[6]
+                        xy_cov = bluecone[7]
+                        raw_noise.append(("noise", 1.0 * x, 1.0 * y, 0, 0, 0, 0))
 
                 if keep_all_noise:
                         for noise in inactive_noise.itertuples():
                                 x = (noise[2])
                                 y = (noise[3])
-                                raw_noise.append(("noise", 1.0 * x, 1.0 * y, 0))
+                                raw_noise.append(("noise", 1.0 * x, 1.0 * y, 0, 0, 0, 0))
 
                 for c in car_location.itertuples():
-                        raw_car_location = ("car", 1.0 * c[2], 1.0 * c[3], c[4])
+                        raw_car_location = ("car", 1.0 * c[2], 1.0 * c[3], c[4], 0, 0, 0)
 
                 for lap_counter in lap_counters.itertuples():
                         x = 1.0*(lap_counter[2])
                         y = 1.0*(lap_counter[3])
                         lap_number = lap_counter[4]
-                        raw_lap_counters.append(("lap_counter", x, y, lap_number))
+                        raw_lap_counters.append(("lap_counter", x, y, lap_number, 0, 0, 0))
 
                 all_cones = (raw_blue +
                              raw_yellow +
@@ -1798,13 +1815,13 @@ class ConversionTools:
 
                 sdf_allmodels = ""
 
-                def expand_allmodels(allmods, mod, x, y):
+                def expand_allmodels(allmods, mod, x, y, x_cov=0.1, y_cov=0.1, xy_cov=0):
                         """
                         Takes in a model and a pixel location,
                         converts the pixel location to a raw location,
                         and places the model inside sdf_allmodels
                         """
-                        mod_at_p = put_model_at_position(mod, x, y)
+                        mod_at_p = put_model_at_position(mod, x, y, x_cov, y_cov, xy_cov)
                         return allmods + "\n" + mod_at_p
 
 
@@ -1824,7 +1841,7 @@ class ConversionTools:
                         "big_orange": sdf_big_orange_cone_model
                 }
                 for cone in all_cones:
-                    name, x, y, direction = cone
+                    name, x, y, direction, x_cov, y_cov, xy_cov = cone
                     if name == "active_noise" or (keep_all_noise and name == "inactive_noise"):
                             if name == "active_noise":
                                     # Noise should be placed
@@ -1854,7 +1871,10 @@ class ConversionTools:
                                                 sdf_allmodels,
                                                 color_to_model[name],
                                                 x,
-                                                y
+                                                y,
+                                                x_cov,
+                                                y_cov,
+                                                xy_cov
                             )
                     elif name == "lap_counter" and keep_all_noise:
                             # Lap counter!
