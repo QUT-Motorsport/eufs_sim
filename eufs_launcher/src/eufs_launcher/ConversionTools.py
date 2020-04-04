@@ -5,6 +5,7 @@ from LauncherUtilities import (calculate_tangent_angle,
                                get_points_from_component_list,
                                compactify_points)
 from random import randrange, uniform
+from functools import reduce
 import os
 import rospkg
 import rospy
@@ -44,7 +45,7 @@ class ConversionTools:
         track_outer_color = (255, 255, 0, 255)           # yellow
         orange_cone_color = (255, 165, 0, 255)           # orange, for orange cones
         big_orange_cone_color = (127, 80, 0, 255)        # dark orange, for big orange cones
-        lap_counter_color = (202, 44, 146, 255)     # fuschia, for lap counters (skidpad)
+        lap_counter_color = (202, 44, 146, 255)          # fuschia, for lap counters (skidpad)
 
         double_orange_cone_color = (200, 100, 0, 255)    # for double-orange-cones
 
@@ -60,6 +61,11 @@ class ConversionTools:
 
         # Double cone closeness, how close do we place the doubled-up starting cones?
         DOUBLE_CONE_CLOSENESS = 0.7
+
+        # Magic numbers to make the 3n -> 4 + n byte conversion work
+        # These work but are likely not optimal
+        fbtf_min = 1.5
+        fbtf_max = 3
 
         #########################################################
         #              Handle Track Image Metadata              #
@@ -1491,3 +1497,108 @@ class ConversionTools:
                 writer.write(data)
                 reader.close()
                 writer.close()
+
+        #########################################################
+        #       Hack to compress 3n floats into 4+n bytes       #
+        #########################################################
+
+        def convert_from_byte(in_byte, splits=(6, 6, 7)):
+            """Takes in a byte, returns a triple"""
+            out_values = []
+            for splitter in splits:
+                out_values.append(in_byte % splitter)
+                in_byte = in_byte // splitter
+            return out_values
+
+        def convert_to_byte(in_triple, splits=(6, 6, 7)):
+            """Takes in triple, returns a byte"""
+            out_byte = 0
+            for val, base in zip(reversed(in_triple), reversed(splits)):
+                out_byte *= base
+                out_byte += val
+            return out_byte
+
+        def clip_to_byte(b):
+            """Takes in int, returns byte (note counting highest value)"""
+            size_of_byte = 254
+            return 1 if b < 1 else size_of_byte if b > size_of_byte else b
+
+        def fourth_byte_to_float(b):
+            """Takes in byte b, converts it to [1.1, 1.5]"""
+            diff_ = ConversionTools.fbtf_max - ConversionTools.fbtf_min
+            return ConversionTools.fbtf_min + diff_ * ((b+1) / 253.0)
+
+        def float_to_fourth_byte(b):
+            """Inverse of fourth_byte_to_float"""
+            diff_ = ConversionTools.fbtf_max - ConversionTools.fbtf_min
+            return (b - ConversionTools.fbtf_min + 1) / diff_ * 253.0
+
+        def the_model(avg_val, x, s_n, s_mag):
+            """How we put together bytes to calculate covariance"""
+            return avg_val * (fourth_byte_to_float(x)**(s_n - math.floor(s_mag / 2)))
+
+        def covariances_to_triples(in_cov_list, split=(6, 6, 7), speak=True):
+            """
+            Converts a list of covariances into a list of triples.
+            Returns a list of triples, and the 4 global bytes it sets.
+            """
+            # First we transpose in_cov_list:
+            trans_list = list(zip(*in_cov_list))
+
+            # Now we grab some statistics:
+            average_val = [reduce(lambda x, y: x + y, l) / len(l) for l in trans_list]
+            min_val = [min(l) for l in trans_list]
+            max_val = [max(l) for l in trans_list]
+            range_vals = [x - y for x, y in zip(max_val, min_val)]
+
+            # We use our first three bytes to store the average value
+            byte_0, byte_1, byte_2 = (clip_to_byte(int(v * 100)) for v in average_val)
+
+            # We now calculate the fourth byte x and the per-cone split values s_n that miminize:
+            # abs(x**(s_n - floor(|s_n|/2)) - cov/avg)
+            cur_best = 10000000
+            cur_svals = None
+            byte_3 = 255
+            for x in range(1, 254):
+                """x >= 1, x < 254"""
+                s_vals_list = []
+                total_diff = 0
+                for i in range(len(split)):
+                    # Go through each s_val category
+                    s_vals = []
+                    running_error_sum = 0
+                    for cone_cov in trans_list[i]:
+                        # Go through each cone and find the best s_val of this category
+                        s_val_min = 1000000
+                        best_s_val = 0
+                        for s_0 in range(split[i]):
+                            diff_ = abs(the_model(average_val[i], x, s_0, split[i]) - cone_cov)
+                            if diff_ < s_val_min:
+                                s_val_min = diff_
+                                best_s_val = s_0
+                        running_error_sum += s_val_min
+                        s_vals.append(best_s_val)
+                    total_diff += running_error_sum
+                    s_vals_list.append(s_vals)
+                if total_diff < cur_best:
+                    cur_svals = s_vals_list
+                    cur_best = total_diff
+                    byte_3 = x
+            svals_to_use = list(zip(*cur_svals))
+            return ([
+                convert_to_byte(sval, splits=split) for sval in svals_to_use],
+                (byte_0, byte_1, byte_2, byte_3)
+            )
+
+        def bytes_to_covariances(trip, extra_bytes, split=(6, 6, 7)):
+            """Converts cone byte + 4 global `extra_bytes` into covariance triple"""
+            byte_0, byte_1, byte_2, byte_3 = extra_bytes
+            covariances = []
+            for s in trip:
+                s_0, s_1, s_2 = convert_from_byte(s, splits=split)
+                covariances.append((
+                    the_model(byte_0 / 100.0, byte_3, s_0, split[0]),
+                    the_model(byte_1 / 100.0, byte_3, s_1, split[1]),
+                    the_model(byte_2 / 100.0, byte_3, s_2, split[2])
+                ))
+            return covariances
