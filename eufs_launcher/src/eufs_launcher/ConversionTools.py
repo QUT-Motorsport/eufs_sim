@@ -1291,39 +1291,42 @@ class ConversionTools:
                 raw_noise = []
                 raw_car_location = (0, 0, 0, 0, 0)
                 raw_lap_counters = []
+
+                # Note that the indexing may be confusing, pandas has inserted an "index" column,
+                # so all indices that you would expect should be shifted upwards by 1
                 for bluecone in blue_cones.itertuples():
                         x = (bluecone[2])
                         y = (bluecone[3])
-                        raw_blue.append(("blue", 1.0 * x, 1.0 * y, 0, 0))
+                        raw_blue.append(("blue", 1.0 * x, 1.0 * y, 0))
 
                 for yellowcone in yellow_cones.itertuples():
                         x = (yellowcone[2])
                         y = (yellowcone[3])
-                        raw_yellow.append(("yellow", 1.0 * x, 1.0 * y, 0, 0))
+                        raw_yellow.append(("yellow", 1.0 * x, 1.0 * y, 0))
 
                 for orangecone in orange_cones.itertuples():
                         x = (orangecone[2])
                         y = (orangecone[3])
-                        raw_orange.append(("orange", 1.0 * x, 1.0 * y, 0, 0))
+                        raw_orange.append(("orange", 1.0 * x, 1.0 * y, 0))
 
                 for big_orangecone in big_orange_cones.itertuples():
                         x = (big_orangecone[2])
                         y = (big_orangecone[3])
-                        raw_big_orange.append(("big_orange", 1.0 * x, 1.0 * y, 0, 0))
+                        raw_big_orange.append(("big_orange", 1.0 * x, 1.0 * y, 0))
 
                 for noise in active_noise.itertuples():
                         x = (noise[2])
                         y = (noise[3])
-                        raw_noise.append(("noise", 1.0 * x, 1.0 * y, 0, 0))
+                        raw_noise.append(("noise", 1.0 * x, 1.0 * y, 0))
 
                 if keep_all_noise:
                         for noise in inactive_noise.itertuples():
                                 x = (noise[2])
                                 y = (noise[3])
-                                raw_noise.append(("noise", 1.0 * x, 1.0 * y, 0, 0))
+                                raw_noise.append(("noise", 1.0 * x, 1.0 * y, 0))
 
                 for c in car_location.itertuples():
-                        raw_car_location = ("car", 1.0 * c[2], 1.0 * c[3], c[4], 0)
+                        raw_car_location = ("car", 1.0 * c[2], 1.0 * c[3], c[4])
 
                 for lap_counter in lap_counters.itertuples():
                         x = 1.0*(lap_counter[2])
@@ -1390,7 +1393,7 @@ class ConversionTools:
                 for cone in all_cones:
                         new_x = int((cone[1] - min_x + 10) / scale_desired)
                         new_y = int((cone[2] - min_y + 10) / scale_desired)
-                        final_cones.append((cone[0], new_x, new_y))
+                        final_cones.append((cone[0], new_x, new_y, cone[3]))
 
                 # Start drawing the track
                 im = Image.new('RGBA', (twidth, theight), (0, 0, 0, 0))
@@ -1405,7 +1408,7 @@ class ConversionTools:
                 # Now we are placing the pixels of our output image
                 pixels = im.load()
 
-                def get_cone_color(cone_name):
+                def get_cone_color(cone_name, cone_direc):
                         if cone_name == "yellow":
                             return ConversionTools.inner_cone_color
                         elif cone_name == "blue":
@@ -1417,27 +1420,32 @@ class ConversionTools:
                         elif cone_name == "noise":
                             return ConversionTools.noise_color
                         elif cone_name == "lap_counter":
-                            return ConversionTools.lap_counter_color
+                            # Need to add lap number
+                            return (
+                                ConversionTools.lap_counter_color[0],
+                                ConversionTools.lap_counter_color[1],
+                                ConversionTools.lap_counter_color[2],
+                                255 - int(cone_direc)
+                            )
+                        elif cone_name == "car":
+                            # Calculate the car's yaw's corresponding alpha value
+                            yaw_pixel_value = int(raw_car_location[3] / (2 * math.pi) * 254 + 1)
+                            if yaw_pixel_value > 255:
+                                yaw_pixel_value = 255
+                            if yaw_pixel_value < 1:
+                                yaw_pixel_value = 1
+                            return (
+                                ConversionTools.car_color[0],
+                                ConversionTools.car_color[1],
+                                ConversionTools.car_color[2],
+                                yaw_pixel_value
+                            )
                         return ConversionTools.inner_cone_color
 
                 # Place the cone pixels
                 for cone in final_cones:
-                    pixels[cone[1], cone[2]] = get_cone_color(cone[0])
+                    pixels[cone[1], cone[2]] = get_cone_color(cone[0], cone[3])
 
-                # Calculate the car's yaw's corresponding alpha value
-                yaw_pixel_value = int(raw_car_location[3] / (2 * math.pi) * 254 + 1)
-                if yaw_pixel_value > 255:
-                    yaw_pixel_value = 255
-                if yaw_pixel_value < 1:
-                    yaw_pixel_value = 1
-
-                # Finally, add the car
-                pixels[car_x, car_y] = (
-                                        ConversionTools.car_color[0],
-                                        ConversionTools.car_color[1],
-                                        ConversionTools.car_color[2],
-                                        yaw_pixel_value
-                )
 
                 # Add scale metadata:
                 loc = ConversionTools.get_metadata_pixel_location(
