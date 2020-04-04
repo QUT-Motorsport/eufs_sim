@@ -34,6 +34,7 @@ class Track:
         self.orange_cones = None
         self.active_noise = None
         self.inactive_noise = None
+        self.lap_counters = None
 
         # Car data in the format of ("car_start", x, y, yaw)
         # It can be left as ("car_start", 0, 0, 0), only relevant when fed into track_gen through
@@ -98,6 +99,7 @@ class Track:
         big_orange = []
         active_noise = []
         inactive_noise = []
+        lap_counters = []
 
         # iterate over all links of the model
         if len(root[0].findall("link")) != 0:
@@ -113,6 +115,8 @@ class Track:
                     big_orange.append(pose)
                 elif "cone" == mesh_str:
                     orange.append(pose)
+                elif "lap_counter" == mesh_str:
+                    lap_counters.append(pose)
                 else:
                     active_noise.append(pose)
 
@@ -123,6 +127,8 @@ class Track:
                 inactive_noise.append(pose)
 
         # handle includes
+        # note, since some names mismatch (cone vs orange_cone), this section might
+        # be out of date and require maintenance
         if len(root[0].findall("include")) != 0:
             for child in root[0].iter("include"):
                 pose = child.find("pose").text.split(" ")[0:2]
@@ -164,6 +170,9 @@ class Track:
 
         if len(inactive_noise) != 0:
             self.inactive_noise = np.array(inactive_noise, dtype="float64")
+
+        if len(lap_counters) != 0:
+            self.lap_counters = np.array(lap_counters, dtype="float64")
 
     def generate_tracks(self):
         """Generates blue, yellow and centerline tracks for the course
@@ -299,39 +308,70 @@ class Track:
         df["tag"].iloc[-self.yellow_cones.shape[0]:] = "yellow"
 
         if self.big_orange_cones is not None:
-            empty = pd.DataFrame(np.nan, index=np.arange(self.big_orange_cones.shape[0]), columns=["tag", "x", "y"])
+            empty = pd.DataFrame(
+                np.nan,
+                index=np.arange(self.big_orange_cones.shape[0]),
+                columns=["tag", "x", "y"]
+            )
             df = df.append(empty)
             df["x"] = np.hstack((df["x"].dropna().values, self.big_orange_cones[:, 0]))
             df["y"] = np.hstack((df["y"].dropna().values, self.big_orange_cones[:, 1]))
             df["tag"].iloc[-self.big_orange_cones.shape[0]:] = "big_orange"
 
         if self.orange_cones is not None:
-            empty = pd.DataFrame(np.nan, index=np.arange(self.orange_cones.shape[0]), columns=["tag", "x", "y"])
+            empty = pd.DataFrame(
+                np.nan,
+                index=np.arange(self.orange_cones.shape[0]),
+                columns=["tag", "x", "y"]
+            )
             df = df.append(empty)
             df["x"] = np.hstack((df["x"].dropna().values, self.orange_cones[:, 0]))
             df["y"] = np.hstack((df["y"].dropna().values, self.orange_cones[:, 1]))
             df["tag"].iloc[-self.orange_cones.shape[0]:] = "orange"
 
         if self.midpoints is not None:
-            empty = pd.DataFrame(np.nan, index=np.arange(self.midpoints.shape[0]), columns=["tag", "x", "y"])
+            empty = pd.DataFrame(
+                np.nan,
+                index=np.arange(self.midpoints.shape[0]),
+                columns=["tag", "x", "y"]
+            )
             df = df.append(empty)
             df["x"] = np.hstack((df["x"].dropna().values, self.midpoints[:, 0]))
             df["y"] = np.hstack((df["y"].dropna().values, self.midpoints[:, 1]))
             df["tag"].iloc[-self.midpoints.shape[0]:] = "midpoint"
 
         if self.active_noise is not None:
-            empty = pd.DataFrame(np.nan, index=np.arange(self.active_noise.shape[0]), columns=["tag", "x", "y"])
+            empty = pd.DataFrame(
+                np.nan,
+                index=np.arange(self.active_noise.shape[0]),
+                columns=["tag", "x", "y"]
+            )
             df = df.append(empty)
             df["x"] = np.hstack((df["x"].dropna().values, self.active_noise[:, 0]))
             df["y"] = np.hstack((df["y"].dropna().values, self.active_noise[:, 1]))
             df["tag"].iloc[-self.active_noise.shape[0]:] = "active_noise"
 
         if self.inactive_noise is not None:
-            empty = pd.DataFrame(np.nan, index=np.arange(self.inactive_noise.shape[0]), columns=["tag", "x", "y"])
+            empty = pd.DataFrame(
+                np.nan,
+                index=np.arange(self.inactive_noise.shape[0]),
+                columns=["tag", "x", "y"]
+            )
             df = df.append(empty)
             df["x"] = np.hstack((df["x"].dropna().values, self.inactive_noise[:, 0]))
             df["y"] = np.hstack((df["y"].dropna().values, self.inactive_noise[:, 1]))
             df["tag"].iloc[-self.inactive_noise.shape[0]:] = "inactive_noise"
+
+        if self.lap_counters is not None:
+            empty = pd.DataFrame(
+                np.nan,
+                index=np.arange(self.lap_counters.shape[0]),
+                columns=["tag", "x", "y"]
+            )
+            df = df.append(empty)
+            df["x"] = np.hstack((df["x"].dropna().values, self.lap_counters[:, 0]))
+            df["y"] = np.hstack((df["y"].dropna().values, self.lap_counters[:, 1]))
+            df["tag"].iloc[-self.lap_counters.shape[0]:] = "lap_counters"
 
         # Add car data (always ("car_start",0,0,0,0,0,0) unless this file is called from ConversionTools))
         cardf = pd.DataFrame(

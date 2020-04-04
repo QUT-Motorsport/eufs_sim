@@ -1250,8 +1250,9 @@ class ConversionTools:
                 which_file:        The name of the csv file to convert
                                    example: rand.csv
 
-                params["keep_all_noise"]: True if inactive noise should be put in csv
+                params["keep_all_noise"]: True if inactive noise should be kept
                                           Defaults to True
+                                          Also applies to lap counters
 
                 conversion_suffix: Something to append to the output filename
                                    So if it is "foo", rand.png becomes randfoo.launch.
