@@ -870,7 +870,7 @@
       <collision name="collision">
         <geometry>
           <mesh>
-            <uri>model://eufs_description/meshes/lap_counter.dae</uri>
+            <uri>model://eufs_description/meshes/lap_counter;0.dae</uri>
           </mesh>
         </geometry>
       </collision>
@@ -878,7 +878,7 @@
       <visual name="visual">
         <geometry>
           <mesh>
-            <uri>model://eufs_description/meshes/lap_counter.dae</uri>
+            <uri>model://eufs_description/meshes/lap_counter;0.dae</uri>
           </mesh>
         </geometry>
       </visual>
@@ -1290,7 +1290,7 @@
       <collision name="collision">
         <geometry>
           <mesh>
-            <uri>model://eufs_description/meshes/lap_counter.dae</uri>
+            <uri>model://eufs_description/meshes/lap_counter;1.dae</uri>
           </mesh>
         </geometry>
       </collision>
@@ -1298,7 +1298,7 @@
       <visual name="visual">
         <geometry>
           <mesh>
-            <uri>model://eufs_description/meshes/lap_counter.dae</uri>
+            <uri>model://eufs_description/meshes/lap_counter;1.dae</uri>
           </mesh>
         </geometry>
       </visual>

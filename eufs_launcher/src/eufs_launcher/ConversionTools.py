@@ -1036,9 +1036,6 @@ class ConversionTools:
                 sdf_orange_cone_model = join_cone_model_data("cone")
                 sdf_big_orange_cone_model = join_cone_model_data("cone_big")
 
-                # We also load in lap counter data, although no such model exists
-                sdf_lap_counter_model = join_cone_model_data("lap_counter")
-
                 # Now let's load in the noise priorities
                 noise_priority_file = os.path.join(
                                                    rospkg.RosPack().get_path('eufs_launcher'),
@@ -1190,10 +1187,10 @@ class ConversionTools:
                                 elif p[:3] == ConversionTools.lap_counter_color[:3]:
                                         # Lap counter!
                                         sdf_allmodels = expand_allmodels(
-                                                            sdf_allmodels,
-                                                            sdf_lap_counter_model,
-                                                            i,
-                                                            j
+                                            sdf_allmodels,
+                                            join_cone_model_data("lap_counter;" + str(255 - p[3])),
+                                            i,
+                                            j
                                         )
 
                 # Splice the sdf file back together.
