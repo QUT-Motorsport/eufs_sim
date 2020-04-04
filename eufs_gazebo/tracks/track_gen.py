@@ -115,8 +115,9 @@ class Track:
                     big_orange.append(pose)
                 elif "cone" == mesh_str:
                     orange.append(pose)
-                elif "lap_counter" == mesh_str:
-                    lap_counters.append(pose)
+                elif "lap_counter" == mesh_str.split(";")[0]:
+                    # Lap counter number stored in other part of `mesh_str`
+                    lap_counters.append((pose, mesh_str.split(";")[1]))
                 else:
                     active_noise.append(pose)
 
@@ -172,7 +173,10 @@ class Track:
             self.inactive_noise = np.array(inactive_noise, dtype="float64")
 
         if len(lap_counters) != 0:
-            self.lap_counters = np.array(lap_counters, dtype="float64")
+            lc = [None, None]
+            lc[0] = np.array([l[0] for l in lap_counters], dtype="float64")
+            lc[1] = np.array([l[1] for l in lap_counters], dtype="int")
+            self.lap_counters = lc
 
     def generate_tracks(self):
         """Generates blue, yellow and centerline tracks for the course
@@ -306,6 +310,10 @@ class Track:
         df["y"] = np.hstack((self.blue_cones[:, 1], self.yellow_cones[:, 1]))
         df["tag"].iloc[:] = "blue"
         df["tag"].iloc[-self.yellow_cones.shape[0]:] = "yellow"
+        df["direction"] = 0
+        df["x_variance"] = 0.01
+        df["y_variance"] = 0.01
+        df["xy_covariance"] = 0
 
         if self.big_orange_cones is not None:
             empty = pd.DataFrame(
@@ -317,6 +325,10 @@ class Track:
             df["x"] = np.hstack((df["x"].dropna().values, self.big_orange_cones[:, 0]))
             df["y"] = np.hstack((df["y"].dropna().values, self.big_orange_cones[:, 1]))
             df["tag"].iloc[-self.big_orange_cones.shape[0]:] = "big_orange"
+            df["direction"] = 0
+            df["x_variance"] = 0.01
+            df["y_variance"] = 0.01
+            df["xy_covariance"] = 0
 
         if self.orange_cones is not None:
             empty = pd.DataFrame(
@@ -328,6 +340,10 @@ class Track:
             df["x"] = np.hstack((df["x"].dropna().values, self.orange_cones[:, 0]))
             df["y"] = np.hstack((df["y"].dropna().values, self.orange_cones[:, 1]))
             df["tag"].iloc[-self.orange_cones.shape[0]:] = "orange"
+            df["direction"] = 0
+            df["x_variance"] = 0.01
+            df["y_variance"] = 0.01
+            df["xy_covariance"] = 0
 
         if self.midpoints is not None:
             empty = pd.DataFrame(
@@ -339,6 +355,10 @@ class Track:
             df["x"] = np.hstack((df["x"].dropna().values, self.midpoints[:, 0]))
             df["y"] = np.hstack((df["y"].dropna().values, self.midpoints[:, 1]))
             df["tag"].iloc[-self.midpoints.shape[0]:] = "midpoint"
+            df["direction"] = 0
+            df["x_variance"] = 0.01
+            df["y_variance"] = 0.01
+            df["xy_covariance"] = 0
 
         if self.active_noise is not None:
             empty = pd.DataFrame(
@@ -350,6 +370,10 @@ class Track:
             df["x"] = np.hstack((df["x"].dropna().values, self.active_noise[:, 0]))
             df["y"] = np.hstack((df["y"].dropna().values, self.active_noise[:, 1]))
             df["tag"].iloc[-self.active_noise.shape[0]:] = "active_noise"
+            df["direction"] = 0
+            df["x_variance"] = 0.01
+            df["y_variance"] = 0.01
+            df["xy_covariance"] = 0
 
         if self.inactive_noise is not None:
             empty = pd.DataFrame(
@@ -361,19 +385,30 @@ class Track:
             df["x"] = np.hstack((df["x"].dropna().values, self.inactive_noise[:, 0]))
             df["y"] = np.hstack((df["y"].dropna().values, self.inactive_noise[:, 1]))
             df["tag"].iloc[-self.inactive_noise.shape[0]:] = "inactive_noise"
+            df["direction"] = 0
+            df["x_variance"] = 0.01
+            df["y_variance"] = 0.01
+            df["xy_covariance"] = 0
 
         if self.lap_counters is not None:
+            position_values = self.lap_counters[0]
+            lap_values = self.lap_counters[1]
             empty = pd.DataFrame(
                 np.nan,
-                index=np.arange(self.lap_counters.shape[0]),
-                columns=["tag", "x", "y"]
+                index=np.arange(position_values.shape[0]),
+                columns=["tag", "x", "y", "direction"]
             )
             df = df.append(empty)
-            df["x"] = np.hstack((df["x"].dropna().values, self.lap_counters[:, 0]))
-            df["y"] = np.hstack((df["y"].dropna().values, self.lap_counters[:, 1]))
-            df["tag"].iloc[-self.lap_counters.shape[0]:] = "lap_counters"
+            df["x"] = np.hstack((df["x"].dropna().values, position_values[:, 0]))
+            df["y"] = np.hstack((df["y"].dropna().values, position_values[:, 1]))
+            df["direction"] = np.hstack((df["direction"].dropna().values, lap_values))
+            df["tag"].iloc[-position_values.shape[0]:] = "lap_counters"
+            df["x_variance"] = 0.01
+            df["y_variance"] = 0.01
+            df["xy_covariance"] = 0
 
-        # Add car data (always ("car_start",0,0,0,0,0,0) unless this file is called from ConversionTools))
+        # Add car data (always ("car_start",0,0,0,0,0,0)
+        # unless this file is called from ConversionTools))
         cardf = pd.DataFrame(
             [self.car_start_data],
             columns=[
@@ -386,10 +421,6 @@ class Track:
                 "xy_covariance"
             ]
         )
-        df["direction"] = 0
-        df["x_variance"] = 0.01
-        df["y_variance"] = 0.01
-        df["xy_covariance"] = 0
         df = df.append(cardf)
 
         df.to_csv(
