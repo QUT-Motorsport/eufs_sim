@@ -1,6 +1,6 @@
 <?xml version='1.0'?>
 <sdf version='1.6'>
-  <model name='rand'>
+  <model name='track'>
     
 
     <ghostlink name='link_0_clone_%LINKNUM%'>

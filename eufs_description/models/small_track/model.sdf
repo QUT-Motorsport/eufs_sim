@@ -1,6 +1,6 @@
 <?xml version='1.0'?>
 <sdf version="1.6">
-    <model name="small_track">
+    <model name="track">
         <include>
             <uri>model://models/blue_cone</uri>
             <pose>-16.7219 9.56934 0 0 0 0</pose>

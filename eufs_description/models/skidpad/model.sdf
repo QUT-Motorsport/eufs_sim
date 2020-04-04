@@ -1,6 +1,6 @@
 <?xml version='1.0'?>
 <sdf version='1.6'>
-    <model name='skidpad'>
+    <model name='track'>
         <include>
             <pose>-1.637 0 0 0 0 0</pose>
             <uri>model://models/blue_cone</uri>
