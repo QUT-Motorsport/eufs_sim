@@ -105,21 +105,25 @@ class Track:
         if len(root[0].findall("link")) != 0:
             for child in root[0].iter("link"):
                 pose = child.find("pose").text.split(" ")[0:2]
+                covariance_x = float(child.find("covariance").attrib["x"])
+                covariance_y = float(child.find("covariance").attrib["y"])
+                covariance_xy = float(child.find("covariance").attrib["xy"])
+                cov_info = [covariance_x, covariance_y, covariance_xy]
                 mesh_str = child.find("visual")[0][0][0].text.split("/")[-1].split(".")[0]
                 # indentify cones by the name of their mesh
                 if "cone_blue" == mesh_str:
-                    blue.append(pose)
+                    blue.append(pose + cov_info)
                 elif "cone_yellow" == mesh_str:
-                    yellow.append(pose)
+                    yellow.append(pose + cov_info)
                 elif "cone_big" == mesh_str:
-                    big_orange.append(pose)
+                    big_orange.append(pose + cov_info)
                 elif "cone" == mesh_str:
-                    orange.append(pose)
+                    orange.append(pose + cov_info)
                 elif "lap_counter" == mesh_str.split(";")[0]:
                     # Lap counter number stored in other part of `mesh_str`
-                    lap_counters.append((pose, mesh_str.split(";")[1]))
+                    lap_counters.append((pose + cov_info, mesh_str.split(";")[1]))
                 else:
-                    active_noise.append(pose)
+                    active_noise.append(pose + cov_info)
 
         # handle hidden links
         if len(root[0].findall("ghostlink")) != 0:
@@ -192,14 +196,18 @@ class Track:
         # Deal with blue cones
         if self.blue_cones.size is not None:
             self.blue_cones = self.order_points(self.blue_cones)
-            self.blue_track = self.smoothLine(self.blue_cones)
+            self.blue_track = self.smoothLine(
+                np.array([(x, y) for x, y, _, _, _ in self.blue_cones])
+            )
         else:
             print("Warning: no blue cones")
 
         # Deal with yellow cones
         if self.yellow_cones.size is not None:
             self.yellow_cones = self.order_points(self.yellow_cones)
-            self.yellow_track = self.smoothLine(self.yellow_cones)
+            self.yellow_track = self.smoothLine(
+                np.array([(x, y) for x, y, _, _, _ in self.yellow_cones])
+            )
         else:
             print("Warning: no yellow cones")
 
@@ -226,13 +234,20 @@ class Track:
 
         for blue_cone in self.blue_cones:
             closest_cone, closest_dist = self.find_closest(blue_cone, self.yellow_cones)
-            midpoints.append([(closest_cone[0] + blue_cone[0]) / 2, (closest_cone[1] + blue_cone[1]) / 2])
+            midpoints.append([
+                (closest_cone[0] + blue_cone[0]) / 2,
+                (closest_cone[1] + blue_cone[1]) / 2]
+            )
 
         if _plot:
             for blue_cone in self.blue_cones:
                 closest_cone, closest_dist = self.find_closest(blue_cone, self.yellow_cones)
                 self.plot_line(i, blue_cone)
-                plt.plot((closest_cone[0] + blue_cone[0]) / 2, (closest_cone[1] + blue_cone[1]) / 2, 'bo')
+                plt.plot(
+                    (closest_cone[0] + blue_cone[0]) / 2,
+                    (closest_cone[1] + blue_cone[1]) / 2,
+                    'bo'
+                )
 
             plt.show()
 
@@ -311,84 +326,146 @@ class Track:
         df["tag"].iloc[:] = "blue"
         df["tag"].iloc[-self.yellow_cones.shape[0]:] = "yellow"
         df["direction"] = 0
-        df["x_variance"] = 0.01
-        df["y_variance"] = 0.01
-        df["xy_covariance"] = 0
+        df["x_variance"] = np.hstack((
+            self.blue_cones[:, 2], self.yellow_cones[:, 2]
+        ))
+        df["y_variance"] = np.hstack((
+            self.blue_cones[:, 3], self.yellow_cones[:, 3]
+        ))
+        df["xy_covariance"] = np.hstack((
+            self.blue_cones[:, 4], self.yellow_cones[:, 4]
+        ))
 
         if self.big_orange_cones is not None:
             empty = pd.DataFrame(
                 np.nan,
                 index=np.arange(self.big_orange_cones.shape[0]),
-                columns=["tag", "x", "y"]
+                columns=[
+                    "tag", "x", "y", "direction",
+                    "x_variance", "y_variance", "xy_covariance"
+                ]
             )
             df = df.append(empty)
             df["x"] = np.hstack((df["x"].dropna().values, self.big_orange_cones[:, 0]))
             df["y"] = np.hstack((df["y"].dropna().values, self.big_orange_cones[:, 1]))
             df["tag"].iloc[-self.big_orange_cones.shape[0]:] = "big_orange"
-            df["direction"] = 0
-            df["x_variance"] = 0.01
-            df["y_variance"] = 0.01
-            df["xy_covariance"] = 0
+            df["direction"] = np.hstack((
+                df["direction"].dropna().values, [0 for _ in self.big_orange_cones[:, 2]]
+            ))
+            df["x_variance"] = np.hstack((
+                df["x_variance"].dropna().values, self.big_orange_cones[:, 2]
+            ))
+            df["y_variance"] = np.hstack((
+                df["y_variance"].dropna().values, self.big_orange_cones[:, 3]
+            ))
+            df["xy_covariance"] = np.hstack((
+                df["xy_covariance"].dropna().values, self.big_orange_cones[:, 4]
+            ))
+
 
         if self.orange_cones is not None:
             empty = pd.DataFrame(
                 np.nan,
                 index=np.arange(self.orange_cones.shape[0]),
-                columns=["tag", "x", "y"]
+                columns=[
+                    "tag", "x", "y", "direction",
+                    "x_variance", "y_variance", "xy_covariance"
+                ]
             )
             df = df.append(empty)
             df["x"] = np.hstack((df["x"].dropna().values, self.orange_cones[:, 0]))
             df["y"] = np.hstack((df["y"].dropna().values, self.orange_cones[:, 1]))
             df["tag"].iloc[-self.orange_cones.shape[0]:] = "orange"
-            df["direction"] = 0
-            df["x_variance"] = 0.01
-            df["y_variance"] = 0.01
-            df["xy_covariance"] = 0
+            df["direction"] = np.hstack((
+                df["direction"].dropna().values, [0 for _ in self.orange_cones[:, 2]]
+            ))
+            df["x_variance"] = np.hstack((
+                df["x_variance"].dropna().values, self.orange_cones[:, 2]
+            ))
+            df["y_variance"] = np.hstack((
+                df["y_variance"].dropna().values, self.orange_cones[:, 3]
+            ))
+            df["xy_covariance"] = np.hstack((
+                df["xy_covariance"].dropna().values, self.orange_cones[:, 4]
+            ))
 
         if self.midpoints is not None:
             empty = pd.DataFrame(
                 np.nan,
                 index=np.arange(self.midpoints.shape[0]),
-                columns=["tag", "x", "y"]
+                columns=[
+                    "tag", "x", "y", "direction",
+                    "x_variance", "y_variance", "xy_covariance"
+                ]
             )
             df = df.append(empty)
             df["x"] = np.hstack((df["x"].dropna().values, self.midpoints[:, 0]))
             df["y"] = np.hstack((df["y"].dropna().values, self.midpoints[:, 1]))
             df["tag"].iloc[-self.midpoints.shape[0]:] = "midpoint"
-            df["direction"] = 0
-            df["x_variance"] = 0.01
-            df["y_variance"] = 0.01
-            df["xy_covariance"] = 0
+            df["direction"] = np.hstack((
+                df["direction"].dropna().values, [0 for _ in self.midpoints[:, 1]]
+            ))
+            df["x_variance"] = np.hstack((
+                df["x_variance"].dropna().values, [0.01 for _ in self.midpoints[:, 1]]
+            ))
+            df["y_variance"] = np.hstack((
+                df["y_variance"].dropna().values, [0.01 for _ in self.midpoints[:, 1]]
+            ))
+            df["xy_covariance"] = np.hstack((
+                df["xy_covariance"].dropna().values, [0 for _ in self.midpoints[:, 1]]
+            ))
 
         if self.active_noise is not None:
             empty = pd.DataFrame(
                 np.nan,
                 index=np.arange(self.active_noise.shape[0]),
-                columns=["tag", "x", "y"]
+                columns=[
+                    "tag", "x", "y", "direction",
+                    "x_variance", "y_variance", "xy_covariance"
+                ]
             )
             df = df.append(empty)
             df["x"] = np.hstack((df["x"].dropna().values, self.active_noise[:, 0]))
             df["y"] = np.hstack((df["y"].dropna().values, self.active_noise[:, 1]))
             df["tag"].iloc[-self.active_noise.shape[0]:] = "active_noise"
-            df["direction"] = 0
-            df["x_variance"] = 0.01
-            df["y_variance"] = 0.01
-            df["xy_covariance"] = 0
+            df["direction"] = np.hstack((
+                df["direction"].dropna().values, [0 for _ in self.active_noise[:, 2]]
+            ))
+            df["x_variance"] = np.hstack((
+                df["x_variance"].dropna().values, self.active_noise[:, 2]
+            ))
+            df["y_variance"] = np.hstack((
+                df["y_variance"].dropna().values, self.active_noise[:, 3]
+            ))
+            df["xy_covariance"] = np.hstack((
+                df["xy_covariance"].dropna().values, self.active_noise[:, 4]
+            ))
 
         if self.inactive_noise is not None:
             empty = pd.DataFrame(
                 np.nan,
                 index=np.arange(self.inactive_noise.shape[0]),
-                columns=["tag", "x", "y"]
+                columns=[
+                    "tag", "x", "y", "direction",
+                    "x_variance", "y_variance", "xy_covariance"
+                ]
             )
             df = df.append(empty)
             df["x"] = np.hstack((df["x"].dropna().values, self.inactive_noise[:, 0]))
             df["y"] = np.hstack((df["y"].dropna().values, self.inactive_noise[:, 1]))
             df["tag"].iloc[-self.inactive_noise.shape[0]:] = "inactive_noise"
-            df["direction"] = 0
-            df["x_variance"] = 0.01
-            df["y_variance"] = 0.01
-            df["xy_covariance"] = 0
+            df["direction"] = np.hstack((
+                df["direction"].dropna().values, [0 for _ in self.inactive_noise[:, 2]]
+            ))
+            df["x_variance"] = np.hstack((
+                df["x_variance"].dropna().values, self.inactive_noise[:, 2]
+            ))
+            df["y_variance"] = np.hstack((
+                df["y_variance"].dropna().values, self.inactive_noise[:, 3]
+            ))
+            df["xy_covariance"] = np.hstack((
+                df["xy_covariance"].dropna().values, self.inactive_noise[:, 4]
+            ))
 
         if self.lap_counters is not None:
             position_values = self.lap_counters[0]
@@ -396,16 +473,26 @@ class Track:
             empty = pd.DataFrame(
                 np.nan,
                 index=np.arange(position_values.shape[0]),
-                columns=["tag", "x", "y", "direction"]
+                columns=[
+                    "tag", "x", "y", "direction",
+                    "x_variance", "y_variance", "xy_covariance"
+                ]
             )
             df = df.append(empty)
             df["x"] = np.hstack((df["x"].dropna().values, position_values[:, 0]))
             df["y"] = np.hstack((df["y"].dropna().values, position_values[:, 1]))
             df["direction"] = np.hstack((df["direction"].dropna().values, lap_values))
             df["tag"].iloc[-position_values.shape[0]:] = "lap_counter"
-            df["x_variance"] = 0.01
-            df["y_variance"] = 0.01
-            df["xy_covariance"] = 0
+            df["x_variance"] = np.hstack((
+                df["x_variance"].dropna().values, position_values[:, 2]
+            ))
+            df["y_variance"] = np.hstack((
+                df["y_variance"].dropna().values, position_values[:, 3]
+            ))
+            df["xy_covariance"] = np.hstack((
+                df["xy_covariance"].dropna().values, position_values[:, 4]
+            ))
+
 
         # Add car data (always ("car_start",0,0,0,0,0,0)
         # unless this file is called from ConversionTools))

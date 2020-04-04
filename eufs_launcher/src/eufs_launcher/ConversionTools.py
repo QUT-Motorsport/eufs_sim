@@ -1064,7 +1064,7 @@ class ConversionTools:
                 # so that we can give each a unique name.
                 ConversionTools.link_num = -1
 
-                def put_model_at_position(mod, x, y, x_cov=0.1, y_cov=0.1, xy_cov=0):
+                def put_model_at_position(mod, x, y, x_cov=0.01, y_cov=0.01, xy_cov=0):
                         """
                         mod: model template to be placed
                         x,y: x and y positions for mod
@@ -1815,7 +1815,7 @@ class ConversionTools:
 
                 sdf_allmodels = ""
 
-                def expand_allmodels(allmods, mod, x, y, x_cov=0.1, y_cov=0.1, xy_cov=0):
+                def expand_allmodels(allmods, mod, x, y, x_cov=0.01, y_cov=0.01, xy_cov=0):
                         """
                         Takes in a model and a pixel location,
                         converts the pixel location to a raw location,
