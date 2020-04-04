@@ -44,12 +44,13 @@ class ConversionTools:
         track_outer_color = (255, 255, 0, 255)           # yellow
         orange_cone_color = (255, 165, 0, 255)           # orange, for orange cones
         big_orange_cone_color = (127, 80, 0, 255)        # dark orange, for big orange cones
+        lap_counter_color = (202, 44, 146, 255)     # fuschia, for lap counters (skidpad)
 
         double_orange_cone_color = (200, 100, 0, 255)    # for double-orange-cones
 
         # Other various retained parameters
         link_num = -1
-        TRACKIMG_VERSION_NUM = 1
+        TRACKIMG_VERSION_NUM = 2
 
         # Metadata corner variables
         TOP_LEFT = "Top Left"
@@ -1268,6 +1269,7 @@ class ConversionTools:
                 active_noise = df[df['tag'] == "active_noise"]
                 inactive_noise = df[df['tag'] == "inactive_noise"]
                 car_location = df[df['tag'] == "car_start"]
+                lap_counters = df[df['tag'] == "lap_counter"]
 
                 # Here we parse the data and get a full list of all relevant info of the cones
                 # and the car (type,x,y,yaw)
@@ -1277,6 +1279,7 @@ class ConversionTools:
                 raw_big_orange = []
                 raw_noise = []
                 raw_car_location = (0, 0, 0, 0, 0)
+                raw_lap_counters = []
                 for bluecone in blue_cones.itertuples():
                         x = (bluecone[2])
                         y = (bluecone[3])
@@ -1311,12 +1314,19 @@ class ConversionTools:
                 for c in car_location.itertuples():
                         raw_car_location = ("car", 1.0 * c[2], 1.0 * c[3], c[4], 0)
 
+                for lap_counter in lap_counters.itertuples():
+                        x = 1.0*(lap_counter[2])
+                        y = 1.0*(lap_counter[3])
+                        lap_number = lap_counter[4]
+                        raw_lap_counters.append(("lap_counter", x, y, lap_number))
+
                 all_cones = (raw_blue +
                              raw_yellow +
                              raw_orange +
                              raw_big_orange +
                              raw_noise +
-                             [raw_car_location])
+                             [raw_car_location] +
+                             raw_lap_counters)
 
                 # Here we convert all positions to positive
                 min_x = 100000
@@ -1395,6 +1405,8 @@ class ConversionTools:
                             return ConversionTools.big_orange_cone_color
                         elif cone_name == "noise":
                             return ConversionTools.noise_color
+                        elif cone_name == "lap_counter":
+                            return ConversionTools.lap_counter_color
                         return ConversionTools.inner_cone_color
 
                 # Place the cone pixels
