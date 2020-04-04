@@ -402,7 +402,7 @@ class Track:
             df["x"] = np.hstack((df["x"].dropna().values, position_values[:, 0]))
             df["y"] = np.hstack((df["y"].dropna().values, position_values[:, 1]))
             df["direction"] = np.hstack((df["direction"].dropna().values, lap_values))
-            df["tag"].iloc[-position_values.shape[0]:] = "lap_counters"
+            df["tag"].iloc[-position_values.shape[0]:] = "lap_counter"
             df["x_variance"] = 0.01
             df["y_variance"] = 0.01
             df["xy_covariance"] = 0

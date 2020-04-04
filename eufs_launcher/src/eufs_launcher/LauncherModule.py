@@ -966,6 +966,7 @@ class EufsLauncher(Plugin):
                         ) |
                         (uniform(0, 1) < noise_level)
                 ]
+
                 for idx, val in loaded_csv.iterrows():
                         # Activate remaining noise
                         if loaded_csv.loc[idx, "tag"] == "inactive_noise":
