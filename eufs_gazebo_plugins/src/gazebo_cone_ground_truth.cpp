@@ -86,7 +86,6 @@ namespace gazebo {
 
     if (simulate_perception_) {
       // Camera cone publisher
-      ROS_ERROR("assimulate!  assimulate!");
       if (!_sdf->HasElement("perceptionConesTopicName")) {
         ROS_FATAL_NAMED("state_ground_truth",
                         "state_ground_truth plugin missing <perceptionConesTopicName>, cannot proceed");

@@ -43,8 +43,12 @@
     <plugin name="cone_ground_truth" filename="libgazebo_cone_ground_truth.so">
       <alwaysOn>true</alwaysOn>
       <updateRate>25.0</updateRate>
-      <viewDistance>15</viewDistance>
-      <fov>1.91986</fov>
+      <cameraViewDistance>15</cameraViewDistance>
+      <lidarViewDistance>100</lidarViewDistance>
+      <lidarXViewDistance>20</lidarXViewDistance>
+      <lidarYViewDistance>10</lidarYViewDistance>
+      <cameraFOV>1.91986</cameraFOV><!--110 degrees-->
+      <lidarFOV>6.283185</lidarFOV><!-- 360 degrees-->
       <coneFrame>base_footprint</coneFrame>
       <groundTruthConesTopicName>/ground_truth/cones</groundTruthConesTopicName>
       <groundTruthConeMarkersTopicName>/ground_truth/cones/viz</groundTruthConeMarkersTopicName>
@@ -52,7 +56,9 @@
       <simulatePerception>true</simulatePerception>
       <perceptionConesTopicName>/fusion/cones</perceptionConesTopicName>
       <perceptionConeMarkersTopicName>/fusion/cones/viz</perceptionConeMarkersTopicName>
-      <perceptionNoise>0.0 0.0 0.0</perceptionNoise>
+      <perceptionCameraDepthNoiseParameterA>0.0184</perceptionCameraDepthNoiseParameterA>
+      <perceptionCameraDepthNoiseParameterB>0.2106</perceptionCameraDepthNoiseParameterB>
+      <perceptionLidarNoise>0.03 0.03 0.0</perceptionLidarNoise>
     </plugin>
   </gazebo>
 
