@@ -47,7 +47,7 @@
       <lidarViewDistance>100</lidarViewDistance>
       <lidarXViewDistance>20</lidarXViewDistance>
       <lidarYViewDistance>10</lidarYViewDistance>
-      <cameraFOV>1.91986</cameraFOV><!--110 degrees-->
+      <cameraFOV>1.918889</cameraFOV><!--110 degrees-->
       <lidarFOV>6.283185</lidarFOV><!-- 360 degrees-->
       <coneFrame>base_footprint</coneFrame>
       <groundTruthConesTopicName>/ground_truth/cones</groundTruthConesTopicName>

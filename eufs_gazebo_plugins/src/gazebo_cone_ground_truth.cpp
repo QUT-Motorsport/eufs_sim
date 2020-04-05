@@ -53,14 +53,20 @@ namespace gazebo {
 
     this->update_rate_ = getDoubleParameter(_sdf, "updateRate", 0, "0.0 (as fast as possible)");
 
-    this->view_distance = getDoubleParameter(_sdf, "viewDistance", 15, "15");
-    this->fov = getDoubleParameter(_sdf, "fov", 1.91986, "1.91986  (120 degrees)");
+    this->lidar_total_view_distance = getDoubleParameter(_sdf, "lidarViewDistance", 100, "100");
+    this->camera_total_view_distance = getDoubleParameter(_sdf, "cameraViewDistance", 10, "10");
+    this->lidar_x_view_distance = getDoubleParameter(_sdf, "lidarXViewDistance", 20, "20");
+    this->lidar_y_view_distance = getDoubleParameter(_sdf, "lidarYViewDistance", 10, "10");
+    this->lidar_fov = getDoubleParameter(_sdf, "lidarFOV", 6.283185, "6.283185  (360 degrees)");
+    this->camera_fov = getDoubleParameter(_sdf, "cameraFOV", 1.918889, "1.918889  (110 degrees)");
+    this->camera_a = getDoubleParameter(_sdf, "perceptionCameraDepthNoiseParameterA", 0.0184, "0.0184");
+    this->camera_b = getDoubleParameter(_sdf, "perceptionCameraDepthNoiseParameterB", 0.2106, "0.2106");
 
     this->cone_frame_ = getStringParameter(_sdf, "coneFrame", "base_footprint", "base_footprint");
 
     this->simulate_perception_ = getBoolParameter(_sdf, "simulatePerception", false, "false");
 
-    this->perception_noise_ = getVector3dParameter(_sdf, "perceptionNoise", {0.0, 0.0, 0.0}, "0.0, 0.0, 0.0 (no noise)");
+    this->perception_lidar_noise_ = getVector3dParameter(_sdf, "perceptionNoise", {0.03, 0.03, 0.0}, "0.03, 0.03, 0.0");
 
     this->rosnode_ = new ros::NodeHandle("");
 
