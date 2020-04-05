@@ -9,7 +9,12 @@
     <!-- First we import all posible elements defined in the urdf.xacro files. All these elements are defined as macro:xacros -->
 
     <!-- Import Robotnik CAR base elements -->
-    <xacro:include filename="$(find eufs_description)/urdf/ads-dv_base.urdf.xacro" />
+    <xacro:arg name="publish_tf" default="false"/>
+    <xacro:arg name="simulate_perception" default="false"/>
+    <xacro:include filename="$(find eufs_description)/urdf/ads-dv_base.urdf.xacro">
+      <xacro:arg name="publish_tf" value="$(arg publish_tf)"/>
+      <xacro:arg name="simulate_perception" value="$(arg simulate_perception)"/>
+    </xacro:include>
 
     <!-- Import Robotnik CAR wheels -->
     <xacro:include filename="$(find eufs_description)/urdf/suspension_wheel.urdf.xacro" />

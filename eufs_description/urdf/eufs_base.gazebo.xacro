@@ -48,7 +48,8 @@
       <coneFrame>base_footprint</coneFrame>
       <groundTruthConesTopicName>/ground_truth/cones</groundTruthConesTopicName>
       <groundTruthConeMarkersTopicName>/ground_truth/cones/viz</groundTruthConeMarkersTopicName>
-      <simulatePerception>$(arg simulate_perception)</simulatePerception>
+      <!--<simulatePerception>$(arg simulate_perception)</simulatePerception>-->
+      <simulatePerception>true</simulatePerception>
       <perceptionConesTopicName>/fusion/cones</perceptionConesTopicName>
       <perceptionConeMarkersTopicName>/fusion/cones/viz</perceptionConeMarkersTopicName>
       <perceptionNoise>0.0 0.0 0.0</perceptionNoise>

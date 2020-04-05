@@ -27,7 +27,7 @@
  * @copyright 2020 Edinburgh University Formula Student (EUFS)
  * @brief ground truth cone Gazebo plugin
  *
- * @details Provides ground truth cones in simulation in the form of `eufs_msgs/ConeArray`.
+ * @details Provides ground truth cones in simulation in the form of `eufs_msgs/ConeArrayWithCovariance`.
  * Can also simulate the perception stack by publishing cones with noise.
  **/
 
@@ -72,7 +72,7 @@ namespace gazebo {
       return;
     } else {
       std::string topic_name_ = _sdf->GetElement("groundTruthConesTopicName")->Get<std::string>();
-      this->ground_truth_cone_pub_ = this->rosnode_->advertise<eufs_msgs::ConeArray>(topic_name_, 1);
+      this->ground_truth_cone_pub_ = this->rosnode_->advertise<eufs_msgs::ConeArrayWithCovariance>(topic_name_, 1);
     }
 
     // Ground truth cone marker publisher
@@ -86,13 +86,14 @@ namespace gazebo {
 
     if (simulate_perception_) {
       // Camera cone publisher
+      ROS_ERROR("assimulate!  assimulate!");
       if (!_sdf->HasElement("perceptionConesTopicName")) {
         ROS_FATAL_NAMED("state_ground_truth",
                         "state_ground_truth plugin missing <perceptionConesTopicName>, cannot proceed");
         return;
       } else {
         std::string topic_name_ = _sdf->GetElement("perceptionConesTopicName")->Get<std::string>();
-        this->perception_cone_pub_ = this->rosnode_->advertise<eufs_msgs::ConeArray>(topic_name_, 1);
+        this->perception_cone_pub_ = this->rosnode_->advertise<eufs_msgs::ConeArrayWithCovariance>(topic_name_, 1);
       }
 
       // Camera cone marker publisher
@@ -131,7 +132,7 @@ namespace gazebo {
     this->car_pos = this->car_link->GetWorldPose().Ign();
 #endif
 
-    eufs_msgs::ConeArray ground_truth_cone_array_message;
+    eufs_msgs::ConeArrayWithCovariance ground_truth_cone_array_message;
 
     // Publish the ground truth if it has subscribers
     if (this->ground_truth_cone_pub_.getNumSubscribers() > 0 || this->ground_truth_cone_marker_pub_.getNumSubscribers() > 0) {
@@ -146,7 +147,7 @@ namespace gazebo {
 
     // Publish the simulated perception cones if it has subscribers
     if (this->simulate_perception_ && (this->perception_cone_pub_.getNumSubscribers() > 0 || this->perception_cone_marker_pub_.getNumSubscribers() > 0)) {
-      eufs_msgs::ConeArray perception_cone_array_message = getConeArrayMessageWithNoise(ground_truth_cone_array_message, perception_noise_);
+      eufs_msgs::ConeArrayWithCovariance perception_cone_array_message = getConeArrayMessageWithNoise(ground_truth_cone_array_message, perception_noise_);
       visualization_msgs::MarkerArray perception_cone_marker_array_message = getConeMarkerArrayMessage(perception_cone_array_message);
 
       this->perception_cone_pub_.publish(perception_cone_array_message);
@@ -157,8 +158,8 @@ namespace gazebo {
 
 
   // Getting the cone arrays
-  eufs_msgs::ConeArray GazeboConeGroundTruth::getConeArrayMessage() {
-    eufs_msgs::ConeArray ground_truth_cone_array_message;
+  eufs_msgs::ConeArrayWithCovariance GazeboConeGroundTruth::getConeArrayMessage() {
+    eufs_msgs::ConeArrayWithCovariance ground_truth_cone_array_message;
 
     physics::Link_V links = this->track_model->GetLinks();
     for (unsigned int i = 0; i < links.size(); i++) {
@@ -177,7 +178,7 @@ namespace gazebo {
     return ground_truth_cone_array_message;
   }
 
-  void GazeboConeGroundTruth::addConeToConeArray(eufs_msgs::ConeArray &ground_truth_cone_array, physics::LinkPtr link) {
+  void GazeboConeGroundTruth::addConeToConeArray(eufs_msgs::ConeArrayWithCovariance &ground_truth_cone_array, physics::LinkPtr link) {
     geometry_msgs::Point point;
 
 #if GAZEBO_MAJOR_VERSION >= 8
@@ -191,49 +192,53 @@ namespace gazebo {
 
     ConeType cone_type = this->getConeType(link);
 
+    eufs_msgs::ConeWithCovariance cone = eufs_msgs::ConeWithCovariance();
+    cone.point = point;
+    cone.covariance = {0, 0, 0, 0};
+
     switch (cone_type) {
       case ConeType::blue:
-        ground_truth_cone_array.blue_cones.push_back(point);
+        ground_truth_cone_array.blue_cones.push_back(cone);
         break;
       case ConeType::yellow:
-        ground_truth_cone_array.yellow_cones.push_back(point);
+        ground_truth_cone_array.yellow_cones.push_back(cone);
         break;
       case ConeType::orange:
-        ground_truth_cone_array.orange_cones.push_back(point);
+        ground_truth_cone_array.orange_cones.push_back(cone);
         break;
       case ConeType::big_orange:
-        ground_truth_cone_array.big_orange_cones.push_back(point);
+        ground_truth_cone_array.big_orange_cones.push_back(cone);
         break;
     }
   }
 
-  void GazeboConeGroundTruth::processCones(std::vector<geometry_msgs::Point> &points) {
-    std::vector<geometry_msgs::Point> points_in_view;
+  void GazeboConeGroundTruth::processCones(std::vector<eufs_msgs::ConeWithCovariance> &cones) {
+    std::vector<eufs_msgs::ConeWithCovariance> cones_in_view;
 
-    for (unsigned int i = 0; i < points.size(); i++) {
+    for (unsigned int i = 0; i < cones.size(); i++) {
       // Translate the position of the cone to be based on the car
-      float x = points[i].x - this->car_pos.Pos().X();
-      float y = points[i].y - this->car_pos.Pos().Y();
+      float x = cones[i].point.x - this->car_pos.Pos().X();
+      float y = cones[i].point.y - this->car_pos.Pos().Y();
 
       // If the cone is withing viewing distance
       if ((x * x) + (y * y) < (view_distance * view_distance)) {
         float yaw = this->car_pos.Rot().Yaw();
 
         // Rotate the points using the yaw of the car (x and y are the other way around)
-        points[i].y = (cos(yaw) * y) - (sin(yaw) * x);
-        points[i].x = (sin(yaw) * y) + (cos(yaw) * x);
+        cones[i].point.y = (cos(yaw) * y) - (sin(yaw) * x);
+        cones[i].point.x = (sin(yaw) * y) + (cos(yaw) * x);
 
         // Angle between the direction of the car and the cone
-        float angle = atan2(points[i].y, points[i].x);
+        float angle = atan2(cones[i].point.y, cones[i].point.x);
 
         // If the cone is inside the field of view
         if (abs(angle) < (this->fov / 2)) {
-          points_in_view.push_back(points[i]);
+          cones_in_view.push_back(cones[i]);
         }
       }
     }
 
-    points = points_in_view;
+    cones = cones_in_view;
   }
 
   GazeboConeGroundTruth::ConeType GazeboConeGroundTruth::getConeType(physics::LinkPtr link) {
@@ -257,7 +262,7 @@ namespace gazebo {
 
   // Getting the cone marker array
 
-  visualization_msgs::MarkerArray GazeboConeGroundTruth::getConeMarkerArrayMessage(eufs_msgs::ConeArray &ground_truth_cone_array_message) {
+  visualization_msgs::MarkerArray GazeboConeGroundTruth::getConeMarkerArrayMessage(eufs_msgs::ConeArrayWithCovariance &ground_truth_cone_array_message) {
     visualization_msgs::MarkerArray ground_truth_cone_marker_array;
 
     int marker_id = 0;
@@ -269,7 +274,7 @@ namespace gazebo {
     return ground_truth_cone_marker_array;
   }
 
-  int GazeboConeGroundTruth::addConeMarkers(std::vector<visualization_msgs::Marker> &marker_array, int marker_id, std::vector<geometry_msgs::Point> cones, float red, float green, float blue, bool big) {
+  int GazeboConeGroundTruth::addConeMarkers(std::vector<visualization_msgs::Marker> &marker_array, int marker_id, std::vector<eufs_msgs::ConeWithCovariance> cones, float red, float green, float blue, bool big) {
     int id = marker_id;
     for (int i = 0; i < cones.size(); i++) {
       visualization_msgs::Marker marker;
@@ -282,8 +287,8 @@ namespace gazebo {
       marker.type = marker.MESH_RESOURCE;
       marker.action = marker.ADD;
 
-      marker.pose.position.x = cones[i].x;
-      marker.pose.position.y = cones[i].y;
+      marker.pose.position.x = cones[i].point.x;
+      marker.pose.position.y = cones[i].point.y;
 
       marker.scale.x = 1.5;
       marker.scale.y = 1.5;
@@ -311,8 +316,8 @@ namespace gazebo {
 
 
   // Add noise to the cone arrays
-  eufs_msgs::ConeArray GazeboConeGroundTruth::getConeArrayMessageWithNoise(eufs_msgs::ConeArray &ground_truth_cone_array_message, ignition::math::Vector3d noise) {
-    eufs_msgs::ConeArray cone_array_message_with_noise = ground_truth_cone_array_message;
+  eufs_msgs::ConeArrayWithCovariance GazeboConeGroundTruth::getConeArrayMessageWithNoise(eufs_msgs::ConeArrayWithCovariance &ground_truth_cone_array_message, ignition::math::Vector3d noise) {
+    eufs_msgs::ConeArrayWithCovariance cone_array_message_with_noise = ground_truth_cone_array_message;
 
     addNoiseToConeArray(cone_array_message_with_noise.blue_cones, noise);
     addNoiseToConeArray(cone_array_message_with_noise.yellow_cones, noise);
@@ -325,10 +330,12 @@ namespace gazebo {
     return cone_array_message_with_noise;
   }
 
-  void GazeboConeGroundTruth::addNoiseToConeArray(std::vector<geometry_msgs::Point> &cone_array, ignition::math::Vector3d noise) {
+  void GazeboConeGroundTruth::addNoiseToConeArray(std::vector<eufs_msgs::ConeWithCovariance> &cone_array, ignition::math::Vector3d noise) {
     for (unsigned int i = 0; i < cone_array.size(); i++) {
-      cone_array[i].x += GaussianKernel(0, noise.X());
-      cone_array[i].y += GaussianKernel(0, noise.Y());
+      cone_array[i].point.x += GaussianKernel(0, noise.X());
+      cone_array[i].point.y += GaussianKernel(0, noise.Y());
+      // This is just a placeholder
+      cone_array[i].covariance = {noise.X(), noise.Y(), 0};
     }
   }
 

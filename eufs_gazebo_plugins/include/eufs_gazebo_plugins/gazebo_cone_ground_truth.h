@@ -27,7 +27,7 @@
  * @copyright 2020 Edinburgh University Formula Student (EUFS)
  * @brief ground truth cone Gazebo plugin
  *
- * @details Provides ground truth cones in simulation in the form of `eufs_msgs/ConeArray`.
+ * @details Provides ground truth cones in simulation in the form of `eufs_msgs/ConeArrayWithCovariance`.
  * Can also simulate the perception stack by publishing cones with noise.
  **/
 
@@ -48,7 +48,8 @@
 
 #include <ros/ros.h>
 
-#include <eufs_msgs/ConeArray.h>
+#include <eufs_msgs/ConeArrayWithCovariance.h>
+#include <eufs_msgs/ConeWithCovariance.h>
 #include <eufs_msgs/PointArray.h>
 #include <eufs_msgs/CarState.h>
 #include <geometry_msgs/Point.h>
@@ -75,24 +76,24 @@ namespace gazebo {
     void UpdateChild();
 
     // Getting the cone arrays
-    eufs_msgs::ConeArray getConeArrayMessage();
+    eufs_msgs::ConeArrayWithCovariance getConeArrayMessage();
 
-    void addConeToConeArray(eufs_msgs::ConeArray &ground_truth_cone_array, physics::LinkPtr link);
+    void addConeToConeArray(eufs_msgs::ConeArrayWithCovariance &ground_truth_cone_array, physics::LinkPtr link);
 
-    void processCones(std::vector <geometry_msgs::Point> &points);
+    void processCones(std::vector <eufs_msgs::ConeWithCovariance> &cones);
 
     GazeboConeGroundTruth::ConeType getConeType(physics::LinkPtr link);
 
     // Getting the cone marker array
-    visualization_msgs::MarkerArray getConeMarkerArrayMessage(eufs_msgs::ConeArray &cone_array_message);
+    visualization_msgs::MarkerArray getConeMarkerArrayMessage(eufs_msgs::ConeArrayWithCovariance &cone_array_message);
 
     int addConeMarkers(std::vector <visualization_msgs::Marker> &marker_array, int marker_id,
-                       std::vector <geometry_msgs::Point> cones, float red, float green, float blue, bool big);
+                       std::vector <eufs_msgs::ConeWithCovariance> cones, float red, float green, float blue, bool big);
 
     // Add noise to the cone arrays
-    eufs_msgs::ConeArray getConeArrayMessageWithNoise(eufs_msgs::ConeArray &ground_truth_cone_array_message, ignition::math::Vector3d noise);
+    eufs_msgs::ConeArrayWithCovariance getConeArrayMessageWithNoise(eufs_msgs::ConeArrayWithCovariance &ground_truth_cone_array_message, ignition::math::Vector3d noise);
 
-    void addNoiseToConeArray(std::vector<geometry_msgs::Point> &cone_array, ignition::math::Vector3d noise);
+    void addNoiseToConeArray(std::vector<eufs_msgs::ConeWithCovariance> &cone_array, ignition::math::Vector3d noise);
 
     double GaussianKernel(double mu, double sigma);
 
