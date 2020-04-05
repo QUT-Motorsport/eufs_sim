@@ -101,7 +101,6 @@ class Track:
         inactive_noise = []
         lap_counters = []
 
-
         # iterate over all links of the model
         if len(root[0].findall("include")) != 0:
             for child in root[0].iter("include"):
@@ -114,7 +113,6 @@ class Track:
                     covariance_y = float(cov_node.attrib["y"])
                     covariance_xy = float(cov_node.attrib["xy"])
                     cov_info = [covariance_x, covariance_y, covariance_xy]
-                #mesh_str = child.find("visual")[0][0][0].text.split("/")[-1].split(".")[0]
                 mesh_str = "_".join(child.find("name").text.split("_")[:-1])
                 # indentify cones by the name of their mesh
                 if "blue_cone" == mesh_str:
@@ -376,7 +374,6 @@ class Track:
                 df["xy_covariance"].dropna().values, self.big_orange_cones[:, 4]
             ))
 
-
         if self.orange_cones is not None:
             empty = pd.DataFrame(
                 np.nan,
@@ -506,7 +503,6 @@ class Track:
             df["xy_covariance"] = np.hstack((
                 df["xy_covariance"].dropna().values, position_values[:, 4]
             ))
-
 
         # Add car data (always ("car_start",0,0,0,0,0,0)
         # unless this file is called from ConversionTools))

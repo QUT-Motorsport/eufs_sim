@@ -255,4 +255,3 @@ class SLAMEval(object):
 if __name__ == "__main__":
     ekf_evaluator = SLAMEval()
     rospy.spin()
-

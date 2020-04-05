@@ -45,10 +45,6 @@ eufs_launcher:
             package: "fast_slam"
             location: "launch/fast_slam.launch"
 
-        perception_sensors_simulator:
-            package: "eufs_gazebo"
-            location: "launch/perception_sensors_simulator.launch"
-
     # Checkboxes to have in the config section.  
     # `eufs_launcher` handles layout based on priority set.
     checkboxes:
