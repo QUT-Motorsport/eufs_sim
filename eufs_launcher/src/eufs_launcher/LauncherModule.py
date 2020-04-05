@@ -1001,7 +1001,7 @@ class EufsLauncher(Plugin):
                         "csv",
                         "launch",
                         csv_path,
-                        params={"keep_all_noise": False, "noise": 1},
+                        params={"keep_all_noise": True, "noise": 1},
                         override_name="LAST_LAUNCH"
                 )
                 track_to_launch = "LAST_LAUNCH.launch"
@@ -1018,6 +1018,21 @@ class EufsLauncher(Plugin):
                                 'launch',
                                 "LAST_LAUNCH.launch"
                         ),
+                        conversion_suffix=""
+                )
+
+                # And now strip the launch file of the metadata that causes warnings
+                # This step is non-essential, but will result in a lot of terminal warnings
+                # if left out
+                Converter.convert(
+                        "csv",
+                        "launch",
+                        os.path.join(
+                                self.GAZEBO,
+                                'tracks',
+                                "LAST_LAUNCH.csv"
+                        ),
+                        params={"keep_all_noise": False, "noise": 1},
                         conversion_suffix=""
                 )
 

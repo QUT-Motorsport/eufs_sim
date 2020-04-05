@@ -1081,9 +1081,11 @@ class ConversionTools:
                         x_cov_str = str(x_cov)
                         y_cov_str = str(y_cov)
                         xy_cov_str = str(xy_cov)
+                        rospy.logerr(x_cov_str)
                         mod_with_cov = setup_covariance(x_cov_str, y_cov_str, xy_cov_str).join(
                                 mod_with_link.split("%FILLCOVARIANCE%")
                         )
+                        rospy.logerr(mod_with_cov)
                         return mod_with_cov
 
                 sdf_allmodels = ""
