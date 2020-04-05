@@ -4,8 +4,8 @@
     
 
        <include>
-            <uri>model://eufs_description/meshes/cone_blue.dae</uri>
-            <pose>61.521274612 16.3033910374 0.15 0 0 0</pose>
+            <uri>model://models/blue_cone.dae</uri>
+            <pose>63.0440931878 21.6607437402 0.15 0 0 0</pose>
             <name>blue_cone_0</name>
             
       <covariance x="0" y="0" xy="0"/>
@@ -14,8 +14,8 @@
 
 
        <include>
-            <uri>model://eufs_description/meshes/cone_blue.dae</uri>
-            <pose>65.5049618499 16.7185970035 0.15 0 0 0</pose>
+            <uri>model://models/blue_cone.dae</uri>
+            <pose>66.9333289281 22.5996041706 0.15 0 0 0</pose>
             <name>blue_cone_1</name>
             
       <covariance x="0" y="0" xy="0"/>
@@ -24,8 +24,8 @@
 
 
        <include>
-            <uri>model://eufs_description/meshes/cone_blue.dae</uri>
-            <pose>66.8807121201 16.8583687234 0.15 0 0 0</pose>
+            <uri>model://models/blue_cone.dae</uri>
+            <pose>70.8225646685 23.538464601 0.15 0 0 0</pose>
             <name>blue_cone_2</name>
             
       <covariance x="0" y="0" xy="0"/>
@@ -34,8 +34,8 @@
 
 
        <include>
-            <uri>model://eufs_description/meshes/cone_blue.dae</uri>
-            <pose>70.7990679691 16.9195293675 0.15 0 0 0</pose>
+            <uri>model://models/blue_cone.dae</uri>
+            <pose>74.7118004088 24.4773250314 0.15 0 0 0</pose>
             <name>blue_cone_3</name>
             
       <covariance x="0" y="0" xy="0"/>
@@ -44,8 +44,8 @@
 
 
        <include>
-            <uri>model://eufs_description/meshes/cone_blue.dae</uri>
-            <pose>74.8086281901 16.7960435772 0.15 0 0 0</pose>
+            <uri>model://models/blue_cone.dae</uri>
+            <pose>78.1720178003 25.3105429246 0.15 0 0 0</pose>
             <name>blue_cone_4</name>
             
       <covariance x="0" y="0" xy="0"/>
@@ -54,8 +54,8 @@
 
 
        <include>
-            <uri>model://eufs_description/meshes/cone_blue.dae</uri>
-            <pose>78.8181884111 16.6725577869 0.15 0 0 0</pose>
+            <uri>model://models/blue_cone.dae</uri>
+            <pose>82.300197366 25.6031016543 0.15 0 0 0</pose>
             <name>blue_cone_5</name>
             
       <covariance x="0" y="0" xy="0"/>
@@ -64,8 +64,8 @@
 
 
        <include>
-            <uri>model://eufs_description/meshes/cone_blue.dae</uri>
-            <pose>82.8277486321 16.5490719966 0.15 0 0 0</pose>
+            <uri>model://models/blue_cone.dae</uri>
+            <pose>83.9594044761 25.4395457338 0.15 0 0 0</pose>
             <name>blue_cone_6</name>
             
       <covariance x="0" y="0" xy="0"/>
@@ -74,8 +74,8 @@
 
 
        <include>
-            <uri>model://eufs_description/meshes/cone_blue.dae</uri>
-            <pose>86.8373088531 16.4255862063 0.15 0 0 0</pose>
+            <uri>model://models/blue_cone.dae</uri>
+            <pose>87.9291534449 24.84323461 0.15 0 0 0</pose>
             <name>blue_cone_7</name>
             
       <covariance x="0" y="0" xy="0"/>
@@ -84,8 +84,8 @@
 
 
        <include>
-            <uri>model://eufs_description/meshes/cone_blue.dae</uri>
-            <pose>90.8468690741 16.3021004159 0.15 0 0 0</pose>
+            <uri>model://models/blue_cone.dae</uri>
+            <pose>91.8989024136 24.2469234862 0.15 0 0 0</pose>
             <name>blue_cone_8</name>
             
       <covariance x="0" y="0" xy="0"/>
@@ -94,8 +94,8 @@
 
 
        <include>
-            <uri>model://eufs_description/meshes/cone_blue.dae</uri>
-            <pose>94.8564292951 16.1786146256 0.15 0 0 0</pose>
+            <uri>model://models/blue_cone.dae</uri>
+            <pose>95.8686513824 23.6506123624 0.15 0 0 0</pose>
             <name>blue_cone_9</name>
             
       <covariance x="0" y="0" xy="0"/>
@@ -104,8 +104,8 @@
 
 
        <include>
-            <uri>model://eufs_description/meshes/cone_blue.dae</uri>
-            <pose>98.8659895161 16.0551288353 0.15 0 0 0</pose>
+            <uri>model://models/blue_cone.dae</uri>
+            <pose>99.8384003512 23.0543012386 0.15 0 0 0</pose>
             <name>blue_cone_10</name>
             
       <covariance x="0" y="0" xy="0"/>
@@ -114,8 +114,8 @@
 
 
        <include>
-            <uri>model://eufs_description/meshes/cone_blue.dae</uri>
-            <pose>102.875549737 15.931643045 0.15 0 0 0</pose>
+            <uri>model://models/blue_cone.dae</uri>
+            <pose>103.80814932 22.4579901148 0.15 0 0 0</pose>
             <name>blue_cone_11</name>
             
       <covariance x="0" y="0" xy="0"/>
@@ -124,8 +124,8 @@
 
 
        <include>
-            <uri>model://eufs_description/meshes/cone_blue.dae</uri>
-            <pose>106.885109958 15.8081572546 0.15 0 0 0</pose>
+            <uri>model://models/blue_cone.dae</uri>
+            <pose>107.777898289 21.861678991 0.15 0 0 0</pose>
             <name>blue_cone_12</name>
             
       <covariance x="0" y="0" xy="0"/>
@@ -134,8 +134,8 @@
 
 
        <include>
-            <uri>model://eufs_description/meshes/cone_blue.dae</uri>
-            <pose>110.845679899 15.6861802591 0.15 0 0 0</pose>
+            <uri>model://models/blue_cone.dae</uri>
+            <pose>111.747647258 21.2653678672 0.15 0 0 0</pose>
             <name>blue_cone_13</name>
             
       <covariance x="0" y="0" xy="0"/>
@@ -144,8 +144,8 @@
 
 
        <include>
-            <uri>model://eufs_description/meshes/cone_blue.dae</uri>
-            <pose>114.786722821 16.4742603022 0.15 0 0 0</pose>
+            <uri>model://models/blue_cone.dae</uri>
+            <pose>115.717396226 20.6690567435 0.15 0 0 0</pose>
             <name>blue_cone_14</name>
             
       <covariance x="0" y="0" xy="0"/>
@@ -154,8 +154,8 @@
 
 
        <include>
-            <uri>model://eufs_description/meshes/cone_blue.dae</uri>
-            <pose>116.326637215 19.8462637801 0.15 0 0 0</pose>
+            <uri>model://models/blue_cone.dae</uri>
+            <pose>116.420219109 20.5634830393 0.15 0 0 0</pose>
             <name>blue_cone_15</name>
             
       <covariance x="0" y="0" xy="0"/>
@@ -164,8 +164,8 @@
 
 
        <include>
-            <uri>model://eufs_description/meshes/cone_blue.dae</uri>
-            <pose>117.950458805 23.5143730137 0.15 0 0 0</pose>
+            <uri>model://models/blue_cone.dae</uri>
+            <pose>120.464229063 20.5358245206 0.15 0 0 0</pose>
             <name>blue_cone_16</name>
             
       <covariance x="0" y="0" xy="0"/>
@@ -174,8 +174,8 @@
 
 
        <include>
-            <uri>model://eufs_description/meshes/cone_blue.dae</uri>
-            <pose>119.574280395 27.1824822473 0.15 0 0 0</pose>
+            <uri>model://models/blue_cone.dae</uri>
+            <pose>124.333825512 21.8510552328 0.15 0 0 0</pose>
             <name>blue_cone_17</name>
             
       <covariance x="0" y="0" xy="0"/>
@@ -184,8 +184,8 @@
 
 
        <include>
-            <uri>model://eufs_description/meshes/cone_blue.dae</uri>
-            <pose>121.198101985 30.8505914809 0.15 0 0 0</pose>
+            <uri>model://models/blue_cone.dae</uri>
+            <pose>127.941000533 23.6255949631 0.15 0 0 0</pose>
             <name>blue_cone_18</name>
             
       <covariance x="0" y="0" xy="0"/>
@@ -194,8 +194,8 @@
 
 
        <include>
-            <uri>model://eufs_description/meshes/cone_blue.dae</uri>
-            <pose>122.821923575 34.5187007145 0.15 0 0 0</pose>
+            <uri>model://models/blue_cone.dae</uri>
+            <pose>130.774587582 26.5047741966 0.15 0 0 0</pose>
             <name>blue_cone_19</name>
             
       <covariance x="0" y="0" xy="0"/>
@@ -204,8 +204,8 @@
 
 
        <include>
-            <uri>model://eufs_description/meshes/cone_blue.dae</uri>
-            <pose>124.445745165 38.1868099481 0.15 0 0 0</pose>
+            <uri>model://models/blue_cone.dae</uri>
+            <pose>132.47524112 30.1556453898 0.15 0 0 0</pose>
             <name>blue_cone_20</name>
             
       <covariance x="0" y="0" xy="0"/>
@@ -214,8 +214,8 @@
 
 
        <include>
-            <uri>model://eufs_description/meshes/cone_blue.dae</uri>
-            <pose>126.069566756 41.8549191817 0.15 0 0 0</pose>
+            <uri>model://models/blue_cone.dae</uri>
+            <pose>133.642414056 33.4900453123 0.15 0 0 0</pose>
             <name>blue_cone_21</name>
             
       <covariance x="0" y="0" xy="0"/>
@@ -224,8 +224,8 @@
 
 
        <include>
-            <uri>model://eufs_description/meshes/cone_blue.dae</uri>
-            <pose>127.693388346 45.5230284153 0.15 0 0 0</pose>
+            <uri>model://models/blue_cone.dae</uri>
+            <pose>134.273888374 37.4514922817 0.15 0 0 0</pose>
             <name>blue_cone_22</name>
             
       <covariance x="0" y="0" xy="0"/>
@@ -234,8 +234,8 @@
 
 
        <include>
-            <uri>model://eufs_description/meshes/cone_blue.dae</uri>
-            <pose>129.317209936 49.1911376489 0.15 0 0 0</pose>
+            <uri>model://models/blue_cone.dae</uri>
+            <pose>134.905362692 41.4129392511 0.15 0 0 0</pose>
             <name>blue_cone_23</name>
             
       <covariance x="0" y="0" xy="0"/>
@@ -244,8 +244,8 @@
 
 
        <include>
-            <uri>model://eufs_description/meshes/cone_blue.dae</uri>
-            <pose>130.941031526 52.8592468825 0.15 0 0 0</pose>
+            <uri>model://models/blue_cone.dae</uri>
+            <pose>135.536837011 45.3743862205 0.15 0 0 0</pose>
             <name>blue_cone_24</name>
             
       <covariance x="0" y="0" xy="0"/>
@@ -254,8 +254,8 @@
 
 
        <include>
-            <uri>model://eufs_description/meshes/cone_blue.dae</uri>
-            <pose>132.597113038 56.614509953 0.15 0 0 0</pose>
+            <uri>model://models/blue_cone.dae</uri>
+            <pose>136.168311329 49.3358331899 0.15 0 0 0</pose>
             <name>blue_cone_25</name>
             
       <covariance x="0" y="0" xy="0"/>
@@ -264,8 +264,8 @@
 
 
        <include>
-            <uri>model://eufs_description/meshes/cone_blue.dae</uri>
-            <pose>133.848643309 60.5945277018 0.15 0 0 0</pose>
+            <uri>model://models/blue_cone.dae</uri>
+            <pose>136.799785648 53.2972801593 0.15 0 0 0</pose>
             <name>blue_cone_26</name>
             
       <covariance x="0" y="0" xy="0"/>
@@ -274,8 +274,8 @@
 
 
        <include>
-            <uri>model://eufs_description/meshes/cone_blue.dae</uri>
-            <pose>133.638071359 64.7250797434 0.15 0 0 0</pose>
+            <uri>model://models/blue_cone.dae</uri>
+            <pose>137.431259966 57.2587271287 0.15 0 0 0</pose>
             <name>blue_cone_27</name>
             
       <covariance x="0" y="0" xy="0"/>
@@ -284,8 +284,8 @@
 
 
        <include>
-            <uri>model://eufs_description/meshes/cone_blue.dae</uri>
-            <pose>131.982650649 68.5857882381 0.15 0 0 0</pose>
+            <uri>model://models/blue_cone.dae</uri>
+            <pose>138.062734285 61.2201740981 0.15 0 0 0</pose>
             <name>blue_cone_28</name>
             
       <covariance x="0" y="0" xy="0"/>
@@ -294,8 +294,8 @@
 
 
        <include>
-            <uri>model://eufs_description/meshes/cone_blue.dae</uri>
-            <pose>129.794288569 72.0100061326 0.15 0 0 0</pose>
+            <uri>model://models/blue_cone.dae</uri>
+            <pose>138.694208603 65.1816210675 0.15 0 0 0</pose>
             <name>blue_cone_29</name>
             
       <covariance x="0" y="0" xy="0"/>
@@ -304,8 +304,8 @@
 
 
        <include>
-            <uri>model://eufs_description/meshes/cone_blue.dae</uri>
-            <pose>126.423918762 74.2717885416 0.15 0 0 0</pose>
+            <uri>model://models/blue_cone.dae</uri>
+            <pose>139.325682922 69.1430680369 0.15 0 0 0</pose>
             <name>blue_cone_30</name>
             
       <covariance x="0" y="0" xy="0"/>
@@ -314,8 +314,8 @@
 
 
        <include>
-            <uri>model://eufs_description/meshes/cone_blue.dae</uri>
-            <pose>122.591525903 76.00813069 0.15 0 0 0</pose>
+            <uri>model://models/blue_cone.dae</uri>
+            <pose>139.983568374 73.3212272775 0.15 0 0 0</pose>
             <name>blue_cone_31</name>
             
       <covariance x="0" y="0" xy="0"/>
@@ -324,8 +324,8 @@
 
 
        <include>
-            <uri>model://eufs_description/meshes/cone_blue.dae</uri>
-            <pose>122.219184563 76.080649308 0.15 0 0 0</pose>
+            <uri>model://models/blue_cone.dae</uri>
+            <pose>140.109153707 77.6790472198 0.15 0 0 0</pose>
             <name>blue_cone_32</name>
             
       <covariance x="0" y="0" xy="0"/>
@@ -334,8 +334,8 @@
 
 
        <include>
-            <uri>model://eufs_description/meshes/cone_blue.dae</uri>
-            <pose>118.281708189 76.8475272081 0.15 0 0 0</pose>
+            <uri>model://models/blue_cone.dae</uri>
+            <pose>139.448148563 81.647242712 0.15 0 0 0</pose>
             <name>blue_cone_33</name>
             
       <covariance x="0" y="0" xy="0"/>
@@ -344,8 +344,8 @@
 
 
        <include>
-            <uri>model://eufs_description/meshes/cone_blue.dae</uri>
-            <pose>114.344231815 77.6144051082 0.15 0 0 0</pose>
+            <uri>model://models/blue_cone.dae</uri>
+            <pose>137.592569783 85.6750487544 0.15 0 0 0</pose>
             <name>blue_cone_34</name>
             
       <covariance x="0" y="0" xy="0"/>
@@ -354,8 +354,8 @@
 
 
        <include>
-            <uri>model://eufs_description/meshes/cone_blue.dae</uri>
-            <pose>110.406755442 78.3812830083 0.15 0 0 0</pose>
+            <uri>model://models/blue_cone.dae</uri>
+            <pose>135.421800341 89.5363287724 0.15 0 0 0</pose>
             <name>blue_cone_35</name>
             
       <covariance x="0" y="0" xy="0"/>
@@ -364,8 +364,8 @@
 
 
        <include>
-            <uri>model://eufs_description/meshes/cone_blue.dae</uri>
-            <pose>106.469279068 79.1481609084 0.15 0 0 0</pose>
+            <uri>model://models/blue_cone.dae</uri>
+            <pose>132.605705425 92.4091518936 0.15 0 0 0</pose>
             <name>blue_cone_36</name>
             
       <covariance x="0" y="0" xy="0"/>
@@ -374,8 +374,8 @@
 
 
        <include>
-            <uri>model://eufs_description/meshes/cone_blue.dae</uri>
-            <pose>102.621777983 79.8972828443 0.15 0 0 0</pose>
+            <uri>model://models/blue_cone.dae</uri>
+            <pose>128.808621731 94.6762316751 0.15 0 0 0</pose>
             <name>blue_cone_37</name>
             
       <covariance x="0" y="0" xy="0"/>
@@ -384,8 +384,8 @@
 
 
        <include>
-            <uri>model://eufs_description/meshes/cone_blue.dae</uri>
-            <pose>98.6233800529 79.7396369228 0.15 0 0 0</pose>
+            <uri>model://models/blue_cone.dae</uri>
+            <pose>125.103979195 96.2443920455 0.15 0 0 0</pose>
             <name>blue_cone_38</name>
             
       <covariance x="0" y="0" xy="0"/>
@@ -394,8 +394,8 @@
 
 
        <include>
-            <uri>model://eufs_description/meshes/cone_blue.dae</uri>
-            <pose>94.8071071958 78.4093146706 0.15 0 0 0</pose>
+            <uri>model://models/blue_cone.dae</uri>
+            <pose>120.864593319 97.3717082608 0.15 0 0 0</pose>
             <name>blue_cone_39</name>
             
       <covariance x="0" y="0" xy="0"/>
@@ -404,8 +404,8 @@
 
 
        <include>
-            <uri>model://eufs_description/meshes/cone_blue.dae</uri>
-            <pose>92.2254820271 75.2973047892 0.15 0 0 0</pose>
+            <uri>model://models/blue_cone.dae</uri>
+            <pose>118.127153625 97.5071170669 0.15 0 0 0</pose>
             <name>blue_cone_40</name>
             
       <covariance x="0" y="0" xy="0"/>
@@ -414,8 +414,8 @@
 
 
        <include>
-            <uri>model://eufs_description/meshes/cone_blue.dae</uri>
-            <pose>90.0797681934 71.8928967355 0.15 0 0 0</pose>
+            <uri>model://models/blue_cone.dae</uri>
+            <pose>114.115752615 97.5291133379 0.15 0 0 0</pose>
             <name>blue_cone_41</name>
             
       <covariance x="0" y="0" xy="0"/>
@@ -424,8 +424,8 @@
 
 
        <include>
-            <uri>model://eufs_description/meshes/cone_blue.dae</uri>
-            <pose>88.5051614067 68.1852903183 0.15 0 0 0</pose>
+            <uri>model://models/blue_cone.dae</uri>
+            <pose>110.104351604 97.5511096089 0.15 0 0 0</pose>
             <name>blue_cone_42</name>
             
       <covariance x="0" y="0" xy="0"/>
@@ -434,8 +434,8 @@
 
 
        <include>
-            <uri>model://eufs_description/meshes/cone_blue.dae</uri>
-            <pose>88.4087649949 67.8852734507 0.15 0 0 0</pose>
+            <uri>model://models/blue_cone.dae</uri>
+            <pose>106.092950593 97.5731058799 0.15 0 0 0</pose>
             <name>blue_cone_43</name>
             
       <covariance x="0" y="0" xy="0"/>
@@ -444,8 +444,8 @@
 
 
        <include>
-            <uri>model://eufs_description/meshes/cone_blue.dae</uri>
-            <pose>85.8406370046 64.7637661926 0.15 0 0 0</pose>
+            <uri>model://models/blue_cone.dae</uri>
+            <pose>102.081549582 97.5951021509 0.15 0 0 0</pose>
             <name>blue_cone_44</name>
             
       <covariance x="0" y="0" xy="0"/>
@@ -454,8 +454,8 @@
 
 
        <include>
-            <uri>model://eufs_description/meshes/cone_blue.dae</uri>
-            <pose>83.6223162979 61.3527199944 0.15 0 0 0</pose>
+            <uri>model://models/blue_cone.dae</uri>
+            <pose>99.0954884225 97.6163270048 0.15 0 0 0</pose>
             <name>blue_cone_45</name>
             
       <covariance x="0" y="0" xy="0"/>
@@ -464,8 +464,8 @@
 
 
        <include>
-            <uri>model://eufs_description/meshes/cone_blue.dae</uri>
-            <pose>80.4342468404 58.9045676144 0.15 0 0 0</pose>
+            <uri>model://models/blue_cone.dae</uri>
+            <pose>95.0686648708 97.8121123362 0.15 0 0 0</pose>
             <name>blue_cone_46</name>
             
       <covariance x="0" y="0" xy="0"/>
@@ -474,8 +474,8 @@
 
 
        <include>
-            <uri>model://eufs_description/meshes/cone_blue.dae</uri>
-            <pose>76.5619878235 57.8519483882 0.15 0 0 0</pose>
+            <uri>model://models/blue_cone.dae</uri>
+            <pose>90.2331697409 98.6380963653 0.15 0 0 0</pose>
             <name>blue_cone_47</name>
             
       <covariance x="0" y="0" xy="0"/>
@@ -484,8 +484,8 @@
 
 
        <include>
-            <uri>model://eufs_description/meshes/cone_blue.dae</uri>
-            <pose>72.5181903488 57.5467009015 0.15 0 0 0</pose>
+            <uri>model://models/blue_cone.dae</uri>
+            <pose>86.5076633371 100.127999228 0.15 0 0 0</pose>
             <name>blue_cone_48</name>
             
       <covariance x="0" y="0" xy="0"/>
@@ -494,8 +494,8 @@
 
 
        <include>
-            <uri>model://eufs_description/meshes/cone_blue.dae</uri>
-            <pose>68.0748949872 58.1353858839 0.15 0 0 0</pose>
+            <uri>model://models/blue_cone.dae</uri>
+            <pose>82.5229293304 102.914316423 0.15 0 0 0</pose>
             <name>blue_cone_49</name>
             
       <covariance x="0" y="0" xy="0"/>
@@ -504,8 +504,8 @@
 
 
        <include>
-            <uri>model://eufs_description/meshes/cone_blue.dae</uri>
-            <pose>64.9394381805 60.6754324966 0.15 0 0 0</pose>
+            <uri>model://models/blue_cone.dae</uri>
+            <pose>79.4493701146 105.493549304 0.15 0 0 0</pose>
             <name>blue_cone_50</name>
             
       <covariance x="0" y="0" xy="0"/>
@@ -514,8 +514,8 @@
 
 
        <include>
-            <uri>model://eufs_description/meshes/cone_blue.dae</uri>
-            <pose>61.5085777757 62.8720226314 0.15 0 0 0</pose>
+            <uri>model://models/blue_cone.dae</uri>
+            <pose>76.8571363637 108.556151577 0.15 0 0 0</pose>
             <name>blue_cone_51</name>
             
       <covariance x="0" y="0" xy="0"/>
@@ -524,8 +524,8 @@
 
 
        <include>
-            <uri>model://eufs_description/meshes/cone_blue.dae</uri>
-            <pose>61.4338414431 62.9589171751 0.15 0 0 0</pose>
+            <uri>model://models/blue_cone.dae</uri>
+            <pose>74.4340239719 111.823211862 0.15 0 0 0</pose>
             <name>blue_cone_52</name>
             
       <covariance x="0" y="0" xy="0"/>
@@ -534,8 +534,8 @@
 
 
        <include>
-            <uri>model://eufs_description/meshes/cone_blue.dae</uri>
-            <pose>58.8180698012 66.0002262064 0.15 0 0 0</pose>
+            <uri>model://models/blue_cone.dae</uri>
+            <pose>72.8026332992 115.48896867 0.15 0 0 0</pose>
             <name>blue_cone_53</name>
             
       <covariance x="0" y="0" xy="0"/>
@@ -544,8 +544,8 @@
 
 
        <include>
-            <uri>model://eufs_description/meshes/cone_blue.dae</uri>
-            <pose>56.2022981593 69.0415352377 0.15 0 0 0</pose>
+            <uri>model://models/blue_cone.dae</uri>
+            <pose>71.5727710792 119.300629332 0.15 0 0 0</pose>
             <name>blue_cone_54</name>
             
       <covariance x="0" y="0" xy="0"/>
@@ -554,8 +554,8 @@
 
 
        <include>
-            <uri>model://eufs_description/meshes/cone_blue.dae</uri>
-            <pose>53.5865265175 72.082844269 0.15 0 0 0</pose>
+            <uri>model://models/blue_cone.dae</uri>
+            <pose>69.563271598 122.790028154 0.15 0 0 0</pose>
             <name>blue_cone_55</name>
             
       <covariance x="0" y="0" xy="0"/>
@@ -564,8 +564,8 @@
 
 
        <include>
-            <uri>model://eufs_description/meshes/cone_blue.dae</uri>
-            <pose>50.9707548756 75.1241533003 0.15 0 0 0</pose>
+            <uri>model://models/blue_cone.dae</uri>
+            <pose>66.1126304401 124.856554235 0.15 0 0 0</pose>
             <name>blue_cone_56</name>
             
       <covariance x="0" y="0" xy="0"/>
@@ -574,8 +574,8 @@
 
 
        <include>
-            <uri>model://eufs_description/meshes/cone_blue.dae</uri>
-            <pose>48.3549832337 78.1654623316 0.15 0 0 0</pose>
+            <uri>model://models/blue_cone.dae</uri>
+            <pose>62.2580897856 126.048099819 0.15 0 0 0</pose>
             <name>blue_cone_57</name>
             
       <covariance x="0" y="0" xy="0"/>
@@ -584,8 +584,8 @@
 
 
        <include>
-            <uri>model://eufs_description/meshes/cone_blue.dae</uri>
-            <pose>45.7392115919 81.2067713629 0.15 0 0 0</pose>
+            <uri>model://models/blue_cone.dae</uri>
+            <pose>58.2883712661 125.511216516 0.15 0 0 0</pose>
             <name>blue_cone_58</name>
             
       <covariance x="0" y="0" xy="0"/>
@@ -594,8 +594,8 @@
 
 
        <include>
-            <uri>model://eufs_description/meshes/cone_blue.dae</uri>
-            <pose>43.12343995 84.2480803942 0.15 0 0 0</pose>
+            <uri>model://models/blue_cone.dae</uri>
+            <pose>58.0111733131 125.077622612 0.15 0 0 0</pose>
             <name>blue_cone_59</name>
             
       <covariance x="0" y="0" xy="0"/>
@@ -604,8 +604,8 @@
 
 
        <include>
-            <uri>model://eufs_description/meshes/cone_blue.dae</uri>
-            <pose>40.5076683081 87.2893894255 0.15 0 0 0</pose>
+            <uri>model://models/blue_cone.dae</uri>
+            <pose>53.9013059733 123.968042585 0.15 0 0 0</pose>
             <name>blue_cone_60</name>
             
       <covariance x="0" y="0" xy="0"/>
@@ -614,8 +614,8 @@
 
 
        <include>
-            <uri>model://eufs_description/meshes/cone_blue.dae</uri>
-            <pose>37.8918966662 90.3306984568 0.15 0 0 0</pose>
+            <uri>model://models/blue_cone.dae</uri>
+            <pose>51.0704114171 120.75030224 0.15 0 0 0</pose>
             <name>blue_cone_61</name>
             
       <covariance x="0" y="0" xy="0"/>
@@ -624,8 +624,8 @@
 
 
        <include>
-            <uri>model://eufs_description/meshes/cone_blue.dae</uri>
-            <pose>35.236963674 93.4175396618 0.15 0 0 0</pose>
+            <uri>model://models/blue_cone.dae</uri>
+            <pose>48.7148762159 117.058427168 0.15 0 0 0</pose>
             <name>blue_cone_62</name>
             
       <covariance x="0" y="0" xy="0"/>
@@ -634,8 +634,8 @@
 
 
        <include>
-            <uri>model://eufs_description/meshes/cone_blue.dae</uri>
-            <pose>32.2157505973 96.0987216311 0.15 0 0 0</pose>
+            <uri>model://models/blue_cone.dae</uri>
+            <pose>47.4582318851 114.194620429 0.15 0 0 0</pose>
             <name>blue_cone_63</name>
             
       <covariance x="0" y="0" xy="0"/>
@@ -644,8 +644,8 @@
 
 
        <include>
-            <uri>model://eufs_description/meshes/cone_blue.dae</uri>
-            <pose>28.3985357122 97.5767628477 0.15 0 0 0</pose>
+            <uri>model://models/blue_cone.dae</uri>
+            <pose>46.0674442346 110.402938531 0.15 0 0 0</pose>
             <name>blue_cone_64</name>
             
       <covariance x="0" y="0" xy="0"/>
@@ -654,8 +654,8 @@
 
 
        <include>
-            <uri>model://eufs_description/meshes/cone_blue.dae</uri>
-            <pose>24.2189400647 97.8030724839 0.15 0 0 0</pose>
+            <uri>model://models/blue_cone.dae</uri>
+            <pose>44.6766565841 106.611256633 0.15 0 0 0</pose>
             <name>blue_cone_65</name>
             
       <covariance x="0" y="0" xy="0"/>
@@ -664,8 +664,8 @@
 
 
        <include>
-            <uri>model://eufs_description/meshes/cone_blue.dae</uri>
-            <pose>20.2355543117 96.3729348822 0.15 0 0 0</pose>
+            <uri>model://models/blue_cone.dae</uri>
+            <pose>43.2858689336 102.819574735 0.15 0 0 0</pose>
             <name>blue_cone_66</name>
             
       <covariance x="0" y="0" xy="0"/>
@@ -674,8 +674,8 @@
 
 
        <include>
-            <uri>model://eufs_description/meshes/cone_blue.dae</uri>
-            <pose>16.7571695304 94.2323518984 0.15 0 0 0</pose>
+            <uri>model://models/blue_cone.dae</uri>
+            <pose>42.0693877256 99.4919221131 0.15 0 0 0</pose>
             <name>blue_cone_67</name>
             
       <covariance x="0" y="0" xy="0"/>
@@ -684,8 +684,8 @@
 
 
        <include>
-            <uri>model://eufs_description/meshes/cone_blue.dae</uri>
-            <pose>14.5873398529 90.7746202394 0.15 0 0 0</pose>
+            <uri>model://models/blue_cone.dae</uri>
+            <pose>41.4800212205 96.7586505413 0.15 0 0 0</pose>
             <name>blue_cone_68</name>
             
       <covariance x="0" y="0" xy="0"/>
@@ -694,8 +694,8 @@
 
 
        <include>
-            <uri>model://eufs_description/meshes/cone_blue.dae</uri>
-            <pose>13.1246133511 86.8007024371 0.15 0 0 0</pose>
+            <uri>model://models/blue_cone.dae</uri>
+            <pose>41.7260025317 92.7530946521 0.15 0 0 0</pose>
             <name>blue_cone_69</name>
             
       <covariance x="0" y="0" xy="0"/>
@@ -704,8 +704,8 @@
 
 
        <include>
-            <uri>model://eufs_description/meshes/cone_blue.dae</uri>
-            <pose>13.3170142781 82.6197364069 0.15 0 0 0</pose>
+            <uri>model://models/blue_cone.dae</uri>
+            <pose>41.9719838429 88.7475387629 0.15 0 0 0</pose>
             <name>blue_cone_70</name>
             
       <covariance x="0" y="0" xy="0"/>
@@ -714,8 +714,8 @@
 
 
        <include>
-            <uri>model://eufs_description/meshes/cone_blue.dae</uri>
-            <pose>15.1446270258 78.7680090065 0.15 0 0 0</pose>
+            <uri>model://models/blue_cone.dae</uri>
+            <pose>42.2179651541 84.7419828737 0.15 0 0 0</pose>
             <name>blue_cone_71</name>
             
       <covariance x="0" y="0" xy="0"/>
@@ -724,8 +724,8 @@
 
 
        <include>
-            <uri>model://eufs_description/meshes/cone_blue.dae</uri>
-            <pose>17.6363554413 75.557661705 0.15 0 0 0</pose>
+            <uri>model://models/blue_cone.dae</uri>
+            <pose>42.4639464653 80.7364269845 0.15 0 0 0</pose>
             <name>blue_cone_72</name>
             
       <covariance x="0" y="0" xy="0"/>
@@ -734,8 +734,8 @@
 
 
        <include>
-            <uri>model://eufs_description/meshes/cone_blue.dae</uri>
-            <pose>20.8526291965 73.9516601884 0.15 0 0 0</pose>
+            <uri>model://models/blue_cone.dae</uri>
+            <pose>42.7099277765 76.7308710953 0.15 0 0 0</pose>
             <name>blue_cone_73</name>
             
       <covariance x="0" y="0" xy="0"/>
@@ -744,8 +744,8 @@
 
 
        <include>
-            <uri>model://eufs_description/meshes/cone_blue.dae</uri>
-            <pose>24.5464418422 72.3388311318 0.15 0 0 0</pose>
+            <uri>model://models/blue_cone.dae</uri>
+            <pose>42.9559090877 72.725315206 0.15 0 0 0</pose>
             <name>blue_cone_74</name>
             
       <covariance x="0" y="0" xy="0"/>
@@ -754,8 +754,8 @@
 
 
        <include>
-            <uri>model://eufs_description/meshes/cone_blue.dae</uri>
-            <pose>28.2402544879 70.7260020751 0.15 0 0 0</pose>
+            <uri>model://models/blue_cone.dae</uri>
+            <pose>43.2018903989 68.7197593168 0.15 0 0 0</pose>
             <name>blue_cone_75</name>
             
       <covariance x="0" y="0" xy="0"/>
@@ -764,8 +764,8 @@
 
 
        <include>
-            <uri>model://eufs_description/meshes/cone_blue.dae</uri>
-            <pose>31.9340671335 69.1131730185 0.15 0 0 0</pose>
+            <uri>model://models/blue_cone.dae</uri>
+            <pose>43.2696142902 67.62733143 0.15 0 0 0</pose>
             <name>blue_cone_76</name>
             
       <covariance x="0" y="0" xy="0"/>
@@ -774,8 +774,8 @@
 
 
        <include>
-            <uri>model://eufs_description/meshes/cone_blue.dae</uri>
-            <pose>35.6278797792 67.5003439618 0.15 0 0 0</pose>
+            <uri>model://models/blue_cone.dae</uri>
+            <pose>43.2706555361 63.618205806 0.15 0 0 0</pose>
             <name>blue_cone_77</name>
             
       <covariance x="0" y="0" xy="0"/>
@@ -784,8 +784,8 @@
 
 
        <include>
-            <uri>model://eufs_description/meshes/cone_blue.dae</uri>
-            <pose>39.3216924249 65.8875149052 0.15 0 0 0</pose>
+            <uri>model://models/blue_cone.dae</uri>
+            <pose>42.6572623341 59.6554944268 0.15 0 0 0</pose>
             <name>blue_cone_78</name>
             
       <covariance x="0" y="0" xy="0"/>
@@ -794,8 +794,8 @@
 
 
        <include>
-            <uri>model://eufs_description/meshes/cone_blue.dae</uri>
-            <pose>39.6374822161 65.7505928259 0.15 0 0 0</pose>
+            <uri>model://models/blue_cone.dae</uri>
+            <pose>41.7130338215 55.70261354 0.15 0 0 0</pose>
             <name>blue_cone_79</name>
             
       <covariance x="0" y="0" xy="0"/>
@@ -804,8 +804,8 @@
 
 
        <include>
-            <uri>model://eufs_description/meshes/cone_blue.dae</uri>
-            <pose>42.7660740343 63.0849079792 0.15 0 0 0</pose>
+            <uri>model://models/blue_cone.dae</uri>
+            <pose>39.0087342352 52.2748565095 0.15 0 0 0</pose>
             <name>blue_cone_80</name>
             
       <covariance x="0" y="0" xy="0"/>
@@ -814,8 +814,8 @@
 
 
        <include>
-            <uri>model://eufs_description/meshes/cone_blue.dae</uri>
-            <pose>46.3392561846 61.1701542495 0.15 0 0 0</pose>
+            <uri>model://models/blue_cone.dae</uri>
+            <pose>37.1666847777 48.6689666679 0.15 0 0 0</pose>
             <name>blue_cone_81</name>
             
       <covariance x="0" y="0" xy="0"/>
@@ -824,8 +824,8 @@
 
 
        <include>
-            <uri>model://eufs_description/meshes/cone_blue.dae</uri>
-            <pose>49.1561445207 58.2610355767 0.15 0 0 0</pose>
+            <uri>model://models/blue_cone.dae</uri>
+            <pose>34.3659239634 45.7992852299 0.15 0 0 0</pose>
             <name>blue_cone_82</name>
             
       <covariance x="0" y="0" xy="0"/>
@@ -834,8 +834,8 @@
 
 
        <include>
-            <uri>model://eufs_description/meshes/cone_blue.dae</uri>
-            <pose>51.98703259 54.6275213653 0.15 0 0 0</pose>
+            <uri>model://models/blue_cone.dae</uri>
+            <pose>30.805575205 43.894443424 0.15 0 0 0</pose>
             <name>blue_cone_83</name>
             
       <covariance x="0" y="0" xy="0"/>
@@ -844,8 +844,8 @@
 
 
        <include>
-            <uri>model://eufs_description/meshes/cone_blue.dae</uri>
-            <pose>53.7328339038 50.9737549356 0.15 0 0 0</pose>
+            <uri>model://models/blue_cone.dae</uri>
+            <pose>27.7550414454 41.2527476489 0.15 0 0 0</pose>
             <name>blue_cone_84</name>
             
       <covariance x="0" y="0" xy="0"/>
@@ -854,8 +854,8 @@
 
 
        <include>
-            <uri>model://eufs_description/meshes/cone_blue.dae</uri>
-            <pose>54.5951720442 47.0598003659 0.15 0 0 0</pose>
+            <uri>model://models/blue_cone.dae</uri>
+            <pose>23.8425992237 40.1903196178 0.15 0 0 0</pose>
             <name>blue_cone_85</name>
             
       <covariance x="0" y="0" xy="0"/>
@@ -864,8 +864,8 @@
 
 
        <include>
-            <uri>model://eufs_description/meshes/cone_blue.dae</uri>
-            <pose>55.1189398538 43.0443927114 0.15 0 0 0</pose>
+            <uri>model://models/blue_cone.dae</uri>
+            <pose>20.1472050804 38.4742968987 0.15 0 0 0</pose>
             <name>blue_cone_86</name>
             
       <covariance x="0" y="0" xy="0"/>
@@ -874,8 +874,8 @@
 
 
        <include>
-            <uri>model://eufs_description/meshes/cone_blue.dae</uri>
-            <pose>55.0329270152 39.0067357041 0.15 0 0 0</pose>
+            <uri>model://models/blue_cone.dae</uri>
+            <pose>16.8274899621 36.2147688006 0.15 0 0 0</pose>
             <name>blue_cone_87</name>
             
       <covariance x="0" y="0" xy="0"/>
@@ -884,8 +884,8 @@
 
 
        <include>
-            <uri>model://eufs_description/meshes/cone_blue.dae</uri>
-            <pose>54.2827838738 35.027399501 0.15 0 0 0</pose>
+            <uri>model://models/blue_cone.dae</uri>
+            <pose>14.73043971 32.7771183117 0.15 0 0 0</pose>
             <name>blue_cone_88</name>
             
       <covariance x="0" y="0" xy="0"/>
@@ -894,8 +894,8 @@
 
 
        <include>
-            <uri>model://eufs_description/meshes/cone_blue.dae</uri>
-            <pose>53.1886913965 31.0123522584 0.15 0 0 0</pose>
+            <uri>model://models/blue_cone.dae</uri>
+            <pose>13.2306481706 29.058713572 0.15 0 0 0</pose>
             <name>blue_cone_89</name>
             
       <covariance x="0" y="0" xy="0"/>
@@ -904,8 +904,8 @@
 
 
        <include>
-            <uri>model://eufs_description/meshes/cone_blue.dae</uri>
-            <pose>50.4938115797 27.8994797618 0.15 0 0 0</pose>
+            <uri>model://models/blue_cone.dae</uri>
+            <pose>13.1530341548 24.9546738693 0.15 0 0 0</pose>
             <name>blue_cone_90</name>
             
       <covariance x="0" y="0" xy="0"/>
@@ -914,8 +914,8 @@
 
 
        <include>
-            <uri>model://eufs_description/meshes/cone_blue.dae</uri>
-            <pose>48.5550696153 24.3443226591 0.15 0 0 0</pose>
+            <uri>model://models/blue_cone.dae</uri>
+            <pose>14.5728048264 21.0514609979 0.15 0 0 0</pose>
             <name>blue_cone_91</name>
             
       <covariance x="0" y="0" xy="0"/>
@@ -924,8 +924,8 @@
 
 
        <include>
-            <uri>model://eufs_description/meshes/cone_blue.dae</uri>
-            <pose>45.6197263577 21.5547722813 0.15 0 0 0</pose>
+            <uri>model://models/blue_cone.dae</uri>
+            <pose>16.5741481285 17.5485285635 0.15 0 0 0</pose>
             <name>blue_cone_92</name>
             
       <covariance x="0" y="0" xy="0"/>
@@ -934,8 +934,8 @@
 
 
        <include>
-            <uri>model://eufs_description/meshes/cone_blue.dae</uri>
-            <pose>42.1149376193 18.8340771663 0.15 0 0 0</pose>
+            <uri>model://models/blue_cone.dae</uri>
+            <pose>19.2867692016 14.5102959063 0.15 0 0 0</pose>
             <name>blue_cone_93</name>
             
       <covariance x="0" y="0" xy="0"/>
@@ -944,8 +944,8 @@
 
 
        <include>
-            <uri>model://eufs_description/meshes/cone_blue.dae</uri>
-            <pose>38.4579815052 17.0949672419 0.15 0 0 0</pose>
+            <uri>model://models/blue_cone.dae</uri>
+            <pose>23.2451226389 13.7412666337 0.15 0 0 0</pose>
             <name>blue_cone_94</name>
             
       <covariance x="0" y="0" xy="0"/>
@@ -954,8 +954,8 @@
 
 
        <include>
-            <uri>model://eufs_description/meshes/cone_blue.dae</uri>
-            <pose>34.54245325 16.2379647354 0.15 0 0 0</pose>
+            <uri>model://models/blue_cone.dae</uri>
+            <pose>27.2956442951 13.0 0.15 0 0 0</pose>
             <name>blue_cone_95</name>
             
       <covariance x="0" y="0" xy="0"/>
@@ -964,8 +964,8 @@
 
 
        <include>
-            <uri>model://eufs_description/meshes/cone_blue.dae</uri>
-            <pose>30.7744898868 14.849515375 0.15 0 0 0</pose>
+            <uri>model://models/blue_cone.dae</uri>
+            <pose>31.4449720273 13.5185231456 0.15 0 0 0</pose>
             <name>blue_cone_96</name>
             
       <covariance x="0" y="0" xy="0"/>
@@ -974,8 +974,8 @@
 
 
        <include>
-            <uri>model://eufs_description/meshes/cone_blue.dae</uri>
-            <pose>40.9809370743 13.9729554803 0.15 0 0 0</pose>
+            <uri>model://models/blue_cone.dae</uri>
+            <pose>35.3276759312 14.7203557383 0.15 0 0 0</pose>
             <name>blue_cone_97</name>
             
       <covariance x="0" y="0" xy="0"/>
@@ -984,8 +984,8 @@
 
 
        <include>
-            <uri>model://eufs_description/meshes/cone_blue.dae</uri>
-            <pose>45.0319741418 14.4135156155 0.15 0 0 0</pose>
+            <uri>model://models/blue_cone.dae</uri>
+            <pose>39.2157549657 15.6773705806 0.15 0 0 0</pose>
             <name>blue_cone_98</name>
             
       <covariance x="0" y="0" xy="0"/>
@@ -994,8 +994,8 @@
 
 
        <include>
-            <uri>model://eufs_description/meshes/cone_blue.dae</uri>
-            <pose>49.0830112094 14.8540757507 0.15 0 0 0</pose>
+            <uri>model://models/blue_cone.dae</uri>
+            <pose>43.1038340003 16.634385423 0.15 0 0 0</pose>
             <name>blue_cone_99</name>
             
       <covariance x="0" y="0" xy="0"/>
@@ -1004,8 +1004,8 @@
 
 
        <include>
-            <uri>model://eufs_description/meshes/cone_blue.dae</uri>
-            <pose>53.134048277 15.294635886 0.15 0 0 0</pose>
+            <uri>model://models/blue_cone.dae</uri>
+            <pose>46.9919130348 17.5914002653 0.15 0 0 0</pose>
             <name>blue_cone_100</name>
             
       <covariance x="0" y="0" xy="0"/>
@@ -1014,8 +1014,8 @@
 
 
        <include>
-            <uri>model://eufs_description/meshes/cone_blue.dae</uri>
-            <pose>57.1850853446 15.7351960212 0.15 0 0 0</pose>
+            <uri>model://models/blue_cone.dae</uri>
+            <pose>50.8799920694 18.5484151077 0.15 0 0 0</pose>
             <name>blue_cone_101</name>
             
       <covariance x="0" y="0" xy="0"/>
@@ -1024,9 +1024,9 @@
 
 
        <include>
-            <uri>model://eufs_description/meshes/cone_yellow.dae</uri>
-            <pose>63.521274612 10.3033910374 0.15 0 0 0</pose>
-            <name>yellow_cone_102</name>
+            <uri>model://models/blue_cone.dae</uri>
+            <pose>54.7680711039 19.50542995 0.15 0 0 0</pose>
+            <name>blue_cone_102</name>
             
       <covariance x="0" y="0" xy="0"/>
 
@@ -1034,9 +1034,9 @@
 
 
        <include>
-            <uri>model://eufs_description/meshes/cone_yellow.dae</uri>
-            <pose>67.5049618499 10.7185970035 0.15 0 0 0</pose>
-            <name>yellow_cone_103</name>
+            <uri>model://models/blue_cone.dae</uri>
+            <pose>58.6561501385 20.4624447924 0.15 0 0 0</pose>
+            <name>blue_cone_103</name>
             
       <covariance x="0" y="0" xy="0"/>
 
@@ -1044,8 +1044,8 @@
 
 
        <include>
-            <uri>model://eufs_description/meshes/cone_yellow.dae</uri>
-            <pose>68.8807121201 10.8583687234 0.15 0 0 0</pose>
+            <uri>model://models/yellow_cone.dae</uri>
+            <pose>65.0440931878 15.6607437402 0.15 0 0 0</pose>
             <name>yellow_cone_104</name>
             
       <covariance x="0" y="0" xy="0"/>
@@ -1054,8 +1054,8 @@
 
 
        <include>
-            <uri>model://eufs_description/meshes/cone_yellow.dae</uri>
-            <pose>70.7990679691 10.9195293675 0.15 0 0 0</pose>
+            <uri>model://models/yellow_cone.dae</uri>
+            <pose>68.9333289281 16.5996041706 0.15 0 0 0</pose>
             <name>yellow_cone_105</name>
             
       <covariance x="0" y="0" xy="0"/>
@@ -1064,8 +1064,8 @@
 
 
        <include>
-            <uri>model://eufs_description/meshes/cone_yellow.dae</uri>
-            <pose>74.8086281901 10.7960435772 0.15 0 0 0</pose>
+            <uri>model://models/yellow_cone.dae</uri>
+            <pose>72.8225646685 17.538464601 0.15 0 0 0</pose>
             <name>yellow_cone_106</name>
             
       <covariance x="0" y="0" xy="0"/>
@@ -1074,8 +1074,8 @@
 
 
        <include>
-            <uri>model://eufs_description/meshes/cone_yellow.dae</uri>
-            <pose>78.8181884111 10.6725577869 0.15 0 0 0</pose>
+            <uri>model://models/yellow_cone.dae</uri>
+            <pose>76.7118004088 18.4773250314 0.15 0 0 0</pose>
             <name>yellow_cone_107</name>
             
       <covariance x="0" y="0" xy="0"/>
@@ -1084,8 +1084,8 @@
 
 
        <include>
-            <uri>model://eufs_description/meshes/cone_yellow.dae</uri>
-            <pose>82.8277486321 10.5490719966 0.15 0 0 0</pose>
+            <uri>model://models/yellow_cone.dae</uri>
+            <pose>80.1720178003 19.3105429246 0.15 0 0 0</pose>
             <name>yellow_cone_108</name>
             
       <covariance x="0" y="0" xy="0"/>
@@ -1094,8 +1094,8 @@
 
 
        <include>
-            <uri>model://eufs_description/meshes/cone_yellow.dae</uri>
-            <pose>86.8373088531 10.4255862063 0.15 0 0 0</pose>
+            <uri>model://models/yellow_cone.dae</uri>
+            <pose>83.9594044761 19.4395457338 0.15 0 0 0</pose>
             <name>yellow_cone_109</name>
             
       <covariance x="0" y="0" xy="0"/>
@@ -1104,8 +1104,8 @@
 
 
        <include>
-            <uri>model://eufs_description/meshes/cone_yellow.dae</uri>
-            <pose>90.8468690741 10.3021004159 0.15 0 0 0</pose>
+            <uri>model://models/yellow_cone.dae</uri>
+            <pose>87.9291534449 18.84323461 0.15 0 0 0</pose>
             <name>yellow_cone_110</name>
             
       <covariance x="0" y="0" xy="0"/>
@@ -1114,8 +1114,8 @@
 
 
        <include>
-            <uri>model://eufs_description/meshes/cone_yellow.dae</uri>
-            <pose>94.8564292951 10.1786146256 0.15 0 0 0</pose>
+            <uri>model://models/yellow_cone.dae</uri>
+            <pose>91.8989024136 18.2469234862 0.15 0 0 0</pose>
             <name>yellow_cone_111</name>
             
       <covariance x="0" y="0" xy="0"/>
@@ -1124,8 +1124,8 @@
 
 
        <include>
-            <uri>model://eufs_description/meshes/cone_yellow.dae</uri>
-            <pose>98.8659895161 10.0551288353 0.15 0 0 0</pose>
+            <uri>model://models/yellow_cone.dae</uri>
+            <pose>95.8686513824 17.6506123624 0.15 0 0 0</pose>
             <name>yellow_cone_112</name>
             
       <covariance x="0" y="0" xy="0"/>
@@ -1134,8 +1134,8 @@
 
 
        <include>
-            <uri>model://eufs_description/meshes/cone_yellow.dae</uri>
-            <pose>102.875549737 9.93164304497 0.15 0 0 0</pose>
+            <uri>model://models/yellow_cone.dae</uri>
+            <pose>99.8384003512 17.0543012386 0.15 0 0 0</pose>
             <name>yellow_cone_113</name>
             
       <covariance x="0" y="0" xy="0"/>
@@ -1144,8 +1144,8 @@
 
 
        <include>
-            <uri>model://eufs_description/meshes/cone_yellow.dae</uri>
-            <pose>106.885109958 9.80815725465 0.15 0 0 0</pose>
+            <uri>model://models/yellow_cone.dae</uri>
+            <pose>103.80814932 16.4579901148 0.15 0 0 0</pose>
             <name>yellow_cone_114</name>
             
       <covariance x="0" y="0" xy="0"/>
@@ -1154,8 +1154,8 @@
 
 
        <include>
-            <uri>model://eufs_description/meshes/cone_yellow.dae</uri>
-            <pose>110.845679899 9.6861802591 0.15 0 0 0</pose>
+            <uri>model://models/yellow_cone.dae</uri>
+            <pose>107.777898289 15.861678991 0.15 0 0 0</pose>
             <name>yellow_cone_115</name>
             
       <covariance x="0" y="0" xy="0"/>
@@ -1164,8 +1164,8 @@
 
 
        <include>
-            <uri>model://eufs_description/meshes/cone_yellow.dae</uri>
-            <pose>114.871403623 10.0841544194 0.15 0 0 0</pose>
+            <uri>model://models/yellow_cone.dae</uri>
+            <pose>111.747647258 15.2653678672 0.15 0 0 0</pose>
             <name>yellow_cone_116</name>
             
       <covariance x="0" y="0" xy="0"/>
@@ -1174,8 +1174,8 @@
 
 
        <include>
-            <uri>model://eufs_description/meshes/cone_yellow.dae</uri>
-            <pose>118.334422599 12.1781998929 0.15 0 0 0</pose>
+            <uri>model://models/yellow_cone.dae</uri>
+            <pose>115.717396226 14.6690567435 0.15 0 0 0</pose>
             <name>yellow_cone_117</name>
             
       <covariance x="0" y="0" xy="0"/>
@@ -1184,8 +1184,8 @@
 
 
        <include>
-            <uri>model://eufs_description/meshes/cone_yellow.dae</uri>
-            <pose>121.774862649 14.2937926594 0.15 0 0 0</pose>
+            <uri>model://models/yellow_cone.dae</uri>
+            <pose>116.420219109 14.5634830393 0.15 0 0 0</pose>
             <name>yellow_cone_118</name>
             
       <covariance x="0" y="0" xy="0"/>
@@ -1194,8 +1194,8 @@
 
 
        <include>
-            <uri>model://eufs_description/meshes/cone_yellow.dae</uri>
-            <pose>124.207292956 17.576672724 0.15 0 0 0</pose>
+            <uri>model://models/yellow_cone.dae</uri>
+            <pose>120.447196078 14.3836533545 0.15 0 0 0</pose>
             <name>yellow_cone_119</name>
             
       <covariance x="0" y="0" xy="0"/>
@@ -1204,8 +1204,8 @@
 
 
        <include>
-            <uri>model://eufs_description/meshes/cone_yellow.dae</uri>
-            <pose>124.326637215 17.8462637801 0.15 0 0 0</pose>
+            <uri>model://models/yellow_cone.dae</uri>
+            <pose>124.453213781 14.9039521026 0.15 0 0 0</pose>
             <name>yellow_cone_120</name>
             
       <covariance x="0" y="0" xy="0"/>
@@ -1214,8 +1214,8 @@
 
 
        <include>
-            <uri>model://eufs_description/meshes/cone_yellow.dae</uri>
-            <pose>125.950458805 21.5143730137 0.15 0 0 0</pose>
+            <uri>model://models/yellow_cone.dae</uri>
+            <pose>128.643504473 15.9846994666 0.15 0 0 0</pose>
             <name>yellow_cone_121</name>
             
       <covariance x="0" y="0" xy="0"/>
@@ -1224,8 +1224,8 @@
 
 
        <include>
-            <uri>model://eufs_description/meshes/cone_yellow.dae</uri>
-            <pose>127.574280395 25.1824822473 0.15 0 0 0</pose>
+            <uri>model://models/yellow_cone.dae</uri>
+            <pose>131.866991831 18.8095302495 0.15 0 0 0</pose>
             <name>yellow_cone_122</name>
             
       <covariance x="0" y="0" xy="0"/>
@@ -1234,8 +1234,8 @@
 
 
        <include>
-            <uri>model://eufs_description/meshes/cone_yellow.dae</uri>
-            <pose>129.198101985 28.8505914809 0.15 0 0 0</pose>
+            <uri>model://models/yellow_cone.dae</uri>
+            <pose>135.43539946 20.9888080697 0.15 0 0 0</pose>
             <name>yellow_cone_123</name>
             
       <covariance x="0" y="0" xy="0"/>
@@ -1244,8 +1244,8 @@
 
 
        <include>
-            <uri>model://eufs_description/meshes/cone_yellow.dae</uri>
-            <pose>130.821923575 32.5187007145 0.15 0 0 0</pose>
+            <uri>model://models/yellow_cone.dae</uri>
+            <pose>137.573406641 24.5916708897 0.15 0 0 0</pose>
             <name>yellow_cone_124</name>
             
       <covariance x="0" y="0" xy="0"/>
@@ -1254,8 +1254,8 @@
 
 
        <include>
-            <uri>model://eufs_description/meshes/cone_yellow.dae</uri>
-            <pose>132.445745165 36.1868099481 0.15 0 0 0</pose>
+            <uri>model://models/yellow_cone.dae</uri>
+            <pose>140.346556538 27.8438728469 0.15 0 0 0</pose>
             <name>yellow_cone_125</name>
             
       <covariance x="0" y="0" xy="0"/>
@@ -1264,8 +1264,8 @@
 
 
        <include>
-            <uri>model://eufs_description/meshes/cone_yellow.dae</uri>
-            <pose>134.069566756 39.8549191817 0.15 0 0 0</pose>
+            <uri>model://models/yellow_cone.dae</uri>
+            <pose>141.376247631 32.0510064301 0.15 0 0 0</pose>
             <name>yellow_cone_126</name>
             
       <covariance x="0" y="0" xy="0"/>
@@ -1274,8 +1274,8 @@
 
 
        <include>
-            <uri>model://eufs_description/meshes/cone_yellow.dae</uri>
-            <pose>135.693388346 43.5230284153 0.15 0 0 0</pose>
+            <uri>model://models/yellow_cone.dae</uri>
+            <pose>141.642414056 33.4900453123 0.15 0 0 0</pose>
             <name>yellow_cone_127</name>
             
       <covariance x="0" y="0" xy="0"/>
@@ -1284,8 +1284,8 @@
 
 
        <include>
-            <uri>model://eufs_description/meshes/cone_yellow.dae</uri>
-            <pose>137.317209936 47.1911376489 0.15 0 0 0</pose>
+            <uri>model://models/yellow_cone.dae</uri>
+            <pose>142.273888374 37.4514922817 0.15 0 0 0</pose>
             <name>yellow_cone_128</name>
             
       <covariance x="0" y="0" xy="0"/>
@@ -1294,8 +1294,8 @@
 
 
        <include>
-            <uri>model://eufs_description/meshes/cone_yellow.dae</uri>
-            <pose>138.941031526 50.8592468825 0.15 0 0 0</pose>
+            <uri>model://models/yellow_cone.dae</uri>
+            <pose>142.905362692 41.4129392511 0.15 0 0 0</pose>
             <name>yellow_cone_129</name>
             
       <covariance x="0" y="0" xy="0"/>
@@ -1304,8 +1304,8 @@
 
 
        <include>
-            <uri>model://eufs_description/meshes/cone_yellow.dae</uri>
-            <pose>140.597113038 54.614509953 0.15 0 0 0</pose>
+            <uri>model://models/yellow_cone.dae</uri>
+            <pose>143.536837011 45.3743862205 0.15 0 0 0</pose>
             <name>yellow_cone_130</name>
             
       <covariance x="0" y="0" xy="0"/>
@@ -1314,8 +1314,8 @@
 
 
        <include>
-            <uri>model://eufs_description/meshes/cone_yellow.dae</uri>
-            <pose>141.547722469 58.6868374808 0.15 0 0 0</pose>
+            <uri>model://models/yellow_cone.dae</uri>
+            <pose>144.168311329 49.3358331899 0.15 0 0 0</pose>
             <name>yellow_cone_131</name>
             
       <covariance x="0" y="0" xy="0"/>
@@ -1324,8 +1324,8 @@
 
 
        <include>
-            <uri>model://eufs_description/meshes/cone_yellow.dae</uri>
-            <pose>141.938198825 63.8455113973 0.15 0 0 0</pose>
+            <uri>model://models/yellow_cone.dae</uri>
+            <pose>144.799785648 53.2972801593 0.15 0 0 0</pose>
             <name>yellow_cone_132</name>
             
       <covariance x="0" y="0" xy="0"/>
@@ -1334,8 +1334,8 @@
 
 
        <include>
-            <uri>model://eufs_description/meshes/cone_yellow.dae</uri>
-            <pose>141.356343373 67.981751811 0.15 0 0 0</pose>
+            <uri>model://models/yellow_cone.dae</uri>
+            <pose>145.431259966 57.2587271287 0.15 0 0 0</pose>
             <name>yellow_cone_133</name>
             
       <covariance x="0" y="0" xy="0"/>
@@ -1344,8 +1344,8 @@
 
 
        <include>
-            <uri>model://eufs_description/meshes/cone_yellow.dae</uri>
-            <pose>140.265052251 72.0069688966 0.15 0 0 0</pose>
+            <uri>model://models/yellow_cone.dae</uri>
+            <pose>146.062734285 61.2201740981 0.15 0 0 0</pose>
             <name>yellow_cone_134</name>
             
       <covariance x="0" y="0" xy="0"/>
@@ -1354,8 +1354,8 @@
 
 
        <include>
-            <uri>model://eufs_description/meshes/cone_yellow.dae</uri>
-            <pose>137.462847265 76.0499692438 0.15 0 0 0</pose>
+            <uri>model://models/yellow_cone.dae</uri>
+            <pose>146.694208603 65.1816210675 0.15 0 0 0</pose>
             <name>yellow_cone_135</name>
             
       <covariance x="0" y="0" xy="0"/>
@@ -1364,8 +1364,8 @@
 
 
        <include>
-            <uri>model://eufs_description/meshes/cone_yellow.dae</uri>
-            <pose>134.615292658 79.1058608144 0.15 0 0 0</pose>
+            <uri>model://models/yellow_cone.dae</uri>
+            <pose>147.325682922 69.1430680369 0.15 0 0 0</pose>
             <name>yellow_cone_136</name>
             
       <covariance x="0" y="0" xy="0"/>
@@ -1374,8 +1374,8 @@
 
 
        <include>
-            <uri>model://eufs_description/meshes/cone_yellow.dae</uri>
-            <pose>130.987090012 81.9593455261 0.15 0 0 0</pose>
+            <uri>model://models/yellow_cone.dae</uri>
+            <pose>147.983568374 73.3212272775 0.15 0 0 0</pose>
             <name>yellow_cone_137</name>
             
       <covariance x="0" y="0" xy="0"/>
@@ -1384,8 +1384,8 @@
 
 
        <include>
-            <uri>model://eufs_description/meshes/cone_yellow.dae</uri>
-            <pose>127.152619914 83.6158115237 0.15 0 0 0</pose>
+            <uri>model://models/yellow_cone.dae</uri>
+            <pose>148.195682766 77.8916354566 0.15 0 0 0</pose>
             <name>yellow_cone_138</name>
             
       <covariance x="0" y="0" xy="0"/>
@@ -1394,8 +1394,8 @@
 
 
        <include>
-            <uri>model://eufs_description/meshes/cone_yellow.dae</uri>
-            <pose>124.219184563 84.080649308 0.15 0 0 0</pose>
+            <uri>model://models/yellow_cone.dae</uri>
+            <pose>147.821083778 81.8970291779 0.15 0 0 0</pose>
             <name>yellow_cone_139</name>
             
       <covariance x="0" y="0" xy="0"/>
@@ -1404,8 +1404,8 @@
 
 
        <include>
-            <uri>model://eufs_description/meshes/cone_yellow.dae</uri>
-            <pose>120.281708189 84.8475272081 0.15 0 0 0</pose>
+            <uri>model://models/yellow_cone.dae</uri>
+            <pose>147.086542475 85.9398715354 0.15 0 0 0</pose>
             <name>yellow_cone_140</name>
             
       <covariance x="0" y="0" xy="0"/>
@@ -1414,8 +1414,8 @@
 
 
        <include>
-            <uri>model://eufs_description/meshes/cone_yellow.dae</uri>
-            <pose>116.344231815 85.6144051082 0.15 0 0 0</pose>
+            <uri>model://models/yellow_cone.dae</uri>
+            <pose>145.592569783 89.6750487544 0.15 0 0 0</pose>
             <name>yellow_cone_141</name>
             
       <covariance x="0" y="0" xy="0"/>
@@ -1424,8 +1424,8 @@
 
 
        <include>
-            <uri>model://eufs_description/meshes/cone_yellow.dae</uri>
-            <pose>112.406755442 86.3812830083 0.15 0 0 0</pose>
+            <uri>model://models/yellow_cone.dae</uri>
+            <pose>142.77494497 92.7554784519 0.15 0 0 0</pose>
             <name>yellow_cone_142</name>
             
       <covariance x="0" y="0" xy="0"/>
@@ -1434,8 +1434,8 @@
 
 
        <include>
-            <uri>model://eufs_description/meshes/cone_yellow.dae</uri>
-            <pose>108.469279068 87.1481609084 0.15 0 0 0</pose>
+            <uri>model://models/yellow_cone.dae</uri>
+            <pose>140.535153887 96.5440520988 0.15 0 0 0</pose>
             <name>yellow_cone_143</name>
             
       <covariance x="0" y="0" xy="0"/>
@@ -1444,8 +1444,8 @@
 
 
        <include>
-            <uri>model://eufs_description/meshes/cone_yellow.dae</uri>
-            <pose>104.621777983 87.8972828443 0.15 0 0 0</pose>
+            <uri>model://models/yellow_cone.dae</uri>
+            <pose>137.568498343 99.2611200311 0.15 0 0 0</pose>
             <name>yellow_cone_144</name>
             
       <covariance x="0" y="0" xy="0"/>
@@ -1454,8 +1454,8 @@
 
 
        <include>
-            <uri>model://eufs_description/meshes/cone_yellow.dae</uri>
-            <pose>100.611005661 88.0589965871 0.15 0 0 0</pose>
+            <uri>model://models/yellow_cone.dae</uri>
+            <pose>133.594326618 102.247853438 0.15 0 0 0</pose>
             <name>yellow_cone_145</name>
             
       <covariance x="0" y="0" xy="0"/>
@@ -1464,8 +1464,8 @@
 
 
        <include>
-            <uri>model://eufs_description/meshes/cone_yellow.dae</uri>
-            <pose>96.6354792884 87.4469165381 0.15 0 0 0</pose>
+            <uri>model://models/yellow_cone.dae</uri>
+            <pose>129.948362639 103.947985766 0.15 0 0 0</pose>
             <name>yellow_cone_146</name>
             
       <covariance x="0" y="0" xy="0"/>
@@ -1474,8 +1474,8 @@
 
 
        <include>
-            <uri>model://eufs_description/meshes/cone_yellow.dae</uri>
-            <pose>93.5274825775 84.8869969878 0.15 0 0 0</pose>
+            <uri>model://models/yellow_cone.dae</uri>
+            <pose>125.951264493 104.851226174 0.15 0 0 0</pose>
             <name>yellow_cone_147</name>
             
       <covariance x="0" y="0" xy="0"/>
@@ -1484,8 +1484,8 @@
 
 
        <include>
-            <uri>model://eufs_description/meshes/cone_yellow.dae</uri>
-            <pose>89.9851991718 82.99892599 0.15 0 0 0</pose>
+            <uri>model://models/yellow_cone.dae</uri>
+            <pose>121.973024489 105.448812769 0.15 0 0 0</pose>
             <name>yellow_cone_148</name>
             
       <covariance x="0" y="0" xy="0"/>
@@ -1494,8 +1494,8 @@
 
 
        <include>
-            <uri>model://eufs_description/meshes/cone_yellow.dae</uri>
-            <pose>87.1939406215 80.0946864022 0.15 0 0 0</pose>
+            <uri>model://models/yellow_cone.dae</uri>
+            <pose>120.127153625 105.507117067 0.15 0 0 0</pose>
             <name>yellow_cone_149</name>
             
       <covariance x="0" y="0" xy="0"/>
@@ -1504,8 +1504,8 @@
 
 
        <include>
-            <uri>model://eufs_description/meshes/cone_yellow.dae</uri>
-            <pose>84.5544731737 76.7277608703 0.15 0 0 0</pose>
+            <uri>model://models/yellow_cone.dae</uri>
+            <pose>116.115752615 105.529113338 0.15 0 0 0</pose>
             <name>yellow_cone_150</name>
             
       <covariance x="0" y="0" xy="0"/>
@@ -1514,8 +1514,8 @@
 
 
        <include>
-            <uri>model://eufs_description/meshes/cone_yellow.dae</uri>
-            <pose>82.8169119536 73.0936704912 0.15 0 0 0</pose>
+            <uri>model://models/yellow_cone.dae</uri>
+            <pose>112.104351604 105.551109609 0.15 0 0 0</pose>
             <name>yellow_cone_151</name>
             
       <covariance x="0" y="0" xy="0"/>
@@ -1524,8 +1524,8 @@
 
 
        <include>
-            <uri>model://eufs_description/meshes/cone_yellow.dae</uri>
-            <pose>82.4087649949 71.8852734507 0.15 0 0 0</pose>
+            <uri>model://models/yellow_cone.dae</uri>
+            <pose>108.092950593 105.57310588 0.15 0 0 0</pose>
             <name>yellow_cone_152</name>
             
       <covariance x="0" y="0" xy="0"/>
@@ -1534,8 +1534,8 @@
 
 
        <include>
-            <uri>model://eufs_description/meshes/cone_yellow.dae</uri>
-            <pose>80.5870224157 68.2446518026 0.15 0 0 0</pose>
+            <uri>model://models/yellow_cone.dae</uri>
+            <pose>104.081549582 105.595102151 0.15 0 0 0</pose>
             <name>yellow_cone_153</name>
             
       <covariance x="0" y="0" xy="0"/>
@@ -1544,8 +1544,8 @@
 
 
        <include>
-            <uri>model://eufs_description/meshes/cone_yellow.dae</uri>
-            <pose>77.0312299261 66.2879043911 0.15 0 0 0</pose>
+            <uri>model://models/yellow_cone.dae</uri>
+            <pose>99.0954884225 105.616327005 0.15 0 0 0</pose>
             <name>yellow_cone_154</name>
             
       <covariance x="0" y="0" xy="0"/>
@@ -1554,8 +1554,8 @@
 
 
        <include>
-            <uri>model://eufs_description/meshes/cone_yellow.dae</uri>
-            <pose>72.9916374811 65.6822233529 0.15 0 0 0</pose>
+            <uri>model://models/yellow_cone.dae</uri>
+            <pose>95.0464882738 106.164223426 0.15 0 0 0</pose>
             <name>yellow_cone_155</name>
             
       <covariance x="0" y="0" xy="0"/>
@@ -1564,8 +1564,8 @@
 
 
        <include>
-            <uri>model://eufs_description/meshes/cone_yellow.dae</uri>
-            <pose>68.9394381805 66.6754324966 0.15 0 0 0</pose>
+            <uri>model://models/yellow_cone.dae</uri>
+            <pose>91.3127637554 107.742430486 0.15 0 0 0</pose>
             <name>yellow_cone_156</name>
             
       <covariance x="0" y="0" xy="0"/>
@@ -1574,8 +1574,8 @@
 
 
        <include>
-            <uri>model://eufs_description/meshes/cone_yellow.dae</uri>
-            <pose>67.4338414431 68.9589171751 0.15 0 0 0</pose>
+            <uri>model://models/yellow_cone.dae</uri>
+            <pose>87.6610441735 109.550364919 0.15 0 0 0</pose>
             <name>yellow_cone_157</name>
             
       <covariance x="0" y="0" xy="0"/>
@@ -1584,8 +1584,8 @@
 
 
        <include>
-            <uri>model://eufs_description/meshes/cone_yellow.dae</uri>
-            <pose>64.8180698012 72.0002262064 0.15 0 0 0</pose>
+            <uri>model://models/yellow_cone.dae</uri>
+            <pose>84.7076836379 112.266404324 0.15 0 0 0</pose>
             <name>yellow_cone_158</name>
             
       <covariance x="0" y="0" xy="0"/>
@@ -1594,8 +1594,8 @@
 
 
        <include>
-            <uri>model://eufs_description/meshes/cone_yellow.dae</uri>
-            <pose>62.2022981593 75.0415352377 0.15 0 0 0</pose>
+            <uri>model://models/yellow_cone.dae</uri>
+            <pose>82.5208116239 115.667181257 0.15 0 0 0</pose>
             <name>yellow_cone_159</name>
             
       <covariance x="0" y="0" xy="0"/>
@@ -1604,8 +1604,8 @@
 
 
        <include>
-            <uri>model://eufs_description/meshes/cone_yellow.dae</uri>
-            <pose>59.5865265175 78.082844269 0.15 0 0 0</pose>
+            <uri>model://models/yellow_cone.dae</uri>
+            <pose>80.8617360242 119.320491627 0.15 0 0 0</pose>
             <name>yellow_cone_160</name>
             
       <covariance x="0" y="0" xy="0"/>
@@ -1614,8 +1614,8 @@
 
 
        <include>
-            <uri>model://eufs_description/meshes/cone_yellow.dae</uri>
-            <pose>56.9707548756 81.1241533003 0.15 0 0 0</pose>
+            <uri>model://models/yellow_cone.dae</uri>
+            <pose>79.6260312656 123.173708216 0.15 0 0 0</pose>
             <name>yellow_cone_161</name>
             
       <covariance x="0" y="0" xy="0"/>
@@ -1624,8 +1624,8 @@
 
 
        <include>
-            <uri>model://eufs_description/meshes/cone_yellow.dae</uri>
-            <pose>54.3549832337 84.1654623316 0.15 0 0 0</pose>
+            <uri>model://models/yellow_cone.dae</uri>
+            <pose>77.1049803942 126.942921807 0.15 0 0 0</pose>
             <name>yellow_cone_162</name>
             
       <covariance x="0" y="0" xy="0"/>
@@ -1634,8 +1634,8 @@
 
 
        <include>
-            <uri>model://eufs_description/meshes/cone_yellow.dae</uri>
-            <pose>51.7392115919 87.2067713629 0.15 0 0 0</pose>
+            <uri>model://models/yellow_cone.dae</uri>
+            <pose>74.3381120176 129.896461021 0.15 0 0 0</pose>
             <name>yellow_cone_163</name>
             
       <covariance x="0" y="0" xy="0"/>
@@ -1644,8 +1644,8 @@
 
 
        <include>
-            <uri>model://eufs_description/meshes/cone_yellow.dae</uri>
-            <pose>49.12343995 90.2480803942 0.15 0 0 0</pose>
+            <uri>model://models/yellow_cone.dae</uri>
+            <pose>71.1630756453 132.342116892 0.15 0 0 0</pose>
             <name>yellow_cone_164</name>
             
       <covariance x="0" y="0" xy="0"/>
@@ -1654,8 +1654,8 @@
 
 
        <include>
-            <uri>model://eufs_description/meshes/cone_yellow.dae</uri>
-            <pose>46.5076683081 93.2893894255 0.15 0 0 0</pose>
+            <uri>model://models/yellow_cone.dae</uri>
+            <pose>67.3025084323 133.513294458 0.15 0 0 0</pose>
             <name>yellow_cone_165</name>
             
       <covariance x="0" y="0" xy="0"/>
@@ -1664,8 +1664,8 @@
 
 
        <include>
-            <uri>model://eufs_description/meshes/cone_yellow.dae</uri>
-            <pose>43.8918966662 96.3306984568 0.15 0 0 0</pose>
+            <uri>model://models/yellow_cone.dae</uri>
+            <pose>63.295292637 134.080018438 0.15 0 0 0</pose>
             <name>yellow_cone_166</name>
             
       <covariance x="0" y="0" xy="0"/>
@@ -1674,8 +1674,8 @@
 
 
        <include>
-            <uri>model://eufs_description/meshes/cone_yellow.dae</uri>
-            <pose>41.236963674 99.4175396618 0.15 0 0 0</pose>
+            <uri>model://models/yellow_cone.dae</uri>
+            <pose>59.2894103419 133.762543006 0.15 0 0 0</pose>
             <name>yellow_cone_167</name>
             
       <covariance x="0" y="0" xy="0"/>
@@ -1684,8 +1684,8 @@
 
 
        <include>
-            <uri>model://eufs_description/meshes/cone_yellow.dae</uri>
-            <pose>38.2157505973 102.098721631 0.15 0 0 0</pose>
+            <uri>model://models/yellow_cone.dae</uri>
+            <pose>56.0111733131 133.077622612 0.15 0 0 0</pose>
             <name>yellow_cone_168</name>
             
       <covariance x="0" y="0" xy="0"/>
@@ -1694,8 +1694,8 @@
 
 
        <include>
-            <uri>model://eufs_description/meshes/cone_yellow.dae</uri>
-            <pose>34.6949912082 104.510106317 0.15 0 0 0</pose>
+            <uri>model://models/yellow_cone.dae</uri>
+            <pose>52.2254194695 130.177146997 0.15 0 0 0</pose>
             <name>yellow_cone_169</name>
             
       <covariance x="0" y="0" xy="0"/>
@@ -1704,8 +1704,8 @@
 
 
        <include>
-            <uri>model://eufs_description/meshes/cone_yellow.dae</uri>
-            <pose>30.6812070655 105.515268836 0.15 0 0 0</pose>
+            <uri>model://models/yellow_cone.dae</uri>
+            <pose>48.4539168123 128.093012733 0.15 0 0 0</pose>
             <name>yellow_cone_170</name>
             
       <covariance x="0" y="0" xy="0"/>
@@ -1714,8 +1714,8 @@
 
 
        <include>
-            <uri>model://eufs_description/meshes/cone_yellow.dae</uri>
-            <pose>25.9502649056 105.914110497 0.15 0 0 0</pose>
+            <uri>model://models/yellow_cone.dae</uri>
+            <pose>45.5773413372 124.9835026 0.15 0 0 0</pose>
             <name>yellow_cone_171</name>
             
       <covariance x="0" y="0" xy="0"/>
@@ -1724,8 +1724,8 @@
 
 
        <include>
-            <uri>model://eufs_description/meshes/cone_yellow.dae</uri>
-            <pose>21.9481194835 105.367029856 0.15 0 0 0</pose>
+            <uri>model://models/yellow_cone.dae</uri>
+            <pose>43.0875109415 121.733847238 0.15 0 0 0</pose>
             <name>yellow_cone_172</name>
             
       <covariance x="0" y="0" xy="0"/>
@@ -1734,8 +1734,8 @@
 
 
        <include>
-            <uri>model://eufs_description/meshes/cone_yellow.dae</uri>
-            <pose>17.9750721178 104.247103113 0.15 0 0 0</pose>
+            <uri>model://models/yellow_cone.dae</uri>
+            <pose>41.4582318851 118.194620429 0.15 0 0 0</pose>
             <name>yellow_cone_173</name>
             
       <covariance x="0" y="0" xy="0"/>
@@ -1744,8 +1744,8 @@
 
 
        <include>
-            <uri>model://eufs_description/meshes/cone_yellow.dae</uri>
-            <pose>14.5102556819 101.740147717 0.15 0 0 0</pose>
+            <uri>model://models/yellow_cone.dae</uri>
+            <pose>40.0674442346 114.402938531 0.15 0 0 0</pose>
             <name>yellow_cone_174</name>
             
       <covariance x="0" y="0" xy="0"/>
@@ -1754,8 +1754,8 @@
 
 
        <include>
-            <uri>model://eufs_description/meshes/cone_yellow.dae</uri>
-            <pose>11.5940179542 98.9451481244 0.15 0 0 0</pose>
+            <uri>model://models/yellow_cone.dae</uri>
+            <pose>38.6766565841 110.611256633 0.15 0 0 0</pose>
             <name>yellow_cone_175</name>
             
       <covariance x="0" y="0" xy="0"/>
@@ -1764,8 +1764,8 @@
 
 
        <include>
-            <uri>model://eufs_description/meshes/cone_yellow.dae</uri>
-            <pose>8.9838209968 95.5465025927 0.15 0 0 0</pose>
+            <uri>model://models/yellow_cone.dae</uri>
+            <pose>37.2858689336 106.819574735 0.15 0 0 0</pose>
             <name>yellow_cone_176</name>
             
       <covariance x="0" y="0" xy="0"/>
@@ -1774,8 +1774,8 @@
 
 
        <include>
-            <uri>model://eufs_description/meshes/cone_yellow.dae</uri>
-            <pose>7.57551065216 91.0686201846 0.15 0 0 0</pose>
+            <uri>model://models/yellow_cone.dae</uri>
+            <pose>36.0693877256 103.491922113 0.15 0 0 0</pose>
             <name>yellow_cone_177</name>
             
       <covariance x="0" y="0" xy="0"/>
@@ -1784,8 +1784,8 @@
 
 
        <include>
-            <uri>model://eufs_description/meshes/cone_yellow.dae</uri>
-            <pose>7.00224505644 87.0701415033 0.15 0 0 0</pose>
+            <uri>model://models/yellow_cone.dae</uri>
+            <pose>35.4636789006 99.3423400864 0.15 0 0 0</pose>
             <name>yellow_cone_178</name>
             
       <covariance x="0" y="0" xy="0"/>
@@ -1794,8 +1794,8 @@
 
 
        <include>
-            <uri>model://eufs_description/meshes/cone_yellow.dae</uri>
-            <pose>7.26246281234 82.9038292528 0.15 0 0 0</pose>
+            <uri>model://models/yellow_cone.dae</uri>
+            <pose>35.4800212205 96.7586505413 0.15 0 0 0</pose>
             <name>yellow_cone_179</name>
             
       <covariance x="0" y="0" xy="0"/>
@@ -1804,8 +1804,8 @@
 
 
        <include>
-            <uri>model://eufs_description/meshes/cone_yellow.dae</uri>
-            <pose>8.13882425608 78.8501041229 0.15 0 0 0</pose>
+            <uri>model://models/yellow_cone.dae</uri>
+            <pose>35.7260025317 92.7530946521 0.15 0 0 0</pose>
             <name>yellow_cone_180</name>
             
       <covariance x="0" y="0" xy="0"/>
@@ -1814,8 +1814,8 @@
 
 
        <include>
-            <uri>model://eufs_description/meshes/cone_yellow.dae</uri>
-            <pose>10.7569249092 75.7864257344 0.15 0 0 0</pose>
+            <uri>model://models/yellow_cone.dae</uri>
+            <pose>35.9719838429 88.7475387629 0.15 0 0 0</pose>
             <name>yellow_cone_181</name>
             
       <covariance x="0" y="0" xy="0"/>
@@ -1824,8 +1824,8 @@
 
 
        <include>
-            <uri>model://eufs_description/meshes/cone_yellow.dae</uri>
-            <pose>12.9925201415 72.1394484111 0.15 0 0 0</pose>
+            <uri>model://models/yellow_cone.dae</uri>
+            <pose>36.2179651541 84.7419828737 0.15 0 0 0</pose>
             <name>yellow_cone_182</name>
             
       <covariance x="0" y="0" xy="0"/>
@@ -1834,8 +1834,8 @@
 
 
        <include>
-            <uri>model://eufs_description/meshes/cone_yellow.dae</uri>
-            <pose>16.4964460385 70.1840452172 0.15 0 0 0</pose>
+            <uri>model://models/yellow_cone.dae</uri>
+            <pose>36.4639464653 80.7364269845 0.15 0 0 0</pose>
             <name>yellow_cone_183</name>
             
       <covariance x="0" y="0" xy="0"/>
@@ -1844,8 +1844,8 @@
 
 
        <include>
-            <uri>model://eufs_description/meshes/cone_yellow.dae</uri>
-            <pose>18.8526291965 67.9516601884 0.15 0 0 0</pose>
+            <uri>model://models/yellow_cone.dae</uri>
+            <pose>36.7099277765 76.7308710953 0.15 0 0 0</pose>
             <name>yellow_cone_184</name>
             
       <covariance x="0" y="0" xy="0"/>
@@ -1854,8 +1854,8 @@
 
 
        <include>
-            <uri>model://eufs_description/meshes/cone_yellow.dae</uri>
-            <pose>22.5464418422 66.3388311318 0.15 0 0 0</pose>
+            <uri>model://models/yellow_cone.dae</uri>
+            <pose>36.9559090877 72.725315206 0.15 0 0 0</pose>
             <name>yellow_cone_185</name>
             
       <covariance x="0" y="0" xy="0"/>
@@ -1864,8 +1864,8 @@
 
 
        <include>
-            <uri>model://eufs_description/meshes/cone_yellow.dae</uri>
-            <pose>26.2402544879 64.7260020751 0.15 0 0 0</pose>
+            <uri>model://models/yellow_cone.dae</uri>
+            <pose>37.2018903989 68.7197593168 0.15 0 0 0</pose>
             <name>yellow_cone_186</name>
             
       <covariance x="0" y="0" xy="0"/>
@@ -1874,8 +1874,8 @@
 
 
        <include>
-            <uri>model://eufs_description/meshes/cone_yellow.dae</uri>
-            <pose>29.9340671335 63.1131730185 0.15 0 0 0</pose>
+            <uri>model://models/yellow_cone.dae</uri>
+            <pose>37.2696142902 67.62733143 0.15 0 0 0</pose>
             <name>yellow_cone_187</name>
             
       <covariance x="0" y="0" xy="0"/>
@@ -1884,8 +1884,8 @@
 
 
        <include>
-            <uri>model://eufs_description/meshes/cone_yellow.dae</uri>
-            <pose>33.6278797792 61.5003439618 0.15 0 0 0</pose>
+            <uri>model://models/yellow_cone.dae</uri>
+            <pose>37.0511486672 63.6233539054 0.15 0 0 0</pose>
             <name>yellow_cone_188</name>
             
       <covariance x="0" y="0" xy="0"/>
@@ -1894,8 +1894,8 @@
 
 
        <include>
-            <uri>model://eufs_description/meshes/cone_yellow.dae</uri>
-            <pose>37.3216924249 59.8875149052 0.15 0 0 0</pose>
+            <uri>model://models/yellow_cone.dae</uri>
+            <pose>35.746495456 59.7875087576 0.15 0 0 0</pose>
             <name>yellow_cone_189</name>
             
       <covariance x="0" y="0" xy="0"/>
@@ -1904,8 +1904,8 @@
 
 
        <include>
-            <uri>model://eufs_description/meshes/cone_yellow.dae</uri>
-            <pose>37.6374822161 59.7505928259 0.15 0 0 0</pose>
+            <uri>model://models/yellow_cone.dae</uri>
+            <pose>34.7681761426 55.8871747798 0.15 0 0 0</pose>
             <name>yellow_cone_190</name>
             
       <covariance x="0" y="0" xy="0"/>
@@ -1914,8 +1914,8 @@
 
 
        <include>
-            <uri>model://eufs_description/meshes/cone_yellow.dae</uri>
-            <pose>41.2893587438 58.0210976581 0.15 0 0 0</pose>
+            <uri>model://models/yellow_cone.dae</uri>
+            <pose>31.8294446631 53.1725020854 0.15 0 0 0</pose>
             <name>yellow_cone_191</name>
             
       <covariance x="0" y="0" xy="0"/>
@@ -1924,8 +1924,8 @@
 
 
        <include>
-            <uri>model://eufs_description/meshes/cone_yellow.dae</uri>
-            <pose>44.2761572792 55.2867118295 0.15 0 0 0</pose>
+            <uri>model://models/yellow_cone.dae</uri>
+            <pose>28.7874368949 50.5599321949 0.15 0 0 0</pose>
             <name>yellow_cone_192</name>
             
       <covariance x="0" y="0" xy="0"/>
@@ -1934,8 +1934,8 @@
 
 
        <include>
-            <uri>model://eufs_description/meshes/cone_yellow.dae</uri>
-            <pose>46.4047217488 51.8932868035 0.15 0 0 0</pose>
+            <uri>model://models/yellow_cone.dae</uri>
+            <pose>25.0831841295 48.9672948794 0.15 0 0 0</pose>
             <name>yellow_cone_193</name>
             
       <covariance x="0" y="0" xy="0"/>
@@ -1944,8 +1944,8 @@
 
 
        <include>
-            <uri>model://eufs_description/meshes/cone_yellow.dae</uri>
-            <pose>48.0118556894 48.1764397731 0.15 0 0 0</pose>
+            <uri>model://models/yellow_cone.dae</uri>
+            <pose>21.152827566 47.7251616126 0.15 0 0 0</pose>
             <name>yellow_cone_194</name>
             
       <covariance x="0" y="0" xy="0"/>
@@ -1954,8 +1954,8 @@
 
 
        <include>
-            <uri>model://eufs_description/meshes/cone_yellow.dae</uri>
-            <pose>49.0412446577 44.2243892171 0.15 0 0 0</pose>
+            <uri>model://models/yellow_cone.dae</uri>
+            <pose>17.4702972621 46.0944226848 0.15 0 0 0</pose>
             <name>yellow_cone_195</name>
             
       <covariance x="0" y="0" xy="0"/>
@@ -1964,8 +1964,8 @@
 
 
        <include>
-            <uri>model://eufs_description/meshes/cone_yellow.dae</uri>
-            <pose>48.9361315429 40.1675722744 0.15 0 0 0</pose>
+            <uri>model://models/yellow_cone.dae</uri>
+            <pose>14.3096921507 43.5830070448 0.15 0 0 0</pose>
             <name>yellow_cone_196</name>
             
       <covariance x="0" y="0" xy="0"/>
@@ -1974,8 +1974,8 @@
 
 
        <include>
-            <uri>model://eufs_description/meshes/cone_yellow.dae</uri>
-            <pose>47.7018498569 36.2625753246 0.15 0 0 0</pose>
+            <uri>model://models/yellow_cone.dae</uri>
+            <pose>11.5151738505 40.6828335396 0.15 0 0 0</pose>
             <name>yellow_cone_197</name>
             
       <covariance x="0" y="0" xy="0"/>
@@ -1984,8 +1984,8 @@
 
 
        <include>
-            <uri>model://eufs_description/meshes/cone_yellow.dae</uri>
-            <pose>45.9416509793 32.6157230845 0.15 0 0 0</pose>
+            <uri>model://models/yellow_cone.dae</uri>
+            <pose>9.0849434143 37.4676512484 0.15 0 0 0</pose>
             <name>yellow_cone_198</name>
             
       <covariance x="0" y="0" xy="0"/>
@@ -1994,8 +1994,8 @@
 
 
        <include>
-            <uri>model://eufs_description/meshes/cone_yellow.dae</uri>
-            <pose>43.5138559184 29.2365263737 0.15 0 0 0</pose>
+            <uri>model://models/yellow_cone.dae</uri>
+            <pose>7.67527261079 33.0262776314 0.15 0 0 0</pose>
             <name>yellow_cone_199</name>
             
       <covariance x="0" y="0" xy="0"/>
@@ -2004,8 +2004,8 @@
 
 
        <include>
-            <uri>model://eufs_description/meshes/cone_yellow.dae</uri>
-            <pose>40.6913352526 26.1868752979 0.15 0 0 0</pose>
+            <uri>model://models/yellow_cone.dae</uri>
+            <pose>7.01878791875 29.0526940172 0.15 0 0 0</pose>
             <name>yellow_cone_200</name>
             
       <covariance x="0" y="0" xy="0"/>
@@ -2014,8 +2014,8 @@
 
 
        <include>
-            <uri>model://eufs_description/meshes/cone_yellow.dae</uri>
-            <pose>36.7740927462 25.2143629549 0.15 0 0 0</pose>
+            <uri>model://models/yellow_cone.dae</uri>
+            <pose>7.15303415476 24.9546738693 0.15 0 0 0</pose>
             <name>yellow_cone_201</name>
             
       <covariance x="0" y="0" xy="0"/>
@@ -2024,8 +2024,8 @@
 
 
        <include>
-            <uri>model://eufs_description/meshes/cone_yellow.dae</uri>
-            <pose>32.8807536683 23.9346446163 0.15 0 0 0</pose>
+            <uri>model://models/yellow_cone.dae</uri>
+            <pose>7.83985139419 20.9307636576 0.15 0 0 0</pose>
             <name>yellow_cone_202</name>
             
       <covariance x="0" y="0" xy="0"/>
@@ -2034,8 +2034,8 @@
 
 
        <include>
-            <uri>model://eufs_description/meshes/cone_yellow.dae</uri>
-            <pose>29.1681540196 22.1412184837 0.15 0 0 0</pose>
+            <uri>model://models/yellow_cone.dae</uri>
+            <pose>10.5201636955 17.2705875061 0.15 0 0 0</pose>
             <name>yellow_cone_203</name>
             
       <covariance x="0" y="0" xy="0"/>
@@ -2044,8 +2044,8 @@
 
 
        <include>
-            <uri>model://eufs_description/meshes/cone_yellow.dae</uri>
-            <pose>25.5064105566 19.4406097004 0.15 0 0 0</pose>
+            <uri>model://models/yellow_cone.dae</uri>
+            <pose>12.4693538331 13.6630816355 0.15 0 0 0</pose>
             <name>yellow_cone_204</name>
             
       <covariance x="0" y="0" xy="0"/>
@@ -2054,8 +2054,8 @@
 
 
        <include>
-            <uri>model://eufs_description/meshes/cone_yellow.dae</uri>
-            <pose>24.8269134859 14.893933185 0.15 0 0 0</pose>
+            <uri>model://models/yellow_cone.dae</uri>
+            <pose>16.5042718894 11.0155145859 0.15 0 0 0</pose>
             <name>yellow_cone_205</name>
             
       <covariance x="0" y="0" xy="0"/>
@@ -2064,8 +2064,8 @@
 
 
        <include>
-            <uri>model://eufs_description/meshes/cone_yellow.dae</uri>
-            <pose>26.6008203498 11.2849213558 0.15 0 0 0</pose>
+            <uri>model://models/yellow_cone.dae</uri>
+            <pose>19.6378853033 8.31662729209 0.15 0 0 0</pose>
             <name>yellow_cone_206</name>
             
       <covariance x="0" y="0" xy="0"/>
@@ -2074,8 +2074,8 @@
 
 
        <include>
-            <uri>model://eufs_description/meshes/cone_yellow.dae</uri>
-            <pose>29.2468114799 7.69096597804 0.15 0 0 0</pose>
+            <uri>model://models/yellow_cone.dae</uri>
+            <pose>23.5973116734 7.39058925366 0.15 0 0 0</pose>
             <name>yellow_cone_207</name>
             
       <covariance x="0" y="0" xy="0"/>
@@ -2084,8 +2084,8 @@
 
 
        <include>
-            <uri>model://eufs_description/meshes/cone_yellow.dae</uri>
-            <pose>33.790403897 7.00001362184 0.15 0 0 0</pose>
+            <uri>model://models/yellow_cone.dae</uri>
+            <pose>28.4508955962 7.00113320368 0.15 0 0 0</pose>
             <name>yellow_cone_208</name>
             
       <covariance x="0" y="0" xy="0"/>
@@ -2094,8 +2094,8 @@
 
 
        <include>
-            <uri>model://eufs_description/meshes/cone_yellow.dae</uri>
-            <pose>37.8178506156 7.41145726869 0.15 0 0 0</pose>
+            <uri>model://models/yellow_cone.dae</uri>
+            <pose>32.4449720273 7.51852314558 0.15 0 0 0</pose>
             <name>yellow_cone_209</name>
             
       <covariance x="0" y="0" xy="0"/>
@@ -2104,8 +2104,8 @@
 
 
        <include>
-            <uri>model://eufs_description/meshes/cone_yellow.dae</uri>
-            <pose>41.8688876832 7.85201740392 0.15 0 0 0</pose>
+            <uri>model://models/yellow_cone.dae</uri>
+            <pose>36.3330510619 8.47553798793 0.15 0 0 0</pose>
             <name>yellow_cone_210</name>
             
       <covariance x="0" y="0" xy="0"/>
@@ -2114,8 +2114,8 @@
 
 
        <include>
-            <uri>model://eufs_description/meshes/cone_yellow.dae</uri>
-            <pose>45.9199247507 8.29257753916 0.15 0 0 0</pose>
+            <uri>model://models/yellow_cone.dae</uri>
+            <pose>40.2211300964 9.43255283028 0.15 0 0 0</pose>
             <name>yellow_cone_211</name>
             
       <covariance x="0" y="0" xy="0"/>
@@ -2124,8 +2124,8 @@
 
 
        <include>
-            <uri>model://eufs_description/meshes/cone_yellow.dae</uri>
-            <pose>49.9709618183 8.73313767439 0.15 0 0 0</pose>
+            <uri>model://models/yellow_cone.dae</uri>
+            <pose>44.109209131 10.3895676726 0.15 0 0 0</pose>
             <name>yellow_cone_212</name>
             
       <covariance x="0" y="0" xy="0"/>
@@ -2134,8 +2134,8 @@
 
 
        <include>
-            <uri>model://eufs_description/meshes/cone_yellow.dae</uri>
-            <pose>54.0219988859 9.17369780963 0.15 0 0 0</pose>
+            <uri>model://models/yellow_cone.dae</uri>
+            <pose>47.9972881655 11.346582515 0.15 0 0 0</pose>
             <name>yellow_cone_213</name>
             
       <covariance x="0" y="0" xy="0"/>
@@ -2144,8 +2144,8 @@
 
 
        <include>
-            <uri>model://eufs_description/meshes/cone_yellow.dae</uri>
-            <pose>58.0730359535 9.61425794486 0.15 0 0 0</pose>
+            <uri>model://models/yellow_cone.dae</uri>
+            <pose>51.8853672001 12.3035973573 0.15 0 0 0</pose>
             <name>yellow_cone_214</name>
             
       <covariance x="0" y="0" xy="0"/>
@@ -2154,9 +2154,9 @@
 
 
        <include>
-            <uri>model://eufs_description/meshes/cone_big.dae</uri>
-            <pose>61.179430993 10.0957880543 0.15 0 0 0</pose>
-            <name>big_orange_cone_215</name>
+            <uri>model://models/yellow_cone.dae</uri>
+            <pose>55.7734462346 13.2606121997 0.15 0 0 0</pose>
+            <name>yellow_cone_215</name>
             
       <covariance x="0" y="0" xy="0"/>
 
@@ -2164,9 +2164,9 @@
 
 
        <include>
-            <uri>model://eufs_description/meshes/cone_big.dae</uri>
-            <pose>61.879430993 10.0957880543 0.15 0 0 0</pose>
-            <name>big_orange_cone_216</name>
+            <uri>model://models/yellow_cone.dae</uri>
+            <pose>59.6615252692 14.217627042 0.15 0 0 0</pose>
+            <name>yellow_cone_216</name>
             
       <covariance x="0" y="0" xy="0"/>
 
@@ -2174,9 +2174,9 @@
 
 
        <include>
-            <uri>model://eufs_description/meshes/cone_big.dae</uri>
-            <pose>59.179430993 16.0957880543 0.15 0 0 0</pose>
-            <name>big_orange_cone_217</name>
+            <uri>model://models/yellow_cone.dae</uri>
+            <pose>63.5496043037 15.1746418844 0.15 0 0 0</pose>
+            <name>yellow_cone_217</name>
             
       <covariance x="0" y="0" xy="0"/>
 
@@ -2184,9 +2184,39 @@
 
 
        <include>
-            <uri>model://eufs_description/meshes/cone_big.dae</uri>
-            <pose>59.879430993 16.0957880543 0.15 0 0 0</pose>
-            <name>big_orange_cone_218</name>
+            <uri>model://models/big_cone.dae</uri>
+            <pose>62.7494753176 15.191313525 0.15 0 0 0</pose>
+            <name>big_cone_218</name>
+            
+      <covariance x="0" y="0" xy="0"/>
+
+        </include>
+
+
+       <include>
+            <uri>model://models/big_cone.dae</uri>
+            <pose>63.4494753176 15.191313525 0.15 0 0 0</pose>
+            <name>big_cone_219</name>
+            
+      <covariance x="0" y="0" xy="0"/>
+
+        </include>
+
+
+       <include>
+            <uri>model://models/big_cone.dae</uri>
+            <pose>60.7494753176 21.191313525 0.15 0 0 0</pose>
+            <name>big_cone_220</name>
+            
+      <covariance x="0" y="0" xy="0"/>
+
+        </include>
+
+
+       <include>
+            <uri>model://models/big_cone.dae</uri>
+            <pose>61.4494753176 21.191313525 0.15 0 0 0</pose>
+            <name>big_cone_221</name>
             
       <covariance x="0" y="0" xy="0"/>
 

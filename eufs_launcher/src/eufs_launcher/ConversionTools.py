@@ -966,7 +966,7 @@ class ConversionTools:
                                 name = flip_cones[0]
                         else:
                                 name = flip_cones[1] + "_" + flip_cones[0]
-                        cone_string = "model://models/"+name+".dae"
+                        cone_string = "model://models/"+name
                         return cone_string.join(collision_template)
 
                 def setup_covariance(x, y, xy):
@@ -1711,7 +1711,7 @@ class ConversionTools:
                                 name = flip_cones[0]
                         else:
                                 name = flip_cones[1] + "_" + flip_cones[0]
-                        cone_string = "model://models/"+name+".dae"
+                        cone_string = "model://models/"+name
                         return cone_string.join(collision_template)
 
                 def setup_covariance(x, y, xy):
