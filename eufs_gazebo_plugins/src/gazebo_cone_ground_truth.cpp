@@ -55,6 +55,8 @@ namespace gazebo {
 
     this->lidar_total_view_distance = getDoubleParameter(_sdf, "lidarViewDistance", 100, "100");
     this->camera_total_view_distance = getDoubleParameter(_sdf, "cameraViewDistance", 10, "10");
+    this->lidar_min_view_distance = getDoubleParameter(_sdf, "lidarMinViewDistance", 1, "1");
+    this->camera_min_view_distance = getDoubleParameter(_sdf, "cameraMinViewDistance", 1, "1");
     this->lidar_x_view_distance = getDoubleParameter(_sdf, "lidarXViewDistance", 20, "20");
     this->lidar_y_view_distance = getDoubleParameter(_sdf, "lidarYViewDistance", 10, "10");
     this->lidar_fov = getDoubleParameter(_sdf, "lidarFOV", 6.283185, "6.283185  (360 degrees)");
@@ -152,7 +154,7 @@ namespace gazebo {
 
     // Publish the simulated perception cones if it has subscribers
     if (this->simulate_perception_ && (this->perception_cone_pub_.getNumSubscribers() > 0 || this->perception_cone_marker_pub_.getNumSubscribers() > 0)) {
-      eufs_msgs::ConeArrayWithCovariance perception_cone_array_message = getConeArrayMessageWithNoise(ground_truth_cone_array_message, perception_noise_);
+      eufs_msgs::ConeArrayWithCovariance perception_cone_array_message = getConeArrayMessageWithNoise(ground_truth_cone_array_message, perception_lidar_noise_);
       visualization_msgs::MarkerArray perception_cone_marker_array_message = getConeMarkerArrayMessage(perception_cone_array_message);
 
       this->perception_cone_pub_.publish(perception_cone_array_message);
@@ -171,10 +173,7 @@ namespace gazebo {
       addConeToConeArray(ground_truth_cone_array_message, links[i]);
     }
 
-    processCones(ground_truth_cone_array_message.blue_cones);
-    processCones(ground_truth_cone_array_message.yellow_cones);
-    processCones(ground_truth_cone_array_message.orange_cones);
-    processCones(ground_truth_cone_array_message.big_orange_cones);
+    processCones(ground_truth_cone_array_message);
 
     ground_truth_cone_array_message.header.frame_id = "/" + this->cone_frame_;
     ground_truth_cone_array_message.header.stamp = ros::Time::now();
@@ -217,33 +216,96 @@ namespace gazebo {
     }
   }
 
-  void GazeboConeGroundTruth::processCones(std::vector<eufs_msgs::ConeWithCovariance> &cones) {
+  void GazeboConeGroundTruth::processCones(eufs_msgs::ConeArrayWithCovariance &cones) {
+    std::vector<eufs_msgs::ConeWithCovariance> new_blue;
+    std::vector<eufs_msgs::ConeWithCovariance> new_yellow;
+    std::vector<eufs_msgs::ConeWithCovariance> new_orange;
+    std::vector<eufs_msgs::ConeWithCovariance> new_big_orange;
+    std::vector<eufs_msgs::ConeWithCovariance> new_unknown;
+
+    std::vector<eufs_msgs::ConeWithCovariance> color, no_color;
+
+    // blue
+    std::tie(color, no_color) = GazeboConeGroundTruth::fovCones(cones.blue_cones);
+    new_blue.resize(new_blue.size() + color.size());
+    copy(color.begin(), color.end(), new_blue.rbegin());
+    new_unknown.resize(new_unknown.size() + color.size());
+    copy(color.begin(), color.end(), new_unknown.rbegin());
+
+    // yellow
+    std::tie(color, no_color) = GazeboConeGroundTruth::fovCones(cones.yellow_cones);
+    new_yellow.resize(new_yellow.size() + color.size());
+    copy(color.begin(), color.end(), new_yellow.rbegin());
+    new_unknown.resize(new_unknown.size() + color.size());
+    copy(color.begin(), color.end(), new_unknown.rbegin());
+
+    // orange
+    std::tie(color, no_color) = GazeboConeGroundTruth::fovCones(cones.orange_cones);
+    new_orange.resize(new_orange.size() + color.size());
+    copy(color.begin(), color.end(), new_orange.rbegin());
+    new_unknown.resize(new_unknown.size() + color.size());
+    copy(color.begin(), color.end(), new_unknown.rbegin());
+
+    // big_orange
+    std::tie(color, no_color) = GazeboConeGroundTruth::fovCones(cones.big_orange_cones);
+    new_big_orange.resize(new_big_orange.size() + color.size());
+    copy(color.begin(), color.end(), new_big_orange.rbegin());
+    new_unknown.resize(new_unknown.size() + color.size());
+    copy(color.begin(), color.end(), new_unknown.rbegin());
+
+    // unknown
+    std::tie(color, no_color) = GazeboConeGroundTruth::fovCones(cones.unknown_color_cones);
+    new_unknown.resize(new_blue.size() + color.size());
+    copy(color.begin(), color.end(), new_unknown.rbegin());
+    new_unknown.resize(new_unknown.size() + color.size());
+    copy(color.begin(), color.end(), new_unknown.rbegin());
+
+    cones.blue_cones = new_blue;
+    cones.yellow_cones = new_yellow;
+    cones.orange_cones = new_orange;
+    cones.big_orange_cones = new_big_orange;
+    cones.unknown_color_cones = new_unknown;
+  }
+
+  std::pair<std::vector<eufs_msgs::ConeWithCovariance>, std::vector<eufs_msgs::ConeWithCovariance>>
+      GazeboConeGroundTruth::fovCones(std::vector<eufs_msgs::ConeWithCovariance> conesToCheck)
+  {
     std::vector<eufs_msgs::ConeWithCovariance> cones_in_view;
-
-    for (unsigned int i = 0; i < cones.size(); i++) {
+    std::vector<eufs_msgs::ConeWithCovariance> cones_in_view_without_color;
+    for (unsigned int i = 0; i < conesToCheck.size(); i++) {
       // Translate the position of the cone to be based on the car
-      float x = cones[i].point.x - this->car_pos.Pos().X();
-      float y = cones[i].point.y - this->car_pos.Pos().Y();
+      float x = conesToCheck[i].point.x - this->car_pos.Pos().X();
+      float y = conesToCheck[i].point.y - this->car_pos.Pos().Y();
 
-      // If the cone is withing viewing distance
-      if ((x * x) + (y * y) < (view_distance * view_distance)) {
+      // If the cone is withing viewing distance of lidar
+      auto dist = (x * x) + (y * y);
+      bool lidar_sees = lidar_min_view_distance < dist &&
+                        dist < lidar_total_view_distance &&
+                        abs(x) < lidar_x_view_distance &&
+                        abs(y) < lidar_y_view_distance;
+      bool camera_sees = camera_min_view_distance < dist && dist < camera_total_view_distance;
+      if (lidar_sees || camera_sees) {
         float yaw = this->car_pos.Rot().Yaw();
 
         // Rotate the points using the yaw of the car (x and y are the other way around)
-        cones[i].point.y = (cos(yaw) * y) - (sin(yaw) * x);
-        cones[i].point.x = (sin(yaw) * y) + (cos(yaw) * x);
+        conesToCheck[i].point.y = (cos(yaw) * y) - (sin(yaw) * x);
+        conesToCheck[i].point.x = (sin(yaw) * y) + (cos(yaw) * x);
 
         // Angle between the direction of the car and the cone
-        float angle = atan2(cones[i].point.y, cones[i].point.x);
+        float angle = atan2(conesToCheck[i].point.y, conesToCheck[i].point.x);
 
         // If the cone is inside the field of view
-        if (abs(angle) < (this->fov / 2)) {
-          cones_in_view.push_back(cones[i]);
+        lidar_sees = abs(angle) < (this->lidar_fov / 2);
+        camera_sees = abs(angle) < (this->camera_fov / 2);
+        if (true or (lidar_sees && !camera_sees)) {
+          cones_in_view_without_color.push_back(conesToCheck[i]);
+        }
+        else if (camera_sees) {
+          cones_in_view.push_back(conesToCheck[i]);
         }
       }
     }
-
-    cones = cones_in_view;
+    return std::make_pair(cones_in_view, cones_in_view_without_color);
   }
 
   GazeboConeGroundTruth::ConeType GazeboConeGroundTruth::getConeType(physics::LinkPtr link) {

@@ -80,7 +80,10 @@ namespace gazebo {
 
     void addConeToConeArray(eufs_msgs::ConeArrayWithCovariance &ground_truth_cone_array, physics::LinkPtr link);
 
-    void processCones(std::vector <eufs_msgs::ConeWithCovariance> &cones);
+    void processCones(eufs_msgs::ConeArrayWithCovariance &cones);
+
+    std::pair<std::vector<eufs_msgs::ConeWithCovariance>, std::vector<eufs_msgs::ConeWithCovariance>>
+      fovCones(std::vector<eufs_msgs::ConeWithCovariance> conesToCheck);
 
     GazeboConeGroundTruth::ConeType getConeType(physics::LinkPtr link);
 
@@ -117,8 +120,16 @@ namespace gazebo {
 
     // Parameters
 
-    double view_distance;
-    double fov;
+    double lidar_total_view_distance;
+    double camera_total_view_distance;
+    double lidar_min_view_distance;
+    double camera_min_view_distance;
+    double lidar_x_view_distance;
+    double lidar_y_view_distance;
+    double lidar_fov;
+    double camera_fov;
+    double camera_a;
+    double camera_b;
 
     double update_rate_;
     ros::Time time_last_published;
@@ -127,7 +138,7 @@ namespace gazebo {
 
     bool simulate_perception_;
 
-    ignition::math::Vector3d perception_noise_;
+    ignition::math::Vector3d perception_lidar_noise_;
 
     // Required ROS gazebo plugin variables
     event::ConnectionPtr update_connection_;
