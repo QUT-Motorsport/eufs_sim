@@ -410,7 +410,7 @@ namespace gazebo {
       cone_array[i].point.x += GaussianKernel(0, noise.X());
       cone_array[i].point.y += GaussianKernel(0, noise.Y());
       // This is just a placeholder
-      cone_array[i].covariance = {100, 100, 0};
+      cone_array[i].covariance = {noise.X(), 0, 0, noise.Y()};
     }
   }
 
