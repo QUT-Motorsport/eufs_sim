@@ -107,7 +107,7 @@ namespace gazebo {
     }
 
     this->update_connection_ = event::Events::ConnectWorldUpdateBegin(boost::bind(&GazeboConeGroundTruth::UpdateChild, this));
-  }
+  }  // GazeboConeGroundTruth
 
   void GazeboConeGroundTruth::UpdateChild() {
     // Check if it is time to pubilsh new data
@@ -152,10 +152,11 @@ namespace gazebo {
       this->perception_cone_pub_.publish(perception_cone_array_message);
       this->perception_cone_marker_pub_.publish(perception_cone_marker_array_message);
     }
+
   }
 
-  // Getting the cone arrays
 
+  // Getting the cone arrays
   eufs_msgs::ConeArray GazeboConeGroundTruth::getConeArrayMessage() {
     eufs_msgs::ConeArray ground_truth_cone_array_message;
 
@@ -171,6 +172,7 @@ namespace gazebo {
 
     ground_truth_cone_array_message.header.frame_id = "/" + this->cone_frame_;
     ground_truth_cone_array_message.header.stamp = ros::Time::now();
+
 
     return ground_truth_cone_array_message;
   }

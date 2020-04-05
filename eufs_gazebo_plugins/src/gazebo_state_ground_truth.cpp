@@ -53,6 +53,8 @@ GazeboStateGroundTruth::~GazeboStateGroundTruth() {
 }
 
 void GazeboStateGroundTruth::Load(physics::ModelPtr _parent, sdf::ElementPtr _sdf) {
+
+
   // Get the world name.
   this->world_ = _parent->GetWorld();
   this->model_ = _parent;
@@ -99,6 +101,7 @@ void GazeboStateGroundTruth::Load(physics::ModelPtr _parent, sdf::ElementPtr _sd
     return;
   } else
     this->state_topic_name_ = _sdf->GetElement("stateTopicName")->Get<std::string>();
+
 
   if (!_sdf->HasElement("positionNoise")) {
     ROS_DEBUG_NAMED("state_ground_truth",
@@ -170,6 +173,7 @@ void GazeboStateGroundTruth::Load(physics::ModelPtr _parent, sdf::ElementPtr _sd
   } else
     this->update_rate_ = _sdf->GetElement("updateRate")->Get<double>();
 
+
   // Initialise the static fields of publishes messages
   this->odom_msg_.header.frame_id = this->frame_name_;
   this->odom_msg_.child_frame_id = this->robot_link_name_;
@@ -230,6 +234,7 @@ void GazeboStateGroundTruth::Load(physics::ModelPtr _parent, sdf::ElementPtr _sd
     }
   }
 
+
   // init reference frame state
   if (this->reference_link_) {
     ROS_DEBUG_NAMED("state_ground_truth", "got body %s", this->reference_link_->GetName().c_str());
@@ -260,7 +265,6 @@ void GazeboStateGroundTruth::Load(physics::ModelPtr _parent, sdf::ElementPtr _sd
 
 // Update the controller
 void GazeboStateGroundTruth::UpdateChild() {
-
   if (!this->robot_link_)
     return;
 
@@ -289,7 +293,6 @@ void GazeboStateGroundTruth::UpdateChild() {
     ROS_WARN_NAMED("p3d", "Negative update time difference detected.");
     this->last_time_ = cur_time;
   }
-
   // rate control
   if (this->update_rate_ > 0 &&
       (cur_time - this->last_time_).Double() < (1.0 / this->update_rate_))

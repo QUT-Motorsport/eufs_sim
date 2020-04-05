@@ -438,69 +438,6 @@ class ConversionTools:
 
                 return im_to_display
 
-                """for px, py, color in cone_locs:
-                        if color is CONE_INNER:
-                                true_color = ConversionTools.inner_cone_color
-                        elif color is CONE_OUTER:
-                                true_color = ConversionTools.outer_cone_color
-                        elif color is CONE_ORANGE:
-                                true_color = ConversionTools.orange_cone_color
-                        elif color is CONE_START:
-                                true_color = ConversionTools.double_orange_cone_color"""
-
-
-                """# Finally, we just need to place noise.
-                # At maximal noise, the track should be about 1% covered.
-
-                for i in range(im.size[0]):
-                        for j in range(im.size[1]):
-                                # Don't add noise in margin
-                                if i < 5 or j < 5 or i >= im.size[0] - 5 or j >= im.size[0] - 5:
-                                        continue
-                                if pixels[i, j] == ConversionTools.background_color:
-                                        # Only 1% should be covered with noise
-                                        if uniform(0, 100) < 1:
-                                                pixels[i, j] = ConversionTools.noise_color"""
-
-                """# Add margins (as specified by the file format)
-                margin = 5
-                im2 = Image.new(
-                                'RGBA',
-                                (twidth + 2 * margin, theight + 2 * margin),
-                                (255, 255, 255, 255)
-                )
-                pixels2 = im2.load()
-                for x in range(im.size[0]):
-                        for y in range(im.size[1]):
-                                pixels2[x + margin, y + margin] = pixels[x, y]
-
-                # And tag it with the version number
-                loc = ConversionTools.get_metadata_pixel_location(
-                                            4,
-                                            4,
-                                            ConversionTools.BOTTOM_RIGHT,
-                                            im2.size
-                )
-                pixels2[loc[0], loc[1]] = ConversionTools.deconvert_version_metadata(
-                                             ConversionTools.TRACKIMG_VERSION_NUM
-                )[0]
-
-                # Tag it with scale data
-                loc = ConversionTools.get_metadata_pixel_location(
-                                            0,
-                                            0,
-                                            ConversionTools.TOP_LEFT,
-                                            im2.size
-                )
-                pixels2[loc[0], loc[1]] = ConversionTools.deconvert_scale_metadata(
-                    ConversionTools.RANDOM_TRACK_SCALE_FACTOR
-                )[0]
-
-                im2.save(
-                        os.path.join(rospkg.RosPack().get_path('eufs_gazebo'),
-                                     'randgen_imgs/'+GENERATED_FILENAME+'.png')
-                )
-                return im"""
 
         @staticmethod
         def comps_to_png(which_file, params, conversion_suffix="", override_name=None):
@@ -1010,8 +947,8 @@ class ConversionTools:
                 # And the corresponding sdf_ghost_model and sdf_ghost_model_with_collisions
                 # which store inactive (hidden) models.
                 sdf_main = sdf_split_again[0]
-                sdf_split_along_collisions = sdf_split_again[1].split("%FILLCOLLISION%")
-                sdf_split_along_ghost_collisions = sdf_split_again[4].split("%FILLCOLLISION%")
+                sdf_split_along_collisions = sdf_split_again[6].split("%FILLCOLLISION%")
+                sdf_split_along_ghost_collisions = sdf_split_again[6].split("%FILLCOLLISION%")
                 sdf_model = sdf_split_again[3].join(sdf_split_along_collisions)
                 sdf_model_with_collisions = sdf_split_again[2].join(sdf_split_along_collisions)
                 sdf_ghost_model = sdf_split_again[3].join(sdf_split_along_ghost_collisions)
@@ -1064,7 +1001,7 @@ class ConversionTools:
                 # so that we can give each a unique name.
                 ConversionTools.link_num = -1
 
-                def put_model_at_position(mod, x, y, x_cov=0.01, y_cov=0.01, xy_cov=0):
+                def put_model_at_position(mod, x, y, modtype, x_cov=0.01, y_cov=0.01, xy_cov=0):
                         """
                         mod: model template to be placed
                         x,y: x and y positions for mod
@@ -1078,28 +1015,29 @@ class ConversionTools:
                         mod_with_y = y_str.join(mod.split("%PLACEY%"))
                         mod_with_x = x_str.join(mod_with_y.split("%PLACEX%"))
                         mod_with_link = link_str.join(mod_with_x.split("%LINKNUM%"))
+                        mod_with_link2 = modtype.join(mod_with_link.split("%LINKTYPE%"))
                         x_cov_str = str(x_cov)
                         y_cov_str = str(y_cov)
                         xy_cov_str = str(xy_cov)
                         rospy.logerr(x_cov_str)
                         mod_with_cov = setup_covariance(x_cov_str, y_cov_str, xy_cov_str).join(
-                                mod_with_link.split("%FILLCOVARIANCE%")
+                                mod_with_link2.split("%FILLCOVARIANCE%")
                         )
                         rospy.logerr(mod_with_cov)
                         return mod_with_cov
 
                 sdf_allmodels = ""
 
-                def expand_allmodels(allmods, mod, x, y):
+                def expand_allmodels(allmods, mod, modtype, x, y):
                         """
                         Takes in a model and a pixel location,
                         converts the pixel location to a raw location,
                         and places the model inside sdf_allmodels
                         """
-                        mod_at_p = put_model_at_position(mod, x * scale_data, y * scale_data)
+                        mod_at_p = put_model_at_position(mod, x * scale_data, y * scale_data, modtype)
                         return allmods + "\n" + mod_at_p
 
-                def doubly_expand_allmodels(allmods, mod, x, y, yaw):
+                def doubly_expand_allmodels(allmods, mod, modtype, x, y, yaw):
                         """
                         Takes in a model and a pixel location,
                         converts the pixel location to a raw location,
@@ -1123,13 +1061,15 @@ class ConversionTools:
                         mod_at_p1 = put_model_at_position(
                                 mod,
                                 x * scale_data + direction_vector[0],
-                                y * scale_data + direction_vector[1]
+                                y * scale_data + direction_vector[1],
+                                modtype
                         )
 
                         mod_at_p2 = put_model_at_position(
                                 mod,
                                 x * scale_data - direction_vector[0],
-                                y * scale_data - direction_vector[1]
+                                y * scale_data - direction_vector[1],
+                                modtype
                         )
 
                         return allmods + "\n" + mod_at_p1 + "\n" + mod_at_p2
@@ -1149,6 +1089,12 @@ class ConversionTools:
                         ConversionTools.orange_cone_color[:3]: sdf_orange_cone_model,
                         ConversionTools.big_orange_cone_color[:3]: sdf_big_orange_cone_model
                 }
+                color_to_name = {
+                        ConversionTools.inner_cone_color[:3]: "yellow_cone",
+                        ConversionTools.outer_cone_color[:3]: "blue_cone",
+                        ConversionTools.orange_cone_color[:3]: "orange_cone",
+                        ConversionTools.big_orange_cone_color[:3]: "big_orange_cone"
+                }
                 for i in range(im.size[0]):
                         for j in range(im.size[1]):
                                 p = pixels[i, j]
@@ -1161,6 +1107,7 @@ class ConversionTools:
                                                 sdf_allmodels = expand_allmodels(
                                                                        sdf_allmodels,
                                                                        sdf_noisemodel,
+                                                                       "active_noise",
                                                                        i,
                                                                        j
                                                 )
@@ -1172,14 +1119,16 @@ class ConversionTools:
                                                 sdf_allmodels = expand_allmodels(
                                                                        sdf_allmodels,
                                                                        sdf_noisemodel,
+                                                                       "inactive_noise",
                                                                        i,
-                                                                       j
+                                                                       j,
                                                 )
                                 elif p[:3] in color_to_model:
                                         # Normal cones.
                                         sdf_allmodels = expand_allmodels(
                                                             sdf_allmodels,
                                                             color_to_model[p[:3]],
+                                                            color_to_name[p[:3]],
                                                             i,
                                                             j
                                         )
@@ -1192,6 +1141,7 @@ class ConversionTools:
                                         sdf_allmodels = doubly_expand_allmodels(
                                                             sdf_allmodels,
                                                             sdf_big_orange_cone_model,
+                                                            "big_orange_cone",
                                                             i,
                                                             j,
                                                             model_yaw
@@ -1201,6 +1151,7 @@ class ConversionTools:
                                         sdf_allmodels = expand_allmodels(
                                             sdf_allmodels,
                                             join_cone_model_data("lap_counter;" + str(255 - p[3])),
+                                            "lap_counter;" + str(255 - p[3]),
                                             i,
                                             j
                                         )
@@ -1736,8 +1687,8 @@ class ConversionTools:
                 # And the corresponding sdf_ghost_model and sdf_ghost_model_with_collisions
                 # which store inactive (hidden) models.
                 sdf_main = sdf_split_again[0]
-                sdf_split_along_collisions = sdf_split_again[1].split("%FILLCOLLISION%")
-                sdf_split_along_ghost_collisions = sdf_split_again[4].split("%FILLCOLLISION%")
+                sdf_split_along_collisions = sdf_split_again[6].split("%FILLCOLLISION%")
+                sdf_split_along_ghost_collisions = sdf_split_again[6].split("%FILLCOLLISION%")
                 sdf_model = sdf_split_again[3].join(sdf_split_along_collisions)
                 sdf_model_with_collisions = sdf_split_again[2].join(sdf_split_along_collisions)
                 sdf_ghost_model = sdf_split_again[3].join(sdf_split_along_ghost_collisions)
@@ -1793,7 +1744,7 @@ class ConversionTools:
                 # so that we can give each a unique name.
                 ConversionTools.link_num = -1
 
-                def put_model_at_position(mod, x, y, x_cov=0.1, y_cov=0.1, xy_cov=0):
+                def put_model_at_position(mod, x, y, modtype, x_cov=0.01, y_cov=0.01, xy_cov=0):
                         """
                         mod: model template to be placed
                         x,y: x and y positions for mod
@@ -1807,23 +1758,26 @@ class ConversionTools:
                         mod_with_y = y_str.join(mod.split("%PLACEY%"))
                         mod_with_x = x_str.join(mod_with_y.split("%PLACEX%"))
                         mod_with_link = link_str.join(mod_with_x.split("%LINKNUM%"))
+                        mod_with_link2 = modtype.join(mod_with_link.split("%LINKTYPE%"))
                         x_cov_str = str(x_cov)
                         y_cov_str = str(y_cov)
                         xy_cov_str = str(xy_cov)
+                        rospy.logerr(x_cov_str)
                         mod_with_cov = setup_covariance(x_cov_str, y_cov_str, xy_cov_str).join(
-                                mod_with_link.split("%FILLCOVARIANCE%")
+                                mod_with_link2.split("%FILLCOVARIANCE%")
                         )
+                        rospy.logerr(mod_with_cov)
                         return mod_with_cov
 
                 sdf_allmodels = ""
 
-                def expand_allmodels(allmods, mod, x, y, x_cov=0.01, y_cov=0.01, xy_cov=0):
+                def expand_allmodels(allmods, mod, modtype, x, y, x_cov=0.01, y_cov=0.01, xy_cov=0):
                         """
                         Takes in a model and a pixel location,
                         converts the pixel location to a raw location,
                         and places the model inside sdf_allmodels
                         """
-                        mod_at_p = put_model_at_position(mod, x, y, x_cov, y_cov, xy_cov)
+                        mod_at_p = put_model_at_position(mod, x, y, modtype, x_cov, y_cov, xy_cov)
                         return allmods + "\n" + mod_at_p
 
 
@@ -1853,6 +1807,7 @@ class ConversionTools:
                                     sdf_allmodels = expand_allmodels(
                                                            sdf_allmodels,
                                                            sdf_noisemodel,
+                                                           name,
                                                            x,
                                                            y
                                     )
@@ -1864,6 +1819,7 @@ class ConversionTools:
                                     sdf_allmodels = expand_allmodels(
                                                            sdf_allmodels,
                                                            sdf_noisemodel,
+                                                           name,
                                                            x,
                                                            y
                                     )
@@ -1872,6 +1828,7 @@ class ConversionTools:
                             sdf_allmodels = expand_allmodels(
                                                 sdf_allmodels,
                                                 color_to_model[name],
+                                                name + "_cone",
                                                 x,
                                                 y,
                                                 x_cov,
@@ -1883,6 +1840,7 @@ class ConversionTools:
                             sdf_allmodels = expand_allmodels(
                                 sdf_allmodels,
                                 join_cone_model_data("lap_counter;" + str(int(direction))),
+                                "lap_counter;" + str(int(direction)),
                                 x,
                                 y
                             )
