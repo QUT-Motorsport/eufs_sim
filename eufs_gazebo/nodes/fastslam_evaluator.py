@@ -14,7 +14,7 @@ SLAM Message:
 `/fast_slam/map` (of type `eufs_msgs/ConeArray`)
 
 Ground truths:
-`/ground_truth/cones` (of type `eufs_msgs/ConeArray`)
+`/ground_truth/cones_without_covariance` (of type `eufs_msgs/ConeArray`)
 `/ground_truth/state ` (of type `eufs_msgs/CarState`)
 
 It publishes a message:
@@ -82,7 +82,7 @@ class SLAMEval(object):
             ConeArray,
             self.slam_receiver
         )
-        self.map_sub = rospy.Subscriber("/ground_truth/all_cones", ConeArray, self.ground_truth_receiver)
+        self.map_sub = rospy.Subscriber("/ground_truth/cones_without_covariance", ConeArray, self.ground_truth_receiver)
         self.pose_sub = rospy.Subscriber(
             "/ground_truth/state",
             CarState,

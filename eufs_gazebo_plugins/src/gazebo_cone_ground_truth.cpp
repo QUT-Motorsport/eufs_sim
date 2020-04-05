@@ -74,6 +74,13 @@ namespace gazebo {
 
     // Setup the publishers
 
+
+    // GT without covariance & perception without covariance
+    std::string gtwc_name_ = _sdf->GetElement("groundTruthConesWithoutCovarianceTopicName")->Get<std::string>();
+        this->ground_truth_cone_without_covariance_pub_ = this->rosnode_->advertise<eufs_msgs::ConeArray>(gtwc_name_, 1);
+    std::string pwc_name_ = _sdf->GetElement("perceptionConesWithoutCovarianceTopicName")->Get<std::string>();
+        this->perception_cone_without_covariance_pub_ = this->rosnode_->advertise<eufs_msgs::ConeArray>(pwc_name_, 1);
+
     // Ground truth cone publisher
     if (!_sdf->HasElement("groundTruthConesTopicName")) {
       ROS_FATAL_NAMED("state_ground_truth", "state_ground_truth plugin missing <groundTruthConesTopicName>, cannot proceed");
@@ -148,6 +155,7 @@ namespace gazebo {
 
       this->ground_truth_cone_pub_.publish(ground_truth_cone_array_message);
       this->ground_truth_cone_marker_pub_.publish(ground_truth_cone_marker_array_message);
+      this->ground_truth_cone_without_covariance_pub_.publish(stripCovariance(ground_truth_cone_array_message));
     } else if (this->simulate_perception_ && (this->perception_cone_pub_.getNumSubscribers() > 0 || this->perception_cone_marker_pub_.getNumSubscribers() > 0)) {
       ground_truth_cone_array_message = getConeArrayMessage();
     }
@@ -158,6 +166,7 @@ namespace gazebo {
       visualization_msgs::MarkerArray perception_cone_marker_array_message = getConeMarkerArrayMessage(perception_cone_array_message);
 
       this->perception_cone_pub_.publish(perception_cone_array_message);
+      this->perception_cone_without_covariance_pub_.publish(stripCovariance(perception_cone_array_message));
       this->perception_cone_marker_pub_.publish(perception_cone_marker_array_message);
     }
 
@@ -409,7 +418,6 @@ namespace gazebo {
     for (unsigned int i = 0; i < cone_array.size(); i++) {
       cone_array[i].point.x += GaussianKernel(0, noise.X());
       cone_array[i].point.y += GaussianKernel(0, noise.Y());
-      // This is just a placeholder
       cone_array[i].covariance = {noise.X(), 0, 0, noise.Y()};
     }
   }
@@ -470,6 +478,32 @@ namespace gazebo {
     } else {
       return  _sdf->GetElement(element)->Get<ignition::math::Vector3d>();
     }
+  }
+
+  eufs_msgs::ConeArray GazeboConeGroundTruth::stripCovariance(eufs_msgs::ConeArrayWithCovariance msg)
+  {
+    auto return_msg = eufs_msgs::ConeArray();
+    for (auto c : msg.blue_cones)
+    {
+      return_msg.blue_cones.push_back(c.point);
+    }
+    for (auto c : msg.yellow_cones)
+    {
+      return_msg.yellow_cones.push_back(c.point);
+    }
+    for (auto c : msg.orange_cones)
+    {
+      return_msg.orange_cones.push_back(c.point);
+    }
+    for (auto c : msg.big_orange_cones)
+    {
+      return_msg.big_orange_cones.push_back(c.point);
+    }
+    for (auto c : msg.unknown_color_cones)
+    {
+      return_msg.unknown_color_cones.push_back(c.point);
+    }
+    return return_msg;
   }
 
 }

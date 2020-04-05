@@ -49,6 +49,7 @@
 #include <ros/ros.h>
 
 #include <eufs_msgs/ConeArrayWithCovariance.h>
+#include <eufs_msgs/ConeArray.h>
 #include <eufs_msgs/ConeWithCovariance.h>
 #include <eufs_msgs/PointArray.h>
 #include <eufs_msgs/CarState.h>
@@ -106,11 +107,16 @@ namespace gazebo {
     std::string getStringParameter(sdf::ElementPtr _sdf, const char* element, std::string default_value, const char* default_description);
     ignition::math::Vector3d getVector3dParameter(sdf::ElementPtr _sdf, const char* element, ignition::math::Vector3d default_value, const char* default_description);
 
+    // Strip away covariance
+    eufs_msgs::ConeArray stripCovariance(eufs_msgs::ConeArrayWithCovariance msg);
+
     // Publishers
     ros::Publisher ground_truth_cone_pub_;
+    ros::Publisher ground_truth_cone_without_covariance_pub_;
     ros::Publisher ground_truth_cone_marker_pub_;
 
     ros::Publisher perception_cone_pub_;
+    ros::Publisher perception_cone_without_covariance_pub_;
     ros::Publisher perception_cone_marker_pub_;
 
     // Gazebo variables
