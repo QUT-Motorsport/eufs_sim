@@ -1,6 +1,6 @@
 <?xml version='1.0'?>
 <sdf version='1.6'>
-  <model name='acceleration'>
+  <model name='track'>
     <include>
       <pose>-50 1.5 0 0 0 0</pose>
       <uri>model://models/big_cone</uri>

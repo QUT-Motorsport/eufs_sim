@@ -2,34 +2,6 @@
 This is the main simulation package which contains the simulation model of the car an several environments.
 
 ## Nodes
-### cone_ground_truth.py
-Node that simulates cone locations as they would have been received
-by the team's cone detection stack. This reads a CSV file generated
-from the track files and then publishes the appropriate cone detections
-based on the location of the car at a certain frequency.
-
-#### Parameters
-
-- `~view_distance` (float, default: 15). Only the cones that are within this distance are published.
-- `~fov` (float, default: 1.91986). Field of view in front of the car
-- `~track_path` (string). Path to the track csv file.
-- `~loop_rate` (float, default: 25). Frequency at which the data is published
-
-#### Subscribers
-
-- `/ground_truth/state` (eufs_msgs/CarState).
-        Simulated ground truth odometry for the car
-
-#### Publishers
-
-- `/ground_truth/cones` (eufs_msgs/ConeArrayWithCovariance).
-        Cone locations in the frame of the car
-- `/ground_truth/cones/viz` (visualization_msgs/MarkerArray).
-        Cone locations to be displayed in Rviz
-- `/ground_truth/midpoints` (eufs_msgs/pointsArray).
-        Track midpoints as an array of Points
-- `/ground_truth/midpoints/viz` (visualization_msgs/Marker).
-        Track midpoints for visualization in Rviz
 
 ### sbg_raw_simulator.py
 Node that simulates the outputs of our sbg sensor
