@@ -101,36 +101,49 @@ class Track:
         inactive_noise = []
         lap_counters = []
 
+
         # iterate over all links of the model
-        if len(root[0].findall("link")) != 0:
-            for child in root[0].iter("link"):
+        if len(root[0].findall("include")) != 0:
+            for child in root[0].iter("include"):
                 pose = child.find("pose").text.split(" ")[0:2]
-                covariance_x = float(child.find("covariance").attrib["x"])
-                covariance_y = float(child.find("covariance").attrib["y"])
-                covariance_xy = float(child.find("covariance").attrib["xy"])
-                cov_info = [covariance_x, covariance_y, covariance_xy]
-                mesh_str = child.find("visual")[0][0][0].text.split("/")[-1].split(".")[0]
+                cov_node = child.find("covariance")
+                if cov_node is None:
+                    cov_info = [0.01, 0.01, 0.0]
+                else:
+                    covariance_x = float(cov_node.attrib["x"])
+                    covariance_y = float(cov_node.attrib["y"])
+                    covariance_xy = float(cov_node.attrib["xy"])
+                    cov_info = [covariance_x, covariance_y, covariance_xy]
+                #mesh_str = child.find("visual")[0][0][0].text.split("/")[-1].split(".")[0]
+                mesh_str = "_".join(child.find("name").text.split("_")[:-1])
                 # indentify cones by the name of their mesh
-                if "cone_blue" == mesh_str:
+                if "blue_cone" == mesh_str:
                     blue.append(pose + cov_info)
-                elif "cone_yellow" == mesh_str:
+                elif "yellow_cone" == mesh_str:
                     yellow.append(pose + cov_info)
-                elif "cone_big" == mesh_str:
+                elif "big_cone" == mesh_str:
                     big_orange.append(pose + cov_info)
-                elif "cone" == mesh_str:
+                elif "orange_cone" == mesh_str:
                     orange.append(pose + cov_info)
                 elif "lap_counter" == mesh_str.split(";")[0]:
                     # Lap counter number stored in other part of `mesh_str`
                     lap_counters.append((pose + cov_info, mesh_str.split(";")[1]))
-                else:
+                elif "active_noise" == mesh_str:
                     active_noise.append(pose + cov_info)
+                elif "inactive_noise" == mesh_str:
+                    inactive_noise.append(pose + cov_info)
+                else:
+                    rospy.logerr("[track_gen.py] No such object: " + mesh_str)
 
+        """
         # handle hidden links
         if len(root[0].findall("ghostlink")) != 0:
             for child in root[0].iter("ghostlink"):
                 pose = child.find("pose").text.split(" ")[0:2]
                 inactive_noise.append(pose)
+        """
 
+        """
         # handle includes
         # note, since some names mismatch (cone vs orange_cone), this section might
         # be out of date and require maintenance
@@ -148,6 +161,7 @@ class Track:
                     big_orange.append(pose)
                 elif "orange_cone" == mesh_str:
                     orange.append(pose)
+        """
 
         # convert all lists to numpy as arrays for efficiency
         if len(blue) != 0:

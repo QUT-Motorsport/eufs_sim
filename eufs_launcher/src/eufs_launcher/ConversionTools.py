@@ -961,7 +961,12 @@ class ConversionTools:
                 collision_template = sdf_model_with_collisions.split("%MODELNAME%")
 
                 def join_cone_model_data(cone_type):
-                        cone_string = "model://eufs_description/meshes/"+cone_type+".dae"
+                        flip_cones = cone_type.split("_")
+                        if len(flip_cones) == 1:
+                                name = flip_cones[0]
+                        else:
+                                name = flip_cones[1] + "_" + flip_cones[0]
+                        cone_string = "model://models/"+name+".dae"
                         return cone_string.join(collision_template)
 
                 def setup_covariance(x, y, xy):
@@ -1093,7 +1098,7 @@ class ConversionTools:
                         ConversionTools.inner_cone_color[:3]: "yellow_cone",
                         ConversionTools.outer_cone_color[:3]: "blue_cone",
                         ConversionTools.orange_cone_color[:3]: "orange_cone",
-                        ConversionTools.big_orange_cone_color[:3]: "big_orange_cone"
+                        ConversionTools.big_orange_cone_color[:3]: "big_cone"
                 }
                 for i in range(im.size[0]):
                         for j in range(im.size[1]):
@@ -1141,7 +1146,7 @@ class ConversionTools:
                                         sdf_allmodels = doubly_expand_allmodels(
                                                             sdf_allmodels,
                                                             sdf_big_orange_cone_model,
-                                                            "big_orange_cone",
+                                                            "big_cone",
                                                             i,
                                                             j,
                                                             model_yaw
@@ -1701,7 +1706,12 @@ class ConversionTools:
                 collision_template = sdf_model_with_collisions.split("%MODELNAME%")
 
                 def join_cone_model_data(cone_type):
-                        cone_string = "model://eufs_description/meshes/"+cone_type+".dae"
+                        flip_cones = cone_type.split("_")
+                        if len(flip_cones) == 1:
+                                name = flip_cones[0]
+                        else:
+                                name = flip_cones[1] + "_" + flip_cones[0]
+                        cone_string = "model://models/"+name+".dae"
                         return cone_string.join(collision_template)
 
                 def setup_covariance(x, y, xy):
@@ -1762,11 +1772,9 @@ class ConversionTools:
                         x_cov_str = str(x_cov)
                         y_cov_str = str(y_cov)
                         xy_cov_str = str(xy_cov)
-                        rospy.logerr(x_cov_str)
                         mod_with_cov = setup_covariance(x_cov_str, y_cov_str, xy_cov_str).join(
                                 mod_with_link2.split("%FILLCOVARIANCE%")
                         )
-                        rospy.logerr(mod_with_cov)
                         return mod_with_cov
 
                 sdf_allmodels = ""
@@ -1828,7 +1836,8 @@ class ConversionTools:
                             sdf_allmodels = expand_allmodels(
                                                 sdf_allmodels,
                                                 color_to_model[name],
-                                                name + "_cone",
+                                                name + "_cone" if name != "big_orange"
+                                                else "big_cone",
                                                 x,
                                                 y,
                                                 x_cov,
