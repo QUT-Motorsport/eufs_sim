@@ -65,7 +65,7 @@ eufs_launcher:
             priority: 2
             name: "Perception_Checkbox"
             label: "Perception Stack"
-            checked_on_default: No
+            checked_on_default: Yes
             parameter_triggering:
                 if_on: {}
                 if_off: {"launch_group:=no_perception"}
