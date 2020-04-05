@@ -64,7 +64,7 @@ namespace gazebo {
   public:
 
     enum ConeType {
-      blue, yellow, orange, big_orange
+      blue, yellow, orange, big_orange, unknown
     };
 
     GazeboConeGroundTruth();
