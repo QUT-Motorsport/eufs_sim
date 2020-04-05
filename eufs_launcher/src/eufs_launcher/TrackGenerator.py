@@ -1032,17 +1032,22 @@ def de_parameterize(func):
 class CONE_INNER:
     pass
 
+
 class CONE_OUTER:
     pass
+
 
 class CONE_ORANGE:
     pass
 
+
 class CONE_START:
     pass
 
+
 class CONE_BIG_ORANGE:
     pass
+
 
 class NOISE:
     pass

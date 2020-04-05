@@ -340,7 +340,6 @@ class ConversionTools:
                         in get_points_from_component_list(components)
                 ])
 
-
                 # We want to calculate direction of car position
                 sx = xys[0][0]
                 sy = xys[0][1]
@@ -437,7 +436,6 @@ class ConversionTools:
                 )
 
                 return im_to_display
-
 
         @staticmethod
         def comps_to_png(which_file, params, conversion_suffix="", override_name=None):
@@ -1411,7 +1409,6 @@ class ConversionTools:
                 for cone in final_cones:
                     pixels[cone[1], cone[2]] = get_cone_color(cone[0], cone[3])
 
-
                 # Add scale metadata:
                 loc = ConversionTools.get_metadata_pixel_location(
                                                                   0,
@@ -1579,7 +1576,6 @@ class ConversionTools:
                 # so here we are pasting in copies of the relevant filename.
                 launch_merged = "".join(launch_template)
                 launch_merged = GENERATED_FILENAME.join(launch_merged.split("%FILLNAME%"))
-
 
                 # Find the car's position
                 # Get x data
@@ -1788,7 +1784,6 @@ class ConversionTools:
                         mod_at_p = put_model_at_position(mod, x, y, modtype, x_cov, y_cov, xy_cov)
                         return allmods + "\n" + mod_at_p
 
-
                 def get_random_noise_template(mod_with_collisions):
                         """
                         Gets a template for an arbitrary noise model
@@ -1868,8 +1863,6 @@ class ConversionTools:
                 sdf_out.write(sdf_main)
                 sdf_out.close()
 
-                
-
         #########################################################
         #                        Copying                        #
         #########################################################
@@ -1882,5 +1875,3 @@ class ConversionTools:
                 writer.write(data)
                 reader.close()
                 writer.close()
-
-

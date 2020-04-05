@@ -301,7 +301,7 @@ class EufsLauncher(Plugin):
                                         (lambda: rospy.set_param(check["param_name"], check["if_on"])),
                                         (lambda: rospy.set_param(check["param_name"], check["if_off"]))
                                 ))
-                                
+
                         setattr(self, checkboxes[key]["name"].upper(), cur_cbox)
                         counter += 1
 
