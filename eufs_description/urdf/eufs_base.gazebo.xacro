@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <robot xmlns:xacro="http://www.ros.org/wiki/xacro">
   <xacro:arg name="publish_tf" default="false"/>
-  <xacro:arg name="simulate_perception" default="false"/>
+  <xacro:arg name="simulate_perception" default="true"/>
 
   <!-- ROS control plugin which controls all actuators in the simulation
   This effectively looks in the namespace of the robot, finds the controller
@@ -51,6 +51,7 @@
       <lidarMinDistance>1</lidarMinDistance>
       <cameraFOV>1.918889</cameraFOV><!--110 degrees-->
       <lidarFOV>6.283185</lidarFOV><!-- 360 degrees-->
+      <lidarOn>true</lidarOn><!--If false, we only simulate camera measurements-->
       <coneFrame>base_footprint</coneFrame>
       <groundTruthConesTopicName>/ground_truth/cones</groundTruthConesTopicName>
       <groundTruthConesWithoutCovarianceTopicName>/ground_truth/cones_without_covariance</groundTruthConesWithoutCovarianceTopicName>

@@ -57,6 +57,7 @@
 #include <visualization_msgs/Marker.h>
 #include <visualization_msgs/MarkerArray.h>
 
+#include <cmath>
 
 namespace gazebo {
 
@@ -110,6 +111,12 @@ namespace gazebo {
     // Strip away covariance
     eufs_msgs::ConeArray stripCovariance(eufs_msgs::ConeArrayWithCovariance msg);
 
+    // Helper functions for determining whether a cone is in range
+    bool inRangeOfCamera(eufs_msgs::ConeWithCovariance cone);
+    bool inFOVOfCamera(eufs_msgs::ConeWithCovariance cone);
+    bool inRangeOfLidar(eufs_msgs::ConeWithCovariance cone);
+    bool inFOVOfLidar(eufs_msgs::ConeWithCovariance cone);
+
     // Publishers
     ros::Publisher ground_truth_cone_pub_;
     ros::Publisher ground_truth_cone_without_covariance_pub_;
@@ -136,6 +143,7 @@ namespace gazebo {
     double camera_fov;
     double camera_a;
     double camera_b;
+    bool lidar_on;
 
     double update_rate_;
     ros::Time time_last_published;

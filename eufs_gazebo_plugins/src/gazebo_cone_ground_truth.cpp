@@ -63,6 +63,7 @@ namespace gazebo {
     this->camera_fov = getDoubleParameter(_sdf, "cameraFOV", 1.918889, "1.918889  (110 degrees)");
     this->camera_a = getDoubleParameter(_sdf, "perceptionCameraDepthNoiseParameterA", 0.0184, "0.0184");
     this->camera_b = getDoubleParameter(_sdf, "perceptionCameraDepthNoiseParameterB", 0.2106, "0.2106");
+    this->lidar_on = getBoolParameter(_sdf, "lidarOn", true, "true");
 
     this->cone_frame_ = getStringParameter(_sdf, "coneFrame", "base_footprint", "base_footprint");
 
@@ -279,6 +280,35 @@ namespace gazebo {
     cones.unknown_color_cones = new_unknown;
   }
 
+  bool GazeboConeGroundTruth::inRangeOfCamera(eufs_msgs::ConeWithCovariance cone)
+  {
+    auto dist = (cone.point.x * cone.point.x) + (cone.point.y * cone.point.y);
+    return camera_min_view_distance * camera_min_view_distance < dist &&
+           dist < camera_total_view_distance * camera_total_view_distance;
+  }
+
+  bool GazeboConeGroundTruth::inFOVOfCamera(eufs_msgs::ConeWithCovariance cone)
+  {
+    float angle = atan2(cone.point.y, cone.point.x);
+    return abs(angle) < (this->camera_fov / 2);
+  }
+
+  bool GazeboConeGroundTruth::inRangeOfLidar(eufs_msgs::ConeWithCovariance cone)
+  {
+    auto dist = (cone.point.x * cone.point.x) + (cone.point.y * cone.point.y);
+    return lidar_min_view_distance * lidar_min_view_distance < dist &&
+           dist < lidar_total_view_distance * lidar_total_view_distance &&
+           abs(cone.point.x) < lidar_x_view_distance &&
+           abs(cone.point.y) < lidar_y_view_distance &&
+           this->lidar_on;
+  }
+
+  bool GazeboConeGroundTruth::inFOVOfLidar(eufs_msgs::ConeWithCovariance cone)
+  {
+    float angle = atan2(cone.point.y, cone.point.x);
+    return abs(angle) < (this->lidar_fov / 2) && this->lidar_on;
+  }
+
   std::pair<std::vector<eufs_msgs::ConeWithCovariance>, std::vector<eufs_msgs::ConeWithCovariance>>
       GazeboConeGroundTruth::fovCones(std::vector<eufs_msgs::ConeWithCovariance> conesToCheck)
   {
@@ -290,34 +320,20 @@ namespace gazebo {
       float y = conesToCheck[i].point.y - this->car_pos.Pos().Y();
 
       // If the cone is withing viewing distance of lidar
-      auto dist = (x * x) + (y * y);
-      bool lidar_sees = lidar_min_view_distance * lidar_min_view_distance < dist &&
-                        dist < lidar_total_view_distance * lidar_total_view_distance;
-      bool camera_sees = camera_min_view_distance * camera_min_view_distance < dist &&
-                         dist < camera_total_view_distance * camera_total_view_distance;
-      if (lidar_sees || camera_sees) {
-        float yaw = this->car_pos.Rot().Yaw();
+      float yaw = this->car_pos.Rot().Yaw();
 
-        // Rotate the points using the yaw of the car (x and y are the other way around)
-        conesToCheck[i].point.y = (cos(yaw) * y) - (sin(yaw) * x);
-        conesToCheck[i].point.x = (sin(yaw) * y) + (cos(yaw) * x);
+      // Rotate the points using the yaw of the car (x and y are the other way around)
+      conesToCheck[i].point.y = (cos(yaw) * y) - (sin(yaw) * x);
+      conesToCheck[i].point.x = (sin(yaw) * y) + (cos(yaw) * x);
 
-        // Angle between the direction of the car and the cone
-        float angle = atan2(conesToCheck[i].point.y, conesToCheck[i].point.x);
+      bool lidar_sees = inRangeOfLidar(conesToCheck[i]) && inFOVOfLidar(conesToCheck[i]);
+      bool camera_sees = inRangeOfCamera(conesToCheck[i]) && inFOVOfCamera(conesToCheck[i]);
 
-        // If the cone is inside the field of view
-        lidar_sees = lidar_sees &&
-                     abs(angle) < (this->lidar_fov / 2) &&
-                     abs(x) < lidar_x_view_distance &&
-                     abs(y) < lidar_y_view_distance;
-        camera_sees = camera_sees &&
-                      abs(angle) < (this->camera_fov / 2);
-        if ((lidar_sees && !camera_sees)) {
-          cones_in_view_without_color.push_back(conesToCheck[i]);
-        }
-        else if (camera_sees) {
-          cones_in_view.push_back(conesToCheck[i]);
-        }
+      if ((lidar_sees && !camera_sees)) {
+        cones_in_view_without_color.push_back(conesToCheck[i]);
+      }
+      else if (camera_sees) {
+        cones_in_view.push_back(conesToCheck[i]);
       }
     }
     return std::make_pair(cones_in_view, cones_in_view_without_color);
@@ -416,9 +432,25 @@ namespace gazebo {
 
   void GazeboConeGroundTruth::addNoiseToConeArray(std::vector<eufs_msgs::ConeWithCovariance> &cone_array, ignition::math::Vector3d noise) {
     for (unsigned int i = 0; i < cone_array.size(); i++) {
-      cone_array[i].point.x += GaussianKernel(0, noise.X());
-      cone_array[i].point.y += GaussianKernel(0, noise.Y());
-      cone_array[i].covariance = {noise.X(), 0, 0, noise.Y()};
+      // By default we use just lidar noise
+      auto x_noise = noise.X();
+      auto y_noise = noise.Y();
+
+      // But if only the camera sees it, we use camera noise specifically
+      if (!inFOVOfLidar(cone_array[i]) && !inRangeOfLidar(cone_array[i]))
+      {
+        auto dist = sqrt(
+            cone_array[i].point.x * cone_array[i].point.x +
+            cone_array[i].point.y * cone_array[i].point.y
+        );
+        x_noise = camera_a * std::exp(camera_b * dist);
+        y_noise = x_noise / 5;
+      }
+
+      // Apply noise
+      cone_array[i].point.x += GaussianKernel(0, x_noise);
+      cone_array[i].point.y += GaussianKernel(0, y_noise);
+      cone_array[i].covariance = {x_noise, 0, 0, y_noise};
     }
   }
 
