@@ -1166,7 +1166,7 @@ class EufsLauncher(Plugin):
                 """Unregister all publishers, kill all nodes."""
                 self.tell_launchella("Shutdown Engaged...")
 
-                # (Stop all processes)
+                # (Stop all processes)zz
                 for p in self.processes:
                     p.stop()
 

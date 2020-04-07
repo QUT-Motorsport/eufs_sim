@@ -60,11 +60,11 @@ eufs_launcher:
         perception:
             priority: 2
             name: "Perception_Checkbox"
-            label: "Perception Stack"
+            label: "Use Simulated Perception"
             checked_on_default: Yes
             parameter_triggering:
-                if_on: {}
-                if_off: {"launch_group:=no_perception"}
+                if_on: {"launch_group:=no_perception"}
+                if_off: {}
             
         gazebo_gui:
             priority: 3
