@@ -69,8 +69,6 @@ namespace gazebo {
 
     this->simulate_perception_ = getBoolParameter(_sdf, "simulatePerception", false, "false");
 
-    ROS_ERROR((std::to_string(this->simulate_perception_) + "test").c_str());
-
     this->perception_lidar_noise_ = getVector3dParameter(_sdf, "perceptionNoise", {0.03, 0.03, 0.0}, "0.03, 0.03, 0.0");
 
     this->rosnode_ = new ros::NodeHandle("");
