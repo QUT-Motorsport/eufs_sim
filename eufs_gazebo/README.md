@@ -14,31 +14,6 @@ Node that simulates the outputs of our sbg sensor
 `/imu/nav_sat_fix` (of type `sensor_msgs/NavSatFix`)
 `/imu/data`    (of type `sensor_msgs/Imu`)
 
-### ekf_evaluator.py
-Node that listens to ground truth and the ekf outputs and compares their accuracy
-
-#### Subscribers:
-`/odometry/filtered` (of type `nav_msgs/Odometry`)
-`/accel/filtered` (of type `geometry_msgs/AccelWithCovarianceStamped`)
-`/imu` (of type `sensor_msgs/Imu`)
-`/gps_velocity` (of type `geometry_msgs/Vector3Stamped`)
-
-#### Publishers:
-`/ekf/evaluation` (of type `eufs_msgs/EKFErr`)
-
-### fastslam_evaluator.py
-Node that listens to ground truth and fastslam outputs and compares their accuracy
-
-#### Subscribers:
-`fast_slam/pose` (of type `geometry_msgs/Pose`)
-`/fast_slam/map` (of type `eufs_msgs/ConeArray`)
-`/ground_truth/cones` (of type `eufs_msgs/ConeArray`)
-`/ground_truth/state ` (of type `eufs_msgs/CarState`)
-
-
-#### Publishers:
-`/slam/evaluation` (of type `eufs_msgs/SLAMErr`)
-
 ### perception_sensors_simulator.py
 Node that applies the noise profile of perception sensors onto the ground truth
 cone output received from `cone_ground_truth.py`
