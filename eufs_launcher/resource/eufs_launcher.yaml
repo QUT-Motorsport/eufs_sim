@@ -25,10 +25,6 @@ eufs_launcher:
             location: "launch/sbg_raw_data_simulator.launch"
             args: {"_imu_hz:=200", "_gps_hz:=5"}
 
-        wheel_odometry:
-            package: "wheel_odometry"
-            location: "launch/wheel_odometry.launch"
-
         localisation:
             package: "evaluator_scripts"
             location: "launch/simulation.launch"
