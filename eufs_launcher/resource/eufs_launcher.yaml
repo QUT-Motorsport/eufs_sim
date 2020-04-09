@@ -29,6 +29,10 @@ eufs_launcher:
             package: "wheel_odometry"
             location: "launch/wheel_odometry.launch"
 
+        localisation:
+            package: "evaluator_scripts"
+            location: "launch/simulation.launch"
+
 
     # Checkboxes to have in the config section.  
     # `eufs_launcher` handles layout based on priority set.
