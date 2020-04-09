@@ -29,21 +29,6 @@ eufs_launcher:
             package: "wheel_odometry"
             location: "launch/wheel_odometry.launch"
 
-        ekf_evaluator:
-            package: "eufs_gazebo"
-            location: "launch/ekf_evaluator.launch"
-
-        slam_evaluator:
-            package: "eufs_gazebo"
-            location: "launch/fastslam_evaluator.launch"
-
-        ekf_node:
-            package: "ekf"
-            location: "launch/localization.launch"
-
-        fastslam_node:
-            package: "fast_slam"
-            location: "launch/fast_slam.launch"
 
     # Checkboxes to have in the config section.  
     # `eufs_launcher` handles layout based on priority set.
