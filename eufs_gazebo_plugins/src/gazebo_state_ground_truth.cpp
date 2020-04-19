@@ -419,7 +419,7 @@ void GazeboStateGroundTruth::UpdateChild() {
         if (this->state_pub_.getNumSubscribers() > 0) {
           this->state_msg_.header.stamp = this->odom_msg_.header.stamp;
           this->state_msg_.pose = this->odom_msg_.pose;
-          this->state_msg_.twist = this->state_msg_.twist;
+          this->state_msg_.twist = this->odom_msg_.twist;
 
           // Handle accelerations
           this->state_msg_.linear_acceleration.x =
