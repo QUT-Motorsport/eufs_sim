@@ -1,6 +1,7 @@
 <?xml version="1.0"?>
 <robot xmlns:xacro="http://www.ros.org/wiki/xacro">
   <xacro:arg name="publish_tf" default="false"/>
+  <xacro:arg name="simulate_perception" default="false"/>
 
   <!-- ROS control plugin which controls all actuators in the simulation
   This effectively looks in the namespace of the robot, finds the controller
@@ -24,7 +25,7 @@
   <gazebo>
     <plugin name="state_ground_truth" filename="libgazebo_state_ground_truth.so">
       <alwaysOn>true</alwaysOn>
-      <updateRate>200.0</updateRate>
+      <updateRate>15.0</updateRate>
       <referenceFrame>map</referenceFrame>
       <robotFrame>base_footprint</robotFrame>
       <publishTransform>$(arg publish_tf)</publishTransform>
@@ -35,6 +36,22 @@
       <linearVelocityNoise>0.0 0.0 0.0</linearVelocityNoise>
       <angularVelocityNoise>0.0 0.0 0.0</angularVelocityNoise>
       <linearAccelerationNoise>0.0 0.0 0.0</linearAccelerationNoise>
+    </plugin>
+  </gazebo>
+
+  <gazebo>
+    <plugin name="cone_ground_truth" filename="libgazebo_cone_ground_truth.so">
+      <alwaysOn>true</alwaysOn>
+      <updateRate>25.0</updateRate>
+      <viewDistance>15</viewDistance>
+      <fov>1.91986</fov>
+      <coneFrame>base_footprint</coneFrame>
+      <groundTruthConesTopicName>/ground_truth/cones</groundTruthConesTopicName>
+      <groundTruthConeMarkersTopicName>/ground_truth/cones/viz</groundTruthConeMarkersTopicName>
+      <simulatePerception>$(arg simulate_perception)</simulatePerception>
+      <perceptionConesTopicName>/fusion/cones</perceptionConesTopicName>
+      <perceptionConeMarkersTopicName>/fusion/cones/viz</perceptionConeMarkersTopicName>
+      <perceptionNoise>0.0 0.0 0.0</perceptionNoise>
     </plugin>
   </gazebo>
 

@@ -21,6 +21,7 @@
   <arg name="controlMethod" default="speed"/>
   <arg name="show_rqt_gui" default="true"/>
   <arg name="publish_gt_tf" default="false"/>
+  <arg name="launch_group" default="default"/>
 
   <!-- eufs_control launch file -->
   <include file="$(find eufs_gazebo)/launch/eufs_control.launch"/>
@@ -48,14 +49,7 @@
     <arg name="show_rqt_gui" default="$(arg show_rqt_gui)"/>
     <arg name="cmd_timeout" value="$(arg cmd_timeout)"/>
     <arg name="publish_gt_tf" value="$(arg publish_gt_tf)"/>
+    <arg name="launch_group" default="$(arg launch_group)"/>
   </include>
-
-  <node name="cone_ground_truth" pkg="eufs_gazebo" type="cone_ground_truth.py" output="screen">
-    <param name="view_distance" value="15"/>
-    <param name="track_path" value="$(find eufs_gazebo)/tracks/rand_CT.csv"/>
-    <param name="x_init" value="$(arg x)"/>
-    <param name="y_init" value="$(arg y)"/>
-    <param name="yaw_init" value="$(arg yaw)"/>
-  </node>
 
 </launch>

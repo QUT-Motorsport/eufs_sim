@@ -45,12 +45,21 @@ catkin_package(
         tf2_ros
 )
 
-# Add single plugin
+# Add plugins
 add_library(gazebo_state_ground_truth src/gazebo_state_ground_truth.cpp)
 target_include_directories(gazebo_state_ground_truth PUBLIC include ${CMAKE_SOURCE_DIR} ${catkin_LIBRARY_DIRS})
 target_link_libraries(gazebo_state_ground_truth ${GAZEBO_LIBRARIES} ${IGNITION-MSGS_LIBRARIES} ${catkin_LIBRARIES} ${OGRE_LIBRARY})
 
 install(TARGETS gazebo_state_ground_truth
+        ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+        LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+        RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})
+
+add_library(gazebo_cone_ground_truth src/gazebo_cone_ground_truth.cpp)
+target_include_directories(gazebo_cone_ground_truth PUBLIC include ${CMAKE_SOURCE_DIR} ${catkin_LIBRARY_DIRS})
+target_link_libraries(gazebo_cone_ground_truth ${GAZEBO_LIBRARIES} ${IGNITION-MSGS_LIBRARIES} ${catkin_LIBRARIES} ${OGRE_LIBRARY})
+
+install(TARGETS gazebo_cone_ground_truth
         ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
         LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
         RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})

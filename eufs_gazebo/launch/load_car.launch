@@ -17,11 +17,17 @@
   <!-- Control Method Argument -->
   <arg name="controlMethod" default="speed"/>
   <arg name="show_rqt_gui" default="true"/>
+  <arg name="launch_group" default="default" />
 
   <!-- Load the URDF into the ROS Parameter Server -->
   <group if="$(eval arg('controlMethod')=='speed')">
 
-    <param command="$(find xacro)/xacro --inorder '$(find eufs_description)/robots/ads-dv.urdf.xacro' publish_tf:=$(arg publish_gt_tf) " name="robot_description"/>
+    <group if="$(eval arg('launch_group')=='no_perception')">
+      <param command="$(find xacro)/xacro --inorder '$(find eufs_description)/robots/ads-dv.urdf.xacro' publish_tf:=$(arg publish_gt_tf) simulate_perception:=true" name="robot_description"/>
+    </group>
+    <group unless="$(eval arg('launch_group')=='no_perception')">
+      <param command="$(find xacro)/xacro --inorder '$(find eufs_description)/robots/ads-dv.urdf.xacro' publish_tf:=$(arg publish_gt_tf) simulate_perception:=false" name="robot_description"/>
+    </group>
 
     <!-- start ros_can_sim node -->
     <include file="$(find ros_can_sim)/launch/ros_can_sim.launch"/>
