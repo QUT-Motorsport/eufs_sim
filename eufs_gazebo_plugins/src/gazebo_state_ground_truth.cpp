@@ -343,11 +343,7 @@ void GazeboStateGroundTruth::UpdateChild() {
         }
 
         // Apply Constant Offsets
-        // apply xyz offsets and get position and rotation components
-        pose.Pos() = pose.Pos() - this->offset_.Pos();
-        // apply rpy offsets
-        pose.Rot() = pose.Rot() * this->offset_.Rot();
-        pose.Rot().Normalize();
+        pose -= this->offset_;
 
         // compute accelerations
         this->apos_ = (this->last_vpos_ - vpos) / tmp_dt;
@@ -463,6 +459,7 @@ double GazeboStateGroundTruth::GaussianKernel(double mu, double sigma) {
   // normalized uniform random variable
   double U = static_cast<double>(rand_r(&this->seed)) /
       static_cast<double>(RAND_MAX);
+
 
   // normalized uniform random variable
   double V = static_cast<double>(rand_r(&this->seed)) /
