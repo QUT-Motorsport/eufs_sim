@@ -19,12 +19,24 @@
   <arg name="show_rqt_gui" default="true"/>
   <arg name="launch_group" default="default" />
 
-  <group if="$(eval arg('launch_group')=='no_perception')">
-    <param command="$(find xacro)/xacro --inorder '$(find eufs_description)/robots/ads-dv.urdf.xacro' publish_tf:=$(arg publish_gt_tf) simulate_perception:=true" name="robot_description"/>
-  </group>
-  <group unless="$(eval arg('launch_group')=='no_perception')">
-    <param command="$(find xacro)/xacro --inorder '$(find eufs_description)/robots/ads-dv.urdf.xacro' publish_tf:=$(arg publish_gt_tf) simulate_perception:=false" name="robot_description"/>
-  </group>
+<!--  <param name="robot_description"-->
+<!--         command="$(find xacro)/xacro &#45;&#45;inorder '$(find eufs_description)/robots/ads-dv.urdf.xacro'-->
+<!--                                                publish_tf:=$(arg publish_gt_tf)-->
+<!--                                                simulate_perception:=true"/>-->
+
+  <arg name="robot_name" default="gotthard"/>
+  <param name="tf_prefix" value="/fssim/vehicle"/>
+
+  <arg name="sensors_config_file" default="$(find eufs_description)/cars/$(arg robot_name)/config/sensors.yaml"/>
+  <arg name="car_config_file"     default="$(find eufs_description)/cars/$(arg robot_name)/config/car.yaml"/>
+  <arg name="car_dimensions_file" default="$(find eufs_description)/cars/$(arg robot_name)/config/distances.yaml"/>
+
+  <param name="robot_description"
+         command="$(find xacro)/xacro --inorder '$(find eufs_description)/urdf/vehicle/car.xacro'
+                                                robot_name:='$(arg robot_name)'
+                                                sensors_config_file:='$(arg sensors_config_file)'
+                                                car_config_file:='$(arg car_config_file)'
+                                                car_dimensions_file:='$(arg car_dimensions_file)'" />
 
   <group if="$(eval arg('show_rqt_gui'))">
     <!-- start rqt robot steering module -->
