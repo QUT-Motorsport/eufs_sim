@@ -13,6 +13,7 @@ find_package(catkin REQUIRED COMPONENTS
         nav_msgs
         eufs_msgs
         tf2_ros
+        tf
         )
 
 find_package(Boost REQUIRED COMPONENTS thread)
@@ -43,7 +44,10 @@ catkin_package(
         nav_msgs
         eufs_msgs
         tf2_ros
+        tf
 )
+
+add_subdirectory(gazebo_race_car_model)
 
 # Add plugins
 add_library(gazebo_state_ground_truth src/gazebo_state_ground_truth.cpp)

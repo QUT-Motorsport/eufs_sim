@@ -38,12 +38,16 @@
                                                 car_config_file:='$(arg car_config_file)'
                                                 car_dimensions_file:='$(arg car_dimensions_file)'" />
 
-  <!-- once the joint_state is published, run the robot_state_publisher, the namespace has to be adapted -->
   <!-- convert joint states to TF transforms for rviz, etc -->
-  <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher"
+  <node name="fssim_robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher"
         respawn="false" output="screen">
-    <remap from="/joint_states" to="/eufs/joint_states" />
+    <remap from="/joint_states" to="/fssim/joint_states" />
   </node>
+
+  <node name="spawn_platform" pkg="gazebo_ros" type="spawn_model" args="-urdf -param robot_description -model $(arg namespace)
+              -gazebo_namespace /gazebo
+              -x $(arg x) -y $(arg y) -z $(arg z)
+              -R $(arg roll) -P $(arg pitch) -Y $(arg yaw)"/>
 
   <group if="$(eval arg('show_rqt_gui'))">
     <!-- start rqt robot steering module -->
@@ -52,13 +56,5 @@
     <!--start twist to ackermannDrive converter for robot steering plugin -->
     <node pkg="ros_can_sim" name="twist_to_ackermannDrive" type="twist_to_ackermannDrive.py" args="twistToAckermannDrive:=eufsa_control/teleop_vel_out"/>
   </group>
-
-  <node name="spawn_platform" pkg="gazebo_ros" type="spawn_model" args="-urdf -param robot_description -model $(arg namespace)
-              -gazebo_namespace /gazebo
-              -x $(arg x) -y $(arg y) -z $(arg z)
-              -R $(arg roll) -P $(arg pitch) -Y $(arg yaw)"/>
-
-  <!-- load joint controllers -->
-  <!--<node name="controller_spawner" pkg="controller_manager" type="spawner" args="$(find ros_can_sim)/config/joint_controller.yaml"/>-->
 
 </launch>
