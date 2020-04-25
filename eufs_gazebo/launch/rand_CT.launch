@@ -23,9 +23,6 @@
   <arg name="publish_gt_tf" default="false"/>
   <arg name="launch_group" default="default"/>
 
-  <!-- eufs_control launch file -->
-  <include file="$(find eufs_gazebo)/launch/eufs_control.launch"/>
-
   <!-- Gazebo -->
   <include file="$(find gazebo_ros)/launch/empty_world.launch">
     <arg name="world_name" value="$(find eufs_gazebo)/worlds/rand_CT.world"/>

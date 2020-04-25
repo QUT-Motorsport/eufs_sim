@@ -38,6 +38,13 @@
                                                 car_config_file:='$(arg car_config_file)'
                                                 car_dimensions_file:='$(arg car_dimensions_file)'" />
 
+  <!-- once the joint_state is published, run the robot_state_publisher, the namespace has to be adapted -->
+  <!-- convert joint states to TF transforms for rviz, etc -->
+  <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher"
+        respawn="false" output="screen">
+    <remap from="/joint_states" to="/eufs/joint_states" />
+  </node>
+
   <group if="$(eval arg('show_rqt_gui'))">
     <!-- start rqt robot steering module -->
     <node name="eufs_sim_rqt" pkg="rqt_gui" type="rqt_gui" respawn="false" output="screen" args="--perspective-file $(find eufs_gazebo)/config/eufs_sim.perspective"/>
