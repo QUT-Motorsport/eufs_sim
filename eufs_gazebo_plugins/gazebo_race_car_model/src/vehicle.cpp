@@ -146,7 +146,7 @@ void Vehicle::publish(const double sim_time) {
 }
 
 void Vehicle::update(const double dt) {
-    input_.dc = car_info_.torque_ok && ros::Time::now().toSec() - time_last_cmd_ < 1.0 ? input_.dc : -1.0;
+    input_.dc = /*car_info_.torque_ok &&*/ ros::Time::now().toSec() - time_last_cmd_ < 1.0 ? input_.dc : -1.0;
 
     double Fz = getNormalForce(state_);
 
