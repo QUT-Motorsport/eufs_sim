@@ -11,6 +11,7 @@ find_package(catkin REQUIRED COMPONENTS
         nodelet
         geometry_msgs
         nav_msgs
+        ackermann_msgs
         eufs_msgs
         tf2_ros
         tf
@@ -43,6 +44,7 @@ catkin_package(
         geometry_msgs
         nav_msgs
         eufs_msgs
+        ackermann_msgs
         tf2_ros
         tf
 )

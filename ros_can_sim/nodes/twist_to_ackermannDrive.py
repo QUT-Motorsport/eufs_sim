@@ -15,7 +15,7 @@ from geometry_msgs.msg import Twist
 class Convert:
     def __init__(self):
         self.publisher = rospy.Publisher(
-            '/rqt/command', AckermannDriveStamped, queue_size=10)
+            '/fssim/cmd', AckermannDriveStamped, queue_size=10)
         self.max_steering = 1
         self.min_steering = -1
         self.epsilon_steering = math.radians(0.001)
@@ -26,6 +26,7 @@ class Convert:
 
         drive = AckermannDrive()
         drive.speed = data.linear.x
+        drive.acceleration = data.linear.x
         drive.steering_angle = data.angular.z
 
         # impose limits on commanded angle

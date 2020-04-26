@@ -106,7 +106,7 @@ void Vehicle::setPositionFromWorld() {
     const auto accel = model->WorldLinearAccel();
     const auto r     = model->WorldAngularVel();
 
-    state_.x   = -1;
+    state_.x   = pos.Pos().X();
     state_.y   = pos.Pos().Y();
     state_.yaw = pos.Rot().Yaw();
     state_.v_x = 0.0;
@@ -278,9 +278,9 @@ double Vehicle::getMTv(const State &x, const Input &u) const {
     return 0.0;
 }
 
-void Vehicle::onCmd(const eufs_msgs::CmdConstPtr &msg) {
-    input_.delta = msg->delta;
-    input_.dc    = msg->dc;
+void Vehicle::onCmd(const ackermann_msgs::AckermannDriveStampedConstPtr &msg) {
+    input_.delta = msg->drive.steering_angle;
+    input_.dc    = msg->drive.acceleration;
     time_last_cmd_ = ros::Time::now().toSec();
 }
 

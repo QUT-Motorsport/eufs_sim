@@ -32,14 +32,11 @@
 
 // ROS Msgs
 #include "eufs_msgs/CarInfo.h"
-#include "eufs_msgs/Cmd.h"
-#include "eufs_msgs/WheelSpeeds2.h"
 #include "eufs_msgs/ResState.h"
-#include "eufs_msgs/Mission.h"
 #include "eufs_msgs/State.h"
 #include "nav_msgs/Odometry.h"
 #include "geometry_msgs/PoseWithCovarianceStamped.h"
-
+#include "ackermann_msgs/AckermannDriveStamped.h"
 // ROS
 #include <tf/transform_datatypes.h>
 #include <tf/transform_broadcaster.h>
@@ -104,7 +101,7 @@ class Vehicle {
 
     double getMTv(const State &x, const Input &u) const;
 
-    void onCmd(const eufs_msgs::CmdConstPtr &msg);
+    void onCmd(const ackermann_msgs::AckermannDriveStampedConstPtr &msg);
 
     void onInitialPose(const geometry_msgs::PoseWithCovarianceStamped &msg);
 
