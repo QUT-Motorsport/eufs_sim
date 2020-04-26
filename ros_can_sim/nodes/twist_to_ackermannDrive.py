@@ -26,7 +26,6 @@ class Convert:
 
         drive = AckermannDrive()
         drive.speed = data.linear.x
-        drive.acceleration = data.linear.x
         drive.steering_angle = data.angular.z
 
         # impose limits on commanded angle
