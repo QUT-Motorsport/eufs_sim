@@ -27,44 +27,7 @@
 #include "vehicle.hpp"
 
 namespace gazebo {
-    namespace noise {
-
-        Eigen::Vector2d gaussiaNoise2D(double mu, double sigma) {
-            // using Box-Muller transform to generate two independent standard normally disbributed normal variables
-            // see wikipedia
-            double U = (double) std::rand() / (double) RAND_MAX; // normalized uniform random variable
-            double V = (double) std::rand() / (double) RAND_MAX; // normalized uniform random variable
-            double X = sqrt(-2.0 * ::log(U)) * cos(2.0 * M_PI * V);
-            double Y = sqrt(-2.0 * ::log(U)) * sin(2.0 * M_PI * V); // the other indep. normal variable
-            // we'll just use X
-            // scale to our mu and sigma
-            X = sigma * X + mu;
-            Y = sigma * Y + mu;
-            return Eigen::Vector2d(X, Y);
-        }
-
-        Eigen::Vector3d gaussiaNoise3D(double mu, double sigma) {
-            const auto vect_2d = gaussiaNoise2D(mu, sigma);
-            return Eigen::Vector3d(vect_2d.x(), vect_2d.y(), 0.0);
-        }
-
-        double getGaussianNoise(double mean, double var) {
-            std::normal_distribution<double> distribution(mean, var);
-            // construct a trivial random generator engine from a time-based seed:
-            long                             seed = std::chrono::system_clock::now().time_since_epoch().count();
-            std::default_random_engine       generator(seed);
-            return distribution(generator);
-        }
-
-        bool probability(const double likelihood, double &lik_res) {
-            const double rand = (double) std::rand() / (double) RAND_MAX; // normalized uniform random variable
-            lik_res = std::max(likelihood, rand);
-            return rand <= likelihood;
-        }
-
-    }  // namespace noise
-
-    namespace fssim {
+namespace fssim {
 
 Vehicle::Vehicle(physics::ModelPtr &_model,
                  sdf::ElementPtr &_sdf,
@@ -75,6 +38,9 @@ Vehicle::Vehicle(physics::ModelPtr &_model,
       front_axle_(_model, _sdf, "front", gznode, nh),
       rear_axle_(_model, _sdf, "rear", gznode, nh),
       aero_(param_.aero) {
+
+    // For the Gaussian Kernel random number generation
+    seed = 0;
 
     // ROS Publishers
     pub_ground_truth_ = nh->advertise<eufs_msgs::State>("/fssim/base_pose_ground_truth", 1);
@@ -146,6 +112,7 @@ void Vehicle::publish(const double sim_time) {
 }
 
 void Vehicle::update(const double dt) {
+    // TODO: Implement some kind of state machine
     input_.dc = /*car_info_.torque_ok &&*/ ros::Time::now().toSec() - time_last_cmd_ < 1.0 ? input_.dc : -1.0;
 
     double Fz = getNormalForce(state_);
@@ -172,9 +139,9 @@ void Vehicle::update(const double dt) {
 
     // Overlay Noise on Velocities
     auto state_pub = state_.toRos(ros::Time::now());
-    state_pub.vx += noise::getGaussianNoise(0.0, param_.sensors.noise_vx_sigma);
-    state_pub.vy += noise::getGaussianNoise(0.0, param_.sensors.noise_vy_sigma);
-    state_pub.r += noise::getGaussianNoise(0.0, param_.sensors.noise_r_sigma);
+    state_pub.vx += GaussianKernel(0.0, param_.sensors.noise_vx_sigma);
+    state_pub.vy += GaussianKernel(0.0, param_.sensors.noise_vy_sigma);
+    state_pub.r += GaussianKernel(0.0, param_.sensors.noise_r_sigma);
     pub_ground_truth_.publish(state_pub);
 
     publishCarInfo(alphaF, alphaR, FyF, FyR, Fx);
@@ -274,7 +241,7 @@ double Vehicle::getMTv(const State &x, const Input &u) const {
 
     const double delta = u.delta;
     const double v_x   = x.v_x;
-  
+
     return 0.0;
 }
 
@@ -339,6 +306,27 @@ void Vehicle::publishCarInfo(const AxleTires &alphaF,
 
     car_info.Fx = Fx;
     pub_car_info_.publish(car_info);
+}
+
+double Vehicle::GaussianKernel(double mu, double sigma) {
+    // using Box-Muller transform to generate two independent standard
+    // normally distributed normal variables see wikipedia
+
+    // normalized uniform random variable
+    double U = static_cast<double>(rand_r(&seed)) /
+      static_cast<double>(RAND_MAX);
+
+    // normalized uniform random variable
+    double V = static_cast<double>(rand_r(&seed)) /
+      static_cast<double>(RAND_MAX);
+
+    double X = sqrt(-2.0 * ::log(U)) * cos(2.0 * M_PI * V);
+    // double Y = sqrt(-2.0 * ::log(U)) * sin(2.0*M_PI * V);
+
+    // there are 2 indep. vars, we'll just use X
+    // scale to our mu and sigma
+    X = sigma * X + mu;
+    return X;
 }
 
 } // namespace fssim

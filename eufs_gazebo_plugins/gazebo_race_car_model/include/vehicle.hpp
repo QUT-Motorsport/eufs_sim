@@ -164,6 +164,11 @@ class Vehicle {
 
     // Name of the System
     std::string robot_name_;
+
+
+    // Gaussian Kernel for random number generation
+    unsigned int seed;
+    double GaussianKernel(double mu, double sigma);
 };
 
 typedef std::unique_ptr<Vehicle> VehiclePtr;
