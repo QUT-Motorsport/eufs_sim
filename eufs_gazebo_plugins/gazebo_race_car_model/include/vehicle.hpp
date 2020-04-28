@@ -44,131 +44,136 @@
 namespace gazebo {
 template<class VecOut, class VecIn>
 VecOut getRosVesMsg(VecIn &in) {
-    VecOut out;
-    out.x = in.X();
-    out.y = in.Y();
-    out.z = in.Z();
-    return out;
+  VecOut out;
+  out.x = in.X();
+  out.y = in.Y();
+  out.z = in.Z();
+  return out;
 };
 
 namespace fssim {
 
 class Vehicle {
  public:
-    Vehicle(physics::ModelPtr &_model,
-            sdf::ElementPtr &_sdf,
-            boost::shared_ptr<ros::NodeHandle> &nh,
-            transport::NodePtr &gznode);
+  Vehicle(physics::ModelPtr &_model,
+          sdf::ElementPtr &_sdf,
+          boost::shared_ptr<ros::NodeHandle> &nh,
+          transport::NodePtr &gznode);
 
-    void onRes(const eufs_msgs::ResStateConstPtr &msg);
+  void onRes(const eufs_msgs::ResStateConstPtr &msg);
 
-    void update(double dt);
+  void update(double dt);
 
-    void printInfo();
+  void printInfo();
 
-    void publish(double sim_time);
-
- private:
-
-    State f(const State &x,
-            const Input &u,
-            double Fx,
-            double M_TV,
-            const AxleTires &FyF,
-            const AxleTires &FyR);
-
-    State f_kin_correction(const State &x_in,
-                           const State &x_state,
-                           const Input &u,
-                           const double Fx,
-                           const double M_TV,
-                           const AxleTires &FyF,
-                           const AxleTires &FyR,
-                           const double dt);
-
-
-    void setPositionFromWorld();
-
-    void publishTf(const State &x);
-
-    void publishCarInfo(const AxleTires &alphaF,
-                        const AxleTires &alphaR,
-                        const AxleTires &FyF,
-                        const AxleTires &FyR,
-                        const double Fx) const;
-
-    double getFx(const State &x, const Input &u);
-
-    double getMTv(const State &x, const Input &u) const;
-
-    void onCmd(const ackermann_msgs::AckermannDriveStampedConstPtr &msg);
-
-    void onInitialPose(const geometry_msgs::PoseWithCovarianceStamped &msg);
-
-    void initModel(sdf::ElementPtr &_sdf);
-
-    void initVehicleParam(sdf::ElementPtr &_sdf);
-
-    double getNormalForce(const State &x);
-
-    void setModelState(const State &x);
-
-    double getGaussianNoise(double mean, double var) const;
-
-    State &getState() { return state_; }
-
-    Input &getInput() { return input_; }
+  void publish(double sim_time);
 
  private:
 
-    // ROS Nodehandle
-    boost::shared_ptr<ros::NodeHandle> nh_;
+  State point_mass_model(const State &x,
+                         const double &steering_angle,
+                         const double &acceleration,
+                         const double dt);
 
-    // ROS Publishrs
-    ros::Publisher pub_ground_truth_;
-    ros::Publisher pub_car_info_;
+  State f(const State &x,
+          const Input &u,
+          double Fx,
+          double M_TV,
+          const AxleTires &FyF,
+          const AxleTires &FyR);
 
-    // ROS Subscribers
-    ros::Subscriber sub_cmd_;
-    ros::Subscriber sub_initial_pose_;
-    ros::Subscriber sub_res_;
-
-    // ROS TF
-    tf::TransformBroadcaster tf_br_;
-
-    /// Pointer to the parent model
-    physics::ModelPtr model;
-
-    /// Chassis link and Base Link
-    physics::LinkPtr chassisLink;
-    physics::LinkPtr base_link_;
-
-    // Front and Rear Axle
-    FrontAxle front_axle_;
-    RearAxle  rear_axle_;
-
-    // Car Infor and RES
-    eufs_msgs::CarInfo  car_info_;
-    eufs_msgs::ResState res_state_;
-
-    // Parameters
-    Param param_;
-
-    // States
-    State state_;
-    Input input_;
-    double time_last_cmd_;
-
-    // Consider Aerodynamics
-    Aero aero_;
-
-    // Name of the System
-    std::string robot_name_;
+  State f_kin_correction(const State &x_in,
+                         const State &x_state,
+                         const Input &u,
+                         const double Fx,
+                         const double M_TV,
+                         const AxleTires &FyF,
+                         const AxleTires &FyR,
+                         const double dt);
 
 
-    // Gaussian Kernel for random number generation
-    unsigned int seed;
-    double GaussianKernel(double mu, double sigma);
+  void setPositionFromWorld();
+
+  void publishTf(const State &x);
+
+  void publishCarInfo(const AxleTires &alphaF,
+                      const AxleTires &alphaR,
+                      const AxleTires &FyF,
+                      const AxleTires &FyR,
+                      const double Fx) const;
+
+  double getFx(const State &x, const Input &u);
+
+  double getMTv(const State &x, const Input &u) const;
+
+  void onCmd(const ackermann_msgs::AckermannDriveStampedConstPtr &msg);
+
+  void onInitialPose(const geometry_msgs::PoseWithCovarianceStamped &msg);
+
+  void initModel(sdf::ElementPtr &_sdf);
+
+  void initVehicleParam(sdf::ElementPtr &_sdf);
+
+  double getNormalForce(const State &x);
+
+  void setModelState(const State &x);
+
+  double getGaussianNoise(double mean, double var) const;
+
+  State &getState() { return state_; }
+
+  Input &getInput() { return input_; }
+
+ private:
+
+  // ROS Nodehandle
+  boost::shared_ptr<ros::NodeHandle> nh_;
+
+  // ROS Publishrs
+  ros::Publisher pub_ground_truth_;
+  ros::Publisher pub_car_info_;
+
+  // ROS Subscribers
+  ros::Subscriber sub_cmd_;
+  ros::Subscriber sub_initial_pose_;
+  ros::Subscriber sub_res_;
+
+  // ROS TF
+  tf::TransformBroadcaster tf_br_;
+
+  /// Pointer to the parent model
+  physics::ModelPtr model;
+
+  /// Chassis link and Base Link
+  physics::LinkPtr chassisLink;
+  physics::LinkPtr base_link_;
+
+  // Front and Rear Axle
+  FrontAxle front_axle_;
+  RearAxle  rear_axle_;
+
+  // Car Infor and RES
+  eufs_msgs::CarInfo  car_info_;
+  eufs_msgs::ResState res_state_;
+
+  // Parameters
+  Param param_;
+
+  // States
+  State state_;
+  Input input_;
+  double time_last_cmd_;
+
+  // Consider Aerodynamics
+  Aero aero_;
+
+  // Name of the System
+  std::string robot_name_;
+
+
+  // Gaussian Kernel for random number generation
+  unsigned int seed;
+  double GaussianKernel(double mu, double sigma);
 };
 
 typedef std::unique_ptr<Vehicle> VehiclePtr;
