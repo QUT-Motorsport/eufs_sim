@@ -66,6 +66,8 @@ struct State {
         state.vx              = v_x;
         state.vy              = v_y;
         state.r               = r;
+        state.ax              = a_x;
+        state.ay              = a_y;
         return state;
     }
 
