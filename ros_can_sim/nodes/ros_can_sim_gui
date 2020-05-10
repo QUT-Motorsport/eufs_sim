@@ -5,6 +5,6 @@ import sys
 from ros_can_sim import RosCanSimGUI
 from rqt_gui.main import Main
 
-plugin = 'ros_can_sim'
+plugin = 'ros_can_sim_gui'
 main = Main(filename=plugin)
 sys.exit(main.main(standalone=plugin))
