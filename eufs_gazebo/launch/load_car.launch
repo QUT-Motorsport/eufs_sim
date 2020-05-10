@@ -52,9 +52,6 @@
   <group if="$(eval arg('show_rqt_gui'))">
     <!-- start rqt robot steering module -->
     <node name="eufs_sim_rqt" pkg="rqt_gui" type="rqt_gui" respawn="false" output="screen" args="--perspective-file $(find eufs_gazebo)/config/eufs_sim.perspective"/>
-
-    <!--start twist to ackermannDrive converter for robot steering plugin -->
-    <node pkg="ros_can_sim" name="twist_to_ackermannDrive" type="twist_to_ackermannDrive.py" args="twistToAckermannDrive:=eufsa_control/teleop_vel_out"/>
   </group>
 
 </launch>

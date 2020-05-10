@@ -44,6 +44,10 @@ install(PROGRAMS nodes/ros_can_sim_gui
         DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
         )
 
+install(PROGRAMS nodes/eufs_robot_steering_gui
+        DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
+        )
+
 install(DIRECTORY
         resource
         DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}

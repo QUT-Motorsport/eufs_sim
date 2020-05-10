@@ -272,7 +272,7 @@ double Vehicle::getMTv(const State &x, const Input &u) const {
 
 void Vehicle::onCmd(const ackermann_msgs::AckermannDriveStampedConstPtr &msg) {
   input_.delta = msg->drive.steering_angle;
-  input_.dc    = msg->drive.speed;
+  input_.dc    = msg->drive.acceleration;
   time_last_cmd_ = ros::Time::now().toSec();
 }
 
