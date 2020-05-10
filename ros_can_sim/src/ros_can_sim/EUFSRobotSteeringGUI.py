@@ -35,7 +35,7 @@ from qt_gui.plugin import Plugin
 from python_qt_binding import loadUi
 from python_qt_binding.QtCore import Qt, QTimer, Slot
 from python_qt_binding.QtGui import QKeySequence
-from python_qt_binding.QtWidgets import QShortcut, QWidget
+from python_qt_binding.QtWidgets import QComboBox, QShortcut, QWidget
 
 # ROS
 import rospkg
@@ -75,6 +75,10 @@ class EUFSRobotSteeringGUI(Plugin):
 
         self._publisher = None
 
+        self.inputs = ["Speed", "Acceleration", "Jerk"]
+
+        self._widget.input_select_menu.addItems(self.inputs)
+        self._widget.input_select_menu.setCurrentIndex(1)
 
         self._widget.topic_line_edit.textChanged.connect(
             self._on_topic_changed)
@@ -285,9 +289,17 @@ class EUFSRobotSteeringGUI(Plugin):
         drive = AckermannDriveStamped()
         drive.header.stamp = rospy.Time.now()
 
-        drive.drive.acceleration = linear
+        drive.drive.acceleration = 0
         drive.drive.speed = 0
         drive.drive.jerk = 0
+        input = self._widget.input_select_menu.currentIndex()
+        if self.inputs[input] == "Speed":
+            drive.drive.speed = linear
+        elif self.inputs[input] == "Acceleration":
+            drive.drive.acceleration = linear
+        elif self.inputs[input] == "Jerk":
+            drive.drive.jerk = linear
+
         drive.drive.steering_angle = angular
         drive.drive.steering_angle_velocity = 0
 
@@ -311,6 +323,8 @@ class EUFSRobotSteeringGUI(Plugin):
 
     def save_settings(self, plugin_settings, instance_settings):
         instance_settings.set_value(
+            'input', self.input)
+        instance_settings.set_value(
             'topic', self._widget.topic_line_edit.text())
         instance_settings.set_value(
             'vx_max', self._widget.max_linear_double_spin_box.value())
@@ -322,7 +336,11 @@ class EUFSRobotSteeringGUI(Plugin):
             'vw_min', self._widget.min_angular_double_spin_box.value())
 
     def restore_settings(self, plugin_settings, instance_settings):
-        value = instance_settings.value('topic', '/cmd_vel')
+        value = instance_settings.value('input', 1)
+        value = rospy.get_param('~default_input', value)
+        self.input = value
+
+        value = instance_settings.value('topic', '/cmd_vel_out')
         value = rospy.get_param('~default_topic', value)
         self._widget.topic_line_edit.setText(value)
 
