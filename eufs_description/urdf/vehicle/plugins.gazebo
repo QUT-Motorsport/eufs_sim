@@ -27,6 +27,8 @@
             <cog_link>cog</cog_link>
             <robot_name>$(arg robot_name)</robot_name>
 
+            <vehicle_model>$(arg vehicle_model)</vehicle_model>
+
             <front_left_wheel>front_left_wheel_joint</front_left_wheel>
             <front_right_wheel>front_right_wheel_joint</front_right_wheel>
 

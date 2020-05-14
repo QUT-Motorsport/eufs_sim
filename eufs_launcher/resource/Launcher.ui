@@ -135,7 +135,7 @@
      <x>525</x>
      <y>25</y>
      <width>200</width>
-     <height>27</height>
+     <height>25</height>
     </rect>
    </property>
    <property name="text">
@@ -157,7 +157,7 @@
          <x>500</x>
          <y>50</y>
          <width>150</width>
-         <height>30</height>
+         <height>15</height>
        </rect>
     </property>
     <property name="text">
@@ -173,15 +173,15 @@
     <property name="geometry">
       <rect>
         <x>490</x>
-        <y>70</y>
+        <y>65</y>
         <width>100</width>
-        <height>30</height>
+        <height>15</height>
       </rect>
     </property>
     <property name="maximumSize">
       <size>
         <width>16777215</width>
-        <height>40</height>
+        <height>15</height>
       </size>
     </property>
     <property name="layoutDirection">
@@ -206,15 +206,15 @@
     <property name="geometry">
       <rect>
         <x>490</x>
-        <y>90</y>
+        <y>80</y>
         <width>120</width>
-        <height>30</height>
+        <height>15</height>
       </rect>
     </property>
     <property name="maximumSize">
       <size>
         <width>16777215</width>
-        <height>40</height>
+        <height>15</height>
       </size>
     </property>
     <property name="text">
@@ -227,6 +227,48 @@
        <font>
             <pointsize>7</pointsize>
        </font>
+   </property>
+  </widget>
+
+  <!--Drop-Down Box: Options added in code, impossible in a .ui file.-->
+  <!--This handles vehicle model selection.-->
+  <widget class="QLabel" name="VehicleModelLabel">
+   <property name="geometry">
+    <rect>
+     <x>500</x>
+     <y>100</y>
+     <width>150</width>
+     <height>15</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>Vehicle model: </string>
+   </property>
+   <property name="font">
+    <font>
+     <pointsize>7</pointsize>
+    </font>
+   </property>
+  </widget>
+  <widget class="QComboBox" name="WhichVehicleModel">
+   <property name="geometry">
+    <rect>
+     <x>490</x>
+     <y>115</y>
+     <width>100</width>
+     <height>30</height>
+    </rect>
+   </property>
+   <property name="maximumSize">
+    <size>
+     <width>16777215</width>
+     <height>30</height>
+    </size>
+   </property>
+   <property name="font">
+    <font>
+     <pointsize>7</pointsize>
+    </font>
    </property>
   </widget>
 
@@ -291,7 +333,7 @@
   </widget>
 
 
-  <!--Ground truth transformr-->
+  <!--Ground truth transformer-->
   <widget class="QCheckBox" name="GroundTruthTransform">
   <property name="geometry">
       <rect>
@@ -1272,13 +1314,10 @@
    </property>
   </widget>
 
-
-
-
- </widget>
- <resources/>
- <connections/>
- <buttongroups>
-   <buttongroup name="SpeedOrTorque"/>
- </buttongroups>
+</widget>
+<resources/>
+<connections/>
+<buttongroups>
+ <buttongroup name="SpeedOrTorque"/>
+</buttongroups>
 </ui>

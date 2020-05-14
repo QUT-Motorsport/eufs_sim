@@ -107,6 +107,7 @@ class EufsLauncher(Plugin):
                 self.RENAME_FILE_TEXTBOX = self._widget.findChild(QLineEdit, "RenameFileTextbox")
                 self.RENAME_FILE_HEADER = self._widget.findChild(QLabel, "RenameFileHeader")
                 self.NOISE_SLIDER = self._widget.findChild(QSlider, "Noisiness")
+                self.VEHICLE_MODEL_MENU = self._widget.findChild(QComboBox, "WhichVehicleModel")
                 self.SPEED_RADIO = self._widget.findChild(QRadioButton, "SpeedRadio")
                 self.TORQUE_RADIO = self._widget.findChild(QRadioButton, "TorqueRadio")
                 self.PERCEPTION_CHECKBOX = self._widget.findChild(QCheckBox, "PerceptionCheckbox")
@@ -226,6 +227,16 @@ class EufsLauncher(Plugin):
 
                 # Setup Gazebo Gui button
                 self.GAZEBO_GUI_CHECKBOX.setChecked(True)
+
+                # Setup Vehicle Models menu
+                # TODO: Get different vehicle models from the different abstract classes with different models
+                vehicle_models = ["PointMass", "KinematicBicycle", "DynamicBicycle"]
+                default_model = "KinematicBicycle"
+                if default_model in vehicle_models:
+                        self.VEHICLE_MODEL_MENU.addItem(default_model)
+                for model in vehicle_models:
+                        if model != default_model:
+                                self.VEHICLE_MODEL_MENU.addItem(model)
 
                 # Setup Conversion Tools dropdowns
                 for f in ["launch", "png", "csv"]:
@@ -819,6 +830,10 @@ class EufsLauncher(Plugin):
                         self.tell_launchella("With Torque Controls")
                         control_method = "controlMethod:=torque"
 
+                # Get vehicle model information
+                self.tell_launchella("With " + self.VEHICLE_MODEL_MENU.currentText() + "Vehicle Model")
+                vehicle_model = "vehicleModel:=" + self.VEHICLE_MODEL_MENU.currentText()
+
                 # Get perception information
                 perception_stack = ["launch_group:=no_perception"]
                 if self.PERCEPTION_CHECKBOX.isChecked():
@@ -848,6 +863,7 @@ class EufsLauncher(Plugin):
                                                 launch_location,
                                                 [
                                                         control_method,
+                                                        vehicle_model,
                                                         gui_on,
                                                         publish_gt_tf,
                                                         "track:=" + track_to_launch.split(".")[0]

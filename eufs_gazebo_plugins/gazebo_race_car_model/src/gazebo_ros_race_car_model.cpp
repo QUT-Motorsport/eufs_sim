@@ -57,8 +57,26 @@ void RaceCarModelPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf) {
 
     this->dataPtr->gznode->Init();
 
-    this->dataPtr->vehicle = std::unique_ptr<fssim::Vehicle>(
+    std::string vehicle_model_ = "";
+    if (!_sdf->HasElement("vehicle_model")) {
+      vehicle_model_ = "KinematicBicycle";
+    } else {
+      vehicle_model_ = _sdf->GetElement("vehicle_model")->Get<std::string>();
+    }
+
+    if (vehicle_model_ == "PointMass") {
+      this->dataPtr->vehicle = std::unique_ptr<fssim::Vehicle>(
         new fssim::Vehicle(_model, _sdf, this->dataPtr->rosnode, this->dataPtr->gznode));
+    } else if (vehicle_model_ == "KinematicBicycle") {
+      this->dataPtr->vehicle = std::unique_ptr<fssim::Vehicle>(
+        new fssim::Vehicle(_model, _sdf, this->dataPtr->rosnode, this->dataPtr->gznode));
+    } else if (vehicle_model_ == "DynamicBicycle") {
+      this->dataPtr->vehicle = std::unique_ptr<fssim::Vehicle>(
+        new fssim::Vehicle(_model, _sdf, this->dataPtr->rosnode, this->dataPtr->gznode));
+    } else {
+      this->dataPtr->vehicle = std::unique_ptr<fssim::Vehicle>(
+        new fssim::Vehicle(_model, _sdf, this->dataPtr->rosnode, this->dataPtr->gznode));
+    }
     this->dataPtr->vehicle->printInfo();
 
     this->dataPtr->updateConnection =
@@ -106,4 +124,3 @@ bool RaceCarModelPlugin::isLoopTime(const common::Time &time, double &dt) {
 
 GZ_REGISTER_MODEL_PLUGIN(RaceCarModelPlugin)
 } // namespace gazebo
-

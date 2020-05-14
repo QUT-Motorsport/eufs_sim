@@ -16,6 +16,7 @@
 
   <!-- Control Method Argument -->
   <arg name="controlMethod" default="speed"/>
+  <arg name="vehicleModel" default="KinematicBicycle"/>
   <arg name="show_rqt_gui" default="true"/>
   <arg name="launch_group" default="default" />
 
@@ -34,6 +35,7 @@
   <param name="robot_description"
          command="$(find xacro)/xacro --inorder '$(find eufs_description)/urdf/vehicle/car.xacro'
                                                 robot_name:='$(arg robot_name)'
+                                                vehicle_model:='$(arg vehicleModel)'
                                                 sensors_config_file:='$(arg sensors_config_file)'
                                                 car_config_file:='$(arg car_config_file)'
                                                 car_dimensions_file:='$(arg car_dimensions_file)'" />
