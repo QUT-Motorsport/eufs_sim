@@ -53,9 +53,9 @@ VecOut getRosVesMsg(VecIn &in) {
 
 namespace fssim {
 
-class Vehicle {
+class VehicleModel {
  public:
-  Vehicle(physics::ModelPtr &_model,
+  VehicleModel(physics::ModelPtr &_model,
           sdf::ElementPtr &_sdf,
           boost::shared_ptr<ros::NodeHandle> &nh,
           transport::NodePtr &gznode);
@@ -68,29 +68,9 @@ class Vehicle {
 
   void publish(double sim_time);
 
- private:
+ protected:
 
-  State point_mass_model(const State &x,
-                         const double &steering_angle,
-                         const double &acceleration,
-                         const double dt);
-
-  State f(const State &x,
-          const Input &u,
-          double Fx,
-          double M_TV,
-          const AxleTires &FyF,
-          const AxleTires &FyR);
-
-  State f_kin_correction(const State &x_in,
-                         const State &x_state,
-                         const Input &u,
-                         const double Fx,
-                         const double M_TV,
-                         const AxleTires &FyF,
-                         const AxleTires &FyR,
-                         const double dt);
-
+  virtual void updateState(const double dt);
 
   void setPositionFromWorld();
 
@@ -124,7 +104,7 @@ class Vehicle {
 
   Input &getInput() { return input_; }
 
- private:
+ protected:
 
   // ROS Nodehandle
   boost::shared_ptr<ros::NodeHandle> nh_;
@@ -175,7 +155,7 @@ class Vehicle {
   double GaussianKernel(double mu, double sigma);
 };
 
-typedef std::unique_ptr<Vehicle> VehiclePtr;
+typedef std::unique_ptr<VehicleModel> VehicleModelPtr;
 
 } // namespace fssim
 } // namespace gazebo

@@ -2,6 +2,8 @@
  * AMZ-Driverless
  * Copyright (c) 2018 Authors:
  *   - Juraj Kabzan <kabzanj@gmail.com>
+ *   - Miguel de la Iglesia Valls <dmiguel@ethz.ch>
+ *   - Manuel Dangel <mdangel@student.ethz.ch>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -22,52 +24,41 @@
  * SOFTWARE.
  */
 
-
-#ifndef FSSIM_GAZEBO_RACECARPLUGINPRIVATE_H
-#define FSSIM_GAZEBO_RACECARPLUGINPRIVATE_H
-
-// ROS Includes
-#include <ros/ros.h>
-
-// Gazebo Includes
-#include <gazebo/common/Time.hh>
-#include <gazebo/physics/physics.hh>
-#include <gazebo/transport/transport.hh>
-#include <gazebo/common/Plugin.hh>
-
-// ROS RACE CAR PLUGIN
 #include "vehicle_model.hpp"
-#include "../src/kinematic_bicycle.cpp"
-#include "../src/point_mass.cpp"
 
 namespace gazebo {
+namespace fssim {
 
-class gazebo_race_car_private {
- public:
-    boost::shared_ptr<ros::NodeHandle> rosnode;
+class PointMass: public VehicleModel {
+public:
+  PointMass(physics::ModelPtr &_model,
+                   sdf::ElementPtr &_sdf,
+                   boost::shared_ptr<ros::NodeHandle> &nh,
+                   transport::NodePtr &gznode)
+    : VehicleModel(_model, _sdf, nh, gznode)
+  {
+    // IDK
+  }
 
-    physics::WorldPtr world;
+private:
+  virtual void updateState(const double dt)
+  {
+    state_.a_x = input_.dc * std::cos(input_.delta);
+    state_.a_y = input_.dc * std::sin(input_.delta);
 
-    physics::ModelPtr model;
+    State x_dot{};
 
-    transport::NodePtr gznode;
+    x_dot.x = state_.v_x;
+    x_dot.y = state_.v_y;
 
- public:
+    x_dot.v_x = state_.a_x;
+    x_dot.v_y = state_.a_y;
 
-    event::ConnectionPtr updateConnection;
+    state_ = state_ + (x_dot * dt);
 
-    fssim::VehicleModelPtr vehicle;
-
-    common::Time lastSimTime;
-
-    transport::SubscriberPtr keyboardSub;
-
-    std::mutex mutex;
-
-    transport::PublisherPtr worldControlPub;
-
+    state_.yaw = std::atan2(state_.v_y, state_.v_x);
+  }
 };
 
+} // namespace fssim
 } // namespace gazebo
-
-#endif //FSSIM_GAZEBO_RACECARPLUGINPRIVATE_H

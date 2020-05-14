@@ -35,7 +35,9 @@ link_directories(
 
 add_library(gazebo_race_car_model SHARED
         src/gazebo_ros_race_car_model.cpp
-        src/vehicle.cpp
+        src/vehicle_model.cpp
+        src/kinematic_bicycle.cpp
+        src/point_mass.cpp
         src/wheel.cpp
         src/axle.cpp)
 target_include_directories(gazebo_race_car_model PUBLIC include ${CMAKE_SOURCE_DIR} ${catkin_LIBRARY_DIRS})

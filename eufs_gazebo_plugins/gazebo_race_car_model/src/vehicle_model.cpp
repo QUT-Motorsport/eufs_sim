@@ -24,12 +24,12 @@
  * SOFTWARE.
  */
 
-#include "vehicle.hpp"
+#include "vehicle_model.hpp"
 
 namespace gazebo {
 namespace fssim {
 
-Vehicle::Vehicle(physics::ModelPtr &_model,
+VehicleModel::VehicleModel(physics::ModelPtr &_model,
                  sdf::ElementPtr &_sdf,
                  boost::shared_ptr<ros::NodeHandle> &nh,
                  transport::NodePtr &gznode)
@@ -47,9 +47,9 @@ Vehicle::Vehicle(physics::ModelPtr &_model,
   pub_car_info_     = nh->advertise<eufs_msgs::CarInfo>("/fssim/car_info", 1);
 
   // ROS Subscribers
-  sub_res_          = nh->subscribe("/fssim/res_state", 1, &Vehicle::onRes, this);
-  sub_cmd_          = nh->subscribe("/fssim/cmd", 1, &Vehicle::onCmd, this);
-  sub_initial_pose_ = nh->subscribe("/initialpose", 1, &Vehicle::onInitialPose, this);
+  sub_res_          = nh->subscribe("/fssim/res_state", 1, &VehicleModel::onRes, this);
+  sub_cmd_          = nh->subscribe("/fssim/cmd", 1, &VehicleModel::onCmd, this);
+  sub_initial_pose_ = nh->subscribe("/initialpose", 1, &VehicleModel::onInitialPose, this);
 
   // Initializatoin
   initModel(_sdf);
@@ -66,7 +66,7 @@ Vehicle::Vehicle(physics::ModelPtr &_model,
   time_last_cmd_ = 0.0;
 }
 
-void Vehicle::setPositionFromWorld() {
+void VehicleModel::setPositionFromWorld() {
   auto       pos   = model->WorldPose();
   const auto vel   = model->WorldLinearVel();
   const auto accel = model->WorldLinearAccel();
@@ -82,7 +82,7 @@ void Vehicle::setPositionFromWorld() {
   state_.a_y = 0.0;
 }
 
-void Vehicle::initModel(sdf::ElementPtr &_sdf) {
+void VehicleModel::initModel(sdf::ElementPtr &_sdf) {
 
   std::string chassisLinkName = model->GetName() + "::" + _sdf->Get<std::string>("chassis");
   getLink(chassisLink, model, chassisLinkName);
@@ -95,7 +95,7 @@ void Vehicle::initModel(sdf::ElementPtr &_sdf) {
   param_.kinematic.l = vec3.Length();
 }
 
-void Vehicle::initVehicleParam(sdf::ElementPtr &_sdf) {
+void VehicleModel::initVehicleParam(sdf::ElementPtr &_sdf) {
   robot_name_ = getParam<std::string>(_sdf, "robot_name");
 
   std::string yaml_name = "config.yaml";
@@ -107,17 +107,17 @@ void Vehicle::initVehicleParam(sdf::ElementPtr &_sdf) {
   initParamSensors(param_, yaml_name);
 }
 
-void Vehicle::publish(const double sim_time) {
+void VehicleModel::publish(const double sim_time) {
 
 }
 
-void Vehicle::onRes(const eufs_msgs::ResStateConstPtr &msg) {
+void VehicleModel::onRes(const eufs_msgs::ResStateConstPtr &msg) {
   res_state_ = *msg;
   if (res_state_.push_button) { car_info_.torque_ok = static_cast<unsigned char>(true); }
   if (res_state_.emergency) { car_info_.torque_ok = static_cast<unsigned char>(false); }
 }
 
-void Vehicle::printInfo() {
+void VehicleModel::printInfo() {
   front_axle_.printInfo();
   rear_axle_.printInfo();
 }
@@ -126,29 +126,21 @@ std::ostream &operator<<(std::ostream &os, const State s) {
   os << s.getString();
 }
 
-void Vehicle::update(const double dt) {
+void VehicleModel::update(const double dt) {
   // TODO: Implement some kind of state machine
   input_.dc = /*car_info_.torque_ok &&*/ ros::Time::now().toSec() - time_last_cmd_ < 1.0 ? input_.dc : -1.0;
 
-  double Fz = getNormalForce(state_);
+  front_axle_.setSteering(input_.delta);
 
-  // Tire Forces
+  double Fz = getNormalForce(state_);
   AxleTires FyF{}, FyR{}, alphaF{}, alphaR{};
   front_axle_.getFy(state_, input_, Fz, FyF, &alphaF);
   rear_axle_.getFy(state_, input_, Fz, FyR, &alphaR);
-  front_axle_.setSteering(input_.delta);
 
-  // Drivetrain Model
   const double Fx   = getFx(state_, input_);
   const double M_Tv = getMTv(state_, input_);
 
-  // Dynamics
-  const auto x_dot_dyn  = f(state_, input_, Fx, M_Tv, FyF, FyR);
-  const auto x_next_dyn = state_ + x_dot_dyn * dt;
-  state_ = f_kin_correction(x_next_dyn, state_, input_, Fx, M_Tv, FyF, FyR, dt);
-  state_.validate();
-
-//  state_ = point_mass_model(state_, input_.delta, input_.dc, dt);
+  updateState(dt);
 
   // Publish Everything
   setModelState(state_);
@@ -164,82 +156,11 @@ void Vehicle::update(const double dt) {
   publishCarInfo(alphaF, alphaR, FyF, FyR, Fx);
 }
 
-State Vehicle::point_mass_model(const State &x, const double &steering_angle, const double &acceleration, const double dt) {
-  State state = x;
+void VehicleModel::updateState(const double dt) {
 
-  state.a_x = input_.dc * std::cos(input_.delta);
-  state.a_y = input_.dc * std::sin(input_.delta);
-
-  State x_dot{};
-
-  x_dot.x = state_.v_x;
-  x_dot.y = state_.v_y;
-
-  x_dot.v_x = state_.a_x;
-  x_dot.v_y = state_.a_y;
-
-  state = state + (x_dot * dt);
-
-  front_axle_.setSteering(input_.delta);
-
-  state_.yaw = std::atan2(state_.v_y, state_.v_x);
-
-  return state;
 }
 
-State Vehicle::f(const State &x,
-                 const Input &u,
-                 const double Fx,
-                 const double M_TV,
-                 const AxleTires &FyF,
-                 const AxleTires &FyR) {
-  const double FyF_tot = FyF.left + FyF.right;
-  const double FyR_tot = FyR.left + FyR.right;
-  const double v_x     = std::max(1.0, x.v_x);
-
-  const double m_lon = param_.inertia.m + param_.driveTrain.m_lon_add;
-
-  State x_dot{};
-  x_dot.x   = std::cos(x.yaw) * x.v_x - std::sin(x.yaw) * x.v_y;
-  x_dot.y   = std::sin(x.yaw) * x.v_x + std::cos(x.yaw) * x.v_y;
-  x_dot.yaw = x.r;
-  x_dot.v_x = (x.r * x.v_y) + (Fx - std::sin(u.delta) * (FyF_tot)) / m_lon;
-  x_dot.v_y = ((std::cos(u.delta) * FyF_tot) + FyR_tot) / param_.inertia.m - (x.r * v_x);
-  x_dot.r   = ((std::cos(u.delta) * FyF_tot * param_.kinematic.l_F
-    + std::sin(u.delta) * (FyF.left - FyF.right) * 0.5 * param_.kinematic.b_F)
-    - ((FyR_tot) * param_.kinematic.l_R)
-    + M_TV) / param_.inertia.I_z;
-  x_dot.a_x = 0;
-  x_dot.a_y = 0;
-
-  return x_dot;
-}
-
-State Vehicle::f_kin_correction(const State &x_in,
-                                const State &x_state,
-                                const Input &u,
-                                const double Fx,
-                                const double M_TV,
-                                const AxleTires &FyF,
-                                const AxleTires &FyR,
-                                const double dt) {
-  State        x       = x_in;
-  const double v_x_dot = Fx / (param_.inertia.m + param_.driveTrain.m_lon_add);
-  const double v       = std::hypot(state_.v_x, state_.v_y);
-  const double v_blend = 0.5 * (v - 1.5);
-  const double blend   = std::fmax(std::fmin(1.0, v_blend), 0.0);
-
-  x.v_x = blend * x.v_x + (1.0 - blend) * (x_state.v_x + dt * v_x_dot);
-
-  const double v_y = std::tan(u.delta) * x.v_x * param_.kinematic.l_R / param_.kinematic.l;
-  const double r   = std::tan(u.delta) * x.v_x / param_.kinematic.l;
-
-  x.v_y = blend * x.v_y + (1.0 - blend) * v_y;
-  x.r   = blend * x.r + (1.0 - blend) * r;
-  return x;
-}
-
-void Vehicle::publishTf(const State &x) {
+void VehicleModel::publishTf(const State &x) {
   // Position
   tf::Transform transform;
   transform.setOrigin(tf::Vector3(x.x, x.y, 0.0));
@@ -253,13 +174,13 @@ void Vehicle::publishTf(const State &x) {
   tf_br_.sendTransform(tf::StampedTransform(transform, ros::Time::now(), "/fssim_map", "/fssim/vehicle/base_link"));
 }
 
-double Vehicle::getFx(const State &x, const Input &u) {
+double VehicleModel::getFx(const State &x, const Input &u) {
   const double dc = x.v_x <= 0.0 && u.dc < 0.0 ? 0.0 : u.dc;
   const double Fx = dc * param_.driveTrain.cm1 - aero_.getFdrag(x) - param_.driveTrain.cr0;
   return Fx;
 }
 
-double Vehicle::getMTv(const State &x, const Input &u) const {
+double VehicleModel::getMTv(const State &x, const Input &u) const {
   const double shrinkage = param_.torqueVectoring.shrinkage;
   const double K_stab    = param_.torqueVectoring.K_stability;
   const double l         = param_.kinematic.l;
@@ -270,24 +191,24 @@ double Vehicle::getMTv(const State &x, const Input &u) const {
   return 0.0;
 }
 
-void Vehicle::onCmd(const ackermann_msgs::AckermannDriveStampedConstPtr &msg) {
+void VehicleModel::onCmd(const ackermann_msgs::AckermannDriveStampedConstPtr &msg) {
   input_.delta = msg->drive.steering_angle;
   input_.dc    = msg->drive.acceleration;
   time_last_cmd_ = ros::Time::now().toSec();
 }
 
-void Vehicle::onInitialPose(const geometry_msgs::PoseWithCovarianceStamped &msg) {
+void VehicleModel::onInitialPose(const geometry_msgs::PoseWithCovarianceStamped &msg) {
   state_.x   = msg.pose.pose.position.x;
   state_.y   = msg.pose.pose.position.y;
   state_.yaw = tf::getYaw(msg.pose.pose.orientation);
   state_.v_x = state_.v_y = state_.r = state_.a_x = state_.a_y = 0.0;
 }
 
-double Vehicle::getNormalForce(const State &x) {
+double VehicleModel::getNormalForce(const State &x) {
   return param_.inertia.g * param_.inertia.m + aero_.getFdown(x);
 }
 
-void Vehicle::setModelState(const State &x) {
+void VehicleModel::setModelState(const State &x) {
   const ignition::math::Pose3d    pose(x.x, x.y, 0.0, 0, 0.0, x.yaw);
   const ignition::math::Vector3d vel(x.v_x, x.v_y, 0.0);
   const ignition::math::Vector3d angular(0.0, 0.0, x.r);
@@ -296,7 +217,7 @@ void Vehicle::setModelState(const State &x) {
   model->SetLinearVel(vel);
 }
 
-double Vehicle::getGaussianNoise(double mean, double var) const {
+double VehicleModel::getGaussianNoise(double mean, double var) const {
   std::normal_distribution<double> distribution(mean, var);
   // construct a trivial random generator engine from a time-based seed:
   long                             seed = std::chrono::system_clock::now().time_since_epoch().count();
@@ -304,7 +225,7 @@ double Vehicle::getGaussianNoise(double mean, double var) const {
   return distribution(generator);
 }
 
-void Vehicle::publishCarInfo(const AxleTires &alphaF,
+void VehicleModel::publishCarInfo(const AxleTires &alphaF,
                              const AxleTires &alphaR,
                              const AxleTires &FyF,
                              const AxleTires &FyR,
@@ -333,7 +254,7 @@ void Vehicle::publishCarInfo(const AxleTires &alphaF,
   pub_car_info_.publish(car_info);
 }
 
-double Vehicle::GaussianKernel(double mu, double sigma) {
+double VehicleModel::GaussianKernel(double mu, double sigma) {
   // using Box-Muller transform to generate two independent standard
   // normally distributed normal variables see wikipedia
 
