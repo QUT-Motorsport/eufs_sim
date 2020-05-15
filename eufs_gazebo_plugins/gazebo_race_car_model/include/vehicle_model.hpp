@@ -28,7 +28,6 @@
 
 // FSSIM Includes
 #include "axle.hpp"
-#include "aero.hpp"
 
 // ROS Msgs
 #include "eufs_msgs/CarState.h"
@@ -123,9 +122,6 @@ protected:
   State state_;
   Input input_;
   double time_last_cmd_;
-
-  // Consider Aerodynamics
-  Aero aero_;
 
   // Name of the System
   std::string robot_name_;

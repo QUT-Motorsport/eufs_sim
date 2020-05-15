@@ -115,7 +115,7 @@ private:
 
   double getFx(const State &x, const Input &u) {
     const double dc = x.v_x <= 0.0 && u.dc < 0.0 ? 0.0 : u.dc;
-    const double Fx = dc * param_.driveTrain.cm1 - aero_.getFdrag(x) - param_.driveTrain.cr0;
+    const double Fx = dc * param_.driveTrain.cm1 - getFdrag(x) - param_.driveTrain.cr0;
     return Fx;
   }
 
@@ -131,7 +131,15 @@ private:
   }
 
   double getNormalForce(const State &x) {
-    return param_.inertia.g * param_.inertia.m + aero_.getFdown(x);
+    return param_.inertia.g * param_.inertia.m + getFdown(x);
+  }
+
+  double getFdown(const State &x) {
+    return param_.aero.c_down * x.v_x * x.v_x;
+  }
+
+  double getFdrag(const State &x) {
+    return param_.aero.c_drag * x.v_x * x.v_x;
   }
 };
 

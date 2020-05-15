@@ -36,8 +36,8 @@ VehicleModel::VehicleModel(physics::ModelPtr &_model,
   : nh_(nh),
     model(_model),
     front_axle_(_model, _sdf, "front", gznode, nh),
-    rear_axle_(_model, _sdf, "rear", gznode, nh),
-    aero_(param_.aero) {
+    rear_axle_(_model, _sdf, "rear", gznode, nh)
+{
 
   // For the Gaussian Kernel random number generation
   seed = 0;
