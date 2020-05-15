@@ -43,11 +43,9 @@ VehicleModel::VehicleModel(physics::ModelPtr &_model,
   seed = 0;
 
   // ROS Publishers
-  pub_ground_truth_ = nh->advertise<eufs_msgs::State>("/fssim/base_pose_ground_truth", 1);
-  pub_car_info_     = nh->advertise<eufs_msgs::CarInfo>("/fssim/car_info", 1);
+  pub_car_state_    = nh->advertise<eufs_msgs::CarState>("/ground_truth/state", 1);
 
   // ROS Subscribers
-  sub_res_          = nh->subscribe("/fssim/res_state", 1, &VehicleModel::onRes, this);
   sub_cmd_          = nh->subscribe("/fssim/cmd", 1, &VehicleModel::onCmd, this);
   sub_initial_pose_ = nh->subscribe("/initialpose", 1, &VehicleModel::onInitialPose, this);
 
@@ -111,12 +109,6 @@ void VehicleModel::publish(const double sim_time) {
 
 }
 
-void VehicleModel::onRes(const eufs_msgs::ResStateConstPtr &msg) {
-  res_state_ = *msg;
-  if (res_state_.push_button) { car_info_.torque_ok = static_cast<unsigned char>(true); }
-  if (res_state_.emergency) { car_info_.torque_ok = static_cast<unsigned char>(false); }
-}
-
 void VehicleModel::printInfo() {
   front_axle_.printInfo();
   rear_axle_.printInfo();
@@ -128,36 +120,16 @@ std::ostream &operator<<(std::ostream &os, const State s) {
 
 void VehicleModel::update(const double dt) {
   // TODO: Implement some kind of state machine
-  input_.dc = /*car_info_.torque_ok &&*/ ros::Time::now().toSec() - time_last_cmd_ < 1.0 ? input_.dc : -1.0;
+  input_.dc = ros::Time::now().toSec() - time_last_cmd_ < 1.0 ? input_.dc : -1.0;
 
   front_axle_.setSteering(input_.delta);
-
-  double Fz = getNormalForce(state_);
-  AxleTires FyF{}, FyR{}, alphaF{}, alphaR{};
-  front_axle_.getFy(state_, input_, Fz, FyF, &alphaF);
-  rear_axle_.getFy(state_, input_, Fz, FyR, &alphaR);
-
-  const double Fx   = getFx(state_, input_);
-  const double M_Tv = getMTv(state_, input_);
 
   updateState(dt);
 
   // Publish Everything
   setModelState(state_);
   publishTf(state_);
-
-  // Overlay Noise on Velocities
-  auto state_pub = state_.toRos(ros::Time::now());
-  state_pub.vx += GaussianKernel(0.0, param_.sensors.noise_vx_sigma);
-  state_pub.vy += GaussianKernel(0.0, param_.sensors.noise_vy_sigma);
-  state_pub.r += GaussianKernel(0.0, param_.sensors.noise_r_sigma);
-  pub_ground_truth_.publish(state_pub);
-
-  publishCarInfo(alphaF, alphaR, FyF, FyR, Fx);
-}
-
-void VehicleModel::updateState(const double dt) {
-
+  publishCarState();
 }
 
 void VehicleModel::publishTf(const State &x) {
@@ -225,33 +197,42 @@ double VehicleModel::getGaussianNoise(double mean, double var) const {
   return distribution(generator);
 }
 
-void VehicleModel::publishCarInfo(const AxleTires &alphaF,
-                             const AxleTires &alphaR,
-                             const AxleTires &FyF,
-                             const AxleTires &FyR,
-                             const double Fx) const {
+void VehicleModel::publishCarState() {
   // Publish Car Info
-  eufs_msgs::CarInfo car_info;
-  car_info.header.stamp = ros::Time::now();
+  eufs_msgs::CarState car_state;
+  car_state.header.stamp = ros::Time::now();
 
-  car_info.alpha_f   = alphaF.avg();
-  car_info.alpha_f_l = alphaF.left;
-  car_info.alpha_f_r = alphaF.right;
+  car_state.child_frame_id = robot_name_;
 
-  car_info.Fy_f   = FyF.avg();
-  car_info.Fy_f_l = FyF.left;
-  car_info.Fy_f_r = FyF.right;
+  geometry_msgs::PoseWithCovariance pose;
+  // TODO: set pose
+  car_state.pose = pose;
 
-  car_info.alpha_r   = alphaR.avg();
-  car_info.alpha_r_l = alphaR.left;
-  car_info.alpha_r_r = alphaR.right;
+  geometry_msgs::TwistWithCovariance twist;
+  // TODO: set twist
+  car_state.twist = twist;
+  // geometry_msgs/Vector3 linear_acceleration # m/s^2
+  geometry_msgs::Vector3 linear_acceleration;
+  // TODO: set linear_acceleration
+  car_state.linear_acceleration = linear_acceleration;
 
-  car_info.Fy_r   = FyR.avg();
-  car_info.Fy_r_l = FyR.left;
-  car_info.Fy_r_r = FyR.right;
+  // Overlay Noise on Velocities
+  // auto state_pub = state_.toRos(ros::Time::now());
+  // state_pub.vx += GaussianKernel(0.0, param_.sensors.noise_vx_sigma);
+  // state_pub.vy += GaussianKernel(0.0, param_.sensors.noise_vy_sigma);
+  // state_pub.r += GaussianKernel(0.0, param_.sensors.noise_r_sigma);
 
-  car_info.Fx = Fx;
-  pub_car_info_.publish(car_info);
+  boost::array<double, 9> linear_acceleration_covariance = { 0 };
+  // TODO: set linear_acceleration_covariance
+  car_state.linear_acceleration_covariance = linear_acceleration_covariance;
+
+  // TODO: set slip_angle
+  car_state.slip_angle = 0;
+
+  // TODO: set state_of_charge
+  car_state.state_of_charge = 1000;
+
+  pub_car_state_.publish(car_state);
 }
 
 double VehicleModel::GaussianKernel(double mu, double sigma) {

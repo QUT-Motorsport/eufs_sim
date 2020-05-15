@@ -31,11 +31,12 @@
 #include "aero.hpp"
 
 // ROS Msgs
-#include "eufs_msgs/CarInfo.h"
-#include "eufs_msgs/ResState.h"
-#include "eufs_msgs/State.h"
+#include "eufs_msgs/CarState.h"
 #include "nav_msgs/Odometry.h"
 #include "geometry_msgs/PoseWithCovarianceStamped.h"
+#include "geometry_msgs/PoseWithCovariance.h"
+#include "geometry_msgs/TwistWithCovariance.h"
+#include "geometry_msgs/Vector3.h"
 #include "ackermann_msgs/AckermannDriveStamped.h"
 // ROS
 #include <tf/transform_datatypes.h>
@@ -60,8 +61,6 @@ class VehicleModel {
           boost::shared_ptr<ros::NodeHandle> &nh,
           transport::NodePtr &gznode);
 
-  void onRes(const eufs_msgs::ResStateConstPtr &msg);
-
   void update(double dt);
 
   void printInfo();
@@ -70,17 +69,13 @@ class VehicleModel {
 
  protected:
 
-  virtual void updateState(const double dt);
+  virtual void updateState(const double dt) = 0;
 
   void setPositionFromWorld();
 
   void publishTf(const State &x);
 
-  void publishCarInfo(const AxleTires &alphaF,
-                      const AxleTires &alphaR,
-                      const AxleTires &FyF,
-                      const AxleTires &FyR,
-                      const double Fx) const;
+  void publishCarState();
 
   double getFx(const State &x, const Input &u);
 
@@ -110,13 +105,11 @@ class VehicleModel {
   boost::shared_ptr<ros::NodeHandle> nh_;
 
   // ROS Publishrs
-  ros::Publisher pub_ground_truth_;
-  ros::Publisher pub_car_info_;
+  ros::Publisher pub_car_state_;
 
   // ROS Subscribers
   ros::Subscriber sub_cmd_;
   ros::Subscriber sub_initial_pose_;
-  ros::Subscriber sub_res_;
 
   // ROS TF
   tf::TransformBroadcaster tf_br_;
@@ -131,10 +124,6 @@ class VehicleModel {
   // Front and Rear Axle
   FrontAxle front_axle_;
   RearAxle  rear_axle_;
-
-  // Car Infor and RES
-  eufs_msgs::CarInfo  car_info_;
-  eufs_msgs::ResState res_state_;
 
   // Parameters
   Param param_;
