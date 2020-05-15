@@ -132,7 +132,7 @@ void VehicleModel::update(const double dt) {
   publishCarState();
 }
 
-virtual void VehicleModel::updateState(const double dt) {}
+void VehicleModel::updateState(const double dt) {}
 
 void VehicleModel::publishTf(const State &x) {
   // Position

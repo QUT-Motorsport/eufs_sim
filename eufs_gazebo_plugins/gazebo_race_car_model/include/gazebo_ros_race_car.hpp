@@ -26,8 +26,19 @@
 #ifndef GAZEBO_ROS_RACE_CAR_HPP
 #define GAZEBO_ROS_RACE_CAR_HPP
 
-// Structure holding run-time important objects
-#include "gazebo_race_car_private.hpp"
+// ROS Includes
+#include <ros/ros.h>
+
+// Gazebo Includes
+#include <gazebo/common/Time.hh>
+#include <gazebo/physics/physics.hh>
+#include <gazebo/transport/transport.hh>
+#include <gazebo/common/Plugin.hh>
+
+// ROS RACE CAR PLUGIN
+#include "vehicle_model.hpp"
+#include "../src/kinematic_bicycle.cpp"
+#include "../src/point_mass.cpp"
 
 namespace gazebo {
 
@@ -42,6 +53,14 @@ class RaceCarModelPlugin : public ModelPlugin {
 
     void Load(physics::ModelPtr _parent, sdf::ElementPtr _sdf) override;
 
+    boost::shared_ptr<ros::NodeHandle> rosnode;
+
+    physics::WorldPtr world;
+
+    physics::ModelPtr model;
+
+    transport::NodePtr gznode;
+
  private:
 
     void update();
@@ -50,7 +69,17 @@ class RaceCarModelPlugin : public ModelPlugin {
 
     bool isLoopTime(const common::Time &time, double &dt);
 
-    std::unique_ptr<gazebo_race_car_private> dataPtr;
+    event::ConnectionPtr updateConnection;
+
+    fssim::VehicleModelPtr vehicle;
+
+    common::Time lastSimTime;
+
+    transport::SubscriberPtr keyboardSub;
+
+    std::mutex mutex;
+
+    transport::PublisherPtr worldControlPub;
 };
 
 } // namespace gazebo

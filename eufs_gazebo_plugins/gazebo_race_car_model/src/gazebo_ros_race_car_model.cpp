@@ -33,29 +33,28 @@
 
 namespace gazebo {
 
-RaceCarModelPlugin::RaceCarModelPlugin()
-    : dataPtr(new gazebo_race_car_private) {
+RaceCarModelPlugin::RaceCarModelPlugin() {
     int  argc  = 0;
     char *argv = nullptr;
     ros::init(argc, &argv, "RaceCarModelPlugin");
-    this->dataPtr->rosnode = boost::shared_ptr<ros::NodeHandle>(new ros::NodeHandle());
+    this->rosnode = boost::shared_ptr<ros::NodeHandle>(new ros::NodeHandle());
 }
 
 RaceCarModelPlugin::~RaceCarModelPlugin() {
-    this->dataPtr->updateConnection.reset();
+    this->updateConnection.reset();
 }
 
 void RaceCarModelPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf) {
     gzmsg << "Loading RaceCarModelPlugin" << std::endl;
     gzmsg << "RaceCarModelPlugin loading params" << std::endl;
 
-    this->dataPtr->model = _model;
+    this->model = _model;
 
-    this->dataPtr->world = this->dataPtr->model->GetWorld();
+    this->world = this->model->GetWorld();
 
-    this->dataPtr->gznode = transport::NodePtr(new transport::Node());
+    this->gznode = transport::NodePtr(new transport::Node());
 
-    this->dataPtr->gznode->Init();
+    this->gznode->Init();
 
     std::string vehicle_model_ = "";
     if (!_sdf->HasElement("vehicle_model")) {
@@ -65,54 +64,54 @@ void RaceCarModelPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf) {
     }
 
     if (vehicle_model_ == "PointMass") {
-      this->dataPtr->vehicle = std::unique_ptr<fssim::VehicleModel>(
-        new fssim::PointMass(_model, _sdf, this->dataPtr->rosnode, this->dataPtr->gznode));
+      this->vehicle = std::unique_ptr<fssim::VehicleModel>(
+        new fssim::PointMass(_model, _sdf, this->rosnode, this->gznode));
     } else if (vehicle_model_ == "KinematicBicycle") {
-      this->dataPtr->vehicle = std::unique_ptr<fssim::VehicleModel>(
-        new fssim::KinematicBicycle(_model, _sdf, this->dataPtr->rosnode, this->dataPtr->gznode));
+      this->vehicle = std::unique_ptr<fssim::VehicleModel>(
+        new fssim::KinematicBicycle(_model, _sdf, this->rosnode, this->gznode));
     } else if (vehicle_model_ == "DynamicBicycle") {
-      this->dataPtr->vehicle = std::unique_ptr<fssim::VehicleModel>(
-        new fssim::VehicleModel(_model, _sdf, this->dataPtr->rosnode, this->dataPtr->gznode));
+      this->vehicle = std::unique_ptr<fssim::VehicleModel>(
+        new fssim::VehicleModel(_model, _sdf, this->rosnode, this->gznode));
     } else {
-      this->dataPtr->vehicle = std::unique_ptr<fssim::VehicleModel>(
-        new fssim::VehicleModel(_model, _sdf, this->dataPtr->rosnode, this->dataPtr->gznode));
+      this->vehicle = std::unique_ptr<fssim::VehicleModel>(
+        new fssim::VehicleModel(_model, _sdf, this->rosnode, this->gznode));
     }
-    this->dataPtr->vehicle->printInfo();
+    this->vehicle->printInfo();
 
-    this->dataPtr->updateConnection =
+    this->updateConnection =
         event::Events::ConnectWorldUpdateBegin(std::bind(&RaceCarModelPlugin::update, this));
 
-    this->dataPtr->worldControlPub = this->dataPtr->gznode->Advertise<msgs::WorldControl>("~/world_control");
+    this->worldControlPub = this->gznode->Advertise<msgs::WorldControl>("~/world_control");
 
-    this->dataPtr->lastSimTime = this->dataPtr->world->SimTime();
+    this->lastSimTime = this->world->SimTime();
 }
 
 void RaceCarModelPlugin::Reset() {
-    this->dataPtr->lastSimTime = 0;
+    this->lastSimTime = 0;
 }
 
 void RaceCarModelPlugin::update() {
-    std::lock_guard<std::mutex> lock(this->dataPtr->mutex);
+    std::lock_guard<std::mutex> lock(this->mutex);
 
     publishInfo();
 
-    common::Time curTime = this->dataPtr->world->SimTime();
+    common::Time curTime = this->world->SimTime();
     double       dt      = 0.0;
-    if (!isLoopTime(this->dataPtr->world->SimTime(), dt)) {
+    if (!isLoopTime(this->world->SimTime(), dt)) {
         return;
     }
 
-    this->dataPtr->lastSimTime = curTime;
+    this->lastSimTime = curTime;
 
-    this->dataPtr->vehicle->update(dt);
+    this->vehicle->update(dt);
 }
 
 void RaceCarModelPlugin::publishInfo() {
-    this->dataPtr->vehicle->publish(this->dataPtr->world->SimTime().Double());
+    this->vehicle->publish(this->world->SimTime().Double());
 }
 
 bool RaceCarModelPlugin::isLoopTime(const common::Time &time, double &dt) {
-    dt = (time - this->dataPtr->lastSimTime).Double();
+    dt = (time - this->lastSimTime).Double();
     if (dt < 0.0) {
         this->Reset();
         return false;
