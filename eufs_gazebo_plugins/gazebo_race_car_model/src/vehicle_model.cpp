@@ -105,10 +105,6 @@ void VehicleModel::initVehicleParam(sdf::ElementPtr &_sdf) {
   initParamSensors(param_, yaml_name);
 }
 
-void VehicleModel::publish(const double sim_time) {
-
-}
-
 void VehicleModel::printInfo() {
   front_axle_.printInfo();
   rear_axle_.printInfo();

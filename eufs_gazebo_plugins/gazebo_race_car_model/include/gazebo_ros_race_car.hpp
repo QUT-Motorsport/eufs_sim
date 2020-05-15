@@ -43,43 +43,35 @@
 namespace gazebo {
 
 class RaceCarModelPlugin : public ModelPlugin {
- public:
+public:
+  RaceCarModelPlugin();
 
-    RaceCarModelPlugin();
+  ~RaceCarModelPlugin() override;
 
-    ~RaceCarModelPlugin() override;
+  void Reset() override;
 
-    void Reset() override;
+  void Load(physics::ModelPtr _parent, sdf::ElementPtr _sdf) override;
 
-    void Load(physics::ModelPtr _parent, sdf::ElementPtr _sdf) override;
+  boost::shared_ptr<ros::NodeHandle> rosnode;
 
-    boost::shared_ptr<ros::NodeHandle> rosnode;
+  physics::WorldPtr world;
 
-    physics::WorldPtr world;
+  physics::ModelPtr model;
 
-    physics::ModelPtr model;
+  transport::NodePtr gznode;
 
-    transport::NodePtr gznode;
+private:
+  void update();
 
- private:
+  bool isLoopTime(const common::Time &time, double &dt);
 
-    void update();
+  event::ConnectionPtr updateConnection;
 
-    void publishInfo();
+  fssim::VehicleModelPtr vehicle;
 
-    bool isLoopTime(const common::Time &time, double &dt);
+  common::Time lastSimTime;
 
-    event::ConnectionPtr updateConnection;
-
-    fssim::VehicleModelPtr vehicle;
-
-    common::Time lastSimTime;
-
-    transport::SubscriberPtr keyboardSub;
-
-    std::mutex mutex;
-
-    transport::PublisherPtr worldControlPub;
+  transport::PublisherPtr worldControlPub;
 };
 
 } // namespace gazebo

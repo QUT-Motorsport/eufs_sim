@@ -65,8 +65,6 @@ class VehicleModel {
 
   void printInfo();
 
-  void publish(double sim_time);
-
  protected:
 
   virtual void updateState(const double dt);
