@@ -55,7 +55,7 @@ VecOut getRosVesMsg(VecIn &in) {
 namespace fssim {
 
 class VehicleModel {
- public:
+public:
   VehicleModel(physics::ModelPtr &_model,
           sdf::ElementPtr &_sdf,
           boost::shared_ptr<ros::NodeHandle> &nh,
@@ -65,39 +65,32 @@ class VehicleModel {
 
   void printInfo();
 
- protected:
-
-  virtual void updateState(const double dt);
-
+protected:
   void setPositionFromWorld();
-
-  void publishTf(const State &x);
-
-  void publishCarState();
-
-  double getFx(const State &x, const Input &u);
-
-  double getMTv(const State &x, const Input &u) const;
-
-  void onCmd(const ackermann_msgs::AckermannDriveStampedConstPtr &msg);
-
-  void onInitialPose(const geometry_msgs::PoseWithCovarianceStamped &msg);
 
   void initModel(sdf::ElementPtr &_sdf);
 
   void initVehicleParam(sdf::ElementPtr &_sdf);
 
-  double getNormalForce(const State &x);
+  virtual void updateState(const double dt);
 
-  void setModelState(const State &x);
+  void setModelState();
 
-  double getGaussianNoise(double mean, double var) const;
+  void publishCarState();
+  void publishCanState();
+  void publishWheelSpeeds();
+
+  void publishTf();
+
+  void onCmd(const ackermann_msgs::AckermannDriveStampedConstPtr &msg);
+
+  void onInitialPose(const geometry_msgs::PoseWithCovarianceStamped &msg);
 
   State &getState() { return state_; }
 
   Input &getInput() { return input_; }
 
- protected:
+protected:
 
   // ROS Nodehandle
   boost::shared_ptr<ros::NodeHandle> nh_;

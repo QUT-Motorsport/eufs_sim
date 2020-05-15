@@ -106,95 +106,43 @@ void VehicleModel::initVehicleParam(sdf::ElementPtr &_sdf) {
 }
 
 void VehicleModel::printInfo() {
+  // TODO: Update this function
   front_axle_.printInfo();
   rear_axle_.printInfo();
-}
-
-std::ostream &operator<<(std::ostream &os, const State s) {
-  os << s.getString();
 }
 
 void VehicleModel::update(const double dt) {
   // TODO: Implement some kind of state machine
   input_.dc = ros::Time::now().toSec() - time_last_cmd_ < 1.0 ? input_.dc : -1.0;
 
+  // TODO: Check if this should always be the case
   front_axle_.setSteering(input_.delta);
 
   updateState(dt);
 
+  setModelState();
+
   // Publish Everything
-  setModelState(state_);
-  publishTf(state_);
   publishCarState();
+  publishCanState();
+  publishWheelSpeeds();
+
+  // TODO: Only do this if it is selected in the launcher
+  publishTf();
 }
 
 void VehicleModel::updateState(const double dt) {}
 
-void VehicleModel::publishTf(const State &x) {
-  // Position
-  tf::Transform transform;
-  transform.setOrigin(tf::Vector3(x.x, x.y, 0.0));
-
-  // Orientation
-  tf::Quaternion q;
-  q.setRPY(0.0, 0.0, x.yaw);
-  transform.setRotation(q);
-
-  // Send TF
-  tf_br_.sendTransform(tf::StampedTransform(transform, ros::Time::now(), "/fssim_map", "/fssim/vehicle/base_link"));
-}
-
-double VehicleModel::getFx(const State &x, const Input &u) {
-  const double dc = x.v_x <= 0.0 && u.dc < 0.0 ? 0.0 : u.dc;
-  const double Fx = dc * param_.driveTrain.cm1 - aero_.getFdrag(x) - param_.driveTrain.cr0;
-  return Fx;
-}
-
-double VehicleModel::getMTv(const State &x, const Input &u) const {
-  const double shrinkage = param_.torqueVectoring.shrinkage;
-  const double K_stab    = param_.torqueVectoring.K_stability;
-  const double l         = param_.kinematic.l;
-
-  const double delta = u.delta;
-  const double v_x   = x.v_x;
-
-  return 0.0;
-}
-
-void VehicleModel::onCmd(const ackermann_msgs::AckermannDriveStampedConstPtr &msg) {
-  input_.delta = msg->drive.steering_angle;
-  input_.dc    = msg->drive.acceleration;
-  time_last_cmd_ = ros::Time::now().toSec();
-}
-
-void VehicleModel::onInitialPose(const geometry_msgs::PoseWithCovarianceStamped &msg) {
-  state_.x   = msg.pose.pose.position.x;
-  state_.y   = msg.pose.pose.position.y;
-  state_.yaw = tf::getYaw(msg.pose.pose.orientation);
-  state_.v_x = state_.v_y = state_.r = state_.a_x = state_.a_y = 0.0;
-}
-
-double VehicleModel::getNormalForce(const State &x) {
-  return param_.inertia.g * param_.inertia.m + aero_.getFdown(x);
-}
-
-void VehicleModel::setModelState(const State &x) {
-  const ignition::math::Pose3d    pose(x.x, x.y, 0.0, 0, 0.0, x.yaw);
-  const ignition::math::Vector3d vel(x.v_x, x.v_y, 0.0);
-  const ignition::math::Vector3d angular(0.0, 0.0, x.r);
+void VehicleModel::setModelState() {
+  const ignition::math::Pose3d   pose(state_.x, state_.y, 0.0, 0, 0.0, state_.yaw);
+  const ignition::math::Vector3d vel(state_.v_x, state_.v_y, 0.0);
+  const ignition::math::Vector3d angular(0.0, 0.0, state_.r);
   model->SetWorldPose(pose);
   model->SetAngularVel(angular);
   model->SetLinearVel(vel);
 }
 
-double VehicleModel::getGaussianNoise(double mean, double var) const {
-  std::normal_distribution<double> distribution(mean, var);
-  // construct a trivial random generator engine from a time-based seed:
-  long                             seed = std::chrono::system_clock::now().time_since_epoch().count();
-  std::default_random_engine       generator(seed);
-  return distribution(generator);
-}
-
+// TODO: Implement this function properly
 void VehicleModel::publishCarState() {
   // Publish Car Info
   eufs_msgs::CarState car_state;
@@ -215,7 +163,6 @@ void VehicleModel::publishCarState() {
   car_state.linear_acceleration = linear_acceleration;
 
   // Overlay Noise on Velocities
-  // auto state_pub = state_.toRos(ros::Time::now());
   // state_pub.vx += GaussianKernel(0.0, param_.sensors.noise_vx_sigma);
   // state_pub.vy += GaussianKernel(0.0, param_.sensors.noise_vy_sigma);
   // state_pub.r += GaussianKernel(0.0, param_.sensors.noise_r_sigma);
@@ -231,6 +178,39 @@ void VehicleModel::publishCarState() {
   car_state.state_of_charge = 1000;
 
   pub_car_state_.publish(car_state);
+}
+
+// TODO: Implement this function
+void VehicleModel::publishCanState() {}
+
+// TODO: Implement this function
+void VehicleModel::publishWheelSpeeds() {}
+
+void VehicleModel::publishTf() {
+  // Position
+  tf::Transform transform;
+  transform.setOrigin(tf::Vector3(state_.x, state_.y, 0.0));
+
+  // Orientation
+  tf::Quaternion q;
+  q.setRPY(0.0, 0.0, state_.yaw);
+  transform.setRotation(q);
+
+  // Send TF
+  tf_br_.sendTransform(tf::StampedTransform(transform, ros::Time::now(), "/fssim_map", "/fssim/vehicle/base_link"));
+}
+
+void VehicleModel::onCmd(const ackermann_msgs::AckermannDriveStampedConstPtr &msg) {
+  input_.delta = msg->drive.steering_angle;
+  input_.dc    = msg->drive.acceleration;
+  time_last_cmd_ = ros::Time::now().toSec();
+}
+
+void VehicleModel::onInitialPose(const geometry_msgs::PoseWithCovarianceStamped &msg) {
+  state_.x   = msg.pose.pose.position.x;
+  state_.y   = msg.pose.pose.position.y;
+  state_.yaw = tf::getYaw(msg.pose.pose.orientation);
+  state_.v_x = state_.v_y = state_.r = state_.a_x = state_.a_y = 0.0;
 }
 
 double VehicleModel::GaussianKernel(double mu, double sigma) {

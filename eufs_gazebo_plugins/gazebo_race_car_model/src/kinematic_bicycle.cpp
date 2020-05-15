@@ -112,6 +112,27 @@ private:
     x.r   = blend * x.r + (1.0 - blend) * r;
     return x;
   }
+
+  double getFx(const State &x, const Input &u) {
+    const double dc = x.v_x <= 0.0 && u.dc < 0.0 ? 0.0 : u.dc;
+    const double Fx = dc * param_.driveTrain.cm1 - aero_.getFdrag(x) - param_.driveTrain.cr0;
+    return Fx;
+  }
+
+  double getMTv(const State &x, const Input &u) const {
+    const double shrinkage = param_.torqueVectoring.shrinkage;
+    const double K_stab    = param_.torqueVectoring.K_stability;
+    const double l         = param_.kinematic.l;
+
+    const double delta = u.delta;
+    const double v_x   = x.v_x;
+
+    return 0.0;
+  }
+
+  double getNormalForce(const State &x) {
+    return param_.inertia.g * param_.inertia.m + aero_.getFdown(x);
+  }
 };
 
 } // namespace fssim
