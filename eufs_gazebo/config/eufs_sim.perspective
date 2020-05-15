@@ -33,7 +33,7 @@
               "keys": {
                 "topic": {
                   "type": "repr",
-                  "repr": "u'/fssim/cmd'"
+                  "repr": "u'/cmd_vel_out'"
                 },
                 "vx_min": {
                   "type": "repr",

@@ -69,7 +69,7 @@ class VehicleModel {
 
  protected:
 
-  virtual void updateState(const double dt) = 0;
+  virtual void updateState(const double dt);
 
   void setPositionFromWorld();
 

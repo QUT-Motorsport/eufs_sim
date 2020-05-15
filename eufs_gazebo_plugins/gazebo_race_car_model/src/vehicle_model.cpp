@@ -46,7 +46,7 @@ VehicleModel::VehicleModel(physics::ModelPtr &_model,
   pub_car_state_    = nh->advertise<eufs_msgs::CarState>("/ground_truth/state", 1);
 
   // ROS Subscribers
-  sub_cmd_          = nh->subscribe("/fssim/cmd", 1, &VehicleModel::onCmd, this);
+  sub_cmd_          = nh->subscribe("/cmd_vel_out", 1, &VehicleModel::onCmd, this);
   sub_initial_pose_ = nh->subscribe("/initialpose", 1, &VehicleModel::onInitialPose, this);
 
   // Initializatoin
@@ -131,6 +131,8 @@ void VehicleModel::update(const double dt) {
   publishTf(state_);
   publishCarState();
 }
+
+virtual void VehicleModel::updateState(const double dt) {}
 
 void VehicleModel::publishTf(const State &x) {
   // Position
