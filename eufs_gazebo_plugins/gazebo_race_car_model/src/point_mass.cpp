@@ -36,13 +36,11 @@ public:
                    boost::shared_ptr<ros::NodeHandle> &nh,
                    transport::NodePtr &gznode)
     : VehicleModel(_model, _sdf, nh, gznode)
-  {
-    // IDK
-  }
+  {}
 
-private:
   virtual void updateState(const double dt)
   {
+    ROS_INFO("Bye");
     state_.a_x = input_.dc * std::cos(input_.delta);
     state_.a_y = input_.dc * std::sin(input_.delta);
 

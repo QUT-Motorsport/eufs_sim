@@ -25,8 +25,6 @@
 #ifndef FSSIM_GAZEBO_DEFINITIONS_HPP
 #define FSSIM_GAZEBO_DEFINITIONS_HPP
 
-#include "eufs_msgs/State.h"
-
 namespace gazebo {
 namespace fssim {
 

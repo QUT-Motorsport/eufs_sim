@@ -36,19 +36,17 @@ public:
                    boost::shared_ptr<ros::NodeHandle> &nh,
                    transport::NodePtr &gznode)
     : VehicleModel(_model, _sdf, nh, gznode)
-  {
-    // IDK
-  }
+  {}
 
 private:
-  virtual void updateState(const double dt)
-  {
+  virtual void updateState(const double dt) {
     double Fz = getNormalForce(state_);
 
-    // Tire Forces
-    AxleTires FyF{}, FyR{}, alphaF{}, alphaR{};
-    front_axle_.getFy(state_, input_, Fz, FyF, &alphaF);
-    rear_axle_.getFy(state_, input_, Fz, FyR, &alphaR);
+    double alphaF = getSlipAngle();
+    double alphaR = getSlipAngle(false);
+
+    double FyF = getFrontFy(Fz);
+    double FyR = getRearFy(Fz);
 
     // Drivetrain Model
     const double Fx   = getFx(state_, input_);
@@ -57,7 +55,7 @@ private:
     // Dynamics
     const auto x_dot_dyn  = f(state_, input_, Fx, M_Tv, FyF, FyR);
     const auto x_next_dyn = state_ + x_dot_dyn * dt;
-    state_ = f_kin_correction(x_next_dyn, state_, input_, Fx, M_Tv, FyF, FyR, dt);
+    state_ = f_kin_correction(x_next_dyn, state_, input_, Fx, M_Tv, dt);
     state_.validate();
   }
 
@@ -65,10 +63,10 @@ private:
                    const Input &u,
                    const double Fx,
                    const double M_TV,
-                   const AxleTires &FyF,
-                   const AxleTires &FyR) {
-    const double FyF_tot = FyF.left + FyF.right;
-    const double FyR_tot = FyR.left + FyR.right;
+                   const double FyF,
+                   const double FyR) {
+    const double FyF_tot = 2 * FyF;
+    const double FyR_tot = 2 * FyR;
     const double v_x     = std::max(1.0, x.v_x);
 
     const double m_lon = param_.inertia.m + param_.driveTrain.m_lon_add;
@@ -80,7 +78,7 @@ private:
     x_dot.v_x = (x.r * x.v_y) + (Fx - std::sin(u.delta) * (FyF_tot)) / m_lon;
     x_dot.v_y = ((std::cos(u.delta) * FyF_tot) + FyR_tot) / param_.inertia.m - (x.r * v_x);
     x_dot.r   = ((std::cos(u.delta) * FyF_tot * param_.kinematic.l_F
-      + std::sin(u.delta) * (FyF.left - FyF.right) * 0.5 * param_.kinematic.b_F)
+      + std::sin(u.delta) * (0/*FyF.left - FyF.right*/) * 0.5 * param_.kinematic.b_F)
       - ((FyR_tot) * param_.kinematic.l_R)
       + M_TV) / param_.inertia.I_z;
     x_dot.a_x = 0;
@@ -94,8 +92,6 @@ private:
                                   const Input &u,
                                   const double Fx,
                                   const double M_TV,
-                                  const AxleTires &FyF,
-                                  const AxleTires &FyR,
                                   const double dt) {
     State        x       = x_in;
     const double v_x_dot = Fx / (param_.inertia.m + param_.driveTrain.m_lon_add);
@@ -140,6 +136,44 @@ private:
 
   double getFdrag(const State &x) {
     return param_.aero.c_drag * x.v_x * x.v_x;
+  }
+
+  double getFrontFy(const double Fz) {
+    double slipAngle = getSlipAngle();
+
+    const double Fz_axle = getDownForceFront(Fz);
+
+    const double B    = param_.tire.B;
+    const double C    = param_.tire.C;
+    const double D    = param_.tire.D;
+    const double E    = param_.tire.E;
+    const double mu_y = D * std::sin(C * std::atan(B * (1.0 - E) * slipAngle + E * std::atan(B * slipAngle)));
+    const double Fy   = Fz_axle * mu_y;
+    return Fy;
+  }
+
+  double getRearFy(const double Fz) {
+    double slipAngle = getSlipAngle(false);
+
+    const double Fz_axle = getDownForceFront(Fz);
+
+    const double B    = param_.tire.B;
+    const double C    = param_.tire.C;
+    const double D    = param_.tire.D;
+    const double E    = param_.tire.E;
+    const double mu_y = D * std::sin(C * std::atan(B * (1.0 - E) * slipAngle + E * std::atan(B * slipAngle)));
+    const double Fy   = Fz_axle * mu_y;
+    return Fy;
+  }
+
+  double getDownForceFront(const double Fz) {
+      double FzAxle = 0.5 * param_.kinematic.w_front * Fz;
+      return FzAxle;
+  }
+
+  double getDownForceRear(const double Fz) {
+      double FzAxle = 0.5 * (1 - param_.kinematic.w_front) * Fz;
+      return FzAxle;
   }
 };
 

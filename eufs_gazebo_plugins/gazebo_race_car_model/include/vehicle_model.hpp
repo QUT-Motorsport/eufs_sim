@@ -26,10 +26,16 @@
 #ifndef FSSIM_GAZEBO_VEHICLE_H
 #define FSSIM_GAZEBO_VEHICLE_H
 
-// FSSIM Includes
-#include "axle.hpp"
+#include <ros/ros.h>
 
-// ROS Msgs
+#include <gazebo/physics/physics.hh>
+
+// FSSIM Include
+#include "gazebo_utills.hpp"
+#include "config.hpp"
+#include "definitions.hpp"
+
+// ROS msgs
 #include "eufs_msgs/CarState.h"
 #include "nav_msgs/Odometry.h"
 #include "geometry_msgs/PoseWithCovarianceStamped.h"
@@ -76,6 +82,9 @@ protected:
   void setModelState();
 
   void publishCarState();
+
+  double getSlipAngle(bool isFront = true);
+
   void publishCanState();
   void publishWheelSpeeds();
 
@@ -111,9 +120,15 @@ protected:
   physics::LinkPtr chassisLink;
   physics::LinkPtr base_link_;
 
-  // Front and Rear Axle
-  FrontAxle front_axle_;
-  RearAxle  rear_axle_;
+  // Steering joints
+  physics::JointPtr left_steering_joint;
+  physics::JointPtr right_steering_joint;
+
+  // Wheels
+  physics::JointPtr front_left_wheel;
+  physics::JointPtr front_right_wheel;
+  physics::JointPtr rear_left_wheel;
+  physics::JointPtr rear_right_wheel;
 
   // Parameters
   Param param_;

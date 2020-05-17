@@ -34,9 +34,7 @@ VehicleModel::VehicleModel(physics::ModelPtr &_model,
                  boost::shared_ptr<ros::NodeHandle> &nh,
                  transport::NodePtr &gznode)
   : nh_(nh),
-    model(_model),
-    front_axle_(_model, _sdf, "front", gznode, nh),
-    rear_axle_(_model, _sdf, "rear", gznode, nh)
+    model(_model)
 {
 
   // For the Gaussian Kernel random number generation
@@ -52,12 +50,6 @@ VehicleModel::VehicleModel(physics::ModelPtr &_model,
   // Initializatoin
   initModel(_sdf);
   initVehicleParam(_sdf);
-
-  // Set Axle parameters
-  front_axle_.setLeverArm(param_.kinematic.l, 1.0 - param_.kinematic.w_front, param_.kinematic.b_F);
-  rear_axle_.setLeverArm(param_.kinematic.l, param_.kinematic.w_front, param_.kinematic.b_R);
-  front_axle_.setParam(param_);
-  rear_axle_.setParam(param_);
 
   setPositionFromWorld();
 
@@ -81,16 +73,31 @@ void VehicleModel::setPositionFromWorld() {
 }
 
 void VehicleModel::initModel(sdf::ElementPtr &_sdf) {
-
+  // Chassis link
   std::string chassisLinkName = model->GetName() + "::" + _sdf->Get<std::string>("chassis");
   getLink(chassisLink, model, chassisLinkName);
 
+  // Base link
   std::string baseLinkName = model->GetName() + "::" + _sdf->Get<std::string>("base_link");
   getLink(base_link_, model, baseLinkName);
 
-  // then the wheelbase is the distance between the axle centers
-  auto vec3 = front_axle_.getAxlePos() - rear_axle_.getAxlePos();
-  param_.kinematic.l = vec3.Length();
+  // Steering joints
+  std::string leftSteeringJointName = model->GetName() + "::" + _sdf->Get<std::string>("front_left_wheel_steering");
+  left_steering_joint = model->GetJoint(leftSteeringJointName);
+  std::string rightSteeringJointName = model->GetName() + "::" + _sdf->Get<std::string>("front_right_wheel_steering");
+  right_steering_joint = model->GetJoint(rightSteeringJointName);
+
+  // Front wheels
+  std::string frontLeftWheelName = model->GetName() + "::" + _sdf->Get<std::string>("front_left_wheel");
+  front_left_wheel = model->GetJoint(frontLeftWheelName);
+  std::string frontRightWheelName = model->GetName() + "::" + _sdf->Get<std::string>("front_right_wheel");
+  front_right_wheel = model->GetJoint(frontRightWheelName);
+
+  // Rear wheels
+  std::string rearLeftWheelName = model->GetName() + "::" + _sdf->Get<std::string>("rear_left_wheel");
+  rear_left_wheel = model->GetJoint(rearLeftWheelName);
+  std::string rearRightWheelName = model->GetName() + "::" + _sdf->Get<std::string>("rear_right_wheel");
+  rear_right_wheel = model->GetJoint(rearRightWheelName);
 }
 
 void VehicleModel::initVehicleParam(sdf::ElementPtr &_sdf) {
@@ -105,18 +112,18 @@ void VehicleModel::initVehicleParam(sdf::ElementPtr &_sdf) {
   initParamSensors(param_, yaml_name);
 }
 
-void VehicleModel::printInfo() {
-  // TODO: Update this function
-  front_axle_.printInfo();
-  rear_axle_.printInfo();
-}
+// TODO: Update this function
+void VehicleModel::printInfo() {}
 
 void VehicleModel::update(const double dt) {
   // TODO: Implement some kind of state machine
   input_.dc = ros::Time::now().toSec() - time_last_cmd_ < 1.0 ? input_.dc : -1.0;
 
+  // TODO: create current (state) and input variables to make sure they do not change during the process
+
   // TODO: Check if this should always be the case
-  front_axle_.setSteering(input_.delta);
+  left_steering_joint->SetPosition(0, input_.delta);
+  right_steering_joint->SetPosition(0, input_.delta);
 
   updateState(dt);
 
@@ -171,13 +178,41 @@ void VehicleModel::publishCarState() {
   // TODO: set linear_acceleration_covariance
   car_state.linear_acceleration_covariance = linear_acceleration_covariance;
 
-  // TODO: set slip_angle
-  car_state.slip_angle = 0;
+  car_state.slip_angle = getSlipAngle();
 
   // TODO: set state_of_charge
   car_state.state_of_charge = 1000;
 
   pub_car_state_.publish(car_state);
+}
+
+// TODO: Check if these formulas are correct
+double VehicleModel::getSlipAngle(bool isFront) {
+  unsigned int id = 0;
+
+  double lever_arm_length_ = param_.kinematic.l * param_.kinematic.w_front;
+
+  if (!isFront) {
+    double axle_width_ = (rear_left_wheel->GetChild()->GetCollision(id)->WorldPose().Pos() -
+                          rear_right_wheel->GetChild()->GetCollision(id)->WorldPose().Pos()).Length();
+
+    // From Ignat
+    // return -std::atan2(state_.v_y - state_.r * lever_arm_length_, state_.v_x);
+
+    // From fssim
+    double v_x = std::max(1.0, state_.v_x);
+    return std::atan((state_.v_y + -1 * lever_arm_length_ * state_.r) / (v_x - 0.5 * axle_width_ * state_.r));
+  }
+
+  double axle_width_ = (front_left_wheel->GetChild()->GetCollision(id)->WorldPose().Pos() -
+                        front_right_wheel->GetChild()->GetCollision(id)->WorldPose().Pos()).Length();
+
+  // From Ignat
+  // return input_.delta - std::atan2(state_.v_y + state_.r * lever_arm_length_, state_.v_x);
+
+  // From fssim
+  double v_x = std::max(1.0, state_.v_x);
+  return std::atan((state_.v_y + lever_arm_length_ * state_.r) / (v_x - 0.5 * axle_width_ * state_.r)) - input_.delta;
 }
 
 // TODO: Implement this function

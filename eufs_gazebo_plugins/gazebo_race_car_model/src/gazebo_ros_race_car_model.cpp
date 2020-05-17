@@ -105,7 +105,7 @@ void RaceCarModelPlugin::update() {
 
 bool RaceCarModelPlugin::isLoopTime(const common::Time &time, double &dt) {
   dt = (time - this->lastSimTime).Double();
-  
+
   if (dt < 0.0) {
     this->Reset();
     return false;
