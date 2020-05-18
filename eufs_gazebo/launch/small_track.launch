@@ -19,7 +19,7 @@
 
   <!-- Control Method Argument -->
   <arg name="controlMethod" default="speed"/>
-  <arg name="vehicleModel" default="KinematicBicycle"/>
+  <arg name="vehicleModel" default="FssimModel"/>
   <arg name="show_rqt_gui" default="true"/>
   <arg name="publish_gt_tf" default="false"/>
   <arg name="launch_group" default="default"/>

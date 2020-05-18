@@ -29,9 +29,9 @@
 namespace gazebo {
 namespace fssim {
 
-class KinematicBicycle: public VehicleModel {
+class FssimModel: public VehicleModel {
 public:
-  KinematicBicycle(physics::ModelPtr &_model,
+  FssimModel(physics::ModelPtr &_model,
                    sdf::ElementPtr &_sdf,
                    boost::shared_ptr<ros::NodeHandle> &nh,
                    transport::NodePtr &gznode)

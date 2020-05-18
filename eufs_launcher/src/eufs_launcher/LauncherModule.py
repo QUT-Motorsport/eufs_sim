@@ -230,8 +230,8 @@ class EufsLauncher(Plugin):
 
                 # Setup Vehicle Models menu
                 # TODO: Get different vehicle models from the different abstract classes with different models
-                vehicle_models = ["PointMass", "KinematicBicycle", "DynamicBicycle"]
-                default_model = "KinematicBicycle"
+                vehicle_models = ["PointMass", "FssimModel"]
+                default_model = "FssimModel"
                 if default_model in vehicle_models:
                         self.VEHICLE_MODEL_MENU.addItem(default_model)
                 for model in vehicle_models:

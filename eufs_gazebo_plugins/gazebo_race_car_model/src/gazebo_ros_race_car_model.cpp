@@ -58,7 +58,7 @@ void RaceCarModelPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf) {
 
   std::string vehicle_model_ = "";
   if (!_sdf->HasElement("vehicle_model")) {
-    vehicle_model_ = "KinematicBicycle";
+    vehicle_model_ = "FssimModel";
   } else {
     vehicle_model_ = _sdf->GetElement("vehicle_model")->Get<std::string>();
   }
@@ -66,12 +66,9 @@ void RaceCarModelPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf) {
   if (vehicle_model_ == "PointMass") {
     this->vehicle = std::unique_ptr<fssim::VehicleModel>(
       new fssim::PointMass(_model, _sdf, this->rosnode, this->gznode));
-  } else if (vehicle_model_ == "KinematicBicycle") {
+  } else if (vehicle_model_ == "FssimModel") {
     this->vehicle = std::unique_ptr<fssim::VehicleModel>(
-      new fssim::KinematicBicycle(_model, _sdf, this->rosnode, this->gznode));
-  } else if (vehicle_model_ == "DynamicBicycle") {
-    this->vehicle = std::unique_ptr<fssim::VehicleModel>(
-      new fssim::VehicleModel(_model, _sdf, this->rosnode, this->gznode));
+      new fssim::FssimModel(_model, _sdf, this->rosnode, this->gznode));
   } else {
     this->vehicle = std::unique_ptr<fssim::VehicleModel>(
       new fssim::VehicleModel(_model, _sdf, this->rosnode, this->gznode));

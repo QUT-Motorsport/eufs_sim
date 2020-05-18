@@ -37,7 +37,7 @@
 
 // ROS RACE CAR PLUGIN
 #include "vehicle_model.hpp"
-#include "../src/kinematic_bicycle.cpp"
+#include "../src/fssim_model.cpp"
 #include "../src/point_mass.cpp"
 
 namespace gazebo {
