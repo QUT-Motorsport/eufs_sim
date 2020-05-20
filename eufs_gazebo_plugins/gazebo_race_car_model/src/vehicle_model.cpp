@@ -131,7 +131,6 @@ void VehicleModel::update(const double dt) {
 
   // Publish Everything
   publishCarState();
-  publishCanState();
   publishWheelSpeeds();
 
   // TODO: Only do this if it is selected in the launcher
@@ -149,7 +148,7 @@ void VehicleModel::setModelState() {
   model->SetLinearVel(vel);
 }
 
-// TODO: Implement this function properly
+// TODO: Implement publishCarState function properly
 void VehicleModel::publishCarState() {
   // Publish Car Info
   eufs_msgs::CarState car_state;
@@ -215,7 +214,7 @@ double VehicleModel::getSlipAngle(bool isFront) {
   return std::atan((state_.v_y + lever_arm_length_ * state_.r) / (v_x - 0.5 * axle_width_ * state_.r)) - input_.delta;
 }
 
-// TODO: Implement this function
+// TODO: Implement publishWheelSpeeds function
 void VehicleModel::publishWheelSpeeds() {}
 
 void VehicleModel::publishTf() {
