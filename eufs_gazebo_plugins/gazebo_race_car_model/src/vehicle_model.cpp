@@ -216,9 +216,6 @@ double VehicleModel::getSlipAngle(bool isFront) {
 }
 
 // TODO: Implement this function
-void VehicleModel::publishCanState() {}
-
-// TODO: Implement this function
 void VehicleModel::publishWheelSpeeds() {}
 
 void VehicleModel::publishTf() {

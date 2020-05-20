@@ -85,7 +85,6 @@ protected:
 
   double getSlipAngle(bool isFront = true);
 
-  void publishCanState();
   void publishWheelSpeeds();
 
   void publishTf();
