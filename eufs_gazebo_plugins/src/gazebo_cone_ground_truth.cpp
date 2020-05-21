@@ -75,13 +75,6 @@ namespace gazebo {
 
     // Setup the publishers
 
-
-    // GT without covariance & perception without covariance
-    std::string gtwc_name_ = _sdf->GetElement("groundTruthConesWithoutCovarianceTopicName")->Get<std::string>();
-        this->ground_truth_cone_without_covariance_pub_ = this->rosnode_->advertise<eufs_msgs::ConeArray>(gtwc_name_, 1);
-    std::string pwc_name_ = _sdf->GetElement("perceptionConesWithoutCovarianceTopicName")->Get<std::string>();
-        this->perception_cone_without_covariance_pub_ = this->rosnode_->advertise<eufs_msgs::ConeArray>(pwc_name_, 1);
-
     // Ground truth cone publisher
     if (!_sdf->HasElement("groundTruthConesTopicName")) {
       ROS_FATAL_NAMED("state_ground_truth", "state_ground_truth plugin missing <groundTruthConesTopicName>, cannot proceed");

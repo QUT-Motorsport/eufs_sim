@@ -257,8 +257,8 @@ class EufsLauncher(Plugin):
                 )
                 self.checkbox_effect_mapping = []
                 self.checkbox_parameter_mapping = []
-                starting_xpos = 570
-                starting_ypos = 90
+                starting_xpos = 170
+                starting_ypos = 290
                 counter = 0
                 for key, value in checkboxes.items():
                         cur_xpos = starting_xpos + 100 * (counter % 2)
@@ -303,6 +303,13 @@ class EufsLauncher(Plugin):
 
                         setattr(self, checkboxes[key]["name"].upper(), cur_cbox)
                         counter += 1
+
+                # Hide color and cone noise slider by default, since the average user shouldn't
+                # stumble upon them.
+                self.COLOR_NOISE_SLIDER.setVisible(False)
+                self.CONE_NOISE_SLIDER.setVisible(False)
+                self._widget.findChild(QLabel, "ConeColorNoiseLabel").setVisible(False)
+                self._widget.findChild(QLabel, "ConeNoiseLabel").setVisible(False)
 
                 # Read in default noise levels
                 self.set_noise_level(

@@ -54,11 +54,9 @@
       <lidarOn>true</lidarOn><!--If false, we only simulate camera measurements-->
       <coneFrame>base_footprint</coneFrame>
       <groundTruthConesTopicName>/ground_truth/cones</groundTruthConesTopicName>
-      <groundTruthConesWithoutCovarianceTopicName>/ground_truth/cones_without_covariance</groundTruthConesWithoutCovarianceTopicName>
       <groundTruthConeMarkersTopicName>/ground_truth/cones/viz</groundTruthConeMarkersTopicName>
       <simulatePerception>$(arg simulate_perception)</simulatePerception>
       <perceptionConesTopicName>/fusion/cones</perceptionConesTopicName>
-      <perceptionConesWithoutCovarianceTopicName>/fusion/cones_without_covariance</perceptionConesWithoutCovarianceTopicName>
       <perceptionConeMarkersTopicName>/fusion/cones/viz</perceptionConeMarkersTopicName>
       <perceptionCameraDepthNoiseParameterA>0.0184</perceptionCameraDepthNoiseParameterA>
       <perceptionCameraDepthNoiseParameterB>0.2106</perceptionCameraDepthNoiseParameterB>
