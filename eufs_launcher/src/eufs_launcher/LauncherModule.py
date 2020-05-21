@@ -65,8 +65,7 @@ class EufsLauncher(Plugin):
                 # `roslaunch eufs_launcher eufs_launcher.launch config:=example.yaml`
                 # Will load in example.yaml instead.
                 yaml_loc = os.path.join(
-                        rospkg.RosPack().get_path('eufs_launcher'),
-                        'resource',
+                        rospkg.RosPack().get_path(loc_to_load),
                         yaml_to_load.split(".")[0] + ".yaml"
                 )
                 with open(yaml_loc, 'r') as stream:
@@ -1073,7 +1072,7 @@ class EufsLauncher(Plugin):
                                 effect_off()
 
                 # Hard-Coded Map Effect
-                if self.FAST_SLAM_LOAD_MAP.isChecked():
+                if hasattr(self, "FAST_SLAM_LOAD_MAP") and self.FAST_SLAM_LOAD_MAP.isChecked():
                         in_path = os.path.join(
                                 self.GAZEBO,
                                 'tracks',

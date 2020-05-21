@@ -25,10 +25,6 @@ eufs_launcher:
             location: "launch/sbg_raw_data_simulator.launch"
             args: {"_imu_hz:=200", "_gps_hz:=5"}
 
-        localisation:
-            package: "evaluator_scripts"
-            location: "launch/simulation.launch"
-
 
     # Checkboxes to have in the config section.  
     # `eufs_launcher` handles layout based on priority set.
@@ -69,16 +65,6 @@ eufs_launcher:
                 if_on: {"publish_gt_tf:=true"}
                 if_off: {"publish_gt_tf:=false"}
 
-        fast_slam_load_map:
-            # This button also has a hardcoded effect
-            priority: 5
-            name: "Fast_SLAM_Load_Map"
-            label: "Load SLAM Map"
-            checked_on_default: No
-            ros_param_triggering:
-                param_name: "slam/map_load"
-                if_on: "true"
-                if_off: "false"
 
 
 

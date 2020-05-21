@@ -1,11 +1,18 @@
 <?xml version="1.0"?>
 <launch>
-  
-  <arg name="config" default="eufs_launcher"/>
+  <!--
+  `config_loc`; Package that the config file is in, for example `eufs_launcher` or `localisation_meta`
+  `config`; Filepath, within package, that the config file is located
+  `gui`; Whether or not to actually launch the gui of the launcher (if not, launcher auto-launches according
+    to its config file)
+  -->
+  <arg name="config" default="resource/eufs_launcher"/>
+  <arg name="config_loc" default="eufs_launcher"/>
   <arg name="gui" default="True"/>
 
   <node name="eufs_launcher" pkg="eufs_launcher" type="eufs_launcher">
     <param name="config" value="$(arg config)"/>
+    <param name="config_loc" value="$(arg config_loc)"/>
     <param name="gui" value="$(arg gui)"/>
   </node>
 
