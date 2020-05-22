@@ -44,6 +44,8 @@ eufs_launcher:
             label: "Use Simulated Perception"
             checked_on_default: Yes
             parameter_triggering:
+            # Note that this is working as intended - "no_perception" means
+            # No real perception!  In which case we use the simulated perception.
                 if_on: {"launch_group:=no_perception"}
                 if_off: {}
             

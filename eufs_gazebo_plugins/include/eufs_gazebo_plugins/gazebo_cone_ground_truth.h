@@ -119,11 +119,9 @@ namespace gazebo {
 
     // Publishers
     ros::Publisher ground_truth_cone_pub_;
-    ros::Publisher ground_truth_cone_without_covariance_pub_;
     ros::Publisher ground_truth_cone_marker_pub_;
 
     ros::Publisher perception_cone_pub_;
-    ros::Publisher perception_cone_without_covariance_pub_;
     ros::Publisher perception_cone_marker_pub_;
 
     // Gazebo variables

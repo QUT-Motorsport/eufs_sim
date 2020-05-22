@@ -149,7 +149,6 @@ namespace gazebo {
 
       this->ground_truth_cone_pub_.publish(ground_truth_cone_array_message);
       this->ground_truth_cone_marker_pub_.publish(ground_truth_cone_marker_array_message);
-      this->ground_truth_cone_without_covariance_pub_.publish(stripCovariance(ground_truth_cone_array_message));
     } else if (this->simulate_perception_ && (this->perception_cone_pub_.getNumSubscribers() > 0 || this->perception_cone_marker_pub_.getNumSubscribers() > 0)) {
       ground_truth_cone_array_message = getConeArrayMessage();
     }
@@ -160,7 +159,6 @@ namespace gazebo {
       visualization_msgs::MarkerArray perception_cone_marker_array_message = getConeMarkerArrayMessage(perception_cone_array_message);
 
       this->perception_cone_pub_.publish(perception_cone_array_message);
-      this->perception_cone_without_covariance_pub_.publish(stripCovariance(perception_cone_array_message));
       this->perception_cone_marker_pub_.publish(perception_cone_marker_array_message);
     }
 
@@ -430,7 +428,7 @@ namespace gazebo {
       auto y_noise = noise.Y();
 
       // But if only the camera sees it, we use camera noise specifically
-      if (!inFOVOfLidar(cone_array[i]) && !inRangeOfLidar(cone_array[i]))
+      if (!inFOVOfLidar(cone_array[i]) || !inRangeOfLidar(cone_array[i]))
       {
         auto dist = sqrt(
             cone_array[i].point.x * cone_array[i].point.x +
