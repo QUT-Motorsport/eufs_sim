@@ -1,5 +1,6 @@
 <?xml version="1.0"?>
-<robot name="eufs" xmlns:xacro="http://www.ros.org/wiki/xacro">
+<robot name="eufs" 
+    xmlns:xacro="http://www.ros.org/wiki/xacro">
 
 
     <!-- ***************** -->
@@ -12,8 +13,8 @@
     <xacro:arg name="publish_tf" default="false"/>
     <xacro:arg name="simulate_perception" default="false"/>
     <xacro:include filename="$(find eufs_description)/urdf/ads-dv_base.urdf.xacro">
-      <xacro:arg name="publish_tf" value="$(arg publish_tf)"/>
-      <xacro:arg name="simulate_perception" value="$(arg simulate_perception)"/>
+        <xacro:arg name="publish_tf" value="$(arg publish_tf)"/>
+        <xacro:arg name="simulate_perception" value="$(arg simulate_perception)"/>
     </xacro:include>
 
     <!-- Import Robotnik CAR wheels -->
@@ -29,7 +30,8 @@
     <xacro:property name="PI" value="3.1415926535897931"/>
 
     <!-- Wheel parameters -->
-    <xacro:property name="wheel_offset_x" value="1.0" />    <!-- x,y,z in translation from base_link to the center of the wheel -->
+    <xacro:property name="wheel_offset_x" value="1.0" />
+    <!-- x,y,z in translation from base_link to the center of the wheel -->
     <xacro:property name="wheel_offset_y" value="0.75" />
     <xacro:property name="wheel_offset_z" value="0.0" />
 
@@ -49,25 +51,18 @@
     <!-- Gazebo ros control pluggins -->
     <xacro:ros_control/>
 
-    <!-- Gazebo skid steering pluggins -->
-    <!-- xacro:skid_steering broadcastOdomTF="1"/ -->
-
     <!-- WHEELS -->
-
-    <!-- Wheels -->
-    <xacro:front_wheel lr_prefix="left" fr_prefix="front"
-        lr_reflect="1" fr_reflect="1"/>
-    <xacro:front_wheel lr_prefix="right" fr_prefix="front"
-        lr_reflect="-1" fr_reflect="1"/>
-    <xacro:rear_wheel lr_prefix="left" fr_prefix="rear"
-        lr_reflect="1" fr_reflect="-1"/>
-    <xacro:rear_wheel lr_prefix="right" fr_prefix="rear"
-        lr_reflect="-1" fr_reflect="-1"/>
+    <xacro:front_wheel lr_prefix="left" fr_prefix="front" lr_reflect="1" fr_reflect="1"/>
+    <xacro:front_wheel lr_prefix="right" fr_prefix="front" lr_reflect="-1" fr_reflect="1"/>
+    <xacro:rear_wheel lr_prefix="left" fr_prefix="rear" lr_reflect="1" fr_reflect="-1"/>
+    <xacro:rear_wheel lr_prefix="right" fr_prefix="rear" lr_reflect="-1" fr_reflect="-1"/>
 
 
-    <!-- MAIN SENSORS -->
+    <!-- *********************************************** -->
+    <!--                 MAIN SENSORS                    -->
+    <!-- *********************************************** -->
 
-<!--     LOCATIONS: (XYZ)
+    <!--     LOCATIONS: (XYZ)
     IMU: 0.0 0.0 0.170
     GPS: -0.110 0.0 0.9
     LIDAR: 1.700 0.0 -0.150
@@ -77,34 +72,30 @@
         <origin xyz="-0.0 0.0 0.0" rpy="0 0 0"/>
     </xacro:sensor_imu>
 
-
-    <xacro:sensor_gps  parent="base_footprint" prefix="gps">
+    <xacro:sensor_gps parent="base_footprint" prefix="gps">
         <origin xyz="0.0 0.0 0.4" rpy="0 0 0"/>
     </xacro:sensor_gps>
 
+    <!-- Simulate raw perception sensors only if we're not using the abstracted perception simulation -->
+    <xacro:unless value="$(arg simulate_perception)">
+        <xacro:VLP-16R parent="base_footprint" name="velodyne" topic="/velodyne_points" hz="10" samples="800">
+            <origin xyz="1.58 0.0 -0.1" rpy="0 ${1*M_PI/180.0} 0"/>
+        </xacro:VLP-16R>
 
-<!--     <xacro:sensor_hokuyo_utm30lx  parent="base_link" prefix="lidar" >
-        <origin xyz="1.700 0.0 -0.080" rpy="0 -0.0174533 0"/>
-    </xacro:sensor_hokuyo_utm30lx> -->
-
-
-    <!-- <xacro:VLP-16  parent="base_link" name="velodyne" topic="/velodyne_points" hz="10">
-        <origin xyz="1.700 0.0 -0.150" rpy="0 -0.0174533 0"/>
-    </xacro:VLP-16> -->
-
-    <xacro:VLP-16R  parent="base_footprint" name="velodyne" topic="/velodyne_points" hz="10" samples="800">
-        <origin xyz="1.58 0.0 -0.1" rpy="0 ${1*M_PI/180.0} 0"/>
-    </xacro:VLP-16R>
-
-    <xacro:zed_camera parent="base_footprint" prefix="zed">
-        <origin xyz="0.1 0.0 0.52" rpy="0 0 0"/>
-    </xacro:zed_camera>
+        <xacro:zed_camera parent="base_footprint" prefix="zed">
+            <origin xyz="0.1 0.0 0.52" rpy="0 0 0"/>
+        </xacro:zed_camera>
+    </xacro:unless>
 
 
-
+    <!-- *********************************************** -->
     <!-- EXTRA SENSORS FROM THE ROBOTNIK SENSORS LIBRARY -->
+    <!-- *********************************************** -->
 
-<!--
+    <!--     <xacro:sensor_hokuyo_utm30lx parent="base_link" prefix="lidar">
+        <origin xyz="1.700 0.0 -0.080" rpy="0 -0.0174533 0"/>
+    </xacro:sensor_hokuyo_utm30lx>
+
     <xacro:sensor_hokuyo3d name="hokuyo3d" parent="base_link">
         <origin xyz="0.9 0.0 0.450" rpy="0 0.35 0"/>
     </xacro:sensor_hokuyo3d>
@@ -129,23 +120,10 @@
         <origin xyz="0.0 0.0 0.45" rpy="0 0 0"/>
     </xacro:sensor_kinect>
 
-
-    <xacro:BB2-08S2C-60  prefix="bee" frame="bee" name="bee"/>
-
+    <xacro:BB2-08S2C-60 prefix="bee" frame="bee" name="bee"/>
 
     <xacro:sensor_fotonic name="fotonic" parent="base_link">
         <origin xyz="0.3 0.0 0.24" rpy="0 0 0"/>
     </xacro:sensor_fotonic>   -->
-
-
-
-    <!-- PLUGINS -->
-
-    <!-- ros control plugin -->
-<!--   <gazebo>
-    <plugin name="gazebo_ros_control" filename="libgazebo_ros_control.so"/>
-</gazebo> -->
-
-
 
 </robot>
