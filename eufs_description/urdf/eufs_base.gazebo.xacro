@@ -3,21 +3,6 @@
   <xacro:arg name="publish_tf" default="false"/>
   <xacro:arg name="simulate_perception" default="false"/>
 
-  <!-- ROS control plugin which controls all actuators in the simulation
-  This effectively looks in the namespace of the robot, finds the controller
-  interfaces based on a .yaml file (eufs_gazebo/config/eufs_control.yaml) -->
-  <xacro:macro name="ros_control">
-    <gazebo>
-      <plugin name="ros_control" filename="libgazebo_ros_control.so">
-        <robotNamespace>/eufs</robotNamespace>
-        <robotParam>robot_description</robotParam>
-        <controlPeriod>0.001</controlPeriod>
-        <robotSimType>gazebo_ros_control/DefaultRobotHWSim</robotSimType>
-        <legacyModeNS>true</legacyModeNS>
-      </plugin>
-    </gazebo>
-  </xacro:macro>
-
   <!-- Custom ROS plugin to simulate ground truth state in simulation.
   This node publishes nav_msgs/Odometry and eufs_msgs/CarState messages
   with added noise via parameters below. This node can additionally publish

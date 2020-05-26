@@ -24,14 +24,7 @@
         </geometry>
     </visual>
     <inertial>
-      <mass value="125.0" />
-      <origin xyz="0 0 0" />
-      <inertia  ixx="16.3"
-                ixy="0.004"
-                ixz="0.0"
-                iyy="33.6"
-                iyz="0.0"
-                izz="47.9" />
+      <xacro:chassis_inertial_params/>
     </inertial>
     <collision>
       <origin xyz="0 0 ${clearance}" rpy="0 0 0" />  <!-- height is the clearance -->

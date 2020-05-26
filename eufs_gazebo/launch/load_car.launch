@@ -33,7 +33,7 @@
   <arg name="car_dimensions_file" default="$(find eufs_description)/cars/$(arg robot_name)/config/distances.yaml"/>
 
   <param name="robot_description"
-         command="$(find xacro)/xacro --inorder '$(find eufs_description)/urdf/vehicle/car.xacro'
+         command="$(find xacro)/xacro --inorder '$(find eufs_description)/robots/ads-dv.urdf.xacro'
                                                 robot_name:='$(arg robot_name)'
                                                 vehicle_model:='$(arg vehicleModel)'
                                                 sensors_config_file:='$(arg sensors_config_file)'
