@@ -34,6 +34,7 @@
 #include "gazebo_utills.hpp"
 #include "config.hpp"
 #include "definitions.hpp"
+#include "state_machine.hpp"
 
 // ROS msgs
 #include "eufs_msgs/CarState.h"
@@ -70,7 +71,9 @@ public:
 
   void printInfo();
 
-protected:
+  StateMachine state_machine_;
+
+ protected:
   void setPositionFromWorld();
 
   void initModel(sdf::ElementPtr &_sdf);
@@ -102,7 +105,7 @@ protected:
   // ROS Nodehandle
   boost::shared_ptr<ros::NodeHandle> nh_;
 
-  // ROS Publishrs
+  // ROS Publishers
   ros::Publisher pub_car_state_;
 
   // ROS Subscribers

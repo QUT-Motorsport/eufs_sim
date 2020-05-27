@@ -340,7 +340,7 @@ class EUFSRobotSteeringGUI(Plugin):
         value = rospy.get_param('~default_input', value)
         self.input = value
 
-        value = instance_settings.value('topic', '/cmd_vel_out')
+        value = instance_settings.value('topic', '/rqt/command')
         value = rospy.get_param('~default_topic', value)
         self._widget.topic_line_edit.setText(value)
 

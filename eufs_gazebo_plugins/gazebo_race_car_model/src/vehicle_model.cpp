@@ -34,7 +34,8 @@ VehicleModel::VehicleModel(physics::ModelPtr &_model,
                  boost::shared_ptr<ros::NodeHandle> &nh,
                  transport::NodePtr &gznode)
   : nh_(nh),
-    model(_model)
+    model(_model),
+    state_machine_(nh)
 {
 
   // For the Gaussian Kernel random number generation
@@ -135,6 +136,8 @@ void VehicleModel::update(const double dt) {
 
   // TODO: Only do this if it is selected in the launcher
   publishTf();
+
+  state_machine_.spinOnce();
 }
 
 void VehicleModel::updateState(const double dt) {}
@@ -215,7 +218,9 @@ double VehicleModel::getSlipAngle(bool isFront) {
 }
 
 // TODO: Implement publishWheelSpeeds function
-void VehicleModel::publishWheelSpeeds() {}
+void VehicleModel::publishWheelSpeeds() {
+
+}
 
 void VehicleModel::publishTf() {
   // Position
@@ -232,8 +237,15 @@ void VehicleModel::publishTf() {
 }
 
 void VehicleModel::onCmd(const ackermann_msgs::AckermannDriveStampedConstPtr &msg) {
-  input_.delta = msg->drive.steering_angle;
-  input_.dc    = msg->drive.acceleration;
+  if (state_machine_.canDrive()) {
+    input_.delta = msg->drive.steering_angle;
+    input_.dc    = msg->drive.acceleration;
+  } else {
+    // TODO: Stop the car somehow
+    input_.delta = 0;
+    input_.dc    = -1;
+  }
+
   time_last_cmd_ = ros::Time::now().toSec();
 }
 

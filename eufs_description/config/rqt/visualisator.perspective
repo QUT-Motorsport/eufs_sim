@@ -152,7 +152,7 @@
               "keys": {
                 "topic": {
                   "type": "repr",
-                  "repr": "u'/cmd_vel'"
+                  "repr": "u'/rqt/command'"
                 },
                 "vx_min": {
                   "type": "repr",

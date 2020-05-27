@@ -33,7 +33,7 @@
               "keys": {
                 "topic": {
                   "type": "repr",
-                  "repr": "u'/cmd_vel_out'"
+                  "repr": "u'/rqt/command'"
                 },
                 "vx_min": {
                   "type": "repr",
@@ -80,7 +80,7 @@
               "keys": {
                 "topic": {
                   "type": "repr",
-                  "repr": "u'/cmd_vel'"
+                  "repr": "u'/rqt/command'"
                 },
                 "vx_min": {
                   "type": "repr",

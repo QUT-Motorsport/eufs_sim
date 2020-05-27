@@ -35,6 +35,7 @@ link_directories(
 
 add_library(gazebo_race_car_model SHARED
         src/gazebo_ros_race_car_model.cpp
+        src/state_machine.cpp
         src/vehicle_model.cpp
         src/fssim_model.cpp
         src/point_mass.cpp)
