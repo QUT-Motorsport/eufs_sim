@@ -34,8 +34,6 @@ include_directories(
 # needed because of setup.py
 catkin_python_setup()
 
-add_executable(ros_can_sim_node src/ros_can_sim.cpp)
-
 target_link_libraries(ros_can_sim_node
         ${catkin_LIBRARIES}
         )
