@@ -21,7 +21,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  *
- * @file ros_can_sim.h
+ * @file state_machine.hpp
  * @author EUFS
  * @date 09/06/2019
  * @copyright MIT License
@@ -32,8 +32,8 @@
  * and controls and interfaces with the ADS-DV car for the FSUK competition
  */
 
-#ifndef ROBOT_CONTROL_ROS_CAN_SIM_H
-#define ROBOT_CONTROL_ROS_CAN_SIM_H
+#ifndef ROBOT_CONTROL_STATE_MACHINE_H
+#define ROBOT_CONTROL_STATE_MACHINE_H
 
 #include <chrono>
 #include <thread>
@@ -162,4 +162,4 @@ private:
 
 };
 
-#endif //ROBOT_CONTROL_ROS_CAN_SIM_H
+#endif //ROBOT_CONTROL_STATE_MACHINE_H

@@ -21,7 +21,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  *
- * @file ros_can_sim.cpp
+ * @file state_machine.cpp
  * @author EUFS
  * @date 09/06/2019
  * @copyright MIT License
@@ -39,8 +39,6 @@
 
 StateMachine::StateMachine(boost::shared_ptr<ros::NodeHandle> &nh) : nh_(nh)
 {
-    ROS_INFO("ros_can_sim :: Starting ");
-
     // init state machine state
     as_state_ = as_state_type::AS_OFF;
     ami_state_ = ami_state_type::AMI_NOT_SELECTED;
@@ -152,7 +150,7 @@ void StateMachine::updateState()
 
                 // now transition to new state
                 as_state_ = as_state_type::AS_READY;
-                ROS_DEBUG("ros_can_sim :: switching to AS_READY state");
+                ROS_DEBUG("state_machine :: switching to AS_READY state");
             }
             break;
 
@@ -160,7 +158,7 @@ void StateMachine::updateState()
             if (driving_flag_)
             {
                 as_state_ = as_state_type::AS_DRIVING;
-                ROS_DEBUG("ros_can_sim :: switching to AS_DRIVING state");
+                ROS_DEBUG("state_machine :: switching to AS_DRIVING state");
             }
             break;
 
@@ -168,7 +166,7 @@ void StateMachine::updateState()
             if (!driving_flag_)
             {
                 as_state_ = as_state_type::AS_FINISHED;
-                ROS_DEBUG("ros_can_sim :: switching to AS_FINISHED state");
+                ROS_DEBUG("state_machine :: switching to AS_FINISHED state");
             }
             break;
 
@@ -281,7 +279,7 @@ std_msgs::String StateMachine::makeStateString(const eufs_msgs::CanState &state)
 
 void StateMachine::flagCallback(std_msgs::Bool msg)
 {
-    ROS_DEBUG("ros_can_sim :: setting driving flag to %d", msg.data);
+    ROS_DEBUG("state_machine :: setting driving flag to %d", msg.data);
     driving_flag_ = msg.data;
 }
 
