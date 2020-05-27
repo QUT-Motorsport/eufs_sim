@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <launch>
-
+  
   <!-- roslaunch arguments -->
   <env name="GAZEBO_MODEL_PATH" value="$(find eufs_description)"/>
   <env name="GAZEBO_RESOURCE_PATH" value="$(find eufs_description)"/>
@@ -8,15 +8,15 @@
   <arg name="debug" default="false"/>
   <arg name="gui" default="true"/>
   <arg name="cmd_timeout" default="0.5"/>
-
+  
   <!-- Vehicle pose -->
-  <arg name="x" default="16"/>
-  <arg name="y" default="70"/>
+  <arg name="x" default="53.0"/>
+  <arg name="y" default="11.0"/>
   <arg name="z" default="0.1"/>
   <arg name="roll" default="0.0"/>
   <arg name="pitch" default="0.0"/>
   <arg name="yaw" default="0.0"/>
-
+  
   <!-- Control Method Argument -->
   <arg name="controlMethod" default="speed"/>
   <arg name="show_rqt_gui" default="true"/>
@@ -35,7 +35,7 @@
 
   <!--Launch car & controller.-->
   <include file="$(find eufs_gazebo)/launch/load_car.launch">
-    <arg name="namespace" value="$(arg namespace)"/>
+     <arg name="namespace" value="$(arg namespace)"/>
     <arg name="x" default="$(arg x)"/>
     <arg name="y" default="$(arg y)"/>
     <arg name="z" default="$(arg z)"/>
@@ -49,4 +49,5 @@
     <arg name="launch_group" default="$(arg launch_group)"/>
   </include>
 
+  
 </launch>

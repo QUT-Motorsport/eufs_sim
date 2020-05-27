@@ -27,7 +27,7 @@
  * @copyright 2020 Edinburgh University Formula Student (EUFS)
  * @brief ground truth cone Gazebo plugin
  *
- * @details Provides ground truth cones in simulation in the form of `eufs_msgs/ConeArray`.
+ * @details Provides ground truth cones in simulation in the form of `eufs_msgs/ConeArrayWithCovariance`.
  * Can also simulate the perception stack by publishing cones with noise.
  **/
 
@@ -48,13 +48,16 @@
 
 #include <ros/ros.h>
 
+#include <eufs_msgs/ConeArrayWithCovariance.h>
 #include <eufs_msgs/ConeArray.h>
+#include <eufs_msgs/ConeWithCovariance.h>
 #include <eufs_msgs/PointArray.h>
 #include <eufs_msgs/CarState.h>
 #include <geometry_msgs/Point.h>
 #include <visualization_msgs/Marker.h>
 #include <visualization_msgs/MarkerArray.h>
 
+#include <cmath>
 
 namespace gazebo {
 
@@ -63,7 +66,7 @@ namespace gazebo {
   public:
 
     enum ConeType {
-      blue, yellow, orange, big_orange
+      blue, yellow, orange, big_orange, unknown
     };
 
     GazeboConeGroundTruth();
@@ -75,24 +78,27 @@ namespace gazebo {
     void UpdateChild();
 
     // Getting the cone arrays
-    eufs_msgs::ConeArray getConeArrayMessage();
+    eufs_msgs::ConeArrayWithCovariance getConeArrayMessage();
 
-    void addConeToConeArray(eufs_msgs::ConeArray &ground_truth_cone_array, physics::LinkPtr link);
+    void addConeToConeArray(eufs_msgs::ConeArrayWithCovariance &ground_truth_cone_array, physics::LinkPtr link);
 
-    void processCones(std::vector <geometry_msgs::Point> &points);
+    void processCones(eufs_msgs::ConeArrayWithCovariance &cones);
+
+    std::pair<std::vector<eufs_msgs::ConeWithCovariance>, std::vector<eufs_msgs::ConeWithCovariance>>
+      fovCones(std::vector<eufs_msgs::ConeWithCovariance> conesToCheck);
 
     GazeboConeGroundTruth::ConeType getConeType(physics::LinkPtr link);
 
     // Getting the cone marker array
-    visualization_msgs::MarkerArray getConeMarkerArrayMessage(eufs_msgs::ConeArray &cone_array_message);
+    visualization_msgs::MarkerArray getConeMarkerArrayMessage(eufs_msgs::ConeArrayWithCovariance &cone_array_message);
 
     int addConeMarkers(std::vector <visualization_msgs::Marker> &marker_array, int marker_id,
-                       std::vector <geometry_msgs::Point> cones, float red, float green, float blue, bool big);
+                       std::vector <eufs_msgs::ConeWithCovariance> cones, float red, float green, float blue, bool big);
 
     // Add noise to the cone arrays
-    eufs_msgs::ConeArray getConeArrayMessageWithNoise(eufs_msgs::ConeArray &ground_truth_cone_array_message, ignition::math::Vector3d noise);
+    eufs_msgs::ConeArrayWithCovariance getConeArrayMessageWithNoise(eufs_msgs::ConeArrayWithCovariance &ground_truth_cone_array_message, ignition::math::Vector3d noise);
 
-    void addNoiseToConeArray(std::vector<geometry_msgs::Point> &cone_array, ignition::math::Vector3d noise);
+    void addNoiseToConeArray(std::vector<eufs_msgs::ConeWithCovariance> &cone_array, ignition::math::Vector3d noise);
 
     double GaussianKernel(double mu, double sigma);
 
@@ -101,6 +107,15 @@ namespace gazebo {
     double getDoubleParameter(sdf::ElementPtr _sdf, const char* element, double default_value, const char* default_description);
     std::string getStringParameter(sdf::ElementPtr _sdf, const char* element, std::string default_value, const char* default_description);
     ignition::math::Vector3d getVector3dParameter(sdf::ElementPtr _sdf, const char* element, ignition::math::Vector3d default_value, const char* default_description);
+
+    // Strip away covariance
+    eufs_msgs::ConeArray stripCovariance(eufs_msgs::ConeArrayWithCovariance msg);
+
+    // Helper functions for determining whether a cone is in range
+    bool inRangeOfCamera(eufs_msgs::ConeWithCovariance cone);
+    bool inFOVOfCamera(eufs_msgs::ConeWithCovariance cone);
+    bool inRangeOfLidar(eufs_msgs::ConeWithCovariance cone);
+    bool inFOVOfLidar(eufs_msgs::ConeWithCovariance cone);
 
     // Publishers
     ros::Publisher ground_truth_cone_pub_;
@@ -116,8 +131,17 @@ namespace gazebo {
 
     // Parameters
 
-    double view_distance;
-    double fov;
+    double lidar_total_view_distance;
+    double camera_total_view_distance;
+    double lidar_min_view_distance;
+    double camera_min_view_distance;
+    double lidar_x_view_distance;
+    double lidar_y_view_distance;
+    double lidar_fov;
+    double camera_fov;
+    double camera_a;
+    double camera_b;
+    bool lidar_on;
 
     double update_rate_;
     ros::Time time_last_published;
@@ -126,7 +150,7 @@ namespace gazebo {
 
     bool simulate_perception_;
 
-    ignition::math::Vector3d perception_noise_;
+    ignition::math::Vector3d perception_lidar_noise_;
 
     // Required ROS gazebo plugin variables
     event::ConnectionPtr update_connection_;

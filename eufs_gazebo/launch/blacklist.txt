@@ -2,7 +2,12 @@
 blacklist.txt
 actually_load_car_torque.launch
 load_car_torque.launch
-eufs_control.launch
 load_car.launch
 sprint17.launch
 sbg_raw_data_simulator.launch
+ekf_sim_launcher.launch
+fastslam_evaluator.launch
+ekf_evaluator.launch
+LAST_LAUNCH.launch
+empty.launch
+perception_sensors_simulator.launch

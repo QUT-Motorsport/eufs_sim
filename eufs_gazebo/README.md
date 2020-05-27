@@ -1,12 +1,34 @@
 # eufs_gazebo
 This is the main simulation package which contains the simulation model of the car an several environments.
 
+## Nodes
+
+### sbg_raw_simulator.py
+Node that simulates the outputs of our sbg sensor
+
+#### Subscribers:
+`/imu` (of type `sensor_msgs/Imu`)
+`/gps`    (of type `sensor_msgs/NavSatFix`)
+
+#### Publishers:
+`/imu/nav_sat_fix` (of type `sensor_msgs/NavSatFix`)
+`/imu/data`    (of type `sensor_msgs/Imu`)
+
+### perception_sensors_simulator.py
+Node that applies the noise profile of perception sensors onto the ground truth
+cone output received from `cone_ground_truth.py`
+
+#### Subscribers:
+`ground_truth/all_cones` (of type `eufs_msgs/ConeArray`)
+
+#### Publishers:
+`/perception_sim/cones` (of type `eufs_msgs/ConeArrayWithCovariance`)
+
 ## Launches
 
 - `acceleration.launch` - Launches a simulation of the acceleration event at competition. 50m straight track.
 - `big_track.launch` - Launches a simulation of a relatively big artificially created track (100x100m).
 - `empty.launch` - Launches a simulation which only has the car without anything else.
-- `eufs_control.launch` - Launches the joint controller for the robot. This is also included in all other simulation launches. Without this the car can't move.
 - `skidpad.launch` - Launches a simulation of the skidpad event at competition. It's quite literally a figuire of 8.
 - `small_track.launch` - Launches a simulation of an artificially created small track. Better run this if you don't have a good performing computing.
 - `sprint17.launch` - Launches a simulation of the 2017 FSUK sprint event. This is the biggest simulation by far and will probably wreck your computer. Also nobody has bothered so far to colour code the cones on it.

@@ -104,7 +104,7 @@
     </property>
     <property name="font">
        <font>
-            <pointsize>7</pointsize>
+            <pointsize>10</pointsize>
        </font>
    </property>
   </widget>
@@ -113,8 +113,8 @@
   <widget class="QLabel" name="LauncherParametersLabel">
    <property name="geometry">
     <rect>
-     <x>520</x>
-     <y>10</y>
+     <x>120</x>
+     <y>210</y>
      <width>200</width>
      <height>27</height>
     </rect>
@@ -132,8 +132,8 @@
   <widget class="QLabel" name="LauncherParametersSubLabel">
    <property name="geometry">
     <rect>
-     <x>525</x>
-     <y>25</y>
+     <x>125</x>
+     <y>225</y>
      <width>200</width>
      <height>25</height>
     </rect>
@@ -151,13 +151,13 @@
   <!--Radio Buttons-->
   <!--To toggle between torque and speed controls.-->
   <!--If you add a new buttonGroup, don't forget to add it to the bottom of the file.-->
-  <widget class="QLabel" name="NoiseLabel">
+  <widget class="QLabel" name="ControlLabel">
     <property name="geometry">
        <rect>
-         <x>500</x>
-         <y>50</y>
+         <x>60</x>
+         <y>290</y>
          <width>150</width>
-         <height>15</height>
+         <height>30</height>
        </rect>
     </property>
     <property name="text">
@@ -165,23 +165,23 @@
     </property>
     <property name="font">
        <font>
-            <pointsize>7</pointsize>
+            <pointsize>9</pointsize>
        </font>
    </property>
   </widget>
   <widget class="QRadioButton" name="SpeedRadio">
     <property name="geometry">
       <rect>
-        <x>490</x>
-        <y>65</y>
-        <width>100</width>
-        <height>15</height>
+        <x>50</x>
+        <y>310</y>
+        <width>150</width>
+        <height>30</height>
       </rect>
     </property>
     <property name="maximumSize">
       <size>
         <width>16777215</width>
-        <height>15</height>
+        <height>30</height>
       </size>
     </property>
     <property name="layoutDirection">
@@ -205,16 +205,16 @@
   <widget class="QRadioButton" name="TorqueRadio">
     <property name="geometry">
       <rect>
-        <x>490</x>
-        <y>80</y>
-        <width>120</width>
-        <height>15</height>
+        <x>50</x>
+        <y>330</y>
+        <width>150</width>
+        <height>30</height>
       </rect>
     </property>
     <property name="maximumSize">
       <size>
         <width>16777215</width>
-        <height>15</height>
+        <height>30</height>
       </size>
     </property>
     <property name="text">
@@ -235,10 +235,10 @@
   <widget class="QLabel" name="VehicleModelLabel">
    <property name="geometry">
     <rect>
-     <x>500</x>
-     <y>100</y>
+     <x>60</x>
+     <y>350</y>
      <width>150</width>
-     <height>15</height>
+     <height>30</height>
     </rect>
    </property>
    <property name="text">
@@ -246,16 +246,16 @@
    </property>
    <property name="font">
     <font>
-     <pointsize>7</pointsize>
+     <pointsize>9</pointsize>
     </font>
    </property>
   </widget>
   <widget class="QComboBox" name="WhichVehicleModel">
    <property name="geometry">
     <rect>
-     <x>490</x>
-     <y>115</y>
-     <width>100</width>
+     <x>50</x>
+     <y>375</y>
+     <width>150</width>
      <height>30</height>
     </rect>
    </property>
@@ -272,18 +272,94 @@
    </property>
   </widget>
 
-  <!--Visualisator Launcher-->
-  <widget class="QCheckBox" name="VisualisatorCheckbox">
-  <property name="geometry">
-      <rect>
-        <x>610</x>
-        <y>70</y>
-        <width>150</width>
-        <height>30</height>
-      </rect>
+
+  <!--Slider-->
+  <!--This handles terrain noise generation-->
+  <widget class="QLabel" name="NoiseLabel">
+   <property name="geometry">
+    <rect>
+     <x>50</x>
+     <y>245</y>
+     <width>50</width>
+     <height>27</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>Object Noise:</string>
+   </property>
+   <property name="font">
+       <font>
+            <pointsize>7</pointsize>
+       </font>
+   </property>
+  </widget>
+  <widget class="QSlider" name="Noisiness">
+   <property name="geometry">
+    <rect>
+     <x>100</x>
+     <y>245</y>
+     <width>250</width>
+     <height>30</height>
+    </rect>
+   </property>
+   <property name="orientation">
+      <enum>Qt::Horizontal</enum>
     </property>
-    <property name="text" >
-      <string>Launch LIDAR Visualisator</string>
+    <property name="font">
+       <font>
+            <pointsize>7</pointsize>
+       </font>
+   </property>
+  </widget>
+  <widget class="QLabel" name="ObjectNoiseTooltip">
+   <property name="geometry">
+    <rect>
+     <x>100</x>
+     <y>260</y>
+     <width>50</width>
+     <height>27</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>Quantity of non-cone objects to place on the track.</string>
+   </property>
+   <property name="font">
+       <font>
+            <pointsize>7</pointsize>
+       </font>
+   </property>
+  </widget>
+
+  <!--This handles cone noise generation-->
+  <widget class="QLabel" name="ConeNoiseLabel">
+   <property name="geometry">
+    <rect>
+     <x>50</x>
+     <y>260</y>
+     <width>50</width>
+     <height>27</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>Cone Noise:</string>
+   </property>
+   <property name="font">
+       <font>
+            <pointsize>7</pointsize>
+       </font>
+   </property>
+  </widget>
+  <widget class="QSlider" name="ConeNoisiness">
+   <property name="geometry">
+    <rect>
+     <x>100</x>
+     <y>260</y>
+     <width>250</width>
+     <height>30</height>
+    </rect>
+   </property>
+   <property name="orientation">
+      <enum>Qt::Horizontal</enum>
     </property>
     <property name="font">
        <font>
@@ -292,59 +368,36 @@
    </property>
   </widget>
 
-  <!--Perception Launcher-->
-  <widget class="QCheckBox" name="PerceptionCheckbox">
-  <property name="geometry">
-      <rect>
-        <x>610</x>
-        <y>85</y>
-        <width>150</width>
-        <height>30</height>
-      </rect>
-    </property>
-    <property name="text" >
-      <string>Launch Perception Stack</string>
-    </property>
-    <property name="font">
+  <!--This handles cone color noise generation-->
+  <widget class="QLabel" name="ConeColorNoiseLabel">
+   <property name="geometry">
+    <rect>
+     <x>50</x>
+     <y>275</y>
+     <width>50</width>
+     <height>27</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>Color Noise:</string>
+   </property>
+   <property name="font">
        <font>
             <pointsize>7</pointsize>
        </font>
    </property>
   </widget>
-
-  <!--Gazebo Gui Launcher-->
-  <widget class="QCheckBox" name="GazeboGuiCheckbox">
-  <property name="geometry">
-      <rect>
-        <x>610</x>
-        <y>100</y>
-        <width>150</width>
-        <height>30</height>
-      </rect>
-    </property>
-    <property name="text" >
-      <string>Launch Gazebo Gui</string>
-    </property>
-    <property name="font">
-       <font>
-            <pointsize>7</pointsize>
-       </font>
+  <widget class="QSlider" name="ConeColorNoisiness">
+   <property name="geometry">
+    <rect>
+     <x>100</x>
+     <y>275</y>
+     <width>250</width>
+     <height>30</height>
+    </rect>
    </property>
-  </widget>
-
-
-  <!--Ground truth transformer-->
-  <widget class="QCheckBox" name="GroundTruthTransform">
-  <property name="geometry">
-      <rect>
-        <x>610</x>
-        <y>115</y>
-        <width>150</width>
-        <height>30</height>
-      </rect>
-    </property>
-    <property name="text" >
-      <string>Use Ground Truth TF</string>
+   <property name="orientation">
+      <enum>Qt::Horizontal</enum>
     </property>
     <property name="font">
        <font>
@@ -357,7 +410,7 @@
    <property name="geometry">
     <rect>
      <x>510</x>
-     <y>150</y>
+     <y>50</y>
      <width>200</width>
      <height>27</height>
     </rect>
@@ -376,7 +429,7 @@
    <property name="geometry">
     <rect>
      <x>490</x>
-     <y>165</y>
+     <y>65</y>
      <width>400</width>
      <height>27</height>
     </rect>
@@ -396,7 +449,7 @@
    <property name="geometry">
     <rect>
      <x>440</x>
-     <y>180</y>
+     <y>80</y>
      <width>100</width>
      <height>27</height>
     </rect>
@@ -414,7 +467,7 @@
    <property name="geometry">
     <rect>
      <x>535</x>
-     <y>180</y>
+     <y>80</y>
      <width>60</width>
      <height>30</height>
     </rect>
@@ -433,7 +486,7 @@
    <property name="geometry">
     <rect>
      <x>440</x>
-     <y>200</y>
+     <y>100</y>
      <width>100</width>
      <height>27</height>
     </rect>
@@ -451,7 +504,7 @@
    <property name="geometry">
     <rect>
      <x>535</x>
-     <y>200</y>
+     <y>100</y>
      <width>60</width>
      <height>30</height>
     </rect>
@@ -470,7 +523,7 @@
    <property name="geometry">
     <rect>
      <x>440</x>
-     <y>220</y>
+     <y>120</y>
      <width>100</width>
      <height>27</height>
     </rect>
@@ -488,7 +541,7 @@
    <property name="geometry">
     <rect>
      <x>535</x>
-     <y>220</y>
+     <y>120</y>
      <width>60</width>
      <height>30</height>
     </rect>
@@ -507,7 +560,7 @@
    <property name="geometry">
     <rect>
      <x>440</x>
-     <y>240</y>
+     <y>140</y>
      <width>100</width>
      <height>27</height>
     </rect>
@@ -525,7 +578,7 @@
    <property name="geometry">
     <rect>
      <x>535</x>
-     <y>240</y>
+     <y>140</y>
      <width>60</width>
      <height>30</height>
     </rect>
@@ -544,7 +597,7 @@
    <property name="geometry">
     <rect>
      <x>610</x>
-     <y>180</y>
+     <y>80</y>
      <width>100</width>
      <height>27</height>
     </rect>
@@ -562,7 +615,7 @@
    <property name="geometry">
     <rect>
      <x>705</x>
-     <y>180</y>
+     <y>80</y>
      <width>60</width>
      <height>30</height>
     </rect>
@@ -581,7 +634,7 @@
    <property name="geometry">
     <rect>
      <x>610</x>
-     <y>200</y>
+     <y>100</y>
      <width>100</width>
      <height>27</height>
     </rect>
@@ -599,7 +652,7 @@
    <property name="geometry">
     <rect>
      <x>705</x>
-     <y>200</y>
+     <y>100</y>
      <width>60</width>
      <height>30</height>
     </rect>
@@ -618,7 +671,7 @@
    <property name="geometry">
     <rect>
      <x>610</x>
-     <y>220</y>
+     <y>120</y>
      <width>100</width>
      <height>27</height>
     </rect>
@@ -636,7 +689,7 @@
    <property name="geometry">
     <rect>
      <x>705</x>
-     <y>220</y>
+     <y>120</y>
      <width>60</width>
      <height>30</height>
     </rect>
@@ -655,7 +708,7 @@
    <property name="geometry">
     <rect>
      <x>610</x>
-     <y>240</y>
+     <y>140</y>
      <width>100</width>
      <height>27</height>
     </rect>
@@ -673,7 +726,7 @@
    <property name="geometry">
     <rect>
      <x>705</x>
-     <y>240</y>
+     <y>140</y>
      <width>60</width>
      <height>30</height>
     </rect>
@@ -691,7 +744,7 @@
    <property name="geometry">
     <rect>
      <x>430</x>
-     <y>350</y>
+     <y>250</y>
      <width>100</width>
      <height>27</height>
     </rect>
@@ -709,7 +762,7 @@
    <property name="geometry">
     <rect>
      <x>430</x>
-     <y>368</y>
+     <y>268</y>
      <width>70</width>
      <height>20</height>
     </rect>
@@ -729,7 +782,7 @@
    <property name="geometry">
     <rect>
      <x>530</x>
-     <y>300</y>
+     <y>200</y>
      <width>170</width>
      <height>100</height>
     </rect>
@@ -739,7 +792,7 @@
     </property>
     <property name="font">
        <font>
-            <pointsize>5</pointsize>
+            <pointsize>10</pointsize>
        </font>
    </property>
   </widget>
@@ -750,7 +803,7 @@
    <property name="geometry">
     <rect>
      <x>470</x>
-     <y>270</y>
+     <y>170</y>
      <width>50</width>
      <height>27</height>
     </rect>
@@ -768,7 +821,7 @@
    <property name="geometry">
     <rect>
      <x>500</x>
-     <y>270</y>
+     <y>170</y>
      <width>250</width>
      <height>27</height>
     </rect>
@@ -785,7 +838,7 @@
   <property name="geometry">
       <rect>
         <x>430</x>
-        <y>300</y>
+        <y>200</y>
         <width>100</width>
         <height>30</height>
       </rect>
@@ -805,7 +858,7 @@
   <property name="geometry">
       <rect>
         <x>430</x>
-        <y>330</y>
+        <y>230</y>
         <width>100</width>
         <height>30</height>
       </rect>
@@ -814,182 +867,6 @@
       <string>Full Stack</string>
     </property>
     <property name="font">
-       <font>
-            <pointsize>7</pointsize>
-       </font>
-   </property>
-  </widget>
- 
-
-  <!-- Image launcher! -->
-  <widget class="QLabel" name="ImageLauncherLabel">
-   <property name="geometry">
-    <rect>
-     <x>130</x>
-     <y>210</y>
-     <width>200</width>
-     <height>27</height>
-    </rect>
-   </property>
-   <property name="text">
-    <string>Image Launcher</string>
-   </property>
-   <property name="font">
-       <font>
-            <pointsize>14</pointsize>
-       </font>
-   </property>
-  </widget>
-
-  <widget class="QLabel" name="ImageLauncherSubLabel">
-   <property name="geometry">
-    <rect>
-     <x>55</x>
-     <y>225</y>
-     <width>310</width>
-     <height>27</height>
-    </rect>
-   </property>
-   <property name="text">
-    <string>Launches a track image - great for introducing random noise!</string>
-   </property>
-   <property name="font">
-       <font>
-            <pointsize>8</pointsize>
-       </font>
-   </property>
-  </widget>
-
-
-  <!--Load From Image Button-->
-  <widget class="QPushButton" name="LoadFromImageButton">
-   <property name="geometry">
-    <rect>
-     <x>130</x>
-     <y>300</y>
-     <width>170</width>
-     <height>100</height>
-    </rect>
-   </property>
-   <property name="text" >
-      <string>Load Track From Image</string>
-    </property>
-    <property name="font">
-       <font>
-            <pointsize>7</pointsize>
-       </font>
-   </property>
-  </widget>
-
-  <!--Full Stack for Image Button -->
-  <widget class="QCheckBox" name="FullStackImageButton">
-  <property name="geometry">
-      <rect>
-        <x>60</x>
-        <y>300</y>
-        <width>100</width>
-        <height>30</height>
-      </rect>
-    </property>
-    <property name="text" >
-      <string>Full Stack</string>
-    </property>
-    <property name="font">
-       <font>
-            <pointsize>7</pointsize>
-       </font>
-   </property>
-  </widget>
-
-  <!-- Image Sketcher! -->
-  <widget class="QPushButton" name="SketcherButton">
-   <property name="geometry">
-    <rect>
-     <x>60</x>
-     <y>330</y>
-     <width>50</width>
-     <height>30</height>
-    </rect>
-   </property>
-   <property name="text" >
-      <string>Draw!</string>
-    </property>
-    <property name="font">
-       <font>
-            <pointsize>7</pointsize>
-       </font>
-   </property>
-  </widget>
-
-  <!--Slider-->
-  <!--This handles terrain noise generation-->
-  <widget class="QLabel" name="NoiseLabel">
-   <property name="geometry">
-    <rect>
-     <x>60</x>
-     <y>240</y>
-     <width>50</width>
-     <height>27</height>
-    </rect>
-   </property>
-   <property name="text">
-    <string>Noise:</string>
-   </property>
-   <property name="font">
-       <font>
-            <pointsize>7</pointsize>
-       </font>
-   </property>
-  </widget>
-  <widget class="QSlider" name="Noisiness">
-   <property name="geometry">
-    <rect>
-     <x>90</x>
-     <y>240</y>
-     <width>250</width>
-     <height>30</height>
-    </rect>
-   </property>
-   <property name="orientation">
-      <enum>Qt::Horizontal</enum>
-    </property>
-    <property name="font">
-       <font>
-            <pointsize>7</pointsize>
-       </font>
-   </property>
-  </widget>
-
-  <!--Drop-Down Box: Options added in code, impossible in a .ui file.-->
-  <!--This handles image selection.-->
-  <widget class="QLabel" name="ImageLabel">
-   <property name="geometry">
-    <rect>
-     <x>60</x>
-     <y>270</y>
-     <width>50</width>
-     <height>27</height>
-    </rect>
-   </property>
-   <property name="text">
-    <string>Image: </string>
-   </property>
-   <property name="font">
-       <font>
-            <pointsize>7</pointsize>
-       </font>
-   </property>
-  </widget>
-  <widget class="QComboBox" name="WhichImage">
-   <property name="geometry">
-    <rect>
-     <x>90</x>
-     <y>270</y>
-     <width>250</width>
-     <height>27</height>
-    </rect>
-   </property>
-   <property name="font">
        <font>
             <pointsize>7</pointsize>
        </font>
@@ -1154,7 +1031,7 @@
     </property>
     <property name="font">
        <font>
-            <pointsize>7</pointsize>
+            <pointsize>10</pointsize>
        </font>
    </property>
   </widget>
@@ -1269,7 +1146,7 @@
     </property>
     <property name="font">
        <font>
-            <pointsize>7</pointsize>
+            <pointsize>10</pointsize>
        </font>
    </property>
   </widget>

@@ -1,14 +1,15 @@
 <?xml version='1.0'?>
 <sdf version='1.6'>
-  <model name='%FILLNAME%'>
+  <model name='track'>
     %FILLDATA%
     <static>0</static>
     <allow_auto_disable>1</allow_auto_disable>
   </model>
 </sdf>
 $===$
-    <link name='link_0_clone_%LINKNUM%'>
+    <link name='%LINKTYPE%_%LINKNUM%'>
       <pose frame=''>%PLACEX% %PLACEY% 0.15 0 -0 0</pose>
+      %FILLCOVARIANCE%
       %FILLCOLLISION%
       <visual name="visual">
         <geometry>
@@ -35,8 +36,9 @@ $===$
         </geometry>
       </collision>
 $===$
-    <ghostlink name='link_0_clone_%LINKNUM%'>
+    <ghostlink name='%LINKTYPE%_%LINKNUM%'>
       <pose frame=''>%PLACEX% %PLACEY% 0.15 0 -0 0</pose>
+      %FILLCOVARIANCE%
       %FILLCOLLISION%
       <visual name="visual">
         <geometry>
@@ -46,3 +48,12 @@ $===$
         </geometry>
       </visual>
     </ghostlink>
+$===$
+      <covariance x="%XCOV%" y="%YCOV%" xy="%XYCOV%"/>
+$===$
+       <include>
+            <uri>%MODELNAME%</uri>
+            <pose>%PLACEX% %PLACEY% 0.15 0 0 0</pose>
+            <name>%LINKTYPE%_%LINKNUM%</name>
+            %FILLCOVARIANCE%
+        </include>
