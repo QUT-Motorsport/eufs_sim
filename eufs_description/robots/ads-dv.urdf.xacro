@@ -92,7 +92,7 @@
     <xacro:property name="suspension_joint_friction" value="0.1" />
 
     <!-- Wheels -->
-    <xacro:macro name="body_left_rear_wheel">
+    <xacro:macro name="left_rear_wheel">
         <joint name="rear_left_wheel_joint" type="continuous">
             <origin xyz="${-1 * wheelbase / 2}
                          ${1 * ((hex_hub_dist / 2) - axle_length)}
@@ -122,7 +122,7 @@
         </gazebo>
     </xacro:macro>
 
-    <xacro:macro name="body_right_rear_wheel">
+    <xacro:macro name="right_rear_wheel">
         <joint name="rear_right_wheel_joint" type="continuous">
             <parent link="base_footprint"/>
             <child link="right_rear_wheel"/>
@@ -152,7 +152,7 @@
         </gazebo>
     </xacro:macro>
 
-    <xacro:macro name="body_left_front_wheel">
+    <xacro:macro name="left_front_wheel">
         <joint name="left_steering_hinge_joint" type="revolute">
             <origin xyz="${1 * wheelbase / 2}
                          ${1 * ((hex_hub_dist / 2) - axle_length)}
@@ -200,7 +200,7 @@
         </gazebo>
     </xacro:macro>
 
-    <xacro:macro name="body_right_front_wheel">
+    <xacro:macro name="right_front_wheel">
         <joint name="right_steering_hinge_joint" type="revolute">
             <parent link="base_footprint"/>
             <child link="right_steering_hinge"/>
@@ -250,22 +250,22 @@
     <!-- ################################################################## -->
     <!-- #### Add the left rear wheel with its joints and tranmissions #### -->
     <!-- ################################################################## -->
-    <xacro:body_left_rear_wheel/>
+    <xacro:left_rear_wheel/>
 
     <!-- ################################################################### -->
     <!-- #### Add the right rear wheel with its joints and tranmissions #### -->
     <!-- ################################################################### -->
-    <xacro:body_right_rear_wheel/>
+    <xacro:right_rear_wheel/>
 
     <!-- ############################################################################## -->
     <!-- #### Add the left front wheel with its joints, steering and tranmissions #### -->
     <!-- ############################################################################## -->
-    <xacro:body_left_front_wheel/>
+    <xacro:left_front_wheel/>
 
     <!-- ############################################################################## -->
     <!-- #### Add the right front wheel with its joints, steering and tranmissions #### -->
     <!-- ############################################################################## -->
-    <xacro:body_right_front_wheel/>
+    <xacro:right_front_wheel/>
 
     <!-- *********************************************** -->
     <!--                 MAIN SENSORS                    -->

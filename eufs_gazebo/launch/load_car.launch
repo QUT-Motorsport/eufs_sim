@@ -26,7 +26,6 @@
 <!--                                                simulate_perception:=true"/>-->
 
   <arg name="robot_name" default="gotthard"/>
-  <param name="tf_prefix" value="/fssim/vehicle"/>
 
   <arg name="sensors_config_file" default="$(find eufs_description)/cars/$(arg robot_name)/config/sensors.yaml"/>
   <arg name="car_config_file"     default="$(find eufs_description)/cars/$(arg robot_name)/config/car.yaml"/>
@@ -57,8 +56,9 @@
   </group>
 
 
+  <!-- once the joint_state is published, run the robot_state_publisher, the namespace has to be adapted -->
   <!-- convert joint states to TF transforms for rviz, etc -->
-  <node name="fssim_robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher"
+  <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher"
         respawn="false" output="screen">
     <remap from="/joint_states" to="/fssim/joint_states" />
   </node>

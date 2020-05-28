@@ -34,10 +34,6 @@ include_directories(
 # needed because of setup.py
 catkin_python_setup()
 
-target_link_libraries(ros_can_sim_node
-        ${catkin_LIBRARIES}
-        )
-
 install(PROGRAMS nodes/ros_can_sim_gui
         DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
         )
