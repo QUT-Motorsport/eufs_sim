@@ -60,7 +60,7 @@
   <!-- convert joint states to TF transforms for rviz, etc -->
   <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher"
         respawn="false" output="screen">
-    <remap from="/joint_states" to="/fssim/joint_states" />
+    <remap from="/joint_states" to="/eufs/joint_states" />
   </node>
 
   <node name="spawn_platform" pkg="gazebo_ros" type="spawn_model" args="-urdf -param robot_description -model $(arg namespace)

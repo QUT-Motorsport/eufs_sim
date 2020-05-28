@@ -7,7 +7,7 @@
                 right_steering_hinge_joint, left_steering_hinge_joint
             </jointName>
             <updateRate>500.0</updateRate>
-            <robotNamespace>/fssim</robotNamespace>
+            <robotNamespace>/eufs</robotNamespace>
             <alwaysOn>true</alwaysOn>
         </plugin>
     </gazebo>
