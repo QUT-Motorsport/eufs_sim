@@ -77,10 +77,17 @@ private:
     x_dot.yaw = x.r;
     x_dot.v_x = (x.r * x.v_y) + (Fx - std::sin(u.delta) * (FyF_tot)) / m_lon;
     x_dot.v_y = ((std::cos(u.delta) * FyF_tot) + FyR_tot) / param_.inertia.m - (x.r * v_x);
+    /*
     x_dot.r   = ((std::cos(u.delta) * FyF_tot * param_.kinematic.l_F
-      + std::sin(u.delta) * (0/*FyF.left - FyF.right*/) * 0.5 * param_.kinematic.b_F)
+      + std::sin(u.delta) * (FyF.left - FyF.right) * 0.5 * param_.kinematic.b_F)
       - ((FyR_tot) * param_.kinematic.l_R)
       + M_TV) / param_.inertia.I_z;
+    */
+
+//    Simplified for FyF.left == FyF.right
+    x_dot.r  = (std::cos(u.delta) * FyF_tot * param_.kinematic.l_F - FyR_tot * param_.kinematic.l_R + M_TV)
+            / param_.inertia.I_z;
+
     x_dot.a_x = 0;
     x_dot.a_y = 0;
 
