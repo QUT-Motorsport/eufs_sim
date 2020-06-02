@@ -145,7 +145,7 @@ void VehicleModel::updateState(const double dt) {}
 void VehicleModel::setModelState() {
   // TODO: Make the z a parameter
   const ignition::math::Pose3d   pose(state_.x, state_.y, 0.274421, 0, 0.0, state_.yaw);
-  const ignition::math::Vector3d vel(state_.v_x, state_.v_y, 0.0);
+  const ignition::math::Vector3d vel(state_.v_x * cos(state_.yaw) - state_.v_y * sin(state_.yaw), state_.v_x * sin (state_.yaw) + state_.v_y * cos(state_.yaw), 0.0);
   const ignition::math::Vector3d angular(0.0, 0.0, state_.r);
   model->SetWorldPose(pose);
   model->SetAngularVel(angular);
