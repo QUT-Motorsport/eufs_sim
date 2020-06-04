@@ -15,6 +15,7 @@ tire:
   C: -1.38
   D: 1.60
   E: -0.58
+  radius: 0.2525
 
 aero:
   C_Down: # F_Downforce = C_Downforce*v_x^2; C_Downforce = a*b*c
@@ -55,7 +56,6 @@ steering_hinge:
     iyz: 0
     izz: 0.04
 
-# TODO: Delete drivetrain and torque_vectoring
 drivetrain:
   Cm1: 5000
   Cr0: 180

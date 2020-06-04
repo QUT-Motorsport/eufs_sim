@@ -64,12 +64,14 @@ struct Param {
         double C;
         double D;
         double E;
+        double radius;
         void print() {
             ROS_DEBUG("Tire: \n "
                       "\tB: %f\n"
                       "\tC: %f\n"
                       "\tD: %f\n"
-                      "\tE: %f", B, C, D, E);
+                      "\tE: %f"
+                      "\tradius: %f", B, C, D, E, radius);
         }
     };
 
@@ -83,7 +85,6 @@ struct Param {
         }
     };
 
-    // TODO: Remove DriveTrain from Param
     struct DriveTrain {
         int    nm_wheels;
         double inertia;
@@ -101,7 +102,6 @@ struct Param {
         }
     };
 
-  // TODO: Remove TorqueVectoring from Param
     struct TorqueVectoring {
         double K_FFW;
         double K_p;
@@ -120,7 +120,6 @@ struct Param {
     Kinematic       kinematic;
     Tire            tire;
     Aero            aero;
-  // TODO: Remove driveTrain and torqueVectoring from Param
     DriveTrain      driveTrain;
     TorqueVectoring torqueVectoring;
 };
@@ -165,6 +164,7 @@ struct convert<Param::Tire> {
         cType.C = node["C"].as<double>();
         cType.D = node["D"].as<double>() * cType.tire_coefficient;
         cType.E = node["E"].as<double>();
+        cType.radius = node["radius"].as<double>();
         ROS_DEBUG("LOADED Tire");
         cType.print();
         return true;
@@ -184,7 +184,6 @@ struct convert<Param::Aero> {
     }
 };
 
-// TODO: Remove DriveTrain from Param
 template<>
 struct convert<Param::DriveTrain> {
     static bool decode(const Node &node, Param::DriveTrain &cType) {
@@ -200,7 +199,6 @@ struct convert<Param::DriveTrain> {
     }
 };
 
-// TODO: Remove TorqueVectoring from Param
 template<>
 struct convert<Param::TorqueVectoring> {
     static bool decode(const Node &node, Param::TorqueVectoring &cType) {
@@ -224,7 +222,6 @@ inline void initParam(Param &param, std::string &yaml_file) {
     param.kinematic       = config["kinematics"].as<Param::Kinematic>();
     param.tire            = config["tire"].as<Param::Tire>();
     param.aero            = config["aero"].as<Param::Aero>();
-    // TODO: Remove driveTrain and torqueVectoring from Param
     param.driveTrain      = config["drivetrain"].as<Param::DriveTrain>();
     param.torqueVectoring = config["torque_vectoring"].as<Param::TorqueVectoring>();
 }

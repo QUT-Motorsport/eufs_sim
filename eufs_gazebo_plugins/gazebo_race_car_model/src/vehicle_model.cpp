@@ -43,6 +43,7 @@ VehicleModel::VehicleModel(physics::ModelPtr &_model,
 
   // ROS Publishers
   pub_car_state_    = nh->advertise<eufs_msgs::CarState>("/ground_truth/state", 1);
+  pub_wheel_speeds_  = nh->advertise<eufs_msgs::WheelSpeedsStamped>("/ros_can/wheel_speeds", 1);
 
   // ROS Subscribers
   sub_cmd_          = nh->subscribe("/cmd_vel_out", 1, &VehicleModel::onCmd, this);
@@ -130,8 +131,7 @@ void VehicleModel::update(const double dt) {
 void VehicleModel::updateState(const double dt) {}
 
 void VehicleModel::setModelState() {
-  // TODO: Make the z a parameter
-  const ignition::math::Pose3d   pose(state_.x, state_.y, 0.302494/*model->WorldPose().Pos().Z()*/, 0, 0.0, state_.yaw);
+  const ignition::math::Pose3d   pose(state_.x, state_.y, model->WorldPose().Pos().Z(), 0, 0.0, state_.yaw);
   const ignition::math::Vector3d vel(state_.v_x * cos(state_.yaw) - state_.v_y * sin(state_.yaw), state_.v_x * sin (state_.yaw) + state_.v_y * cos(state_.yaw), 0.0);
   const ignition::math::Vector3d angular(0.0, 0.0, state_.r);
   model->SetWorldPose(pose);
@@ -173,7 +173,7 @@ void VehicleModel::publishCarState() {
   car_state.slip_angle = getSlipAngle();
 
   // TODO: set state_of_charge
-  car_state.state_of_charge = 1000;
+  car_state.state_of_charge = 999;
 
   pub_car_state_.publish(car_state);
 }
@@ -209,7 +209,21 @@ double VehicleModel::getSlipAngle(bool isFront) {
 
 // TODO: Implement publishWheelSpeeds function
 void VehicleModel::publishWheelSpeeds() {
+  eufs_msgs::WheelSpeedsStamped wheel_speeds;
 
+  wheel_speeds.steering = input_.delta;
+
+  // TODO: Change these to a different value?
+  wheel_speeds.lf_speed = 0;
+  wheel_speeds.rf_speed = 0;
+
+  float PI = 3.14159265;
+  float wheel_circumference = PI * param_.tire.radius;
+
+  wheel_speeds.lb_speed = (state_.v_x / wheel_circumference) * 60;
+  wheel_speeds.rb_speed = (state_.v_x / wheel_circumference) * 60;
+
+  pub_wheel_speeds_.publish(wheel_speeds);
 }
 
 void VehicleModel::publishTf() {

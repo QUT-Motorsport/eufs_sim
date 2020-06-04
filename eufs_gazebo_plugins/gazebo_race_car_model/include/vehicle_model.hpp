@@ -38,6 +38,7 @@
 
 // ROS msgs
 #include "eufs_msgs/CarState.h"
+#include "eufs_msgs/WheelSpeedsStamped.h"
 #include "nav_msgs/Odometry.h"
 #include "geometry_msgs/PoseWithCovarianceStamped.h"
 #include "geometry_msgs/PoseWithCovariance.h"
@@ -107,6 +108,7 @@ protected:
 
   // ROS Publishers
   ros::Publisher pub_car_state_;
+  ros::Publisher pub_wheel_speeds_;
 
   // ROS Subscribers
   ros::Subscriber sub_cmd_;
