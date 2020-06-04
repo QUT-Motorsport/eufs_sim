@@ -10,64 +10,51 @@
 
   <xacro:macro name="eufs_base" params="name publish_bf hq">
 
-  <!-- Robot mechanical and motor parameters -->
-  <xacro:property name="PI" value="3.1415926535897931"/>
-  <xacro:property name="wheel_width" value="0.175" />
-  <!-- <xacro:property name="clearance" value="${tire_dia/2.0}" /> -->
-  <xacro:property name="clearance" value="0.0" />
+    <!-- Robot mechanical and motor parameters -->
+    <xacro:property name="PI" value="3.1415926535897931"/>
+    <xacro:property name="wheel_width" value="0.175" />
+  <!--   <xacro:property name="clearance" value="${tire_diameter/2.0}" />-->
+    <xacro:property name="clearance" value="0.0" />
 
-  <xacro:property name="base_mass" value="140"/>
-  <xacro:property name="base_x" value="0"/>
-  <xacro:property name="base_y" value="0"/>
-  <xacro:property name="base_z" value="0.1"/>
+    <!--  These are for the position of the center of mass  -->
+    <xacro:property name="base_mass" value="140"/>
 
-  <!-- BASE FOOTPRINT -->
-  <link name="base_footprint">
-    <visual>
-      <origin xyz="0 0 ${clearance}" rpy="0 0 0" />  <!-- height is the clearance -->
+    <!-- BASE FOOTPRINT -->
+    <link name="base_footprint"/>
+
+    <joint name="chassis_joint" type="fixed">
+      <parent link="base_footprint"/>
+      <child link="chassis"/>
+      <origin xyz="0 0 ${clearance}"
+              rpy="0 0 0"/>
+      <axis xyz="1 0 0"/>
+    </joint>
+
+    <link name="chassis">
+      <visual>
+        <origin xyz="0 0 ${clearance}" rpy="0 0 0" />
         <geometry>
           <mesh filename="package://eufs_description/meshes/ads-dv.dae"/>
         </geometry>
-    </visual>
-    <inertial>
-      <origin xyz="${base_x} ${base_y} ${base_z}" rpy="0 0 0" />
-      <mass value="${base_mass}" />
-      <inertia
-          ixx="16.3"
-          ixy="0"
-          ixz="0"
-          iyy="33.6"
-          iyz="0"
-          izz="47.9" />
-    </inertial>
-    <collision>
-      <origin xyz="0 0 ${clearance}" rpy="0 0 0" />  <!-- height is the clearance -->
-      <geometry>
-        <mesh filename="package://eufs_description/meshes/ads-dv.dae"/>
-      </geometry>
-    </collision>
-  </link>
-
-  <link name="odom_ground_truth">
-    <collision>
-      <geometry>
-        <box size="0.1 0.1 0.1"/>
-      </geometry>
-    </collision>
-    <inertial>
-      <mass value="1e-5" />
-      <origin xyz="0 0 0" rpy="0 0 0"/>
-      <inertia ixx="1e-6" ixy="0" ixz="0" iyy="1e-6" iyz="0" izz="1e-6" />
-    </inertial>
-  </link>
-
-  <joint name="odom_ground_truth_joint" type="fixed">
-    <axis xyz="0 0 0" />
-    <origin xyz="0 0 0" rpy="0 0 0"/>
-    <parent link="base_footprint"/>
-    <child link="odom_ground_truth"/>
-  </joint>
-
+      </visual>
+      <inertial>
+        <origin xyz="0 0 ${clearance}" rpy="0 0 0" />
+        <mass value="${base_mass}" />
+        <inertia
+            ixx="16.3"
+            ixy="0"
+            ixz="0"
+            iyy="33.6"
+            iyz="0"
+            izz="47.9" />
+      </inertial>
+      <collision>
+        <origin xyz="0 0 ${clearance}" rpy="0 0 0" />  <!-- height is the clearance -->
+        <geometry>
+          <mesh filename="package://eufs_description/meshes/ads-dv.dae"/>
+        </geometry>
+      </collision>
+    </link>
 
   </xacro:macro>
 </robot>
