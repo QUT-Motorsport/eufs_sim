@@ -9,8 +9,6 @@
     <xacro:include filename="$(find eufs_description)/urdf/vehicle/inertias.xacro"/>
     <xacro:include filename="$(find eufs_description)/urdf/wheels.urdf.xacro"/>
 
-    <xacro:include filename="$(find eufs_description)/urdf/vehicle/plugins.gazebo"/>
-
     <!-- ***************** -->
     <!-- Imported elements -->
     <!-- ***************** -->
