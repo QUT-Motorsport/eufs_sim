@@ -16,6 +16,10 @@
   <!-- <xacro:property name="clearance" value="${tire_dia/2.0}" /> -->
   <xacro:property name="clearance" value="0.0" />
 
+  <xacro:property name="base_mass" value="140"/>
+  <xacro:property name="base_x" value="0"/>
+  <xacro:property name="base_y" value="0"/>
+  <xacro:property name="base_z" value="0.1"/>
 
   <!-- BASE FOOTPRINT -->
   <link name="base_footprint">
@@ -26,7 +30,15 @@
         </geometry>
     </visual>
     <inertial>
-      <xacro:chassis_inertial_params/>
+      <origin xyz="${base_x} ${base_y} ${base_z}" rpy="0 0 0" />
+      <mass value="${base_mass}" />
+      <inertia
+          ixx="16.3"
+          ixy="0"
+          ixz="0"
+          iyy="33.6"
+          iyz="0"
+          izz="47.9" />
     </inertial>
     <collision>
       <origin xyz="0 0 ${clearance}" rpy="0 0 0" />  <!-- height is the clearance -->
