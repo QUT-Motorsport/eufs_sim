@@ -1,17 +1,7 @@
 <?xml version="1.0"?>
 <robot name="wheels" xmlns:xacro="http://www.ros.org/wiki/xacro">
 
-  <xacro:property name="tire_diameter" value="0.505"/>
-  <xacro:property name="tire_width" value="0.2"/>
-
-  <xacro:property name="wheel_mass" value="10.0"/>   <!-- check -->
-
   <xacro:property name="degrees_90" value="1.5708"/>
-
-  <xacro:property name="wheelbase" value="1.530"/>
-  <xacro:property name="hex_hub_dist" value="1.201"/>  <!-- track/width of the car -->
-  <xacro:property name="axle_length" value="0.120"/>
-  <xacro:property name="wheel_travel" value="0.05"/>
 
   <!-- Description of the wheel itself -->
   <xacro:macro name="wheel"
@@ -19,14 +9,14 @@
     <link name="${lr_prefix}_${fr_prefix}_wheel">
       <inertial>
         <origin xyz="0 0 0" rpy="0 0 0" />
-        <mass value="${wheel_mass}"/>
+        <mass value="${config['wheel']['mass']}"/>
         <inertia
-            ixx="0.3"
-            ixy="0"
-            ixz="0"
-            iyy="0.2"
-            iyz="0"
-            izz="0.2"   />
+            ixx="${config['wheel']['inertia']['ixx']}"
+            ixy="${config['wheel']['inertia']['ixy']}"
+            ixz="${config['wheel']['inertia']['ixz']}"
+            iyy="${config['wheel']['inertia']['iyy']}"
+            iyz="${config['wheel']['inertia']['iyz']}"
+            izz="${config['wheel']['inertia']['izz']}"   />
       </inertial>
 
       <visual>
@@ -38,9 +28,9 @@
       </visual>
 
       <collision>
-        <origin xyz="0 0 0" rpy="0 0 0"/>
+        <origin xyz="0 0 0" rpy="${degrees_90} 0 0"/>
         <geometry>
-          <cylinder radius="${tire_diameter / 2}" length="${tire_width}"/>
+          <cylinder radius="${config['wheel']['diameter'] / 2}" length="${config['wheel']['width']}"/>
         </geometry>
       </collision>
     </link>
@@ -55,27 +45,27 @@
                params="lr_prefix lr_reflect">
 
     <joint name="${lr_prefix}_steering_hinge_joint" type="revolute">
-      <origin xyz="${1 * wheelbase / 2}
-                   ${lr_reflect * ((hex_hub_dist / 2) - axle_length)}
-                   ${-wheel_travel}"
+      <origin xyz="${1 * config['wheel']['wheelbase'] / 2}
+                   ${lr_reflect * ((config['wheel']['hex_hub_dist'] / 2) - config['wheel']['axle_length'])}
+                   ${-config['wheel']['wheel_travel']}"
               rpy="0 0 0"/>
       <parent link="base_footprint"/>
       <child link="${lr_prefix}_steering_hinge"/>
       <axis xyz="0 0 1"/>
-      <limit lower="-0.8727" upper="0.8727" effort="10000000" velocity="1000000"/>
+      <limit lower="${config['wheel']['wheelbase'] * -1}" upper="${config['wheel']['wheelbase']}" effort="10000000" velocity="1000000"/>
     </joint>
 
     <link name="${lr_prefix}_steering_hinge">
       <inertial>
         <origin xyz="0 0 0" rpy="0 0 0" />
-        <mass value="1" />
+        <mass value="${config['steering_hinge']['mass']}"/>
         <inertia
-            ixx="0.004"
-            ixy="0"
-            ixz="0"
-            iyy="0.004"
-            iyz="0"
-            izz="0.004"   />
+            ixx="${config['steering_hinge']['inertia']['ixx']}"
+            ixy="${config['steering_hinge']['inertia']['ixy']}"
+            ixz="${config['steering_hinge']['inertia']['ixz']}"
+            iyy="${config['steering_hinge']['inertia']['iyy']}"
+            iyz="${config['steering_hinge']['inertia']['iyz']}"
+            izz="${config['steering_hinge']['inertia']['izz']}"   />
       </inertial>
     </link>
 
@@ -85,6 +75,7 @@
       <parent link="${lr_prefix}_steering_hinge"/>
       <child link="${lr_prefix}_front_wheel"/>
       <axis xyz="0 1 0"/>
+      <limit lower="0" upper="0" effort="10000000" velocity="1000000"/>
     </joint>
 
     <xacro:wheel lr_prefix="${lr_prefix}" fr_prefix="front"/>
@@ -95,13 +86,14 @@
                params="lr_prefix lr_reflect">
 
     <joint name="rear_${lr_prefix}_wheel_joint" type="continuous">
-      <origin xyz="${-1 * wheelbase / 2}
-                   ${lr_reflect * ((hex_hub_dist / 2) - axle_length)}
-                   ${-wheel_travel}"
+      <origin xyz="${-1 * config['wheel']['wheelbase'] / 2}
+                   ${lr_reflect * ((config['wheel']['hex_hub_dist'] / 2) - config['wheel']['axle_length'])}
+                   ${-config['wheel']['wheel_travel']}"
               rpy="0 0 0"/>
       <parent link="base_footprint"/>
       <child link="${lr_prefix}_rear_wheel"/>
       <axis xyz="0 1 0"/>
+      <limit lower="0" upper="0" effort="10000000" velocity="1000000"/>
     </joint>
 
     <xacro:wheel lr_prefix="${lr_prefix}" fr_prefix="rear"/>

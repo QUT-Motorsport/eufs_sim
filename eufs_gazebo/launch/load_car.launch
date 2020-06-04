@@ -30,6 +30,8 @@
   <arg name="sensors_config_file" default="$(find eufs_description)/cars/$(arg robot_name)/config/sensors.yaml"/>
   <arg name="car_config_file"     default="$(find eufs_description)/cars/$(arg robot_name)/config/car.yaml"/>
   <arg name="car_dimensions_file" default="$(find eufs_description)/cars/$(arg robot_name)/config/distances.yaml"/>
+  <arg name="config_file" default="$(find eufs_description)/robots/ads-dv/config.yaml"/>
+
 
   <!-- Change the simulate_perception parameter based on the launch group -->
   <group if="$(eval arg('launch_group')=='no_perception')">
@@ -39,6 +41,7 @@
                                                 vehicle_model:='$(arg vehicleModel)'
                                                 sensors_config_file:='$(arg sensors_config_file)'
                                                 car_config_file:='$(arg car_config_file)'
+                                                config_file:='$(arg config_file)'
                                                 car_dimensions_file:='$(arg car_dimensions_file)'
                                                 publish_tf:=$(arg publish_gt_tf)
                                                 simulate_perception:=true"/>  <!-- Should simulate perception if in no_perception launch group -->

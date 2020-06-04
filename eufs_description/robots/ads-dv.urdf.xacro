@@ -6,6 +6,8 @@
     <xacro:property name="car_settings" value="${load_yaml('$(arg car_config_file)')}"/>
     <xacro:property name="dist" value="${load_yaml('$(arg car_dimensions_file)')}"/>
 
+    <xacro:property name="config" value="${load_yaml('$(arg config_file)')}"/>
+
     <xacro:include filename="$(find eufs_description)/urdf/wheels.urdf.xacro"/>
 
     <!-- ***************** -->
