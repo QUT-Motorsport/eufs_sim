@@ -21,11 +21,6 @@
    and the steering angle of the wheels -->
   <gazebo>
     <plugin name="race_car" filename="libgazebo_race_car_model.so">
-      <chassis>base_link</chassis>
-      <base_link>base_link</base_link>
-      <cog_link>cog</cog_link>
-      <robot_name>$(arg robot_name)</robot_name>
-
       <vehicle_model>$(arg vehicle_model)</vehicle_model>
 
       <front_left_wheel>front_left_wheel_joint</front_left_wheel>
@@ -37,8 +32,7 @@
       <rear_left_wheel>rear_left_wheel_joint</rear_left_wheel>
       <rear_right_wheel>rear_right_wheel_joint</rear_right_wheel>
 
-      <yaml_config>$(arg car_config_file)</yaml_config>
-      <yaml_sensors>$(arg sensors_config_file)</yaml_sensors>
+      <yaml_config>$(arg config_file)</yaml_config>
     </plugin>
   </gazebo>
 

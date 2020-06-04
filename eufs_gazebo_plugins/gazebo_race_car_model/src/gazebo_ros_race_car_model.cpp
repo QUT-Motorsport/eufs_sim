@@ -46,6 +46,7 @@ RaceCarModelPlugin::~RaceCarModelPlugin() {
 
 void RaceCarModelPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf) {
   ROS_INFO("Loading RaceCarModelPlugin");
+  // TODO: Move this message to where params are actually loading
   ROS_INFO("RaceCarModelPlugin loading params");
 
   this->model = _model;

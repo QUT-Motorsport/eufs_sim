@@ -74,14 +74,6 @@ void VehicleModel::setPositionFromWorld() {
 }
 
 void VehicleModel::initModel(sdf::ElementPtr &_sdf) {
-  // Chassis link
-  std::string chassisLinkName = model->GetName() + "::" + _sdf->Get<std::string>("chassis");
-  getLink(chassisLink, model, chassisLinkName);
-
-  // Base link
-  std::string baseLinkName = model->GetName() + "::" + _sdf->Get<std::string>("base_link");
-  getLink(base_link_, model, baseLinkName);
-
   // Steering joints
   std::string leftSteeringJointName = model->GetName() + "::" + _sdf->Get<std::string>("front_left_wheel_steering");
   left_steering_joint = model->GetJoint(leftSteeringJointName);
@@ -102,15 +94,10 @@ void VehicleModel::initModel(sdf::ElementPtr &_sdf) {
 }
 
 void VehicleModel::initVehicleParam(sdf::ElementPtr &_sdf) {
-  robot_name_ = getParam<std::string>(_sdf, "robot_name");
-
   std::string yaml_name = "config.yaml";
-
   yaml_name = getParam(_sdf, "yaml_config", yaml_name);
-  initParam(param_, yaml_name);
 
-  yaml_name = getParam(_sdf, "yaml_sensors", yaml_name);
-  initParamSensors(param_, yaml_name);
+  initParam(param_, yaml_name);
 }
 
 // TODO: Update this function
@@ -144,7 +131,7 @@ void VehicleModel::updateState(const double dt) {}
 
 void VehicleModel::setModelState() {
   // TODO: Make the z a parameter
-  const ignition::math::Pose3d   pose(state_.x, state_.y, 0.274421, 0, 0.0, state_.yaw);
+  const ignition::math::Pose3d   pose(state_.x, state_.y, 0.302494/*model->WorldPose().Pos().Z()*/, 0, 0.0, state_.yaw);
   const ignition::math::Vector3d vel(state_.v_x * cos(state_.yaw) - state_.v_y * sin(state_.yaw), state_.v_x * sin (state_.yaw) + state_.v_y * cos(state_.yaw), 0.0);
   const ignition::math::Vector3d angular(0.0, 0.0, state_.r);
   model->SetWorldPose(pose);
@@ -158,7 +145,8 @@ void VehicleModel::publishCarState() {
   eufs_msgs::CarState car_state;
   car_state.header.stamp = ros::Time::now();
 
-  car_state.child_frame_id = robot_name_;
+  // TODO: Check what the child_frame_id of the car state should be
+  car_state.child_frame_id = "eufs";
 
   geometry_msgs::PoseWithCovariance pose;
   // TODO: set pose
@@ -172,7 +160,8 @@ void VehicleModel::publishCarState() {
   // TODO: set linear_acceleration
   car_state.linear_acceleration = linear_acceleration;
 
-  // Overlay Noise on Velocities
+  // TODO: Overlay Noise on Velocities
+  // The param_.sensors does not exist anymore
   // state_pub.vx += GaussianKernel(0.0, param_.sensors.noise_vx_sigma);
   // state_pub.vy += GaussianKernel(0.0, param_.sensors.noise_vy_sigma);
   // state_pub.r += GaussianKernel(0.0, param_.sensors.noise_r_sigma);

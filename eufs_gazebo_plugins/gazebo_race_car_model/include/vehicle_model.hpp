@@ -118,10 +118,6 @@ protected:
   /// Pointer to the parent model
   physics::ModelPtr model;
 
-  /// Chassis link and Base Link
-  physics::LinkPtr chassisLink;
-  physics::LinkPtr base_link_;
-
   // Steering joints
   physics::JointPtr left_steering_joint;
   physics::JointPtr right_steering_joint;
@@ -139,9 +135,6 @@ protected:
   State state_;
   Input input_;
   double time_last_cmd_;
-
-  // Name of the System
-  std::string robot_name_;
 
   // Gaussian Kernel for random number generation
   unsigned int seed;

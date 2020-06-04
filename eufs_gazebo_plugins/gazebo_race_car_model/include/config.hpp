@@ -30,15 +30,13 @@
 struct Param {
     struct Inertia {
         double m;
-        double m_driver;
         double g;
         double I_z;
         void print() {
             ROS_DEBUG("Inertia: \n "
                       "\tm: %f\n"
-                      "\tm_driver: %f\n"
                       "\tg: %f\n"
-                      "\tI_z: %f", m, m_driver, g, I_z);
+                      "\tI_z: %f", m, g, I_z);
         }
     };
 
@@ -49,7 +47,6 @@ struct Param {
         double w_front;
         double l_F;
         double l_R;
-        double h_cg;
         void print() {
             ROS_DEBUG("Kinematic: \n "
                       "\tl: %f\n"
@@ -57,8 +54,7 @@ struct Param {
                       "\tb_R: %f\n"
                       "\tw_front: %f\n"
                       "\tl_F: %f\n"
-                      "\tl_R: %f\n"
-                      "\th_cg: %f", l, b_F, b_R, w_front, l_F, l_R, h_cg);
+                      "\tl_R: %f\n", l, b_F, b_R, w_front, l_F, l_R);
         }
     };
 
@@ -87,6 +83,7 @@ struct Param {
         }
     };
 
+    // TODO: Remove DriveTrain from Param
     struct DriveTrain {
         int    nm_wheels;
         double inertia;
@@ -104,6 +101,7 @@ struct Param {
         }
     };
 
+  // TODO: Remove TorqueVectoring from Param
     struct TorqueVectoring {
         double K_FFW;
         double K_p;
@@ -118,26 +116,13 @@ struct Param {
         }
     };
 
-    struct Sensors {
-        double noise_vx_sigma;
-        double noise_vy_sigma;
-        double noise_r_sigma;
-
-        void print() {
-            ROS_DEBUG("Sensors: \n "
-                      "\tnoise_vx_sigma: %f\n"
-                      "\tnoise_vy_sigma: %f\n"
-                      "\tnoise_r_sigma: %f", noise_vx_sigma, noise_vy_sigma, noise_r_sigma);
-        }
-    };
-
     Inertia         inertia;
     Kinematic       kinematic;
     Tire            tire;
     Aero            aero;
+  // TODO: Remove driveTrain and torqueVectoring from Param
     DriveTrain      driveTrain;
     TorqueVectoring torqueVectoring;
-    Sensors         sensors;
 };
 
 namespace YAML {
@@ -145,7 +130,6 @@ template<>
 struct convert<Param::Inertia> {
     static bool decode(const Node &node, Param::Inertia &cType) {
         cType.m        = node["m"].as<double>();
-        cType.m_driver = node["m_driver"].as<double>();
         cType.g        = node["g"].as<double>();
         cType.I_z      = node["I_z"].as<double>();
         ROS_DEBUG("LOADED Inertia");
@@ -161,7 +145,6 @@ struct convert<Param::Kinematic> {
         cType.b_F     = node["b_F"].as<double>();
         cType.b_R     = node["b_R"].as<double>();
         cType.w_front = node["w_front"].as<double>();
-        cType.h_cg    = node["h_cg"].as<double>();
         cType.l_F     = cType.l * (1 - cType.w_front);
         cType.l_R     = cType.l * cType.w_front;
         ROS_DEBUG("LOADED Kinematic");
@@ -201,6 +184,7 @@ struct convert<Param::Aero> {
     }
 };
 
+// TODO: Remove DriveTrain from Param
 template<>
 struct convert<Param::DriveTrain> {
     static bool decode(const Node &node, Param::DriveTrain &cType) {
@@ -216,6 +200,7 @@ struct convert<Param::DriveTrain> {
     }
 };
 
+// TODO: Remove TorqueVectoring from Param
 template<>
 struct convert<Param::TorqueVectoring> {
     static bool decode(const Node &node, Param::TorqueVectoring &cType) {
@@ -229,39 +214,19 @@ struct convert<Param::TorqueVectoring> {
     }
 };
 
-template<>
-struct convert<Param::Sensors> {
-    static bool decode(const Node &node, Param::Sensors &cType) {
-        cType.noise_vx_sigma = node["noise_vx_sigma"].as<double>();
-        cType.noise_vy_sigma = node["noise_vy_sigma"].as<double>();
-        cType.noise_r_sigma  = node["noise_r_sigma"].as<double>();
-        ROS_DEBUG("LOADED Sensors");
-        cType.print();
-        return true;
-    }
-};
-
 }
 
 inline void initParam(Param &param, std::string &yaml_file) {
     YAML::Node config = YAML::LoadFile(yaml_file);
     ROS_DEBUG("STARTING THIS YAML CraP: %s ********************************", yaml_file.c_str());
-    const auto car    = config["car"];
 
-    param.inertia         = car["inertia"].as<Param::Inertia>();
-    param.kinematic       = car["kinematics"].as<Param::Kinematic>();
-    param.tire            = car["tire"].as<Param::Tire>();
-    param.aero            = car["aero"].as<Param::Aero>();
-    param.driveTrain      = car["drivetrain"].as<Param::DriveTrain>();
-    param.torqueVectoring = car["torque_vectoring"].as<Param::TorqueVectoring>();
-}
-
-inline void initParamSensors(Param &param, std::string &yaml_file) {
-    YAML::Node config = YAML::LoadFile(yaml_file);
-    ROS_DEBUG("STARTING SENSORS THIS YAML: %s ********************************", yaml_file.c_str());
-    const auto car    = config["sensors"];
-
-    param.sensors = car["velocity"].as<Param::Sensors>();
+    param.inertia         = config["inertia"].as<Param::Inertia>();
+    param.kinematic       = config["kinematics"].as<Param::Kinematic>();
+    param.tire            = config["tire"].as<Param::Tire>();
+    param.aero            = config["aero"].as<Param::Aero>();
+    // TODO: Remove driveTrain and torqueVectoring from Param
+    param.driveTrain      = config["drivetrain"].as<Param::DriveTrain>();
+    param.torqueVectoring = config["torque_vectoring"].as<Param::TorqueVectoring>();
 }
 
 #endif //FSSIM_GAZEBO_CONFIG_HPP_HPP

@@ -37,6 +37,10 @@
 
     <gazebo reference="${lr_prefix}_${fr_prefix}_wheel">
       <material>Gazebo/Black</material>
+      <mu1>${config['wheel']['friction']}</mu1>
+      <mu2>${config['wheel']['friction']}</mu2>
+      <!-- <minDepth>0.005</minDepth> -->
+      <kp>${config['wheel']['kp']}</kp>
     </gazebo>
   </xacro:macro>
 

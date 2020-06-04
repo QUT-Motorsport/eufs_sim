@@ -25,11 +25,8 @@
 <!--                                                publish_tf:=$(arg publish_gt_tf)-->
 <!--                                                simulate_perception:=true"/>-->
 
-  <arg name="robot_name" default="gotthard"/>
+  <arg name="robot_name" default="ads-dv"/>
 
-  <arg name="sensors_config_file" default="$(find eufs_description)/cars/$(arg robot_name)/config/sensors.yaml"/>
-  <arg name="car_config_file"     default="$(find eufs_description)/cars/$(arg robot_name)/config/car.yaml"/>
-  <arg name="car_dimensions_file" default="$(find eufs_description)/cars/$(arg robot_name)/config/distances.yaml"/>
   <arg name="config_file" default="$(find eufs_description)/robots/ads-dv/config.yaml"/>
 
 
@@ -39,10 +36,7 @@
            command="$(find xacro)/xacro '$(find eufs_description)/robots/ads-dv.urdf.xacro'
                                                 robot_name:='$(arg robot_name)'
                                                 vehicle_model:='$(arg vehicleModel)'
-                                                sensors_config_file:='$(arg sensors_config_file)'
-                                                car_config_file:='$(arg car_config_file)'
                                                 config_file:='$(arg config_file)'
-                                                car_dimensions_file:='$(arg car_dimensions_file)'
                                                 publish_tf:=$(arg publish_gt_tf)
                                                 simulate_perception:=true"/>  <!-- Should simulate perception if in no_perception launch group -->
   </group>
@@ -51,9 +45,7 @@
            command="$(find xacro)/xacro '$(find eufs_description)/robots/ads-dv.urdf.xacro'
                                                 robot_name:='$(arg robot_name)'
                                                 vehicle_model:='$(arg vehicleModel)'
-                                                sensors_config_file:='$(arg sensors_config_file)'
-                                                car_config_file:='$(arg car_config_file)'
-                                                car_dimensions_file:='$(arg car_dimensions_file)'
+                                                config_file:='$(arg config_file)'
                                                 publish_tf:=$(arg publish_gt_tf)
                                                 simulate_perception:=false"/>   <!-- Should NOT simulate perception if NOT in no_perception launch group -->
   </group>
