@@ -34,7 +34,7 @@
   <!-- Change the simulate_perception parameter based on the launch group -->
   <group if="$(eval arg('launch_group')=='no_perception')">
     <param name="robot_description"
-           command="$(find xacro)/xacro --inorder '$(find eufs_description)/robots/ads-dv.urdf.xacro'
+           command="$(find xacro)/xacro '$(find eufs_description)/robots/ads-dv.urdf.xacro'
                                                 robot_name:='$(arg robot_name)'
                                                 vehicle_model:='$(arg vehicleModel)'
                                                 sensors_config_file:='$(arg sensors_config_file)'
@@ -45,7 +45,7 @@
   </group>
   <group unless="$(eval arg('launch_group')=='no_perception')">
     <param name="robot_description"
-           command="$(find xacro)/xacro --inorder '$(find eufs_description)/robots/ads-dv.urdf.xacro'
+           command="$(find xacro)/xacro '$(find eufs_description)/robots/ads-dv.urdf.xacro'
                                                 robot_name:='$(arg robot_name)'
                                                 vehicle_model:='$(arg vehicleModel)'
                                                 sensors_config_file:='$(arg sensors_config_file)'
