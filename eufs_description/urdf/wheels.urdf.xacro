@@ -3,26 +3,55 @@
 
   <xacro:property name="degrees_90" value="1.5708"/>
 
+  <xacro:property name="wheel_mass" value="10.9"/>
+
+  <xacro:property name="wheel_diameter" value="0.505"/>
+  <xacro:property name="wheel_width" value="0.2"/>
+
+  <!-- Size of the wheel mesh to calculate how to scale it -->
+  <xacro:property name="wheel_mesh_diameter" value="0.505"/>
+  <xacro:property name="wheel_mesh_width" value="0.2"/>
+
+  <!-- Distance from center of car to wheels -->
+  <xacro:property name="wheelbase" value="1.530"/>
+  <!-- TODO: Ask what exactly these are -->
+  <!-- Distance between wheels on the same axle -->
+  <xacro:property name="hex_hub_dist" value="1.201"/>
+  <!-- Length of the axle -->
+  <xacro:property name="axle_length" value="0.120"/>
+  <!-- IDK -->
+  <xacro:property name="wheel_travel" value="0.05"/>
+
+  <xacro:property name="wheel_friction_mu1" value="2"/>
+  <xacro:property name="wheel_friction_mu2" value="2"/>
+  <xacro:property name="wheel_friction_kp" value="1e8"/>
+
+  <xacro:property name="steering_hinge_mass" value="1"/>
+
+
   <!-- Description of the wheel itself -->
   <xacro:macro name="wheel"
                params="lr_prefix fr_prefix">
     <link name="${lr_prefix}_${fr_prefix}_wheel">
       <inertial>
         <origin xyz="0 0 0" rpy="0 0 0" />
-        <mass value="${config['wheel']['mass']}"/>
+        <mass value="${wheel_mass}"/>
         <inertia
-            ixx="${config['wheel']['inertia']['ixx']}"
-            ixy="${config['wheel']['inertia']['ixy']}"
-            ixz="${config['wheel']['inertia']['ixz']}"
-            iyy="${config['wheel']['inertia']['iyy']}"
-            iyz="${config['wheel']['inertia']['iyz']}"
-            izz="${config['wheel']['inertia']['izz']}"   />
+            ixx="0.3"
+            ixy="0"
+            ixz="0"
+            iyy="0.2"
+            iyz="0"
+            izz="0.2"   />
       </inertial>
 
       <visual>
         <origin xyz="0 0 0" rpy="${degrees_90} 0 0"/>
         <geometry>
-          <mesh filename="package://eufs_description/meshes/wheel_${lr_prefix}.dae"/>
+          <mesh filename="package://eufs_description/meshes/wheel_${lr_prefix}.dae"
+                scale="${wheel_diameter / wheel_mesh_diameter}
+                       ${wheel_diameter / wheel_mesh_diameter}
+                       ${wheel_width / wheel_mesh_width}"      />
         </geometry>
         <material name="tire_mat"/>
       </visual>
@@ -30,17 +59,17 @@
       <collision>
         <origin xyz="0 0 0" rpy="${degrees_90} 0 0"/>
         <geometry>
-          <cylinder radius="${config['wheel']['diameter'] / 2}" length="${config['wheel']['width']}"/>
+          <cylinder radius="${0.505 / 2}" length="${wheel_width}"/>
         </geometry>
       </collision>
     </link>
 
     <gazebo reference="${lr_prefix}_${fr_prefix}_wheel">
       <material>Gazebo/Black</material>
-      <mu1>${config['wheel']['friction']}</mu1>
-      <mu2>${config['wheel']['friction']}</mu2>
+      <mu1>${wheel_friction_mu1}</mu1>
+      <mu2>${wheel_friction_mu2}</mu2>
       <!-- <minDepth>0.005</minDepth> -->
-      <kp>${config['wheel']['kp']}</kp>
+      <kp>${wheel_friction_kp}</kp>
     </gazebo>
   </xacro:macro>
 
@@ -49,27 +78,27 @@
                params="lr_prefix lr_reflect">
 
     <joint name="${lr_prefix}_steering_hinge_joint" type="revolute">
-      <origin xyz="${1 * config['wheel']['wheelbase'] / 2}
-                   ${lr_reflect * ((config['wheel']['hex_hub_dist'] / 2) - config['wheel']['axle_length'])}
-                   ${-config['wheel']['wheel_travel']}"
+      <origin xyz="${wheelbase / 2}
+                   ${lr_reflect * ((hex_hub_dist / 2) - axle_length)}
+                   ${-1 * wheel_travel}"
               rpy="0 0 0"/>
       <parent link="base_footprint"/>
       <child link="${lr_prefix}_steering_hinge"/>
       <axis xyz="0 0 1"/>
-      <limit lower="${config['wheel']['wheelbase'] * -1}" upper="${config['wheel']['wheelbase']}" effort="10000000" velocity="1000000"/>
+      <limit lower="${config['tire']['max_steering'] * -1}" upper="${config['tire']['max_steering']}" effort="10000000" velocity="1000000"/>
     </joint>
 
     <link name="${lr_prefix}_steering_hinge">
       <inertial>
         <origin xyz="0 0 0" rpy="0 0 0" />
-        <mass value="${config['steering_hinge']['mass']}"/>
+        <mass value="${steering_hinge_mass}"/>
         <inertia
-            ixx="${config['steering_hinge']['inertia']['ixx']}"
-            ixy="${config['steering_hinge']['inertia']['ixy']}"
-            ixz="${config['steering_hinge']['inertia']['ixz']}"
-            iyy="${config['steering_hinge']['inertia']['iyy']}"
-            iyz="${config['steering_hinge']['inertia']['iyz']}"
-            izz="${config['steering_hinge']['inertia']['izz']}"   />
+            ixx="0.04"
+            ixy="0.0"
+            ixz="0.0"
+            iyy="0.04"
+            iyz="0.0"
+            izz="0.04"   />
       </inertial>
     </link>
 
@@ -90,9 +119,9 @@
                params="lr_prefix lr_reflect">
 
     <joint name="rear_${lr_prefix}_wheel_joint" type="continuous">
-      <origin xyz="${-1 * config['wheel']['wheelbase'] / 2}
-                   ${lr_reflect * ((config['wheel']['hex_hub_dist'] / 2) - config['wheel']['axle_length'])}
-                   ${-config['wheel']['wheel_travel']}"
+      <origin xyz="${-1 * wheelbase / 2}
+                   ${lr_reflect * ((hex_hub_dist / 2) - axle_length)}
+                   ${-1 * wheel_travel}"
               rpy="0 0 0"/>
       <parent link="base_footprint"/>
       <child link="${lr_prefix}_rear_wheel"/>

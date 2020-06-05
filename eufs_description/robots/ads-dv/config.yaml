@@ -1,6 +1,6 @@
 inertia:
   m:        190.0   # Weight of the Vehicle [kg]
-  g:        9.81    # Graviti force         [m/s^2]
+  g:        9.81    # Gravity force         [m/s^2]
   I_z:      110    # Inertial force I_zz
 
 kinematics:
@@ -16,6 +16,7 @@ tire:
   D: 1.60
   E: -0.58
   radius: 0.2525
+  max_steering: 0.8727
 
 aero:
   C_Down: # F_Downforce = C_Downforce*v_x^2; C_Downforce = a*b*c
@@ -26,35 +27,6 @@ aero:
     a: 0.7
     b: 1.0
     c: 1.0
-
-wheel:
-  max_steering: 0.8727
-  diameter: 0.505
-  width: 0.2
-  mass: 10.0
-  inertia:
-    ixx: 0.3
-    ixy: 0
-    ixz: 0
-    iyy: 0.2
-    iyz: 0
-    izz: 0.2
-  wheelbase: 1.530
-  hex_hub_dist: 1.201
-  axle_length: 0.120
-  wheel_travel: 0.05
-  friction: 2
-  kp: 1e8
-
-steering_hinge:
-  mass: 1
-  inertia:
-    ixx: 0.04
-    ixy: 0
-    ixz: 0
-    iyy: 0.04
-    iyz: 0
-    izz: 0.04
 
 drivetrain:
   Cm1: 5000
