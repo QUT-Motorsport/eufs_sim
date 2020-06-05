@@ -1,0 +1,42 @@
+inertia:
+  m:        190.0   # Weight of the Vehicle [kg]
+  g:        9.81    # Gravity force         [m/s^2]
+  I_z:      110     # Inertial force I_zz
+
+kinematics:
+  l: 1.53           # Vehicle Length [m]
+  b_F: 1.22         # From COG to front axle [m]
+  b_R: 1.22         # From COG to rear axle [m]
+  w_front: 0.5      # Percentage of weight front
+
+tire:
+  tire_coefficient: 1.0
+  B: 12.56
+  C: -1.38
+  D: 1.60
+  E: -0.58
+  radius: 0.2525
+  max_steering: 0.8727
+
+aero:
+  C_Down: # F_Downforce = C_Downforce*v_x^2; C_Downforce = a*b*c
+    a: 1.22
+    b: 2.6
+    c: 0.6
+  C_drag: # F_Drag = C_Drag*v_x^2; C_drag = a*b*c
+    a: 0.7
+    b: 1.0
+    c: 1.0
+
+drivetrain:
+  Cm1: 5000
+  Cr0: 180
+  inertia: 0.4 # wheel_plus_packaging
+  r_dyn: 0.231
+  nm_wheels: 4
+
+torque_vectoring:
+  K_FFW: 2.1
+  K_p: 500
+  shrinkage: 0.8
+  K_stability: 0.004

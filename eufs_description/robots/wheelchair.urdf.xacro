@@ -1,18 +1,36 @@
 <?xml version="1.0"?>
-<robot name="eufs" xmlns:xacro="http://www.ros.org/wiki/xacro"> 
-
+<robot name="eufs" xmlns:xacro="http://www.ros.org/wiki/xacro">
 
     <!-- ***************** -->
     <!-- Imported elements -->
     <!-- ***************** -->
-    
-    <!-- First we import all posible elements defined in the urdf.xacro files. All these elements are defined as macro:xacros -->
 
-    <!-- Import Robotnik CAR base elements -->
-    <xacro:include filename="$(find eufs_description)/urdf/eufs_base.urdf.xacro" />
+    <!--  Import the wheels  -->
+    <xacro:include filename="$(find eufs_description)/urdf/wheels.urdf.xacro"/>
+
+    <!-- Import EUFS base element with the chassis -->
+    <xacro:include filename="$(find eufs_description)/urdf/eufs_base.urdf.xacro">
+        <xacro:arg name="publish_tf" value="$(arg publish_tf)"/>
+        <xacro:arg name="simulate_perception" value="$(arg simulate_perception)"/>
+    </xacro:include>
 
     <!-- Import all available sensors -->
     <xacro:include filename="$(find eufs_description)/sensors/all_sensors.urdf.xacro" />
+
+    <!--  Include the plugins  -->
+    <xacro:arg name="publish_tf" default="false"/>
+    <xacro:arg name="simulate_perception" default="true"/>
+    <xacro:include filename="$(find eufs_description)/urdf/eufs_plugins.gazebo.xacro">
+        <xacro:arg name="publish_tf" value="$(arg publish_tf)"/>
+        <xacro:arg name="simulate_perception" value="$(arg simulate_perception)"/>
+    </xacro:include>
+
+    <!-- ***************** -->
+    <!-- Config parameters -->
+    <!-- ***************** -->
+
+    <!--  Load the config file  -->
+    <xacro:property name="config" value="${load_yaml('$(arg config_file)')}"/>
 
     <!-- ***************** -->
     <!-- Global parameters -->
@@ -24,35 +42,36 @@
     <!-- Robots Elements -->
     <!-- *************** -->
 
-    <!-- Here we create the robot elements using the xacro:macros imported at the beggining of this file -->
+    <!-- Chassis of the wheelchair -->
+    <!--  NOTE: This is not the chassis of the wheelchair because at the time there is no mesh for it  -->
+    <xacro:eufs_base chassis_mesh="package://eufs_description/meshes/ads-dv.dae"/>
 
-    <!-- Chassis of the car -->
-    <xacro:eufs_base name="eufs" publish_bf="true" hq="false" clearance="0"/>
+    <!-- Wheels -->
+    <xacro:wheels chassis_width="1" wheelbase="1.530"></xacro:wheels>
 
+    <!-- *********************************************** -->
+    <!--                 MAIN SENSORS                    -->
+    <!-- *********************************************** -->
 
-    <!-- MAIN SENSORS -->
-    <!-- all sensor frames below are relative to base_footprint -->
-
-    <xacro:sensor_imu parent="base_link" prefix="imu">
+    <xacro:sensor_imu parent="base_footprint" prefix="imu">
         <origin xyz="0.20 0.0 0.46" rpy="0 0 0"/>
     </xacro:sensor_imu>
 
 
-    <xacro:sensor_gps  parent="base_link" prefix="gps">
+    <xacro:sensor_gps  parent="base_footprint" prefix="gps">
         <origin xyz="0.0 0.0 1.095" rpy="0 0 0"/>
     </xacro:sensor_gps>
 
 
-    <xacro:VLP-16R  parent="base_link" name="velodyne" topic="/velodyne_points" hz="10" samples="1200">
-        <origin xyz="0.54 0.0 0.13" rpy="0 -${1.7*M_PI/180.0} 0"/>
-    </xacro:VLP-16R>
+    <!-- Simulate raw perception sensors only if we're not using the abstracted perception simulation -->
+    <xacro:unless value="$(arg simulate_perception)">
+        <xacro:VLP-16R parent="base_footprint" name="velodyne" topic="/velodyne_points" hz="10" samples="800">
+            <origin xyz="0.54 0.0 0.13" rpy="0 ${1*M_PI/180.0} 0"/>
+        </xacro:VLP-16R>
 
-
-    <xacro:zed_camera parent="base_link" prefix="zed">
-        <origin xyz="0.175 -0.01 0.785" rpy="0 0 0"/> 
-    </xacro:zed_camera>  
-
-    <!-- We don't have URDFs for the wheels but we're putting the frames here anyway -->
-    <!-- -0.29 +/-0.275 0.155 -->
+        <xacro:zed_camera parent="base_footprint" prefix="zed">
+            <origin xyz="0.175 -0.01 0.785" rpy="0 0 0"/>
+        </xacro:zed_camera>
+    </xacro:unless>
 
 </robot>

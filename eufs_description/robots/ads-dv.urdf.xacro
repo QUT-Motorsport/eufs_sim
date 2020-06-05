@@ -1,21 +1,15 @@
 <?xml version="1.0"?>
-<robot name="eufs"
-    xmlns:xacro="http://www.ros.org/wiki/xacro">
-
-    <xacro:property name="config" value="${load_yaml('$(arg config_file)')}"/>
-
-    <xacro:include filename="$(find eufs_description)/urdf/wheels.urdf.xacro"/>
+<robot name="eufs" xmlns:xacro="http://www.ros.org/wiki/xacro">
 
     <!-- ***************** -->
     <!-- Imported elements -->
     <!-- ***************** -->
 
-    <!-- First we import all posible elements defined in the urdf.xacro files. All these elements are defined as macro:xacros -->
+    <!--  Import the wheels  -->
+    <xacro:include filename="$(find eufs_description)/urdf/wheels.urdf.xacro"/>
 
-    <!-- Import Robotnik CAR base elements -->
-    <xacro:arg name="publish_tf" default="false"/>
-    <xacro:arg name="simulate_perception" default="false"/>
-    <xacro:include filename="$(find eufs_description)/urdf/ads-dv_base.urdf.xacro">
+    <!-- Import EUFS base element with the chassis -->
+    <xacro:include filename="$(find eufs_description)/urdf/eufs_base.urdf.xacro">
         <xacro:arg name="publish_tf" value="$(arg publish_tf)"/>
         <xacro:arg name="simulate_perception" value="$(arg simulate_perception)"/>
     </xacro:include>
@@ -23,37 +17,36 @@
     <!-- Import all available sensors -->
     <xacro:include filename="$(find eufs_description)/sensors/all_sensors.urdf.xacro" />
 
+    <!--  Include the plugins  -->
+    <xacro:arg name="publish_tf" default="false"/>
+    <xacro:arg name="simulate_perception" default="true"/>
+    <xacro:include filename="$(find eufs_description)/urdf/eufs_plugins.gazebo.xacro">
+        <xacro:arg name="publish_tf" value="$(arg publish_tf)"/>
+        <xacro:arg name="simulate_perception" value="$(arg simulate_perception)"/>
+    </xacro:include>
+
+    <!-- ***************** -->
+    <!-- Config parameters -->
+    <!-- ***************** -->
+
+    <!--  Load the config file  -->
+    <xacro:property name="config" value="${load_yaml('$(arg config_file)')}"/>
+
     <!-- ***************** -->
     <!-- Global parameters -->
     <!-- ***************** -->
 
     <xacro:property name="PI" value="3.1415926535897931"/>
 
-    <!-- Wheel parameters -->
-    <xacro:property name="wheel_offset_x" value="1.0" />
-    <!-- x,y,z in translation from base_link to the center of the wheel -->
-    <xacro:property name="wheel_offset_y" value="0.75" />
-    <xacro:property name="wheel_offset_z" value="0.0" />
-
-    <!-- Flag to select the high or low quality model -->
-    <xacro:property name="hq" value="true" />
-
-
     <!-- *************** -->
     <!-- Robots Elements -->
     <!-- *************** -->
 
-    <!-- Here we create the robot elements using the xacro:macros imported at the beggining of this file -->
+    <!-- Chassis of the car -->
+    <xacro:eufs_base chassis_mesh="package://eufs_description/meshes/ads-dv.dae"/>
 
-    <!-- Summit XL base -->
-    <xacro:eufs_base name="eufs" publish_bf="true" hq="${hq}" />
-
-    <!-- WHEELS -->
-    <xacro:front_wheel lr_prefix="left" lr_reflect="1"/>
-    <xacro:front_wheel lr_prefix="right" lr_reflect="-1"/>
-
-    <xacro:rear_wheel lr_prefix="left" lr_reflect="1" />
-    <xacro:rear_wheel lr_prefix="right" lr_reflect="-1" />
+    <!-- Wheels -->
+    <xacro:wheels chassis_width="0.98" wheelbase="1.530"></xacro:wheels>
 
 
     <!-- *********************************************** -->
@@ -66,8 +59,9 @@
     LIDAR: 1.700 0.0 -0.150
     STEREO CAM: -0.110 0.0 0.800 -->
 
+    <!--  TODO: Check the locations of these are correct  -->
     <xacro:sensor_imu parent="base_footprint" prefix="imu">
-        <origin xyz="-0.0 0.0 0.0" rpy="0 0 0"/>
+        <origin xyz="0.0 0.0 0.0" rpy="0 0 0"/>
     </xacro:sensor_imu>
 
     <xacro:sensor_gps parent="base_footprint" prefix="gps">
@@ -84,44 +78,5 @@
             <origin xyz="0.1 0.0 0.52" rpy="0 0 0"/>
         </xacro:zed_camera>
     </xacro:unless>
-
-
-    <!-- *********************************************** -->
-    <!-- EXTRA SENSORS FROM THE ROBOTNIK SENSORS LIBRARY -->
-    <!-- *********************************************** -->
-
-    <!--     <xacro:sensor_hokuyo_utm30lx parent="base_link" prefix="lidar">
-        <origin xyz="1.700 0.0 -0.080" rpy="0 -0.0174533 0"/>
-    </xacro:sensor_hokuyo_utm30lx>
-
-    <xacro:sensor_hokuyo3d name="hokuyo3d" parent="base_link">
-        <origin xyz="0.9 0.0 0.450" rpy="0 0.35 0"/>
-    </xacro:sensor_hokuyo3d>
-
-
-    <xacro:sensor_hokuyo_urg04lx name="hokuyo1" parent="base_link">
-        <origin xyz="-0.1 0.0 0.33" rpy="0 0 0"/>
-    </xacro:sensor_hokuyo_urg04lx>
-
-
-    <xacro:sensor_axis name="camera" parent="base_link">
-        <origin xyz="0.19 0 0.17" rpy="0 ${15*PI/180} 0"/>
-    </xacro:sensor_axis>
-
-
-    <xacro:sensor_asus_xtion_pro name="xtion_pro" parent="base_link">
-        <origin xyz="0.3 0.0 0.3" rpy="0 0 0"/>
-    </xacro:sensor_asus_xtion_pro>
-
-
-    <xacro:sensor_kinect parent="base_link" prefix="kinect">
-        <origin xyz="0.0 0.0 0.45" rpy="0 0 0"/>
-    </xacro:sensor_kinect>
-
-    <xacro:BB2-08S2C-60 prefix="bee" frame="bee" name="bee"/>
-
-    <xacro:sensor_fotonic name="fotonic" parent="base_link">
-        <origin xyz="0.3 0.0 0.24" rpy="0 0 0"/>
-    </xacro:sensor_fotonic>   -->
 
 </robot>

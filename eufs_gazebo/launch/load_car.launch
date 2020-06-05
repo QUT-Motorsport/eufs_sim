@@ -9,7 +9,7 @@
   <!-- Vehicle pose -->
   <arg name="x" default="0"/>
   <arg name="y" default="0"/>
-  <arg name="z" default="0.3"/>
+  <arg name="z" default="0"/>
   <arg name="roll" default="0.0"/>
   <arg name="pitch" default="0.0"/>
   <arg name="yaw" default="0.0"/>
@@ -20,20 +20,15 @@
   <arg name="show_rqt_gui" default="true"/>
   <arg name="launch_group" default="default" />
 
-<!--  <param name="robot_description"-->
-<!--         command="$(find xacro)/xacro &#45;&#45;inorder '$(find eufs_description)/robots/ads-dv.urdf.xacro'-->
-<!--                                                publish_tf:=$(arg publish_gt_tf)-->
-<!--                                                simulate_perception:=true"/>-->
-
   <arg name="robot_name" default="ads-dv"/>
 
-  <arg name="config_file" default="$(find eufs_description)/robots/ads-dv/config.yaml"/>
+  <arg name="config_file" default="$(find eufs_description)/robots/$(arg robot_name)_config.yaml"/>
 
 
   <!-- Change the simulate_perception parameter based on the launch group -->
   <group if="$(eval arg('launch_group')=='no_perception')">
     <param name="robot_description"
-           command="$(find xacro)/xacro '$(find eufs_description)/robots/ads-dv.urdf.xacro'
+           command="$(find xacro)/xacro '$(find eufs_description)/robots/$(arg robot_name).urdf.xacro'
                                                 robot_name:='$(arg robot_name)'
                                                 vehicle_model:='$(arg vehicleModel)'
                                                 config_file:='$(arg config_file)'
@@ -42,7 +37,7 @@
   </group>
   <group unless="$(eval arg('launch_group')=='no_perception')">
     <param name="robot_description"
-           command="$(find xacro)/xacro '$(find eufs_description)/robots/ads-dv.urdf.xacro'
+           command="$(find xacro)/xacro '$(find eufs_description)/robots/$(arg robot_name).urdf.xacro'
                                                 robot_name:='$(arg robot_name)'
                                                 vehicle_model:='$(arg vehicleModel)'
                                                 config_file:='$(arg config_file)'
