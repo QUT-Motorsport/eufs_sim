@@ -65,13 +65,15 @@ struct Param {
         double D;
         double E;
         double radius;
+        double max_steering;
         void print() {
             ROS_DEBUG("Tire: \n "
                       "\tB: %f\n"
                       "\tC: %f\n"
                       "\tD: %f\n"
                       "\tE: %f"
-                      "\tradius: %f", B, C, D, E, radius);
+                      "\tradius: %f"
+                      "\tmax_steering: %f", B, C, D, E, radius, max_steering);
         }
     };
 
@@ -165,6 +167,7 @@ struct convert<Param::Tire> {
         cType.D = node["D"].as<double>() * cType.tire_coefficient;
         cType.E = node["E"].as<double>();
         cType.radius = node["radius"].as<double>();
+        cType.max_steering = node["max_steering"].as<double>();
         ROS_DEBUG("LOADED Tire");
         cType.print();
         return true;

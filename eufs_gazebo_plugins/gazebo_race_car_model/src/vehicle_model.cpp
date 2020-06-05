@@ -172,7 +172,6 @@ void VehicleModel::publishCarState() {
 
   car_state.slip_angle = getSlipAngle();
 
-  // TODO: set state_of_charge
   car_state.state_of_charge = 999;
 
   pub_car_state_.publish(car_state);
@@ -243,6 +242,14 @@ void VehicleModel::publishTf() {
 void VehicleModel::onCmd(const ackermann_msgs::AckermannDriveStampedConstPtr &msg) {
   if (state_machine_.canDrive()) {
     input_.delta = msg->drive.steering_angle;
+
+    // The input delta is capped at the max_steering angle
+    if (input_.delta < -param_.tire.max_steering) {
+      input_.delta = -param_.tire.max_steering;
+    } else if (input_.delta > param_.tire.max_steering) {
+      input_.delta = param_.tire.max_steering;
+    }
+
     input_.dc    = msg->drive.acceleration;
   } else {
     // TODO: Stop the car somehow
