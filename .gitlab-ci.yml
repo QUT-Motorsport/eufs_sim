@@ -11,6 +11,9 @@ before_script:
 # Add eufs package dependencies here, separated by spaces
  - export DEP_PACKAGES="eufs_msgs"
 
+# Install git
+ - apt-get install git
+
  - 'which ssh-agent || ( apt-get update -y && apt-get install openssh-client -y ) >/dev/null'
  - eval $(ssh-agent -s)
  - echo "$SSH_PRIVATE_KEY" | tr -d '\r' | ssh-add - > /dev/null
