@@ -12,7 +12,7 @@ before_script:
  - export DEP_PACKAGES="eufs_msgs"
 
 # Install git
- - apt-get install git
+ - apt update >/dev/null && apt install -y git >/dev/null
 
  - 'which ssh-agent || ( apt-get update -y && apt-get install openssh-client -y ) >/dev/null'
  - eval $(ssh-agent -s)
