@@ -95,6 +95,8 @@ void VehicleModel::initModel(sdf::ElementPtr &_sdf) {
 }
 
 void VehicleModel::initVehicleParam(sdf::ElementPtr &_sdf) {
+  ROS_INFO("RaceCarModelPlugin loading params");
+
   std::string yaml_name = "config.yaml";
   yaml_name = getParam(_sdf, "yaml_config", yaml_name);
 
