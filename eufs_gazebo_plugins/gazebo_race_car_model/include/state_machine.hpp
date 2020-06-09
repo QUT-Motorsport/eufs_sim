@@ -40,16 +40,9 @@
 #include <iostream>
 
 #include <ros/ros.h>
-#include <sensor_msgs/JointState.h>
-#include <sensor_msgs/Imu.h>
-#include <std_msgs/Float64.h>
-#include <tf/transform_broadcaster.h>
-#include <ackermann_msgs/AckermannDriveStamped.h>
-#include <eufs_msgs/WheelSpeeds.h>
-#include <eufs_msgs/WheelSpeedsStamped.h>
 #include <eufs_msgs/CanState.h>
-#include <std_msgs/String.h>
 #include <std_msgs/Bool.h>
+#include <std_msgs/String.h>
 #include <std_srvs/Trigger.h>
 
 
