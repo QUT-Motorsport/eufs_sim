@@ -78,35 +78,9 @@ public:
 private:
     boost::shared_ptr<ros::NodeHandle> nh_;
 
-    // TODO: Remove e_as_state_type enumerator, just use what is in the message
-    // definition of internal state machine
-    typedef enum e_as_state_type {
-        AS_OFF = 0,
-        AS_READY = 1,
-        AS_DRIVING = 2,
-        AS_EMERGENCY_BRAKE = 3,
-        AS_FINISHED = 4,
-    } as_state_type;
+    uint16_t as_state_; ///< state machine state
 
-    as_state_type as_state_; ///< state machine state
-
-    // TODO: Remove e_ami_state_type enumerator, just use what is in the message
-    // definition of mission selection
-    typedef enum e_ami_state_type {
-        AMI_NOT_SELECTED = 10,
-        AMI_ACCELERATION = 11,
-        AMI_SKIDPAD = 12,
-        AMI_AUTOCROSS = 13,
-        AMI_TRACK_DRIVE = 14,
-        AMI_BRAKE_TEST = 15,
-        AMI_ADS_INSPECTION = 16,
-        AMI_ADS_EBS = 17,
-        AMI_DDT_INSPECTION_A = 18,
-        AMI_DDT_INSPECTION_B = 19,
-        AMI_MANUAL = 20
-    } ami_state_type;
-
-    ami_state_type ami_state_;  ///< mission status
+    uint16_t ami_state_;  ///< mission status
 
     bool driving_flag_; ///< mission flag as per ADS-DV specs
 

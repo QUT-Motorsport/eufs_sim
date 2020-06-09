@@ -40,8 +40,8 @@
 StateMachine::StateMachine(boost::shared_ptr<ros::NodeHandle> &nh) : nh_(nh)
 {
     // init state machine state
-    as_state_ = as_state_type::AS_OFF;
-    ami_state_ = ami_state_type::AMI_NOT_SELECTED;
+    as_state_ = eufs_msgs::CanState::AS_OFF;
+    ami_state_ = eufs_msgs::CanState::AMI_NOT_SELECTED;
     driving_flag_ = false;
 
     // Subscribers
@@ -65,46 +65,46 @@ void StateMachine::setMission(eufs_msgs::CanState state)
 {
     if (state.as_state == eufs_msgs::CanState::AS_DRIVING)
     {
-        as_state_ = as_state_type::AS_DRIVING;
+        as_state_ = eufs_msgs::CanState::AS_DRIVING;
         driving_flag_ = true;
     }
 
-    if (ami_state_ == ami_state_type::AMI_NOT_SELECTED)
+    if (ami_state_ == eufs_msgs::CanState::AMI_NOT_SELECTED)
     {
         switch (state.ami_state)
         {
             case eufs_msgs::CanState::AMI_ACCELERATION:
-                ami_state_ = ami_state_type::AMI_ACCELERATION;
+                ami_state_ = eufs_msgs::CanState::AMI_ACCELERATION;
                 break;
             case eufs_msgs::CanState::AMI_SKIDPAD:
-                ami_state_ = ami_state_type::AMI_SKIDPAD;
+                ami_state_ = eufs_msgs::CanState::AMI_SKIDPAD;
                 break;
             case eufs_msgs::CanState::AMI_AUTOCROSS:
-                ami_state_ = ami_state_type::AMI_AUTOCROSS;
+                ami_state_ = eufs_msgs::CanState::AMI_AUTOCROSS;
                 break;
             case eufs_msgs::CanState::AMI_TRACK_DRIVE:
-                ami_state_ = ami_state_type::AMI_TRACK_DRIVE;
+                ami_state_ = eufs_msgs::CanState::AMI_TRACK_DRIVE;
                 break;
             case eufs_msgs::CanState::AMI_BRAKE_TEST:
-                ami_state_ = ami_state_type::AMI_BRAKE_TEST;
+                ami_state_ = eufs_msgs::CanState::AMI_BRAKE_TEST;
                 break;
             case eufs_msgs::CanState::AMI_ADS_INSPECTION:
-                ami_state_ = ami_state_type::AMI_ADS_INSPECTION;
+                ami_state_ = eufs_msgs::CanState::AMI_ADS_INSPECTION;
                 break;
             case eufs_msgs::CanState::AMI_ADS_EBS:
-                ami_state_ = ami_state_type::AMI_ADS_EBS;
+                ami_state_ = eufs_msgs::CanState::AMI_ADS_EBS;
                 break;
             case eufs_msgs::CanState::AMI_DDT_INSPECTION_A:
-                ami_state_ = ami_state_type::AMI_DDT_INSPECTION_A;
+                ami_state_ = eufs_msgs::CanState::AMI_DDT_INSPECTION_A;
                 break;
             case eufs_msgs::CanState::AMI_DDT_INSPECTION_B:
-                ami_state_ = ami_state_type::AMI_DDT_INSPECTION_B;
+                ami_state_ = eufs_msgs::CanState::AMI_DDT_INSPECTION_B;
                 break;
             case eufs_msgs::CanState::AMI_MANUAL:
-                ami_state_ = ami_state_type::AMI_MANUAL;
+                ami_state_ = eufs_msgs::CanState::AMI_MANUAL;
                 break;
             default:
-                ami_state_ = ami_state_type::AMI_NOT_SELECTED;
+                ami_state_ = eufs_msgs::CanState::AMI_NOT_SELECTED;
                 break;
         }
     }
@@ -118,8 +118,8 @@ bool StateMachine::resetState(std_srvs::Trigger::Request& request, std_srvs::Tri
 {
     (void)request;   // suppress unused parameter warning
     (void)response;  // suppress unused parameter warning
-    as_state_ = as_state_type::AS_OFF;
-    ami_state_ = ami_state_type::AMI_NOT_SELECTED;
+    as_state_ = eufs_msgs::CanState::AS_OFF;
+    ami_state_ = eufs_msgs::CanState::AMI_NOT_SELECTED;
     driving_flag_ = false;
     response.success = true;
     return response.success;
@@ -129,8 +129,8 @@ bool StateMachine::requestEBS(std_srvs::Trigger::Request& request, std_srvs::Tri
 {
     (void)request;   // suppress unused parameter warning
     (void)response;  // suppress unused parameter warning
-    as_state_ = as_state_type::AS_EMERGENCY_BRAKE;
-    ami_state_ = ami_state_type::AMI_NOT_SELECTED;
+    as_state_ = eufs_msgs::CanState::AS_EMERGENCY_BRAKE;
+    ami_state_ = eufs_msgs::CanState::AMI_NOT_SELECTED;
     driving_flag_ = false;
     response.success = true;
     return response.success;
@@ -142,39 +142,39 @@ void StateMachine::updateState()
 
     switch (as_state_)
     {
-        case as_state_type::AS_OFF:
-            if ((ami_state_ != ami_state_type::AMI_NOT_SELECTED) && driving_flag_)
+        case eufs_msgs::CanState::AS_OFF:
+            if ((ami_state_ != eufs_msgs::CanState::AMI_NOT_SELECTED) && driving_flag_)
             {
                 // first sleep for 5s as is with the real car
                 std::this_thread::sleep_for(5s);
 
                 // now transition to new state
-                as_state_ = as_state_type::AS_READY;
+                as_state_ = eufs_msgs::CanState::AS_READY;
                 ROS_DEBUG("state_machine :: switching to AS_READY state");
             }
             break;
 
-        case as_state_type::AS_READY:
+        case eufs_msgs::CanState::AS_READY:
             if (driving_flag_)
             {
-                as_state_ = as_state_type::AS_DRIVING;
+                as_state_ = eufs_msgs::CanState::AS_DRIVING;
                 ROS_DEBUG("state_machine :: switching to AS_DRIVING state");
             }
             break;
 
-        case as_state_type::AS_DRIVING:
+        case eufs_msgs::CanState::AS_DRIVING:
             if (!driving_flag_)
             {
-                as_state_ = as_state_type::AS_FINISHED;
+                as_state_ = eufs_msgs::CanState::AS_FINISHED;
                 ROS_DEBUG("state_machine :: switching to AS_FINISHED state");
             }
             break;
 
-        case as_state_type::AS_FINISHED:
+        case eufs_msgs::CanState::AS_FINISHED:
             // do nothing for now
             break;
 
-        case as_state_type::AS_EMERGENCY_BRAKE:
+        case eufs_msgs::CanState::AS_EMERGENCY_BRAKE:
             // do nothing for now
             break;
 
@@ -291,5 +291,5 @@ bool StateMachine::spinOnce()
 }
 
 bool StateMachine::canDrive() {
-  return as_state_ == as_state_type::AS_DRIVING;
+  return as_state_ == eufs_msgs::CanState::AS_DRIVING;
 }
