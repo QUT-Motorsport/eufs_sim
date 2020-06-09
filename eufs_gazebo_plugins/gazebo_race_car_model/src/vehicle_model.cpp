@@ -467,14 +467,14 @@ void VehicleModel::publishOdom() {
 void VehicleModel::publishTf() {
   // Position
   tf::Transform transform;
-  transform.setOrigin(tf::Vector3(state_.x, state_.y, 0.0));
+  transform.setOrigin(tf::Vector3(state_.x + this->GaussianKernel(0, this->position_noise_[0]),
+                                  state_.y + this->GaussianKernel(0, this->position_noise_[1]),
+                                  0.0));
 
   // Orientation
   tf::Quaternion q;
-  q.setRPY(0.0, 0.0, state_.yaw);
+  q.setRPY(0.0, 0.0, state_.yaw + this->GaussianKernel(0, this->angular_velocity_noise_[2]));
   transform.setRotation(q);
-
-  // TODO: Add noise to the odom message
 
   // Send TF
   tf_br_.sendTransform(tf::StampedTransform(transform, ros::Time::now(), this->reference_frame_, this->robot_frame_));
