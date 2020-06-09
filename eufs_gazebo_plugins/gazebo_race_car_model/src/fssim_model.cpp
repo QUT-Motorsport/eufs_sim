@@ -39,8 +39,8 @@ public:
   {}
 
 private:
-  virtual void updateState(const double dt) {
-    double Fz = getNormalForce(state_);
+  virtual void updateState(State& state, Input& input, const double dt) {
+    double Fz = getNormalForce(state);
 
     double alphaF = getSlipAngle();
     double alphaR = getSlipAngle(false);
@@ -49,14 +49,14 @@ private:
     double FyR = getRearFy(Fz);
 
     // Drivetrain Model
-    const double Fx   = getFx(state_, input_);
-    const double M_Tv = getMTv(state_, input_);
+    const double Fx   = getFx(state, input);
+    const double M_Tv = getMTv(state, input);
 
     // Dynamics
-    const auto x_dot_dyn  = f(state_, input_, Fx, M_Tv, FyF, FyR);
-    const auto x_next_dyn = state_ + x_dot_dyn * dt;
-    state_ = f_kin_correction(x_next_dyn, state_, input_, Fx, M_Tv, dt);
-    state_.validate();
+    const auto x_dot_dyn  = f(state, input, Fx, M_Tv, FyF, FyR);
+    const auto x_next_dyn = state + x_dot_dyn * dt;
+    state = f_kin_correction(x_next_dyn, state, input, Fx, M_Tv, dt);
+    state.validate();
   }
 
   State f(const State &x,
@@ -102,7 +102,7 @@ private:
                                   const double dt) {
     State        x       = x_in;
     const double v_x_dot = Fx / (param_.inertia.m + param_.driveTrain.m_lon_add);
-    const double v       = std::hypot(state_.v_x, state_.v_y);
+    const double v       = std::hypot(x_state.v_x, x_state.v_y);
     const double v_blend = 0.5 * (v - 1.5);
     const double blend   = std::fmax(std::fmin(1.0, v_blend), 0.0);
 

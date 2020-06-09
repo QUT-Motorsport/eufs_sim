@@ -81,7 +81,7 @@ public:
 
   void initVehicleParam(sdf::ElementPtr &_sdf);
 
-  virtual void updateState(const double dt);
+  virtual void updateState(State& state, Input& input, const double dt);
 
   void setModelState();
 

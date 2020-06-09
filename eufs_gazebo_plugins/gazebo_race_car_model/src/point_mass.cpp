@@ -38,23 +38,23 @@ public:
     : VehicleModel(_model, _sdf, nh, gznode)
   {}
 
-  virtual void updateState(const double dt)
+  virtual void updateState(State& state, Input& input, const double dt)
   {
     ROS_INFO("Bye");
-    state_.a_x = input_.dc * std::cos(input_.delta);
-    state_.a_y = input_.dc * std::sin(input_.delta);
+    state.a_x = input.dc * std::cos(input.delta);
+    state.a_y = input.dc * std::sin(input.delta);
 
     State x_dot{};
 
-    x_dot.x = state_.v_x;
-    x_dot.y = state_.v_y;
+    x_dot.x = state.v_x;
+    x_dot.y = state.v_y;
 
-    x_dot.v_x = state_.a_x;
-    x_dot.v_y = state_.a_y;
+    x_dot.v_x = state.a_x;
+    x_dot.v_y = state.a_y;
 
-    state_ = state_ + (x_dot * dt);
+    state = state + (x_dot * dt);
 
-    state_.yaw = std::atan2(state_.v_y, state_.v_x);
+    state.yaw = std::atan2(state.v_y, state.v_x);
   }
 };
 

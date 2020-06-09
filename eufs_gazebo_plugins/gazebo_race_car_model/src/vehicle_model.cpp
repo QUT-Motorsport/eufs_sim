@@ -107,16 +107,19 @@ void VehicleModel::initVehicleParam(sdf::ElementPtr &_sdf) {
 void VehicleModel::printInfo() {}
 
 void VehicleModel::update(const double dt) {
-  // TODO: Implement some kind of state machine
   input_.dc = ros::Time::now().toSec() - time_last_cmd_ < 1.0 ? input_.dc : -1.0;
-
-  // TODO: create current (state) and input variables to make sure they do not change during the process
 
   // TODO: Check if this should always be the case
   left_steering_joint->SetPosition(0, input_.delta);
   right_steering_joint->SetPosition(0, input_.delta);
 
-  updateState(dt);
+  State new_state = state_;
+  Input new_input = input_;
+
+  updateState(new_state, new_input, dt);
+
+  state_ = new_state;
+  input_ = new_input;
 
   setModelState();
 
@@ -130,7 +133,7 @@ void VehicleModel::update(const double dt) {
   state_machine_.spinOnce();
 }
 
-void VehicleModel::updateState(const double dt) {}
+void VehicleModel::updateState(State& state, Input& input, const double dt) {}
 
 void VehicleModel::setModelState() {
   const ignition::math::Pose3d   pose(state_.x, state_.y, model->WorldPose().Pos().Z(), 0, 0.0, state_.yaw);
@@ -157,6 +160,7 @@ void VehicleModel::publishCarState() {
   geometry_msgs::TwistWithCovariance twist;
   // TODO: set twist
   car_state.twist = twist;
+
   // geometry_msgs/Vector3 linear_acceleration # m/s^2
   geometry_msgs::Vector3 linear_acceleration;
   // TODO: set linear_acceleration
@@ -208,7 +212,6 @@ double VehicleModel::getSlipAngle(bool isFront) {
   return std::atan((state_.v_y + lever_arm_length_ * state_.r) / (v_x - 0.5 * axle_width_ * state_.r)) - input_.delta;
 }
 
-// TODO: Implement publishWheelSpeeds function
 void VehicleModel::publishWheelSpeeds() {
   eufs_msgs::WheelSpeedsStamped wheel_speeds;
 
