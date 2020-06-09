@@ -20,23 +20,13 @@
       <rear_right_wheel>rear_right_wheel_joint</rear_right_wheel>
 
       <yaml_config>$(arg config_file)</yaml_config>
-    </plugin>
-  </gazebo>
 
-
-  <!-- Custom ROS plugin to simulate ground truth state in simulation.
-  This node publishes nav_msgs/Odometry and eufs_msgs/CarState messages
-  with added noise via parameters below. This node can additionally publish
-  a transform from referenceFrame to robotFrame -->
-  <gazebo>
-    <plugin name="state_ground_truth" filename="libgazebo_state_ground_truth.so">
-      <alwaysOn>true</alwaysOn>
-      <updateRate>15.0</updateRate>
       <referenceFrame>map</referenceFrame>
       <robotFrame>base_footprint</robotFrame>
       <publishTransform>$(arg publish_tf)</publishTransform>
-      <odometryTopicName>/ground_truth/odom</odometryTopicName>
       <stateTopicName>/ground_truth/state</stateTopicName>
+      <wheelSpeedsTopicName>/ros_can/wheel_speeds</wheelSpeedsTopicName>
+      <odometryTopicName>/ground_truth/odom</odometryTopicName>
       <positionNoise>0.0 0.0 0.0</positionNoise>
       <orientationNoise>0.0 0.0 0.0</orientationNoise>
       <linearVelocityNoise>0.0 0.0 0.0</linearVelocityNoise>

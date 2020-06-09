@@ -217,7 +217,7 @@ struct convert<Param::TorqueVectoring> {
 
 }
 
-inline void initParam(Param &param, std::string &yaml_file) {
+inline void initParamStruct(Param &param, std::string &yaml_file) {
     YAML::Node config = YAML::LoadFile(yaml_file);
     ROS_DEBUG("STARTING THIS YAML CraP: %s ********************************", yaml_file.c_str());
 

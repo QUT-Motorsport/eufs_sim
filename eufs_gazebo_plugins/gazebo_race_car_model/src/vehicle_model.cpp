@@ -37,26 +37,159 @@ VehicleModel::VehicleModel(physics::ModelPtr &_model,
     model(_model),
     state_machine_(nh)
 {
-
   // For the Gaussian Kernel random number generation
-  seed = 0;
+  this->seed = 0;
+
+  // Initialization
+  this->initParam(_sdf);
+  this->initModel(_sdf);
+  this->initVehicleParam(_sdf);
 
   // ROS Publishers
-  pub_car_state_    = nh->advertise<eufs_msgs::CarState>("/ground_truth/state", 1);
-  pub_wheel_speeds_  = nh->advertise<eufs_msgs::WheelSpeedsStamped>("/ros_can/wheel_speeds", 1);
+  this->pub_car_state_     = nh->advertise<eufs_msgs::CarState>(this->state_topic_name_, 1);
+  this->pub_wheel_speeds_  = nh->advertise<eufs_msgs::WheelSpeedsStamped>(this->wheel_speeds_topic_name_, 1);
+  this->pub_odom_          = nh->advertise<nav_msgs::Odometry>(this->odom_topic_name_, 1);
 
   // ROS Subscribers
-  sub_cmd_          = nh->subscribe("/cmd_vel_out", 1, &VehicleModel::onCmd, this);
-  sub_initial_pose_ = nh->subscribe("/initialpose", 1, &VehicleModel::onInitialPose, this);
+  this->sub_cmd_          = nh->subscribe("/cmd_vel_out", 1, &VehicleModel::onCmd, this);
+  this->sub_initial_pose_ = nh->subscribe("/initialpose", 1, &VehicleModel::onInitialPose, this);
 
-  // Initializatoin
-  initModel(_sdf);
-  initVehicleParam(_sdf);
+  this->setPositionFromWorld();
 
-  setPositionFromWorld();
-
-  time_last_cmd_ = 0.0;
+  this->time_last_cmd_ = 0.0;
 }
+
+void VehicleModel::initParam(sdf::ElementPtr &_sdf) {
+  if (!_sdf->HasElement("referenceFrame")) {
+    ROS_DEBUG_NAMED("state_ground_truth", "state_ground_truth plugin missing <referenceFrame>, defaults to map");
+    this->reference_frame_ = "map";
+  } else {
+    this->reference_frame_ = _sdf->GetElement("referenceFrame")->Get<std::string>();
+  }
+
+  if (!_sdf->HasElement("robotFrame")) {
+    ROS_DEBUG_NAMED("state_ground_truth", "state_ground_truth plugin missing <robotFrame>, defaults to base_footprint");
+    this->robot_frame_ = "base_footprint";
+  } else {
+    this->robot_frame_ = _sdf->GetElement("robotFrame")->Get<std::string>();
+  }
+
+  if (!_sdf->HasElement("publishTransform")) {
+    ROS_DEBUG_NAMED("state_ground_truth", "state_ground_truth plugin missing <publishTransform>, defaults to false");
+    this->publish_tf_ = false;
+  } else {
+    this->publish_tf_ = _sdf->GetElement("publishTransform")->Get<bool>();
+  }
+
+  if (!_sdf->HasElement("wheelSpeedsTopicName")) {
+    ROS_FATAL_NAMED("state_ground_truth", "state_ground_truth plugin missing <wheelSpeedsTopicName>, cannot proceed");
+    return;
+  } else {
+    this->wheel_speeds_topic_name_ = _sdf->GetElement("wheelSpeedsTopicName")->Get<std::string>();
+  }
+
+  if (!_sdf->HasElement("stateTopicName")) {
+    ROS_FATAL_NAMED("state_ground_truth", "state_ground_truth plugin missing <stateTopicName>, cannot proceed");
+    return;
+  } else {
+    this->state_topic_name_ = _sdf->GetElement("stateTopicName")->Get<std::string>();
+  }
+
+  if (!_sdf->HasElement("odometryTopicName")) {
+    ROS_FATAL_NAMED("state_ground_truth", "state_ground_truth plugin missing <odometryTopicName>, cannot proceed");
+    return;
+  } else {
+    this->odom_topic_name_ = _sdf->GetElement("odometryTopicName")->Get<std::string>();
+  }
+
+  if (!_sdf->HasElement("positionNoise")) {
+    ROS_DEBUG_NAMED("state_ground_truth",
+                    "state_ground_truth plugin missing <positionNoise>, defaults to 0.0, 0.0, 0.0");
+    this->position_noise_ = {0.0, 0.0, 0.0};
+  } else {
+    auto temp = _sdf->GetElement("positionNoise")->Get<ignition::math::Vector3d>();
+    this->position_noise_ = {temp.X(), temp.Y(), temp.Z()};
+  }
+
+  if (this->position_noise_.size() != 3) {
+    ROS_FATAL_NAMED("state_ground_truth", "positionNoise parameter vector is not of size 3");
+  }
+
+  if (!_sdf->HasElement("orientationNoise")) {
+    ROS_DEBUG_NAMED("state_ground_truth",
+                    "state_ground_truth plugin missing <orientationNoise>, defaults to 0.0, 0.0, 0.0");
+    this->orientation_noise_ = {0.0, 0.0, 0.0};
+  } else {
+    auto temp = _sdf->GetElement("orientationNoise")->Get<ignition::math::Vector3d>();
+    this->orientation_noise_ = {temp.X(), temp.Y(), temp.Z()};
+  }
+
+  if (this->orientation_noise_.size() != 3) {
+    ROS_FATAL_NAMED("state_ground_truth", "orientationNoise parameter vector is not of size 3");
+  }
+
+  // convert orientation to quaternion
+  this->orientation_quat_noise_ = this->ToQuaternion(this->orientation_noise_);
+
+  if (!_sdf->HasElement("linearVelocityNoise")) {
+    ROS_DEBUG_NAMED("state_ground_truth",
+                    "state_ground_truth plugin missing <linearVelocityNoise>, defaults to 0.0, 0.0, 0.0");
+    this->linear_velocity_noise_ = {0.0, 0.0, 0.0};
+  } else {
+    auto temp = _sdf->GetElement("linearVelocityNoise")->Get<ignition::math::Vector3d>();
+    this->linear_velocity_noise_ = {temp.X(), temp.Y(), temp.Z()};
+  }
+
+  if (this->linear_velocity_noise_.size() != 3) {
+    ROS_FATAL_NAMED("state_ground_truth", "linearVelocityNoise parameter vector is not of size 3");
+  }
+
+  if (!_sdf->HasElement("angularVelocityNoise")) {
+    ROS_DEBUG_NAMED("state_ground_truth",
+                    "state_ground_truth plugin missing <angularVelocityNoise>, defaults to 0.0, 0.0, 0.0");
+    this->angular_velocity_noise_ = {0.0, 0.0, 0.0};
+  } else {
+    auto temp = _sdf->GetElement("angularVelocityNoise")->Get<ignition::math::Vector3d>();
+    this->angular_velocity_noise_ = {temp.X(), temp.Y(), temp.Z()};
+  }
+
+  if (this->angular_velocity_noise_.size() != 3) {
+    ROS_FATAL_NAMED("state_ground_truth", "angularVelocityNoise parameter vector is not of size 3");
+  }
+
+  if (!_sdf->HasElement("linearAccelerationNoise")) {
+    ROS_DEBUG_NAMED("state_ground_truth",
+                    "state_ground_truth plugin missing <linearAccelerationNoise>, defaults to 0.0, 0.0, 0.0");
+    this->linear_acceleration_noise_ = {0.0, 0.0, 0.0};
+  } else {
+    auto temp = _sdf->GetElement("linearAccelerationNoise")->Get<ignition::math::Vector3d>();
+    this->linear_acceleration_noise_ = {temp.X(), temp.Y(), temp.Z()};
+  }
+
+  if (this->linear_acceleration_noise_.size() != 3) {
+    ROS_FATAL_NAMED("state_ground_truth", "linearAccelerationNoise parameter vector is not of size 3");
+  }
+}
+
+std::vector<double> VehicleModel::ToQuaternion(std::vector<double> &euler) {
+  // Abbreviations for the various angular functions
+  double cy = cos(euler[0] * 0.5);
+  double sy = sin(euler[0] * 0.5);
+  double cp = cos(euler[1] * 0.5);
+  double sp = sin(euler[1] * 0.5);
+  double cr = cos(euler[2] * 0.5);
+  double sr = sin(euler[2] * 0.5);
+
+  std::vector<double> q;
+  q.reserve(4);
+  q[0] = cy * cp * cr + sy * sp * sr;
+  q[1] = cy * cp * sr - sy * sp * cr;
+  q[2] = sy * cp * sr + cy * sp * cr;
+  q[3] = sy * cp * cr - cy * sp * sr;
+
+  return q;
+}
+
 
 void VehicleModel::setPositionFromWorld() {
   auto       pos   = model->WorldPose();
@@ -100,7 +233,7 @@ void VehicleModel::initVehicleParam(sdf::ElementPtr &_sdf) {
   std::string yaml_name = "config.yaml";
   yaml_name = getParam(_sdf, "yaml_config", yaml_name);
 
-  initParam(param_, yaml_name);
+  initParamStruct(param_, yaml_name);
 }
 
 // TODO: Update this function
@@ -126,9 +259,12 @@ void VehicleModel::update(const double dt) {
   // Publish Everything
   publishCarState();
   publishWheelSpeeds();
+  publishOdom();
 
   // TODO: Only do this if it is selected in the launcher
-  publishTf();
+  if (this->publish_tf_) {
+    publishTf();
+  }
 
   state_machine_.spinOnce();
 }
@@ -153,28 +289,67 @@ void VehicleModel::publishCarState() {
   // TODO: Check what the child_frame_id of the car state should be
   car_state.child_frame_id = "eufs";
 
-  geometry_msgs::PoseWithCovariance pose;
-  // TODO: set pose
-  car_state.pose = pose;
+  car_state.pose.pose.position.x = this->state_.x + this->GaussianKernel(0, this->position_noise_[0]);
+  car_state.pose.pose.position.y = this->state_.y + this->GaussianKernel(0, this->position_noise_[1]);
+  car_state.pose.pose.position.z = model->WorldPose().Pos().Z() + this->GaussianKernel(0, this->position_noise_[2]);
 
-  geometry_msgs::TwistWithCovariance twist;
-  // TODO: set twist
-  car_state.twist = twist;
+  std::vector<double> orientation = {0.0, 0.0, state_.yaw};
+  orientation = this->ToQuaternion(orientation);
+
+  car_state.pose.pose.orientation.x = orientation[0] + this->GaussianKernel(0, this->orientation_noise_[0]);
+  car_state.pose.pose.orientation.y = orientation[1] + this->GaussianKernel(0, this->orientation_noise_[1]);
+  car_state.pose.pose.orientation.z = orientation[2] + this->GaussianKernel(0, this->orientation_noise_[2]);
+  car_state.pose.pose.orientation.w = orientation[3] + this->GaussianKernel(0, this->orientation_noise_[3]);
+
+  car_state.twist.twist.linear.x = state_.v_x + this->GaussianKernel(0, this->linear_velocity_noise_[0]);
+  car_state.twist.twist.linear.y = state_.v_y + this->GaussianKernel(0, this->linear_velocity_noise_[1]);
+  car_state.twist.twist.linear.z = 0 + this->GaussianKernel(0, this->linear_velocity_noise_[2]);
+  car_state.twist.twist.angular.x = 0 + this->GaussianKernel(0, this->angular_velocity_noise_[0]);
+  car_state.twist.twist.angular.y = 0 + this->GaussianKernel(0, this->angular_velocity_noise_[1]);
+  car_state.twist.twist.angular.z = state_.r + this->GaussianKernel(0, this->angular_velocity_noise_[2]);
+
+  // TODO: Make sure I don't need this
+//  // now rotate linear velocities to correct orientation
+//  auto q0 = car_state.pose.pose.orientation.w;
+//  auto q1 = car_state.pose.pose.orientation.x;
+//  auto q2 = car_state.pose.pose.orientation.y;
+//  auto q3 = car_state.pose.pose.orientation.z;
+//  auto yaw = atan2(2 * q1 * q2 + 2 * q0 * q3, q1 * q1 + q0 * q0 - q3 * q3 - q2 * q2);
+//  auto new_x_vel =
+//    cos(yaw) * car_state.twist.twist.linear.x + sin(yaw) * car_state.twist.twist.linear.y;
+//  auto new_y_vel =
+//    -sin(yaw) * car_state.twist.twist.linear.x + cos(yaw) * car_state.twist.twist.linear.y;
+//  car_state.twist.twist.linear.x = new_x_vel;
+//  car_state.twist.twist.linear.y = new_y_vel;
+
+  // fill in covariance matrix
+  car_state.pose.covariance[0] = pow(this->position_noise_[0], 2);
+  car_state.pose.covariance[7] = pow(this->position_noise_[1], 2);
+  car_state.pose.covariance[14] = pow(this->position_noise_[2], 2);
+  car_state.pose.covariance[21] = pow(this->orientation_noise_[1], 2);
+  car_state.pose.covariance[28] = pow(this->orientation_noise_[1], 2);
+  car_state.pose.covariance[35] = pow(this->orientation_noise_[2], 2);
+
+  car_state.twist.covariance[0] = pow(this->linear_velocity_noise_[0], 2);
+  car_state.twist.covariance[7] = pow(this->linear_velocity_noise_[1], 2);
+  car_state.twist.covariance[14] = pow(this->linear_velocity_noise_[2], 2);
+  car_state.twist.covariance[21] = pow(this->angular_velocity_noise_[0], 2);
+  car_state.twist.covariance[28] = pow(this->angular_velocity_noise_[1], 2);
+  car_state.twist.covariance[35] = pow(this->angular_velocity_noise_[2], 2);
+
+
+  // TODO: set linear_acceleration
+  car_state.linear_acceleration.x = 0 + this->GaussianKernel(0, this->linear_acceleration_noise_[0]);
+  car_state.linear_acceleration.y = 0 + this->GaussianKernel(0, this->linear_acceleration_noise_[1]);
+  car_state.linear_acceleration.z = 0 + this->GaussianKernel(0, this->linear_acceleration_noise_[2]);
+
+  car_state.linear_acceleration_covariance[0] = pow(this->linear_acceleration_noise_[0], 2);
+  car_state.linear_acceleration_covariance[4] = pow(this->linear_acceleration_noise_[1], 2);
+  car_state.linear_acceleration_covariance[8] = pow(this->linear_acceleration_noise_[2], 2);
 
   // geometry_msgs/Vector3 linear_acceleration # m/s^2
   geometry_msgs::Vector3 linear_acceleration;
-  // TODO: set linear_acceleration
   car_state.linear_acceleration = linear_acceleration;
-
-  // TODO: Overlay Noise on Velocities
-  // The param_.sensors does not exist anymore
-  // state_pub.vx += GaussianKernel(0.0, param_.sensors.noise_vx_sigma);
-  // state_pub.vy += GaussianKernel(0.0, param_.sensors.noise_vy_sigma);
-  // state_pub.r += GaussianKernel(0.0, param_.sensors.noise_r_sigma);
-
-  boost::array<double, 9> linear_acceleration_covariance = { 0 };
-  // TODO: set linear_acceleration_covariance
-  car_state.linear_acceleration_covariance = linear_acceleration_covariance;
 
   car_state.slip_angle = getSlipAngle();
 
@@ -230,6 +405,65 @@ void VehicleModel::publishWheelSpeeds() {
   pub_wheel_speeds_.publish(wheel_speeds);
 }
 
+void VehicleModel::publishOdom() {
+  nav_msgs::Odometry odom;
+
+  odom.header.stamp = ros::Time::now();
+
+  // TODO: Check what the child_frame_id of the car state should be
+  odom.child_frame_id = "eufs";
+
+  odom.pose.pose.position.x = this->state_.x + this->GaussianKernel(0, this->position_noise_[0]);
+  odom.pose.pose.position.y = this->state_.y + this->GaussianKernel(0, this->position_noise_[1]);
+  odom.pose.pose.position.z = model->WorldPose().Pos().Z() + this->GaussianKernel(0, this->position_noise_[2]);
+
+  std::vector<double> orientation = {0.0, 0.0, state_.yaw};
+  orientation = this->ToQuaternion(orientation);
+
+  odom.pose.pose.orientation.x = orientation[0] + this->GaussianKernel(0, this->orientation_noise_[0]);
+  odom.pose.pose.orientation.y = orientation[1] + this->GaussianKernel(0, this->orientation_noise_[1]);
+  odom.pose.pose.orientation.z = orientation[2] + this->GaussianKernel(0, this->orientation_noise_[2]);
+  odom.pose.pose.orientation.w = orientation[3] + this->GaussianKernel(0, this->orientation_noise_[3]);
+
+  odom.twist.twist.linear.x = state_.v_x + this->GaussianKernel(0, this->linear_velocity_noise_[0]);
+  odom.twist.twist.linear.y = state_.v_y + this->GaussianKernel(0, this->linear_velocity_noise_[1]);
+  odom.twist.twist.linear.z = 0 + this->GaussianKernel(0, this->linear_velocity_noise_[2]);
+  odom.twist.twist.angular.x = 0 + this->GaussianKernel(0, this->angular_velocity_noise_[0]);
+  odom.twist.twist.angular.y = 0 + this->GaussianKernel(0, this->angular_velocity_noise_[1]);
+  odom.twist.twist.angular.z = state_.r + this->GaussianKernel(0, this->angular_velocity_noise_[2]);
+
+  // TODO: Make sure I don't need this
+//  // now rotate linear velocities to correct orientation
+//  auto q0 = odom.pose.pose.orientation.w;
+//  auto q1 = odom.pose.pose.orientation.x;
+//  auto q2 = odom.pose.pose.orientation.y;
+//  auto q3 = odom.pose.pose.orientation.z;
+//  auto yaw = atan2(2 * q1 * q2 + 2 * q0 * q3, q1 * q1 + q0 * q0 - q3 * q3 - q2 * q2);
+//  auto new_x_vel =
+//    cos(yaw) * odom.twist.twist.linear.x + sin(yaw) * odom.twist.twist.linear.y;
+//  auto new_y_vel =
+//    -sin(yaw) * odom.twist.twist.linear.x + cos(yaw) * odom.twist.twist.linear.y;
+//  odom.twist.twist.linear.x = new_x_vel;
+//  odom.twist.twist.linear.y = new_y_vel;
+
+  // fill in covariance matrix
+  odom.pose.covariance[0] = pow(this->position_noise_[0], 2);
+  odom.pose.covariance[7] = pow(this->position_noise_[1], 2);
+  odom.pose.covariance[14] = pow(this->position_noise_[2], 2);
+  odom.pose.covariance[21] = pow(this->orientation_noise_[1], 2);
+  odom.pose.covariance[28] = pow(this->orientation_noise_[1], 2);
+  odom.pose.covariance[35] = pow(this->orientation_noise_[2], 2);
+
+  odom.twist.covariance[0] = pow(this->linear_velocity_noise_[0], 2);
+  odom.twist.covariance[7] = pow(this->linear_velocity_noise_[1], 2);
+  odom.twist.covariance[14] = pow(this->linear_velocity_noise_[2], 2);
+  odom.twist.covariance[21] = pow(this->angular_velocity_noise_[0], 2);
+  odom.twist.covariance[28] = pow(this->angular_velocity_noise_[1], 2);
+  odom.twist.covariance[35] = pow(this->angular_velocity_noise_[2], 2);
+
+  pub_odom_.publish(odom);
+}
+
 void VehicleModel::publishTf() {
   // Position
   tf::Transform transform;
@@ -240,8 +474,10 @@ void VehicleModel::publishTf() {
   q.setRPY(0.0, 0.0, state_.yaw);
   transform.setRotation(q);
 
+  // TODO: Add noise to the odom message
+
   // Send TF
-  tf_br_.sendTransform(tf::StampedTransform(transform, ros::Time::now(), "/fssim_map", "/fssim/vehicle/base_link"));
+  tf_br_.sendTransform(tf::StampedTransform(transform, ros::Time::now(), this->reference_frame_, this->robot_frame_));
 }
 
 void VehicleModel::onCmd(const ackermann_msgs::AckermannDriveStampedConstPtr &msg) {

@@ -74,8 +74,10 @@ public:
 
   StateMachine state_machine_;
 
- protected:
+protected:
   void setPositionFromWorld();
+
+  void initParam(sdf::ElementPtr &_sdf);
 
   void initModel(sdf::ElementPtr &_sdf);
 
@@ -91,6 +93,8 @@ public:
 
   void publishWheelSpeeds();
 
+  void publishOdom();
+
   void publishTf();
 
   void onCmd(const ackermann_msgs::AckermannDriveStampedConstPtr &msg);
@@ -101,25 +105,52 @@ public:
 
   Input &getInput() { return input_; }
 
-protected:
+  // States
+  State state_;
+  Input input_;
+  double time_last_cmd_;
 
   // ROS Nodehandle
   boost::shared_ptr<ros::NodeHandle> nh_;
 
+  // Pointer to the parent model
+  physics::ModelPtr model;
+
+  std::string state_topic_name_;
+  std::string wheel_speeds_topic_name_;
+  std::string odom_topic_name_;
+
   // ROS Publishers
   ros::Publisher pub_car_state_;
   ros::Publisher pub_wheel_speeds_;
+  ros::Publisher pub_odom_;
 
   // ROS Subscribers
   ros::Subscriber sub_cmd_;
   ros::Subscriber sub_initial_pose_;
 
+  bool publish_tf_;
+  std::string reference_frame_;
+  std::string robot_frame_;
+
+  std::vector<double> position_noise_;
+  std::vector<double> orientation_noise_;
+  std::vector<double> orientation_quat_noise_;
+  std::vector<double> linear_velocity_noise_;
+  std::vector<double> angular_velocity_noise_;
+  std::vector<double> linear_acceleration_noise_;
+
+  /// @brief Converts an euler orientation to quaternion
+  std::vector<double> ToQuaternion(std::vector<double> &euler);
+
   // ROS TF
   tf::TransformBroadcaster tf_br_;
 
-  /// Pointer to the parent model
-  physics::ModelPtr model;
+  // Gaussian Kernel for random number generation
+  unsigned int seed;
+  double GaussianKernel(double mu, double sigma);
 
+ protected:
   // Steering joints
   physics::JointPtr left_steering_joint;
   physics::JointPtr right_steering_joint;
@@ -132,15 +163,6 @@ protected:
 
   // Parameters
   Param param_;
-
-  // States
-  State state_;
-  Input input_;
-  double time_last_cmd_;
-
-  // Gaussian Kernel for random number generation
-  unsigned int seed;
-  double GaussianKernel(double mu, double sigma);
 };
 
 typedef std::unique_ptr<VehicleModel> VehicleModelPtr;
