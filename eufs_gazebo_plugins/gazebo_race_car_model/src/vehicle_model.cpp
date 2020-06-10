@@ -251,7 +251,7 @@ void VehicleModel::printInfo() {}
 void VehicleModel::update(const double dt) {
   input_.dc = ros::Time::now().toSec() - time_last_cmd_ < 1.0 ? input_.dc : -1.0;
 
-  // TODO: Check if this should always be the case
+  // TODO: Should the steering be set to exactly the delta value no matter the direction of the car?
   left_steering_joint->SetPosition(0, input_.delta);
   right_steering_joint->SetPosition(0, input_.delta);
 
@@ -298,8 +298,7 @@ void VehicleModel::publishCarState() {
   eufs_msgs::CarState car_state;
   car_state.header.stamp = ros::Time::now();
 
-  // TODO: Check what the child_frame_id of the car state should be
-  car_state.child_frame_id = "eufs";
+  car_state.child_frame_id = "base_footprint";
 
 #if GAZEBO_MAJOR_VERSION >= 8
   double z = model->WorldPose().Pos().Z();
@@ -359,7 +358,7 @@ void VehicleModel::publishCarState() {
   pub_car_state_.publish(car_state);
 }
 
-// TODO: Check if these formulas are correct
+// TODO: Are the equations for the slip angle here correct?
 double VehicleModel::getSlipAngle(bool isFront) {
   unsigned int id = 0;
 
@@ -403,7 +402,7 @@ void VehicleModel::publishWheelSpeeds() {
 
   wheel_speeds.steering = input_.delta;
 
-  // TODO: Change these to a different value?
+  // TODO: Should I change these to a different value to signify they are not used?
   wheel_speeds.lf_speed = 0;
   wheel_speeds.rf_speed = 0;
 
@@ -421,8 +420,7 @@ void VehicleModel::publishOdom() {
 
   odom.header.stamp = ros::Time::now();
 
-  // TODO: Check what the child_frame_id of the car state should be
-  odom.child_frame_id = "eufs";
+  odom.child_frame_id = "base_footprint";
 
 #if GAZEBO_MAJOR_VERSION >= 8
   double z = model->WorldPose().Pos().Z();
@@ -496,7 +494,7 @@ void VehicleModel::onCmd(const ackermann_msgs::AckermannDriveStampedConstPtr &ms
 
     input_.dc    = msg->drive.acceleration;
   } else {
-    // TODO: Stop the car somehow
+    // TODO: Should we do something else to stop the car or is this good for now
     input_.delta = 0;
     input_.dc    = -1;
   }
