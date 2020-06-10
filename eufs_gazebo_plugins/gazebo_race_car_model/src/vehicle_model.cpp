@@ -192,10 +192,17 @@ std::vector<double> VehicleModel::ToQuaternion(std::vector<double> &euler) {
 
 
 void VehicleModel::setPositionFromWorld() {
+#if GAZEBO_MAJOR_VERSION >= 8
   auto       pos   = model->WorldPose();
   const auto vel   = model->WorldLinearVel();
   const auto accel = model->WorldLinearAccel();
   const auto r     = model->WorldAngularVel();
+#else
+  auto       pos   = model->GetWorldPose().Ign();
+  const auto vel   = model->GetWorldLinearVel().Ign();
+  const auto accel = model->GetWorldLinearAccel().Ign();
+  const auto r     = model->GetWorldAngularVel().Ign();
+#endif
 
   state_.x   = pos.Pos().X();
   state_.y   = pos.Pos().Y();
@@ -273,7 +280,12 @@ void VehicleModel::update(const double dt) {
 void VehicleModel::updateState(State& state, Input& input, const double dt) {}
 
 void VehicleModel::setModelState() {
-  const ignition::math::Pose3d   pose(state_.x, state_.y, model->WorldPose().Pos().Z(), 0, 0.0, state_.yaw);
+#if GAZEBO_MAJOR_VERSION >= 8
+  double z = model->WorldPose().Pos().Z();
+#else
+  double z = model->GetWorldPose().Ign().Pos().Z();
+#endif
+  const ignition::math::Pose3d   pose(state_.x, state_.y, z, 0, 0.0, state_.yaw);
   const ignition::math::Vector3d vel(state_.v_x * cos(state_.yaw) - state_.v_y * sin(state_.yaw), state_.v_x * sin (state_.yaw) + state_.v_y * cos(state_.yaw), 0.0);
   const ignition::math::Vector3d angular(0.0, 0.0, state_.r);
   model->SetWorldPose(pose);
@@ -289,9 +301,14 @@ void VehicleModel::publishCarState() {
   // TODO: Check what the child_frame_id of the car state should be
   car_state.child_frame_id = "eufs";
 
+#if GAZEBO_MAJOR_VERSION >= 8
+  double z = model->WorldPose().Pos().Z();
+#else
+  double z = model->GetWorldPose().Ign().Pos().Z();
+#endif
   car_state.pose.pose.position.x = this->state_.x + this->GaussianKernel(0, this->position_noise_[0]);
   car_state.pose.pose.position.y = this->state_.y + this->GaussianKernel(0, this->position_noise_[1]);
-  car_state.pose.pose.position.z = model->WorldPose().Pos().Z() + this->GaussianKernel(0, this->position_noise_[2]);
+  car_state.pose.pose.position.z = z + this->GaussianKernel(0, this->position_noise_[2]);
 
   std::vector<double> orientation = {0.0, 0.0, state_.yaw};
   orientation = this->ToQuaternion(orientation);
@@ -349,8 +366,13 @@ double VehicleModel::getSlipAngle(bool isFront) {
   double lever_arm_length_ = param_.kinematic.l * param_.kinematic.w_front;
 
   if (!isFront) {
+#if GAZEBO_MAJOR_VERSION >= 8
     double axle_width_ = (rear_left_wheel->GetChild()->GetCollision(id)->WorldPose().Pos() -
                           rear_right_wheel->GetChild()->GetCollision(id)->WorldPose().Pos()).Length();
+#else
+    double axle_width_ = (rear_left_wheel->GetChild()->GetCollision(id)->GetWorldPose().Ign().Pos() -
+                          rear_right_wheel->GetChild()->GetCollision(id)->GetWorldPose().Ign().Pos()).Length();
+#endif
 
     // From Ignat
     // return -std::atan2(state_.v_y - state_.r * lever_arm_length_, state_.v_x);
@@ -360,8 +382,13 @@ double VehicleModel::getSlipAngle(bool isFront) {
     return std::atan((state_.v_y + -1 * lever_arm_length_ * state_.r) / (v_x - 0.5 * axle_width_ * state_.r));
   }
 
+#if GAZEBO_MAJOR_VERSION >= 8
   double axle_width_ = (front_left_wheel->GetChild()->GetCollision(id)->WorldPose().Pos() -
                         front_right_wheel->GetChild()->GetCollision(id)->WorldPose().Pos()).Length();
+#else
+  double axle_width_ = (front_left_wheel->GetChild()->GetCollision(id)->GetWorldPose().Ign().Pos() -
+                        front_right_wheel->GetChild()->GetCollision(id)->GetWorldPose().Ign().Pos()).Length();
+#endif
 
   // From Ignat
   // return input_.delta - std::atan2(state_.v_y + state_.r * lever_arm_length_, state_.v_x);
@@ -397,9 +424,15 @@ void VehicleModel::publishOdom() {
   // TODO: Check what the child_frame_id of the car state should be
   odom.child_frame_id = "eufs";
 
+#if GAZEBO_MAJOR_VERSION >= 8
+  double z = model->WorldPose().Pos().Z();
+#else
+  double z = model->GetWorldPose().Ign().Pos().Z();
+#endif
+
   odom.pose.pose.position.x = this->state_.x + this->GaussianKernel(0, this->position_noise_[0]);
   odom.pose.pose.position.y = this->state_.y + this->GaussianKernel(0, this->position_noise_[1]);
-  odom.pose.pose.position.z = model->WorldPose().Pos().Z() + this->GaussianKernel(0, this->position_noise_[2]);
+  odom.pose.pose.position.z = z + this->GaussianKernel(0, this->position_noise_[2]);
 
   std::vector<double> orientation = {0.0, 0.0, state_.yaw};
   orientation = this->ToQuaternion(orientation);

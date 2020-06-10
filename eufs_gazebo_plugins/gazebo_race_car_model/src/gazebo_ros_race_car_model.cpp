@@ -79,7 +79,11 @@ void RaceCarModelPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf) {
 
   this->worldControlPub = this->gznode->Advertise<msgs::WorldControl>("~/world_control");
 
+#if GAZEBO_MAJOR_VERSION >= 8
   this->lastSimTime = this->world->SimTime();
+#else
+  this->lastSimTime = this->world->GetSimTime();
+#endif
 }
 
 void RaceCarModelPlugin::Reset() {
