@@ -223,9 +223,18 @@ class EufsLauncher(Plugin):
                 self.LAX_CHECKBOX.setChecked(self.LAX_GENERATION)
 
                 # Setup Vehicle Models menu
-                # TODO: Get different vehicle models from the different abstract classes with different models
-                vehicle_models = ["PointMass", "FssimModel"]
-                default_model = "FssimModel"
+                # Clear the dropdowns
+                self.VEHICLE_MODEL_MENU.clear()
+
+                # Remove "blacklisted" files (ones that don't define vehicle models)
+                models_filepath = os.path.join(
+                        rospkg.RosPack().get_path('eufs_gazebo_plugins'),
+                        'gazebo_race_car_model/src/models.txt'
+                )
+                vehicle_models_ = open(models_filepath, "r")
+                vehicle_models = [model.strip() for model in vehicle_models_]  # remove \n
+
+                default_model = self.default_config["eufs_launcher"]["default_vehicle_model"]
                 if default_model in vehicle_models:
                         self.VEHICLE_MODEL_MENU.addItem(default_model)
                 for model in vehicle_models:

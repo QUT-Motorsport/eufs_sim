@@ -7,6 +7,9 @@ eufs_launcher:
     # Make sure to add the .launch suffix, i.e. "small_track.launch"
     base_track: "small_track.launch"
 
+    # Default vehicle model to be selected in the launcher drop-down menu
+    default_vehicle_model: "FssimModel"
+
     # percent of possible noise pixels being utilized
     object_noise_default: 0
 
