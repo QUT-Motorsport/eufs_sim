@@ -31,7 +31,6 @@
 #include <gazebo/physics/physics.hh>
 
 // FSSIM Include
-#include "gazebo_utills.hpp"
 #include "config.hpp"
 #include "definitions.hpp"
 #include "state_machine.hpp"
