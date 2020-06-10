@@ -67,7 +67,7 @@ private:
 
   event::ConnectionPtr updateConnection;
 
-  fssim::VehicleModelPtr vehicle;
+  eufs::VehicleModelPtr vehicle;
 
   common::Time lastSimTime;
 

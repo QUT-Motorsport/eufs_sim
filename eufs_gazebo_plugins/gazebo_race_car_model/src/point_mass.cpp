@@ -27,7 +27,7 @@
 #include "vehicle_model.hpp"
 
 namespace gazebo {
-namespace fssim {
+namespace eufs {
 
 class PointMass: public VehicleModel {
 public:
@@ -40,7 +40,6 @@ public:
 
   virtual void updateState(State& state, Input& input, const double dt)
   {
-    ROS_INFO("Bye");
     state.a_x = input.dc * std::cos(input.delta);
     state.a_y = input.dc * std::sin(input.delta);
 
@@ -58,5 +57,5 @@ public:
   }
 };
 
-} // namespace fssim
+} // namespace eufs
 } // namespace gazebo

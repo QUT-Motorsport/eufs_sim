@@ -22,8 +22,8 @@
  * SOFTWARE.
  */
 
-#ifndef FSSIM_GAZEBO_CONFIG_HPP_HPP
-#define FSSIM_GAZEBO_CONFIG_HPP_HPP
+#ifndef GAZEBO_CONFIG_HPP
+#define GAZEBO_CONFIG_HPP
 #include "ros/common.h"
 #include "yaml-cpp/yaml.h"
 
@@ -229,4 +229,4 @@ inline void initParamStruct(Param &param, std::string &yaml_file) {
     param.torqueVectoring = config["torque_vectoring"].as<Param::TorqueVectoring>();
 }
 
-#endif //FSSIM_GAZEBO_CONFIG_HPP_HPP
+#endif //GAZEBO_CONFIG_HPP

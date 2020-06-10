@@ -63,14 +63,14 @@ void RaceCarModelPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf) {
   }
 
   if (vehicle_model_ == "PointMass") {
-    this->vehicle = std::unique_ptr<fssim::VehicleModel>(
-      new fssim::PointMass(_model, _sdf, this->rosnode, this->gznode));
+    this->vehicle = std::unique_ptr<eufs::VehicleModel>(
+      new eufs::PointMass(_model, _sdf, this->rosnode, this->gznode));
   } else if (vehicle_model_ == "FssimModel") {
-    this->vehicle = std::unique_ptr<fssim::VehicleModel>(
-      new fssim::FssimModel(_model, _sdf, this->rosnode, this->gznode));
+    this->vehicle = std::unique_ptr<eufs::VehicleModel>(
+      new eufs::FssimModel(_model, _sdf, this->rosnode, this->gznode));
   } else {
-    this->vehicle = std::unique_ptr<fssim::VehicleModel>(
-      new fssim::VehicleModel(_model, _sdf, this->rosnode, this->gznode));
+    this->vehicle = std::unique_ptr<eufs::VehicleModel>(
+      new eufs::VehicleModel(_model, _sdf, this->rosnode, this->gznode));
   }
   this->vehicle->printInfo();
 

@@ -27,7 +27,7 @@
 #include "vehicle_model.hpp"
 
 namespace gazebo {
-namespace fssim {
+namespace eufs {
 
 class FssimModel: public VehicleModel {
 public:
@@ -184,5 +184,5 @@ private:
   }
 };
 
-} // namespace fssim
+} // namespace eufs
 } // namespace gazebo

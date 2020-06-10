@@ -22,11 +22,11 @@
  * SOFTWARE.
  */
 
-#ifndef FSSIM_GAZEBO_DEFINITIONS_HPP
-#define FSSIM_GAZEBO_DEFINITIONS_HPP
+#ifndef GAZEBO_DEFINITIONS_HPP
+#define GAZEBO_DEFINITIONS_HPP
 
 namespace gazebo {
-namespace fssim {
+namespace eufs {
 
 struct State {
 
@@ -88,6 +88,6 @@ struct Input {
   double delta;
 };
 
-} // namespace fssim
+} // namespace eufs
 } // namespace gazebo
-#endif //FSSIM_GAZEBO_DEFINITIONS_HPP
+#endif //GAZEBO_DEFINITIONS_HPP

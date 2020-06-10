@@ -27,7 +27,7 @@
 #include "vehicle_model.hpp"
 
 namespace gazebo {
-namespace fssim {
+namespace eufs {
 
 VehicleModel::VehicleModel(physics::ModelPtr &_model,
                  sdf::ElementPtr &_sdf,
@@ -532,5 +532,5 @@ double VehicleModel::GaussianKernel(double mu, double sigma) {
   return X;
 }
 
-} // namespace fssim
+} // namespace eufs
 } // namespace gazebo

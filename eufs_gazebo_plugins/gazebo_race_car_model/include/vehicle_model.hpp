@@ -23,14 +23,14 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef FSSIM_GAZEBO_VEHICLE_H
-#define FSSIM_GAZEBO_VEHICLE_H
+#ifndef GAZEBO_VEHICLE_HPP
+#define GAZEBO_VEHICLE_HPP
 
 #include <ros/ros.h>
 
 #include <gazebo/physics/physics.hh>
 
-// FSSIM Include
+// Include
 #include "config.hpp"
 #include "definitions.hpp"
 #include "state_machine.hpp"
@@ -49,16 +49,7 @@
 #include <tf/transform_broadcaster.h>
 
 namespace gazebo {
-template<class VecOut, class VecIn>
-VecOut getRosVesMsg(VecIn &in) {
-  VecOut out;
-  out.x = in.X();
-  out.y = in.Y();
-  out.z = in.Z();
-  return out;
-};
-
-namespace fssim {
+namespace eufs {
 
 class VehicleModel {
 public:
@@ -166,7 +157,7 @@ protected:
 
 typedef std::unique_ptr<VehicleModel> VehicleModelPtr;
 
-} // namespace fssim
+} // namespace eufs
 } // namespace gazebo
 
-#endif //FSSIM_GAZEBO_VEHICLE_H
+#endif //GAZEBO_VEHICLE_HPP
