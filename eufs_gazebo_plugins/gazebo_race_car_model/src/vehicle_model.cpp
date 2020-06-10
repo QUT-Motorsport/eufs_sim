@@ -236,7 +236,6 @@ void VehicleModel::initVehicleParam(sdf::ElementPtr &_sdf) {
   initParamStruct(param_, yaml_name);
 }
 
-// TODO: Update this function
 void VehicleModel::printInfo() {}
 
 void VehicleModel::update(const double dt) {
@@ -261,7 +260,6 @@ void VehicleModel::update(const double dt) {
   publishWheelSpeeds();
   publishOdom();
 
-  // TODO: Only do this if it is selected in the launcher
   if (this->publish_tf_) {
     publishTf();
   }
@@ -280,7 +278,6 @@ void VehicleModel::setModelState() {
   model->SetLinearVel(vel);
 }
 
-// TODO: Implement publishCarState function properly
 void VehicleModel::publishCarState() {
   // Publish Car Info
   eufs_msgs::CarState car_state;
@@ -308,20 +305,6 @@ void VehicleModel::publishCarState() {
   car_state.twist.twist.angular.y = 0 + this->GaussianKernel(0, this->angular_velocity_noise_[1]);
   car_state.twist.twist.angular.z = state_.r + this->GaussianKernel(0, this->angular_velocity_noise_[2]);
 
-  // TODO: Make sure I don't need this
-//  // now rotate linear velocities to correct orientation
-//  auto q0 = car_state.pose.pose.orientation.w;
-//  auto q1 = car_state.pose.pose.orientation.x;
-//  auto q2 = car_state.pose.pose.orientation.y;
-//  auto q3 = car_state.pose.pose.orientation.z;
-//  auto yaw = atan2(2 * q1 * q2 + 2 * q0 * q3, q1 * q1 + q0 * q0 - q3 * q3 - q2 * q2);
-//  auto new_x_vel =
-//    cos(yaw) * car_state.twist.twist.linear.x + sin(yaw) * car_state.twist.twist.linear.y;
-//  auto new_y_vel =
-//    -sin(yaw) * car_state.twist.twist.linear.x + cos(yaw) * car_state.twist.twist.linear.y;
-//  car_state.twist.twist.linear.x = new_x_vel;
-//  car_state.twist.twist.linear.y = new_y_vel;
-
   // fill in covariance matrix
   car_state.pose.covariance[0] = pow(this->position_noise_[0], 2);
   car_state.pose.covariance[7] = pow(this->position_noise_[1], 2);
@@ -337,10 +320,8 @@ void VehicleModel::publishCarState() {
   car_state.twist.covariance[28] = pow(this->angular_velocity_noise_[1], 2);
   car_state.twist.covariance[35] = pow(this->angular_velocity_noise_[2], 2);
 
-
-  // TODO: set linear_acceleration
-  car_state.linear_acceleration.x = 0 + this->GaussianKernel(0, this->linear_acceleration_noise_[0]);
-  car_state.linear_acceleration.y = 0 + this->GaussianKernel(0, this->linear_acceleration_noise_[1]);
+  car_state.linear_acceleration.x = state_.a_x + this->GaussianKernel(0, this->linear_acceleration_noise_[0]);
+  car_state.linear_acceleration.y = state_.a_y + this->GaussianKernel(0, this->linear_acceleration_noise_[1]);
   car_state.linear_acceleration.z = 0 + this->GaussianKernel(0, this->linear_acceleration_noise_[2]);
 
   car_state.linear_acceleration_covariance[0] = pow(this->linear_acceleration_noise_[0], 2);
@@ -431,20 +412,6 @@ void VehicleModel::publishOdom() {
   odom.twist.twist.angular.x = 0 + this->GaussianKernel(0, this->angular_velocity_noise_[0]);
   odom.twist.twist.angular.y = 0 + this->GaussianKernel(0, this->angular_velocity_noise_[1]);
   odom.twist.twist.angular.z = state_.r + this->GaussianKernel(0, this->angular_velocity_noise_[2]);
-
-  // TODO: Make sure I don't need this
-//  // now rotate linear velocities to correct orientation
-//  auto q0 = odom.pose.pose.orientation.w;
-//  auto q1 = odom.pose.pose.orientation.x;
-//  auto q2 = odom.pose.pose.orientation.y;
-//  auto q3 = odom.pose.pose.orientation.z;
-//  auto yaw = atan2(2 * q1 * q2 + 2 * q0 * q3, q1 * q1 + q0 * q0 - q3 * q3 - q2 * q2);
-//  auto new_x_vel =
-//    cos(yaw) * odom.twist.twist.linear.x + sin(yaw) * odom.twist.twist.linear.y;
-//  auto new_y_vel =
-//    -sin(yaw) * odom.twist.twist.linear.x + cos(yaw) * odom.twist.twist.linear.y;
-//  odom.twist.twist.linear.x = new_x_vel;
-//  odom.twist.twist.linear.y = new_y_vel;
 
   // fill in covariance matrix
   odom.pose.covariance[0] = pow(this->position_noise_[0], 2);
