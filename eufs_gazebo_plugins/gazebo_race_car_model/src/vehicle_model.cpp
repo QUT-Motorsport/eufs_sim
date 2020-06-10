@@ -355,7 +355,9 @@ void VehicleModel::publishCarState() {
 
   car_state.state_of_charge = 999;
 
-  pub_car_state_.publish(car_state);
+  if (pub_car_state_.getNumSubscribers() > 0) {
+    pub_car_state_.publish(car_state);
+  }
 }
 
 // TODO: Are the equations for the slip angle here correct?
@@ -412,7 +414,9 @@ void VehicleModel::publishWheelSpeeds() {
   wheel_speeds.lb_speed = (state_.v_x / wheel_circumference) * 60;
   wheel_speeds.rb_speed = (state_.v_x / wheel_circumference) * 60;
 
-  pub_wheel_speeds_.publish(wheel_speeds);
+  if (pub_wheel_speeds_.getNumSubscribers() > 0) {
+    pub_wheel_speeds_.publish(wheel_speeds);
+  }
 }
 
 void VehicleModel::publishOdom() {
@@ -462,7 +466,9 @@ void VehicleModel::publishOdom() {
   odom.twist.covariance[28] = pow(this->angular_velocity_noise_[1], 2);
   odom.twist.covariance[35] = pow(this->angular_velocity_noise_[2], 2);
 
-  pub_odom_.publish(odom);
+  if (pub_odom_.getNumSubscribers() > 0) {
+    pub_odom_.publish(odom);
+  }
 }
 
 void VehicleModel::publishTf() {
