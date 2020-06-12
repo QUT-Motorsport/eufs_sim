@@ -254,7 +254,6 @@ void VehicleModel::printInfo() {}
 void VehicleModel::update(const double dt) {
   input_.dc = ros::Time::now().toSec() - time_last_cmd_ < 1.0 ? input_.dc : -1.0;
 
-  // TODO: Should the steering be set to exactly the delta value no matter the direction of the car?
   left_steering_joint->SetPosition(0, input_.delta);
   right_steering_joint->SetPosition(0, input_.delta);
 
@@ -504,6 +503,7 @@ void VehicleModel::publishTf() {
 }
 
 void VehicleModel::onCmd(const ackermann_msgs::AckermannDriveStampedConstPtr &msg) {
+  // TODO: Should add delay to the controls
   if (state_machine_.canDrive()) {
     input_.delta = msg->drive.steering_angle;
 
@@ -516,7 +516,7 @@ void VehicleModel::onCmd(const ackermann_msgs::AckermannDriveStampedConstPtr &ms
 
     input_.dc    = msg->drive.acceleration;
   } else {
-    // TODO: Should we do something else to stop the car or is this good for now
+    // TODO: Should  do something else to stop the car but is this good for now
     input_.delta = 0;
     input_.dc    = -1;
   }
