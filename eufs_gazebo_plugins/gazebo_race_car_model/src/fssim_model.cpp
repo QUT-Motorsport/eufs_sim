@@ -42,27 +42,22 @@ private:
   virtual void updateState(State& state, Input& input, const double dt) {
     double Fz = getNormalForce(state);
 
-    double alphaF = getSlipAngle();
-    double alphaR = getSlipAngle(false);
-
-    double FyF = getFrontFy(Fz);
-    double FyR = getRearFy(Fz);
+    double FyF = getFy(Fz, true);
+    double FyR = getFy(Fz, false);
 
     // Drivetrain Model
     const double Fx   = getFx(state, input);
-    const double M_Tv = getMTv(state, input);
 
     // Dynamics
-    const auto x_dot_dyn  = f(state, input, Fx, M_Tv, FyF, FyR);
+    const auto x_dot_dyn  = f(state, input, Fx, FyF, FyR);
     const auto x_next_dyn = state + x_dot_dyn * dt;
-    state = f_kin_correction(x_next_dyn, state, input, Fx, M_Tv, dt);
+    state = f_kin_correction(x_next_dyn, state, input, Fx, dt);
     state.validate();
   }
 
   State f(const State &x,
                    const Input &u,
                    const double Fx,
-                   const double M_TV,
                    const double FyF,
                    const double FyR) {
     const double FyF_tot = 2 * FyF;
@@ -85,7 +80,7 @@ private:
     */
 
 //    Simplified for FyF.left == FyF.right
-    x_dot.r  = (std::cos(u.delta) * FyF_tot * param_.kinematic.l_F - FyR_tot * param_.kinematic.l_R + M_TV)
+    x_dot.r  = (std::cos(u.delta) * FyF_tot * param_.kinematic.l_F - FyR_tot * param_.kinematic.l_R)
             / param_.inertia.I_z;
 
     x_dot.a_x = 0;
@@ -98,7 +93,6 @@ private:
                                   const State &x_state,
                                   const Input &u,
                                   const double Fx,
-                                  const double M_TV,
                                   const double dt) {
     State        x       = x_in;
     const double v_x_dot = Fx / (param_.inertia.m + param_.driveTrain.m_lon_add);
@@ -122,17 +116,6 @@ private:
     return Fx;
   }
 
-  double getMTv(const State &x, const Input &u) const {
-    const double shrinkage = param_.torqueVectoring.shrinkage;
-    const double K_stab    = param_.torqueVectoring.K_stability;
-    const double l         = param_.kinematic.l;
-
-    const double delta = u.delta;
-    const double v_x   = x.v_x;
-
-    return 0.0;
-  }
-
   double getNormalForce(const State &x) {
     return param_.inertia.g * param_.inertia.m + getFdown(x);
   }
@@ -145,24 +128,12 @@ private:
     return param_.aero.c_drag * x.v_x * x.v_x;
   }
 
-  double getFrontFy(const double Fz) {
-    double slipAngle = getSlipAngle();
+  double getFy(const double Fz, bool front) {
+    double slipAngle = getSlipAngle(front);
 
-    const double Fz_axle = getDownForceFront(Fz);
-
-    const double B    = param_.tire.B;
-    const double C    = param_.tire.C;
-    const double D    = param_.tire.D;
-    const double E    = param_.tire.E;
-    const double mu_y = D * std::sin(C * std::atan(B * (1.0 - E) * slipAngle + E * std::atan(B * slipAngle)));
-    const double Fy   = Fz_axle * mu_y;
-    return Fy;
-  }
-
-  double getRearFy(const double Fz) {
-    double slipAngle = getSlipAngle(false);
-
-    const double Fz_axle = getDownForceFront(Fz);
+//    TODO: Check if that's how it all was in fssim
+    const double Fz_axle = front ? getDownForceFront(Fz) :
+            getDownForceRear(Fz);
 
     const double B    = param_.tire.B;
     const double C    = param_.tire.C;
@@ -171,7 +142,7 @@ private:
     const double mu_y = D * std::sin(C * std::atan(B * (1.0 - E) * slipAngle + E * std::atan(B * slipAngle)));
     const double Fy   = Fz_axle * mu_y;
     return Fy;
-  }
+    }
 
   double getDownForceFront(const double Fz) {
       double FzAxle = 0.5 * param_.kinematic.w_front * Fz;

@@ -37,6 +37,7 @@
 
 // ROS msgs
 #include "eufs_msgs/CarState.h"
+#include "eufs_msgs/CarInfo.h"
 #include "eufs_msgs/WheelSpeedsStamped.h"
 #include "nav_msgs/Odometry.h"
 #include "geometry_msgs/PoseWithCovarianceStamped.h"
@@ -111,7 +112,7 @@ protected:
   std::string odom_topic_name_;
 
   // ROS Publishers
-  ros::Publisher pub_car_state_;
+  ros::Publisher pub_car_state_, pub_car_info_;
   ros::Publisher pub_wheel_speeds_;
   ros::Publisher pub_odom_;
 
