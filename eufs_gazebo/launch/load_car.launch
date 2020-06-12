@@ -20,7 +20,7 @@
   <arg name="show_rqt_gui" default="true"/>
   <arg name="launch_group" default="default" />
 
-  <arg name="robot_name" default="ads-dv"/>
+  <arg name="robot_name" default="eufs"/>
 
   <arg name="config_file" default="$(find eufs_description)/robots/$(arg robot_name)_config.yaml"/>
 
