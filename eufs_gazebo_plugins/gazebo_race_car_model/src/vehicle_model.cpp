@@ -264,8 +264,9 @@ void VehicleModel::update(const double dt) {
   car_info.delta = input_.delta;
   car_info.acc = input_.dc;
   car_info.current_v_x = state_.v_x;
-  car_info.current_v_x = state_.v_y;
+  car_info.current_v_y = state_.v_y;
   car_info.current_r = state_.r;
+  car_info.dt = dt;
 
   updateState(new_state, new_input, dt);
 
@@ -275,7 +276,7 @@ void VehicleModel::update(const double dt) {
   this->pub_car_info_.publish(car_info);
 
   car_info.next_v_x = state_.v_x;
-  car_info.next_v_x = state_.v_y;
+  car_info.next_v_y = state_.v_y;
   car_info.next_r = state_.r;
 
   setModelState();

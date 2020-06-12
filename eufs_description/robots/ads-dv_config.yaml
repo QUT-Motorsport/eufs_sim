@@ -29,7 +29,8 @@ aero:
     c: 1.0
 
 drivetrain:
-  Cm1: 5000
+  # Cm1: 5000
+  Cm1: 1667
   Cr0: 180
   inertia: 0.4 # wheel_plus_packaging
   r_dyn: 0.231
