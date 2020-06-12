@@ -47,9 +47,6 @@ VehicleModel::VehicleModel(physics::ModelPtr &_model,
 
   // ROS Publishers
   this->pub_car_state_     = nh->advertise<eufs_msgs::CarState>(this->state_topic_name_, 1);
-
-  this->pub_car_info_     = nh->advertise<eufs_msgs::CarInfo>("/ground_truth/car_info", 1);
-
   this->pub_wheel_speeds_  = nh->advertise<eufs_msgs::WheelSpeedsStamped>(this->wheel_speeds_topic_name_, 1);
   this->pub_odom_          = nh->advertise<nav_msgs::Odometry>(this->odom_topic_name_, 1);
 
@@ -260,24 +257,10 @@ void VehicleModel::update(const double dt) {
   State new_state = state_;
   Input new_input = input_;
 
-  eufs_msgs::CarInfo car_info;
-  car_info.delta = input_.delta;
-  car_info.acc = input_.dc;
-  car_info.current_v_x = state_.v_x;
-  car_info.current_v_y = state_.v_y;
-  car_info.current_r = state_.r;
-  car_info.dt = dt;
-
   updateState(new_state, new_input, dt);
 
   state_ = new_state;
   input_ = new_input;
-
-  this->pub_car_info_.publish(car_info);
-
-  car_info.next_v_x = state_.v_x;
-  car_info.next_v_y = state_.v_y;
-  car_info.next_r = state_.r;
 
   setModelState();
 
