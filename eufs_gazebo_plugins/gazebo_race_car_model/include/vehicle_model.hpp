@@ -37,7 +37,6 @@
 
 // ROS msgs
 #include "eufs_msgs/CarState.h"
-#include "eufs_msgs/CarInfo.h"
 #include "eufs_msgs/WheelSpeedsStamped.h"
 #include "nav_msgs/Odometry.h"
 #include "geometry_msgs/PoseWithCovarianceStamped.h"
