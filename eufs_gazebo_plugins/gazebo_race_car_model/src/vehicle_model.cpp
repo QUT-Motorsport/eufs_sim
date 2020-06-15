@@ -249,7 +249,7 @@ void VehicleModel::initVehicleParam(sdf::ElementPtr &_sdf) {
 void VehicleModel::printInfo() {}
 
 void VehicleModel::update(const double dt) {
-  input_.dc = ros::Time::now().toSec() - time_last_cmd_ < 1.0 ? input_.dc : -1.0;
+  input_.acc = ros::Time::now().toSec() - time_last_cmd_ < 1.0 ? input_.acc : -1.0;
 
   left_steering_joint->SetPosition(0, input_.delta);
   right_steering_joint->SetPosition(0, input_.delta);
@@ -498,11 +498,11 @@ void VehicleModel::onCmd(const ackermann_msgs::AckermannDriveStampedConstPtr &ms
       input_.delta = param_.tire.max_steering;
     }
 
-    input_.dc    = msg->drive.acceleration;
+    input_.acc    = msg->drive.acceleration;
   } else {
     // TODO: Should  do something else to stop the car but is this good for now
     input_.delta = 0;
-    input_.dc    = -1;
+    input_.acc    = -1;
   }
 
   time_last_cmd_ = ros::Time::now().toSec();

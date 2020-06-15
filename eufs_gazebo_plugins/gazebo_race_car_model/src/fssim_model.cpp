@@ -64,7 +64,7 @@ private:
     const double FyR_tot = 2 * FyR;
     const double v_x     = std::max(1.0, x.v_x);
 
-    const double m_lon = param_.inertia.m + param_.driveTrain.m_lon_add;
+    const double m_lon = param_.inertia.m; //+ param_.driveTrain.m_lon_add;
 
     State x_dot{};
     x_dot.x   = std::cos(x.yaw) * x.v_x - std::sin(x.yaw) * x.v_y;
@@ -95,7 +95,7 @@ private:
                                   const double Fx,
                                   const double dt) {
     State        x       = x_in;
-    const double v_x_dot = Fx / (param_.inertia.m + param_.driveTrain.m_lon_add);
+    const double v_x_dot = Fx / (param_.inertia.m); //+ param_.driveTrain.m_lon_add);
     const double v       = std::hypot(x_state.v_x, x_state.v_y);
     const double v_blend = 0.5 * (v - 1.5);
     const double blend   = std::fmax(std::fmin(1.0, v_blend), 0.0);
@@ -111,8 +111,8 @@ private:
   }
 
   double getFx(const State &x, const Input &u) {
-    const double dc = x.v_x <= 0.0 && u.dc < 0.0 ? 0.0 : u.dc;
-    const double Fx = dc * param_.driveTrain.cm1 - getFdrag(x) - param_.driveTrain.cr0;
+    const double acc = x.v_x <= 0.0 && u.acc < 0.0 ? 0.0 : u.acc;
+    const double Fx = acc * param_.inertia.m - getFdrag(x); //- param_.driveTrain.cr0;
     return Fx;
   }
 

@@ -80,11 +80,11 @@ struct State {
 };
 
 struct Input {
-  Input() : dc(0.0), delta(0.0) {}
+  Input() : acc(0.0), delta(0.0) {}
   std::string getString() {
-    return "dc:" + std::to_string(dc) + " | delta:" + std::to_string(delta);
+    return "acc:" + std::to_string(acc) + " | delta:" + std::to_string(delta);
   }
-  double dc;
+  double acc;
   double delta;
 };
 

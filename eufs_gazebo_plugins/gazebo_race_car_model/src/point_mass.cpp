@@ -40,8 +40,8 @@ public:
 
   virtual void updateState(State& state, Input& input, const double dt)
   {
-    state.a_x = input.dc * std::cos(input.delta);
-    state.a_y = input.dc * std::sin(input.delta);
+    state.a_x = input.acc * std::cos(input.delta);
+    state.a_y = input.acc * std::sin(input.delta);
 
     State x_dot{};
 
