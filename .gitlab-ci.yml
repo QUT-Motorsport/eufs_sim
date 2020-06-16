@@ -1,4 +1,4 @@
-image: ros:kinetic-ros-core
+image: ros:melodic-ros-core
 
 variables:
   GIT_SUBMODULE_STRATEGY: recursive
@@ -37,9 +37,9 @@ catkin_tools:
   stage: build
   script:
     - catkin build --summarize --no-status --force-color
-  only:
-    - merge_requests
-    - master
+  rules:
+    - if: $CI_MERGE_REQUEST_ID
+    - if: $CI_COMMIT_BRANCH == "master"
 
 # roslint
 roslint:
@@ -51,7 +51,6 @@ roslint:
     - catkin build eufs_launcher --no-deps --make-args roslint
     - catkin build ros_can_sim
     - catkin build ros_can_sim --no-deps --make-args roslint
-  only:
-    - merge_requests
-    - master
-
+  rules:
+    - if: $CI_MERGE_REQUEST_ID
+    - if: $CI_COMMIT_BRANCH == "master"
