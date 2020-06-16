@@ -87,43 +87,10 @@ struct Param {
         }
     };
 
-    struct DriveTrain {
-        int    nm_wheels;
-        double inertia;
-        double r_dyn;
-        double m_lon_add;
-        double cm1;
-        double cr0;
-        void print() {
-            ROS_DEBUG("DriveTrain: \n "
-                      "\tnm_wheels: %i\n"
-                      "\tinertia: %f\n"
-                      "\tr_dyn: %f\n"
-                      "\tCm1: %f\n"
-                      "\tCr0: %f", nm_wheels, inertia, r_dyn, cm1, cr0);
-        }
-    };
-
-    struct TorqueVectoring {
-        double K_FFW;
-        double K_p;
-        double shrinkage;
-        double K_stability;
-        void print() {
-            ROS_DEBUG("TorqueVectoring: \n "
-                      "\tK_FFW: %f\n"
-                      "\tK_p: %f\n"
-                      "\tshrinkage: %f\n"
-                      "\tK_stability: %f", K_FFW, K_p, shrinkage, K_stability);
-        }
-    };
-
     Inertia         inertia;
     Kinematic       kinematic;
     Tire            tire;
     Aero            aero;
-    DriveTrain      driveTrain;
-    TorqueVectoring torqueVectoring;
 };
 
 namespace YAML {
@@ -154,10 +121,6 @@ struct convert<Param::Kinematic> {
     }
 };
 
-inline double mean(const double a, const double b) {
-    return (a + b) / 2.0;
-}
-
 template<>
 struct convert<Param::Tire> {
     static bool decode(const Node &node, Param::Tire &cType) {
@@ -177,39 +140,11 @@ struct convert<Param::Tire> {
 template<>
 struct convert<Param::Aero> {
     static bool decode(const Node &node, Param::Aero &cType) {
-        cType.c_down =
-            node["C_Down"]["a"].as<double>() * node["C_Down"]["b"].as<double>() * node["C_Down"]["c"].as<double>();
-        cType.c_drag =
-            node["C_drag"]["a"].as<double>() * node["C_drag"]["b"].as<double>() * node["C_drag"]["c"].as<double>();
+        cType.c_down = node["C_Down"].as<double>();
+//            node["C_Down"]["a"].as<double>() * node["C_Down"]["b"].as<double>() * node["C_Down"]["c"].as<double>();
+        cType.c_drag = node["C_drag"].as<double>();
+//            node["C_drag"]["a"].as<double>() * node["C_drag"]["b"].as<double>() * node["C_drag"]["c"].as<double>();
         ROS_DEBUG("LOADED Aero");
-        cType.print();
-        return true;
-    }
-};
-
-template<>
-struct convert<Param::DriveTrain> {
-    static bool decode(const Node &node, Param::DriveTrain &cType) {
-        cType.inertia   = node["inertia"].as<double>();
-        cType.r_dyn     = node["r_dyn"].as<double>();
-        cType.nm_wheels = node["nm_wheels"].as<int>();
-        cType.cr0       = node["Cr0"].as<double>();
-        cType.cm1       = node["Cm1"].as<double>();
-        cType.m_lon_add = cType.nm_wheels * cType.inertia / (cType.r_dyn * cType.r_dyn);
-        ROS_DEBUG("LOADED DriveTrain");
-        cType.print();
-        return true;
-    }
-};
-
-template<>
-struct convert<Param::TorqueVectoring> {
-    static bool decode(const Node &node, Param::TorqueVectoring &cType) {
-        cType.K_FFW       = node["K_FFW"].as<double>();
-        cType.K_p         = node["K_p"].as<double>();
-        cType.shrinkage   = node["shrinkage"].as<double>();
-        cType.K_stability = node["K_stability"].as<double>();
-        ROS_DEBUG("LOADED TorqueVectoring");
         cType.print();
         return true;
     }
@@ -225,8 +160,6 @@ inline void initParamStruct(Param &param, std::string &yaml_file) {
     param.kinematic       = config["kinematics"].as<Param::Kinematic>();
     param.tire            = config["tire"].as<Param::Tire>();
     param.aero            = config["aero"].as<Param::Aero>();
-    param.driveTrain      = config["drivetrain"].as<Param::DriveTrain>();
-    param.torqueVectoring = config["torque_vectoring"].as<Param::TorqueVectoring>();
 }
 
 #endif //GAZEBO_CONFIG_HPP
