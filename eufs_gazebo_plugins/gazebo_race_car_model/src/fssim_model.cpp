@@ -64,13 +64,13 @@ private:
     const double FyR_tot = 2 * FyR;
     const double v_x     = std::max(1.0, x.v_x);
 
-    const double m_lon = param_.inertia.m; //+ param_.driveTrain.m_lon_add;
+     const double m_lon = param_.inertia.m + param_.driveTrain.m_lon_add;
 
     State x_dot{};
     x_dot.x   = std::cos(x.yaw) * x.v_x - std::sin(x.yaw) * x.v_y;
     x_dot.y   = std::sin(x.yaw) * x.v_x + std::cos(x.yaw) * x.v_y;
     x_dot.yaw = x.r;
-    x_dot.v_x = (x.r * x.v_y) + (Fx - std::sin(u.delta) * (FyF_tot)) / m_lon;
+    x_dot.v_x = (x.r * x.v_y) + (Fx - std::sin(u.delta) * FyF_tot) / param_.inertia.m; //m_lon
     x_dot.v_y = ((std::cos(u.delta) * FyF_tot) + FyR_tot) / param_.inertia.m - (x.r * v_x);
     /*
     x_dot.r   = ((std::cos(u.delta) * FyF_tot * param_.kinematic.l_F
@@ -131,7 +131,6 @@ private:
   double getFy(const double Fz, bool front) {
     double slipAngle = getSlipAngle(front);
 
-//    TODO: Check if that's how it all was in fssim
     const double Fz_axle = front ? getDownForceFront(Fz) :
             getDownForceRear(Fz);
 
