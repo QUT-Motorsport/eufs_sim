@@ -75,7 +75,7 @@
 
       <joint name="${lr_prefix}_steering_hinge_joint" type="revolute">
         <origin xyz="${wheelbase / 2}
-                     ${lr_reflect * (chassis_width / 2)}
+                     ${lr_reflect * ((chassis_width - wheel_width) / 2)}
                      0"
                 rpy="0 0 0"/>
         <parent link="base_footprint"/>
@@ -116,7 +116,7 @@
 
       <joint name="rear_${lr_prefix}_wheel_joint" type="continuous">
         <origin xyz="${-1 * wheelbase / 2}
-                     ${lr_reflect * (chassis_width / 2)}
+                     ${lr_reflect * ((chassis_width - wheel_width) / 2)}
                      0"
                 rpy="0 0 0"/>
         <parent link="base_footprint"/>

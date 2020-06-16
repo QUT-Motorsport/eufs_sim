@@ -19,24 +19,5 @@ tire:
   max_steering: 0.8727
 
 aero:
-  C_Down: 1.9 # F_Downforce = C_Downforce*v_x^2; C_Downforce = a*b*c
-  #  a: 1.22
-  #  b: 2.6
-  #  c: 0.6
-  C_drag: 0.7 # F_Drag = C_Drag*v_x^2; C_drag = a*b*c
-  #  a: 0.7
-  #  b: 1.0
-  #  c: 1.0
-
-# drivetrain:
-  # Cm1: 5000
-  # Cr0: 180
-  # inertia: 0.4 # wheel_plus_packaging
-  # r_dyn: 0.231
-  # nm_wheels: 4
-
-# torque_vectoring:
-  # K_FFW: 2.1
-  # K_p: 500
-  # shrinkage: 0.8
-  # K_stability: 0.004
+  C_Down: 1.9 # F_Downforce = C_Downforce*v_x^2
+  C_drag: 1 # F_Drag = C_Drag*v_x^2
