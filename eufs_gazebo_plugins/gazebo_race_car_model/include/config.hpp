@@ -65,15 +65,13 @@ struct Param {
         double D;
         double E;
         double radius;
-        double max_steering;
         void print() {
             ROS_DEBUG("Tire: \n "
                       "\tB: %f\n"
                       "\tC: %f\n"
                       "\tD: %f\n"
-                      "\tE: %f"
-                      "\tradius: %f"
-                      "\tmax_steering: %f", B, C, D, E, radius, max_steering);
+                      "\tE: %f\n"
+                      "\tradius: %f", B, C, D, E, radius);
         }
     };
 
@@ -87,10 +85,32 @@ struct Param {
         }
     };
 
+    struct InputRanges {
+        struct Range {
+            double min;
+            double max;
+            void print() {
+                ROS_DEBUG("\tmin: %f"
+                          "\tmax: %f", min, max);
+            }
+        };
+
+        Range acc;
+        Range delta;
+        void print() {
+            ROS_DEBUG("Input ranges: ");
+            ROS_DEBUG("acc: ");
+            acc.print();
+            ROS_DEBUG("delta: ");
+            delta.print();
+        }
+    };
+
     Inertia         inertia;
     Kinematic       kinematic;
     Tire            tire;
     Aero            aero;
+    InputRanges     input_ranges;
 };
 
 namespace YAML {
@@ -130,7 +150,6 @@ struct convert<Param::Tire> {
         cType.D = node["D"].as<double>() * cType.tire_coefficient;
         cType.E = node["E"].as<double>();
         cType.radius = node["radius"].as<double>();
-        cType.max_steering = node["max_steering"].as<double>();
         ROS_DEBUG("LOADED Tire");
         cType.print();
         return true;
@@ -141,10 +160,21 @@ template<>
 struct convert<Param::Aero> {
     static bool decode(const Node &node, Param::Aero &cType) {
         cType.c_down = node["C_Down"].as<double>();
-//            node["C_Down"]["a"].as<double>() * node["C_Down"]["b"].as<double>() * node["C_Down"]["c"].as<double>();
         cType.c_drag = node["C_drag"].as<double>();
-//            node["C_drag"]["a"].as<double>() * node["C_drag"]["b"].as<double>() * node["C_drag"]["c"].as<double>();
         ROS_DEBUG("LOADED Aero");
+        cType.print();
+        return true;
+    }
+};
+
+template<>
+struct convert<Param::InputRanges> {
+    static bool decode(const Node &node, Param::InputRanges &cType) {
+        cType.acc.min   = node["acceleration"]["min"].as<double>();
+        cType.acc.max   = node["acceleration"]["max"].as<double>();
+        cType.delta.min = node["steering"]["min"].as<double>();
+        cType.delta.max = node["steering"]["max"].as<double>();
+        ROS_DEBUG("LOADED InputRanges");
         cType.print();
         return true;
     }
@@ -160,6 +190,7 @@ inline void initParamStruct(Param &param, std::string &yaml_file) {
     param.kinematic       = config["kinematics"].as<Param::Kinematic>();
     param.tire            = config["tire"].as<Param::Tire>();
     param.aero            = config["aero"].as<Param::Aero>();
+    param.input_ranges    = config["input_ranges"].as<Param::InputRanges>();
 }
 
 #endif //GAZEBO_CONFIG_HPP

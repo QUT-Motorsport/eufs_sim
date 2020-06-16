@@ -40,7 +40,6 @@ public:
 
 private:
   virtual void updateState(State& state, Input& input, const double dt) {
-    input.validate();
     double Fz = getNormalForce(state);
 
     double FyF = getFy(Fz, true);

@@ -80,23 +80,26 @@ struct State {
 };
 
 struct Input {
-  Input() : acc(0.0), max_acc(3.0), min_acc(-5),
-            delta(0.0), max_delta(0.52), min_delta(-0.52) {}
-            
+  Input() : acc(0.0), delta(0.0) {}
+
   std::string getString() {
     return "acc:" + std::to_string(acc) + " | delta:" + std::to_string(delta);
   }
 
-  void validate()
+  void validate(Param &param)
   {
-      acc = std::fmin(std::fmax(acc, -5), 3);
-      delta = std::fmin(std::fmax(delta, -0.52), 0.52);
+      double max_acc = param.input_ranges.acc.max;
+      double min_acc = param.input_ranges.acc.min;
+
+      double max_delta = param.input_ranges.delta.max;
+      double min_delta = param.input_ranges.delta.min;
+
+      acc = std::fmin(std::fmax(acc, min_acc), max_acc);
+      delta = std::fmin(std::fmax(delta, min_delta), max_delta);
   }
 
   double acc;
-  double max_acc, min_acc;
   double delta;
-  double max_delta, min_delta;
 };
 
 } // namespace eufs

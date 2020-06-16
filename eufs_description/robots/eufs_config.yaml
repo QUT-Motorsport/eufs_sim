@@ -16,8 +16,15 @@ tire:
   D: 1.60
   E: -0.58
   radius: 0.2525
-  max_steering: 0.8727
 
 aero:
   C_Down: 1.9 # F_Downforce = C_Downforce*v_x^2
   C_drag: 1 # F_Drag = C_Drag*v_x^2
+
+input_ranges:
+  acceleration:
+    max: 3
+    min: -5
+  steering:
+    max: 0.52
+    min: -0.52

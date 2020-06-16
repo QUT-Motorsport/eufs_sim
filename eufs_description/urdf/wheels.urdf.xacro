@@ -81,7 +81,7 @@
         <parent link="base_footprint"/>
         <child link="${lr_prefix}_steering_hinge"/>
         <axis xyz="0 0 1"/>
-        <limit lower="${config['tire']['max_steering'] * -1}" upper="${config['tire']['max_steering']}" effort="10000000" velocity="1000000"/>
+        <limit lower="${config['input_ranges']['steering']['min']}" upper="${config['input_ranges']['steering']['max']}" effort="10000000" velocity="1000000"/>
       </joint>
 
       <link name="${lr_prefix}_steering_hinge">

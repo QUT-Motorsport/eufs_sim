@@ -490,20 +490,14 @@ void VehicleModel::onCmd(const ackermann_msgs::AckermannDriveStampedConstPtr &ms
   // TODO: Should add delay to the controls
   if (state_machine_.canDrive()) {
     input_.delta = msg->drive.steering_angle;
-
-    // The input delta is capped at the max_steering angle
-    if (input_.delta < -param_.tire.max_steering) {
-      input_.delta = -param_.tire.max_steering;
-    } else if (input_.delta > param_.tire.max_steering) {
-      input_.delta = param_.tire.max_steering;
-    }
-
     input_.acc    = msg->drive.acceleration;
   } else {
     // TODO: Should  do something else to stop the car but is this good for now
     input_.delta = 0;
     input_.acc    = -1;
   }
+
+  input_.validate(param_);
 
   time_last_cmd_ = ros::Time::now().toSec();
 }
