@@ -5,11 +5,14 @@ import roslaunch
 import rosnode
 import math
 import time
+import yaml
 
 from qt_gui.plugin import Plugin
 from python_qt_binding import loadUi
 from python_qt_binding.QtWidgets import (QWidget, QComboBox, QPushButton, QSlider, QRadioButton, QCheckBox, QMainWindow,
                                          QLabel, QLineEdit, QApplication)
+import python_qt_binding.QtCore as QtCore
+from python_qt_binding.QtGui import QFont
 
 from os import listdir
 from os.path import isfile, join
@@ -24,6 +27,11 @@ from TrackGenerator import TrackGenerator as Generator
 from TrackGenerator import GeneratorContext
 
 from ConversionTools import ConversionTools as Converter
+
+import pandas as pd
+from random import uniform
+from collections import OrderedDict
+import math
 
 
 class EufsLauncher(Plugin):
@@ -47,8 +55,25 @@ class EufsLauncher(Plugin):
                                     help="Put plugin in silent mode")
                 args, unknowns = parser.parse_known_args(context.argv())
                 if not args.quiet:
-                        print 'arguments: ', args
-                        print 'unknowns: ', unknowns
+                        print('arguments: ', args)
+                        print('unknowns: ', unknowns)
+
+                # Load in eufs_launcher parameters
+                # yaml_to_load is a special variable that is set by `eufs_launcher.py`
+                # in `eufs_launcher/scripts`.  It defaults to `eufs_launcher.yaml`, but
+                # can be passed in using the `config` param.  Example:
+                # `roslaunch eufs_launcher eufs_launcher.launch config:=example.yaml`
+                # Will load in example.yaml instead.
+                yaml_loc = os.path.join(
+                        rospkg.RosPack().get_path(loc_to_load),
+                        yaml_to_load.split(".")[0] + ".yaml"
+                )
+                with open(yaml_loc, 'r') as stream:
+                    try:
+                        self.default_config = yaml.safe_load(stream)
+                    except yaml.YAMLError as exc:
+                        print(exc)
+                        return
 
                 # Create QWidget
                 self._widget = QWidget()
@@ -58,11 +83,6 @@ class EufsLauncher(Plugin):
                                                  rospkg.RosPack().get_path('eufs_launcher'),
                                                  'resource',
                                                  'Launcher.ui'
-                )
-                self.sketcher_ui_file = os.path.join(
-                                                 rospkg.RosPack().get_path('eufs_launcher'),
-                                                 'resource',
-                                                 'Sketcher.ui'
                 )
 
                 # Extend the widget with all attributes and children from UI file
@@ -80,8 +100,9 @@ class EufsLauncher(Plugin):
                         the_title = (self._widget.windowTitle() + (' (%d)' % context.serial_number()))
                         self._widget.setWindowTitle(the_title)
 
-                # Resize correctly
-                self._widget.setFixedWidth(1200)
+                # Set the magic number for the maximum cone noise allowed
+                self.MAX_CONE_NOISE = 0.4
+                self.MAX_COLOR_NOISE = 1.0
 
                 # Store gazebo's path as it is used quite a lot:
                 self.GAZEBO = rospkg.RosPack().get_path('eufs_gazebo')
@@ -89,10 +110,8 @@ class EufsLauncher(Plugin):
                 # Give widget components permanent names
                 self.PRESET_SELECTOR = self._widget.findChild(QComboBox, "WhichPreset")
                 self.TRACK_SELECTOR = self._widget.findChild(QComboBox, "WhichTrack")
-                self.IMAGE_SELECTOR = self._widget.findChild(QComboBox, "WhichImage")
                 self.LAUNCH_BUTTON = self._widget.findChild(QPushButton, "LaunchButton")
                 self.GENERATOR_BUTTON = self._widget.findChild(QPushButton, "GenerateButton")
-                self.LOAD_IMAGE_BUTTON = self._widget.findChild(QPushButton, "LoadFromImageButton")
 
                 self.CONVERT_BUTTON = self._widget.findChild(QPushButton, "ConvertButton")
                 self.RENAME_BUTTON = self._widget.findChild(QPushButton, "RenameButton")
@@ -107,20 +126,10 @@ class EufsLauncher(Plugin):
                 self.RENAME_FILE_TEXTBOX = self._widget.findChild(QLineEdit, "RenameFileTextbox")
                 self.RENAME_FILE_HEADER = self._widget.findChild(QLabel, "RenameFileHeader")
                 self.NOISE_SLIDER = self._widget.findChild(QSlider, "Noisiness")
+                self.CONE_NOISE_SLIDER = self._widget.findChild(QSlider, "ConeNoisiness")
+                self.COLOR_NOISE_SLIDER = self._widget.findChild(QSlider, "ConeColorNoisiness")
                 self.SPEED_RADIO = self._widget.findChild(QRadioButton, "SpeedRadio")
                 self.TORQUE_RADIO = self._widget.findChild(QRadioButton, "TorqueRadio")
-                self.PERCEPTION_CHECKBOX = self._widget.findChild(QCheckBox, "PerceptionCheckbox")
-
-                self.VISUALISATOR_CHECKBOX = (
-                        self._widget.findChild(QCheckBox, "VisualisatorCheckbox")
-                )
-                self.GAZEBO_GUI_CHECKBOX = (
-                        self._widget.findChild(QCheckBox, "GazeboGuiCheckbox")
-                )
-
-                self.PUBLISH_GT_TF = (
-                        self._widget.findChild(QCheckBox, "GroundTruthTransform")
-                )
 
                 self.FILE_FOR_CONVERSION_BOX = self._widget.findChild(
                         QComboBox,
@@ -133,10 +142,6 @@ class EufsLauncher(Plugin):
                 self.FULL_STACK_TRACK_GEN_BUTTON = self._widget.findChild(
                         QCheckBox,
                         "FullStackTrackGenButton"
-                )
-                self.FULL_STACK_IMAGE_BUTTON = self._widget.findChild(
-                        QCheckBox,
-                        "FullStackImageButton"
                 )
 
                 self.MIN_STRAIGHT_SLIDER = self._widget.findChild(QSlider, "Param_MIN_STRAIGHT")
@@ -160,7 +165,7 @@ class EufsLauncher(Plugin):
                 self.TRACK_WIDTH_LABEL = self._widget.findChild(QLabel, "Label_TRACK_WIDTH")
 
                 # Check the file directory to update drop-down menu
-                self.load_track_and_images()
+                self.load_track_dropdowns()
 
                 # Get presets
                 preset_names = Generator.get_preset_names()
@@ -176,10 +181,8 @@ class EufsLauncher(Plugin):
                 # Hook up buttons to onclick functions
                 self.LAUNCH_BUTTON.clicked.connect(self.launch_button_pressed)
                 self.GENERATOR_BUTTON.clicked.connect(self.generator_button_pressed)
-                self.LOAD_IMAGE_BUTTON.clicked.connect(self.track_from_image_button_pressed)
                 self.CONVERT_BUTTON.clicked.connect(self.convert_button_pressed)
                 self.RENAME_BUTTON.clicked.connect(self.copy_button_pressed)
-                self.SKETCHER_BUTTON.clicked.connect(self.sketcher_button_pressed)
 
                 # Create array of running processes
                 self.processes = []
@@ -195,12 +198,6 @@ class EufsLauncher(Plugin):
                 self.has_launched_ros = False
                 self.launch_file_override = None
                 self.popen_process = None
-
-                # Space the load track button better
-                self.LOAD_IMAGE_BUTTON.setText("Load Track\nFrom Image")
-
-                # Hide track draw button as not currently working
-                self.SKETCHER_BUTTON.setVisible(False)
 
                 # Set up the Generator Params
                 self.update_preset()
@@ -223,9 +220,6 @@ class EufsLauncher(Plugin):
 
                 # Setup Lax Generation button
                 self.LAX_CHECKBOX.setChecked(self.LAX_GENERATION)
-
-                # Setup Gazebo Gui button
-                self.GAZEBO_GUI_CHECKBOX.setChecked(True)
 
                 # Setup Conversion Tools dropdowns
                 for f in ["launch", "png", "csv"]:
@@ -250,13 +244,83 @@ class EufsLauncher(Plugin):
                 track_generator_full_stack = self.FULL_STACK_TRACK_GEN_BUTTON
                 track_generator_full_stack.setChecked(True)
 
-                # Image full stack checkbox
-                image_launcher_full_stack = self.FULL_STACK_IMAGE_BUTTON
-                image_launcher_full_stack.setChecked(True)
-
                 # Copier full stack checkbox
                 copier_full_stack = self.FULL_STACK_COPY_BUTTON
                 copier_full_stack.setChecked(True)
+
+                # Add buttons from yaml file
+                checkboxes = OrderedDict(
+                        sorted(
+                                self.default_config["eufs_launcher"]["checkboxes"].items(),
+                                key=lambda x: x[1]["priority"]
+                        )
+                )
+                self.checkbox_effect_mapping = []
+                self.checkbox_parameter_mapping = []
+                starting_xpos = 170
+                starting_ypos = 290
+                counter = 0
+                for key, value in checkboxes.items():
+                        cur_xpos = starting_xpos + 100 * (counter % 2)
+                        cur_ypos = starting_ypos + 15 * (counter // 2)
+                        cur_cbox = QCheckBox(checkboxes[key]["label"], self._widget)
+                        cur_cbox.setChecked(checkboxes[key]["checked_on_default"])
+                        cur_cbox.setGeometry(cur_xpos, cur_ypos, 300, 30)
+                        cur_cbox.setFont(QFont("Sans Serif", 7))
+                        if "package" in checkboxes[key] and "location" in checkboxes[key]:
+                                # This handles any launch files that the checkbox will launch
+                                # if selected.
+                                filepath = os.path.join(
+                                        rospkg.RosPack().get_path(checkboxes[key]["package"]),
+                                        checkboxes[key]["location"]
+                                )
+                                if "args" in checkboxes[key]:
+                                        cur_cbox_args = self.arg_to_list(checkboxes[key]["args"])
+                                else:
+                                        cur_cbox_args = []
+                                self.checkbox_effect_mapping.append((
+                                        cur_cbox,
+                                        (lambda: self.launch_node_with_args(filepath, cur_cbox_args)),
+                                        (lambda: None)
+                                ))
+                        if "parameter_triggering" in checkboxes[key]:
+                                # This handles parameter details that will be passed to the
+                                # `simulation.launch` backbone file depending on whether the
+                                # checkbox is on or off
+                                self.checkbox_parameter_mapping.append((
+                                        cur_cbox,
+                                        self.arg_to_list(checkboxes[key]["parameter_triggering"]["if_on"]),
+                                        self.arg_to_list(checkboxes[key]["parameter_triggering"]["if_off"])
+                                ))
+                        if "ros_param_triggering" in checkboxes[key]:
+                                # This handles ros parameters that need to be set
+                                check = checkboxes[key]["ros_param_triggering"]
+                                self.checkbox_effect_mapping.append((
+                                        cur_cbox,
+                                        (lambda: rospy.set_param(check["param_name"], check["if_on"])),
+                                        (lambda: rospy.set_param(check["param_name"], check["if_off"]))
+                                ))
+
+                        setattr(self, checkboxes[key]["name"].upper(), cur_cbox)
+                        counter += 1
+
+                # Hide color and cone noise slider by default, since the average user shouldn't
+                # stumble upon them.
+                self.COLOR_NOISE_SLIDER.setVisible(False)
+                self.CONE_NOISE_SLIDER.setVisible(False)
+                self._widget.findChild(QLabel, "ConeColorNoiseLabel").setVisible(False)
+                self._widget.findChild(QLabel, "ConeNoiseLabel").setVisible(False)
+
+                # Read in default noise levels
+                self.set_noise_level(
+                        float(self.default_config["eufs_launcher"]["object_noise_default"])
+                )
+                self.set_cone_noise_level(
+                        float(self.default_config["eufs_launcher"]["cone_noise_default"])
+                )
+                self.set_color_noise_level(
+                        float(self.default_config["eufs_launcher"]["color_noise_default"])
+                )
 
                 # Change label to show current selected file for the copier
                 self.update_copier()
@@ -266,25 +330,42 @@ class EufsLauncher(Plugin):
                 roslaunch.configure_logging(self.uuid)
                 self.DEBUG_SHUTDOWN = False
 
+                # Looping over all widgest to fix scaling issue via manual scaling
+                # Scaling done via magically comparing the width to the 'default' 1700 pixels
+                rec = QApplication.desktop().screenGeometry()
+                scaler_multiplier = rec.width() / 1700.0
+                for widget in self._widget.children():
+                        if hasattr(widget, 'geometry'):
+                                geom = widget.geometry()
+                                new_width = (
+                                        geom.width() * (scaler_multiplier) if not isinstance(widget, QLabel)
+                                        else geom.width() * (scaler_multiplier) + 200
+                                )
+                                widget.setGeometry(
+                                        geom.x() * scaler_multiplier,
+                                        geom.y() * scaler_multiplier,
+                                        new_width,
+                                        geom.height() * (scaler_multiplier)
+                                )
+
+                # If use_gui is false, we jump straight into launching the track
+                # use_gui is a special variable set by `eufs_launcher.py`
+                if not use_gui:
+                        self.launch_button_pressed()
+
         def tell_launchella(self, what):
                 """Display text in feedback box (lower left corner)."""
 
                 self.USER_FEEDBACK_LABEL.setText(what)
                 QApplication.processEvents()
 
-        def sketcher_button_pressed(self):
-                """Called when sketcher button is pressed."""
-
-                loadUi(self.sketcher_ui_file, self._widget)
-
-        def load_track_and_images(self):
+        def load_track_dropdowns(self):
                 """
                 Peruses file system for files to add to the drop-down menus of the launcher.
                 """
 
                 # Clear the dropdowns
                 self.TRACK_SELECTOR.clear()
-                self.IMAGE_SELECTOR.clear()
                 # Get tracks from eufs_gazebo package
                 relevant_path = os.path.join(self.GAZEBO, 'launch')
                 launch_files = [
@@ -301,25 +382,12 @@ class EufsLauncher(Plugin):
                 launch_files = [f for f in launch_files if f not in blacklist]
 
                 # Add Tracks to Track Selector
-                if "small_track.launch" in launch_files:
-                        self.TRACK_SELECTOR.addItem("small_track.launch")
+                base_track = self.default_config["eufs_launcher"]["base_track"]
+                if base_track in launch_files:
+                        self.TRACK_SELECTOR.addItem(base_track)
                 for f in launch_files:
-                        if f != "small_track.launch":
+                        if f != base_track:
                                 self.TRACK_SELECTOR.addItem(f)
-
-                # Get images
-                relevant_path = os.path.join(
-                        self.GAZEBO,
-                        'randgen_imgs'
-                )
-                image_files = [f for f in listdir(relevant_path) if isfile(join(relevant_path, f))]
-
-                # Add Images to Image Selector (always put rand.png first)
-                if "rand.png" in image_files:
-                        self.IMAGE_SELECTOR.addItem("rand.png")
-                for f in image_files:
-                        if f != "rand.png" and f[-3:] == "png":
-                                self.IMAGE_SELECTOR.addItem(f)
 
         def copy_button_pressed(self):
                 """When copy button is pressed, launch ConversionTools"""
@@ -429,8 +497,15 @@ class EufsLauncher(Plugin):
                         )
 
                 # Update drop-downs with new files in directory
-                self.load_track_and_images()
+                self.load_track_dropdowns()
                 self.tell_launchella("Copy Succeeded!")
+
+        def arg_to_list(self, d):
+                """Converts yaml arg dict to parameter list"""
+                to_return = []
+                for k, v in d.items():
+                        to_return.append(str(k))
+                return list(to_return)
 
         def update_copier(self):
                 """Change label to show current selected file for the copier"""
@@ -512,7 +587,7 @@ class EufsLauncher(Plugin):
                 self.HAIRPIN_PAIRS = preset_data["MAX_HAIRPIN_PAIRS"]
                 self.MAX_LENGTH = preset_data["MAX_LENGTH"]
                 self.LAX_GENERATION = preset_data["LAX_GENERATION"]
-                self.TRACK_WIDTH = preset_data["TRACK_WIDTH"]
+                self.TRACK_WIDTH = self.deconvert_track_width(preset_data["TRACK_WIDTH"])
                 self.LAX_CHECKBOX.setChecked(self.LAX_GENERATION)
 
         def keep_track_of_preset_changes(self):
@@ -562,7 +637,9 @@ class EufsLauncher(Plugin):
                 self.MAX_HAIRPIN_LABEL.setText("MAX_HAIRPIN: " + str((self.MAX_HAIRPIN / 2.0)))
                 self.HAIRPIN_PAIRS_LABEL.setText("HAIRPIN_PAIRS: " + str(self.HAIRPIN_PAIRS))
                 self.MAX_LENGTH_LABEL.setText("MAX_LENGTH: " + str(self.MAX_LENGTH))
-                self.TRACK_WIDTH_LABEL.setText("TRACK_WIDTH: " + str(self.TRACK_WIDTH))
+                self.TRACK_WIDTH_LABEL.setText(
+                    "TRACK_WIDTH: " + str(self.convert_track_width(self.TRACK_WIDTH))
+                )
 
         def keep_sliders_up_to_date(self):
                 """This function keeps the values of the sliders up to date."""
@@ -614,8 +691,8 @@ class EufsLauncher(Plugin):
                 max_hairpin_pairs = 5
                 min_max_length = 200
                 max_max_length = 2000
-                min_width = 2
-                max_width = 10
+                min_width = 0
+                max_width = 5
                 self.set_slider_data("Param_MIN_STRAIGHT", min_straight, max_straight)
                 self.set_slider_data("Param_MAX_STRAIGHT", min_straight, max_straight)
                 self.set_slider_data("Param_MIN_CTURN", min_turn, max_turn)
@@ -625,6 +702,21 @@ class EufsLauncher(Plugin):
                 self.set_slider_data("Param_HAIRPIN_PAIRS", min_hairpin_pairs, max_hairpin_pairs)
                 self.set_slider_data("Param_MAX_LENGTH", min_max_length, max_max_length)
                 self.set_slider_data("Param_TRACK_WIDTH", min_width, max_width)
+
+        def convert_track_width(self, w):
+                """
+                Track width officially between 0 and 5,
+                but it's really between 2.5 and 5
+                """
+                return w/2.0 + 2.5
+
+        def deconvert_track_width(self, w):
+                """
+                Track width officially between 0 and 5,
+                but it's really between 2.5 and 5
+                This is inverse of convert_track_width
+                """
+                return (w - 2.5) * 2.0
 
         def get_slider_value(self, slidername):
                 """Returns the value of the specified slider."""
@@ -666,7 +758,7 @@ class EufsLauncher(Plugin):
                                     "MAX_HAIRPIN_PAIRS": self.HAIRPIN_PAIRS,
                                     "MAX_LENGTH": self.MAX_LENGTH,
                                     "LAX_GENERATION": isLaxGenerator,
-                                    "TRACK_WIDTH": self.TRACK_WIDTH,
+                                    "TRACK_WIDTH": self.convert_track_width(self.TRACK_WIDTH),
                                     "COMPONENTS": component_data
                 }
 
@@ -681,7 +773,7 @@ class EufsLauncher(Plugin):
                         self.tell_launchella("Loading Image...")
                         im = Converter.convert(
                                 "comps",
-                                "png",
+                                "csv",
                                 "rand",
                                 params={
                                         "track data": (xys, twidth, theight)
@@ -691,14 +783,14 @@ class EufsLauncher(Plugin):
                         # If full stack selected, convert into csv and launch as well
                         track_generator_full_stack = self.FULL_STACK_TRACK_GEN_BUTTON
                         if track_generator_full_stack.isChecked():
-                                img_path = os.path.join(
+                                csv_path = os.path.join(
                                         self.GAZEBO,
-                                        'randgen_imgs/rand.png'
+                                        'tracks/rand.csv'
                                 )
                                 Converter.convert(
-                                        "png",
+                                        "csv",
                                         "ALL",
-                                        img_path,
+                                        csv_path,
                                         params={"noise": self.get_noise_level()}
                                 )
 
@@ -706,47 +798,73 @@ class EufsLauncher(Plugin):
 
                         im.show()
 
-                self.load_track_and_images()
-
-        def track_from_image_button_pressed(self):
-                """
-                Converts .png to .launch by interfacing with ConversionTools,
-                then launches said .launch.
-                """
-
-                self.tell_launchella("Preparing to launch image as a track... ")
-                filename = self.IMAGE_SELECTOR.currentText()
-                filename_full = os.path.join(
-                        self.GAZEBO,
-                        'randgen_imgs/'+filename
-                )
-                image_launcher_full_stack = self.FULL_STACK_IMAGE_BUTTON
-                if image_launcher_full_stack.isChecked():
-                        Converter.convert(
-                                "png",
-                                "ALL",
-                                filename_full,
-                                params={"noise": self.get_noise_level()}
-                        )
-                else:
-                        Converter.convert(
-                                "png",
-                                "launch",
-                                filename_full,
-                                params={"noise": self.get_noise_level()}
-                        )
-
-                self.launch_file_override = filename[:-4] + ".launch"
-                self.load_track_and_images()
-                self.launch_button_pressed()
+                self.load_track_dropdowns()
 
         def get_noise_level(self):
-                """Returns the noise slider's noise level."""
+                """Returns the object noise slider's noise level."""
 
                 noise_level_widget = self.NOISE_SLIDER
                 numerator = (1.0 * (noise_level_widget.value() - noise_level_widget.minimum()))
                 denominator = (noise_level_widget.maximum() - noise_level_widget.minimum())
                 return numerator/denominator
+
+        def set_noise_level(self, new_noise_level):
+                """
+                Sets the object noise slider's level.
+                Code may look complicated, but it's really just inverting get_noise_level to solve
+                for `noise_level_widget.value()`
+                """
+                noise_level_widget = self.NOISE_SLIDER
+                denominator = (noise_level_widget.maximum() - noise_level_widget.minimum())
+                numerator = new_noise_level * denominator
+                new_value = numerator + noise_level_widget.minimum()
+                noise_level_widget.setValue(
+                        new_value
+                )
+
+        def get_cone_noise_level(self):
+                """Returns the cone noise slider's noise level."""
+
+                noise_level_widget = self.CONE_NOISE_SLIDER
+                numerator = (1.0 * (noise_level_widget.value() - noise_level_widget.minimum()))
+                denominator = (noise_level_widget.maximum() - noise_level_widget.minimum())
+                return self.MAX_CONE_NOISE * numerator/denominator
+
+        def set_cone_noise_level(self, new_noise_level):
+                """
+                Sets the cone noise slider's level.
+                Code may look complicated, but it's really just inverting get_cone_noise_level to solve
+                for `cone_noise_level_widget.value()`
+                """
+                noise_level_widget = self.CONE_NOISE_SLIDER
+                denominator = (noise_level_widget.maximum() - noise_level_widget.minimum())
+                numerator = new_noise_level * denominator / self.MAX_CONE_NOISE
+                new_value = numerator + noise_level_widget.minimum()
+                noise_level_widget.setValue(
+                        new_value
+                )
+
+        def get_color_noise_level(self):
+                """Returns the color noise slider's noise level."""
+
+                noise_level_widget = self.COLOR_NOISE_SLIDER
+                numerator = (1.0 * (noise_level_widget.value() - noise_level_widget.minimum()))
+                denominator = (noise_level_widget.maximum() - noise_level_widget.minimum())
+                return self.MAX_COLOR_NOISE * numerator/denominator
+
+        def set_color_noise_level(self, new_noise_level):
+                """
+                Sets the color noise slider's level.
+                Code may look complicated, but it's really just inverting get_color_noise_level to solve
+                for `color_noise_level_widget.value()`
+                """
+                noise_level_widget = self.COLOR_NOISE_SLIDER
+                denominator = (noise_level_widget.maximum() - noise_level_widget.minimum())
+                numerator = new_noise_level * denominator / self.MAX_COLOR_NOISE
+                new_value = numerator + noise_level_widget.minimum()
+                noise_level_widget.setValue(
+                        new_value
+                )
 
         def convert_button_pressed(self):
                 """Handles interfacing with ConversionTools."""
@@ -782,7 +900,7 @@ class EufsLauncher(Plugin):
                         },
                         conversion_suffix=suffix
                 )
-                self.load_track_and_images()
+                self.load_track_dropdowns()
                 self.tell_launchella("Conversion Succeeded!  From: " + from_type +
                                      " To: " + to_type + " For: " + filename)
 
@@ -797,18 +915,132 @@ class EufsLauncher(Plugin):
                 self.tell_launchella("--------------------------")
                 self.tell_launchella("\t\t\tLaunching Nodes...")
 
-                # If we have set a specific file to run regardless of selected file,
-                # which may happen when we launch from an image,
-                # we make sure to launch the overriding track instead.
-                track_to_launch = self.launch_file_override
-                self.launch_file_override = None
-                if not track_to_launch:
-                        track_to_launch = self.TRACK_SELECTOR.currentText()
+                """
+                Here is our pre-launch process:
+                1: Create csv from track_to_launch
+                2: Kill random noise tiles in accordance with the noise value
+                3: Shuffle cone positions slightly in accordance with cone noise value
+                4: Convert that to "LAST_LAUNCH.launch"
+                Launch LAST_LAUNCH.launch
+                """
+
+                # Create csv from track_to_launch
+                self.tell_launchella("Creating csv...")
+                track_to_launch = self.TRACK_SELECTOR.currentText()
+                full_path = os.path.join(
+                        self.GAZEBO,
+                        'launch',
+                        track_to_launch
+                )
+                Converter.convert(
+                        "launch",
+                        "csv",
+                        full_path,
+                        override_name="LAST_LAUNCH"
+                )
 
                 # Get noise level
                 self.tell_launchella("Launching " + track_to_launch)
                 noise_level = self.get_noise_level()
+                cone_noise_level = self.get_cone_noise_level()
+                color_noise_level = self.get_color_noise_level()
                 self.tell_launchella("With Noise Level: " + str(noise_level))
+
+                # Remove relevant random noise tiles from the csv
+                csv_path = os.path.join(
+                        self.GAZEBO,
+                        'tracks',
+                        "LAST_LAUNCH.csv"
+                )
+                loaded_csv = pd.read_csv(
+                        csv_path,
+                        names=[
+                                "tag",
+                                "x",
+                                "y",
+                                "direction",
+                                "x_variance",
+                                "y_variance",
+                                "xy_covariance"
+                        ],
+                        skiprows=1
+                )
+                loaded_csv = loaded_csv[
+                        (
+                                (loaded_csv["tag"] != "inactive_noise") &
+                                (loaded_csv["tag"] != "active_noise")
+                        ) |
+                        (uniform(0, 1) < noise_level)
+                ]
+
+                for idx, val in loaded_csv.iterrows():
+                        # Activate remaining noise
+                        if loaded_csv.loc[idx, "tag"] == "inactive_noise":
+                                loaded_csv.loc[idx, "tag"] = "active_noise"
+
+                        # Shuffle cones
+                        cone_types = ["blue", "yellow", "orange", "big_orange"]
+                        if loaded_csv.loc[idx, "tag"] in cone_types:
+                                uniform_angle = uniform(0, 2 * math.pi)
+                                uniform_radius = uniform(0, cone_noise_level)
+                                del_x = uniform_radius * math.cos(uniform_angle)
+                                del_y = uniform_radius * math.sin(uniform_angle)
+                                loaded_csv.loc[idx, "x"] = float(loaded_csv.loc[idx, "x"]) + del_x
+                                loaded_csv.loc[idx, "y"] = float(loaded_csv.loc[idx, "y"]) + del_y
+
+                loaded_csv.to_csv(
+                        csv_path,
+                        index=False,
+                        columns=[
+                                "tag",
+                                "x",
+                                "y",
+                                "direction",
+                                "x_variance",
+                                "y_variance",
+                                "xy_covariance"
+                        ]
+                )
+
+                # Convert csv to launch file
+                Converter.convert(
+                        "csv",
+                        "launch",
+                        csv_path,
+                        params={"keep_all_noise": True, "noise": 1},
+                        override_name="LAST_LAUNCH"
+                )
+                track_to_launch = "LAST_LAUNCH.launch"
+
+                # Re-create csv file because the csv-to-launch file re-centers the data
+                # A different fix would be to add another metapixel to trackimages that stores
+                # What the car's position should be.
+                # But this will work for now
+                Converter.convert(
+                        "launch",
+                        "csv",
+                        os.path.join(
+                                self.GAZEBO,
+                                'launch',
+                                "LAST_LAUNCH.launch"
+                        ),
+                        conversion_suffix=""
+                )
+
+                # And now strip the launch file of the metadata that causes warnings
+                # This step is non-essential, but will result in a lot of terminal warnings
+                # if left out
+                Converter.convert(
+                        "csv",
+                        "launch",
+                        os.path.join(
+                                self.GAZEBO,
+                                'tracks',
+                                "LAST_LAUNCH.csv"
+                        ),
+                        params={"keep_all_noise": False, "noise": 1},
+                        conversion_suffix=""
+                )
 
                 # Get control information
                 control_method = "controlMethod:=speed"
@@ -819,80 +1051,101 @@ class EufsLauncher(Plugin):
                         self.tell_launchella("With Torque Controls")
                         control_method = "controlMethod:=torque"
 
-                # Get perception information
-                perception_stack = ["launch_group:=no_perception"]
-                if self.PERCEPTION_CHECKBOX.isChecked():
-                        perception_stack = []  # is on
+                # Get checkbox parameter information
+                parameters_to_pass = [control_method, "track:=" + track_to_launch.split(".")[0]]
+                for checkbox, param_if_on, param_if_off in self.checkbox_parameter_mapping:
+                        if checkbox.isChecked():
+                                parameters_to_pass.extend(param_if_on)
+                        else:
+                                parameters_to_pass.extend(param_if_off)
 
-                # Check if we should launch the gazebo gui!
-                gui_on = "gui:=" + (
-                        "true" if self.GAZEBO_GUI_CHECKBOX.isChecked() else "false"
+                # Here we launch the backbone script, `simulation.launch`.
+                dir_to_launch = os.path.dirname(os.path.dirname(os.path.dirname(self.GAZEBO)))
+                launch_location = os.path.join(
+                        dir_to_launch,
+                        'launch',
+                        'simulation.launch'
+                )
+                self.popen_process = self.launch_node_with_args(
+                        launch_location,
+                        parameters_to_pass
                 )
 
-                # Check if we need ground truth odom
-                publish_gt_tf = "publish_gt_tf:=" + (
-                        "true" if self.PUBLISH_GT_TF.isChecked() else "false"
-                )
+                # Trigger launch files hooked to checkboxes
+                for checkbox, effect_on, effect_off in self.checkbox_effect_mapping:
+                        if checkbox.isChecked():
+                                effect_on()
+                        else:
+                                effect_off()
 
-                # How we launch the simulation changes depending on whether
-                # we are using the eufs_sim package standalone, or working within
-                # the eufs-master ecosystem.
-                dir_to_check = os.path.dirname(os.path.dirname(os.path.dirname(self.GAZEBO)))
-                if dir_to_check.split("/")[-1] == "eufs-master":
-                        launch_location = os.path.join(
-                                                dir_to_check,
-                                                'launch',
-                                                'simulation.launch'
+                # Hard-Coded Map Effect
+                if hasattr(self, "FAST_SLAM_LOAD_MAP") and self.FAST_SLAM_LOAD_MAP.isChecked():
+                        in_path = os.path.join(
+                                self.GAZEBO,
+                                'tracks',
+                                "LAST_LAUNCH.csv"
                         )
-                        self.popen_process = self.launch_node_with_args(
-                                                launch_location,
-                                                [
-                                                        control_method,
-                                                        gui_on,
-                                                        publish_gt_tf,
-                                                        "track:=" + track_to_launch.split(".")[0]
-                                                ] + perception_stack
-                                        )
-                else:
-                        self.popen_process = self.launch_node_with_args(
-                                                os.path.join(
-                                                        self.GAZEBO,
-                                                        'launch',
-                                                        track_to_launch
-                                                ),
-                                                [control_method, gui_on]
-                                        )
+                        the_csv = pd.read_csv(
+                                in_path,
+                                names=[
+                                        "tag",
+                                        "x",
+                                        "y",
+                                        "direction",
+                                        "x_variance",
+                                        "y_variance",
+                                        "xy_covariance"
+                                ],
+                                skiprows=1
+                        )
+                        cone_types = ["blue", "yellow", "orange", "big_orange"]
+                        for index, row in the_csv.iterrows():
+                                if uniform(0, 1) < color_noise_level and row["tag"] in cone_types:
+                                        the_csv.at[index, "tag"] = "unknown_color"
+                        out_path = os.path.join(
+                                self.GAZEBO,
+                                'tracks',
+                                "FAST_SLAM_PRELOADED_MAP.csv"
+                        )
+                        the_csv.to_csv(
+                                out_path,
+                                index=False,
+                                columns=[
+                                        "tag",
+                                        "x",
+                                        "y",
+                                        "direction",
+                                        "x_variance",
+                                        "y_variance",
+                                        "xy_covariance"
+                                ]
+                        )
+                        rospy.set_param("/slam/map_path", out_path)
 
-                # Launch the visualisator if applicable.
-                if self.VISUALISATOR_CHECKBOX.isChecked():
-                        self.tell_launchella("And With LIDAR Data Visualisator.")
-                        node_path = os.path.join(
-                                rospkg.RosPack().get_path('eufs_description'),
-                                "launch",
-                                "visualisator.launch"
+                # Auto-launch default scripts in yaml
+                scripts = self.default_config["eufs_launcher"]["on_startup"]
+                for key, value in scripts.items():
+                        filepath = os.path.join(
+                                rospkg.RosPack().get_path(scripts[key]["package"]),
+                                scripts[key]["location"]
                         )
-                        self.launch_node(node_path)
+                        if "args" in scripts[key]:
+                                cur_script_args = self.arg_to_list(scripts[key]["args"])
+                        else:
+                                cur_script_args = []
+                        self.launch_node_with_args(filepath, cur_script_args)
 
                 self.tell_launchella("As I have fulfilled my purpose in guiding you " +
                                      "to launch a track, this launcher will no longer " +
                                      "react to input.")
 
-                # Launch SBG Simulator Node
-                self.launch_node_with_args(
-                        os.path.join(
-                                self.GAZEBO,
-                                "launch",
-                                "sbg_raw_data_simulator.launch"
-                        ),
-                        [
-                                "_imu_hz:=200",
-                                "_gps_hz:=5"
-                        ]
-                )
-
                 # Hide launcher
                 self._widget.setVisible(False)
-                self._widget.window().showMinimized()
+                rospy.Timer(
+                        rospy.Duration(0.1),
+                        lambda x: self._widget.window().showMinimized(),
+                        oneshot=True
+                )
 
         def launch_node(self, filepath):
                 """Wrapper for launch_node_with_args"""
@@ -919,7 +1172,7 @@ class EufsLauncher(Plugin):
                 """Unregister all publishers, kill all nodes."""
                 self.tell_launchella("Shutdown Engaged...")
 
-                # (Stop all processes)
+                # (Stop all processes)zz
                 for p in self.processes:
                     p.stop()
 
@@ -931,31 +1184,25 @@ class EufsLauncher(Plugin):
 
                 # Manual node killer (needs to be used on nodes opened by Popen):
                 extra_nodes = rosnode.get_node_names()
-                extra_nodes.remove("/eufs_launcher")
-                extra_nodes.remove("/rosout")
+                if "/eufs_launcher" in extra_nodes:
+                        extra_nodes.remove("/eufs_launcher")
+                if "/rosout" in extra_nodes:
+                        extra_nodes.remove("/rosout")
                 left_open = len(extra_nodes)
                 if (left_open > 0 and self.DEBUG_SHUTDOWN):
                         rospy.logerr("Warning, after shutting down the launcher, " +
                                      "these nodes are still running: " + str(extra_nodes))
 
-                nodes_to_kill = [
-                                    "/cone_ground_truth",
-                                    "/eufs/controller_spawner",
-                                    "/gazebo",
-                                    "/gazebo_gui",
-                                    "/robot_state_publisher",
-                                    "/ros_can_sim",
-                                    "/twist_to_ackermannDrive",
-                                    "/spawn_platform",
-                                    "/eufs_sim_rqt",
-                                ]
+                nodes_to_kill = self.arg_to_list(self.default_config["eufs_launcher"]["nodes_to_kill"])
                 for bad_node in extra_nodes:
                         if bad_node in nodes_to_kill:
                                 Popen(["rosnode", "kill", bad_node])
                 Popen(["killall", "-9", "gzserver"])
                 time.sleep(0.25)
                 extra_nodes = rosnode.get_node_names()
-                extra_nodes.remove("/eufs_launcher")
-                extra_nodes.remove("/rosout")
+                if "/eufs_launcher" in extra_nodes:
+                        extra_nodes.remove("/eufs_launcher")
+                if "/rosout" in extra_nodes:
+                        extra_nodes.remove("/rosout")
                 if left_open > 0 and self.DEBUG_SHUTDOWN:
                         rospy.logerr("Pruned to: " + str(extra_nodes))

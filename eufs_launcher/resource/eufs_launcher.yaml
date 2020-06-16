@@ -1,0 +1,91 @@
+# Configures what nodes get automatically launched on startup, along with
+# what config checkboxes exist and their default values.
+
+eufs_launcher:
+
+    # Default launch file to be selected in the launcher drop-down menu
+    # Make sure to add the .launch suffix, i.e. "small_track.launch"
+    base_track: "small_track.launch"
+
+    # percent of possible noise pixels being utilized
+    object_noise_default: 0
+
+    # radius in meters where cones may be placed away from ground truth
+    # Range in launcher is between 0 and 0.4
+    # I like 0.05 but by default this should stay 0 to not confuse anyone
+    cone_noise_default: 0
+
+    # percent of cones where fastslam does not know their color if pre-loading map
+    color_noise_default: 0
+    
+    # Launch files to launch no matter what after the launch button is pressed
+    on_startup:
+        sbg_raw_data_simulator:
+            package: "eufs_gazebo"
+            location: "launch/sbg_raw_data_simulator.launch"
+            args: {"_imu_hz:=200", "_gps_hz:=5"}
+
+
+    # Checkboxes to have in the config section.  
+    # `eufs_launcher` handles layout based on priority set.
+    checkboxes:
+        visualisator:
+            priority: 1
+            name: "Visualisator_Checkbox"
+            label: "LIDAR Visualisator"
+            package: "eufs_description"
+            location: "launch/visualisator.launch"
+            args: {}
+            checked_on_default: No
+            
+        perception:
+            priority: 2
+            name: "Perception_Checkbox"
+            label: "Use Simulated Perception"
+            checked_on_default: Yes
+            parameter_triggering:
+            # Note that this is working as intended - "no_perception" means
+            # No real perception!  In which case we use the simulated perception.
+                if_on: {"launch_group:=no_perception"}
+                if_off: {}
+            
+        gazebo_gui:
+            priority: 3
+            name: "Gazebo_GUI_Checkbox"
+            label: "Gazebo GUI"
+            checked_on_default: Yes
+            parameter_triggering:
+                if_on: {"gui:=true"}
+                if_off: {"gui:=false"}
+            
+        ground_truth_transform:
+            priority: 4
+            name: "Ground_Truth_Transform"
+            label: "Ground Truth TF"
+            checked_on_default: No
+            parameter_triggering:
+                if_on: {"publish_gt_tf:=true"}
+                if_off: {"publish_gt_tf:=false"}
+
+
+
+
+    # Some nodes fail to shutdown
+    # I have some theories as to why that is, but for now the solution is
+    # just to manually kill all nodes that fail to quit.
+    # I believe it has to do with how the launcher is launching some nodes
+    # via Popen and not through the ROS API.  This was a necessity in Kinetic,
+    # but now that we're in Melodic it is potentially possible to go through the ROS API.
+    nodes_to_kill: {
+        "/cone_ground_truth",
+        "/eufs/controller_spawner",
+        "/gazebo",
+        "/gazebo_gui",
+        "/robot_state_publisher",
+        "/ros_can_sim",
+        "/twist_to_ackermannDrive",
+        "/spawn_platform",
+        "/eufs_sim_rqt",
+        "/wheel_odometry",
+        "/sbg_raw_data_simulator"
+    }

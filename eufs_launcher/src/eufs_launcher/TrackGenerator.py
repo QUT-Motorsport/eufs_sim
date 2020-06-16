@@ -165,7 +165,7 @@ class TrackGenerator:
                                 "MAX_HAIRPIN_PAIRS": 3,
                                 "MAX_LENGTH": 1500,
                                 "LAX_GENERATION": False,
-                                "TRACK_WIDTH": 4,
+                                "TRACK_WIDTH": 3.5,
                                 "COMPONENTS": {
                                         "STRAIGHT": 1,
                                         "CONSTANT_TURN": 0.7,
@@ -182,7 +182,7 @@ class TrackGenerator:
                                 "MAX_HAIRPIN_PAIRS": 3,
                                 "MAX_LENGTH": 1500,
                                 "LAX_GENERATION": False,
-                                "TRACK_WIDTH": 4,
+                                "TRACK_WIDTH": 3.5,
                                 "COMPONENTS": {
                                         "STRAIGHT": 1,
                                         "CONSTANT_TURN": 0.7,
@@ -200,7 +200,7 @@ class TrackGenerator:
                                 "MAX_HAIRPIN_PAIRS": 3,
                                 "MAX_LENGTH": 700,
                                 "LAX_GENERATION": True,
-                                "TRACK_WIDTH": 4,
+                                "TRACK_WIDTH": 3.5,
                                 "COMPONENTS": {
                                         "STRAIGHT": 1,
                                         "CONSTANT_TURN": 0.7,
@@ -218,7 +218,7 @@ class TrackGenerator:
                                 "MAX_HAIRPIN_PAIRS": 3,
                                 "MAX_LENGTH": 700,
                                 "LAX_GENERATION": True,
-                                "TRACK_WIDTH": 4,
+                                "TRACK_WIDTH": 3.5,
                                 "COMPONENTS": {
                                         "STRAIGHT": 1,
                                         "CONSTANT_TURN": 0.7,
@@ -237,7 +237,7 @@ class TrackGenerator:
                                 "MAX_HAIRPIN_PAIRS": 3,
                                 "MAX_LENGTH": 500,
                                 "LAX_GENERATION": True,
-                                "TRACK_WIDTH": 4,
+                                "TRACK_WIDTH": 3.5,
                                 "COMPONENTS": {
                                         "STRAIGHT": 1,
                                         "CONSTANT_TURN": 0.7,
@@ -255,7 +255,7 @@ class TrackGenerator:
                                 "MAX_HAIRPIN_PAIRS": 3,
                                 "MAX_LENGTH": 700,
                                 "LAX_GENERATION": True,
-                                "TRACK_WIDTH": 4,
+                                "TRACK_WIDTH": 3.5,
                                 "COMPONENTS": {
                                         "STRAIGHT": 1,
                                         "CONSTANT_TURN": 0.7,
@@ -1045,6 +1045,14 @@ class CONE_START:
     pass
 
 
+class CONE_BIG_ORANGE:
+    pass
+
+
+class NOISE:
+    pass
+
+
 def cone_start(xys, track_width=None):
     """Wrapper for cone_default with start parameter"""
     return cone_default(
@@ -1095,7 +1103,7 @@ def cone_default(xys, starting=False, track_width=None, slalom=False, prev_point
         cone_check_amount = 30
 
         # How close can cones be from those on the same side.
-        cone_adjacent_closeness_parameter = 6
+        cone_adjacent_closeness_parameter = 4
 
         all_points_north = []
         all_points_south = []
@@ -1127,6 +1135,9 @@ def cone_default(xys, starting=False, track_width=None, slalom=False, prev_point
         # This is used to check if the yellow and blue cones suddenly swapped.
         last_tangent_normal = (0, 0)
 
+        # Used to make sure orange cones start ahead of the car
+        orig_tangent = (0, 0)
+
         for i in range(len(xys)):
                 # Skip first part [as hard to calculate tangent]
                 if i == 0:
@@ -1140,6 +1151,8 @@ def cone_default(xys, starting=False, track_width=None, slalom=False, prev_point
                 # As we want cones to be placed along the normal.
                 cur_point = xys[i]
                 cur_tangent_angle = calculate_tangent_angle(xys[:(i+1)])
+                if i == 1:
+                    orig_tangent = (math.cos(cur_tangent_angle), math.sin(cur_tangent_angle))
                 cur_tangent_normal = (
                     math.ceil(
                         cone_normal_distance_parameter * math.sin(cur_tangent_angle)
@@ -1165,10 +1178,10 @@ def cone_default(xys, starting=False, track_width=None, slalom=False, prev_point
 
                 # This is where the cones will be placed, provided they pass the
                 # distance checks later.
-                north_point = (int(cur_point[0] + cur_tangent_normal[0]),
-                               int(cur_point[1] + cur_tangent_normal[1]))
-                south_point = (int(cur_point[0] - cur_tangent_normal[0]),
-                               int(cur_point[1] - cur_tangent_normal[1]))
+                north_point = ((cur_point[0] + cur_tangent_normal[0]),
+                               (cur_point[1] + cur_tangent_normal[1]))
+                south_point = ((cur_point[0] - cur_tangent_normal[0]),
+                               (cur_point[1] - cur_tangent_normal[1]))
 
                 # Calculates shortest distance to cone on same side of track
                 difference_from_prev_north = min([
@@ -1224,19 +1237,19 @@ def cone_default(xys, starting=False, track_width=None, slalom=False, prev_point
 
                 # And when they are viable, draw them!
                 if (north_viable):
-                        px_x = int(north_point[0])
-                        px_y = int(north_point[1])
+                        px_x = (north_point[0])
+                        px_y = (north_point[1])
                         to_return.append((px_x, px_y, CONE_OUTER))
                         all_points_north.append(north_point)
                 if (south_viable):
-                        px_x = int(south_point[0])
-                        px_y = int(south_point[1])
+                        px_x = (south_point[0])
+                        px_y = (south_point[1])
                         to_return.append((px_x, px_y, CONE_INNER))
                         all_points_south.append(south_point)
 
                 # Handle placement of slalom cones
                 if slalom and (north_viable or south_viable):
-                        to_return.append((int(cur_point[0]), int(cur_point[1]), CONE_ORANGE))
+                        to_return.append(((cur_point[0]), (cur_point[1]), CONE_ORANGE))
 
                 # Only keep track of last couple of previous cones
                 # (and the very first one, for when the loop joins up)
@@ -1264,7 +1277,11 @@ def cone_default(xys, starting=False, track_width=None, slalom=False, prev_point
                         for idx, tup in enumerate(to_return):
                                 x, y, _ = tup
                                 if int(x) == int(i) and int(y) == int(j):
-                                        to_return[idx] = (x, y, CONE_START)
+                                        to_return[idx] = (
+                                                (x + point_list[1][0])/2,
+                                                (y + point_list[1][1])/2,
+                                                CONE_START
+                                        )
 
         return to_return
 

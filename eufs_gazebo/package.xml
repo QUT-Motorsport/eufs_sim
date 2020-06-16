@@ -37,6 +37,7 @@
     <depend>python-pandas</depend>
     <depend>python-numpy</depend>
     <depend>python-matplotlib</depend>
+    <depend>python-skimage</depend>
 
     <export>
         <gazebo_ros gazebo_plugin_path="${prefix}/plugins" gazebo_model_path="${prefix}/.." />
