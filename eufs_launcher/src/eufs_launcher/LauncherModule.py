@@ -229,7 +229,7 @@ class EufsLauncher(Plugin):
                 # Remove "blacklisted" files (ones that don't define vehicle models)
                 models_filepath = os.path.join(
                         rospkg.RosPack().get_path('eufs_gazebo_plugins'),
-                        'gazebo_race_car_model/src/models.txt'
+                        'gazebo_race_car_model/src/models/models.txt'
                 )
                 vehicle_models_ = open(models_filepath, "r")
                 vehicle_models = [model.strip() for model in vehicle_models_]  # remove \n
