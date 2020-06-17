@@ -1,4 +1,4 @@
-image: ros:kinetic-ros-core
+image: ros:melodic-ros-core
 
 variables:
   GIT_SUBMODULE_STRATEGY: recursive
@@ -10,6 +10,9 @@ cache:
 before_script:
 # Add eufs package dependencies here, separated by spaces
  - export DEP_PACKAGES="eufs_msgs"
+
+# Install git
+ - apt update >/dev/null && apt install -y git >/dev/null
 
  - 'which ssh-agent || ( apt-get update -y && apt-get install openssh-client -y ) >/dev/null'
  - eval $(ssh-agent -s)
@@ -34,9 +37,9 @@ catkin_tools:
   stage: build
   script:
     - catkin build --summarize --no-status --force-color
-  only:
-    - merge_requests
-    - master
+  rules:
+    - if: $CI_MERGE_REQUEST_ID
+    - if: $CI_COMMIT_BRANCH == "master"
 
 # roslint
 roslint:
@@ -48,7 +51,6 @@ roslint:
     - catkin build eufs_launcher --no-deps --make-args roslint
     - catkin build ros_can_sim
     - catkin build ros_can_sim --no-deps --make-args roslint
-  only:
-    - merge_requests
-    - master
-
+  rules:
+    - if: $CI_MERGE_REQUEST_ID
+    - if: $CI_COMMIT_BRANCH == "master"
