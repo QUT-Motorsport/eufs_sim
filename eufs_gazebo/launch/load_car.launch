@@ -1,9 +1,21 @@
 <?xml version="1.0"?>
 <launch>
 
-  <!-- roslaunch arguments -->
-  <arg name="namespace" default=""/>
-  <arg name="cmd_timeout" default="0.5"/>
+  <!-- Namespace of the gazebo robot  -->
+  <arg name="namespace" default="eufs"/>
+
+  <!-- The launch group (default or no_perception) -->
+  <arg name="launch_group" default="default"/>
+
+  <!-- Show the RQT GUI (with ros_can_sim GUI and EUFS Robot Steering GUI) -->
+  <arg name="show_rqt_gui" default="true"/>
+
+  <!-- Control Method Argument -->
+  <arg name="controlMethod" default="speed"/>
+
+  <!-- The vehicle model class to use in the gazebo_ros_race_car_model -->
+  <arg name="vehicleModel" default="DynamicBicycle"/>
+  <!-- If the gazebo_ros_race_car_model should publish the ground truth tf -->
   <arg name="publish_gt_tf" default="false"/>
 
   <!-- Vehicle pose -->
@@ -14,16 +26,9 @@
   <arg name="pitch" default="0.0"/>
   <arg name="yaw" default="0.0"/>
 
-  <!-- Control Method Argument -->
-  <arg name="controlMethod" default="speed"/>
-  <arg name="vehicleModel" default="DynamicBicycle"/>
-  <arg name="show_rqt_gui" default="true"/>
-  <arg name="launch_group" default="default" />
-
+  <!-- The name of the robot ({robot_name}.urdf.xacro and {robot_name}_config.yaml file in eufs_description/robots) -->
   <arg name="robot_name" default="eufs"/>
-
   <arg name="config_file" default="$(find eufs_description)/robots/$(arg robot_name)_config.yaml"/>
-
 
   <!-- Change the simulate_perception parameter based on the launch group -->
   <group if="$(eval arg('launch_group')=='no_perception')">
