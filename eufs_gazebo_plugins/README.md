@@ -7,7 +7,8 @@ This is the main simulation package which contains the simulation model of the c
 
 ### gazebo_ros_race_car_model
 
-Provides ground truth state in simulation in the form of `nav_msgs/Odometry` and  
+Provides the interface in order to control the race car in the simulation.
+Also provides ground truth state in the form of `nav_msgs/Odometry` and  
 `eufs_msgs/CarState`. Additionally can publish transform.
 
 #### Parameters
