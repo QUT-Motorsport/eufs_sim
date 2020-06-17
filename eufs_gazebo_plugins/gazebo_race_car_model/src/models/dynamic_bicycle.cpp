@@ -51,6 +51,11 @@ private:
     const auto x_dot_dyn  = f(state, input, Fx, FyF, FyR);
     const auto x_next_dyn = state + x_dot_dyn * dt;
     state = f_kin_correction(x_next_dyn, state, input, Fx, dt);
+
+    // Set the acceleration based on the change in velocity
+    state.a_x = x_dot_dyn.v_x;
+    state.a_y = x_dot_dyn.v_y;
+
     state.validate();
   }
 

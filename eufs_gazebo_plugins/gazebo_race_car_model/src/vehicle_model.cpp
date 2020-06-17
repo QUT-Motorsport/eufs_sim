@@ -61,50 +61,50 @@ VehicleModel::VehicleModel(physics::ModelPtr &_model,
 
 void VehicleModel::initParam(sdf::ElementPtr &_sdf) {
   if (!_sdf->HasElement("referenceFrame")) {
-    ROS_DEBUG_NAMED("state_ground_truth", "state_ground_truth plugin missing <referenceFrame>, defaults to map");
+    ROS_DEBUG_NAMED("gazebo_ros_race_car_model", "gazebo_ros_race_car_model plugin missing <referenceFrame>, defaults to map");
     this->reference_frame_ = "map";
   } else {
     this->reference_frame_ = _sdf->GetElement("referenceFrame")->Get<std::string>();
   }
 
   if (!_sdf->HasElement("robotFrame")) {
-    ROS_DEBUG_NAMED("state_ground_truth", "state_ground_truth plugin missing <robotFrame>, defaults to base_footprint");
+    ROS_DEBUG_NAMED("gazebo_ros_race_car_model", "gazebo_ros_race_car_model plugin missing <robotFrame>, defaults to base_footprint");
     this->robot_frame_ = "base_footprint";
   } else {
     this->robot_frame_ = _sdf->GetElement("robotFrame")->Get<std::string>();
   }
 
   if (!_sdf->HasElement("publishTransform")) {
-    ROS_DEBUG_NAMED("state_ground_truth", "state_ground_truth plugin missing <publishTransform>, defaults to false");
+    ROS_DEBUG_NAMED("gazebo_ros_race_car_model", "gazebo_ros_race_car_model plugin missing <publishTransform>, defaults to false");
     this->publish_tf_ = false;
   } else {
     this->publish_tf_ = _sdf->GetElement("publishTransform")->Get<bool>();
   }
 
   if (!_sdf->HasElement("wheelSpeedsTopicName")) {
-    ROS_FATAL_NAMED("state_ground_truth", "state_ground_truth plugin missing <wheelSpeedsTopicName>, cannot proceed");
+    ROS_FATAL_NAMED("gazebo_ros_race_car_model", "gazebo_ros_race_car_model plugin missing <wheelSpeedsTopicName>, cannot proceed");
     return;
   } else {
     this->wheel_speeds_topic_name_ = _sdf->GetElement("wheelSpeedsTopicName")->Get<std::string>();
   }
 
   if (!_sdf->HasElement("stateTopicName")) {
-    ROS_FATAL_NAMED("state_ground_truth", "state_ground_truth plugin missing <stateTopicName>, cannot proceed");
+    ROS_FATAL_NAMED("gazebo_ros_race_car_model", "gazebo_ros_race_car_model plugin missing <stateTopicName>, cannot proceed");
     return;
   } else {
     this->state_topic_name_ = _sdf->GetElement("stateTopicName")->Get<std::string>();
   }
 
   if (!_sdf->HasElement("odometryTopicName")) {
-    ROS_FATAL_NAMED("state_ground_truth", "state_ground_truth plugin missing <odometryTopicName>, cannot proceed");
+    ROS_FATAL_NAMED("gazebo_ros_race_car_model", "gazebo_ros_race_car_model plugin missing <odometryTopicName>, cannot proceed");
     return;
   } else {
     this->odom_topic_name_ = _sdf->GetElement("odometryTopicName")->Get<std::string>();
   }
 
   if (!_sdf->HasElement("positionNoise")) {
-    ROS_DEBUG_NAMED("state_ground_truth",
-                    "state_ground_truth plugin missing <positionNoise>, defaults to 0.0, 0.0, 0.0");
+    ROS_DEBUG_NAMED("gazebo_ros_race_car_model",
+                    "gazebo_ros_race_car_model plugin missing <positionNoise>, defaults to 0.0, 0.0, 0.0");
     this->position_noise_ = {0.0, 0.0, 0.0};
   } else {
     auto temp = _sdf->GetElement("positionNoise")->Get<ignition::math::Vector3d>();
@@ -112,12 +112,12 @@ void VehicleModel::initParam(sdf::ElementPtr &_sdf) {
   }
 
   if (this->position_noise_.size() != 3) {
-    ROS_FATAL_NAMED("state_ground_truth", "positionNoise parameter vector is not of size 3");
+    ROS_FATAL_NAMED("gazebo_ros_race_car_model", "positionNoise parameter vector is not of size 3");
   }
 
   if (!_sdf->HasElement("orientationNoise")) {
-    ROS_DEBUG_NAMED("state_ground_truth",
-                    "state_ground_truth plugin missing <orientationNoise>, defaults to 0.0, 0.0, 0.0");
+    ROS_DEBUG_NAMED("gazebo_ros_race_car_model",
+                    "gazebo_ros_race_car_model plugin missing <orientationNoise>, defaults to 0.0, 0.0, 0.0");
     this->orientation_noise_ = {0.0, 0.0, 0.0};
   } else {
     auto temp = _sdf->GetElement("orientationNoise")->Get<ignition::math::Vector3d>();
@@ -125,12 +125,12 @@ void VehicleModel::initParam(sdf::ElementPtr &_sdf) {
   }
 
   if (this->orientation_noise_.size() != 3) {
-    ROS_FATAL_NAMED("state_ground_truth", "orientationNoise parameter vector is not of size 3");
+    ROS_FATAL_NAMED("gazebo_ros_race_car_model", "orientationNoise parameter vector is not of size 3");
   }
 
   if (!_sdf->HasElement("linearVelocityNoise")) {
-    ROS_DEBUG_NAMED("state_ground_truth",
-                    "state_ground_truth plugin missing <linearVelocityNoise>, defaults to 0.0, 0.0, 0.0");
+    ROS_DEBUG_NAMED("gazebo_ros_race_car_model",
+                    "gazebo_ros_race_car_model plugin missing <linearVelocityNoise>, defaults to 0.0, 0.0, 0.0");
     this->linear_velocity_noise_ = {0.0, 0.0, 0.0};
   } else {
     auto temp = _sdf->GetElement("linearVelocityNoise")->Get<ignition::math::Vector3d>();
@@ -138,12 +138,12 @@ void VehicleModel::initParam(sdf::ElementPtr &_sdf) {
   }
 
   if (this->linear_velocity_noise_.size() != 3) {
-    ROS_FATAL_NAMED("state_ground_truth", "linearVelocityNoise parameter vector is not of size 3");
+    ROS_FATAL_NAMED("gazebo_ros_race_car_model", "linearVelocityNoise parameter vector is not of size 3");
   }
 
   if (!_sdf->HasElement("angularVelocityNoise")) {
-    ROS_DEBUG_NAMED("state_ground_truth",
-                    "state_ground_truth plugin missing <angularVelocityNoise>, defaults to 0.0, 0.0, 0.0");
+    ROS_DEBUG_NAMED("gazebo_ros_race_car_model",
+                    "gazebo_ros_race_car_model plugin missing <angularVelocityNoise>, defaults to 0.0, 0.0, 0.0");
     this->angular_velocity_noise_ = {0.0, 0.0, 0.0};
   } else {
     auto temp = _sdf->GetElement("angularVelocityNoise")->Get<ignition::math::Vector3d>();
@@ -151,12 +151,12 @@ void VehicleModel::initParam(sdf::ElementPtr &_sdf) {
   }
 
   if (this->angular_velocity_noise_.size() != 3) {
-    ROS_FATAL_NAMED("state_ground_truth", "angularVelocityNoise parameter vector is not of size 3");
+    ROS_FATAL_NAMED("gazebo_ros_race_car_model", "angularVelocityNoise parameter vector is not of size 3");
   }
 
   if (!_sdf->HasElement("linearAccelerationNoise")) {
-    ROS_DEBUG_NAMED("state_ground_truth",
-                    "state_ground_truth plugin missing <linearAccelerationNoise>, defaults to 0.0, 0.0, 0.0");
+    ROS_DEBUG_NAMED("gazebo_ros_race_car_model",
+                    "gazebo_ros_race_car_model plugin missing <linearAccelerationNoise>, defaults to 0.0, 0.0, 0.0");
     this->linear_acceleration_noise_ = {0.0, 0.0, 0.0};
   } else {
     auto temp = _sdf->GetElement("linearAccelerationNoise")->Get<ignition::math::Vector3d>();
@@ -164,7 +164,7 @@ void VehicleModel::initParam(sdf::ElementPtr &_sdf) {
   }
 
   if (this->linear_acceleration_noise_.size() != 3) {
-    ROS_FATAL_NAMED("state_ground_truth", "linearAccelerationNoise parameter vector is not of size 3");
+    ROS_FATAL_NAMED("gazebo_ros_race_car_model", "linearAccelerationNoise parameter vector is not of size 3");
   }
 }
 
@@ -203,7 +203,7 @@ void VehicleModel::setPositionFromWorld() {
 
   offset_ = pos;
 
-  ROS_DEBUG_NAMED("gazebo_race_car_model",
+  ROS_DEBUG_NAMED("gazebo_ros_race_car_model",
                   "Got starting offset %f %f %f",
                   this->offset_.Pos()[0],
                   this->offset_.Pos()[1],
@@ -359,10 +359,6 @@ void VehicleModel::publishCarState() {
   car_state.linear_acceleration_covariance[0] = pow(this->linear_acceleration_noise_[0], 2);
   car_state.linear_acceleration_covariance[4] = pow(this->linear_acceleration_noise_[1], 2);
   car_state.linear_acceleration_covariance[8] = pow(this->linear_acceleration_noise_[2], 2);
-
-  // geometry_msgs/Vector3 linear_acceleration # m/s^2
-  geometry_msgs::Vector3 linear_acceleration;
-  car_state.linear_acceleration = linear_acceleration;
 
   car_state.slip_angle = getSlipAngle();
 
