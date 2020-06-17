@@ -5,7 +5,7 @@ This is the main simulation package which contains the simulation model of the c
 
 ## Plugins
 
-### gazebo_state_ground_truth
+### gazebo_ros_race_car_model
 
 Provides ground truth state in simulation in the form of `nav_msgs/Odometry` and  
 `eufs_msgs/CarState`. Additionally can publish transform.
@@ -14,17 +14,25 @@ Provides ground truth state in simulation in the form of `nav_msgs/Odometry` and
 
 | Name | Type | Default | Purpose |
 | ----- | ---- |  ------ | ------- |
-| `alwaysOn`                | bool      | true      | Should Gazebo always invoke this plugin?  |
-| `updateRate`              | float     | 0.0       | The rate at which this plugin publishes data. Default is as fast as possible. |
-| `referenceFrame`          | string    | -         | Required parameter. The tf frame in which to publish data. |
-| `robotFrame`              | string    | -         | Required parameter. The tf frame of the robot. |
-| `odometryTopicName`       | string    | -         | Required parameter. The topic in which to publish the nav_msgs/Odometry message. |
-| `stateTopicName`          | string    | -         | Required parameter. The topic in which to publish the eufs_msgs/CarState message. |
-| `positionNoise`           | double[3] | `[0,0,0]` | Position noise. Inducted in the position fields and in the covariance. |
-| `orientationNoise`        | double[3] | `[0,0,0]` |  |
-| `linearVelocityNoise`     | double[3] | `[0,0,0]` |  |
-| `angularVelocityNoise`    | double[3] | `[0,0,0]` |  |
-| `linearAccelerationNoise` | double[3] | `[0,0,0]` |  |
+| `vehicle_model`              | string    | `DynamicBicyle`    | The vehicle model class to use for the race car. |
+| `front_left_wheel_steering`  | string    |                    | Required parameter. The name of the front left  steering wheel joint. |
+| `front_right_wheel`          | string    |                    | Required parameter. The name of the front right steering wheel joint. |
+| `front_left_wheel`           | string    |                    | Required parameter. The name of the front left  wheel joint. |
+| `front_right_wheel_steering` | string    |                    | Required parameter. The name of the front right wheel joint. |
+| `rear_left_wheel`            | string    |                    | Required parameter. The name of the rear  left  wheel joint. |
+| `rear_right_wheel`           | string    |                    | Required parameter. The name of the rear  right wheel joint. |
+| `yaml_config`                | string    |                    | Required parameter. The path to the config file describing the car. |
+| `referenceFrame`             | string    | `"map"`            | The tf frame in which to publish data. |
+| `robotFrame`                 | string    | `"base_footprint"` | The tf frame of the robot. |
+| `publishTransform`           | bool      | `false`            | Whether or not the tf of the car should be published |
+| `stateTopicName`             | string    | -                  | Required parameter. The topic in which to publish the eufs_msgs/CarState message. |
+| `wheelSpeedsTopicName`       | string    | -                  | Required parameter. The topic in which to publish the eufs_msgs/WheelSpeedsStamped message. |
+| `odometryTopicName`          | string    | -                  | Required parameter. The topic in which to publish the nav_msgs/Odometry message. |
+| `positionNoise`              | double[3] | `[0,0,0]`          | Position noise.            Inducted in the position fields and in the covariance. ([x, y, z]) |
+| `orientationNoise`           | double[3] | `[0,0,0]`          | Orientation noise.         Inducted in the position fields and in the covariance. ([yaw, pitch, roll]) |
+| `linearVelocityNoise`        | double[3] | `[0,0,0]`          | Linear velocity noise.     Inducted in the position fields and in the covariance. ([x, y, z]) |
+| `angularVelocityNoise`       | double[3] | `[0,0,0]`          | Angular velocity noise.    Inducted in the position fields and in the covariance. ([x, y, z]) |
+| `linearAccelerationNoise`    | double[3] | `[0,0,0]`          | Linear acceleration noise. Inducted in the position fields and in the covariance. ([x, y, z]) |
 
 #### Example usage
 
@@ -32,14 +40,21 @@ This has to be inserted inside a robot URDF
 
 ```xml
   <gazebo>
-    <plugin name="state_ground_truth" filename="libgazebo_state_ground_truth.so">
-      <alwaysOn>true</alwaysOn>
-      <updateRate>200.0</updateRate>
+    <plugin name="race_car" filename="libgazebo_race_car_model.so">
+      <vehicle_model>$(arg vehicle_model)</vehicle_model>
+      <front_left_wheel_steering>left_steering_hinge_joint</front_left_wheel_steering>
+      <front_right_wheel_steering>right_steering_hinge_joint</front_right_wheel_steering>
+      <front_left_wheel>front_left_wheel_joint</front_left_wheel>
+      <front_right_wheel>front_right_wheel_joint</front_right_wheel>
+      <rear_left_wheel>rear_left_wheel_joint</rear_left_wheel>
+      <rear_right_wheel>rear_right_wheel_joint</rear_right_wheel>
+      <yaml_config>$(arg config_file)</yaml_config>
       <referenceFrame>map</referenceFrame>
       <robotFrame>base_footprint</robotFrame>
       <publishTransform>$(arg publish_tf)</publishTransform>
-      <odometryTopicName>/ground_truth/odom</odometryTopicName>
       <stateTopicName>/ground_truth/state</stateTopicName>
+      <wheelSpeedsTopicName>/ros_can/wheel_speeds</wheelSpeedsTopicName>
+      <odometryTopicName>/ground_truth/odom</odometryTopicName>
       <positionNoise>0.0 0.0 0.0</positionNoise>
       <orientationNoise>0.0 0.0 0.0</orientationNoise>
       <linearVelocityNoise>0.0 0.0 0.0</linearVelocityNoise>

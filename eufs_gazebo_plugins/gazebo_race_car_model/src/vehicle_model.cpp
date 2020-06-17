@@ -240,9 +240,12 @@ void VehicleModel::initModel(sdf::ElementPtr &_sdf) {
 }
 
 void VehicleModel::initVehicleParam(sdf::ElementPtr &_sdf) {
-  std::string yaml_name = "config.yaml";
+  std::string yaml_name = "";
 
-  if (_sdf->HasElement("yaml_config")) {
+  if (!_sdf->HasElement("yaml_config")) {
+    ROS_FATAL_NAMED("gazebo_ros_race_car_model", "gazebo_ros_race_car_model plugin missing <yaml_config>, cannot proceed");
+    return;
+  } else {
     yaml_name = _sdf->GetElement("yaml_config")->Get<std::string>();
   }
 
