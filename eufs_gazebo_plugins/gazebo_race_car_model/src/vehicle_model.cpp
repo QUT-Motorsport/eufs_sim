@@ -128,9 +128,6 @@ void VehicleModel::initParam(sdf::ElementPtr &_sdf) {
     ROS_FATAL_NAMED("state_ground_truth", "orientationNoise parameter vector is not of size 3");
   }
 
-  // convert orientation to quaternion
-  this->orientation_quat_noise_ = this->ToQuaternion(this->orientation_noise_);
-
   if (!_sdf->HasElement("linearVelocityNoise")) {
     ROS_DEBUG_NAMED("state_ground_truth",
                     "state_ground_truth plugin missing <linearVelocityNoise>, defaults to 0.0, 0.0, 0.0");
@@ -182,10 +179,10 @@ std::vector<double> VehicleModel::ToQuaternion(std::vector<double> &euler) {
 
   std::vector<double> q;
   q.reserve(4);
-  q[0] = cy * cp * cr + sy * sp * sr;
-  q[1] = cy * cp * sr - sy * sp * cr;
-  q[2] = sy * cp * sr + cy * sp * cr;
-  q[3] = sy * cp * cr - cy * sp * sr;
+  q[0] = cy * cp * sr - sy * sp * cr; // x
+  q[1] = sy * cp * sr + cy * sp * cr; // y
+  q[2] = sy * cp * cr - cy * sp * sr; // z
+  q[3] = cy * cp * cr + sy * sp * sr; // w
 
   return q;
 }
@@ -198,15 +195,23 @@ void VehicleModel::setPositionFromWorld() {
   const auto accel = model->WorldLinearAccel();
   const auto r     = model->WorldAngularVel();
 #else
-  auto       pos   = model->GetWorldPose().Ign();
+  const auto pos   = model->GetWorldPose().Ign();
   const auto vel   = model->GetWorldLinearVel().Ign();
   const auto accel = model->GetWorldLinearAccel().Ign();
   const auto r     = model->GetWorldAngularVel().Ign();
 #endif
 
-  state_.x   = pos.Pos().X();
-  state_.y   = pos.Pos().Y();
-  state_.yaw = pos.Rot().Yaw();
+  offset_ = pos;
+
+  ROS_DEBUG_NAMED("gazebo_race_car_model",
+                  "Got starting offset %f %f %f",
+                  this->offset_.Pos()[0],
+                  this->offset_.Pos()[1],
+                  this->offset_.Pos()[2]);
+
+  state_.x   = 0.0;
+  state_.y   = 0.0;
+  state_.yaw = 0.0;
   state_.v_x = 0.0;
   state_.v_y = 0.0;
   state_.r   = 0.0;
@@ -284,9 +289,13 @@ void VehicleModel::setModelState() {
 #else
   double z = model->GetWorldPose().Ign().Pos().Z();
 #endif
-  const ignition::math::Pose3d   pose(state_.x, state_.y, z, 0, 0.0, state_.yaw);
-  const ignition::math::Vector3d vel(state_.v_x * cos(state_.yaw) - state_.v_y * sin(state_.yaw), state_.v_x * sin (state_.yaw) + state_.v_y * cos(state_.yaw), 0.0);
+
+  double yaw = state_.yaw + offset_.Rot().Yaw();
+
+  const ignition::math::Pose3d   pose(state_.x + offset_.Pos().X(), state_.y + offset_.Pos().Y(), z, 0, 0.0, yaw);
+  const ignition::math::Vector3d vel(state_.v_x * cos(yaw) - state_.v_y * sin(yaw), state_.v_x * sin (yaw) + state_.v_y * cos(yaw), 0.0);
   const ignition::math::Vector3d angular(0.0, 0.0, state_.r);
+
   model->SetWorldPose(pose);
   model->SetAngularVel(angular);
   model->SetLinearVel(vel);
@@ -297,7 +306,7 @@ void VehicleModel::publishCarState() {
   eufs_msgs::CarState car_state;
   car_state.header.stamp = ros::Time::now();
 
-  car_state.child_frame_id = "base_footprint";
+  car_state.child_frame_id = this->reference_frame_;
 
 #if GAZEBO_MAJOR_VERSION >= 8
   double z = model->WorldPose().Pos().Z();
@@ -308,13 +317,18 @@ void VehicleModel::publishCarState() {
   car_state.pose.pose.position.y = this->state_.y + this->GaussianKernel(0, this->position_noise_[1]);
   car_state.pose.pose.position.z = z + this->GaussianKernel(0, this->position_noise_[2]);
 
-  std::vector<double> orientation = {0.0, 0.0, state_.yaw};
+  std::vector<double> orientation = {state_.yaw, 0.0, 0.0};
+
+  orientation[0] += this->GaussianKernel(0, this->orientation_noise_[0]);
+  orientation[1] += this->GaussianKernel(0, this->orientation_noise_[1]);
+  orientation[2] += this->GaussianKernel(0, this->orientation_noise_[2]);
+
   orientation = this->ToQuaternion(orientation);
 
-  car_state.pose.pose.orientation.x = orientation[0] + this->GaussianKernel(0, this->orientation_noise_[0]);
-  car_state.pose.pose.orientation.y = orientation[1] + this->GaussianKernel(0, this->orientation_noise_[1]);
-  car_state.pose.pose.orientation.z = orientation[2] + this->GaussianKernel(0, this->orientation_noise_[2]);
-  car_state.pose.pose.orientation.w = orientation[3] + this->GaussianKernel(0, this->orientation_noise_[3]);
+  car_state.pose.pose.orientation.x = orientation[0];
+  car_state.pose.pose.orientation.y = orientation[1];
+  car_state.pose.pose.orientation.z = orientation[2];
+  car_state.pose.pose.orientation.w = orientation[3];
 
   car_state.twist.twist.linear.x = state_.v_x + this->GaussianKernel(0, this->linear_velocity_noise_[0]);
   car_state.twist.twist.linear.y = state_.v_y + this->GaussianKernel(0, this->linear_velocity_noise_[1]);
@@ -327,7 +341,7 @@ void VehicleModel::publishCarState() {
   car_state.pose.covariance[0] = pow(this->position_noise_[0], 2);
   car_state.pose.covariance[7] = pow(this->position_noise_[1], 2);
   car_state.pose.covariance[14] = pow(this->position_noise_[2], 2);
-  car_state.pose.covariance[21] = pow(this->orientation_noise_[1], 2);
+  car_state.pose.covariance[21] = pow(this->orientation_noise_[0], 2);
   car_state.pose.covariance[28] = pow(this->orientation_noise_[1], 2);
   car_state.pose.covariance[35] = pow(this->orientation_noise_[2], 2);
 
@@ -423,7 +437,7 @@ void VehicleModel::publishOdom() {
 
   odom.header.stamp = ros::Time::now();
 
-  odom.child_frame_id = "base_footprint";
+  odom.child_frame_id = this->reference_frame_;
 
 #if GAZEBO_MAJOR_VERSION >= 8
   double z = model->WorldPose().Pos().Z();
@@ -435,13 +449,18 @@ void VehicleModel::publishOdom() {
   odom.pose.pose.position.y = this->state_.y + this->GaussianKernel(0, this->position_noise_[1]);
   odom.pose.pose.position.z = z + this->GaussianKernel(0, this->position_noise_[2]);
 
-  std::vector<double> orientation = {0.0, 0.0, state_.yaw};
+  std::vector<double> orientation = {state_.yaw, 0.0, 0.0};
+
+  orientation[0] += this->GaussianKernel(0, this->orientation_noise_[0]);
+  orientation[1] += this->GaussianKernel(0, this->orientation_noise_[1]);
+  orientation[2] += this->GaussianKernel(0, this->orientation_noise_[2]);
+
   orientation = this->ToQuaternion(orientation);
 
-  odom.pose.pose.orientation.x = orientation[0] + this->GaussianKernel(0, this->orientation_noise_[0]);
-  odom.pose.pose.orientation.y = orientation[1] + this->GaussianKernel(0, this->orientation_noise_[1]);
-  odom.pose.pose.orientation.z = orientation[2] + this->GaussianKernel(0, this->orientation_noise_[2]);
-  odom.pose.pose.orientation.w = orientation[3] + this->GaussianKernel(0, this->orientation_noise_[3]);
+  odom.pose.pose.orientation.x = orientation[0];
+  odom.pose.pose.orientation.y = orientation[1];
+  odom.pose.pose.orientation.z = orientation[2];
+  odom.pose.pose.orientation.w = orientation[3];
 
   odom.twist.twist.linear.x = state_.v_x + this->GaussianKernel(0, this->linear_velocity_noise_[0]);
   odom.twist.twist.linear.y = state_.v_y + this->GaussianKernel(0, this->linear_velocity_noise_[1]);
@@ -454,7 +473,7 @@ void VehicleModel::publishOdom() {
   odom.pose.covariance[0] = pow(this->position_noise_[0], 2);
   odom.pose.covariance[7] = pow(this->position_noise_[1], 2);
   odom.pose.covariance[14] = pow(this->position_noise_[2], 2);
-  odom.pose.covariance[21] = pow(this->orientation_noise_[1], 2);
+  odom.pose.covariance[21] = pow(this->orientation_noise_[0], 2);
   odom.pose.covariance[28] = pow(this->orientation_noise_[1], 2);
   odom.pose.covariance[35] = pow(this->orientation_noise_[2], 2);
 

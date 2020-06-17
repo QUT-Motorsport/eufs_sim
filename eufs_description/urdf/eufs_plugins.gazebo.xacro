@@ -28,9 +28,9 @@
       <wheelSpeedsTopicName>/ros_can/wheel_speeds</wheelSpeedsTopicName>
       <odometryTopicName>/ground_truth/odom</odometryTopicName>
       <positionNoise>0.0 0.0 0.0</positionNoise>
-      <orientationNoise>0.0 0.0 0.0</orientationNoise>
+      <orientationNoise>0.0 0.0 0.0</orientationNoise> <!-- Yaw Pitch Roll -->
       <linearVelocityNoise>0.0 0.0 0.0</linearVelocityNoise>
-      <angularVelocityNoise>0.0 0.0 0.0</angularVelocityNoise>
+      <angularVelocityNoise>0.0 0.0 0.0</angularVelocityNoise>  <!-- X Y Z -->
       <linearAccelerationNoise>0.0 0.0 0.0</linearAccelerationNoise>
     </plugin>
   </gazebo>

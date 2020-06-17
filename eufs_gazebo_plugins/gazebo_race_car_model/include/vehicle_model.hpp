@@ -66,6 +66,7 @@ public:
 
 protected:
   void setPositionFromWorld();
+  ignition::math::Pose3d offset_;
 
   void initParam(sdf::ElementPtr &_sdf);
 
@@ -125,7 +126,6 @@ protected:
 
   std::vector<double> position_noise_;
   std::vector<double> orientation_noise_;
-  std::vector<double> orientation_quat_noise_;
   std::vector<double> linear_velocity_noise_;
   std::vector<double> angular_velocity_noise_;
   std::vector<double> linear_acceleration_noise_;
