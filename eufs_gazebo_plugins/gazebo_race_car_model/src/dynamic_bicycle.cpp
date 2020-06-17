@@ -29,9 +29,9 @@
 namespace gazebo {
 namespace eufs {
 
-class FssimModel: public VehicleModel {
+class DynamicBicycle: public VehicleModel {
 public:
-  FssimModel(physics::ModelPtr &_model,
+  DynamicBicycle(physics::ModelPtr &_model,
                    sdf::ElementPtr &_sdf,
                    boost::shared_ptr<ros::NodeHandle> &nh,
                    transport::NodePtr &gznode)

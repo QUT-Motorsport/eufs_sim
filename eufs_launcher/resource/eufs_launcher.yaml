@@ -8,7 +8,7 @@ eufs_launcher:
     base_track: "small_track.launch"
 
     # Default vehicle model to be selected in the launcher drop-down menu
-    default_vehicle_model: "FssimModel"
+    default_vehicle_model: "DynamicBicycle"
 
     # percent of possible noise pixels being utilized
     object_noise_default: 0
