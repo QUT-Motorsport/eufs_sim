@@ -26,14 +26,14 @@
   <arg name="pitch" default="0.0"/>
   <arg name="yaw" default="0.0"/>
 
-  <!-- The name of the robot ({robot_name}.urdf.xacro and {robot_name}_config.yaml file in eufs_description/robots) -->
+  <!-- The name of the robot (must be directory in eufs_description/robots called {robot_name} with robot.urdf.xacro and config.yaml) -->
   <arg name="robot_name" default="eufs"/>
-  <arg name="config_file" default="$(find eufs_description)/robots/$(arg robot_name)_config.yaml"/>
+  <arg name="config_file" default="$(find eufs_description)/robots/$(arg robot_name)/config.yaml"/>
 
   <!-- Change the simulate_perception parameter based on the launch group -->
   <group if="$(eval arg('launch_group')=='no_perception')">
     <param name="robot_description"
-           command="$(find xacro)/xacro '$(find eufs_description)/robots/$(arg robot_name).urdf.xacro'
+           command="$(find xacro)/xacro '$(find eufs_description)/robots/$(arg robot_name)/robot.urdf.xacro'
                                                 robot_name:='$(arg robot_name)'
                                                 vehicle_model:='$(arg vehicleModel)'
                                                 config_file:='$(arg config_file)'
