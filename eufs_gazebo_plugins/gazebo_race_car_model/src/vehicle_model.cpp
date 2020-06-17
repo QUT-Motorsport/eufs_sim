@@ -52,7 +52,6 @@ VehicleModel::VehicleModel(physics::ModelPtr &_model,
 
   // ROS Subscribers
   this->sub_cmd_          = nh->subscribe("/cmd_vel_out", 1, &VehicleModel::onCmd, this);
-  this->sub_initial_pose_ = nh->subscribe("/initialpose", 1, &VehicleModel::onInitialPose, this);
 
   this->setPositionFromWorld();
 
@@ -287,16 +286,22 @@ void VehicleModel::update(const double dt) {
 void VehicleModel::updateState(State& state, Input& input, const double dt) {}
 
 void VehicleModel::setModelState() {
+  double yaw = state_.yaw + offset_.Rot().Yaw();
+
+  double x = offset_.Pos().X() + state_.x * cos(offset_.Rot().Yaw()) - state_.y * sin(offset_.Rot().Yaw());
+  double y = offset_.Pos().Y() + state_.x * sin(offset_.Rot().Yaw()) + state_.y * cos(offset_.Rot().Yaw());
+
 #if GAZEBO_MAJOR_VERSION >= 8
   double z = model->WorldPose().Pos().Z();
 #else
   double z = model->GetWorldPose().Ign().Pos().Z();
 #endif
 
-  double yaw = state_.yaw + offset_.Rot().Yaw();
+  double vx = state_.v_x * cos(yaw) - state_.v_y * sin(yaw);
+  double vy = state_.v_x * sin(yaw) + state_.v_y * cos(yaw);
 
-  const ignition::math::Pose3d   pose(state_.x + offset_.Pos().X(), state_.y + offset_.Pos().Y(), z, 0, 0.0, yaw);
-  const ignition::math::Vector3d vel(state_.v_x * cos(yaw) - state_.v_y * sin(yaw), state_.v_x * sin (yaw) + state_.v_y * cos(yaw), 0.0);
+  const ignition::math::Pose3d   pose(x, y, z, 0, 0.0, yaw);
+  const ignition::math::Vector3d vel(vx, vy, 0.0);
   const ignition::math::Vector3d angular(0.0, 0.0, state_.r);
 
   model->SetWorldPose(pose);
@@ -518,13 +523,6 @@ void VehicleModel::onCmd(const ackermann_msgs::AckermannDriveStampedConstPtr &ms
   input_.validate(param_);
 
   time_last_cmd_ = ros::Time::now().toSec();
-}
-
-void VehicleModel::onInitialPose(const geometry_msgs::PoseWithCovarianceStamped &msg) {
-  state_.x   = msg.pose.pose.position.x;
-  state_.y   = msg.pose.pose.position.y;
-  state_.yaw = tf::getYaw(msg.pose.pose.orientation);
-  state_.v_x = state_.v_y = state_.r = state_.a_x = state_.a_y = 0.0;
 }
 
 double VehicleModel::GaussianKernel(double mu, double sigma) {

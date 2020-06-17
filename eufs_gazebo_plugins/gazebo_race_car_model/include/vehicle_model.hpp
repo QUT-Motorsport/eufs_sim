@@ -90,8 +90,6 @@ protected:
 
   void onCmd(const ackermann_msgs::AckermannDriveStampedConstPtr &msg);
 
-  void onInitialPose(const geometry_msgs::PoseWithCovarianceStamped &msg);
-
   State &getState() { return state_; }
 
   Input &getInput() { return input_; }
@@ -118,7 +116,6 @@ protected:
 
   // ROS Subscribers
   ros::Subscriber sub_cmd_;
-  ros::Subscriber sub_initial_pose_;
 
   bool publish_tf_;
   std::string reference_frame_;
