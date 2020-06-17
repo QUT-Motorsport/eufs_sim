@@ -1,7 +1,5 @@
 # Put things in here to remove them from the launcher
 blacklist.txt
-actually_load_car_torque.launch
-load_car_torque.launch
 load_car.launch
 sprint17.launch
 sbg_raw_data_simulator.launch

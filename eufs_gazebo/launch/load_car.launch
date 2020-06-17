@@ -10,9 +10,6 @@
   <!-- Show the RQT GUI (with ros_can_sim GUI and EUFS Robot Steering GUI) -->
   <arg name="show_rqt_gui" default="true"/>
 
-  <!-- Control Method Argument -->
-  <arg name="controlMethod" default="speed"/>
-
   <!-- The vehicle model class to use in the gazebo_ros_race_car_model -->
   <arg name="vehicleModel" default="DynamicBicycle"/>
   <!-- If the gazebo_ros_race_car_model should publish the ground truth tf -->

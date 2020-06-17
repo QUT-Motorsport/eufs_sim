@@ -149,7 +149,7 @@
   </widget>
 
   <!--Radio Buttons-->
-  <!--To toggle between torque and speed controls.-->
+  <!--To toggle between acceleration and speed controls.-->
   <!--If you add a new buttonGroup, don't forget to add it to the bottom of the file.-->
   <widget class="QLabel" name="ControlLabel">
     <property name="geometry">
@@ -190,11 +190,8 @@
     <property name="text">
       <string>Speed</string>
     </property>
-    <property name="checked">
-      <bool>true</bool>
-    </property>
     <attribute name="buttonGroup">
-      <string>SpeedOrTorque</string>
+      <string>SpeedOrAcceleration</string>
     </attribute>
      <property name="font">
        <font>
@@ -202,7 +199,7 @@
        </font>
    </property>
   </widget>
-  <widget class="QRadioButton" name="TorqueRadio">
+  <widget class="QRadioButton" name="AccelerationRadio">
     <property name="geometry">
       <rect>
         <x>50</x>
@@ -218,10 +215,13 @@
       </size>
     </property>
     <property name="text">
-      <string>Torque (Experimental!)</string>
+      <string>Acceleration</string>
+    </property>
+    <property name="checked">
+      <bool>true</bool>
     </property>
     <attribute name="buttonGroup">
-      <string>SpeedOrTorque</string>
+      <string>SpeedOrAcceleration</string>
     </attribute>
     <property name="font">
        <font>
@@ -1195,6 +1195,6 @@
 <resources/>
 <connections/>
 <buttongroups>
- <buttongroup name="SpeedOrTorque"/>
+ <buttongroup name="SpeedOrAcceleration"/>
 </buttongroups>
 </ui>

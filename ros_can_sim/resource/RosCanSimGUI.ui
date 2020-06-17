@@ -230,6 +230,6 @@
   <resources/>
   <connections/>
   <buttongroups>
-    <buttongroup name="SpeedOrTorque"/>
+    <buttongroup name="SpeedOrAcceleration"/>
   </buttongroups>
 </ui>
