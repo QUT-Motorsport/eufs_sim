@@ -312,9 +312,10 @@ void VehicleModel::setModelState() {
 void VehicleModel::publishCarState() {
   // Publish Car Info
   eufs_msgs::CarState car_state;
-  car_state.header.stamp = ros::Time::now();
 
-  car_state.child_frame_id = this->reference_frame_;
+  car_state.header.stamp = ros::Time::now();
+  car_state.header.frame_id = this->reference_frame_;
+  car_state.child_frame_id = this->robot_frame_;
 
 #if GAZEBO_MAJOR_VERSION >= 8
   double z = model->WorldPose().Pos().Z();
@@ -441,7 +442,8 @@ void VehicleModel::publishOdom() {
 
   odom.header.stamp = ros::Time::now();
 
-  odom.child_frame_id = this->reference_frame_;
+  odom.header.frame_id = this->reference_frame_;
+  odom.child_frame_id = this->robot_frame_;
 
 #if GAZEBO_MAJOR_VERSION >= 8
   double z = model->WorldPose().Pos().Z();
