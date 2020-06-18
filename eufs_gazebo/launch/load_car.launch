@@ -47,9 +47,12 @@
                                                 simulate_perception:=false"/>   <!-- Should NOT simulate perception if NOT in no_perception launch group -->
   </group>
 
+  <!-- Publish the joint states (required for the wheels) -->
+  <node name="joint_state_publisher" pkg="joint_state_publisher" type="joint_state_publisher">
+    <remap from="/joint_states" to="/eufs/joint_states" />
+  </node>
 
-  <!-- once the joint_state is published, run the robot_state_publisher, the namespace has to be adapted -->
-  <!-- convert joint states to TF transforms for rviz, etc -->
+  <!-- Convert joint states to TF transforms for rviz, etc -->
   <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher"
         respawn="false" output="screen">
     <remap from="/joint_states" to="/eufs/joint_states" />

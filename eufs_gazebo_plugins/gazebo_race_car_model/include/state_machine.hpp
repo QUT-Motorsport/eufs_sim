@@ -77,7 +77,6 @@ private:
 
     bool driving_flag_; ///< mission flag as per ADS-DV specs
 
-    // Joint states published by the joint_state_controller of the Controller Manager
     ros::Subscriber set_mission_sub_;
 
     // High level robot command
