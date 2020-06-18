@@ -50,12 +50,14 @@
   <!-- Publish the joint states (required for the wheels) -->
   <node name="joint_state_publisher" pkg="joint_state_publisher" type="joint_state_publisher">
     <remap from="/joint_states" to="/eufs/joint_states" />
+    <param name="rate" value="200" />
   </node>
 
   <!-- Convert joint states to TF transforms for rviz, etc -->
   <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher"
         respawn="false" output="screen">
     <remap from="/joint_states" to="/eufs/joint_states" />
+    <param name="rate" value="200" />
   </node>
 
   <node name="spawn_platform" pkg="gazebo_ros" type="spawn_model" args="-urdf -param robot_description -model $(arg namespace)
