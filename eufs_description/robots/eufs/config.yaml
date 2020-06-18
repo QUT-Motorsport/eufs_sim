@@ -1,13 +1,13 @@
 inertia:
-  m:        190.0   # Weight of the Vehicle [kg]
+  m:        225     # Weight of the Vehicle [kg]
   g:        9.81    # Gravity force         [m/s^2]
-  I_z:      110     # Inertial force I_zz
+  I_z:      31.27   # Inertial force I_zz
 
 kinematics:
-  l: 1.53           # Vehicle Length [m]
-  b_F: 1.22         # From COG to front axle [m]
-  b_R: 1.22         # From COG to rear axle [m]
-  w_front: 0.5      # Percentage of weight front
+  l: 2.780          # Vehicle Length [m]
+  b_F: 0.869        # From COG to front axle [m]
+  b_R: 0.711        # From COG to rear axle [m]
+  w_front: 0.45     # Percentage of weight front
 
 tire:
   tire_coefficient: 1.0
