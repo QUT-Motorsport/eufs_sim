@@ -15,6 +15,7 @@ Also provides ground truth state in the form of `nav_msgs/Odometry` and
 
 | Name | Type | Default | Purpose |
 | ----- | ---- |  ------ | ------- |
+| `update_rate`                | string    | `200`              | The update rate of the vehicle model. |
 | `vehicle_model`              | string    | `DynamicBicyle`    | The vehicle model class to use for the race car. |
 | `front_left_wheel_steering`  | string    |                    | Required parameter. The name of the front left  steering wheel joint. |
 | `front_right_wheel`          | string    |                    | Required parameter. The name of the front right steering wheel joint. |
@@ -42,6 +43,7 @@ This has to be inserted inside a robot URDF
 ```xml
   <gazebo>
     <plugin name="race_car" filename="libgazebo_race_car_model.so">
+      <update_rate>200.0</update_rate>
       <vehicle_model>$(arg vehicle_model)</vehicle_model>
       <front_left_wheel_steering>left_steering_hinge_joint</front_left_wheel_steering>
       <front_right_wheel_steering>right_steering_hinge_joint</front_right_wheel_steering>

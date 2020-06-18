@@ -65,6 +65,8 @@ private:
 
   bool isLoopTime(const common::Time &time, double &dt);
 
+  double update_rate_;
+
   event::ConnectionPtr updateConnection;
 
   eufs::VehicleModelPtr vehicle;

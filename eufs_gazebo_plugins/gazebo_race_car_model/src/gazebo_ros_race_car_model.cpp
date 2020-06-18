@@ -55,6 +55,7 @@ void RaceCarModelPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf) {
 
   this->gznode->Init();
 
+  // Get the vehicle model from the sdf
   std::string vehicle_model_ = "";
   if (!_sdf->HasElement("vehicle_model")) {
     vehicle_model_ = "DynamicBicycle";
@@ -73,6 +74,13 @@ void RaceCarModelPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf) {
       new eufs::VehicleModel(_model, _sdf, this->rosnode, this->gznode));
   }
   this->vehicle->printInfo();
+
+  // Get the update rate from the sdf
+  if (!_sdf->HasElement("update_rate")) {
+    this->update_rate_ = 200.0;
+  } else {
+    this->update_rate_ = _sdf->GetElement("update_rate")->Get<double>();
+  }
 
   this->updateConnection =
       event::Events::ConnectWorldUpdateBegin(std::bind(&RaceCarModelPlugin::update, this));
@@ -106,13 +114,7 @@ void RaceCarModelPlugin::update() {
 bool RaceCarModelPlugin::isLoopTime(const common::Time &time, double &dt) {
   dt = (time - this->lastSimTime).Double();
 
-  if (dt < 0.0) {
-    this->Reset();
-    return false;
-  } else if (ignition::math::equal(dt, 0.0)) {
-    return false;
-  }
-  return true;
+  return dt >= (1 / this->update_rate_);
 }
 
 GZ_REGISTER_MODEL_PLUGIN(RaceCarModelPlugin)

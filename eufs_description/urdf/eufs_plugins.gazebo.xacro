@@ -8,6 +8,7 @@
    and the steering angle of the wheels -->
   <gazebo>
     <plugin name="race_car" filename="libgazebo_race_car_model.so">
+      <update_rate>200.0</update_rate>
       <vehicle_model>$(arg vehicle_model)</vehicle_model>
       <front_left_wheel_steering>left_steering_hinge_joint</front_left_wheel_steering>
       <front_right_wheel_steering>right_steering_hinge_joint</front_right_wheel_steering>
