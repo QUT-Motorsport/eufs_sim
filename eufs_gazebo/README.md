@@ -27,7 +27,6 @@ cone output received from `cone_ground_truth.py`
 ## Launches
 
 - `acceleration.launch` - Launches a simulation of the acceleration event at competition. 50m straight track.
-- `big_track.launch` - Launches a simulation of a relatively big artificially created track (100x100m).
 - `empty.launch` - Launches a simulation which only has the car without anything else.
 - `skidpad.launch` - Launches a simulation of the skidpad event at competition. It's quite literally a figuire of 8.
 - `small_track.launch` - Launches a simulation of an artificially created small track. Better run this if you don't have a good performing computing.
