@@ -138,7 +138,7 @@ bool StateMachine::requestEBS(std_srvs::Trigger::Request& request, std_srvs::Tri
 
 void StateMachine::updateState()
 {
-    using std::chrono_literals::operator""s;
+    using namespace std::chrono_literals;
 
     switch (as_state_)
     {
