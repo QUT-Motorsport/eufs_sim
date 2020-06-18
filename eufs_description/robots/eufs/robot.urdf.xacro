@@ -61,7 +61,6 @@
     LIDAR: 1.700 0.0 -0.150
     STEREO CAM: -0.110 0.0 0.800 -->
 
-    <!--  TODO: Check the locations of these are correct  -->
     <xacro:sensor_imu parent="base_footprint" prefix="imu">
         <origin xyz="0.0 0.0 0.0" rpy="0 0 0"/>
     </xacro:sensor_imu>

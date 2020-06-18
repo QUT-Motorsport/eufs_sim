@@ -14,7 +14,6 @@
     <xacro:property name="wheel_diameter" value="0.505"/>
     <xacro:property name="wheel_width" value="0.2"/>
 
-    <!-- TODO: Check if a different value for these would result in the wheels turning better -->
     <xacro:property name="wheel_friction_mu1" value="2"/>
     <xacro:property name="wheel_friction_mu2" value="2"/>
     <xacro:property name="wheel_friction_kp" value="1e8"/>

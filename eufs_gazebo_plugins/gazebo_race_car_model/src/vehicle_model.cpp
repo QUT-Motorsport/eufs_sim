@@ -378,7 +378,6 @@ void VehicleModel::publishCarState() {
   }
 }
 
-// TODO: Are the equations for the slip angle here correct?
 double VehicleModel::getSlipAngle(bool isFront) {
   unsigned int id = 0;
 
@@ -393,10 +392,6 @@ double VehicleModel::getSlipAngle(bool isFront) {
                           rear_right_wheel->GetChild()->GetCollision(id)->GetWorldPose().Ign().Pos()).Length();
 #endif
 
-    // From Ignat
-    // return -std::atan2(state_.v_y - state_.r * lever_arm_length_, state_.v_x);
-
-    // From fssim
     double v_x = std::max(1.0, state_.v_x);
     return std::atan((state_.v_y - lever_arm_length_ * state_.r) / (v_x - 0.5 * axle_width_ * state_.r));
   }
@@ -409,10 +404,6 @@ double VehicleModel::getSlipAngle(bool isFront) {
                         front_right_wheel->GetChild()->GetCollision(id)->GetWorldPose().Ign().Pos()).Length();
 #endif
 
-  // From Ignat
-  // return input_.delta - std::atan2(state_.v_y + state_.r * lever_arm_length_, state_.v_x);
-
-  // From fssim
   double v_x = std::max(1.0, state_.v_x);
   return std::atan((state_.v_y + lever_arm_length_ * state_.r) / (v_x - 0.5 * axle_width_ * state_.r)) - input_.delta;
 }
@@ -422,7 +413,6 @@ void VehicleModel::publishWheelSpeeds() {
 
   wheel_speeds.steering = input_.delta;
 
-  // TODO: Should I change these to a different value to signify they are not used?
   wheel_speeds.lf_speed = 999;
   wheel_speeds.rf_speed = 999;
 
@@ -519,7 +509,7 @@ void VehicleModel::onCmd(const ackermann_msgs::AckermannDriveStampedConstPtr &ms
   } else {
     // TODO: Should  do something else to stop the car but is this good for now
     input_.delta = 0;
-    input_.acc    = -1;
+    input_.acc    = -100;
   }
 
   input_.validate(param_);
