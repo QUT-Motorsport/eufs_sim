@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <launch>
-  
+
   <!-- Gazebo arguments -->
   <env name="GAZEBO_MODEL_PATH" value="$(find eufs_description)"/>
   <env name="GAZEBO_RESOURCE_PATH" value="$(find eufs_description)"/>
@@ -55,5 +55,5 @@
     <arg name="publish_gt_tf" value="$(arg publish_gt_tf)"/>
     <arg name="launch_group" default="$(arg launch_group)"/>
   </include>
-  
+
 </launch>

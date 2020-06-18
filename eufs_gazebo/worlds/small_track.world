@@ -1,5 +1,5 @@
 <sdf version='1.6'>
-  <world name='default'>
+  <world name='small_track'>
     <gui fullscreen='0'>
       <camera name='user_camera'>
         <pose frame=''>-40 40 20 0 0.667643 -1</pose>

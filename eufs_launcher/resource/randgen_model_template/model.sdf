@@ -51,9 +51,9 @@ $===$
 $===$
       <covariance x="%XCOV%" y="%YCOV%" xy="%XYCOV%"/>
 $===$
-       <include>
-            <uri>%MODELNAME%</uri>
-            <pose>%PLACEX% %PLACEY% 0.15 0 0 0</pose>
-            <name>%LINKTYPE%_%LINKNUM%</name>
-            %FILLCOVARIANCE%
-        </include>
+    <include>
+      <pose>%PLACEX% %PLACEY% 0.15 0 0 0</pose>
+      <uri>%MODELNAME%</uri>
+      <name>%LINKTYPE%_%LINKNUM%</name>
+      %FILLCOVARIANCE%
+    </include>

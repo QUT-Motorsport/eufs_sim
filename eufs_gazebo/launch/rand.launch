@@ -30,7 +30,7 @@
   <arg name="roll" default="0.0"/>
   <arg name="pitch" default="0.0"/>
   <arg name="yaw" default="0.0"/>
-  
+
   <!-- Gazebo -->
   <include file="$(find gazebo_ros)/launch/empty_world.launch">
     <arg name="world_name" value="$(find eufs_gazebo)/worlds/rand.world"/>
