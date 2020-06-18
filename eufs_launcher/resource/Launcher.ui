@@ -148,101 +148,19 @@
    </property>
   </widget>
 
-  <!--Radio Buttons-->
-  <!--To toggle between acceleration and speed controls.-->
-  <!--If you add a new buttonGroup, don't forget to add it to the bottom of the file.-->
-  <widget class="QLabel" name="ControlLabel">
-    <property name="geometry">
-       <rect>
-         <x>60</x>
-         <y>290</y>
-         <width>100</width>
-         <height>30</height>
-       </rect>
-    </property>
-    <property name="text">
-      <string>Control Method:</string>
-    </property>
-    <property name="font">
-       <font>
-            <pointsize>9</pointsize>
-       </font>
-   </property>
-  </widget>
-  <widget class="QRadioButton" name="SpeedRadio">
-    <property name="geometry">
-      <rect>
-        <x>50</x>
-        <y>310</y>
-        <width>100</width>
-        <height>30</height>
-      </rect>
-    </property>
-    <property name="maximumSize">
-      <size>
-        <width>16777215</width>
-        <height>30</height>
-      </size>
-    </property>
-    <property name="layoutDirection">
-      <enum>Qt::LeftToRight</enum>
-    </property>
-    <property name="text">
-      <string>Speed</string>
-    </property>
-    <attribute name="buttonGroup">
-      <string>SpeedOrAcceleration</string>
-    </attribute>
-     <property name="font">
-       <font>
-            <pointsize>7</pointsize>
-       </font>
-   </property>
-  </widget>
-  <widget class="QRadioButton" name="AccelerationRadio">
-    <property name="geometry">
-      <rect>
-        <x>50</x>
-        <y>330</y>
-        <width>120</width>
-        <height>30</height>
-      </rect>
-    </property>
-    <property name="maximumSize">
-      <size>
-        <width>16777215</width>
-        <height>30</height>
-      </size>
-    </property>
-    <property name="text">
-      <string>Acceleration</string>
-    </property>
-    <property name="checked">
-      <bool>true</bool>
-    </property>
-    <attribute name="buttonGroup">
-      <string>SpeedOrAcceleration</string>
-    </attribute>
-    <property name="font">
-       <font>
-            <pointsize>7</pointsize>
-       </font>
-   </property>
-  </widget>
-
   <!--Drop-Down Box: Options added in code, impossible in a .ui file.-->
   <!--This handles vehicle model selection.-->
   <widget class="QLabel" name="VehicleModelLabel">
    <property name="geometry">
     <rect>
      <x>60</x>
-     <y>350</y>
+     <y>290</y>
      <width>100</width>
      <height>30</height>
     </rect>
    </property>
    <property name="text">
-    <string>Vehicle model: </string>
+    <string>Vehicle Model: </string>
    </property>
    <property name="font">
     <font>
@@ -254,7 +172,7 @@
    <property name="geometry">
     <rect>
      <x>50</x>
-     <y>375</y>
+     <y>315</y>
      <width>100</width>
      <height>30</height>
     </rect>
@@ -1194,7 +1112,4 @@
 </widget>
 <resources/>
 <connections/>
-<buttongroups>
- <buttongroup name="SpeedOrAcceleration"/>
-</buttongroups>
 </ui>

@@ -229,7 +229,4 @@
   </widget>
   <resources/>
   <connections/>
-  <buttongroups>
-    <buttongroup name="SpeedOrAcceleration"/>
-  </buttongroups>
 </ui>

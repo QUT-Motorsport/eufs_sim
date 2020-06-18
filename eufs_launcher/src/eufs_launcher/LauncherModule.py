@@ -129,8 +129,6 @@ class EufsLauncher(Plugin):
                 self.VEHICLE_MODEL_MENU = self._widget.findChild(QComboBox, "WhichVehicleModel")
                 self.CONE_NOISE_SLIDER = self._widget.findChild(QSlider, "ConeNoisiness")
                 self.COLOR_NOISE_SLIDER = self._widget.findChild(QSlider, "ConeColorNoisiness")
-                self.SPEED_RADIO = self._widget.findChild(QRadioButton, "SpeedRadio")
-                self.ACCELERATION_RADIO = self._widget.findChild(QRadioButton, "AccelerationRadio")
 
                 self.FILE_FOR_CONVERSION_BOX = self._widget.findChild(
                         QComboBox,
@@ -1062,21 +1060,12 @@ class EufsLauncher(Plugin):
                         conversion_suffix=""
                 )
 
-                # Get control information
-                control_method = "controlMethod:=acceleration"
-                if self.SPEED_RADIO.isChecked():
-                        self.tell_launchella("With Speed Controls")
-                        control_method = "controlMethod:=speed"
-                elif self.ACCELERATION_RADIO.isChecked():
-                        self.tell_launchella("With Acceleration Controls")
-                        control_method = "controlMethod:=acceleration"
-
                 # Get vehicle model information
                 self.tell_launchella("With " + self.VEHICLE_MODEL_MENU.currentText() + "Vehicle Model")
                 vehicle_model = "vehicleModel:=" + self.VEHICLE_MODEL_MENU.currentText()
 
                 # Get checkbox parameter information
-                parameters_to_pass = [control_method, "track:=" + track_to_launch.split(".")[0], vehicle_model]
+                parameters_to_pass = ["track:=" + track_to_launch.split(".")[0], vehicle_model]
                 for checkbox, param_if_on, param_if_off in self.checkbox_parameter_mapping:
                         if checkbox.isChecked():
                                 parameters_to_pass.extend(param_if_on)
