@@ -39,7 +39,7 @@
   </group>
   <group unless="$(eval arg('launch_group')=='no_perception')">
     <param name="robot_description"
-           command="$(find xacro)/xacro '$(find eufs_description)/robots/$(arg robot_name).urdf.xacro'
+           command="$(find xacro)/xacro '$(find eufs_description)/robots/$(arg robot_name)/robot.urdf.xacro'
                                                 robot_name:='$(arg robot_name)'
                                                 vehicle_model:='$(arg vehicleModel)'
                                                 config_file:='$(arg config_file)'

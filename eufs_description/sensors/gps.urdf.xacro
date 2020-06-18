@@ -16,19 +16,31 @@
             </inertial>
             <visual>
                 <origin rpy="0 0 0" xyz="0 0 0"/>
-                <material name="gps_color">
-                    <color rgba="1 1 1 1"/>
-                </material>
                 <geometry>
-                    <mesh filename="package://eufs_description/meshes/antenna_3GO16.stl" scale="1.0 1.0 1.0"/>
+                    <box size="0.001 0.001 0.001"/>
                 </geometry>
             </visual>
             <collision>
                 <origin rpy="0 0 0" xyz="0 0 0"/>
                 <geometry>
-                    <mesh filename="package://eufs_description/meshes/antenna_3GO16.stl" scale="1.0 1.0 1.0"/>
+                    <box size=".001 .001 .001"/>
                 </geometry>
             </collision>
+            <!--            <visual>-->
+<!--                <origin rpy="0 0 0" xyz="0 0 0"/>-->
+<!--                <material name="gps_color">-->
+<!--                    <color rgba="1 1 1 1"/>-->
+<!--                </material>-->
+<!--                <geometry>-->
+<!--                    <mesh filename="package://eufs_description/meshes/antenna_3GO16.stl" scale="1.0 1.0 1.0"/>-->
+<!--                </geometry>-->
+<!--            </visual>-->
+<!--            <collision>-->
+<!--                <origin rpy="0 0 0" xyz="0 0 0"/>-->
+<!--                <geometry>-->
+<!--                    <mesh filename="package://eufs_description/meshes/antenna_3GO16.stl" scale="1.0 1.0 1.0"/>-->
+<!--                </geometry>-->
+<!--            </collision>-->
         </link>
         <gazebo reference="${prefix}_base_link">
             <material>Gazebo/White</material>
