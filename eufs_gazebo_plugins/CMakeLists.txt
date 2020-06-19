@@ -1,11 +1,9 @@
-cmake_minimum_required(VERSION 2.8.3)
+cmake_minimum_required(VERSION 3.5)
 project(eufs_gazebo_plugins)
 
 add_compile_options(-std=c++11)
 
 find_package(catkin REQUIRED COMPONENTS
-        gazebo_dev
-        message_generation
         gazebo_msgs
         roscpp
         nodelet
@@ -24,7 +22,6 @@ catkin_package(
         INCLUDE_DIRS gazebo_cone_ground_truth/include
         LIBRARIES gazebo_state_ground_truth
         CATKIN_DEPENDS
-        message_runtime
         gazebo_msgs
         roscpp
         nodelet

@@ -10,7 +10,6 @@
 
     <buildtool_depend>catkin</buildtool_depend>
 
-    <depend>gazebo_dev</depend>
     <depend>gazebo_msgs</depend>
     <depend>gazebo_plugins</depend>
     <depend>geometry_msgs</depend>
@@ -21,9 +20,7 @@
     <depend>ackermann_msgs</depend>
     <depend>tf2_ros</depend>
     <depend>tf</depend>
-    <depend>std_msgs</depend>
 
-    <build_depend>message_generation</build_depend>
     <exec_depend>message_runtime</exec_depend>
 
     <test_depend>rostest</test_depend>
