@@ -9,6 +9,8 @@
 
   <!-- Show the RQT GUI (with ros_can_sim GUI and EUFS Robot Steering GUI) -->
   <arg name="show_rqt_gui" default="true"/>
+  <!-- Launch RViz -->
+  <arg name="rviz" default="rviz"/>
 
   <!-- The vehicle model class to use in the gazebo_ros_race_car_model -->
   <arg name="vehicleModel" default="DynamicBicycle"/>
@@ -66,7 +68,12 @@
               -R $(arg roll) -P $(arg pitch) -Y $(arg yaw)"/>
 
   <group if="$(eval arg('show_rqt_gui'))">
-    <!-- start rqt robot steering module -->
+    <!-- Launch RViz -->
+    <node name="rviz" pkg="rviz" type="rviz"/>
+  </group>
+
+  <group if="$(eval arg('show_rqt_gui'))">
+    <!-- Start rqt robot steering and ros can sim module -->
     <node name="eufs_sim_rqt" pkg="rqt_gui" type="rqt_gui" respawn="false" output="screen" args="--perspective-file $(find eufs_gazebo)/config/eufs_sim.perspective"/>
   </group>
 

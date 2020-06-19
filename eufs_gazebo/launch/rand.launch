@@ -14,13 +14,15 @@
   <arg name="launch_group" default="default"/>
 
   <!-- Launch the Gazebo GUI -->
-  <arg name="gui" default="true"/>
+  <arg name="gazebo_gui" default="true"/>
   <!-- Show the RQT GUI (with ros_can_sim GUI and EUFS Robot Steering GUI) -->
   <arg name="show_rqt_gui" default="true"/>
+  <!-- Launch RViz -->
+  <arg name="rviz" default="rviz"/>
 
-  <!-- The vehicle model class to use in the gazebo_ros_race_car_model -->
+  <!-- The vehicle model class -->
   <arg name="vehicleModel" default="DynamicBicycle"/>
-  <!-- If the gazebo_ros_race_car_model should publish the ground truth tf -->
+  <!-- Publish the ground truth tf -->
   <arg name="publish_gt_tf" default="false"/>
 
   <!-- Initial vehicle pose -->
@@ -35,7 +37,7 @@
   <include file="$(find gazebo_ros)/launch/empty_world.launch">
     <arg name="world_name" value="$(find eufs_gazebo)/worlds/rand.world"/>
     <arg name="debug" value="$(arg debug)"/>
-    <arg name="gui" value="$(arg gui)"/>
+    <arg name="gui" value="$(arg gazebo_gui)"/>
     <arg name="paused" value="false"/>
     <arg name="use_sim_time" value="true"/>
     <arg name="headless" value="false"/>
@@ -52,6 +54,7 @@
     <arg name="yaw" default="$(arg yaw)"/>
     <arg name="vehicleModel" default="$(arg vehicleModel)"/>
     <arg name="show_rqt_gui" default="$(arg show_rqt_gui)"/>
+    <arg name="rviz" default="$(arg rviz)"/>
     <arg name="publish_gt_tf" value="$(arg publish_gt_tf)"/>
     <arg name="launch_group" default="$(arg launch_group)"/>
   </include>

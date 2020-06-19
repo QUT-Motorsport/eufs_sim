@@ -32,14 +32,14 @@ eufs_launcher:
     # Checkboxes to have in the config section.  
     # `eufs_launcher` handles layout based on priority set.
     checkboxes:
-        visualisator:
+        rviz:
             priority: 1
-            name: "Visualisator_Checkbox"
-            label: "LIDAR Visualisator"
-            package: "eufs_description"
-            location: "launch/visualisator.launch"
-            args: {}
-            checked_on_default: No
+            name: "RViz_Checkbox"
+            label: "RViz"
+            checked_on_default: Yes
+            parameter_triggering:
+                if_on: {"rviz:=true"}
+                if_off: {"rviz:=false"}
             
         perception:
             priority: 2
@@ -51,7 +51,7 @@ eufs_launcher:
             # No real perception!  In which case we use the simulated perception.
                 if_on: {"launch_group:=no_perception"}
                 if_off: {}
-            
+
         gazebo_gui:
             priority: 3
             name: "Gazebo_GUI_Checkbox"
@@ -60,7 +60,7 @@ eufs_launcher:
             parameter_triggering:
                 if_on: {"gui:=true"}
                 if_off: {"gui:=false"}
-            
+
         ground_truth_transform:
             priority: 4
             name: "Ground_Truth_Transform"
