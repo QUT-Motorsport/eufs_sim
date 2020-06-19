@@ -4,7 +4,7 @@ inertia:
   I_z:      31.27   # Inertial force I_zz   [kg/m^2]
 
 kinematics:
-  l: 2.780          # Vehicle Length         [m]
+  l: 1.58           # Wheelbase              [m]
   b_F: 0.869        # From COG to front axle [m]
   b_R: 0.711        # From COG to rear axle  [m]
   w_front: 0.45     # Percentage of weight front
