@@ -58,8 +58,8 @@ eufs_launcher:
             label: "Gazebo GUI"
             checked_on_default: No
             parameter_triggering:
-                if_on: {"gui:=true"}
-                if_off: {"gui:=false"}
+                if_on: {"gazebo_gui:=true"}
+                if_off: {"gazebo_gui:=false"}
 
         ground_truth_transform:
             priority: 4
