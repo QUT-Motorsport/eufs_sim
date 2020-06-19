@@ -94,4 +94,3 @@ roslaunch ros_can_sim rqt_ros_can_sim.launch
 - **If you need to rapidly re-launch** the gui it is important that you wait a few seconds (5 should be more than enough).
 If you try and do it rapidly then you may cause the gui to launch gazebo while gazebo is still shutting itself down.  This will
 crash the program and won't give a satisfactory error message (it will say that it put errors in the log files, but the log files do not exist). More information can be found in the README in eufs_launcher
-- **Torque controlled** car model is still experimental and should not be used unless you know what you are doing!

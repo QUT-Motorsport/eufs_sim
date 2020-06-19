@@ -126,10 +126,9 @@ class EufsLauncher(Plugin):
                 self.RENAME_FILE_TEXTBOX = self._widget.findChild(QLineEdit, "RenameFileTextbox")
                 self.RENAME_FILE_HEADER = self._widget.findChild(QLabel, "RenameFileHeader")
                 self.NOISE_SLIDER = self._widget.findChild(QSlider, "Noisiness")
+                self.VEHICLE_MODEL_MENU = self._widget.findChild(QComboBox, "WhichVehicleModel")
                 self.CONE_NOISE_SLIDER = self._widget.findChild(QSlider, "ConeNoisiness")
                 self.COLOR_NOISE_SLIDER = self._widget.findChild(QSlider, "ConeColorNoisiness")
-                self.SPEED_RADIO = self._widget.findChild(QRadioButton, "SpeedRadio")
-                self.TORQUE_RADIO = self._widget.findChild(QRadioButton, "TorqueRadio")
 
                 self.FILE_FOR_CONVERSION_BOX = self._widget.findChild(
                         QComboBox,
@@ -220,6 +219,25 @@ class EufsLauncher(Plugin):
 
                 # Setup Lax Generation button
                 self.LAX_CHECKBOX.setChecked(self.LAX_GENERATION)
+
+                # Setup Vehicle Models menu
+                # Clear the dropdowns
+                self.VEHICLE_MODEL_MENU.clear()
+
+                # Remove "blacklisted" files (ones that don't define vehicle models)
+                models_filepath = os.path.join(
+                        rospkg.RosPack().get_path('eufs_gazebo_plugins'),
+                        'gazebo_race_car_model/src/models/models.txt'
+                )
+                vehicle_models_ = open(models_filepath, "r")
+                vehicle_models = [model.strip() for model in vehicle_models_]  # remove \n
+
+                default_model = self.default_config["eufs_launcher"]["default_vehicle_model"]
+                if default_model in vehicle_models:
+                        self.VEHICLE_MODEL_MENU.addItem(default_model)
+                for model in vehicle_models:
+                        if model != default_model:
+                                self.VEHICLE_MODEL_MENU.addItem(model)
 
                 # Setup Conversion Tools dropdowns
                 for f in ["launch", "png", "csv"]:
@@ -1042,17 +1060,12 @@ class EufsLauncher(Plugin):
                         conversion_suffix=""
                 )
 
-                # Get control information
-                control_method = "controlMethod:=speed"
-                if self.SPEED_RADIO.isChecked():
-                        self.tell_launchella("With Speed Controls")
-                        control_method = "controlMethod:=speed"
-                elif self.TORQUE_RADIO.isChecked():
-                        self.tell_launchella("With Torque Controls")
-                        control_method = "controlMethod:=torque"
+                # Get vehicle model information
+                self.tell_launchella("With " + self.VEHICLE_MODEL_MENU.currentText() + "Vehicle Model")
+                vehicle_model = "vehicleModel:=" + self.VEHICLE_MODEL_MENU.currentText()
 
                 # Get checkbox parameter information
-                parameters_to_pass = [control_method, "track:=" + track_to_launch.split(".")[0]]
+                parameters_to_pass = ["track:=" + track_to_launch.split(".")[0], vehicle_model]
                 for checkbox, param_if_on, param_if_off in self.checkbox_parameter_mapping:
                         if checkbox.isChecked():
                                 parameters_to_pass.extend(param_if_on)
@@ -1172,7 +1185,7 @@ class EufsLauncher(Plugin):
                 """Unregister all publishers, kill all nodes."""
                 self.tell_launchella("Shutdown Engaged...")
 
-                # (Stop all processes)zz
+                # (Stop all processes)
                 for p in self.processes:
                     p.stop()
 

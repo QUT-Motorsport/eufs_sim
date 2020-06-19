@@ -135,7 +135,7 @@
      <x>125</x>
      <y>225</y>
      <width>200</width>
-     <height>27</height>
+     <height>25</height>
     </rect>
    </property>
    <property name="text">
@@ -148,85 +148,45 @@
    </property>
   </widget>
 
-  <!--Radio Buttons-->
-  <!--To toggle between torque and speed controls.-->
-  <!--If you add a new buttonGroup, don't forget to add it to the bottom of the file.-->
-  <widget class="QLabel" name="ControlLabel">
-    <property name="geometry">
-       <rect>
-         <x>60</x>
-         <y>290</y>
-         <width>150</width>
-         <height>30</height>
-       </rect>
-    </property>
-    <property name="text">
-      <string>Control Method:</string>
-    </property>
-    <property name="font">
-       <font>
-            <pointsize>9</pointsize>
-       </font>
+  <!--Drop-Down Box: Options added in code, impossible in a .ui file.-->
+  <!--This handles vehicle model selection.-->
+  <widget class="QLabel" name="VehicleModelLabel">
+   <property name="geometry">
+    <rect>
+     <x>60</x>
+     <y>290</y>
+     <width>100</width>
+     <height>30</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>Vehicle Model: </string>
+   </property>
+   <property name="font">
+    <font>
+     <pointsize>9</pointsize>
+    </font>
    </property>
   </widget>
-  <widget class="QRadioButton" name="SpeedRadio">
-    <property name="geometry">
-      <rect>
-        <x>50</x>
-        <y>310</y>
-        <width>100</width>
-        <height>30</height>
-      </rect>
-    </property>
-    <property name="maximumSize">
-      <size>
-        <width>16777215</width>
-        <height>40</height>
-      </size>
-    </property>
-    <property name="layoutDirection">
-      <enum>Qt::LeftToRight</enum>
-    </property>
-    <property name="text">
-      <string>Speed</string>
-    </property>
-    <property name="checked">
-      <bool>true</bool>
-    </property>
-    <attribute name="buttonGroup">
-      <string>SpeedOrTorque</string>
-    </attribute>
-     <property name="font">
-       <font>
-            <pointsize>7</pointsize>
-       </font>
+  <widget class="QComboBox" name="WhichVehicleModel">
+   <property name="geometry">
+    <rect>
+     <x>50</x>
+     <y>315</y>
+     <width>100</width>
+     <height>30</height>
+    </rect>
    </property>
-  </widget>
-  <widget class="QRadioButton" name="TorqueRadio">
-    <property name="geometry">
-      <rect>
-        <x>50</x>
-        <y>330</y>
-        <width>120</width>
-        <height>30</height>
-      </rect>
-    </property>
-    <property name="maximumSize">
-      <size>
-        <width>16777215</width>
-        <height>40</height>
-      </size>
-    </property>
-    <property name="text">
-      <string>Torque (Experimental!)</string>
-    </property>
-    <attribute name="buttonGroup">
-      <string>SpeedOrTorque</string>
-    </attribute>
-    <property name="font">
-       <font>
-            <pointsize>7</pointsize>
-       </font>
+   <property name="maximumSize">
+    <size>
+     <width>16777215</width>
+     <height>30</height>
+    </size>
+   </property>
+   <property name="font">
+    <font>
+     <pointsize>7</pointsize>
+    </font>
    </property>
   </widget>
 
@@ -363,7 +323,6 @@
        </font>
    </property>
   </widget>
- 
 
   <widget class="QLabel" name="GeneratorParametersLabel">
    <property name="geometry">
@@ -831,9 +790,6 @@
        </font>
    </property>
   </widget>
- 
-
-
 
   <!-- Conversion tools! -->
   <widget class="QLabel" name="ConversionToolsLabel">
@@ -1153,13 +1109,7 @@
    </property>
   </widget>
 
-
-
-
- </widget>
- <resources/>
- <connections/>
- <buttongroups>
-   <buttongroup name="SpeedOrTorque"/>
- </buttongroups>
+</widget>
+<resources/>
+<connections/>
 </ui>

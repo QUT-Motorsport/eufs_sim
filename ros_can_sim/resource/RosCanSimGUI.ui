@@ -11,7 +11,7 @@
       </rect>
     </property>
     <property name="windowTitle">
-      <string>ros_can GUI</string>
+      <string>ros_can_sim GUI</string>
     </property>
 
     <!--Drop-Down Box: Options added in code, impossible in a .ui file.-->
@@ -229,7 +229,4 @@
   </widget>
   <resources/>
   <connections/>
-  <buttongroups>
-    <buttongroup name="SpeedOrTorque"/>
-  </buttongroups>
 </ui>

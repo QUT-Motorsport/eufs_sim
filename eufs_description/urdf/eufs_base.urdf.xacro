@@ -1,86 +1,43 @@
 <?xml version="1.0"?>
 <robot name="eufs" xmlns:xacro="http://www.ros.org/wiki/xacro">
+  <xacro:macro name="eufs_base" params="chassis_mesh">
 
-  <xacro:arg name="publish_tf" default="false"/>
-  <xacro:arg name="simulate_perception" default="false"/>
+    <!-- BASE FOOTPRINT -->
+    <link name="base_footprint"/>
 
-  <xacro:include filename="$(find eufs_description)/urdf/eufs_base.gazebo.xacro">
-    <xacro:arg name="publish_tf" value="$(arg publish_tf)"/>
-    <xacro:arg name="simulate_perception" value="$(arg simulate_perception)"/>
-  </xacro:include>
-
-  <xacro:macro name="eufs_base" params="name publish_bf hq clearance">
-
-  <!-- Robot mechanical and motor parameters -->
-  <xacro:property name="PI" value="3.1415926535897931"/>
-  <xacro:property name="wheel_width" value="0.175" />
-
-  <!-- BASE FOOTPRINT -->
-  <xacro:if value="${publish_bf}">
-    <link name="base_footprint">
-      <visual>
-          <origin xyz="0 0 0" rpy="0 0 0" />
-          <geometry>
-             <box size="0.001 0.001 0.001" />
-          </geometry>
-      </visual>
-    </link>
-
-    <joint name="base_footprint_joint" type="fixed">
-      <origin xyz="0 0 ${clearance}" rpy="0 0 0" />  <!-- height is the clearance -->
+    <joint name="chassis_joint" type="fixed">
       <parent link="base_footprint"/>
-      <child link="base_link" />
+      <child link="chassis"/>
+      <origin xyz="0 0 0"
+              rpy="0 0 0"/>
+      <axis xyz="1 0 0"/>
     </joint>
-  </xacro:if>
 
-  <!-- BASE_LINK -->
-  <link name="base_link">
-    <inertial>
-      <mass value="125.0" />
-      <origin xyz="0 0 0" />
-      <inertia  ixx="1.391" ixy="0.004"  ixz="0.0"  iyy="6.853"  iyz="0.0"  izz="6.125" />
-    </inertial>
-    <visual>
-       <origin xyz="0 0 0" rpy="0 0 0" />
-       <xacro:if value="${hq}">
-       <geometry>
-	     <mesh filename="package://eufs_description/meshes/chassis.dae"/>
-       </geometry>
-       </xacro:if>
-       <xacro:unless value="${hq}">
-       <geometry>
-	     <mesh filename="package://eufs_description/meshes/chassis.dae"/>
-       </geometry>
-       </xacro:unless>
-    </visual>
-    <collision>
-       <origin xyz="0 0 0" rpy="0 0 0 " />
-       <geometry>
-         <mesh filename="package://eufs_description/meshes/chassis_collision.dae"/>
-       </geometry>
-    </collision>
-  </link>
-  	
-  <link name="odom_ground_truth">
-    <collision>
-      <geometry>
-        <box size="0.1 0.1 0.1"/>
-      </geometry>
-    </collision>
-    <inertial>
-      <mass value="1e-5" />
-      <origin xyz="0 0 0" rpy="0 0 0"/>
-      <inertia ixx="1e-6" ixy="0" ixz="0" iyy="1e-6" iyz="0" izz="1e-6" />
-    </inertial>
-  </link>
-
-  <joint name="odom_ground_truth_joint" type="fixed">
-    <axis xyz="0 0 0" />
-    <origin xyz="0 0 0" rpy="0 0 0"/>
-    <parent link="base_link"/>
-    <child link="odom_ground_truth"/>
-  </joint>
-
+    <link name="chassis">
+      <visual>
+        <origin xyz="0 0 0" rpy="0 0 0" />
+        <geometry>
+          <mesh filename="${chassis_mesh}"/>
+        </geometry>
+      </visual>
+      <inertial>
+        <origin xyz="0 0 0" rpy="0 0 0" />
+        <mass value="140" />
+        <inertia
+            ixx="16.3"
+            ixy="0"
+            ixz="0"
+            iyy="33.6"
+            iyz="0"
+            izz="47.9" />
+      </inertial>
+      <collision>
+        <origin xyz="0 0 0" rpy="0 0 0" />
+        <geometry>
+          <mesh filename="${chassis_mesh}"/>
+        </geometry>
+      </collision>
+    </link>
 
   </xacro:macro>
 </robot>

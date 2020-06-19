@@ -1,0 +1,78 @@
+<?xml version="1.0"?>
+<robot name="eufs" xmlns:xacro="http://www.ros.org/wiki/xacro">
+
+    <!-- ***************** -->
+    <!-- Imported elements -->
+    <!-- ***************** -->
+
+    <!--  Import the wheels  -->
+    <xacro:include filename="$(find eufs_description)/urdf/wheels.urdf.xacro"/>
+
+    <!-- Import EUFS base element with the chassis -->
+    <xacro:include filename="$(find eufs_description)/urdf/eufs_base.urdf.xacro">
+        <xacro:arg name="publish_tf" value="$(arg publish_tf)"/>
+        <xacro:arg name="simulate_perception" value="$(arg simulate_perception)"/>
+    </xacro:include>
+
+    <!-- Import all available sensors -->
+    <xacro:include filename="$(find eufs_description)/sensors/all_sensors.urdf.xacro" />
+
+    <!--  Include the plugins  -->
+    <xacro:arg name="publish_tf" default="false"/>
+    <xacro:arg name="simulate_perception" default="true"/>
+    <xacro:include filename="$(find eufs_description)/urdf/eufs_plugins.gazebo.xacro">
+        <xacro:arg name="publish_tf" value="$(arg publish_tf)"/>
+        <xacro:arg name="simulate_perception" value="$(arg simulate_perception)"/>
+    </xacro:include>
+
+    <!-- ***************** -->
+    <!-- Config parameters -->
+    <!-- ***************** -->
+
+    <!--  Load the config file  -->
+    <xacro:property name="config" value="${load_yaml('$(arg config_file)')}"/>
+
+    <!-- ***************** -->
+    <!-- Global parameters -->
+    <!-- ***************** -->
+
+    <xacro:property name="PI" value="3.1415926535897931"/>
+
+    <!-- *************** -->
+    <!-- Robots Elements -->
+    <!-- *************** -->
+
+    <!-- Chassis of the car -->
+    <xacro:eufs_base chassis_mesh="package://eufs_description/meshes/ads-dv.dae"/>
+
+    <!-- Wheels -->
+    <xacro:wheels chassis_width="0.98" wheelbase="1.530"></xacro:wheels>
+
+
+    <!-- *********************************************** -->
+    <!--                 MAIN SENSORS                    -->
+    <!-- *********************************************** -->
+
+    <!--     LOCATIONS: (XYZ)
+    IMU: 0.0 0.0 0.170
+    GPS: -0.110 0.0 0.9
+    LIDAR: 1.700 0.0 -0.150
+    STEREO CAM: -0.110 0.0 0.800 -->
+
+    <xacro:sensor_imu parent="base_footprint" prefix="imu">
+        <origin xyz="0.0 0.0 0.0" rpy="0 0 0"/>
+    </xacro:sensor_imu>
+
+    <xacro:sensor_gps parent="base_footprint" prefix="gps">
+        <origin xyz="0.0 0.0 0.4" rpy="0 0 0"/>
+    </xacro:sensor_gps>
+
+    <xacro:VLP-16R parent="base_footprint" name="velodyne" topic="/velodyne_points" hz="10" samples="800" active="$(arg simulate_perception)">
+        <origin xyz="1.58 0.0 -0.1" rpy="0 ${1*M_PI/180.0} 0"/>
+    </xacro:VLP-16R>
+
+    <xacro:zed_camera parent="base_footprint" prefix="zed" active="$(arg simulate_perception)">
+        <origin xyz="0.1 0.0 0.52" rpy="0 0 0"/>
+    </xacro:zed_camera>
+
+</robot>

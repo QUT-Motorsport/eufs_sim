@@ -34,13 +34,11 @@ include_directories(
 # needed because of setup.py
 catkin_python_setup()
 
-add_executable(ros_can_sim_node src/ros_can_sim.cpp)
-
-target_link_libraries(ros_can_sim_node
-        ${catkin_LIBRARIES}
+install(PROGRAMS nodes/ros_can_sim_gui
+        DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
         )
 
-install(PROGRAMS nodes/ros_can_sim_gui
+install(PROGRAMS nodes/eufs_robot_steering_gui
         DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
         )
 
@@ -59,4 +57,4 @@ install(FILES
 #############
 
 roslint_python()
-roslint_cpp()
+#roslint_cpp()

@@ -1,6 +1,8 @@
-add_compile_options(-std=c++11)
-cmake_minimum_required(VERSION 2.8.3)
+cmake_minimum_required(VERSION 3.5)
 project(eufs_launcher)
+
+add_compile_options(-std=c++11)
+
 
 find_package(Boost REQUIRED)
 # Load catkin and all dependencies required for this package

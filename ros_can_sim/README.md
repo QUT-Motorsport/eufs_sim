@@ -34,7 +34,10 @@ Same as above
 
 # Launches
 - `ros_can_sim.launch` - launches the `ros_can_sim_node` fully parametarised for the ADS-DV car
-- `speed_control_gui.launch` - rqt gui to control the car WITH SLIDERS
+
+# Custom rqt Plugins
+- `ros_can_sim_gui` - controls the state machine of ros_can_sim
+- `eufs_robot_steering_gui` - controls the car using AckermannDriveStamped messages (slightly modified version of [rqt_robot_steering](https://github.com/ros-visualization/rqt_robot_steering))
 
 ## Notes
 - DO NOT RUN THIS IN THE REAL WORLD

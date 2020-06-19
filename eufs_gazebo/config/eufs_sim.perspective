@@ -5,10 +5,57 @@
       "keys": {
         "running-plugins": {
           "type": "repr",
-          "repr": "{u'ros_can_sim/ros_can_sim_gui': [1], u'rqt_robot_steering/RobotSteering': [1]}"
+          "repr": "{u'ros_can_sim/ros_can_sim_gui': [1], u'ros_can_sim/eufs_robot_steering_gui': [1]}"
         }
       },
       "groups": {
+        "plugin__ros_can_sim__eufs_robot_steering_gui__1": {
+          "keys": {},
+          "groups": {
+            "dock_widget__EUFSRobotSteeringGUI": {
+              "keys": {
+                "dockable": {
+                  "type": "repr",
+                  "repr": "True"
+                },
+                "parent": {
+                  "type": "repr",
+                  "repr": "None"
+                },
+                "dock_widget_title": {
+                  "type": "repr",
+                  "repr": "u'EUFS Robot Steering GUI '"
+                }
+              },
+              "groups": {}
+            },
+            "plugin": {
+              "keys": {
+                "topic": {
+                  "type": "repr",
+                  "repr": "u'/rqt/command'"
+                },
+                "vx_min": {
+                  "type": "repr",
+                  "repr": "-1.0"
+                },
+                "vw_min": {
+                  "type": "repr",
+                  "repr": "-3.0"
+                },
+                "vw_max": {
+                  "type": "repr",
+                  "repr": "3.0"
+                },
+                "vx_max": {
+                  "type": "repr",
+                  "repr": "1.0"
+                }
+              },
+              "groups": {}
+            }
+          }
+        },
         "plugin__rqt_robot_steering__RobotSteering__1": {
           "keys": {},
           "groups": {
@@ -33,7 +80,7 @@
               "keys": {
                 "topic": {
                   "type": "repr",
-                  "repr": "u'/cmd_vel'"
+                  "repr": "u'/rqt/command'"
                 },
                 "vx_min": {
                   "type": "repr",
@@ -87,28 +134,6 @@
                   "type": "repr(QByteArray.hex)",
                   "repr(QByteArray.hex)": "QtCore.QByteArray('000000ff00000001000000020000012c000000640100000009010000000200')",
                   "pretty-print": "       , d     "
-                }
-              },
-              "groups": {}
-            }
-          }
-        },
-        "plugin__rqt_logger_level__LoggerLevel__1": {
-          "keys": {},
-          "groups": {
-            "dock_widget__LoggerLevelWidget": {
-              "keys": {
-                "dockable": {
-                  "type": "repr",
-                  "repr": "u'true'"
-                },
-                "parent": {
-                  "type": "repr",
-                  "repr": "None"
-                },
-                "dock_widget_title": {
-                  "type": "repr",
-                  "repr": "u'Logger Level'"
                 }
               },
               "groups": {}
@@ -176,6 +201,28 @@
                 "publish_click_location": {
                   "type": "repr",
                   "repr": "u'false'"
+                }
+              },
+              "groups": {}
+            }
+          }
+        },
+        "plugin__rqt_logger_level__LoggerLevel__1": {
+          "keys": {},
+          "groups": {
+            "dock_widget__LoggerLevelWidget": {
+              "keys": {
+                "dockable": {
+                  "type": "repr",
+                  "repr": "u'true'"
+                },
+                "parent": {
+                  "type": "repr",
+                  "repr": "None"
+                },
+                "dock_widget_title": {
+                  "type": "repr",
+                  "repr": "u'Logger Level'"
                 }
               },
               "groups": {}
@@ -268,7 +315,7 @@
                 },
                 "dock_widget_title": {
                   "type": "repr",
-                  "repr": "u'ros_can GUI'"
+                  "repr": "u'ros_can_sim GUI'"
                 }
               },
               "groups": {}
@@ -423,13 +470,13 @@
       "keys": {
         "geometry": {
           "type": "repr(QByteArray.hex)",
-          "repr(QByteArray.hex)": "QtCore.QByteArray('01d9d0cb000200000000010e0000024800000350000003f80000010f000002600000034f000003f700000001000000000556')",
-          "pretty-print": "       H P     ` O      V"
+          "repr(QByteArray.hex)": "QtCore.QByteArray('01d9d0cb000200000000006400000064000002e6000002430000006400000082000002e60000024300000000000000000780')",
+          "pretty-print": "     d d   C d     C     "
         },
         "state": {
           "type": "repr(QByteArray.hex)",
-          "repr(QByteArray.hex)": "QtCore.QByteArray('000000ff00000000fd0000000100000003000002410000016bfc0100000005fb0000004c007200710074005f0074006f007000690063005f005f0054006f0070006900630050006c007500670069006e005f005f0031005f005f0054006f0070006900630057006900640067006500740100000000000001110000000000000000fb000000580072006f0073005f00630061006e005f00730069006d005f005f0072006f0073005f00630061006e005f00730069006d005f006700750069005f005f0032005f005f0052006f007300430061006e00530069006d005500690100000000000000cd0000000000000000fb0000006a007200710074005f0072006f0062006f0074005f007300740065006500720069006e0067005f005f0052006f0062006f0074005300740065006500720069006e0067005f005f0031005f005f0052006f0062006f0074005300740065006500720069006e0067005500690100000000000000d7000000d700fffffffb000000580072006f0073005f00630061006e005f00730069006d005f005f0072006f0073005f00630061006e005f00730069006d005f006700750069005f005f0031005f005f0052006f007300430061006e00530069006d0055006901000000dd00000164000000bc00fffffffb00000066007200710074005f006c006f0067006700650072005f006c006500760065006c005f005f004c006f0067006700650072004c006500760065006c005f005f0031005f005f004c006f0067006700650072004c006500760065006c005700690064006700650074010000023f000003170000000000000000000002410000000000000004000000040000000800000008fc00000001000000030000000100000036004d0069006e0069006d0069007a006500640044006f0063006b00570069006400670065007400730054006f006f006c0062006100720000000000ffffffff0000000000000000')",
-          "pretty-print": "                 Lrqt_topic__TopicPlugin__1__TopicWidget          Xros_can_sim__ros_can_sim_gui__2__RosCanSimUi          jrqt_robot_steering__RobotSteering__1__RobotSteeringUi          Xros_can_sim__ros_can_sim_gui__1__RosCanSimUi          frqt_logger_level__LoggerLevel__1__LoggerLevelWidget                            6MinimizedDockWidgetsToolbar        "
+          "repr(QByteArray.hex)": "QtCore.QByteArray('000000ff00000000fd00000001000000030000028300000196fc0100000006fb0000004c007200710074005f0074006f007000690063005f005f0054006f0070006900630050006c007500670069006e005f005f0031005f005f0054006f0070006900630057006900640067006500740100000000000001110000000000000000fb000000580072006f0073005f00630061006e005f00730069006d005f005f0072006f0073005f00630061006e005f00730069006d005f006700750069005f005f0032005f005f0052006f007300430061006e00530069006d005500690100000000000000cd0000000000000000fb0000006a007200710074005f0072006f0062006f0074005f007300740065006500720069006e0067005f005f0052006f0062006f0074005300740065006500720069006e0067005f005f0031005f005f0052006f0062006f0074005300740065006500720069006e0067005500690100000000000000e70000000000000000fb0000007a0072006f0073005f00630061006e005f00730069006d005f005f0065007500660073005f0072006f0062006f0074005f007300740065006500720069006e0067005f006700750069005f005f0031005f005f00450055004600530052006f0062006f0074005300740065006500720069006e00670047005500490100000000000001250000012500fffffffb000000580072006f0073005f00630061006e005f00730069006d005f005f0072006f0073005f00630061006e005f00730069006d005f006700750069005f005f0031005f005f0052006f007300430061006e00530069006d00550069010000012b00000158000000e700fffffffb00000066007200710074005f006c006f0067006700650072005f006c006500760065006c005f005f004c006f0067006700650072004c006500760065006c005f005f0031005f005f004c006f0067006700650072004c006500760065006c005700690064006700650074010000023f000003170000000000000000000002830000000000000004000000040000000800000008fc00000001000000030000000100000036004d0069006e0069006d0069007a006500640044006f0063006b00570069006400670065007400730054006f006f006c0062006100720000000000ffffffff0000000000000000')",
+          "pretty-print": "                 Lrqt_topic__TopicPlugin__1__TopicWidget          Xros_can_sim__ros_can_sim_gui__2__RosCanSimUi          jrqt_robot_steering__RobotSteering__1__RobotSteeringUi          zros_can_sim__eufs_robot_steering_gui__1__EUFSRobotSteeringGUI          Xros_can_sim__ros_can_sim_gui__1__RosCanSimUi          frqt_logger_level__LoggerLevel__1__LoggerLevelWidget                            6MinimizedDockWidgetsToolbar        "
         }
       },
       "groups": {

@@ -1,0 +1,32 @@
+# NOTE: This data is not correct, it is based on the AMZ driverless car
+
+inertia:
+  m:        190.0   # Weight of the Vehicle [kg]
+  g:        9.81    # Gravity force         [m/s^2]
+  I_z:      110     # Inertial force I_zz
+
+kinematics:
+  l: 1.53           # Vehicle Length [m]
+  b_F: 1.22         # From COG to front axle [m]
+  b_R: 1.22         # From COG to rear axle [m]
+  w_front: 0.5      # Percentage of weight front
+
+tire:
+  tire_coefficient: 1.0
+  B: 12.56
+  C: -1.38
+  D: 1.60
+  E: -0.58
+  radius: 0.2525
+
+aero:
+  C_Down: 1.9 # F_Downforce = C_Downforce*v_x^2
+  C_drag: 1 # F_Drag = C_Drag*v_x^2
+
+input_ranges:
+  acceleration:
+    max: 3
+    min: -5
+  steering:
+    max: 0.52
+    min: -0.52
