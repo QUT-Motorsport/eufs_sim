@@ -1723,7 +1723,7 @@ class ConversionTools:
                 # Calculate model data for cones
                 sdf_blue_cone_model = join_cone_model_data("cone_blue")
                 sdf_yellow_cone_model = join_cone_model_data("cone_yellow")
-                sdf_orange_cone_model = join_cone_model_data("cone")
+                sdf_orange_cone_model = join_cone_model_data("cone_orange")
                 sdf_big_orange_cone_model = join_cone_model_data("cone_big")
 
                 # Now let's load in the noise priorities

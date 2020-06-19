@@ -539,7 +539,7 @@ class Track:
         cone_meshes = {"yellow": "model://models/yellow_cone",
                        "blue": "model://models/blue_cone",
                        "big": "model://models/big_cone",
-                       "orange": "model://models/cone"}
+                       "orange": "model://models/orange_cone"}
 
         root = Element("sdf")
         root.set("version", "1.6")
@@ -571,6 +571,16 @@ class Track:
             include = SubElement(model, "include")
             uri = SubElement(include, "uri")
             uri.text = cone_meshes["big"]
+            pose = SubElement(include, "pose")
+            pose.text = str(each[0]) + " " + str(each[1]) + " 0 0 0 0"
+            name = SubElement(include, "name")
+            name.text = "big_cone_" + str(i)
+
+        # deal with orange cones
+        for i, each in enumerate(self.orange_cones):
+            include = SubElement(model, "include")
+            uri = SubElement(include, "uri")
+            uri.text = cone_meshes["orange"]
             pose = SubElement(include, "pose")
             pose.text = str(each[0]) + " " + str(each[1]) + " 0 0 0 0"
             name = SubElement(include, "name")
