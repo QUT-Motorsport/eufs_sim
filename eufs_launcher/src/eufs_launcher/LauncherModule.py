@@ -296,10 +296,24 @@ class EufsLauncher(Plugin):
                                         cur_cbox_args = self.arg_to_list(checkboxes[key]["args"])
                                 else:
                                         cur_cbox_args = []
+                                # The weird double-lambda thing is because python lambda-captures
+                                # by reference, not value, and so consequently since the `key`
+                                # variable is used every loop, at the end of the loops all of
+                                # these lambda functions would actually be refering to the *last*
+                                # loop's key, not each individual loop's key.
+                                # To solve that, we force key into a local variable by wrapping
+                                # our contents with a lambda taking it as a parameter, then
+                                # immediately passing it in.
+                                # We do the same for all other changing variables.
                                 self.checkbox_effect_mapping.append((
                                         cur_cbox,
-                                        (lambda: self.launch_node_with_args(filepath, cur_cbox_args)),
-                                        (lambda: None)
+                                        (lambda key, filepath, cur_cbox_args: (
+                                                lambda: self.launch_node_with_args(
+                                                        filepath,
+                                                        cur_cbox_args
+                                                )
+                                        ))(key, filepath, cur_cbox_args),
+                                        (lambda key: lambda: None)(key)
                                 ))
                         if "parameter_triggering" in checkboxes[key]:
                                 # This handles parameter details that will be passed to the
@@ -315,8 +329,17 @@ class EufsLauncher(Plugin):
                                 check = checkboxes[key]["ros_param_triggering"]
                                 self.checkbox_effect_mapping.append((
                                         cur_cbox,
-                                        (lambda: rospy.set_param(check["param_name"], check["if_on"])),
-                                        (lambda: rospy.set_param(check["param_name"], check["if_off"]))
+                                        (lambda check: (
+                                                lambda: rospy.set_param(
+                                                        check["param_name"],
+                                                        check["if_on"]
+                                                )
+                                        ))(check),
+                                        (lambda check: (
+                                                lambda: rospy.set_param(
+                                                        check["param_name"],
+                                                        check["if_off"])
+                                        ))(check)
                                 ))
 
                         setattr(self, checkboxes[key]["name"].upper(), cur_cbox)
