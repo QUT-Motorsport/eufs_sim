@@ -49,7 +49,7 @@ class RosCanGUI(Plugin):
                          CanState.AMI_ACCELERATION: "ACCELERATION",
                          CanState.AMI_SKIDPAD: "SKIDPAD",
                          CanState.AMI_AUTOCROSS: "AUTOCROSS",
-                         CanState.AMI_TRACK_DRIVE: "TRAK_DRIVE",
+                         CanState.AMI_TRACK_DRIVE: "TRACK_DRIVE",
                          CanState.AMI_BRAKE_TEST: "BRAKE_TEST",
                          CanState.AMI_ADS_INSPECTION: "ADS_INSPECTION",
                          CanState.AMI_ADS_EBS: "ADS_EBS",
