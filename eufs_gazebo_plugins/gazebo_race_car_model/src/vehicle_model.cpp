@@ -417,7 +417,7 @@ void VehicleModel::publishWheelSpeeds() {
   wheel_speeds.rf_speed = 999;
 
   float PI = 3.14159265;
-  float wheel_circumference = PI * param_.tire.radius;
+  float wheel_circumference = 2 * PI * param_.tire.radius;
 
   wheel_speeds.lb_speed = (state_.v_x / wheel_circumference) * 60;
   wheel_speeds.rb_speed = (state_.v_x / wheel_circumference) * 60;
