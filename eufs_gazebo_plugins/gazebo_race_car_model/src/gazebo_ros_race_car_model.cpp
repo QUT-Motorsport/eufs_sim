@@ -77,7 +77,7 @@ void RaceCarModelPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf) {
 
   // Get the update rate from the sdf
   if (!_sdf->HasElement("update_rate")) {
-    this->update_rate_ = 200.0;
+    this->update_rate_ = 1000.0;
   } else {
     this->update_rate_ = _sdf->GetElement("update_rate")->Get<double>();
   }
@@ -99,22 +99,20 @@ void RaceCarModelPlugin::Reset() {
 }
 
 void RaceCarModelPlugin::update() {
+#if GAZEBO_MAJOR_VERSION >= 8
   common::Time curTime = this->world->SimTime();
+#else
+  common::Time curTime = this->world->GetSimTime();
+#endif
 
-  double dt = 0.0;
-  if (!isLoopTime(curTime, dt)) {
+  double dt = (curTime - this->lastSimTime).Double();
+  if (dt < (1 / this->update_rate_)) {
     return;
   }
 
   this->lastSimTime = curTime;
 
   this->vehicle->update(dt);
-}
-
-bool RaceCarModelPlugin::isLoopTime(const common::Time &time, double &dt) {
-  dt = (time - this->lastSimTime).Double();
-
-  return dt >= (1 / this->update_rate_);
 }
 
 GZ_REGISTER_MODEL_PLUGIN(RaceCarModelPlugin)

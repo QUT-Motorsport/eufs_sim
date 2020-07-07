@@ -105,6 +105,10 @@ protected:
   // Pointer to the parent model
   physics::ModelPtr model;
 
+  // Rate to publish ros messages
+  double publish_rate_;
+  double time_last_published_;
+
   std::string state_topic_name_;
   std::string wheel_speeds_topic_name_;
   std::string odom_topic_name_;
