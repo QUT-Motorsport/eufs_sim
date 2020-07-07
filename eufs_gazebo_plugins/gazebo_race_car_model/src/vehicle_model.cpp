@@ -59,6 +59,12 @@ VehicleModel::VehicleModel(physics::ModelPtr &_model,
 }
 
 void VehicleModel::initParam(sdf::ElementPtr &_sdf) {
+  if (!_sdf->HasElement("publish_rate")) {
+    this->publish_rate_ = 200.0;
+  } else {
+    this->publish_rate_ = _sdf->GetElement("publish_rate")->Get<double>();
+  }
+
   if (!_sdf->HasElement("referenceFrame")) {
     ROS_DEBUG_NAMED("gazebo_ros_race_car_model", "gazebo_ros_race_car_model plugin missing <referenceFrame>, defaults to map");
     this->reference_frame_ = "map";
@@ -270,6 +276,16 @@ void VehicleModel::update(const double dt) {
   input_ = new_input;
 
   setModelState();
+
+  double current_time = ros::Time::now().toSec();
+
+  double time_since_last_published = current_time - this->time_last_published_;
+
+  if (time_since_last_published < (1 / this->publish_rate_)) {
+    return;
+  }
+
+  this->time_last_published_ = current_time;
 
   // Publish Everything
   publishCarState();

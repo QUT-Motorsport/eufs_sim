@@ -15,7 +15,8 @@ Also provides ground truth state in the form of `nav_msgs/Odometry` and
 
 | Name | Type | Default | Purpose |
 | ----- | ---- |  ------ | ------- |
-| `update_rate`                | string    | `200`              | The update rate of the vehicle model. |
+| `update_rate`                | string    | `1000`             | The update rate of the vehicle model. |
+| `publish_rate`               | string    | `200`              | The rate to publish messages of the vehicle model. |
 | `vehicle_model`              | string    | `DynamicBicyle`    | The vehicle model class to use for the race car. |
 | `front_left_wheel_steering`  | string    |                    | Required parameter. The name of the front left  steering wheel joint. |
 | `front_right_wheel`          | string    |                    | Required parameter. The name of the front right steering wheel joint. |

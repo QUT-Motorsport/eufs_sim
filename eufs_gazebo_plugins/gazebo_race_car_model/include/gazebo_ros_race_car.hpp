@@ -63,8 +63,6 @@ public:
 private:
   void update();
 
-  bool isLoopTime(const common::Time &time, double &dt);
-
   double update_rate_;
 
   event::ConnectionPtr updateConnection;
