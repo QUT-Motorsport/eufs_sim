@@ -1,0 +1,38 @@
+<!-- 
+    This launch file is intended to launch everything for testing on your laptop, including
+    the simulation. Cannot record data and does not launch sensor drivers.
+-->
+
+<launch>
+
+    <!-- ARGUMENTS -->
+
+    <!-- Which track to launch. Must correspond to a launch file in eufs_gazebo -->
+    <arg name="track" default="small_track"/>
+
+    <!-- The vehicle model class -->
+    <arg name="vehicleModel" default="DynamicBicycle"/>
+
+    <!-- Launch the Gazebo GUI -->
+    <arg name="gazebo_gui" default="false"/>
+
+    <!-- Launch RViz -->
+    <arg name="rviz" default="true"/>
+
+    <!-- Whether or not to use ground truth transfrom-->
+    <arg name="publish_gt_tf" default="false"/>
+
+    <!-- Which group of launch files to use for the state_machine node.
+         Set to 'no_perception' to turn off the perception code and use ground truth cones. -->
+    <arg name="launch_group" default="default" />
+
+    <!-- Launch the simulation -->
+    <include file="$(find eufs_gazebo)/launch/$(arg track).launch">
+        <arg name="vehicleModel" value="$(arg vehicleModel)"/>
+        <arg name="gazebo_gui" value="$(arg gazebo_gui)"/>
+        <arg name="rviz" value="$(arg rviz)"/>
+        <arg name="publish_gt_tf" value="$(arg publish_gt_tf)"/>
+        <arg name="launch_group" value="$(arg launch_group)"/>
+    </include>
+
+</launch>

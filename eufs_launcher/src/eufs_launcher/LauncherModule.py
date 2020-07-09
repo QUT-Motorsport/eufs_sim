@@ -1095,10 +1095,10 @@ class EufsLauncher(Plugin):
                         else:
                                 parameters_to_pass.extend(param_if_off)
 
-                # Here we launch the backbone script, `simulation.launch`.
-                dir_to_launch = os.path.dirname(os.path.dirname(os.path.dirname(self.GAZEBO)))
+                # Here we launch `simulation.launch`.
+                eufs_launcher = rospkg.RosPack().get_path('eufs_launcher')
                 launch_location = os.path.join(
-                        dir_to_launch,
+                        eufs_launcher,
                         'launch',
                         'simulation.launch'
                 )
@@ -1106,6 +1106,42 @@ class EufsLauncher(Plugin):
                         launch_location,
                         parameters_to_pass
                 )
+
+                # Get the parametes to pass to the launch file depending on the type of the parameter
+                def get_parameters_to_pass(parameters):
+                    if isinstance(parameters, list):  # If a list return that list
+                        if isinstance(parameters[0], list):  # If it is a list of lists return the first list
+                            return parameters[0]
+                        return parameters
+                    elif isinstance(parameters, str):  # If a string return a list containing that string
+                        return [parameters]
+
+                    print("Given additional launch file parameter: " + parameters +
+                          ", was not instance of list or str, so no parameters passed")
+                    return []
+
+                # Launch all the add_launch given to the launcher
+                # with the corresponsing arguments that were given
+                if isinstance(add_launch, list):
+                    # Launch every launch file
+                    for i, launch_file in enumerate(add_launch):
+                        parameters_to_pass = []
+                        if i < len(add_launch_params):
+                            parameters_to_pass = get_parameters_to_pass(add_launch_params[i])
+                        self.launch_node_with_args(
+                                launch_file,
+                                parameters_to_pass
+                        )
+                elif isinstance(add_launch, str):
+                    # Launch the one launch file
+                    parameters_to_pass = get_parameters_to_pass(add_launch_params)
+                    self.launch_node_with_args(
+                            add_launch,
+                            parameters_to_pass
+                    )
+                else:
+                    print("Given addition launch files: " + add_launch +
+                          ", was not instance of list or str, so no additional files launched")
 
                 # Trigger launch files hooked to checkboxes
                 for checkbox, effect_on, effect_off in self.checkbox_effect_mapping:
