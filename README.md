@@ -9,8 +9,9 @@ ROS/Gazebo simulation packages for driverless FSAE vehicles.
 1. [Install Prerequisites](#requirements)
 2. [Compiling](#compiling)
 3. [Running](#running)
-4. [Sensors](#sensors)
-5. [Known issues](#issues)
+4. [Launch options](#options)
+5. [Sensors](#sensors)
+6. [Known issues](#issues)
 
 ## 1. Install Prerequisites <a name="requirements"></a>
 
@@ -51,11 +52,42 @@ roslaunch eufs_launcher eufs_launcher.launch
 ```
 
 You shold have something like this:
-
 ![Full Gui](https://gitlab.com/eufs/eufs_sim/wikis/uploads/5bc6e6e51c1b489c372fd4d790744640/image.png)
 
 The basic usage of the simulation is in the left hand side of
 the launcher window.
+Here you can select the options with which you want to launch
+the simulation. These options are desribed in more detail [below](#options).
+
+Using the default options this will launch a RQT with a steering GUI
+and our ros_can_sim GUI, alongside a default RViz window.
+
+In the ros_can_sim GUI you can select the a mission from the
+drop down menu, and hit 'Set Mission'. This will publish
+a `CanState` message to the `/ros_can/set_mission` topic.
+
+Before the car will drive you need to tell it that it can.
+This is done by publishing a `Bool` message with the data
+set to `true` to the `/ros_can/set_mission` topic.
+This can be done using a publisher in a ROS node or,
+it can be done using the following command:
+`rostopic pub -1 /ros_can/mission_flag std_msgs/Bool "data: true"`
+
+After 5 seconds you should see the State changing from
+`OFF` to `DRIVING`.
+The car will now be able to drive around the track!
+
+Commands can be sent to the car publihsing an`AckermannDriveStamped`
+message to the `/cmd_vel_out` topic.
+
+_Note:_
+If you have selected the `Manual` mission and you want to use the
+EUFS Robot Steering GUI without any additional nodes to transform the command,
+you need to change the topic in the text field at the top of the GUI to
+`/cmd_vel_out`
+
+
+## 4. Launch options <a name="options"></a>
 
 Using the Track dropdown menu you can select which track to start the
 simulation in:
@@ -67,9 +99,6 @@ and consistency
 - rand - randomly generated autocross/trackdrive track. One is provided
 by default with the sim but you can generate more with the GUI. For
 more on that read the wiki
-
-After selecting a track, you can start the simulation with
-the Launch! button.
 
 Additional options below:
 
@@ -89,7 +118,7 @@ state is always publishes.
 A full manual of how to use the GUI is
 [available here](https://gitlab.com/eufs/eufs_sim/wikis/Simulation/Launcher-Overview).
 
-## 4. Additional sensors <a name="sensors"></a>
+## 5. Additional sensors <a name="sensors"></a>
 
 **Sensor suit of the car by default:**
 
@@ -104,7 +133,7 @@ Additional sensors for testing are avilable via the
 defined in `eufs_description/robots/eufs.urdf.xarco`. You can simply
 commment them in and attach them appropriately to the car.
 
-## 5. Known issues <a name="issues"></a>
+## 6. Known issues <a name="issues"></a>
 
 - Sometimes you might end up with 2 numpy installations at the same time. To fix this simply uninstall numpy with `pip uninstall numpy` as many times as you can. Then reinstall it with `pip install numpy` and everything should work as usual!
 - **If you need to rapidly re-launch** the gui it is important that
