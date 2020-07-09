@@ -31,14 +31,6 @@
             },
             "plugin": {
               "keys": {
-                "topic": {
-                  "type": "repr",
-                  "repr": "u'/rqt/command'"
-                },
-                "vx_min": {
-                  "type": "repr",
-                  "repr": "-1.0"
-                },
                 "vw_min": {
                   "type": "repr",
                   "repr": "-3.0"
@@ -50,6 +42,18 @@
                 "vx_max": {
                   "type": "repr",
                   "repr": "1.0"
+                },
+                "topic": {
+                  "type": "repr",
+                  "repr": "u'/rqt/command'"
+                },
+                "vx_min": {
+                  "type": "repr",
+                  "repr": "-1.0"
+                },
+                "input": {
+                  "type": "repr",
+                  "repr": "1"
                 }
               },
               "groups": {}
@@ -470,8 +474,8 @@
       "keys": {
         "geometry": {
           "type": "repr(QByteArray.hex)",
-          "repr(QByteArray.hex)": "QtCore.QByteArray('01d9d0cb000200000000006400000064000002e6000002430000006400000082000002e60000024300000000000000000780')",
-          "pretty-print": "     d d   C d     C     "
+          "repr(QByteArray.hex)": "QtCore.QByteArray('01d9d0cb00020000000000430000001b000002c5000001fa0000004300000039000002c5000001fa00000000000000000780')",
+          "pretty-print": "     C       C 9         "
         },
         "state": {
           "type": "repr(QByteArray.hex)",
