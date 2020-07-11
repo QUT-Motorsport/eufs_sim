@@ -426,6 +426,9 @@ double VehicleModel::getSlipAngle(bool isFront) {
 
 void VehicleModel::publishWheelSpeeds() {
   eufs_msgs::WheelSpeedsStamped wheel_speeds;
+  
+  wheel_speeds.header.stamp = ros::Time::now();
+  wheel_speeds.header.frame_id = this->robot_frame_;
 
   wheel_speeds.steering = input_.delta;
 
