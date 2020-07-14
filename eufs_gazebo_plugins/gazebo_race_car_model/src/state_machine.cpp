@@ -85,8 +85,8 @@ void StateMachine::setMission(eufs_msgs::CanState state)
             case eufs_msgs::CanState::AMI_TRACK_DRIVE:
                 ami_state_ = eufs_msgs::CanState::AMI_TRACK_DRIVE;
                 break;
-            case eufs_msgs::CanState::AMI_BRAKE_TEST:
-                ami_state_ = eufs_msgs::CanState::AMI_BRAKE_TEST;
+            case eufs_msgs::CanState::AMI_AUTONOMOUS_DEMO:
+                ami_state_ = eufs_msgs::CanState::AMI_AUTONOMOUS_DEMO;
                 break;
             case eufs_msgs::CanState::AMI_ADS_INSPECTION:
                 ami_state_ = eufs_msgs::CanState::AMI_ADS_INSPECTION;
@@ -260,7 +260,7 @@ std_msgs::String StateMachine::makeStateString(const eufs_msgs::CanState &state)
         case eufs_msgs::CanState::AMI_DDT_INSPECTION_B:
             str2 = "AS:DDT_INSPECTION_B";
             break;
-        case eufs_msgs::CanState::AMI_BRAKE_TEST:
+        case eufs_msgs::CanState::AMI_AUTONOMOUS_DEMO:
             str2 = "AS:BRAKETEST";
             break;
         default:
