@@ -2,7 +2,7 @@
 <launch>
 
   <!-- Filepath, within package, that the config file is located -->
-  <arg name="config" default="resource/eufs_launcher"/>
+  <arg name="config" default="config/eufs_launcher"/>
   <!-- Package that the config file is in, for example `eufs_launcher` or `localisation_meta` -->
   <arg name="config_loc" default="eufs_launcher"/>
 
