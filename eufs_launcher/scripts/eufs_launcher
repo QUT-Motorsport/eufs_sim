@@ -8,7 +8,7 @@ import rospy
 
 LauncherModule.yaml_to_load = rospy.get_param(
     "/eufs_launcher/config",
-    default = "resource/eufs_launcher.yaml"
+    default = "config/eufs_launcher.yaml"
 )
 LauncherModule.loc_to_load = rospy.get_param(
     "/eufs_launcher/config_loc",
