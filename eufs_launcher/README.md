@@ -13,36 +13,6 @@ If you want to do basic layout editing, it should be self explanatory how to edi
 If you want to add whole new options on startup, you will want to direct yourself to `eufs_launcher/src/eufs_launcher/LauncherModule.py`,
 but if you're at that point, you might as well just get in touch with the simulation team and let them handle it.
 
-### Launching additional launch file
-
-Launch files, in addition to the `launch/simulation.launch` file, can be launched via the launcher, for example to launch a software stack to drive the car autonomously.
-Theses additional launch files can be set using arguments in `launch/eufs_launcher.launch`.
-`add_launch` contains a list of the paths to the additional launch files
-`add_launch_params` contains a list of lists with the parameters to the corresponding launch files
-They can be set by changing the default value or giving these arguments to the launch file.
-
-Example usage:
-
-chaning the default value:
-```xml
-<arg name="add_launch" default="['/path/to/launch/file1.launch', '/path/to/launch/file2.launch']"/>
-<arg name="add_launch_params" default="[['param1:=value1', 'param2:=value2'], ['param3:=value3']]"/>
-```
-from the command line:
-`roslaunch eufs_launcher eufs_launcher.launch add_launch:="['/path/to/launch/file1.launch', '/path/to/launch/file2.launch']" add_launch_params:="[['param1:=value1', 'param2:=value2'], ['param3:=value3']]"`
-
-_Note:_ the apostrophes need to be there
-
-The launcher also supports strings instead of a list with one element. These are therefore also valid examples
-```
-add_launch:="['/path/to/launch/file1.launch', '/path/to/launch/file2.launch']"
-add_launch_params:="[['param1:=value1', 'param2:=value2'], 'param3:=value3']"
-```
-```
-add_launch:="'/path/to/launch/file1.launch'"
-add_launch_params:="'param1:=value1'"
-```
-
 ### Image-to-Track
 
 #### Relevant Locations
