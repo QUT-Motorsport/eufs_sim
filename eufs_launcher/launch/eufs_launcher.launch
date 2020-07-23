@@ -10,17 +10,11 @@
     to its config file) -->
   <arg name="gui" default="True"/>
 
-  <!-- The launch files that should be launched in addition to /eufs_sim/launch/simulation.launch -->
-  <arg name="add_launch" default="[]"/>
-  <!-- The parameters to the additional launch files -->
-  <arg name="add_launch_params" default="[]"/>
-
+  <!-- EUFS Launcher -->
   <node name="eufs_launcher" pkg="eufs_launcher" type="eufs_launcher" output="screen">
     <param name="config" value="$(arg config)"/>
     <param name="config_loc" value="$(arg config_loc)"/>
     <param name="gui" value="$(arg gui)"/>
-    <param name="add_launch" value="$(arg add_launch)" type="yaml"/>
-    <param name="add_launch_params" value="$(arg add_launch_params)" type="yaml"/>
   </node>
 
 </launch>
