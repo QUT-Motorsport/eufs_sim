@@ -22,12 +22,7 @@
     <depend>eufs_description</depend>
     <depend>ros_can_sim</depend>
     <depend>eufs_msgs</depend>
-    <depend>controller_manager</depend>
-    <depend>velodyne_simulator</depend>
-    <depend>effort_controllers</depend>
-    <depend>velocity_controllers</depend>
     <depend>joint_state_controller</depend>
-    <depend>gazebo_ros_control</depend>
     <depend>roscpp</depend>
     <depend>rospy</depend>
     <depend>std_msgs</depend>

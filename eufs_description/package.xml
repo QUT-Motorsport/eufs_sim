@@ -3,7 +3,7 @@
     <name>eufs_description</name>
     <version>0.1.0</version>
     <description>The eufs_description package
-    Contrains all of the 3D models and meshes for 
+    Contrains all of the 3D models and meshes for
     simulation purposes.
     </description>
 
@@ -23,12 +23,7 @@
     <depend>urdf</depend>
     <depend>xacro</depend>
     <depend>hector_gazebo_plugins</depend>
-    <depend>controller_manager</depend>
-    <depend>velodyne_simulator</depend>
-    <depend>effort_controllers</depend>
-    <depend>velocity_controllers</depend>
     <depend>joint_state_controller</depend>
-    <depend>gazebo_ros_control</depend>
     <depend>std_msgs</depend>
     <depend>std_srvs</depend>
     <depend>tf</depend>
