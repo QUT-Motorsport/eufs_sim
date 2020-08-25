@@ -1,4 +1,4 @@
-<!-- 
+<!--
     This launch file is intended to launch everything for testing on your laptop, including
     the simulation. Cannot record data and does not launch sensor drivers.
 -->
@@ -19,7 +19,7 @@
     <!-- Launch RViz -->
     <arg name="rviz" default="true"/>
 
-    <!-- Whether or not to use ground truth transfrom-->
+    <!-- Whether or not to use ground truth transfrom -->
     <arg name="publish_gt_tf" default="false"/>
 
     <!-- Which group of launch files to use for the state_machine node.
