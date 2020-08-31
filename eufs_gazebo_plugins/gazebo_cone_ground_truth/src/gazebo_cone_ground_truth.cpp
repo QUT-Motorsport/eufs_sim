@@ -93,7 +93,16 @@ namespace gazebo {
       this->ground_truth_cone_marker_pub_ = this->rosnode_->advertise<visualization_msgs::MarkerArray>(topic_name_, 1);
     }
 
-    if (simulate_perception_) {
+    // Ground truth track publisher
+    if (!_sdf->HasElement("groundTruthTrackTopicName")) {
+      ROS_FATAL_NAMED("state_ground_truth", "state_ground_truth plugin missing <groundTruthTrackTopicName>, cannot proceed");
+      return;
+    } else {
+      std::string topic_name_ = _sdf->GetElement("groundTruthTrackTopicName")->Get<std::string>();
+      this->ground_truth_track_pub_ = this->rosnode_->advertise<eufs_msgs::ConeArrayWithCovariance>(topic_name_, 1);
+    }
+
+    if (this->simulate_perception_) {
       // Camera cone publisher
       if (!_sdf->HasElement("perceptionConesTopicName")) {
         ROS_FATAL_NAMED("state_ground_truth",
@@ -140,17 +149,25 @@ namespace gazebo {
     this->car_pos = this->car_link->GetWorldPose().Ign();
 #endif
 
-    eufs_msgs::ConeArrayWithCovariance ground_truth_cone_array_message;
+    // Get the track message
+    eufs_msgs::ConeArrayWithCovariance ground_truth_track_message = getTrackMessage();
 
-    // Publish the ground truth if it has subscribers
-    if (this->ground_truth_cone_pub_.getNumSubscribers() > 0 || this->ground_truth_cone_marker_pub_.getNumSubscribers() > 0) {
-      ground_truth_cone_array_message = getConeArrayMessage();
-      visualization_msgs::MarkerArray ground_truth_cone_marker_array_message = getConeMarkerArrayMessage(ground_truth_cone_array_message);
+    // Publish the ground truth track if it has subscribers
+    if (this->ground_truth_track_pub_.getNumSubscribers() > 0) {
+      this->ground_truth_track_pub_.publish(ground_truth_track_message);
+    }
 
+    eufs_msgs::ConeArrayWithCovariance ground_truth_cone_array_message = getConeArrayMessage(ground_truth_track_message);
+
+    // Publish the ground truth cones if it has subscribers
+    if (this->ground_truth_cone_pub_.getNumSubscribers() > 0) {
       this->ground_truth_cone_pub_.publish(ground_truth_cone_array_message);
+    }
+
+    // Publish the ground truth cone markers if it has subscribers
+    if (this->ground_truth_cone_marker_pub_.getNumSubscribers() > 0) {
+      visualization_msgs::MarkerArray ground_truth_cone_marker_array_message = getConeMarkerArrayMessage(ground_truth_cone_array_message);
       this->ground_truth_cone_marker_pub_.publish(ground_truth_cone_marker_array_message);
-    } else if (this->simulate_perception_ && (this->perception_cone_pub_.getNumSubscribers() > 0 || this->perception_cone_marker_pub_.getNumSubscribers() > 0)) {
-      ground_truth_cone_array_message = getConeArrayMessage();
     }
 
     // Publish the simulated perception cones if it has subscribers
@@ -164,15 +181,24 @@ namespace gazebo {
 
   }
 
+  // Getting the track
+  eufs_msgs::ConeArrayWithCovariance GazeboConeGroundTruth::getTrackMessage() {
+    eufs_msgs::ConeArrayWithCovariance ground_truth_track_message;
+
+    if (this->track_model != nullptr) {
+      physics::Link_V links = this->track_model->GetLinks();
+      for (unsigned int i = 0; i < links.size(); i++) {
+        addConeToConeArray(ground_truth_track_message, links[i]);
+      }
+    }
+
+    return ground_truth_track_message;
+  }
 
   // Getting the cone arrays
-  eufs_msgs::ConeArrayWithCovariance GazeboConeGroundTruth::getConeArrayMessage() {
-    eufs_msgs::ConeArrayWithCovariance ground_truth_cone_array_message;
 
-    physics::Link_V links = this->track_model->GetLinks();
-    for (unsigned int i = 0; i < links.size(); i++) {
-      addConeToConeArray(ground_truth_cone_array_message, links[i]);
-    }
+  eufs_msgs::ConeArrayWithCovariance GazeboConeGroundTruth::getConeArrayMessage(eufs_msgs::ConeArrayWithCovariance &track) {
+    eufs_msgs::ConeArrayWithCovariance ground_truth_cone_array_message = track;
 
     processCones(ground_truth_cone_array_message);
 
@@ -346,7 +372,8 @@ namespace gazebo {
       return ConeType::big_orange;
     }
 
-    ROS_ERROR("Unknown link in model: %s", link_name.c_str());
+    ROS_WARN_ONCE("Cannot get cone type from link in the track model in simulation: %s", link_name.c_str());
+    return ConeType::unknown;
   }
 
   // Getting the cone marker array
