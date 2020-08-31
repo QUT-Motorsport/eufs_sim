@@ -77,8 +77,11 @@ namespace gazebo {
 
     void UpdateChild();
 
+    // Getting the track
+    eufs_msgs::ConeArrayWithCovariance getTrackMessage();
+
     // Getting the cone arrays
-    eufs_msgs::ConeArrayWithCovariance getConeArrayMessage();
+    eufs_msgs::ConeArrayWithCovariance getConeArrayMessage(eufs_msgs::ConeArrayWithCovariance &track);
 
     void addConeToConeArray(eufs_msgs::ConeArrayWithCovariance &ground_truth_cone_array, physics::LinkPtr link);
 
@@ -120,6 +123,8 @@ namespace gazebo {
     // Publishers
     ros::Publisher ground_truth_cone_pub_;
     ros::Publisher ground_truth_cone_marker_pub_;
+
+    ros::Publisher ground_truth_track_pub_;
 
     ros::Publisher perception_cone_pub_;
     ros::Publisher perception_cone_marker_pub_;
