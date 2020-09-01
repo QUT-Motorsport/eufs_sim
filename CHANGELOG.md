@@ -9,6 +9,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Mission selector and steering RQT GUI
 - Race car model plugin to make the car behave according to the dynamic bicycle vehicle model
 - Cone ground truth plugin to publish cone locations and simulate perception
-- Includes plugins for various sensors
+- Includes plugins for various sensors including IMU, GPS, VLP LiDAR, and ZED camera
 - Existing track layouts for all the Formula Student events
 - Random track generator
