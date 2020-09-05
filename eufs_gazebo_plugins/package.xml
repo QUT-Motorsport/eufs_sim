@@ -1,28 +1,40 @@
 <?xml version="1.0"?>
-<package format="2">
-    <name>eufs_gazebo_plugins</name>
-    <version>1.0.0</version>
-    <description>Gazebo plugins for Formula Student simulations</description>
+<?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
+<package format="3">
+  <name>eufs_gazebo_plugins</name>
+  <version>1.0.0</version>
+  <description>Gazebo plugins for Formula Student simulations</description>
 
-    <maintainer email="info@eufs.co">EUFS</maintainer>
-    <license>MIT</license>
-    <author>EUFS</author>
+  <maintainer email="siliconlad@protonmail.com">Angus Stewart</maintainer>
+  <maintainer email="niklasburggraaff@gmail.com">Ignat Georgiev</maintainer>
 
-    <buildtool_depend>catkin</buildtool_depend>
+  <license>MIT</license>
 
-    <depend>gazebo_msgs</depend>
-    <depend>gazebo_plugins</depend>
-    <depend>geometry_msgs</depend>
-    <depend>roscpp</depend>
-    <depend>nodelet</depend>
-    <depend>nav_msgs</depend>
-    <depend>eufs_msgs</depend>
-    <depend>ackermann_msgs</depend>
-    <depend>tf2_ros</depend>
-    <depend>tf</depend>
+  <url type="website">http://eufs.co</url>
+  <url type="repository">https://gitlab.com/eufs/eufs_sim</url>
+  <url type="bugtracker">https://gitlab.com/eufs/eufs_sim/issues</url>
 
-    <exec_depend>message_runtime</exec_depend>
+  <buildtool_depend>ament_cmake</buildtool_depend>
 
-    <test_depend>rostest</test_depend>
+  <depend>gazebo_msgs</depend>
+  <depend>gazebo_plugins</depend>
+  <depend>geometry_msgs</depend>
+  <depend>rclcpp</depend>
+  <depend>nodelet</depend>
+  <depend>nav_msgs</depend>
+  <depend>eufs_msgs</depend>
+  <depend>ackermann_msgs</depend>
+  <depend>tf2_ros</depend>
+  <depend>tf</depend>
 
+  <exec_depend>message_runtime</exec_depend>
+
+  <test_depend>rostest</test_depend>
+
+  <test_depend>ament_lint_auto</test_depend>
+  <test_depend>ament_lint_common</test_depend>
+
+  <export>
+    <build_type>ament_cmake</build_type>
+  </export>
 </package>

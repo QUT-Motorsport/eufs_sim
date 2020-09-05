@@ -21,14 +21,12 @@
 # SOFTWARE.
 
 include_directories(include
-        ${catkin_INCLUDE_DIRS}
         ${GAZEBO_INCLUDE_DIRS}
         ${SDFormat_INCLUDE_DIRS}
         ${OGRE_INCLUDE_DIRS}
         ${Boost_INCLUDE_DIRS})
 
 link_directories(
-        ${catkin_LIBRARY_DIRS}
         ${OGRE_LIBRARY_DIRS}
         ${OGRE-Terrain_LIBRARY_DIRS}
         ${OGRE-Paging_LIBRARY_DIRS})
@@ -39,10 +37,10 @@ add_library(gazebo_race_car_model SHARED
         src/vehicle_model.cpp
         src/models/dynamic_bicycle.cpp
         src/models/point_mass.cpp)
-target_include_directories(gazebo_race_car_model PUBLIC include ${CMAKE_SOURCE_DIR} ${catkin_LIBRARY_DIRS})
-target_link_libraries(gazebo_race_car_model ${GAZEBO_LIBRARIES} ${IGNITION-MSGS_LIBRARIES} yaml-cpp ${catkin_LIBRARIES} ${OGRE_LIBRARY})
+target_include_directories(gazebo_race_car_model PUBLIC include)
+target_link_libraries(gazebo_race_car_model ${GAZEBO_LIBRARIES} ${IGNITION-MSGS_LIBRARIES} yaml-cpp ${OGRE_LIBRARY})
 
 install(TARGETS gazebo_race_car_model
-        ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
-        LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
-        RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})
+        ARCHIVE DESTINATION lib
+        LIBRARY DESTINATION lib
+        RUNTIME DESTINATION lib)

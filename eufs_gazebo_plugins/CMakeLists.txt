@@ -1,45 +1,52 @@
 cmake_minimum_required(VERSION 3.5)
 project(eufs_gazebo_plugins)
 
-add_compile_options(-std=c++11)
+# Default to C++14
+if(NOT CMAKE_CXX_STANDARD)
+  set(CMAKE_CXX_STANDARD 14)
+endif()
 
-find_package(catkin REQUIRED COMPONENTS
-        gazebo_msgs
-        roscpp
-        nodelet
-        geometry_msgs
-        nav_msgs
-        ackermann_msgs
-        eufs_msgs
-        tf2_ros
-        tf
-        )
+if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
+  add_compile_options(-Wall -Wextra -Wpedantic)
+endif()
+
+find_package(ament_cmake REQUIRED)
+
+find_package(rclcpp REQUIRED)
+
+find_package(eufs_msgs REQUIRED)
+find_package(gazebo_msgs REQUIRED)
+find_package(geometry_msgs REQUIRED)
+find_package(nav_msgs REQUIRED)
+find_package(ackermann_msgs REQUIRED)
+
+find_package(tf2_ros REQUIRED)
+find_package(tf REQUIRED)
+
+find_package(nodelet REQUIRED)
 
 find_package(Boost REQUIRED COMPONENTS thread)
 find_package(gazebo REQUIRED)
 
-catkin_package(
-        INCLUDE_DIRS gazebo_cone_ground_truth/include
-        LIBRARIES gazebo_state_ground_truth
-        CATKIN_DEPENDS
-        gazebo_msgs
-        roscpp
-        nodelet
-        geometry_msgs
-        nav_msgs
-        eufs_msgs
-        ackermann_msgs
-        tf2_ros
-        tf
+ament_export_dependencies(
+  gazebo_msgs
+  rclcpp
+  nodelet
+  geometry_msgs
+  nav_msgs
+  eufs_msgs
+  ackermann_msgs
+  tf2_ros
+  tf
 )
+
+ament_export_include_directories(
+  gazebo_cone_ground_truth/include
+)
+
+ament_export_libraries(gazebo_state_ground_truth)
 
 add_subdirectory(gazebo_cone_ground_truth)
 add_subdirectory(gazebo_race_car_model)
 
-# Tests
-# These need to be run with -j1 flag because gazebo can't be run
-# in parallel.
-#if (CATKIN_ENABLE_TESTING)
-#    find_package(rostest REQUIRED)
-#    # TODO
-#endif ()
+ament_package()

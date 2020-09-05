@@ -1,24 +1,34 @@
 <?xml version="1.0"?>
-<package format="2">
-    <name>eufs_launcher</name>
-    <version>0.0.0</version>
-    <description>The package that launches and links everything together</description>
+<?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
+<package format="3">
+  <name>eufs_launcher</name>
+  <version>0.0.0</version>
+  <description>The package that launches and links everything together</description>
 
-    <maintainer email="e.bailey.andrew@gmail.com">Bailey Andrew</maintainer>
+  <maintainer email="e.bailey.andrew@gmail.com">Bailey Andrew</maintainer>
+  <maintainer email="siliconlad@protonmail.com">Angus Stewart</maintainer>
 
-    <license>MIT</license>
+  <license>MIT</license>
 
-    <buildtool_depend>catkin</buildtool_depend>
+  <url type="website">http://eufs.co</url>
+  <url type="repository">https://gitlab.com/eufs/eufs_sim</url>
+  <url type="bugtracker">https://gitlab.com/eufs/eufs_sim/issues</url>
 
-    <build_depend>roslint</build_depend>
+  <buildtool_depend>ament_cmake</buildtool_depend>
 
-    <depend>gazebo_ros</depend>
-    <depend>roscpp</depend>
-    <depend>rqt_gui_cpp</depend>
-    <depend>eufs_gazebo</depend>
+  <build_depend>roslint</build_depend>
 
-    <export>
-        <gazebo_ros plugin_path='${prefix}/lib' gazebo_media_path='${prefix}' />
-        <rqt_gui plugin="${prefix}/plugin.xml"/>
-    </export>
+  <depend>gazebo_ros</depend>
+  <depend>rclcpp</depend>
+  <depend>rqt_gui_cpp</depend>
+  <depend>eufs_gazebo</depend>
+
+  <test_depend>ament_lint_auto</test_depend>
+  <test_depend>ament_lint_common</test_depend>
+
+  <export>
+    <build_type>ament_python</build_type>
+    <gazebo_ros plugin_path='${prefix}/lib' gazebo_media_path='${prefix}' />
+    <rqt_gui plugin="${prefix}/plugin.xml"/>
+  </export>
 </package>

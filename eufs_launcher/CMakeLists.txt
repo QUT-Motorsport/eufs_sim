@@ -1,54 +1,55 @@
 cmake_minimum_required(VERSION 3.5)
 project(eufs_launcher)
 
-add_compile_options(-std=c++11)
+# Default to C++14
+if(NOT CMAKE_CXX_STANDARD)
+    set(CMAKE_CXX_STANDARD 14)
+endif()
 
+if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
+    add_compile_options(-Wall -Wextra -Wpedantic)
+endif()
+
+find_package(ament_cmake REQUIRED)
+
+find_package(rclcpp REQUIRED)
+
+find_package(roslint REQUIRED)
+
+find_package(gazebo REQUIRED)
+find_package(gazebo_ros REQUIRED)
 
 find_package(Boost REQUIRED)
-# Load catkin and all dependencies required for this package
-find_package(catkin REQUIRED COMPONENTS
-  roscpp
-  gazebo_ros
-  roslint
-)
-
-# Depend on system install of Gazebo
-find_package(gazebo REQUIRED)
-
-catkin_python_setup()
 
 link_directories(${GAZEBO_LIBRARY_DIRS})
-include_directories(${Boost_INCLUDE_DIR} ${catkin_INCLUDE_DIRS} ${GAZEBO_INCLUDE_DIRS})
+include_directories(${Boost_INCLUDE_DIR} ${GAZEBO_INCLUDE_DIRS})
 
-catkin_package(
-  DEPENDS
-    roscpp
-    gazebo_ros
+ament_export_dependencies(
+  rclcpp
+  gazebo_ros
 )
 
+if(BUILD_TESTING)
+    find_package(ament_lint_auto REQUIRED)
+    ament_lint_auto_find_test_dependencies()
+endif()
+
 install(PROGRAMS scripts/rqt_eufs_launcher.py
-  DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
+  DESTINATION lib/${PROJECT_NAME}
 )
 
 install(PROGRAMS scripts/rqt_eufs_sketcher.py
-  DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
+  DESTINATION lib/${PROJECT_NAME}
 )
 
 install(DIRECTORY
   resource
-  DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
+  DESTINATION share
 )
 
 install(FILES
   plugin.xml
-  DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
+  DESTINATION share
 )
 
-#############
-## Roslint ##
-#############
-
-roslint_python()
-
-# Uncomment the line below when C++ files are added to this package
-# roslint_cpp()
+ament_package()

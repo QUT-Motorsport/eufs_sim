@@ -1,60 +1,55 @@
-cmake_minimum_required(VERSION 2.8.3)
+cmake_minimum_required(VERSION 3.5)
 project(ros_can_sim)
 
-set(BUILD_FLAGS "-std=c++14 -Wuninitialized -Wall -Wextra -Wunused-parameter")
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${BUILD_FLAGS}")
+# Default to C++14
+if(NOT CMAKE_CXX_STANDARD)
+    set(CMAKE_CXX_STANDARD 14)
+endif()
 
-find_package(catkin REQUIRED COMPONENTS
-        roscpp
-        tf
-        rqt_gui
-        rqt_gui_py
-        ackermann_msgs
-        geometry_msgs
-        sensor_msgs
-        std_msgs
-        eufs_msgs
-        std_srvs
-        roslint
-        )
+if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
+    add_compile_options(-Wall -Wextra -Wpedantic)
+endif()
 
-catkin_package(
-        #  INCLUDE_DIRS include
-        #  LIBRARIES snap_vislam
-        #  CATKIN_DEPENDS roscpp rospy std_msgs
-        #  DEPENDS system_lib
-)
+find_package(ament_cmake REQUIRED)
 
-## Specify additional locations of header files
-## Your package locations should be listed before other locations
-include_directories(
-        ${catkin_INCLUDE_DIRS}
-)
+find_package(rclcpp REQUIRED)
 
-# needed because of setup.py
-catkin_python_setup()
+find_package(eufs_msgs REQUIRED)
+find_package(std_msgs REQUIRED)
+find_package(ackermann_msgs REQUIRED)
+find_package(geometry_msgs REQUIRED)
+find_package(sensor_msgs REQUIRED)
+
+find_package(std_srvs REQUIRED)
+
+find_package(rqt_gui REQUIRED)
+find_package(rqt_gui_py REQUIRED)
+
+find_package(tf REQUIRED)
+
+find_package(roslint REQUIRED)
+
+if(BUILD_TESTING)
+    find_package(ament_lint_auto REQUIRED)
+    ament_lint_auto_find_test_dependencies()
+endif()
+
+#ament_package()
 
 install(PROGRAMS nodes/ros_can_sim_gui
-        DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
+        DESTINATION lib/${PROJECT_NAME}
         )
 
 install(PROGRAMS nodes/eufs_robot_steering_gui
-        DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
+        DESTINATION lib/${PROJECT_NAME}
         )
 
 install(DIRECTORY
         resource
-        DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
+        DESTINATION share/${PROJECT_NAME}
         )
 
 install(FILES
         plugin.xml
-        DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
+        DESTINATION share/${PROJECT_NAME}
         )
-
-#############
-## Roslint ##
-#############
-
-roslint_python()
-#roslint_cpp()
