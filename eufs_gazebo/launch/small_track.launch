@@ -3,7 +3,7 @@
 
   <!-- Gazebo arguments -->
   <set_env name="GAZEBO_MODEL_PATH" value="$(find-pkg-share eufs_description)/models"/>
-  <set_env name="GAZEBO_RESOURCE_PATH" value="$(find-pkg-share eufs_description)/meshes:/usr/share/gazebo-11"/>
+  <set_env name="GAZEBO_RESOURCE_PATH" value="$(find-pkg-share eufs_description)/meshes:$(find-pkg-share eufs_description)/materials:/usr/share/gazebo-11"/>
   <set_env name="GAZEBO_PLUGIN_PATH" value="/opt/ros/foxy/lib/:$(env EUFS_MASTER)/install/eufs_gazebo_plugins"/>
 
   <!-- Verbose argument passed to Gazebo -->
@@ -16,7 +16,7 @@
   <arg name="launch_group" default="default"/>
 
   <!-- Launch the Gazebo GUI -->
-  <arg name="gazebo_gui" default="true"/>
+  <arg name="gazebo_gui" default="false"/>
   <!-- Show the RQT GUI (with ros_can_sim GUI and EUFS Robot Steering GUI) -->
   <arg name="show_rqt_gui" default="true"/>
   <!-- Launch RViz -->
