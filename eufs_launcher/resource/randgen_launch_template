@@ -3,7 +3,7 @@
 
   <!-- Gazebo arguments -->
   <set_env name="GAZEBO_MODEL_PATH" value="$(find-pkg-share eufs_description)/models"/>
-  <set_env name="GAZEBO_RESOURCE_PATH" value="$(find-pkg-share eufs_description)/meshes:/usr/share/gazebo-11"/>
+  <set_env name="GAZEBO_RESOURCE_PATH" value="$(find-pkg-share eufs_description)/meshes:$(find-pkg-share eufs_description)/materials:/usr/share/gazebo-11"/>
   <set_env name="GAZEBO_PLUGIN_PATH" value="/opt/ros/foxy/lib/:$(env EUFS_MASTER)/install/eufs_gazebo_plugins"/>
 
   <!-- Verbose argument passed to Gazebo -->
