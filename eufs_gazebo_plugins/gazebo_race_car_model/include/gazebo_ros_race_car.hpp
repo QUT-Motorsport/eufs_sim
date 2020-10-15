@@ -27,52 +27,55 @@
 #define GAZEBO_ROS_RACE_CAR_HPP
 
 // ROS Includes
-#include <ros/ros.h>
+#include "rclcpp/rclcpp.hpp"
 
 // Gazebo Includes
 #include <gazebo/common/Time.hh>
 #include <gazebo/physics/physics.hh>
 #include <gazebo/transport/transport.hh>
 #include <gazebo/common/Plugin.hh>
+#include <gazebo_ros/node.hpp>
 
 // ROS RACE CAR PLUGIN
 #include "vehicle_model.hpp"
 #include "../src/models/dynamic_bicycle.cpp"
 #include "../src/models/point_mass.cpp"
 
-namespace gazebo {
+namespace gazebo_plugins {
+namespace eufs {
 
-class RaceCarModelPlugin : public ModelPlugin {
-public:
+class RaceCarModelPlugin : public gazebo::ModelPlugin {
+ public:
   RaceCarModelPlugin();
 
   ~RaceCarModelPlugin() override;
 
   void Reset() override;
 
-  void Load(physics::ModelPtr _parent, sdf::ElementPtr _sdf) override;
+  void Load(gazebo::physics::ModelPtr _parent, sdf::ElementPtr _sdf) override;
 
-  boost::shared_ptr<ros::NodeHandle> rosnode;
+  std::shared_ptr<rclcpp::Node> rosnode;
 
-  physics::WorldPtr world;
+  gazebo::physics::WorldPtr world;
 
-  physics::ModelPtr model;
+  gazebo::physics::ModelPtr model;
 
-  transport::NodePtr gznode;
+  gazebo::transport::NodePtr gznode;
 
-private:
+ private:
   void update();
 
   double update_rate_;
 
-  event::ConnectionPtr updateConnection;
+  gazebo::event::ConnectionPtr updateConnection;
 
   eufs::VehicleModelPtr vehicle;
 
-  common::Time lastSimTime;
+  gazebo::common::Time lastSimTime;
 
-  transport::PublisherPtr worldControlPub;
+  gazebo::transport::PublisherPtr worldControlPub;
 };
 
-} // namespace gazebo
+} // namespace eufs
+} // namespace gazebo_plugins
 #endif // GAZEBO_ROS_RACE_CAR_HPP

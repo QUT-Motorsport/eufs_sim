@@ -26,7 +26,7 @@
 #ifndef GAZEBO_VEHICLE_HPP
 #define GAZEBO_VEHICLE_HPP
 
-#include <ros/ros.h>
+//#include "rclcpp/rclcpp.hpp"
 
 #include <gazebo/physics/physics.hh>
 
@@ -36,27 +36,28 @@
 #include "state_machine.hpp"
 
 // ROS msgs
-#include "eufs_msgs/CarState.h"
-#include "eufs_msgs/WheelSpeedsStamped.h"
-#include "nav_msgs/Odometry.h"
-#include "geometry_msgs/PoseWithCovarianceStamped.h"
-#include "geometry_msgs/PoseWithCovariance.h"
-#include "geometry_msgs/TwistWithCovariance.h"
-#include "geometry_msgs/Vector3.h"
-#include "ackermann_msgs/AckermannDriveStamped.h"
+#include "eufs_msgs/msg/ackermann_drive_stamped.hpp"
+#include "eufs_msgs/msg/car_state.hpp"
+#include "eufs_msgs/msg/wheel_speeds_stamped.hpp"
+#include "nav_msgs/msg/odometry.hpp"
+#include "geometry_msgs/msg/pose_with_covariance_stamped.hpp"
+#include "geometry_msgs/msg/pose_with_covariance.hpp"
+#include "geometry_msgs/msg/twist_with_covariance.hpp"
+#include "geometry_msgs/msg/vector3.hpp"
 // ROS
-#include <tf/transform_datatypes.h>
-#include <tf/transform_broadcaster.h>
+#include <tf2/transform_datatypes.h>
+#include <tf2_ros/transform_broadcaster.h>
+#include <tf2/utils.h>
 
-namespace gazebo {
+namespace gazebo_plugins {
 namespace eufs {
 
 class VehicleModel {
 public:
-  VehicleModel(physics::ModelPtr &_model,
-          sdf::ElementPtr &_sdf,
-          boost::shared_ptr<ros::NodeHandle> &nh,
-          transport::NodePtr &gznode);
+  VehicleModel(gazebo::physics::ModelPtr &_model,
+               sdf::ElementPtr &_sdf,
+               std::shared_ptr<rclcpp::Node> rosnode,
+               gazebo::transport::NodePtr &gznode);
 
   void update(double dt);
 
@@ -88,7 +89,7 @@ protected:
 
   void publishTf();
 
-  void onCmd(const ackermann_msgs::AckermannDriveStampedConstPtr &msg);
+  void onCmd(const eufs_msgs::msg::AckermannDriveStamped::SharedPtr msg);
 
   State &getState() { return state_; }
 
@@ -99,11 +100,11 @@ protected:
   Input input_;
   double time_last_cmd_;
 
-  // ROS Nodehandle
-  boost::shared_ptr<ros::NodeHandle> nh_;
+  // ROS Node
+  std::shared_ptr<rclcpp::Node> rosnode;
 
   // Pointer to the parent model
-  physics::ModelPtr model;
+  gazebo::physics::ModelPtr model;
 
   // Rate to publish ros messages
   double publish_rate_;
@@ -114,12 +115,12 @@ protected:
   std::string odom_topic_name_;
 
   // ROS Publishers
-  ros::Publisher pub_car_state_, pub_car_info_;
-  ros::Publisher pub_wheel_speeds_;
-  ros::Publisher pub_odom_;
+  rclcpp::Publisher<eufs_msgs::msg::CarState>::SharedPtr pub_car_state_;
+  rclcpp::Publisher<eufs_msgs::msg::WheelSpeedsStamped>::SharedPtr pub_wheel_speeds_;
+  rclcpp::Publisher<nav_msgs::msg::Odometry>::SharedPtr pub_odom_;
 
-  // ROS Subscribers
-  ros::Subscriber sub_cmd_;
+  // ROS Subscriptions
+  rclcpp::Subscription<eufs_msgs::msg::AckermannDriveStamped>::SharedPtr sub_cmd_;
 
   bool publish_tf_;
   std::string reference_frame_;
@@ -135,22 +136,22 @@ protected:
   std::vector<double> ToQuaternion(std::vector<double> &euler);
 
   // ROS TF
-  tf::TransformBroadcaster tf_br_;
+  tf2_ros::TransformBroadcaster tf_br_;
 
   // Gaussian Kernel for random number generation
   unsigned int seed;
   double GaussianKernel(double mu, double sigma);
 
  protected:
-  // Steering joints
-  physics::JointPtr left_steering_joint;
-  physics::JointPtr right_steering_joint;
+  // Steering jointsState
+  gazebo::physics::JointPtr left_steering_joint;
+  gazebo::physics::JointPtr right_steering_joint;
 
   // Wheels
-  physics::JointPtr front_left_wheel;
-  physics::JointPtr front_right_wheel;
-  physics::JointPtr rear_left_wheel;
-  physics::JointPtr rear_right_wheel;
+  gazebo::physics::JointPtr front_left_wheel;
+  gazebo::physics::JointPtr front_right_wheel;
+  gazebo::physics::JointPtr rear_left_wheel;
+  gazebo::physics::JointPtr rear_right_wheel;
 
   // Parameters
   Param param_;
@@ -159,6 +160,6 @@ protected:
 typedef std::unique_ptr<VehicleModel> VehicleModelPtr;
 
 } // namespace eufs
-} // namespace gazebo
+} // namespace gazebo_plugins
 
 #endif //GAZEBO_VEHICLE_HPP

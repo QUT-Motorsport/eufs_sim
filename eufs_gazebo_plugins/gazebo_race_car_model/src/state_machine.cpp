@@ -37,103 +37,106 @@
 #include <string>
 #include <vector>
 
-StateMachine::StateMachine(boost::shared_ptr<ros::NodeHandle> &nh) : nh_(nh)
+namespace gazebo_plugins {
+namespace eufs {
+
+StateMachine::StateMachine(std::shared_ptr<rclcpp::Node> rosnode) : rosnode(rosnode)
 {
     // init state machine state
-    as_state_ = eufs_msgs::CanState::AS_OFF;
-    ami_state_ = eufs_msgs::CanState::AMI_NOT_SELECTED;
+    as_state_ = eufs_msgs::msg::CanState::AS_OFF;
+    ami_state_ = eufs_msgs::msg::CanState::AMI_NOT_SELECTED;
     driving_flag_ = false;
 
-    // Subscribers
-    flag_sub_ = nh_->subscribe<std_msgs::Bool>("/ros_can/mission_flag", 1, &StateMachine::flagCallback, this);
-    set_mission_sub_ = nh_->subscribe<eufs_msgs::CanState>("/ros_can/set_mission", 1, &StateMachine::setMission, this);
+    // Subscriptions
+    flag_sub_ = rosnode->create_subscription<std_msgs::msg::Bool>("/ros_can/mission_flag", 1, std::bind(&StateMachine::flagCallback, this, std::placeholders::_1));
+    set_mission_sub_ = rosnode->create_subscription<eufs_msgs::msg::CanState>("/ros_can/set_mission", 1, std::bind(&StateMachine::setMission, this, std::placeholders::_1));
 
     // Services
-    reset_srv_ = nh_->advertiseService("/ros_can/reset", &StateMachine::resetState, this);
-    ebs_srv_ = nh_->advertiseService("/ros_can/ebs", &StateMachine::requestEBS, this);
+    reset_srv_ = rosnode->create_service<std_srvs::srv::Trigger>("/ros_can/reset", std::bind(&StateMachine::resetState, this, std::placeholders::_1, std::placeholders::_2));
+    ebs_srv_ = rosnode->create_service<std_srvs::srv::Trigger>("/ros_can/ebs", std::bind(&StateMachine::requestEBS, this, std::placeholders::_1, std::placeholders::_2));
 
     // Publishers
-    state_pub_ = nh_->advertise<eufs_msgs::CanState>("/ros_can/state", 1);
-    state_pub_str_ = nh_->advertise<std_msgs::String>("/ros_can/state_str", 1);
+    state_pub_ = rosnode->create_publisher<eufs_msgs::msg::CanState>("/ros_can/state", 1);
+    state_pub_str_ = rosnode->create_publisher<std_msgs::msg::String>("/ros_can/state_str", 1);
 }
 
 StateMachine::~StateMachine()
 {
 }
 
-void StateMachine::setMission(eufs_msgs::CanState state)
+void StateMachine::setMission(const eufs_msgs::msg::CanState::SharedPtr state)
 {
-    if (state.as_state == eufs_msgs::CanState::AS_DRIVING)
+    if (state->as_state == eufs_msgs::msg::CanState::AS_DRIVING)
     {
-        as_state_ = eufs_msgs::CanState::AS_DRIVING;
+        as_state_ = eufs_msgs::msg::CanState::AS_DRIVING;
         driving_flag_ = true;
     }
 
-    if (ami_state_ == eufs_msgs::CanState::AMI_NOT_SELECTED)
+    if (ami_state_ == eufs_msgs::msg::CanState::AMI_NOT_SELECTED)
     {
-        switch (state.ami_state)
+        switch (state->ami_state)
         {
-            case eufs_msgs::CanState::AMI_ACCELERATION:
-                ami_state_ = eufs_msgs::CanState::AMI_ACCELERATION;
+            case eufs_msgs::msg::CanState::AMI_ACCELERATION:
+                ami_state_ = eufs_msgs::msg::CanState::AMI_ACCELERATION;
                 break;
-            case eufs_msgs::CanState::AMI_SKIDPAD:
-                ami_state_ = eufs_msgs::CanState::AMI_SKIDPAD;
+            case eufs_msgs::msg::CanState::AMI_SKIDPAD:
+                ami_state_ = eufs_msgs::msg::CanState::AMI_SKIDPAD;
                 break;
-            case eufs_msgs::CanState::AMI_AUTOCROSS:
-                ami_state_ = eufs_msgs::CanState::AMI_AUTOCROSS;
+            case eufs_msgs::msg::CanState::AMI_AUTOCROSS:
+                ami_state_ = eufs_msgs::msg::CanState::AMI_AUTOCROSS;
                 break;
-            case eufs_msgs::CanState::AMI_TRACK_DRIVE:
-                ami_state_ = eufs_msgs::CanState::AMI_TRACK_DRIVE;
+            case eufs_msgs::msg::CanState::AMI_TRACK_DRIVE:
+                ami_state_ = eufs_msgs::msg::CanState::AMI_TRACK_DRIVE;
                 break;
-            case eufs_msgs::CanState::AMI_AUTONOMOUS_DEMO:
-                ami_state_ = eufs_msgs::CanState::AMI_AUTONOMOUS_DEMO;
+            case eufs_msgs::msg::CanState::AMI_AUTONOMOUS_DEMO:
+                ami_state_ = eufs_msgs::msg::CanState::AMI_AUTONOMOUS_DEMO;
                 break;
-            case eufs_msgs::CanState::AMI_ADS_INSPECTION:
-                ami_state_ = eufs_msgs::CanState::AMI_ADS_INSPECTION;
+            case eufs_msgs::msg::CanState::AMI_ADS_INSPECTION:
+                ami_state_ = eufs_msgs::msg::CanState::AMI_ADS_INSPECTION;
                 break;
-            case eufs_msgs::CanState::AMI_ADS_EBS:
-                ami_state_ = eufs_msgs::CanState::AMI_ADS_EBS;
+            case eufs_msgs::msg::CanState::AMI_ADS_EBS:
+                ami_state_ = eufs_msgs::msg::CanState::AMI_ADS_EBS;
                 break;
-            case eufs_msgs::CanState::AMI_DDT_INSPECTION_A:
-                ami_state_ = eufs_msgs::CanState::AMI_DDT_INSPECTION_A;
+            case eufs_msgs::msg::CanState::AMI_DDT_INSPECTION_A:
+                ami_state_ = eufs_msgs::msg::CanState::AMI_DDT_INSPECTION_A;
                 break;
-            case eufs_msgs::CanState::AMI_DDT_INSPECTION_B:
-                ami_state_ = eufs_msgs::CanState::AMI_DDT_INSPECTION_B;
+            case eufs_msgs::msg::CanState::AMI_DDT_INSPECTION_B:
+                ami_state_ = eufs_msgs::msg::CanState::AMI_DDT_INSPECTION_B;
                 break;
-            case eufs_msgs::CanState::AMI_MANUAL:
-                ami_state_ = eufs_msgs::CanState::AMI_MANUAL;
+            case eufs_msgs::msg::CanState::AMI_MANUAL:
+                ami_state_ = eufs_msgs::msg::CanState::AMI_MANUAL;
                 break;
             default:
-                ami_state_ = eufs_msgs::CanState::AMI_NOT_SELECTED;
+                ami_state_ = eufs_msgs::msg::CanState::AMI_NOT_SELECTED;
                 break;
         }
     }
     else
     {
-        ROS_WARN("Failed to set mission as a mission was set previously");
+        RCLCPP_WARN(rosnode->get_logger(), "Failed to set mission as a mission was set previously");
     }
 }
 
-bool StateMachine::resetState(std_srvs::Trigger::Request& request, std_srvs::Trigger::Response& response)
+bool StateMachine::resetState(std::shared_ptr<std_srvs::srv::Trigger::Request> request, std::shared_ptr<std_srvs::srv::Trigger::Response> response)
 {
     (void)request;   // suppress unused parameter warning
     (void)response;  // suppress unused parameter warning
-    as_state_ = eufs_msgs::CanState::AS_OFF;
-    ami_state_ = eufs_msgs::CanState::AMI_NOT_SELECTED;
+    as_state_ = eufs_msgs::msg::CanState::AS_OFF;
+    ami_state_ = eufs_msgs::msg::CanState::AMI_NOT_SELECTED;
     driving_flag_ = false;
-    response.success = true;
-    return response.success;
+    response->success = true;
+    return response->success;
 }
 
-bool StateMachine::requestEBS(std_srvs::Trigger::Request& request, std_srvs::Trigger::Response& response)
+bool StateMachine::requestEBS(std::shared_ptr<std_srvs::srv::Trigger::Request> request, std::shared_ptr<std_srvs::srv::Trigger::Response> response)
 {
     (void)request;   // suppress unused parameter warning
     (void)response;  // suppress unused parameter warning
-    as_state_ = eufs_msgs::CanState::AS_EMERGENCY_BRAKE;
-    ami_state_ = eufs_msgs::CanState::AMI_NOT_SELECTED;
+    as_state_ = eufs_msgs::msg::CanState::AS_EMERGENCY_BRAKE;
+    ami_state_ = eufs_msgs::msg::CanState::AMI_NOT_SELECTED;
     driving_flag_ = false;
-    response.success = true;
-    return response.success;
+    response->success = true;
+    return response->success;
 }
 
 void StateMachine::updateState()
@@ -142,39 +145,39 @@ void StateMachine::updateState()
 
     switch (as_state_)
     {
-        case eufs_msgs::CanState::AS_OFF:
-            if ((ami_state_ != eufs_msgs::CanState::AMI_NOT_SELECTED) && driving_flag_)
+        case eufs_msgs::msg::CanState::AS_OFF:
+            if ((ami_state_ != eufs_msgs::msg::CanState::AMI_NOT_SELECTED) && driving_flag_)
             {
                 // first sleep for 5s as is with the real car
                 std::this_thread::sleep_for(5s);
 
                 // now transition to new state
-                as_state_ = eufs_msgs::CanState::AS_READY;
-                ROS_DEBUG("state_machine :: switching to AS_READY state");
+                as_state_ = eufs_msgs::msg::CanState::AS_READY;
+                RCLCPP_DEBUG(rosnode->get_logger(), "state_machine :: switching to AS_READY state");
             }
             break;
 
-        case eufs_msgs::CanState::AS_READY:
+        case eufs_msgs::msg::CanState::AS_READY:
             if (driving_flag_)
             {
-                as_state_ = eufs_msgs::CanState::AS_DRIVING;
-                ROS_DEBUG("state_machine :: switching to AS_DRIVING state");
+                as_state_ = eufs_msgs::msg::CanState::AS_DRIVING;
+                RCLCPP_DEBUG(rosnode->get_logger(), "state_machine :: switching to AS_DRIVING state");
             }
             break;
 
-        case eufs_msgs::CanState::AS_DRIVING:
+        case eufs_msgs::msg::CanState::AS_DRIVING:
             if (!driving_flag_)
             {
-                as_state_ = eufs_msgs::CanState::AS_FINISHED;
-                ROS_DEBUG("state_machine :: switching to AS_FINISHED state");
+                as_state_ = eufs_msgs::msg::CanState::AS_FINISHED;
+                RCLCPP_DEBUG(rosnode->get_logger(), "state_machine :: switching to AS_FINISHED state");
             }
             break;
 
-        case eufs_msgs::CanState::AS_FINISHED:
+        case eufs_msgs::msg::CanState::AS_FINISHED:
             // do nothing for now
             break;
 
-        case eufs_msgs::CanState::AS_EMERGENCY_BRAKE:
+        case eufs_msgs::msg::CanState::AS_EMERGENCY_BRAKE:
             // do nothing for now
             break;
 
@@ -184,87 +187,92 @@ void StateMachine::updateState()
 
 void StateMachine::publishState()
 {
-    if (state_pub_.getNumSubscribers() == 0 &&
-            state_pub_str_.getNumSubscribers() == 0)
+    if (state_pub_->get_subscription_count() == 0 &&
+            state_pub_str_->get_subscription_count() == 0)
         return;  // do nothing
 
     // create message
-    eufs_msgs::CanState state_msg;
+    eufs_msgs::msg::CanState state_msg;
     state_msg.as_state = as_state_;
     state_msg.ami_state = ami_state_;
     state_msg.mission_flag = driving_flag_;
 
-    if (state_pub_.getNumSubscribers() > 0)
-        state_pub_.publish(state_msg);
+    if (state_pub_->get_subscription_count() > 0)
+        state_pub_->publish(state_msg);
 
-    if (state_pub_str_.getNumSubscribers() > 0)
-        state_pub_str_.publish(makeStateString(state_msg));
+    if (state_pub_str_->get_subscription_count() > 0)
+        state_pub_str_->publish(makeStateString(state_msg));
 }
 
-std_msgs::String StateMachine::makeStateString(const eufs_msgs::CanState &state)
+std_msgs::msg::String StateMachine::makeStateString(const eufs_msgs::msg::CanState &state)
 {
     std::string str1;
     std::string str2;
     std::string str3;
 
-    ROS_DEBUG("AS STATE: %d", state.as_state);
-    ROS_DEBUG("AMI STATE: %d", state.ami_state);
+    RCLCPP_DEBUG(rosnode->get_logger(), "AS STATE: %d", state.as_state);
+    RCLCPP_DEBUG(rosnode->get_logger(), "AMI STATE: %d", state.ami_state);
 
     switch (state.as_state)
     {
-        case eufs_msgs::CanState::AS_OFF:
+        case eufs_msgs::msg::CanState::AS_OFF:
             str1 = "AS:OFF";
             break;
-        case eufs_msgs::CanState::AS_READY:
+        case eufs_msgs::msg::CanState::AS_READY:
             str1 = "AS:READY";
             break;
-        case eufs_msgs::CanState::AS_DRIVING:
+        case eufs_msgs::msg::CanState::AS_DRIVING:
             str1 = "AS:DRIVING";
             break;
-        case eufs_msgs::CanState::AS_FINISHED:
+        case eufs_msgs::msg::CanState::AS_FINISHED:
             str1 = "AS:FINISHED";
             break;
-        case eufs_msgs::CanState::AS_EMERGENCY_BRAKE:
+        case eufs_msgs::msg::CanState::AS_EMERGENCY_BRAKE:
             str1 = "AS:EMERGENCY";
             break;
         default:
             str1 = "NO_SUCH_MESSAGE";
+            break;
     }
 
     switch (state.ami_state)
     {
-        case eufs_msgs::CanState::AMI_NOT_SELECTED:
+        case eufs_msgs::msg::CanState::AMI_NOT_SELECTED:
             str2 = "AMI:NOT_SELECTED";
             break;
-        case eufs_msgs::CanState::AMI_ACCELERATION:
+        case eufs_msgs::msg::CanState::AMI_ACCELERATION:
             str2 = "AMI:ACCELERATION";
             break;
-        case eufs_msgs::CanState::AMI_SKIDPAD:
+        case eufs_msgs::msg::CanState::AMI_SKIDPAD:
             str2 = "AMI:SKIDPAD";
             break;
-        case eufs_msgs::CanState::AMI_AUTOCROSS:
+        case eufs_msgs::msg::CanState::AMI_AUTOCROSS:
             str2 = "AMI:AUTOCROSS";
             break;
-        case eufs_msgs::CanState::AMI_TRACK_DRIVE:
+        case eufs_msgs::msg::CanState::AMI_TRACK_DRIVE:
             str2 = "AMI:TRACKDRIVE";
             break;
-        case eufs_msgs::CanState::AMI_ADS_INSPECTION:
-            str2 = "AS:ADS_INSPECTION";
+        case eufs_msgs::msg::CanState::AMI_ADS_INSPECTION:
+            str2 = "AMI:ADS_INSPECTION";
             break;
-        case eufs_msgs::CanState::AMI_ADS_EBS:
-            str2 = "AS:ADS_EBS";
+        case eufs_msgs::msg::CanState::AMI_ADS_EBS:
+            str2 = "AMI:ADS_EBS";
             break;
-        case eufs_msgs::CanState::AMI_DDT_INSPECTION_A:
-            str2 = "AS:DDT_INSPECTION_A";
+        case eufs_msgs::msg::CanState::AMI_DDT_INSPECTION_A:
+            str2 = "AMI:DDT_INSPECTION_A";
             break;
-        case eufs_msgs::CanState::AMI_DDT_INSPECTION_B:
-            str2 = "AS:DDT_INSPECTION_B";
+        case eufs_msgs::msg::CanState::AMI_DDT_INSPECTION_B:
+            str2 = "AMI:DDT_INSPECTION_B";
             break;
-        case eufs_msgs::CanState::AMI_AUTONOMOUS_DEMO:
-            str2 = "AS:BRAKETEST";
-            break;
+        case eufs_msgs::msg::CanState::AMI_AUTONOMOUS_DEMO:
+          str2 = "AMI:BRAKETEST";
+          break;
+        case eufs_msgs::msg::CanState::AMI_MANUAL:
+          str2 = "AMI:MANUAL";
+          break;
         default:
             str2 = "NO_SUCH_MESSAGE";
+            break;
     }
 
     if (driving_flag_)
@@ -272,24 +280,27 @@ std_msgs::String StateMachine::makeStateString(const eufs_msgs::CanState &state)
     else
         str3 = "DRIVING:FALSE";
 
-    std_msgs::String msg = std_msgs::String();
+    std_msgs::msg::String msg = std_msgs::msg::String();
     msg.data = str1 + " " + str2 + " " + str3;
     return msg;
 }
 
-void StateMachine::flagCallback(std_msgs::Bool msg)
+void StateMachine::flagCallback(const std_msgs::msg::Bool::SharedPtr msg)
 {
-    ROS_DEBUG("state_machine :: setting driving flag to %d", msg.data);
-    driving_flag_ = msg.data;
+    RCLCPP_DEBUG(rosnode->get_logger(), "state_machine :: setting driving flag to %d", msg->data);
+    driving_flag_ = msg->data;
 }
 
-bool StateMachine::spinOnce()
+void StateMachine::spinOnce()
 {
     this->updateState();
     this->publishState();
-    ros::spinOnce();
+//    rclcpp::spin_some(this->rosnode);
 }
 
 bool StateMachine::canDrive() {
-  return as_state_ == eufs_msgs::CanState::AS_DRIVING;
+  return as_state_ == eufs_msgs::msg::CanState::AS_DRIVING;
 }
+
+} // namespace eufs
+} // namespace gazebo_plugins

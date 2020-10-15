@@ -24,7 +24,7 @@
 
 #ifndef GAZEBO_CONFIG_HPP
 #define GAZEBO_CONFIG_HPP
-#include "ros/common.h"
+#include "rclcpp/rclcpp.hpp"
 #include "yaml-cpp/yaml.h"
 
 struct Param {
@@ -33,7 +33,7 @@ struct Param {
         double g;
         double I_z;
         void print() {
-            ROS_DEBUG("Inertia: \n "
+            RCLCPP_DEBUG(rclcpp::get_logger("vehicle_model"), "Inertia: \n "
                       "\tm: %f\n"
                       "\tg: %f\n"
                       "\tI_z: %f", m, g, I_z);
@@ -48,7 +48,7 @@ struct Param {
         double l_F;
         double l_R;
         void print() {
-            ROS_DEBUG("Kinematic: \n "
+            RCLCPP_DEBUG(rclcpp::get_logger("vehicle_model"), "Kinematic: \n "
                       "\tl: %f\n"
                       "\tb_F: %f\n"
                       "\tb_R: %f\n"
@@ -66,7 +66,7 @@ struct Param {
         double E;
         double radius;
         void print() {
-            ROS_DEBUG("Tire: \n "
+            RCLCPP_DEBUG(rclcpp::get_logger("vehicle_model"), "Tire: \n "
                       "\tB: %f\n"
                       "\tC: %f\n"
                       "\tD: %f\n"
@@ -79,7 +79,7 @@ struct Param {
         double c_down;
         double c_drag;
         void print() {
-            ROS_DEBUG("Aero: \n "
+            RCLCPP_DEBUG(rclcpp::get_logger("vehicle_model"), "Aero: \n "
                       "\tc_down: %f\n"
                       "\tc_drag: %f", c_down, c_drag);
         }
@@ -90,7 +90,7 @@ struct Param {
             double min;
             double max;
             void print() {
-                ROS_DEBUG("\tmin: %f"
+                RCLCPP_DEBUG(rclcpp::get_logger("vehicle_model"), "\tmin: %f"
                           "\tmax: %f", min, max);
             }
         };
@@ -98,10 +98,10 @@ struct Param {
         Range acc;
         Range delta;
         void print() {
-            ROS_DEBUG("Input ranges: ");
-            ROS_DEBUG("acc: ");
+            RCLCPP_DEBUG(rclcpp::get_logger("vehicle_model"), "Input ranges: ");
+            RCLCPP_DEBUG(rclcpp::get_logger("vehicle_model"), "acc: ");
             acc.print();
-            ROS_DEBUG("delta: ");
+            RCLCPP_DEBUG(rclcpp::get_logger("vehicle_model"), "delta: ");
             delta.print();
         }
     };
@@ -120,7 +120,7 @@ struct convert<Param::Inertia> {
         cType.m        = node["m"].as<double>();
         cType.g        = node["g"].as<double>();
         cType.I_z      = node["I_z"].as<double>();
-        ROS_DEBUG("LOADED Inertia");
+        RCLCPP_DEBUG(rclcpp::get_logger("vehicle_model"), "LOADED Inertia");
         cType.print();
         return true;
     }
@@ -135,7 +135,7 @@ struct convert<Param::Kinematic> {
         cType.w_front = node["w_front"].as<double>();
         cType.l_F     = cType.l * (1 - cType.w_front);
         cType.l_R     = cType.l * cType.w_front;
-        ROS_DEBUG("LOADED Kinematic");
+        RCLCPP_DEBUG(rclcpp::get_logger("vehicle_model"), "LOADED Kinematic");
         cType.print();
         return true;
     }
@@ -150,7 +150,7 @@ struct convert<Param::Tire> {
         cType.D = node["D"].as<double>() * cType.tire_coefficient;
         cType.E = node["E"].as<double>();
         cType.radius = node["radius"].as<double>();
-        ROS_DEBUG("LOADED Tire");
+        RCLCPP_DEBUG(rclcpp::get_logger("vehicle_model"), "LOADED Tire");
         cType.print();
         return true;
     }
@@ -161,7 +161,7 @@ struct convert<Param::Aero> {
     static bool decode(const Node &node, Param::Aero &cType) {
         cType.c_down = node["C_Down"].as<double>();
         cType.c_drag = node["C_drag"].as<double>();
-        ROS_DEBUG("LOADED Aero");
+        RCLCPP_DEBUG(rclcpp::get_logger("vehicle_model"), "LOADED Aero");
         cType.print();
         return true;
     }
@@ -174,7 +174,7 @@ struct convert<Param::InputRanges> {
         cType.acc.max   = node["acceleration"]["max"].as<double>();
         cType.delta.min = node["steering"]["min"].as<double>();
         cType.delta.max = node["steering"]["max"].as<double>();
-        ROS_DEBUG("LOADED InputRanges");
+        RCLCPP_DEBUG(rclcpp::get_logger("vehicle_model"), "LOADED InputRanges");
         cType.print();
         return true;
     }
@@ -184,7 +184,7 @@ struct convert<Param::InputRanges> {
 
 inline void initParamStruct(Param &param, std::string &yaml_file) {
     YAML::Node config = YAML::LoadFile(yaml_file);
-    ROS_DEBUG("STARTING THIS YAML CraP: %s ********************************", yaml_file.c_str());
+    RCLCPP_DEBUG(rclcpp::get_logger("vehicle_model"), "STARTING THIS YAML CraP: %s ********************************", yaml_file.c_str());
 
     param.inertia         = config["inertia"].as<Param::Inertia>();
     param.kinematic       = config["kinematics"].as<Param::Kinematic>();
