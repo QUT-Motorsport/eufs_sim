@@ -27,54 +27,44 @@
 
   <!-- The name of the robot (must be directory in eufs_description/robots called {robot_name} with robot.urdf.xacro and config.yaml) -->
   <arg name="robot_name" default="eufs"/>
-  <arg name="config_file" default="$(find eufs_description)/robots/$(arg robot_name)/config.yaml"/>
-
-  <!-- Change the simulate_perception parameter based on the launch group -->
-  <group if="$(eval arg('launch_group')=='no_perception')">
-    <param name="robot_description"
-           command="$(find xacro)/xacro '$(find eufs_description)/robots/$(arg robot_name)/robot.urdf.xacro'
-                                                robot_name:='$(arg robot_name)'
-                                                vehicle_model:='$(arg vehicleModel)'
-                                                config_file:='$(arg config_file)'
-                                                publish_tf:=$(arg publish_gt_tf)
-                                                simulate_perception:=true"/>  <!-- Should simulate perception if in no_perception launch group -->
-  </group>
-  <group unless="$(eval arg('launch_group')=='no_perception')">
-    <param name="robot_description"
-           command="$(find xacro)/xacro '$(find eufs_description)/robots/$(arg robot_name)/robot.urdf.xacro'
-                                                robot_name:='$(arg robot_name)'
-                                                vehicle_model:='$(arg vehicleModel)'
-                                                config_file:='$(arg config_file)'
-                                                publish_tf:=$(arg publish_gt_tf)
-                                                simulate_perception:=false"/>   <!-- Should NOT simulate perception if NOT in no_perception launch group -->
-  </group>
+  <arg name="config_file" default="$(find-pkg-share eufs_description)/robots/$(var robot_name)/config.yaml"/>
 
   <!-- Publish the joint states (required for the wheels) -->
-  <node name="joint_state_publisher" pkg="joint_state_publisher" type="joint_state_publisher">
-    <remap from="/joint_states" to="/eufs/joint_states" />
-    <param name="rate" value="200" />
-  </node>
+<!--   <node name="joint_state_publisher" pkg="joint_state_publisher" exec="joint_state_publisher"> -->
+<!--     <remap from="/joint_states" to="/eufs/joint_states" /> -->
+<!--     <param name="rate" value="200" /> -->
+<!--   </node> -->
 
   <!-- Convert joint states to TF transforms for rviz, etc -->
-  <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher"
+  <node name="robot_state_publisher" pkg="robot_state_publisher" exec="robot_state_publisher"
         respawn="false" output="screen">
     <remap from="/joint_states" to="/eufs/joint_states" />
     <param name="rate" value="200" />
   </node>
 
-  <node name="spawn_platform" pkg="gazebo_ros" type="spawn_model" args="-urdf -param robot_description -model $(arg namespace)
-              -gazebo_namespace /gazebo
-              -x $(arg x) -y $(arg y) -z $(arg z)
-              -R $(arg roll) -P $(arg pitch) -Y $(arg yaw)"/>
+  <param name="robot_description"
+         command="$(find xacro)/xacro '$(find-pkg-share eufs_description)/robots/$(car robot_name)/robot.urdf.xacro'
+                                       robot_name:='$(arg robot_name)'
+                                       vehicle_model:='$(arg vehicleModel)'
+                                       config_file:='$(arg config_file)'
+                                       publish_tf:=$(arg publish_gt_tf)
+                                       simulate_perception:=true"/>  <!-- Should simulate perception if in no_perception launch group -->
 
-  <group if="$(eval arg('rviz'))">
+  <node name="spawn_platform" pkg="gazebo_ros" exec="spawn_entity.py" args="-entity $(var namespace)
+        -x $(var x) -y $(var y) -z $(var z)
+        -R $(var roll) -P $(var pitch) -Y $(var yaw)"
+        -stdin $(var robot_description)/>
+
+
+
+<!--   <group if="$(eval arg('rviz'))"> -->
     <!-- Launch RViz -->
-    <node name="rviz" pkg="rviz" type="rviz"/>
-  </group>
+<!--     <node name="rviz" pkg="rviz" type="rviz"/> -->
+<!--   </group> -->
 
-  <group if="$(eval arg('show_rqt_gui'))">
+<!--   <group if="$(eval arg('show_rqt_gui'))"> -->
     <!-- Start rqt robot steering and ros can sim module -->
-    <node name="eufs_sim_rqt" pkg="rqt_gui" type="rqt_gui" respawn="false" output="screen" args="--perspective-file $(find eufs_gazebo)/config/eufs_sim.perspective"/>
-  </group>
+<!--     <node name="eufs_sim_rqt" pkg="rqt_gui" exec="rqt_gui" respawn="false" output="screen" args="perspective-file $(find eufs_gazebo)/config/eufs_sim.perspective"/> -->
+<!--   </group> -->
 
 </launch>
