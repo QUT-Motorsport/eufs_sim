@@ -1,26 +1,26 @@
 from PIL import Image
 from PIL import ImageDraw
 import math
-from LauncherUtilities import (calculate_tangent_angle,
+from .LauncherUtilities import (calculate_tangent_angle,
                                get_points_from_component_list,
                                compactify_points)
 from random import randrange, uniform
 from functools import reduce
 import os
-import rospkg
-import rospy
+from ament_index_python.packages import get_package_share_directory
+from rclpy.node import Node
 import sys
 import pandas as pd
 from collections import OrderedDict
-sys.path.insert(1, os.path.join(rospkg.RosPack().get_path('eufs_gazebo'), 'tracks'))  # nopep8
-from track_gen import Track
-from TrackGenerator import (
+sys.path.insert(1, os.path.join(get_package_share_directory('eufs_gazebo'), 'tracks'))  # nopep8
+from .track_gen import Track
+from .TrackGenerator import (
         compactify_points, cone_start,
         CONE_INNER, CONE_OUTER,
         CONE_ORANGE, CONE_BIG_ORANGE,
         CONE_START, NOISE
 )
-from TrackGenerator import get_cone_function
+from .TrackGenerator import get_cone_function
 
 
 # Here are all the track formats we care about:
@@ -30,7 +30,7 @@ from TrackGenerator import get_cone_function
 # .csv
 # raw_data ("xys",this will be hidden from the user as it is only used to convert into .pngs)
 # raw_data may also be "comps", which is the output of TrackGenerator
-class ConversionTools:
+class ConversionTools(Node):
         def __init__():
                 pass
 
@@ -100,7 +100,7 @@ class ConversionTools:
                 elif corner == ConversionTools.BOTTOM_RIGHT:
                         return (width - 6 + x, height - 6 + y)
                 else:
-                        rospy.logerr("Error, not a valid corner!  Typo?: " + corner)
+                        self.get_logger().error("Error, not a valid corner!  Typo?: " + corner)
                         return None
 
         @staticmethod
@@ -429,7 +429,7 @@ class ConversionTools:
                 df = pd.DataFrame(output, columns=output.keys())
                 df.to_csv(
                     os.path.join(
-                        rospkg.RosPack().get_path('eufs_gazebo'),
+                        get_package_share_directory('eufs_gazebo'),
                         'tracks/'+GENERATED_FILENAME+'.csv'
                     ),
                     index=False
@@ -588,7 +588,7 @@ class ConversionTools:
                 )[0]
 
                 im2.save(
-                        os.path.join(rospkg.RosPack().get_path('eufs_gazebo'),
+                        os.path.join(get_package_share_directory('eufs_gazebo'),
                                      'randgen_imgs/'+GENERATED_FILENAME+'.png')
                 )
                 return im
@@ -737,7 +737,7 @@ class ConversionTools:
                 )[0]
 
                 im2.save(
-                        os.path.join(rospkg.RosPack().get_path('eufs_gazebo'),
+                        os.path.join(get_package_share_directory('eufs_gazebo'),
                                      'randgen_imgs/'+GENERATED_FILENAME+'.png')
                 )
                 return im
@@ -805,8 +805,7 @@ class ConversionTools:
                 version_number = ConversionTools.convert_version_metadata([pixels[loc[0], loc[1]]])
 
                 # Let's start filling in the .launch template:
-                launch_template_file = os.path.join(
-                                                    rospkg.RosPack().get_path('eufs_launcher'),
+                launch_template_file = os.path.join(get_package_share_directory('eufs_launcher'),
                                                     'resource/randgen_launch_template'
                 )
                 launch_template = open(launch_template_file, "r")
@@ -852,8 +851,7 @@ class ConversionTools:
 
                 # Here we write out to our launch file.
                 launch_out_filename = 'launch/'+GENERATED_FILENAME+".launch"
-                launch_out_filepath = os.path.join(
-                                                   rospkg.RosPack().get_path('eufs_gazebo'),
+                launch_out_filepath = os.path.join(get_package_share_directory('eufs_gazebo'),
                                                    launch_out_filename
                 )
                 launch_out = open(launch_out_filepath, "w")
@@ -861,9 +859,8 @@ class ConversionTools:
                 launch_out.close()
 
                 # And now we start the template for the .world:
-                world_template_filepath = os.path.join(
-                                              rospkg.RosPack().get_path('eufs_launcher'),
-                                              'resource/randgen_world_template'
+                world_template_filepath = os.path.join(get_package_share_directory('eufs_launcher'),
+                                                       'resource/randgen_world_template'
                 )
                 world_template = open(world_template_filepath, "r")
 
@@ -873,8 +870,7 @@ class ConversionTools:
                 world_merged = GENERATED_FILENAME.join(world_merged.split("%FILLNAME%"))
 
                 # And now we write out.
-                world_out_filepath = os.path.join(
-                                                  rospkg.RosPack().get_path('eufs_gazebo'),
+                world_out_filepath = os.path.join(get_package_share_directory('eufs_gazebo'),
                                                   'worlds',
                                                   GENERATED_FILENAME+".world"
                 )
@@ -884,8 +880,7 @@ class ConversionTools:
 
                 # And now we work on making the model folder:
                 # First we create the folder itself
-                folder_path = os.path.join(
-                                           rospkg.RosPack().get_path('eufs_description'),
+                folder_path = os.path.join(get_package_share_directory('eufs_description'),
                                            'models',
                                            GENERATED_FILENAME
                 )
@@ -897,9 +892,8 @@ class ConversionTools:
                         os.mkdir(folder_path)
 
                 # Now let's do the .config
-                config_template_filepath = os.path.join(
-                                                   rospkg.RosPack().get_path('eufs_launcher'),
-                                                   'resource/randgen_model_template/model.config'
+                config_template_filepath = os.path.join(get_package_share_directory('eufs_launcher'),
+                                                        'resource/randgen_model_template/model.config'
                 )
                 config_template = open(config_template_filepath, "r")
 
@@ -908,8 +902,7 @@ class ConversionTools:
                 config_merged = GENERATED_FILENAME.join(config_merged.split("%FILLNAME%"))
 
                 # Write out the config data
-                config_out_filepath = os.path.join(
-                                                   rospkg.RosPack().get_path('eufs_description'),
+                config_out_filepath = os.path.join(get_package_share_directory('eufs_description'),
                                                    'models',
                                                    GENERATED_FILENAME,
                                                    "model.config"
@@ -920,8 +913,7 @@ class ConversionTools:
 
                 # Now we create the .sdf
                 # This is fairly intensive
-                sdf_template_filepath = os.path.join(
-                                                     rospkg.RosPack().get_path('eufs_launcher'),
+                sdf_template_filepath = os.path.join(get_package_share_directory('eufs_launcher'),
                                                      'resource/randgen_model_template/model.sdf'
                 )
                 sdf_template = open(sdf_template_filepath, "r")
@@ -964,7 +956,7 @@ class ConversionTools:
                                 name = flip_cones[0]
                         else:
                                 name = flip_cones[1] + "_" + flip_cones[0]
-                        cone_string = "model://models/"+name
+                        cone_string = "model://"+name
                         return cone_string.join(collision_template)
 
                 def setup_covariance(x, y, xy):
@@ -981,8 +973,7 @@ class ConversionTools:
                 sdf_big_orange_cone_model = join_cone_model_data("cone_big")
 
                 # Now let's load in the noise priorities
-                noise_priority_file = os.path.join(
-                                                   rospkg.RosPack().get_path('eufs_launcher'),
+                noise_priority_file = os.path.join(get_package_share_directory('eufs_launcher'),
                                                    'resource/noiseFiles.txt'
                 )
                 noise_files = open(noise_priority_file, "r")
@@ -997,7 +988,7 @@ class ConversionTools:
                         for a in noise_weightings:
                                 if a[0] > randval:
                                         return a[1]
-                        return "model://eufs_description/meshes/NoiseCube.dae"
+                        return "package://eufs_description/meshes/NoiseCube.dae"
 
                 # Let's place all the models!
                 # We'll keep track of how many we've placed
@@ -1022,11 +1013,11 @@ class ConversionTools:
                         x_cov_str = str(x_cov)
                         y_cov_str = str(y_cov)
                         xy_cov_str = str(xy_cov)
-                        rospy.logerr(x_cov_str)
+                        self.get_logger().error(x_cov_str)
                         mod_with_cov = setup_covariance(x_cov_str, y_cov_str, xy_cov_str).join(
                                 mod_with_link2.split("%FILLCOVARIANCE%")
                         )
-                        rospy.logerr(mod_with_cov)
+                        self.get_logger().error(mod_with_cov)
                         return mod_with_cov
 
                 sdf_allmodels = ""
@@ -1163,8 +1154,7 @@ class ConversionTools:
                 sdf_main = sdf_allmodels.join(sdf_main.split("%FILLDATA%"))
 
                 # Write it out.
-                sdf_out_filepath = os.path.join(
-                                                rospkg.RosPack().get_path('eufs_description'),
+                sdf_out_filepath = os.path.join(get_package_share_directory('eufs_description'),
                                                 'models',
                                                 GENERATED_FILENAME,
                                                 "model.sdf"
@@ -1437,8 +1427,7 @@ class ConversionTools:
                 )[0]
 
                 # Save the image:
-                output_path = os.path.join(
-                                           rospkg.RosPack().get_path('eufs_gazebo'),
+                output_path = os.path.join(get_package_share_directory('eufs_gazebo'),
                                            'randgen_imgs/' + filename + '.png'
                 )
                 im.save(output_path)
@@ -1566,8 +1555,7 @@ class ConversionTools:
                              raw_lap_counters)
 
                 # Let's start filling in the .launch template:
-                launch_template_file = os.path.join(
-                                                    rospkg.RosPack().get_path('eufs_launcher'),
+                launch_template_file = os.path.join(get_package_share_directory('eufs_launcher'),
                                                     'resource/randgen_launch_template'
                 )
                 launch_template = open(launch_template_file, "r")
@@ -1595,8 +1583,7 @@ class ConversionTools:
 
                 # Here we write out to our launch file.
                 launch_out_filename = 'launch/'+GENERATED_FILENAME+".launch"
-                launch_out_filepath = os.path.join(
-                                                   rospkg.RosPack().get_path('eufs_gazebo'),
+                launch_out_filepath = os.path.join(get_package_share_directory('eufs_gazebo'),
                                                    launch_out_filename
                 )
                 launch_out = open(launch_out_filepath, "w")
@@ -1604,9 +1591,8 @@ class ConversionTools:
                 launch_out.close()
 
                 # And now we start the template for the .world:
-                world_template_filepath = os.path.join(
-                                              rospkg.RosPack().get_path('eufs_launcher'),
-                                              'resource/randgen_world_template'
+                world_template_filepath = os.path.join(get_package_share_directory('eufs_launcher'),
+                                                       'resource/randgen_world_template'
                 )
                 world_template = open(world_template_filepath, "r")
 
@@ -1616,8 +1602,7 @@ class ConversionTools:
                 world_merged = GENERATED_FILENAME.join(world_merged.split("%FILLNAME%"))
 
                 # And now we write out.
-                world_out_filepath = os.path.join(
-                                                  rospkg.RosPack().get_path('eufs_gazebo'),
+                world_out_filepath = os.path.join(get_package_share_directory('eufs_gazebo'),
                                                   'worlds',
                                                   GENERATED_FILENAME+".world"
                 )
@@ -1627,8 +1612,7 @@ class ConversionTools:
 
                 # And now we work on making the model folder:
                 # First we create the folder itself
-                folder_path = os.path.join(
-                                           rospkg.RosPack().get_path('eufs_description'),
+                folder_path = os.path.join(get_package_share_directory('eufs_description'),
                                            'models',
                                            GENERATED_FILENAME
                 )
@@ -1640,9 +1624,8 @@ class ConversionTools:
                         os.mkdir(folder_path)
 
                 # Now let's do the .config
-                config_template_filepath = os.path.join(
-                                                   rospkg.RosPack().get_path('eufs_launcher'),
-                                                   'resource/randgen_model_template/model.config'
+                config_template_filepath = os.path.join(get_package_share_directory('eufs_launcher'),
+                                                        'resource/randgen_model_template/model.config'
                 )
                 config_template = open(config_template_filepath, "r")
 
@@ -1651,8 +1634,7 @@ class ConversionTools:
                 config_merged = GENERATED_FILENAME.join(config_merged.split("%FILLNAME%"))
 
                 # Write out the config data
-                config_out_filepath = os.path.join(
-                                                   rospkg.RosPack().get_path('eufs_description'),
+                config_out_filepath = os.path.join(get_package_share_directory('eufs_description'),
                                                    'models',
                                                    GENERATED_FILENAME,
                                                    "model.config"
@@ -1663,8 +1645,7 @@ class ConversionTools:
 
                 # Now we create the .sdf
                 # This is fairly intensive
-                sdf_template_filepath = os.path.join(
-                                                     rospkg.RosPack().get_path('eufs_launcher'),
+                sdf_template_filepath = os.path.join(get_package_share_directory('eufs_launcher'),
                                                      'resource/randgen_model_template/model.sdf'
                 )
                 sdf_template = open(sdf_template_filepath, "r")
@@ -1707,7 +1688,7 @@ class ConversionTools:
                                 name = flip_cones[0]
                         else:
                                 name = flip_cones[1] + "_" + flip_cones[0]
-                        cone_string = "model://models/"+name
+                        cone_string = "model://"+name
                         return cone_string.join(collision_template)
 
                 def setup_covariance(x, y, xy):
@@ -1727,8 +1708,7 @@ class ConversionTools:
                 sdf_big_orange_cone_model = join_cone_model_data("cone_big")
 
                 # Now let's load in the noise priorities
-                noise_priority_file = os.path.join(
-                                                   rospkg.RosPack().get_path('eufs_launcher'),
+                noise_priority_file = os.path.join(get_package_share_directory('eufs_launcher'),
                                                    'resource/noiseFiles.txt'
                 )
                 noise_files = open(noise_priority_file, "r")
@@ -1743,7 +1723,7 @@ class ConversionTools:
                         for a in noise_weightings:
                                 if a[0] > randval:
                                         return a[1]
-                        return "model://eufs_description/meshes/NoiseCube.dae"
+                        return "package://eufs_description/meshes/NoiseCube.dae"
 
                 # Let's place all the models!
                 # We'll keep track of how many we've placed
@@ -1853,8 +1833,7 @@ class ConversionTools:
                 sdf_main = sdf_allmodels.join(sdf_main.split("%FILLDATA%"))
 
                 # Write it out.
-                sdf_out_filepath = os.path.join(
-                                                rospkg.RosPack().get_path('eufs_description'),
+                sdf_out_filepath = os.path.join(get_package_share_directory('eufs_description'),
                                                 'models',
                                                 GENERATED_FILENAME,
                                                 "model.sdf"

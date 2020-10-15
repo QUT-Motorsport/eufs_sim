@@ -1,6 +1,5 @@
 import math
 from random import uniform
-import rospy
 
 
 def calculate_tangent_angle(xys):

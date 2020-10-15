@@ -25,7 +25,7 @@ eufs_launcher:
     on_startup:
         sbg_raw_data_simulator:
             package: "eufs_gazebo"
-            location: "launch/sbg_raw_data_simulator.launch"
+            launch_file: "sbg_raw_data_simulator.launch"
             args: {"_imu_hz:=200", "_gps_hz:=5"}
 
 
