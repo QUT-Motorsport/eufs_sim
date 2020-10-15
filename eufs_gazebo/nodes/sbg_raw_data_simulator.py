@@ -15,9 +15,8 @@ It outputs messages the following messages:
 import numpy as np
 import math
 import rospy
-import tf
 from sensor_msgs.msg import NavSatFix, Imu
-from tf.transformations import *
+from tf2.transformations import *
 
 
 class SbgRawDataSimulator(object):
