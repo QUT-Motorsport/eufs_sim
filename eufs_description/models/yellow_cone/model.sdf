@@ -17,7 +17,7 @@
       <visual name='visual'>
         <geometry>
           <mesh>
-            <uri>model://eufs_description/meshes/cone_yellow.dae</uri>
+            <uri>package://eufs_description/meshes/cone_yellow.dae</uri>
           </mesh>
         </geometry>
         <cast_shadows>1</cast_shadows>
@@ -26,7 +26,7 @@
         <max_contacts>3</max_contacts>
         <geometry>
           <mesh>
-            <uri>model://eufs_description/meshes/cone_yellow.dae</uri>
+            <uri>package://eufs_description/meshes/cone_yellow.dae</uri>
           </mesh>
         </geometry>
       </collision>
