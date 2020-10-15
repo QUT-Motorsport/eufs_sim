@@ -14,5 +14,5 @@ with higher weight.
 If gazebo refuses to load, its likely that the meshes don't exist (it halts without error message :/)
 
 $===$
-20|package://eufs_description/meshes/MonkeyNoise.dae
-100|package://eufs_description/meshes/NoiseCube.dae
+20|file://MonkeyNoise.dae
+100|file://NoiseCube.dae

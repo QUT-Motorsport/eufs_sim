@@ -988,7 +988,7 @@ class ConversionTools(Node):
                         for a in noise_weightings:
                                 if a[0] > randval:
                                         return a[1]
-                        return "package://eufs_description/meshes/NoiseCube.dae"
+                        return "file://NoiseCube.dae"
 
                 # Let's place all the models!
                 # We'll keep track of how many we've placed
@@ -1723,7 +1723,7 @@ class ConversionTools(Node):
                         for a in noise_weightings:
                                 if a[0] > randval:
                                         return a[1]
-                        return "package://eufs_description/meshes/NoiseCube.dae"
+                        return "file://NoiseCube.dae"
 
                 # Let's place all the models!
                 # We'll keep track of how many we've placed

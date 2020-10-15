@@ -410,9 +410,9 @@ namespace eufs {
       marker.scale.z = 1.5;
 
       if (big) {
-        marker.mesh_resource = "package://eufs_description/meshes/cone_big.dae";
+        marker.mesh_resource = "file://cone_big.dae";
       } else {
-        marker.mesh_resource = "package://eufs_description/meshes/cone.dae";
+        marker.mesh_resource = "file://cone.dae";
       }
 
       marker.color.r = red;

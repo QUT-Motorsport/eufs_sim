@@ -42,7 +42,7 @@
         <visual>
           <origin xyz="0 0 0" rpy="${degrees_90} 0 0"/>
           <geometry>
-            <mesh filename="package://eufs_description/meshes/wheel_${lr_prefix}.dae"/>
+            <mesh filename="file://wheel_${lr_prefix}.dae"/>
           </geometry>
           <material name="tire_mat"/>
         </visual>
