@@ -1,19 +1,18 @@
-include_directories(include
-        ${GAZEBO_INCLUDE_DIRS}
-        ${SDFormat_INCLUDE_DIRS}
-        ${OGRE_INCLUDE_DIRS}
-        ${Boost_INCLUDE_DIRS})
+add_library(gazebo_cone_ground_truth SHARED
+  src/gazebo_cone_ground_truth.cpp)
 
-link_directories(
-        ${OGRE_LIBRARY_DIRS}
-        ${OGRE-Terrain_LIBRARY_DIRS}
-        ${OGRE-Paging_LIBRARY_DIRS})
+ament_target_dependencies(gazebo_cone_ground_truth
+  "gazebo_dev"
+  "gazebo_ros"
+  "rclcpp"
+  "eufs_msgs"
+  "visualization_msgs")
 
-add_library(gazebo_cone_ground_truth src/gazebo_cone_ground_truth.cpp)
 target_include_directories(gazebo_cone_ground_truth PUBLIC include)
-target_link_libraries(gazebo_cone_ground_truth ${GAZEBO_LIBRARIES} ${IGNITION-MSGS_LIBRARIES} ${OGRE_LIBRARY})
+
+ament_export_libraries(gazebo_cone_ground_truth)
 
 install(TARGETS gazebo_cone_ground_truth
-        ARCHIVE DESTINATION lib
-        LIBRARY DESTINATION lib
-        RUNTIME DESTINATION lib)
+  ARCHIVE DESTINATION lib
+  LIBRARY DESTINATION lib
+  RUNTIME DESTINATION lib)
