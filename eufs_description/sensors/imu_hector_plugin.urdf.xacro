@@ -28,7 +28,7 @@
 			</collision>
 		</link>
 		<gazebo>
-			<plugin filename="libhector_gazebo_ros_imu.so" name="${prefix}_controller">
+			<plugin filename="libgazebo_ros_imu.so" name="${prefix}_controller">
 				<alwaysOn>true</alwaysOn>
 				<topicName>imu/data</topicName>
 				<serviceName>${prefix}imu/service</serviceName>

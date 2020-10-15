@@ -43,6 +43,7 @@
             <stddev>0.007</stddev>
           </noise>
         </camera>
+        <!--
         <plugin name="stereo_camera_controller" filename="libgazebo_ros_multicamera.so">
           <alwaysOn>true</alwaysOn>
           <cameraName>${prefix}</cameraName>
@@ -50,7 +51,9 @@
           <cameraInfoTopicName>camera_info_bee</cameraInfoTopicName>
           <frameName>/${prefix}_frame</frameName>
           <hackBaseline>${baseline}</hackBaseline>
+          -->
           <!-- NOTE: Distortion is currently unused -->
+          <!--
           <distortionK1>0.0</distortionK1>
           <distortionK2>0.0</distortionK2>
           <distortionK3>0.0</distortionK3>
@@ -58,6 +61,7 @@
           <distortionT2>0.0</distortionT2>
           <ignoreTfPrefix>1</ignoreTfPrefix>
         </plugin>
+        -->
       </sensor>
     </gazebo>
   </xacro:macro>

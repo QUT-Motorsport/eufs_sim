@@ -103,6 +103,7 @@
             <far>8.0</far>
           </clip>
         </camera>
+        <!--
         <plugin filename="libgazebo_ros_openni_kinect.so" name="${prefix}_controller">
           <cameraName>${prefix}</cameraName>
           <alwaysOn>true</alwaysOn>
@@ -122,6 +123,7 @@
           <pointCloudCutoff>0.4</pointCloudCutoff>
           <pointCloudCutoffMax>5.0</pointCloudCutoffMax>
         </plugin>
+        -->
       </sensor>
     </gazebo>
   </xacro:macro>
