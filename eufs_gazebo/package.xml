@@ -6,7 +6,7 @@
   <description>The eufs_gazebo package</description>
 
   <maintainer email="siliconlad@protonmail.com">Angus Stewart</maintainer>
-  <maintainer email="niklasburggraaff@gmail.com">Ignat Georgiev</maintainer>
+  <maintainer email="niklasburggraaff@gmail.com">Niklas Burggraaff</maintainer>
 
   <license>MIT</license>
 
@@ -16,28 +16,14 @@
 
   <buildtool_depend>ament_cmake</buildtool_depend>
 
-  <build_depend>roslint</build_depend>
-
   <depend>gazebo_ros</depend>
-  <depend>eufs_description</depend>
-  <depend>ros_can_sim</depend>
-  <depend>eufs_msgs</depend>
-  <depend>joint_state_controller</depend>
-  <depend>roscpp</depend>
-  <depend>rospy</depend>
-  <depend>std_msgs</depend>
-  <depend>std_srvs</depend>
-  <depend>tf</depend>
-  <depend>python-scipy</depend>
-  <depend>python-pandas</depend>
-  <depend>python-numpy</depend>
-  <depend>python-matplotlib</depend>
-  <depend>python-skimage</depend>
+  <depend>xacro</depend>
 
   <test_depend>ament_lint_auto</test_depend>
   <test_depend>ament_lint_common</test_depend>
 
   <export>
-    <gazebo_ros gazebo_plugin_path="${prefix}/plugins" gazebo_model_path="${prefix}/.." />
+    <build_type>ament_cmake</build_type>
+<!--    <gazebo_ros gazebo_plugin_path="${prefix}/plugins" gazebo_model_path="${prefix}/models" />-->
   </export>
 </package>
