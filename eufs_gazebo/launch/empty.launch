@@ -2,12 +2,12 @@
 <launch>
 
   <!-- Gazebo arguments -->
-  <set_env name="GAZEBO_MODEL_PATH" value="$(find-pkg-share eufs_description)/models:"/>
-  <set_env name="GAZEBO_RESOURCE_PATH" value="$(find-pkg-share eufs_description):"/>
-  <set_env name="GAZEBO_PLUGIN_PATH" value="/opt/ros/foxy/lib/:$(env EUFS_MASTER)/install/eufs_gazebo_plugins:"/>
+  <set_env name="GAZEBO_MODEL_PATH" value="$(find-pkg-share eufs_description)/models"/>
+  <set_env name="GAZEBO_RESOURCE_PATH" value="$(find-pkg-share eufs_description)/meshes:/usr/share/gazebo-11"/>
+  <set_env name="GAZEBO_PLUGIN_PATH" value="/opt/ros/foxy/lib/:$(env EUFS_MASTER)/install/eufs_gazebo_plugins"/>
 
   <!-- Verbose argument passed to Gazebo -->
-  <arg name="verbose" default="false"/>
+  <arg name="verbose" default="true"/>
 
   <!-- Namespace of the gazebo robot  -->
   <arg name="namespace" default="eufs"/>
