@@ -2,9 +2,9 @@
 <launch>
 
   <!-- Gazebo arguments -->
-  <set_env name="GAZEBO_MODEL_PATH" value="$(find-pkg-share eufs_description)/models:$(env GAZEBO_MODEL_PATH)"/>
-  <set_env name="GAZEBO_RESOURCE_PATH" value="$(find-pkg-share eufs_description):$(env GAZEBO_RESOURCE_PATH)"/>
-  <set_env name="GAZEBO_PLUGIN_PATH" value="/opt/ros/foxy/lib/:$(env EUFS_MASTER)/install/eufs_gazebo_plugins:$(env GAZEBO_PLUGIN_PATH)"/>
+  <set_env name="GAZEBO_MODEL_PATH" value="$(find-pkg-share eufs_description)/models:"/>
+  <set_env name="GAZEBO_RESOURCE_PATH" value="$(find-pkg-share eufs_description):"/>
+  <set_env name="GAZEBO_PLUGIN_PATH" value="/opt/ros/foxy/lib/:$(env EUFS_MASTER)/install/eufs_gazebo_plugins:"/>
 
   <!-- Verbose argument passed to Gazebo -->
   <arg name="verbose" default="false"/>
