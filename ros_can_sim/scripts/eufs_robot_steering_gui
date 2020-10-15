@@ -2,9 +2,9 @@
 
 import sys
 
-from ros_can_sim import RosCanSimGUI
+from ros_can_sim.EUFSRobotSteeringGUI import EUFSRobotSteeringGUI
 from rqt_gui.main import Main
 
-plugin = 'ros_can_sim_gui'
+plugin = 'ros_can_sim.EUFSRobotSteeringGUI.EUFSRobotSteeringGUI'
 main = Main(filename=plugin)
 sys.exit(main.main(standalone=plugin))
