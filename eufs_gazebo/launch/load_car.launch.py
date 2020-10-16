@@ -61,6 +61,7 @@ def spawn_car(context, *args, **kwargs):
                 '-R', roll,
                 '-P', pitch,
                 '-Y', yaw,
+                '--ros-args', '--log-level', 'warn'
             ]
         ),
 
@@ -82,7 +83,8 @@ def spawn_car(context, *args, **kwargs):
                 'robot_description': robot_description,
                 'rate': 200,
             }],
-            remappings=[('/joint_states', '/eufs/joint_states')]
+            remappings=[('/joint_states', '/eufs/joint_states')],
+            arguments=['--ros-args', '--log-level', 'warn']
         ),
     ]
 
