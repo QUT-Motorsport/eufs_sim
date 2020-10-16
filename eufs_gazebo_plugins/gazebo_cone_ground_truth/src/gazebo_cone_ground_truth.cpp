@@ -47,6 +47,8 @@ namespace eufs {
   void GazeboConeGroundTruth::Load(gazebo::physics::ModelPtr _parent, sdf::ElementPtr _sdf) {
     this->rosnode_ = gazebo_ros::Node::Get(_sdf);
 
+    RCLCPP_DEBUG(this->rosnode_->get_logger(), "Loading ConeGroundTruthPlugin");
+
     this->time_last_published = rclcpp::Time(0);
 
 #if GAZEBO_MAJOR_VERSION >= 8
@@ -130,6 +132,8 @@ namespace eufs {
     cone_mesh_path = "file:///" + eufs_description_directory + "/meshes/cone.dae";
 
     this->update_connection_ = gazebo::event::Events::ConnectWorldUpdateBegin(std::bind(&GazeboConeGroundTruth::UpdateChild, this));
+
+    RCLCPP_INFO(this->rosnode_->get_logger(), "ConeGroundTruthPlugin Loaded");
   }  // GazeboConeGroundTruth
 
   void GazeboConeGroundTruth::UpdateChild() {

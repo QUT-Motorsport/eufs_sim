@@ -252,7 +252,7 @@ void VehicleModel::initVehicleParam(sdf::ElementPtr &_sdf) {
 
   initParamStruct(param_, yaml_name);
 
-  RCLCPP_INFO(this->rosnode->get_logger(), "RaceCarModelPlugin finished loading params");
+  RCLCPP_DEBUG(this->rosnode->get_logger(), "RaceCarModelPlugin finished loading params");
 }
 
 void VehicleModel::printInfo() {}

@@ -44,7 +44,7 @@ RaceCarModelPlugin::~RaceCarModelPlugin() {
 void RaceCarModelPlugin::Load(gazebo::physics::ModelPtr _model, sdf::ElementPtr _sdf) {
   this->rosnode = gazebo_ros::Node::Get(_sdf);
 
-  RCLCPP_INFO(this->rosnode->get_logger(), "Loading RaceCarModelPlugin");
+  RCLCPP_DEBUG(this->rosnode->get_logger(), "Loading RaceCarModelPlugin");
 
   this->model = _model;
 
@@ -91,6 +91,8 @@ void RaceCarModelPlugin::Load(gazebo::physics::ModelPtr _model, sdf::ElementPtr 
 #else
   this->lastSimTime = this->world->GetSimTime();
 #endif
+
+  RCLCPP_INFO(this->rosnode->get_logger(), "RaceCarModelPlugin Loaded");
 }
 
 void RaceCarModelPlugin::Reset() {
