@@ -7,7 +7,7 @@
   <set_env name="GAZEBO_PLUGIN_PATH" value="/opt/ros/foxy/lib/:$(env EUFS_MASTER)/install/eufs_gazebo_plugins"/>
 
   <!-- Verbose argument passed to Gazebo -->
-  <arg name="verbose" default="true"/>
+  <arg name="verbose" default="false"/>
 
   <!-- Namespace of the gazebo robot  -->
   <arg name="namespace" default="eufs"/>
