@@ -125,6 +125,10 @@ namespace eufs {
       }
     }
 
+    std::string eufs_description_directory = ament_index_cpp::get_package_share_directory("eufs_description");
+    cone_big_mesh_path = "file:///" + eufs_description_directory + "/meshes/cone_big.dae";
+    cone_mesh_path = "file:///" + eufs_description_directory + "/meshes/cone.dae";
+
     this->update_connection_ = gazebo::event::Events::ConnectWorldUpdateBegin(std::bind(&GazeboConeGroundTruth::UpdateChild, this));
   }  // GazeboConeGroundTruth
 
@@ -138,11 +142,11 @@ namespace eufs {
     this->time_last_published = this->rosnode_->now();
 
     // Check if there is a reason to publish the data
-//    if (this->ground_truth_cone_pub_->get_subscription_count() == 0 && this->ground_truth_cone_marker_pub_->get_subscription_count() == 0
-//        && this->perception_cone_pub_->get_subscription_count() == 0 && this->perception_cone_marker_pub_->get_subscription_count() == 0) {
-//      RCLCPP_DEBUG(this->rosnode_->get_logger(), "Nobody is listening to cone_ground_truth. Doing nothing");
-//      return;
-//    }
+    if (this->ground_truth_cone_pub_->get_subscription_count() == 0 && this->ground_truth_cone_marker_pub_->get_subscription_count() == 0
+        && this->perception_cone_pub_->get_subscription_count() == 0 && this->perception_cone_marker_pub_->get_subscription_count() == 0) {
+      RCLCPP_DEBUG(this->rosnode_->get_logger(), "Nobody is listening to cone_ground_truth. Doing nothing");
+      return;
+    }
 
 #if GAZEBO_MAJOR_VERSION >= 8
     this->car_pos = this->car_link->WorldPose();
@@ -410,9 +414,9 @@ namespace eufs {
       marker.scale.z = 1.5;
 
       if (big) {
-        marker.mesh_resource = "file://cone_big.dae";
+        marker.mesh_resource = cone_big_mesh_path;
       } else {
-        marker.mesh_resource = "file://cone.dae";
+        marker.mesh_resource = cone_mesh_path;
       }
 
       marker.color.r = red;

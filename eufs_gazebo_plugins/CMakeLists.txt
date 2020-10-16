@@ -63,6 +63,7 @@ ament_export_libraries(gazebo_ros_template2)
 
 ament_export_include_directories(include)
 ament_export_dependencies(rclcpp)
+ament_export_dependencies(ament_index_cpp)
 ament_export_dependencies(gazebo_dev)
 ament_export_dependencies(gazebo_msgs)
 ament_export_dependencies(gazebo_ros)

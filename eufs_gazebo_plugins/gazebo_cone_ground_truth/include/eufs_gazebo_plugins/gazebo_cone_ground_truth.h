@@ -44,6 +44,7 @@
 #include <gazebo_ros/node.hpp>
 
 #include "rclcpp/rclcpp.hpp"
+#include <ament_index_cpp/get_package_share_directory.hpp>
 
 #include <eufs_msgs/msg/cone_array_with_covariance.hpp>
 #include <eufs_msgs/msg/cone_array.hpp>
@@ -92,6 +93,8 @@ namespace eufs {
 
     // Getting the cone marker array
     visualization_msgs::msg::MarkerArray getConeMarkerArrayMessage(eufs_msgs::msg::ConeArrayWithCovariance &cone_array_message);
+    std::string cone_big_mesh_path;
+    std::string cone_mesh_path;
 
     int addConeMarkers(std::vector <visualization_msgs::msg::Marker> &marker_array, int marker_id,
                        std::vector <eufs_msgs::msg::ConeWithCovariance> cones, float red, float green, float blue, bool big);

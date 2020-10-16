@@ -6,7 +6,8 @@ ament_target_dependencies(gazebo_cone_ground_truth
   "gazebo_ros"
   "rclcpp"
   "eufs_msgs"
-  "visualization_msgs")
+  "visualization_msgs"
+  "ament_index_cpp")
 
 target_include_directories(gazebo_cone_ground_truth PUBLIC include)
 
