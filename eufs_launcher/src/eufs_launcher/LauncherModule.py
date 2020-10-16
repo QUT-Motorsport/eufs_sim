@@ -40,26 +40,27 @@ class EufsLauncher(Plugin):
                 """
                 super(EufsLauncher, self).__init__(context)
 
-                yaml_to_load = "config/eufs_launcher.yaml"
-                loc_to_load = "eufs_launcher"
-                use_gui = "True"
-                # yaml_to_load = self.get_parameter(
-                #         "/eufs_launcher/config",
-                #         default = "config/eufs_launcher.yaml"
-                # )
-                # loc_to_load = self.get_parameter(
-                #         "/eufs_launcher/config_loc",
-                #         default = "eufs_launcher"
-                # )
-                # use_gui = self.get_parameter(
-                #         "/eufs_launcher/gui",
-                #         default = "True"
-                # )
-
                 # Give QObjects reasonable names
                 self.setObjectName('EufsLauncher')
 
-                self.node = rclpy.create_node('eufs_launcher')
+                self.node = context.node
+
+                self.node.declare_parameter(
+                        "/eufs_launcher/config",
+                        value="config/eufs_launcher.yaml"
+                )
+                self.node.declare_parameter(
+                        "/eufs_launcher/config_loc",
+                        value="eufs_launcher"
+                )
+                self.node.declare_parameter(
+                        "/eufs_launcher/gui",
+                        value="True"
+                )
+
+                yaml_to_load = self.node.get_parameter("/eufs_launcher/config").value
+                loc_to_load = self.node.get_parameter("/eufs_launcher/config_loc").value
+                use_gui = self.node.get_parameter("/eufs_launcher/gui").value
 
                 # Process standalone plugin command-line arguments
                 from argparse import ArgumentParser

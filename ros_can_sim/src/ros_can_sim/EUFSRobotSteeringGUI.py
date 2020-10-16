@@ -51,7 +51,7 @@ class EUFSRobotSteeringGUI(Plugin):
         super(EUFSRobotSteeringGUI, self).__init__(context)
         self.setObjectName('EUFSRobotSteeringGUI')
 
-        self.node = rclpy.node.Node("EUFSRobotSteeringGUINode")
+        self.node = context.node
 
         # Create QWidget
         self._widget = QWidget()

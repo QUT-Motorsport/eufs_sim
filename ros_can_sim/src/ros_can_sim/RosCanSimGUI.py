@@ -19,7 +19,7 @@ class RosCanGUI(Plugin):
         super(RosCanGUI, self).__init__(context)
         self.setObjectName('RosCanSimGUI')
 
-        self.node = rclpy.node.Node("RosCanSimGUINode")
+        self.node = context.node
 
         # Create QWidget
         self._widget = QWidget()
