@@ -147,7 +147,7 @@ namespace eufs {
 
     // Check if there is a reason to publish the data
     if (this->ground_truth_cone_pub_->get_subscription_count() == 0 && this->ground_truth_cone_marker_pub_->get_subscription_count() == 0
-        && this->perception_cone_pub_->get_subscription_count() == 0 && this->perception_cone_marker_pub_->get_subscription_count() == 0) {
+        && (this->simulate_perception_ && this->perception_cone_pub_->get_subscription_count() == 0 && this->perception_cone_marker_pub_->get_subscription_count() == 0)) {
       RCLCPP_DEBUG(this->rosnode_->get_logger(), "Nobody is listening to cone_ground_truth. Doing nothing");
       return;
     }
