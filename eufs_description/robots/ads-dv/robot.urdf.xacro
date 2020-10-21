@@ -43,7 +43,7 @@
     <!-- *************** -->
 
     <!-- Chassis of the car -->
-    <xacro:eufs_base chassis_mesh="file:///$(find eufs_description)/meshes/ads-dv.dae"/>
+    <xacro:eufs_base chassis_mesh="file://$(find eufs_description)/meshes/ads-dv.dae"/>
 
     <!-- Wheels -->
     <xacro:wheels chassis_width="0.98" wheelbase="1.530"></xacro:wheels>
