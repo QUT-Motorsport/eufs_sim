@@ -134,7 +134,7 @@ def generate_launch_description():
         launch_ros.actions.Node(
             name='eufs_sim_rqt',
             package='rqt_gui', executable='rqt_gui', output='screen',
-            arguments=['--perspective-file', str(rqt_perspective_file)],
+            arguments=['--force-discovery', '--perspective-file', str(rqt_perspective_file)],
             condition=launch.conditions.IfCondition(launch.substitutions.LaunchConfiguration('show_rqt_gui'))
         ),
 
