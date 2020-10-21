@@ -1110,8 +1110,6 @@ class EufsLauncher(Plugin):
                         parameters_to_pass
                 )
 
-                # TODO: REMOVE THIS
-                return
                 # Trigger launch files hooked to checkboxes
                 for checkbox, effect_on, effect_off in self.checkbox_effect_mapping:
                         if checkbox.isChecked():
@@ -1177,8 +1175,8 @@ class EufsLauncher(Plugin):
                                      "react to input.")
 
                 # Hide launcher
+                self._widget.setVisible(True)
                 self._widget.setVisible(False)
-
 
                 rate = self.node.create_rate(0.1)
                 rate.sleep()
