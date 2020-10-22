@@ -14,8 +14,6 @@
   <url type="repository">https://gitlab.com/eufs/eufs_sim</url>
   <url type="bugtracker">https://gitlab.com/eufs/eufs_sim/issues</url>
 
-  <buildtool_depend>ament_python</buildtool_depend>
-
   <depend>rclpy</depend>
   <depend>rqt_gui</depend>
 
