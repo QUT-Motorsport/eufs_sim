@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3.8
 
 """
 sbg_raw_data_simulator.py
@@ -14,14 +14,15 @@ It outputs messages the following messages:
 
 import numpy as np
 import math
-import rospy
+import rclpy
+from rclpy.node import Node
 from sensor_msgs.msg import NavSatFix, Imu
-from tf2.transformations import *
+import tf2_py
 
 
-class SbgRawDataSimulator(object):
+class SbgRawDataSimulator(Node):
 
-    def __init__(self, namespace='sbg_raw_data_simulator'):
+    def __init__(self):
         """
         Initialize the publishers and subscribes to necessary channels
 
@@ -42,7 +43,7 @@ class SbgRawDataSimulator(object):
         to understand why the noise is produced the way it is.
         """
 
-        rospy.init_node("sbg_raw_data_simulator", anonymous=True)
+        super().__init__("sbg_raw_data_simulator")
 
         # Create persistent messages
         self.imu_msg = Imu()
@@ -62,17 +63,20 @@ class SbgRawDataSimulator(object):
         self.longitude_approx = 0.000016
 
         # Publish at fixed rates
-        self.IMU_PUBLISH_RATE_HZ = rospy.get_param("~imu_hz", default=200)
-        self.GPS_PUBLISH_RATE_HZ = rospy.get_param("~gps_hz", default=5)
-        self.gps = rospy.Publisher("/imu/nav_sat_fix", NavSatFix, queue_size=1)
-        self.imu = rospy.Publisher("/imu/data",    Imu,  queue_size=1)
-        rospy.Timer(
-            rospy.Duration(1.0 / self.IMU_PUBLISH_RATE_HZ),
-            lambda x: self.imu.publish(self.imu_msg) if self.got_imu and self.got_gps else None
+        self.declare_parameter("~imu_hz", value=200)
+        self.declare_parameter("~gps_hz", value=5)
+
+        self.IMU_PUBLISH_RATE_HZ = self.get_parameter("~imu_hz").value
+        self.GPS_PUBLISH_RATE_HZ = self.get_parameter("~gps_hz").value
+        self.gps = self.create_publisher(NavSatFix, "/imu/nav_sat_fix", 1)
+        self.imu = self.create_publisher(Imu, "/imu/data", 1)
+        self.create_timer(
+            1.0 / self.IMU_PUBLISH_RATE_HZ,
+            (lambda: self.imu.publish(self.imu_msg) if self.got_imu and self.got_gps else None)
         )
-        rospy.Timer(
-            rospy.Duration(1.0 / self.GPS_PUBLISH_RATE_HZ),
-            lambda x: self.gps.publish(self.gps_msg) if self.got_imu and self.got_gps else None
+        self.create_timer(
+            1.0 / self.GPS_PUBLISH_RATE_HZ,
+            (lambda: self.gps.publish(self.gps_msg) if self.got_imu and self.got_gps else None)
         )
 
         # Set calculated standard distribution information
@@ -88,8 +92,8 @@ class SbgRawDataSimulator(object):
         self.gps_position_white_noise_std = math.sqrt(39.4)
 
         # Subscribe to channels
-        self.imu_sub = rospy.Subscriber("/imu", Imu, self.imu_receiver)
-        self.gps_sub = rospy.Subscriber("/gps", NavSatFix, self.gps_receiver)
+        self.imu_sub = self.create_subscription(Imu, "/imu", self.imu_receiver, 1)
+        self.gps_sub = self.create_subscription(NavSatFix, "/gps", self.gps_receiver, 1)
 
     def imu_receiver(self, msg):
         """Receives gazebo's simulated imu and converts it to sbg-style SbgImuData format"""
@@ -176,5 +180,8 @@ class SbgRawDataSimulator(object):
 
 
 if __name__ == "__main__":
+    rclpy.init()
     sbg_raw_data_simulator = SbgRawDataSimulator()
-    rospy.spin()
+    rclpy.spin(sbg_raw_data_simulator)
+    sbg_raw_data_simulator.destroy_node()
+    rclpy.shutdown()
