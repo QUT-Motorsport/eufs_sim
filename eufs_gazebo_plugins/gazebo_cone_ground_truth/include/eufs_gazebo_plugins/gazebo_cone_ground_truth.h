@@ -93,13 +93,11 @@ namespace eufs {
 
     // Getting the cone marker array
      visualization_msgs::msg::MarkerArray getConeMarkerArrayMessage(eufs_msgs::msg::ConeArrayWithCovariance &cone_array_message);
-     visualization_msgs::msg::MarkerArray getTrackMarkerArrayMessage(eufs_msgs::msg::ConeArrayWithCovariance &ground_truth_cone_array_message);
      std::string cone_big_mesh_path;
      std::string cone_mesh_path;
 
       int addConeMarkers(std::vector<visualization_msgs::msg::Marker> &marker_array,
-                                                int marker_id, std::string marker_frame,
-                                                std::vector<eufs_msgs::msg::ConeWithCovariance> cones,
+                                                int marker_id, std::vector<eufs_msgs::msg::ConeWithCovariance> cones,
                                                 float red, float green, float blue, bool big);
 
     // Add noise to the cone arrays

@@ -383,6 +383,7 @@ namespace gazebo_plugins {
 
         eufs_msgs::msg::ConeArrayWithCovariance
         GazeboConeGroundTruth::getTranslatedTrack(eufs_msgs::msg::ConeArrayWithCovariance cones) {
+            cones.header.frame_id = "/" + this->cone_frame_;
             cones.blue_cones = translateCones(cones.blue_cones);
             cones.yellow_cones = translateCones(cones.yellow_cones);
             cones.orange_cones = translateCones(cones.orange_cones);
@@ -440,39 +441,22 @@ namespace gazebo_plugins {
             visualization_msgs::msg::MarkerArray ground_truth_cone_marker_array;
 
             int marker_id = 0;
-            marker_id = addConeMarkers(ground_truth_cone_marker_array.markers, marker_id, this->cone_frame_,
+            marker_id = addConeMarkers(ground_truth_cone_marker_array.markers, marker_id,
                                        ground_truth_cone_array_message.blue_cones, 0.2, 0.2, 1, false);
-            marker_id = addConeMarkers(ground_truth_cone_marker_array.markers, marker_id, this->cone_frame_,
+            marker_id = addConeMarkers(ground_truth_cone_marker_array.markers, marker_id,
                                        ground_truth_cone_array_message.yellow_cones, 1, 1, 0, false);
-            marker_id = addConeMarkers(ground_truth_cone_marker_array.markers, marker_id, this->cone_frame_,
+            marker_id = addConeMarkers(ground_truth_cone_marker_array.markers, marker_id,
                                        ground_truth_cone_array_message.orange_cones, 1, 0.549, 0, false);
-            marker_id = addConeMarkers(ground_truth_cone_marker_array.markers, marker_id, this->cone_frame_,
+            marker_id = addConeMarkers(ground_truth_cone_marker_array.markers, marker_id,
                                        ground_truth_cone_array_message.big_orange_cones, 1, 0.271, 0, true);
-            marker_id = addConeMarkers(ground_truth_cone_marker_array.markers, marker_id, this->cone_frame_,
+            marker_id = addConeMarkers(ground_truth_cone_marker_array.markers, marker_id,
                                        ground_truth_cone_array_message.unknown_color_cones, 0.7, 0.7, 0.7, false);
 
             return ground_truth_cone_marker_array;
         }
 
-        visualization_msgs::msg::MarkerArray GazeboConeGroundTruth::getTrackMarkerArrayMessage(
-                eufs_msgs::msg::ConeArrayWithCovariance &ground_truth_cone_array_message) {
-            visualization_msgs::msg::MarkerArray ground_truth_cone_marker_array;
-
-            int marker_id = 0;
-            marker_id = addConeMarkers(ground_truth_cone_marker_array.markers, marker_id, "/map",
-                                       ground_truth_cone_array_message.blue_cones, 0.2, 0.2, 1, false);
-            marker_id = addConeMarkers(ground_truth_cone_marker_array.markers, marker_id, "/map",
-                                       ground_truth_cone_array_message.yellow_cones, 1, 1, 0, false);
-            marker_id = addConeMarkers(ground_truth_cone_marker_array.markers, marker_id, "/map",
-                                       ground_truth_cone_array_message.orange_cones, 1, 0.549, 0, false);
-            marker_id = addConeMarkers(ground_truth_cone_marker_array.markers, marker_id, "/map",
-                                       ground_truth_cone_array_message.big_orange_cones, 1, 0.271, 0, true);
-
-            return ground_truth_cone_marker_array;
-        }
-
         int GazeboConeGroundTruth::addConeMarkers(std::vector <visualization_msgs::msg::Marker> &marker_array,
-                                                  int marker_id, std::string marker_frame,
+                                                  int marker_id,
                                                   std::vector <eufs_msgs::msg::ConeWithCovariance> cones,
                                                   float red, float green, float blue, bool big) {
             int id = marker_id;
@@ -480,7 +464,7 @@ namespace gazebo_plugins {
                 visualization_msgs::msg::Marker marker;
 
                 marker.header.stamp = this->rosnode_->now();
-                marker.header.frame_id = marker_frame;
+                marker.header.frame_id = "/" + this->cone_frame_;
 
                 marker.id = id;
 
