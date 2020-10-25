@@ -19,6 +19,8 @@
 
   <depend>rclpy</depend>
   <depend>gazebo_ros</depend>
+  <depend>gazebo_ros_pkgs</depend>
+  <depend>joint_state_publisher</depend>
   <depend>tf2_py</depend>
   <depend>xacro</depend>
 
