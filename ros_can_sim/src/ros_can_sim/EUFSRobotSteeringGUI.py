@@ -335,37 +335,36 @@ class EUFSRobotSteeringGUI(Plugin):
             'vw_min', self._widget.min_angular_double_spin_box.value())
 
     def restore_settings(self, plugin_settings, instance_settings):
-
         value = instance_settings.value('input', 1)
-        self.node.declare_parameter('~default_input', value)
-        value = self.node.get_parameter('~default_input').value
+        self.node.declare_parameter('default_input', value)
+        value = self.node.get_parameter('default_input').value
         self.input = value
 
         value = instance_settings.value('topic', '/rqt/command')
-        self.node.declare_parameter('~default_topic', value)
-        value = self.node.get_parameter('~default_topic').value
+        self.node.declare_parameter('default_topic', value)
+        value = self.node.get_parameter('default_topic').value
         self._widget.topic_line_edit.setText(value)
 
         value = self._widget.max_linear_double_spin_box.value()
         value = instance_settings.value('vx_max', value)
-        self.node.declare_parameter('~default_vx_max', value)
-        value = self.node.get_parameter('~default_vx_max').value
+        self.node.declare_parameter('default_vx_max', value)
+        value = self.node.get_parameter('default_vx_max').value
         self._widget.max_linear_double_spin_box.setValue(float(value))
 
         value = self._widget.min_linear_double_spin_box.value()
         value = instance_settings.value('vx_min', value)
-        self.node.declare_parameter('~default_vx_min', value)
-        value = self.node.get_parameter('~default_vx_min').value
+        self.node.declare_parameter('default_vx_min', value)
+        value = self.node.get_parameter('default_vx_min').value
         self._widget.min_linear_double_spin_box.setValue(float(value))
 
         value = self._widget.max_angular_double_spin_box.value()
         value = instance_settings.value('vw_max', value)
-        self.node.declare_parameter('~default_vw_max', value)
-        value = self.node.get_parameter('~default_vw_max').value
+        self.node.declare_parameter('default_vw_max', value)
+        value = self.node.get_parameter('default_vw_max').value
         self._widget.max_angular_double_spin_box.setValue(float(value))
 
         value = self._widget.min_angular_double_spin_box.value()
         value = instance_settings.value('vw_min', value)
-        self.node.declare_parameter('~default_vw_min', value)
-        value = self.node.get_parameter('~default_vw_min').value
+        self.node.declare_parameter('default_vw_min', value)
+        value = self.node.get_parameter('default_vw_min').value
         self._widget.min_angular_double_spin_box.setValue(float(value))
