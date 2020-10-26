@@ -92,12 +92,13 @@ namespace eufs {
     GazeboConeGroundTruth::ConeType getConeType(gazebo::physics::LinkPtr link);
 
     // Getting the cone marker array
-    visualization_msgs::msg::MarkerArray getConeMarkerArrayMessage(eufs_msgs::msg::ConeArrayWithCovariance &cone_array_message);
-    std::string cone_big_mesh_path;
-    std::string cone_mesh_path;
+     visualization_msgs::msg::MarkerArray getConeMarkerArrayMessage(eufs_msgs::msg::ConeArrayWithCovariance &cone_array_message);
+     std::string cone_big_mesh_path;
+     std::string cone_mesh_path;
 
-    int addConeMarkers(std::vector <visualization_msgs::msg::Marker> &marker_array, int marker_id,
-                       std::vector <eufs_msgs::msg::ConeWithCovariance> cones, float red, float green, float blue, bool big);
+      int addConeMarkers(std::vector<visualization_msgs::msg::Marker> &marker_array,
+                                                int marker_id, std::vector<eufs_msgs::msg::ConeWithCovariance> cones,
+                                                float red, float green, float blue, bool big);
 
     // Add noise to the cone arrays
     eufs_msgs::msg::ConeArrayWithCovariance getConeArrayMessageWithNoise(eufs_msgs::msg::ConeArrayWithCovariance &ground_truth_cone_array_message, ignition::math::Vector3d noise);
@@ -121,11 +122,15 @@ namespace eufs {
     bool inRangeOfLidar(eufs_msgs::msg::ConeWithCovariance cone);
     bool inFOVOfLidar(eufs_msgs::msg::ConeWithCovariance cone);
 
+    std::vector<eufs_msgs::msg::ConeWithCovariance> translateCones(std::vector<eufs_msgs::msg::ConeWithCovariance> cones);
+    eufs_msgs::msg::ConeArrayWithCovariance getTranslatedTrack(eufs_msgs::msg::ConeArrayWithCovariance cones);
+
     // Publishers
     rclcpp::Publisher<eufs_msgs::msg::ConeArrayWithCovariance>::SharedPtr ground_truth_cone_pub_;
     rclcpp::Publisher<visualization_msgs::msg::MarkerArray>::SharedPtr ground_truth_cone_marker_pub_;
 
     rclcpp::Publisher<eufs_msgs::msg::ConeArrayWithCovariance>::SharedPtr ground_truth_track_pub_;
+      rclcpp::Publisher<visualization_msgs::msg::MarkerArray>::SharedPtr ground_truth_track_viz_pub_;
 
     rclcpp::Publisher<eufs_msgs::msg::ConeArrayWithCovariance>::SharedPtr perception_cone_pub_;
     rclcpp::Publisher<visualization_msgs::msg::MarkerArray>::SharedPtr perception_cone_marker_pub_;
