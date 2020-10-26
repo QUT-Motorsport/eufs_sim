@@ -26,7 +26,7 @@
 #ifndef GAZEBO_VEHICLE_HPP
 #define GAZEBO_VEHICLE_HPP
 
-//#include "rclcpp/rclcpp.hpp"
+#include "rclcpp/rclcpp.hpp"
 
 #include <gazebo/physics/physics.hh>
 
