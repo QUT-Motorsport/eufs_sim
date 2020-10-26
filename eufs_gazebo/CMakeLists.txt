@@ -19,6 +19,7 @@ find_package(ament_cmake REQUIRED)
 find_package(ament_cmake_python REQUIRED)
 
 find_package(gazebo_ros REQUIRED)
+find_package(sensor_msgs REQUIRED)
 find_package(tf2_py REQUIRED)
 find_package(xacro REQUIRED)
 
