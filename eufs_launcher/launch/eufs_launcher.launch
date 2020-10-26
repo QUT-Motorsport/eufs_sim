@@ -12,9 +12,9 @@
 
   <!-- EUFS Launcher -->
   <node name="eufs_launcher" pkg="eufs_launcher" exec="eufs_launcher" output="screen">
-    <arg name="config" value="$(var config)"/>
-    <arg name="config_loc" value="$(var config_loc)"/>
-    <arg name="gui" value="$(var gui)"/>
+    <param name="config" value="$(var config)"/>
+    <param name="config_loc" value="$(var config_loc)"/>
+    <param name="gui" value="$(var gui)"/>
   </node>
 
 </launch>
