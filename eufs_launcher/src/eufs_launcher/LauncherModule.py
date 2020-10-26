@@ -1175,7 +1175,6 @@ class EufsLauncher(Plugin):
                                      "react to input.")
 
                 # Hide launcher
-                self._widget.setVisible(True)
                 self._widget.setVisible(False)
 
                 rate = self.node.create_rate(0.1)
