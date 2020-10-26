@@ -39,8 +39,7 @@
 #include <gazebo/physics/World.hh>
 #include <gazebo/physics/Model.hh>
 #include <gazebo/physics/Link.hh>
-//#include <gazebo/common/Events.hh>
-//#include <gazebo/common/Plugin.hh>
+#include <gazebo/common/Plugin.hh>
 #include <gazebo_ros/node.hpp>
 
 #include "rclcpp/rclcpp.hpp"
