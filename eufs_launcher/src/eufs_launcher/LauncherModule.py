@@ -975,7 +975,7 @@ class EufsLauncher(Plugin):
 
                 # Create csv from track_to_launch
                 self.tell_launchella("Creating csv...")
-                track_to_launch = self.TRACK_SELECTOR.currentText()
+                track_to_launch = self.TRACK_SELECTOR.currentText() + ".launch"
                 full_path = os.path.join(
                         self.GAZEBO,
                         'launch',
