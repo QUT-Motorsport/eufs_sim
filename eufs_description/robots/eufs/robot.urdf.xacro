@@ -27,19 +27,13 @@
     <xacro:include filename="$(find eufs_description)/urdf/wheels.urdf.xacro"/>
 
     <!-- Import EUFS base element with the chassis -->
-    <xacro:include filename="$(find eufs_description)/urdf/eufs_base.urdf.xacro">
-        <xacro:arg name="publish_tf" value="$(arg publish_tf)"/>
-        <xacro:arg name="simulate_perception" value="$(arg simulate_perception)"/>
-    </xacro:include>
+    <xacro:include filename="$(find eufs_description)/urdf/eufs_base.urdf.xacro" />
 
     <!-- Import all available sensors -->
     <xacro:include filename="$(find eufs_description)/sensors/all_sensors.urdf.xacro" />
 
     <!--  Include the plugins  -->
-    <xacro:include filename="$(find eufs_description)/urdf/eufs_plugins.gazebo.xacro">
-        <xacro:arg name="publish_tf" value="$(arg publish_tf)"/>
-        <xacro:arg name="simulate_perception" value="$(arg simulate_perception)"/>
-    </xacro:include>
+    <xacro:include filename="$(find eufs_description)/urdf/eufs_plugins.gazebo.xacro" />
 
     <!-- *************** -->
     <!-- Robots Elements -->
@@ -49,7 +43,7 @@
     <xacro:eufs_base chassis_mesh="file://$(find eufs_description)/meshes/sisu-20d.dae"/>
 
     <!-- Wheels -->
-    <xacro:wheels chassis_width="1.6" wheelbase="1.580"></xacro:wheels>
+    <xacro:wheels chassis_width="1.6" wheelbase="1.580" />
 
     <!-- *********************************************** -->
     <!--                 MAIN SENSORS                    -->
