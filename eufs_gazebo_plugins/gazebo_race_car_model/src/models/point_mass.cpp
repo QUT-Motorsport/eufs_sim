@@ -26,16 +26,16 @@
 
 #include "vehicle_model.hpp"
 
-namespace gazebo {
+namespace gazebo_plugins {
 namespace eufs {
 
 class PointMass: public VehicleModel {
 public:
-  PointMass(physics::ModelPtr &_model,
-                   sdf::ElementPtr &_sdf,
-                   boost::shared_ptr<ros::NodeHandle> &nh,
-                   transport::NodePtr &gznode)
-    : VehicleModel(_model, _sdf, nh, gznode)
+  PointMass(gazebo::physics::ModelPtr &_model,
+            sdf::ElementPtr &_sdf,
+            std::shared_ptr<rclcpp::Node> rosnode,
+            gazebo::transport::NodePtr &gznode)
+    : VehicleModel(_model, _sdf, rosnode, gznode)
   {}
 
   virtual void updateState(State& state, Input& input, const double dt)
@@ -58,4 +58,4 @@ public:
 };
 
 } // namespace eufs
-} // namespace gazebo
+} // namespace gazebo_plugins

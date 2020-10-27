@@ -69,7 +69,7 @@
       <visual>
         <origin xyz="0 0 0" rpy="-1.5707 0 -1.5707"/>
         <geometry>
-          <mesh filename="package://eufs_description/meshes/pointgrey_bumblebee2.dae"/>
+          <mesh filename="file://$(find eufs_description)/meshes/pointgrey_bumblebee2.dae"/>
         </geometry>
       </visual>
       <collision>

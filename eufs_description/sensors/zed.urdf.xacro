@@ -16,7 +16,7 @@
       <visual>
         <origin xyz="0 0 0" rpy="0 0 0"/>
         <geometry>
-          <mesh filename="package://eufs_description/meshes/zed.dae" />
+          <mesh filename="file://$(find eufs_description)/meshes/zed.dae" />
         </geometry>
         <material name="light_grey">
           <color rgba="0.8 0.8 0.8 0.8"/>
@@ -110,7 +110,7 @@
               <stddev>0.007</stddev>
             </noise>
           </camera>
-
+          <!--
           <plugin name="stereo_camera_controller" filename="libgazebo_ros_multicamera.so">
             <alwaysOn>true</alwaysOn>
             <updateRate>60.0</updateRate>
@@ -127,6 +127,7 @@
             <distortionT1>0.0</distortionT1>
             <distortionT2>0.0</distortionT2>
           </plugin>
+          -->
         </sensor>
 
         <!-- Depth simulation -->
@@ -145,6 +146,7 @@
               <far>20.0</far>
             </clip>
           </camera>
+          <!--
           <plugin filename="libgazebo_ros_openni_kinect.so" name="${prefix}_controller">
             <cameraName>${prefix}</cameraName>
             <alwaysOn>true</alwaysOn>
@@ -164,6 +166,7 @@
             <pointCloudCutoff>0.5</pointCloudCutoff>
             <pointCloudCutoffMax>20.0</pointCloudCutoffMax>
           </plugin>
+          -->
         </sensor>
       </gazebo>
     </xacro:unless>

@@ -27,29 +27,23 @@
     <xacro:include filename="$(find eufs_description)/urdf/wheels.urdf.xacro"/>
 
     <!-- Import EUFS base element with the chassis -->
-    <xacro:include filename="$(find eufs_description)/urdf/eufs_base.urdf.xacro">
-        <xacro:arg name="publish_tf" value="$(arg publish_tf)"/>
-        <xacro:arg name="simulate_perception" value="$(arg simulate_perception)"/>
-    </xacro:include>
+    <xacro:include filename="$(find eufs_description)/urdf/eufs_base.urdf.xacro" />
 
     <!-- Import all available sensors -->
     <xacro:include filename="$(find eufs_description)/sensors/all_sensors.urdf.xacro" />
 
     <!--  Include the plugins  -->
-    <xacro:include filename="$(find eufs_description)/urdf/eufs_plugins.gazebo.xacro">
-        <xacro:arg name="publish_tf" value="$(arg publish_tf)"/>
-        <xacro:arg name="simulate_perception" value="$(arg simulate_perception)"/>
-    </xacro:include>
+    <xacro:include filename="$(find eufs_description)/urdf/eufs_plugins.gazebo.xacro" />
 
     <!-- *************** -->
     <!-- Robots Elements -->
     <!-- *************** -->
 
     <!-- Chassis of the car -->
-    <xacro:eufs_base chassis_mesh="package://eufs_description/meshes/sisu-20d.dae"/>
+    <xacro:eufs_base chassis_mesh="file://$(find eufs_description)/meshes/sisu-20d.dae"/>
 
     <!-- Wheels -->
-    <xacro:wheels chassis_width="1.6" wheelbase="1.580"></xacro:wheels>
+    <xacro:wheels chassis_width="1.6" wheelbase="1.580" />
 
     <!-- *********************************************** -->
     <!--                 MAIN SENSORS                    -->
@@ -61,6 +55,8 @@
     LIDAR: 1.700 0.0 -0.150
     STEREO CAM: -0.110 0.0 0.800 -->
 
+    <!-- TODO: Add sensors back -->
+<!--
     <xacro:sensor_imu parent="base_footprint" prefix="imu">
         <origin xyz="0.0 0.0 0.0" rpy="0 0 0"/>
     </xacro:sensor_imu>
@@ -68,6 +64,7 @@
     <xacro:sensor_gps parent="base_footprint" prefix="gps">
         <origin xyz="0.0 0.0 0.4" rpy="0 0 0"/>
     </xacro:sensor_gps>
+-->
 
     <xacro:VLP-16R parent="base_footprint" name="velodyne" topic="/velodyne_points" hz="10" samples="800" active="$(arg simulate_perception)">
         <origin xyz="-0.15 0.0 0.79" rpy="0 ${1*M_PI/180.0} 0"/>

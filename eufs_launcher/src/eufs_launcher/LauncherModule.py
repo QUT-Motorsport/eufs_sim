@@ -1,9 +1,6 @@
 import os
-import rospy
-import rospkg
-import roslaunch
-import rosnode
-import math
+import rclpy
+from ament_index_python.packages import get_package_share_directory
 import time
 import yaml
 
@@ -23,10 +20,10 @@ from PIL import Image
 from PIL import ImageDraw
 from random import randrange, uniform
 
-from TrackGenerator import TrackGenerator as Generator
-from TrackGenerator import GeneratorContext
+from .TrackGenerator import TrackGenerator as Generator
+from .TrackGenerator import GeneratorContext
 
-from ConversionTools import ConversionTools as Converter
+from .ConversionTools import ConversionTools as Converter
 
 import pandas as pd
 from random import uniform
@@ -46,6 +43,25 @@ class EufsLauncher(Plugin):
                 # Give QObjects reasonable names
                 self.setObjectName('EufsLauncher')
 
+                self.node = context.node
+
+                self.node.declare_parameter(
+                        "/eufs_launcher/config",
+                        value="config/eufs_launcher.yaml"
+                )
+                self.node.declare_parameter(
+                        "/eufs_launcher/config_loc",
+                        value="eufs_launcher"
+                )
+                self.node.declare_parameter(
+                        "/eufs_launcher/gui",
+                        value="True"
+                )
+
+                yaml_to_load = self.node.get_parameter("/eufs_launcher/config").value
+                loc_to_load = self.node.get_parameter("/eufs_launcher/config_loc").value
+                use_gui = self.node.get_parameter("/eufs_launcher/gui").value
+
                 # Process standalone plugin command-line arguments
                 from argparse import ArgumentParser
                 parser = ArgumentParser()
@@ -55,8 +71,8 @@ class EufsLauncher(Plugin):
                                     help="Put plugin in silent mode")
                 args, unknowns = parser.parse_known_args(context.argv())
                 if not args.quiet:
-                        print('arguments: ', args)
-                        print('unknowns: ', unknowns)
+                        self.node.get_logger().debug('arguments: ' + str(args))
+                        self.node.get_logger().debug('unknowns: ' + str(unknowns))
 
                 # Load in eufs_launcher parameters
                 # yaml_to_load is a special variable that is set by `eufs_launcher.py`
@@ -65,7 +81,7 @@ class EufsLauncher(Plugin):
                 # `roslaunch eufs_launcher eufs_launcher.launch config:=example.yaml`
                 # Will load in example.yaml instead.
                 yaml_loc = os.path.join(
-                        rospkg.RosPack().get_path(loc_to_load),
+                        get_package_share_directory(loc_to_load),
                         yaml_to_load.split(".")[0] + ".yaml"
                 )
                 with open(yaml_loc, 'r') as stream:
@@ -79,8 +95,7 @@ class EufsLauncher(Plugin):
                 self._widget = QWidget()
 
                 # Get path to UI file which should be in the "resource" folder of this package
-                self.main_ui_file = os.path.join(
-                                                 rospkg.RosPack().get_path('eufs_launcher'),
+                self.main_ui_file = os.path.join(get_package_share_directory('eufs_launcher'),
                                                  'resource',
                                                  'Launcher.ui'
                 )
@@ -105,7 +120,7 @@ class EufsLauncher(Plugin):
                 self.MAX_COLOR_NOISE = 1.0
 
                 # Store gazebo's path as it is used quite a lot:
-                self.GAZEBO = rospkg.RosPack().get_path('eufs_gazebo')
+                self.GAZEBO = get_package_share_directory('eufs_gazebo')
 
                 # Give widget components permanent names
                 self.PRESET_SELECTOR = self._widget.findChild(QComboBox, "WhichPreset")
@@ -226,7 +241,7 @@ class EufsLauncher(Plugin):
 
                 # Remove "blacklisted" files (ones that don't define vehicle models)
                 models_filepath = os.path.join(
-                        rospkg.RosPack().get_path('eufs_gazebo_plugins'),
+                        get_package_share_directory('eufs_gazebo_plugins'),
                         'gazebo_race_car_model/src/models/models.txt'
                 )
                 vehicle_models_ = open(models_filepath, "r")
@@ -285,13 +300,9 @@ class EufsLauncher(Plugin):
                         cur_cbox.setChecked(checkboxes[key]["checked_on_default"])
                         cur_cbox.setGeometry(cur_xpos, cur_ypos, 300, 30)
                         cur_cbox.setFont(QFont("Sans Serif", 7))
-                        if "package" in checkboxes[key] and "location" in checkboxes[key]:
+                        if "package" in checkboxes[key] and "launch_file" in checkboxes[key]:
                                 # This handles any launch files that the checkbox will launch
                                 # if selected.
-                                filepath = os.path.join(
-                                        rospkg.RosPack().get_path(checkboxes[key]["package"]),
-                                        checkboxes[key]["location"]
-                                )
                                 if "args" in checkboxes[key]:
                                         cur_cbox_args = self.arg_to_list(checkboxes[key]["args"])
                                 else:
@@ -307,12 +318,13 @@ class EufsLauncher(Plugin):
                                 # We do the same for all other changing variables.
                                 self.checkbox_effect_mapping.append((
                                         cur_cbox,
-                                        (lambda key, filepath, cur_cbox_args: (
+                                        (lambda key, cur_cbox_args: (
                                                 lambda: self.launch_node_with_args(
-                                                        filepath,
+                                                        checkboxes[key]["package"],
+                                                        checkboxes[key]["launch_file"],
                                                         cur_cbox_args
                                                 )
-                                        ))(key, filepath, cur_cbox_args),
+                                        ))(key, cur_cbox_args),
                                         (lambda key: lambda: None)(key)
                                 ))
                         if "parameter_triggering" in checkboxes[key]:
@@ -366,9 +378,6 @@ class EufsLauncher(Plugin):
                 # Change label to show current selected file for the copier
                 self.update_copier()
 
-                # Get uuid of roslaunch
-                self.uuid = roslaunch.rlutil.get_or_generate_uuid(None, False)
-                roslaunch.configure_logging(self.uuid)
                 self.DEBUG_SHUTDOWN = False
 
                 # Looping over all widgest to fix scaling issue via manual scaling
@@ -425,10 +434,10 @@ class EufsLauncher(Plugin):
                 # Add Tracks to Track Selector
                 base_track = self.default_config["eufs_launcher"]["base_track"]
                 if base_track in launch_files:
-                        self.TRACK_SELECTOR.addItem(base_track)
+                        self.TRACK_SELECTOR.addItem(base_track.split(".")[0])
                 for f in launch_files:
                         if f != base_track:
-                                self.TRACK_SELECTOR.addItem(f)
+                                self.TRACK_SELECTOR.addItem(f.split(".")[0])
 
         def copy_button_pressed(self):
                 """When copy button is pressed, launch ConversionTools"""
@@ -450,7 +459,7 @@ class EufsLauncher(Plugin):
                 # For launch files, we also need to move around the model folders
                 if ending == "launch":
                         model_path = os.path.join(
-                                rospkg.RosPack().get_path('eufs_description'),
+                                get_package_share_directory('eufs_description'),
                                 'models',
                                 raw_name_to
                         )
@@ -459,13 +468,13 @@ class EufsLauncher(Plugin):
 
                         # Copy sdf files
                         path_from = os.path.join(
-                                rospkg.RosPack().get_path('eufs_description'),
+                                get_package_share_directory('eufs_description'),
                                 'models',
                                 raw_name_from,
                                 "model.sdf"
                         )
                         path_to = os.path.join(
-                                rospkg.RosPack().get_path('eufs_description'),
+                                get_package_share_directory('eufs_description'),
                                 'models',
                                 raw_name_to,
                                 "model.sdf"
@@ -474,13 +483,13 @@ class EufsLauncher(Plugin):
 
                         # Copy config files
                         path_from = os.path.join(
-                                rospkg.RosPack().get_path('eufs_description'),
+                                get_package_share_directory('eufs_description'),
                                 'models',
                                 raw_name_from,
                                 "model.config"
                         )
                         path_to = os.path.join(
-                                rospkg.RosPack().get_path('eufs_description'),
+                                get_package_share_directory('eufs_description'),
                                 'models',
                                 raw_name_to,
                                 "model.config"
@@ -947,7 +956,6 @@ class EufsLauncher(Plugin):
 
         def launch_button_pressed(self):
                 """Launches Gazebo."""
-
                 if self.has_launched_ros:
                         # Don't let people press launch twice
                         return
@@ -967,7 +975,7 @@ class EufsLauncher(Plugin):
 
                 # Create csv from track_to_launch
                 self.tell_launchella("Creating csv...")
-                track_to_launch = self.TRACK_SELECTOR.currentText()
+                track_to_launch = self.TRACK_SELECTOR.currentText() + ".launch"
                 full_path = os.path.join(
                         self.GAZEBO,
                         'launch',
@@ -1096,14 +1104,9 @@ class EufsLauncher(Plugin):
                                 parameters_to_pass.extend(param_if_off)
 
                 # Here we launch `simulation.launch`.
-                eufs_launcher = rospkg.RosPack().get_path('eufs_launcher')
-                launch_location = os.path.join(
-                        eufs_launcher,
-                        'launch',
-                        'simulation.launch'
-                )
                 self.popen_process = self.launch_node_with_args(
-                        launch_location,
+                        'eufs_launcher',
+                        'simulation.launch',
                         parameters_to_pass
                 )
 
@@ -1161,15 +1164,11 @@ class EufsLauncher(Plugin):
                 # Auto-launch default scripts in yaml
                 scripts = self.default_config["eufs_launcher"]["on_startup"]
                 for key, value in scripts.items():
-                        filepath = os.path.join(
-                                rospkg.RosPack().get_path(scripts[key]["package"]),
-                                scripts[key]["location"]
-                        )
                         if "args" in scripts[key]:
                                 cur_script_args = self.arg_to_list(scripts[key]["args"])
                         else:
                                 cur_script_args = []
-                        self.launch_node_with_args(filepath, cur_script_args)
+                        self.launch_node_with_args(scripts[key]["package"], scripts[key]["launch_file"], cur_script_args)
 
                 self.tell_launchella("As I have fulfilled my purpose in guiding you " +
                                      "to launch a track, this launcher will no longer " +
@@ -1177,32 +1176,23 @@ class EufsLauncher(Plugin):
 
                 # Hide launcher
                 self._widget.setVisible(False)
-                rospy.Timer(
-                        rospy.Duration(0.1),
-                        lambda x: self._widget.window().showMinimized(),
-                        oneshot=True
-                )
 
-        def launch_node(self, filepath):
+                rate = self.node.create_rate(0.1)
+                rate.sleep()
+                self._widget.window().showMinimized()
+
+        def launch_node(self, package, launch_file):
                 """Wrapper for launch_node_with_args"""
-                self.launch_node_with_args(filepath, [])
+                self.launch_node_with_args(package, launch_file, [])
 
-        def launch_node_with_args(self, filepath, args):
+        def launch_node_with_args(self, package, launch_file, args):
                 """
                 Launches ros node.
-
-                If arguments are supplied, it has to use Popen
-                rather than the default launch method.
                 """
-                if len(args) > 0:
-                        process = Popen(["roslaunch", filepath] + args)
-                        self.popens.append(process)
-                        return process
-                else:
-                        launch = roslaunch.parent.ROSLaunchParent(self.uuid, [filepath])
-                        launch.start()
-                        self.launches.append(launch)
-                        return launch
+                command = ' '.join(["ros2 launch", package, launch_file] + args)
+                process = Popen(command, shell=True)
+                self.popens.append(process)
+                return process
 
         def shutdown_plugin(self):
                 """Unregister all publishers, kill all nodes."""
@@ -1219,15 +1209,16 @@ class EufsLauncher(Plugin):
                     p.kill()
 
                 # Manual node killer (needs to be used on nodes opened by Popen):
-                extra_nodes = rosnode.get_node_names()
+                extra_nodes = self.node.get_node_names()
                 if "/eufs_launcher" in extra_nodes:
                         extra_nodes.remove("/eufs_launcher")
                 if "/rosout" in extra_nodes:
                         extra_nodes.remove("/rosout")
                 left_open = len(extra_nodes)
                 if (left_open > 0 and self.DEBUG_SHUTDOWN):
-                        rospy.logerr("Warning, after shutting down the launcher, " +
-                                     "these nodes are still running: " + str(extra_nodes))
+                        self.node.get_logger().error(
+                                "Warning, after shutting down the launcher, " +
+                                "these nodes are still running: " + str(extra_nodes))
 
                 nodes_to_kill = self.arg_to_list(self.default_config["eufs_launcher"]["nodes_to_kill"])
                 for bad_node in extra_nodes:
@@ -1235,10 +1226,10 @@ class EufsLauncher(Plugin):
                                 Popen(["rosnode", "kill", bad_node])
                 Popen(["killall", "-9", "gzserver"])
                 time.sleep(0.25)
-                extra_nodes = rosnode.get_node_names()
+                extra_nodes = self.node.get_node_names()
                 if "/eufs_launcher" in extra_nodes:
                         extra_nodes.remove("/eufs_launcher")
                 if "/rosout" in extra_nodes:
                         extra_nodes.remove("/rosout")
                 if left_open > 0 and self.DEBUG_SHUTDOWN:
-                        rospy.logerr("Pruned to: " + str(extra_nodes))
+                        self.node.get_logger().error("Pruned to: " + str(extra_nodes))

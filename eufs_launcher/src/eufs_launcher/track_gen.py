@@ -18,11 +18,11 @@ from scipy.spatial import cKDTree
 from xml.dom import minidom
 import argparse
 import os
-import rospkg
-import rospy
+from ament_index_python.packages import get_package_share_directory
+from rclpy.node import Node
 
 
-class Track:
+class Track(Node):
     def __init__(self):
         self.midpoints = None
         self.mid_track = None
@@ -131,7 +131,7 @@ class Track:
                 elif "inactive_noise" == mesh_str:
                     inactive_noise.append(pose + cov_info)
                 else:
-                    rospy.logerr("[track_gen.py] No such object: " + mesh_str)
+                    self.get_logger().error("[track_gen.py] No such object: " + mesh_str)
 
         """
         # handle hidden links
@@ -536,10 +536,10 @@ class Track:
         print("Succesfully saved to csv")
 
     def save_sdf(self, model_name):
-        cone_meshes = {"yellow": "model://models/yellow_cone",
-                       "blue": "model://models/blue_cone",
-                       "big": "model://models/big_cone",
-                       "orange": "model://models/orange_cone"}
+        cone_meshes = {"yellow": "model://yellow_cone",
+                       "blue": "model://blue_cone",
+                       "big": "model://big_cone",
+                       "orange": "model://orange_cone"}
 
         root = Element("sdf")
         root.set("version", "1.6")
@@ -655,7 +655,7 @@ class Track:
         points = points[1:]
         ordered.append(current_point)
 
-        while points.shape[0] is not 0:
+        while points.shape[0] != 0:
             closest_cone, closest_dist = self.find_closest(current_point, points)
             ordered.append(closest_cone)
             points = self.remove_point(closest_cone, points)
@@ -700,12 +700,12 @@ class Track:
                            a csv file for the track and for whatever reason you do not
                            desire to overwrite it.
         """
-        track_path = os.path.join(rospkg.RosPack().get_path('eufs_description'), "models",
+        track_path = os.path.join(get_package_share_directory('eufs_description'), "models",
                                   track_name, "model.sdf")
 
         # check if eufs_description exists
         try:
-            assert os.path.isdir(rospkg.RosPack().get_path('eufs_description'))
+            assert os.path.isdir(get_package_share_directory('eufs_description'))
         except:
             raise(AssertionError(("Can't find eufs_description directory."
                   "it is in the same location as eufs_gazebo!")))
@@ -724,7 +724,7 @@ class Track:
             track.generate_midpoints()
             track.generate_tracks()
         out_name = track_name+conversion_suffix if override_name is None else override_name
-        track.save_csv(os.path.join(rospkg.RosPack().get_path('eufs_gazebo'), "tracks", out_name))
+        track.save_csv(os.path.join(get_package_share_directory('eufs_gazebo'), "tracks", out_name))
 
 if __name__ == "__main__":
     # Just a heads up, you can run this with a gui by running the launcher:

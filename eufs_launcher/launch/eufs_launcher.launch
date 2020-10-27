@@ -8,13 +8,13 @@
 
   <!-- Whether or not to actually launch the gui of the launcher (if not, launcher auto-launches according
     to its config file) -->
-  <arg name="gui" default="True"/>
+  <arg name="gui" default="true"/>
 
   <!-- EUFS Launcher -->
-  <node name="eufs_launcher" pkg="eufs_launcher" type="eufs_launcher" output="screen">
-    <param name="config" value="$(arg config)"/>
-    <param name="config_loc" value="$(arg config_loc)"/>
-    <param name="gui" value="$(arg gui)"/>
+  <node name="eufs_launcher" pkg="eufs_launcher" exec="eufs_launcher" output="screen">
+    <param name="config" value="$(var config)"/>
+    <param name="config_loc" value="$(var config_loc)"/>
+    <param name="gui" value="$(var gui)"/>
   </node>
 
 </launch>

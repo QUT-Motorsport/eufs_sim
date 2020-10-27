@@ -25,7 +25,7 @@
 #ifndef GAZEBO_DEFINITIONS_HPP
 #define GAZEBO_DEFINITIONS_HPP
 
-namespace gazebo {
+namespace gazebo_plugins {
 namespace eufs {
 
 struct State {
@@ -103,5 +103,5 @@ struct Input {
 };
 
 } // namespace eufs
-} // namespace gazebo
+} // namespace gazebo_plugins
 #endif //GAZEBO_DEFINITIONS_HPP

@@ -1,5 +1,6 @@
 <sdf version='1.6'>
   <world name='small_track'>
+
     <gui fullscreen='0'>
       <camera name='user_camera'>
         <pose frame=''>-40 40 20 0 0.667643 -1</pose>
@@ -35,12 +36,12 @@
 
     <!-- MODELS -->
     <include>
-      <uri>model://models/ground_plane</uri>
+      <uri>model://ground_plane</uri>
       <pose>0.0 0.0 0.0 0 0 0</pose>
     </include>
 
     <include>
-      <uri>model://models/small_track</uri>
+      <uri>model://small_track</uri>
       <pose>0 0 0.5 0 0 0</pose>
     </include>
 

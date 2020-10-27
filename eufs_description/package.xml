@@ -9,7 +9,7 @@
   </description>
 
   <maintainer email="siliconlad@protonmail.com">Angus Stewart</maintainer>
-  <maintainer email="niklasburggraaff@gmail.com">Ignat Georgiev</maintainer>
+  <maintainer email="niklasburggraaff@gmail.com">Niklas Burggraaff</maintainer>
 
   <license>MIT</license>
 
@@ -19,17 +19,10 @@
 
   <buildtool_depend>ament_cmake</buildtool_depend>
 
-  <depend>gazebo_ros</depend>
-  <depend>urdf</depend>
-  <depend>xacro</depend>
-  <depend>hector_gazebo_plugins</depend>
-  <depend>joint_state_controller</depend>
-  <depend>std_msgs</depend>
-  <depend>std_srvs</depend>
-  <depend>tf</depend>
+  <test_depend>ament_lint_auto</test_depend>
+  <test_depend>ament_lint_common</test_depend>
 
   <export>
     <build_type>ament_cmake</build_type>
-    <gazebo_ros gazebo_plugin_path="${prefix}/lib" gazebo_model_path="${prefix}/.." />
   </export>
 </package>

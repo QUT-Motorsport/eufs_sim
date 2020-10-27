@@ -1,4 +1,5 @@
 import os
+import threading
 
 # qt
 from qt_gui.plugin import Plugin
@@ -6,8 +7,8 @@ from python_qt_binding import loadUi
 from python_qt_binding.QtWidgets import QWidget, QComboBox, QPushButton, QLabel
 
 # ROS
-import rospkg
-import rospy
+from ament_index_python.packages import get_package_share_directory
+import rclpy
 from eufs_msgs.msg import CanState
 from std_srvs.srv import Trigger
 
@@ -17,12 +18,13 @@ class RosCanGUI(Plugin):
     def __init__(self, context):
         super(RosCanGUI, self).__init__(context)
         self.setObjectName('RosCanSimGUI')
-        rp = rospkg.RosPack()
+
+        self.node = context.node
 
         # Create QWidget
         self._widget = QWidget()
         # Get path to UI file which is a sibling of this file
-        ui_file = os.path.join(rp.get_path('ros_can_sim'), 'resource',
+        ui_file = os.path.join(get_package_share_directory('ros_can_sim'), 'resource',
                                'RosCanSimGUI.ui')
         # Extend the widget with all attributes and children from UI file
         loadUi(ui_file, self._widget)
@@ -72,19 +74,23 @@ class RosCanGUI(Plugin):
             QPushButton, "DriveButton").clicked.connect(self.justDrive)
 
         # Subscribers
-        self.state_sub = rospy.Subscriber(
-            "/ros_can/state", CanState, self.stateCallback)
+        self.state_sub = self.node.create_subscription(CanState, "/ros_can/state", self.stateCallback, 10)
 
         # Publishers
-        self.set_mission_pub = rospy.Publisher(
-            "/ros_can/set_mission", CanState, queue_size=1)
+        self.set_mission_pub = self.node.create_publisher(CanState, "/ros_can/set_mission", 1)
 
         # Services
-        self.ebs_srv = rospy.ServiceProxy("/ros_can/ebs", Trigger)
-        self.reset_srv = rospy.ServiceProxy("/ros_can/reset", Trigger)
+        self.ebs_srv = self.node.create_client(Trigger, "/ros_can/ebs")
+        self.reset_srv = self.node.create_client(Trigger, "/ros_can/reset")
 
         # Add widget to the user interface
         context.add_widget(self._widget)
+
+        thread = threading.Thread(target=self.ros_spin, daemon=True)
+        thread.start()
+
+    def ros_spin(self):
+        rclpy.spin(self.node)
 
     def setMission(self):
         """Sends a mission request to the simulated ros_can
@@ -93,7 +99,7 @@ class RosCanGUI(Plugin):
         mission = self._widget.findChild(
             QComboBox, "MissionSelectMenu").currentText()
 
-        rospy.logdebug("Sending mission request for " + str(mission))
+        self.node.get_logger().debug("Sending mission request for " + str(mission))
 
         # create message to be sent
         mission_msg = CanState()
@@ -104,30 +110,32 @@ class RosCanGUI(Plugin):
                 mission_msg.ami_state = enum
 
         self.set_mission_pub.publish(mission_msg)
-        rospy.logdebug("Mission request sent successfully")
+        self.node.get_logger().debug("Mission request sent successfully")
 
     def resetState(self):
         """Requests ros_can to reset it's state machine"""
-        rospy.logdebug("Requesting ros_can_sim reset")
+        self.node.get_logger().debug("Requesting ros_can_sim reset")
         try:
             self.reset_srv.wait_for_service(timeout=1)  # 1 second
-            result = self.reset_srv()
-            rospy.logdebug("ros_can_sim reset successful")
-            rospy.logdebug(result)
+            request = Trigger.Request()
+            result = self.reset_srv.call_async(request)
+            self.node.get_logger().debug("ros_can_sim reset successful")
+            self.node.get_logger().debug(result)
         except:
-            rospy.logwarn(
+            self.node.get_logger().warn(
                 "Requested ros_can_sim reset but /ros_can/reset service is not available")
 
     def requestEBS(self):
         """Requests ros_can to go into EMERGENCY_BRAKE state"""
-        rospy.logdebug("Requesting ros_can_sim reset")
+        self.node.get_logger().debug("Requesting ros_can_sim reset")
         try:
             self.ebs_srv.wait_for_service(timeout=1)  # 1 second
-            result = self.ebs_srv()
-            rospy.logdebug("ros_can_sim reset successful")
-            rospy.logdebug(result)
+            request = Trigger.Request()
+            result = self.ebs_srv.call_async(request)
+            self.node.get_logger().debug("ros_can_sim reset successful")
+            self.node.get_logger().debug(result)
         except:
-            rospy.logwarn(
+            self.node.get_logger().warn(
                 "Requested ros_can_sim EBS but /ros_can/ebs service is not available")
 
     def stateCallback(self, msg):
@@ -155,10 +163,10 @@ class RosCanGUI(Plugin):
     def shutdown_plugin(self):
         """stop all publisher, subscriber and services
         necessary for clean shutdown"""
-        self.set_mission_pub.unregister()
-        self.state_sub.unregister()
-        self.ebs_srv.close()
-        self.reset_srv.close()
+        self.set_mission_pub.destroy()
+        self.state_sub.destroy()
+        self.ebs_srv.destroy()
+        self.reset_srv.destroy()
 
     def save_settings(self, plugin_settings, instance_settings):
         # don't know how to use

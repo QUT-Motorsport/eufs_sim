@@ -6,7 +6,7 @@
   <description>Gazebo plugins for Formula Student simulations</description>
 
   <maintainer email="siliconlad@protonmail.com">Angus Stewart</maintainer>
-  <maintainer email="niklasburggraaff@gmail.com">Ignat Georgiev</maintainer>
+  <maintainer email="niklasburggraaff@gmail.com">Niklas Burggraaff</maintainer>
 
   <license>MIT</license>
 
@@ -16,20 +16,18 @@
 
   <buildtool_depend>ament_cmake</buildtool_depend>
 
-  <depend>gazebo_msgs</depend>
-  <depend>gazebo_plugins</depend>
-  <depend>geometry_msgs</depend>
   <depend>rclcpp</depend>
-  <depend>nodelet</depend>
-  <depend>nav_msgs</depend>
+
   <depend>eufs_msgs</depend>
-  <depend>ackermann_msgs</depend>
+  <depend>geometry_msgs</depend>
+  <depend>nav_msgs</depend>
+  <depend>visualization_msgs</depend>
+  <depend>yaml-cpp</depend>
+
+  <depend>gazebo</depend>
+
+  <depend>tf2</depend>
   <depend>tf2_ros</depend>
-  <depend>tf</depend>
-
-  <exec_depend>message_runtime</exec_depend>
-
-  <test_depend>rostest</test_depend>
 
   <test_depend>ament_lint_auto</test_depend>
   <test_depend>ament_lint_common</test_depend>

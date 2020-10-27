@@ -1,11 +1,5 @@
 # Put things in here to remove them from the launcher
 blacklist.txt
-load_car.launch
-sprint17.launch
+load_car.launch.py
 sbg_raw_data_simulator.launch
-ekf_sim_launcher.launch
-fastslam_evaluator.launch
-ekf_evaluator.launch
 LAST_LAUNCH.launch
-empty.launch
-perception_sensors_simulator.launch

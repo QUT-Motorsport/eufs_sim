@@ -9,19 +9,19 @@ Modelled after the [original specs of the car](https://www.imeche.org/docs/defau
 Same as above
 
 ### Subscribers
-- `/eufs/joint_states` (sensor_msgs/JointState) - states of the joints in Gazebo
-- `/cmd_vel_out` (ackermann_msgs/AckermannDriveStamped) - control command for the car
-- `/ros_can/flag` (std_msgs/Bool) - mission flag of the car. Used to control the state machine transition logic
-- `/ros_can/set_mission` (eufs_msgs/CanState) - sets the mission of the internal state machine
+- `/eufs/joint_states` (sensor_msgs/msg/JointState) - states of the joints in Gazebo
+- `/cmd_vel_out` (eufs_msgs/msg/AckermannDriveStamped) - control command for the car
+- `/ros_can/flag` (std_msgs/msg/Bool) - mission flag of the car. Used to control the state machine transition logic
+- `/ros_can/set_mission` (eufs_msgs/msg/CanState) - sets the mission of the internal state machine
 
 ### Services
-- `/ros_can/reset` (std_srvs/Trigger) - resets the internal state machine. SIMULATION ONLY
-- `/ros_can/ebs` (std_stvs/Trigger) - makes the car transition to the EMERGENCY_BRAKE state and stop
+- `/ros_can/reset` (std_srvs/srv/Trigger) - resets the internal state machine. SIMULATION ONLY
+- `/ros_can/ebs` (std_stvs/srv/Trigger) - makes the car transition to the EMERGENCY_BRAKE state and stop
 
 ### Publishers
-- `/ros_can/state` (eufs_msgs/CanState) - gives the state of the internal state machine
-- `/ros_can/state_str` (std_msgs/String) - same as above but in string format for easy debugging
-- `/ros_can/wheel_speeds` (eufs_msgs/WheelSpeeds) - RPM of the wheels and angle of the steering rack
+- `/ros_can/state` (eufs_msgs/msg/CanState) - gives the state of the internal state machine
+- `/ros_can/state_str` (std_msgs/msg/String) - same as above but in string format for easy debugging
+- `/ros_can/wheel_speeds` (eufs_msgs/msg/WheelSpeeds) - RPM of the wheels and angle of the steering rack
 
 ### Parameters
 - `wheelbase` - distance between the front and rear axis in m

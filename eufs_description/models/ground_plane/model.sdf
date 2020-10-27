@@ -37,7 +37,7 @@
         </geometry>
         <material>
           <script>
-            <uri>model://materials/gazebo.material</uri>
+            <uri>file://gazebo.material</uri>
             <name>Gazebo/Asphalt</name>
           </script>
         </material>

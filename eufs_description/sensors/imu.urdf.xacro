@@ -27,14 +27,14 @@
 			</collision>
 		</link>
 		<gazebo>
-                        <plugin filename="libhector_gazebo_ros_imu.so" name="${prefix}_controller">
+            <plugin filename="libhector_gazebo_ros_imu.so" name="${prefix}_controller">
 				<alwaysOn>true</alwaysOn>
 				<bodyName>${prefix}_base_link</bodyName>
 				<topicName>${prefix}</topicName>
 				<serviceName>${prefix}_service</serviceName>
 				<gaussianNoise>0.00</gaussianNoise>
 				<updateRate>1000.0</updateRate>
-                                <accelOffset>0.0 0.0 -9.81</accelOffset>
+                <accelOffset>0.0 0.0 -9.81</accelOffset>
 			</plugin>
 		</gazebo>
 	</xacro:macro>

@@ -2,9 +2,9 @@ import math
 from PIL import Image
 from PIL import ImageDraw
 import random
-import rospy
+from rclpy.node import Node
 from scipy.special import binom
-from LauncherUtilities import *
+from .LauncherUtilities import *
 import numpy as np
 import collections
 
@@ -14,7 +14,7 @@ class GenerationFailedException(Exception):
         pass
 
 
-class GeneratorContext:
+class GeneratorContext(Node):
         """
         Context manager for the generator.
 
@@ -38,7 +38,7 @@ class GeneratorContext:
         def __exit__(self, exc_type, exc_value, traceback):
                 TrackGenerator.has_context = False
                 if exc_type is GenerationFailedException:
-                        rospy.logerr(
+                        self.get_logger().error(
                                 "\nError!  The generator could not generate in time.\n" +
                                 "Maybe try different parameters?\n" +
                                 "Turning on Lax Generation and increasing MAX_STRAIGHT" +

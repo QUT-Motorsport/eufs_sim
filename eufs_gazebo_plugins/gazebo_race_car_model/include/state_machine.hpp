@@ -39,11 +39,15 @@
 #include <thread>
 #include <iostream>
 
-#include <ros/ros.h>
-#include <eufs_msgs/CanState.h>
-#include <std_msgs/Bool.h>
-#include <std_msgs/String.h>
-#include <std_srvs/Trigger.h>
+#include <rclcpp/rclcpp.hpp>
+
+// ROS msgs
+#include <eufs_msgs/msg/can_state.hpp>
+#include <std_msgs/msg/bool.hpp>
+#include <std_msgs/msg/string.hpp>
+
+// ROS  srvs
+#include <std_srvs/srv/trigger.hpp>
 
 
 /**
@@ -56,12 +60,15 @@
 * Further specs: https://www.imeche.org/docs/default-source/1-oscar/formula-student/2019/fs-ai/ads-dv-software-interface-specification-v0-2.pdf?sfvrsn=2
 */
 
+namespace gazebo_plugins {
+namespace eufs {
+
 class StateMachine {
 public:
-    StateMachine(boost::shared_ptr<ros::NodeHandle> &nh);  ///< Constructor
+    StateMachine(std::shared_ptr<rclcpp::Node> rosnode);  ///< Constructor
     ~StateMachine();  ///< Destructor
 
-    bool spinOnce();  ///< Main operational loop
+    void spinOnce();  ///< Main operational loop
 
     /**
      * Return if the car can drive based on the as_state
@@ -69,7 +76,7 @@ public:
     bool canDrive();
 
 private:
-    boost::shared_ptr<ros::NodeHandle> nh_;
+    std::shared_ptr<rclcpp::Node> rosnode;
 
     uint16_t as_state_; ///< state machine state
 
@@ -77,38 +84,38 @@ private:
 
     bool driving_flag_; ///< mission flag as per ADS-DV specs
 
-    ros::Subscriber set_mission_sub_;
+    rclcpp::Subscription<eufs_msgs::msg::CanState>::SharedPtr set_mission_sub_;
 
     // High level robot command
-    ros::Subscriber flag_sub_;
+    rclcpp::Subscription<std_msgs::msg::Bool>::SharedPtr flag_sub_;
 
-    ros::Publisher state_pub_;
-    ros::Publisher state_pub_str_;
+    rclcpp::Publisher<eufs_msgs::msg::CanState>::SharedPtr state_pub_;
+    rclcpp::Publisher<std_msgs::msg::String>::SharedPtr state_pub_str_;
 
-    ros::ServiceServer reset_srv_;  ///< service to reset state machine
-    ros::ServiceServer ebs_srv_; ///< service to request an emergency brake
+    rclcpp::Service<std_srvs::srv::Trigger>::SharedPtr reset_srv_;  ///< service to reset state machine
+    rclcpp::Service<std_srvs::srv::Trigger>::SharedPtr ebs_srv_; ///< service to request an emergency brake
 
 
     /**
       * Stores the state of the driving flag
       * @param message of the driving flag
       */
-    void flagCallback(std_msgs::Bool msg);
+    void flagCallback(const std_msgs::msg::Bool::SharedPtr msg);
 
     /**
       * Sets the mission of the car. Only available in simulation
       */
-    void setMission(eufs_msgs::CanState state);
+    void setMission(const eufs_msgs::msg::CanState::SharedPtr state);
 
     /**
       * Resets the state of the internal state machine
       */
-    bool resetState(std_srvs::Trigger::Request &request, std_srvs::Trigger::Response &response);
+    bool resetState(std::shared_ptr<std_srvs::srv::Trigger::Request> request, std::shared_ptr<std_srvs::srv::Trigger::Response> response);
 
     /**
       * Puts the car into EMERGENCY_BRAKE state and stops it
       */
-    bool requestEBS(std_srvs::Trigger::Request &request, std_srvs::Trigger::Response &response);
+    bool requestEBS(std::shared_ptr<std_srvs::srv::Trigger::Request> request, std::shared_ptr<std_srvs::srv::Trigger::Response> response);
 
     /**
       * Loops through the internal state machine of the car
@@ -117,15 +124,18 @@ private:
     void updateState();
 
     /**
-      * Publishes internal state and mission in a eufs_msgs/CanState.msg format
+      * Publishes internal state and mission in a eufs_msgs/msg/CanState.msg format
       */
     void publishState();
 
     /**
-      * Creates a std_msgs/String.msg version of the internal state and mission
+      * Creates a std_msgs/msg/String.msg version of the internal state and mission
       */
-    std_msgs::String makeStateString(const eufs_msgs::CanState &state);
+    std_msgs::msg::String makeStateString(const eufs_msgs::msg::CanState &state);
 
 };
+
+} // namespace eufs
+} // namespace gazebo_plugins
 
 #endif //ROBOT_CONTROL_STATE_MACHINE_H

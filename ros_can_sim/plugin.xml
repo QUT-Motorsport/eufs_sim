@@ -7,6 +7,7 @@
       <group>
         <label>EUFS</label>
         <icon type="theme">folder</icon>
+        <statustip>Plugins related to EUFS</statustip>
       </group>
       <label>ros_can_sim GUI</label>
       <icon type="theme">utilities-terminal</icon>
@@ -21,6 +22,7 @@
       <group>
         <label>EUFS</label>
         <icon type="theme">folder</icon>
+        <statustip>Plugins related to EUFS</statustip>
       </group>
       <label>EUFS Robot Steering GUI</label>
       <icon type="theme">utilities-system-monitor</icon>

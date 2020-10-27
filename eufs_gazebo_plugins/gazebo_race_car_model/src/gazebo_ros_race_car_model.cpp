@@ -31,27 +31,26 @@
 #include <mutex>
 #include <thread>
 
-namespace gazebo {
+namespace gazebo_plugins {
+namespace eufs {
 
 RaceCarModelPlugin::RaceCarModelPlugin() {
-  int  argc  = 0;
-  char *argv = nullptr;
-  ros::init(argc, &argv, "RaceCarModelPlugin");
-  this->rosnode = boost::shared_ptr<ros::NodeHandle>(new ros::NodeHandle());
 }
 
 RaceCarModelPlugin::~RaceCarModelPlugin() {
   this->updateConnection.reset();
 }
 
-void RaceCarModelPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf) {
-  ROS_INFO("Loading RaceCarModelPlugin");
+void RaceCarModelPlugin::Load(gazebo::physics::ModelPtr _model, sdf::ElementPtr _sdf) {
+  this->rosnode = gazebo_ros::Node::Get(_sdf);
+
+  RCLCPP_DEBUG(this->rosnode->get_logger(), "Loading RaceCarModelPlugin");
 
   this->model = _model;
 
   this->world = this->model->GetWorld();
 
-  this->gznode = transport::NodePtr(new transport::Node());
+  this->gznode = gazebo::transport::NodePtr(new gazebo::transport::Node());
 
   this->gznode->Init();
 
@@ -83,15 +82,17 @@ void RaceCarModelPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf) {
   }
 
   this->updateConnection =
-      event::Events::ConnectWorldUpdateBegin(std::bind(&RaceCarModelPlugin::update, this));
+      gazebo::event::Events::ConnectWorldUpdateBegin(std::bind(&RaceCarModelPlugin::update, this));
 
-  this->worldControlPub = this->gznode->Advertise<msgs::WorldControl>("~/world_control");
+  this->worldControlPub = this->gznode->Advertise<gazebo::msgs::WorldControl>("~/world_control");
 
 #if GAZEBO_MAJOR_VERSION >= 8
   this->lastSimTime = this->world->SimTime();
 #else
   this->lastSimTime = this->world->GetSimTime();
 #endif
+
+  RCLCPP_INFO(this->rosnode->get_logger(), "RaceCarModelPlugin Loaded");
 }
 
 void RaceCarModelPlugin::Reset() {
@@ -100,9 +101,9 @@ void RaceCarModelPlugin::Reset() {
 
 void RaceCarModelPlugin::update() {
 #if GAZEBO_MAJOR_VERSION >= 8
-  common::Time curTime = this->world->SimTime();
+  gazebo::common::Time curTime = this->world->SimTime();
 #else
-  common::Time curTime = this->world->GetSimTime();
+  gazebo::common::Time curTime = this->world->GetSimTime();
 #endif
 
   double dt = (curTime - this->lastSimTime).Double();
@@ -116,4 +117,6 @@ void RaceCarModelPlugin::update() {
 }
 
 GZ_REGISTER_MODEL_PLUGIN(RaceCarModelPlugin)
-} // namespace gazebo
+
+} // namespace eufs
+} // namespace gazebo_plugins

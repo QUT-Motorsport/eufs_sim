@@ -38,9 +38,9 @@ from python_qt_binding.QtGui import QKeySequence
 from python_qt_binding.QtWidgets import QComboBox, QShortcut, QWidget
 
 # ROS
-import rospkg
-import rospy
-from ackermann_msgs.msg import AckermannDriveStamped
+from ament_index_python.packages import get_package_share_directory
+import rclpy
+from eufs_msgs.msg import AckermannDriveStamped
 
 
 class EUFSRobotSteeringGUI(Plugin):
@@ -50,12 +50,13 @@ class EUFSRobotSteeringGUI(Plugin):
     def __init__(self, context):
         super(EUFSRobotSteeringGUI, self).__init__(context)
         self.setObjectName('EUFSRobotSteeringGUI')
-        rp = rospkg.RosPack()
+
+        self.node = context.node
 
         # Create QWidget
         self._widget = QWidget()
         # Get path to UI file which is a sibling of this file
-        ui_file = os.path.join(rp.get_path('ros_can_sim'), 'resource',
+        ui_file = os.path.join(get_package_share_directory('ros_can_sim'), 'resource',
                                'EUFSRobotSteeringGUI.ui')
         # Extend the widget with all attributes and children from UI file
         loadUi(ui_file, self._widget)
@@ -198,10 +199,8 @@ class EUFSRobotSteeringGUI(Plugin):
         self._unregister_publisher()
         if topic == '':
             return
-        try:
-            self._publisher = rospy.Publisher(topic, AckermannDriveStamped, queue_size=10)
-        except TypeError:
-            self._publisher = rospy.Publisher(topic, AckermannDriveStamped)
+
+        self._publisher = self.node.create_publisher(AckermannDriveStamped, topic, 10)
 
     def _on_stop_pressed(self):
         # If the current value of sliders is zero directly send stop AckermannDriveStamped msg
@@ -287,11 +286,11 @@ class EUFSRobotSteeringGUI(Plugin):
             return
 
         drive = AckermannDriveStamped()
-        drive.header.stamp = rospy.Time.now()
+        drive.header.stamp = self.node.get_clock().now().to_msg()
 
-        drive.drive.acceleration = 0
-        drive.drive.speed = 0
-        drive.drive.jerk = 0
+        drive.drive.acceleration = 0.0
+        drive.drive.speed = 0.0
+        drive.drive.jerk = 0.0
         input = self._widget.input_select_menu.currentIndex()
         if self.inputs[input] == "Speed":
             drive.drive.speed = linear
@@ -301,7 +300,7 @@ class EUFSRobotSteeringGUI(Plugin):
             drive.drive.jerk = linear
 
         drive.drive.steering_angle = angular
-        drive.drive.steering_angle_velocity = 0
+        drive.drive.steering_angle_velocity = 0.0
 
         # Only send the zero command once so other devices can take control
         if linear == 0 and angular == 0:
@@ -314,7 +313,7 @@ class EUFSRobotSteeringGUI(Plugin):
 
     def _unregister_publisher(self):
         if self._publisher is not None:
-            self._publisher.unregister()
+            self._publisher.destroy()
             self._publisher = None
 
     def shutdown_plugin(self):
@@ -337,29 +336,35 @@ class EUFSRobotSteeringGUI(Plugin):
 
     def restore_settings(self, plugin_settings, instance_settings):
         value = instance_settings.value('input', 1)
-        value = rospy.get_param('~default_input', value)
+        self.node.declare_parameter('default_input', value)
+        value = self.node.get_parameter('default_input').value
         self.input = value
 
         value = instance_settings.value('topic', '/rqt/command')
-        value = rospy.get_param('~default_topic', value)
+        self.node.declare_parameter('default_topic', value)
+        value = self.node.get_parameter('default_topic').value
         self._widget.topic_line_edit.setText(value)
 
         value = self._widget.max_linear_double_spin_box.value()
         value = instance_settings.value('vx_max', value)
-        value = rospy.get_param('~default_vx_max', value)
+        self.node.declare_parameter('default_vx_max', value)
+        value = self.node.get_parameter('default_vx_max').value
         self._widget.max_linear_double_spin_box.setValue(float(value))
 
         value = self._widget.min_linear_double_spin_box.value()
         value = instance_settings.value('vx_min', value)
-        value = rospy.get_param('~default_vx_min', value)
+        self.node.declare_parameter('default_vx_min', value)
+        value = self.node.get_parameter('default_vx_min').value
         self._widget.min_linear_double_spin_box.setValue(float(value))
 
         value = self._widget.max_angular_double_spin_box.value()
         value = instance_settings.value('vw_max', value)
-        value = rospy.get_param('~default_vw_max', value)
+        self.node.declare_parameter('default_vw_max', value)
+        value = self.node.get_parameter('default_vw_max').value
         self._widget.max_angular_double_spin_box.setValue(float(value))
 
         value = self._widget.min_angular_double_spin_box.value()
         value = instance_settings.value('vw_min', value)
-        value = rospy.get_param('~default_vw_min', value)
+        self.node.declare_parameter('default_vw_min', value)
+        value = self.node.get_parameter('default_vw_min').value
         self._widget.min_angular_double_spin_box.setValue(float(value))
