@@ -182,6 +182,8 @@ class SbgRawDataSimulator(Node):
 if __name__ == "__main__":
     rclpy.init()
     sbg_raw_data_simulator = SbgRawDataSimulator()
-    rclpy.spin(sbg_raw_data_simulator)
-    sbg_raw_data_simulator.destroy_node()
-    rclpy.shutdown()
+    try:
+        rclpy.spin(sbg_raw_data_simulator)
+    except:
+        sbg_raw_data_simulator.destroy_node()
+        rclpy.shutdown()
