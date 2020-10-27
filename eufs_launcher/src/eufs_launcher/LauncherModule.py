@@ -434,10 +434,10 @@ class EufsLauncher(Plugin):
                 # Add Tracks to Track Selector
                 base_track = self.default_config["eufs_launcher"]["base_track"]
                 if base_track in launch_files:
-                        self.TRACK_SELECTOR.addItem(base_track)
+                        self.TRACK_SELECTOR.addItem(base_track.split(".")[0])
                 for f in launch_files:
                         if f != base_track:
-                                self.TRACK_SELECTOR.addItem(f)
+                                self.TRACK_SELECTOR.addItem(f.split(".")[0])
 
         def copy_button_pressed(self):
                 """When copy button is pressed, launch ConversionTools"""
