@@ -10,7 +10,7 @@ Same as above
 
 ### Subscribers
 - `/eufs/joint_states` (sensor_msgs/msg/JointState) - states of the joints in Gazebo
-- `/cmd_vel_out` (eufs_msgs/msg/AckermannDriveStamped) - control command for the car
+- `/cmd` (eufs_msgs/msg/AckermannDriveStamped) - control command for the car
 - `/ros_can/flag` (std_msgs/msg/Bool) - mission flag of the car. Used to control the state machine transition logic
 - `/ros_can/set_mission` (eufs_msgs/msg/CanState) - sets the mission of the internal state machine
 
