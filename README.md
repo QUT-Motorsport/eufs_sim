@@ -78,13 +78,13 @@ After 5 seconds you should see the State changing from
 The car will now be able to drive around the track!
 
 Commands can be sent to the car publihsing an`AckermannDriveStamped`
-message to the `/cmd_vel_out` topic.
+message to the `/cmd` topic.
 
 _Note:_
 If you have selected the `Manual` mission and you want to use the
 EUFS Robot Steering GUI without any additional nodes to transform the command,
 you need to change the topic in the text field at the top of the GUI to
-`/cmd_vel_out`
+`/cmd`
 
 
 ## 4. Launch options <a name="options"></a>

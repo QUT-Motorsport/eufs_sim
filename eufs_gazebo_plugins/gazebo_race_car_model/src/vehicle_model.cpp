@@ -52,7 +52,7 @@ VehicleModel::VehicleModel(gazebo::physics::ModelPtr &_model,
   this->pub_odom_ = rosnode->create_publisher<nav_msgs::msg::Odometry>(this->odom_topic_name_, 1);
 
   // ROS Subscriptions
-  this->sub_cmd_ = rosnode->create_subscription<eufs_msgs::msg::AckermannDriveStamped>("/cmd_vel_out", 1, std::bind(&VehicleModel::onCmd, this, std::placeholders::_1));
+  this->sub_cmd_ = rosnode->create_subscription<eufs_msgs::msg::AckermannDriveStamped>("/cmd", 1, std::bind(&VehicleModel::onCmd, this, std::placeholders::_1));
 
   this->setPositionFromWorld();
 
