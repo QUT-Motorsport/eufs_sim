@@ -200,7 +200,11 @@ class EUFSRobotSteeringGUI(Plugin):
         if topic == '':
             return
 
-        self._publisher = self.node.create_publisher(AckermannDriveStamped, topic, 10)
+        #Catches "topics can't end in backslash" error
+        try:
+            self._publisher = self.node.create_publisher(AckermannDriveStamped, topic, 10)
+        except rclpy.exceptions.InvalidTopicNameException:
+            return
 
     def _on_stop_pressed(self):
         # If the current value of sliders is zero directly send stop AckermannDriveStamped msg
