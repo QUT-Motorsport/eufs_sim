@@ -28,7 +28,8 @@ Also provides ground truth state in the form of `nav_msgs/Odometry` and
 | `referenceFrame`             | string    | `"map"`            | The tf frame in which to publish data. |
 | `robotFrame`                 | string    | `"base_footprint"` | The tf frame of the robot. |
 | `publishTransform`           | bool      | `false`            | Whether or not the tf of the car should be published |
-| `stateTopicName`             | string    | -                  | Required parameter. The topic in which to publish the eufs_msgs/CarState message. |
+| `groundTruthCarStateTopic`   | string    | -                  | Required parameter. The topic in which to publish the ground truth eufs_msgs/CarState message. |
+| `localisationCarStateTopic`  | string    | -                  | Required parameter. The topic in which to publish the eufs_msgs/CarState message. |
 | `wheelSpeedsTopicName`       | string    | -                  | Required parameter. The topic in which to publish the eufs_msgs/WheelSpeedsStamped message. |
 | `odometryTopicName`          | string    | -                  | Required parameter. The topic in which to publish the nav_msgs/Odometry message. |
 | `positionNoise`              | double[3] | `[0,0,0]`          | Position noise.            Inducted in the position fields and in the covariance. ([x, y, z]) |
@@ -56,7 +57,8 @@ This has to be inserted inside a robot URDF
       <referenceFrame>map</referenceFrame>
       <robotFrame>base_footprint</robotFrame>
       <publishTransform>$(arg publish_tf)</publishTransform>
-      <stateTopicName>/ground_truth/state</stateTopicName>
+      <groundTruthCarStateTopic>/ground_truth/state</groundTruthCarStateTopic>
+      <localisationCarStateTopic>/odometry_integration/car_state</localisationCarStateTopic>
       <wheelSpeedsTopicName>/ros_can/wheel_speeds</wheelSpeedsTopicName>
       <odometryTopicName>/ground_truth/odom</odometryTopicName>
       <positionNoise>0.0 0.0 0.0</positionNoise>
