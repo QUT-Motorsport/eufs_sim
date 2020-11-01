@@ -48,6 +48,7 @@ VehicleModel::VehicleModel(gazebo::physics::ModelPtr &_model,
 
   // ROS Publishers
   this->pub_car_state_ = rosnode->create_publisher<eufs_msgs::msg::CarState>(this->state_topic_name_, 1);
+  this->pub_car_state_noisy_ = rosnode->create_publisher<eufs_msgs::msg::CarState>(this->state_topic_name_noisy_, 1);
   this->pub_wheel_speeds_ = rosnode->create_publisher<eufs_msgs::msg::WheelSpeedsStamped>(this->wheel_speeds_topic_name_, 1);
   this->pub_odom_ = rosnode->create_publisher<nav_msgs::msg::Odometry>(this->odom_topic_name_, 1);
 
@@ -99,6 +100,13 @@ void VehicleModel::initParam(sdf::ElementPtr &_sdf) {
     return;
   } else {
     this->state_topic_name_ = _sdf->GetElement("stateTopicName")->Get<std::string>();
+  }
+
+  if (!_sdf->HasElement("stateTopicNameNoisy")) {
+    RCLCPP_FATAL(this->rosnode->get_logger(), "gazebo_ros_race_car_model plugin missing <stateTopicNameNoisy>, cannot proceed");
+    return;
+  } else {
+    this->state_topic_name_noisy_ = _sdf->GetElement("stateTopicNameNoisy")->Get<std::string>();
   }
 
   if (!_sdf->HasElement("odometryTopicName")) {
@@ -334,11 +342,47 @@ void VehicleModel::publishCarState() {
 #else
   double z = model->GetWorldPose().Ign().Pos().Z();
 #endif
-  car_state.pose.pose.position.x = this->state_.x + this->GaussianKernel(0, this->position_noise_[0]);
-  car_state.pose.pose.position.y = this->state_.y + this->GaussianKernel(0, this->position_noise_[1]);
-  car_state.pose.pose.position.z = z + this->GaussianKernel(0, this->position_noise_[2]);
+
+  car_state.pose.pose.position.x = this->state_.x;
+  car_state.pose.pose.position.y = this->state_.y;
+  car_state.pose.pose.position.z = z;
 
   std::vector<double> orientation = {state_.yaw, 0.0, 0.0};
+
+  orientation = this->ToQuaternion(orientation);
+
+  car_state.pose.pose.orientation.x = orientation[0];
+  car_state.pose.pose.orientation.y = orientation[1];
+  car_state.pose.pose.orientation.z = orientation[2];
+  car_state.pose.pose.orientation.w = orientation[3];
+
+  car_state.twist.twist.linear.x = state_.v_x;
+  car_state.twist.twist.linear.y = state_.v_y;
+  car_state.twist.twist.linear.z = 0;
+  car_state.twist.twist.angular.x = 0;
+  car_state.twist.twist.angular.y = 0;
+  car_state.twist.twist.angular.z = state_.r;
+
+  car_state.linear_acceleration.x = state_.a_x;
+  car_state.linear_acceleration.y = state_.a_y;
+  car_state.linear_acceleration.z = 0;
+
+  car_state.slip_angle = getSlipAngle();
+
+  car_state.state_of_charge = 999;
+
+  // Publish ground_truth
+  if (this->pub_car_state_->get_subscription_count() > 0) {
+    this->pub_car_state_->publish(car_state);
+  }
+
+  // Add noise
+  car_state.pose.pose.position.x += this->GaussianKernel(0, this->position_noise_[0]);
+  car_state.pose.pose.position.y += this->GaussianKernel(0, this->position_noise_[1]);
+  car_state.pose.pose.position.z += this->GaussianKernel(0, this->position_noise_[2]);
+
+  // Reset orientation
+  orientation = {state_.yaw, 0.0, 0.0};
 
   orientation[0] += this->GaussianKernel(0, this->orientation_noise_[0]);
   orientation[1] += this->GaussianKernel(0, this->orientation_noise_[1]);
@@ -351,14 +395,14 @@ void VehicleModel::publishCarState() {
   car_state.pose.pose.orientation.z = orientation[2];
   car_state.pose.pose.orientation.w = orientation[3];
 
-  car_state.twist.twist.linear.x = state_.v_x + this->GaussianKernel(0, this->linear_velocity_noise_[0]);
-  car_state.twist.twist.linear.y = state_.v_y + this->GaussianKernel(0, this->linear_velocity_noise_[1]);
-  car_state.twist.twist.linear.z = 0 + this->GaussianKernel(0, this->linear_velocity_noise_[2]);
-  car_state.twist.twist.angular.x = 0 + this->GaussianKernel(0, this->angular_velocity_noise_[0]);
-  car_state.twist.twist.angular.y = 0 + this->GaussianKernel(0, this->angular_velocity_noise_[1]);
-  car_state.twist.twist.angular.z = state_.r + this->GaussianKernel(0, this->angular_velocity_noise_[2]);
+  car_state.twist.twist.linear.x += this->GaussianKernel(0, this->linear_velocity_noise_[0]);
+  car_state.twist.twist.linear.y += this->GaussianKernel(0, this->linear_velocity_noise_[1]);
+  car_state.twist.twist.linear.z += this->GaussianKernel(0, this->linear_velocity_noise_[2]);
+  car_state.twist.twist.angular.x += this->GaussianKernel(0, this->angular_velocity_noise_[0]);
+  car_state.twist.twist.angular.y += this->GaussianKernel(0, this->angular_velocity_noise_[1]);
+  car_state.twist.twist.angular.z += this->GaussianKernel(0, this->angular_velocity_noise_[2]);
 
-  // fill in covariance matrix
+  // Fill in covariance matrix
   car_state.pose.covariance[0] = pow(this->position_noise_[0], 2);
   car_state.pose.covariance[7] = pow(this->position_noise_[1], 2);
   car_state.pose.covariance[14] = pow(this->position_noise_[2], 2);
@@ -373,20 +417,17 @@ void VehicleModel::publishCarState() {
   car_state.twist.covariance[28] = pow(this->angular_velocity_noise_[1], 2);
   car_state.twist.covariance[35] = pow(this->angular_velocity_noise_[2], 2);
 
-  car_state.linear_acceleration.x = state_.a_x + this->GaussianKernel(0, this->linear_acceleration_noise_[0]);
-  car_state.linear_acceleration.y = state_.a_y + this->GaussianKernel(0, this->linear_acceleration_noise_[1]);
-  car_state.linear_acceleration.z = 0 + this->GaussianKernel(0, this->linear_acceleration_noise_[2]);
+  car_state.linear_acceleration.x += this->GaussianKernel(0, this->linear_acceleration_noise_[0]);
+  car_state.linear_acceleration.y += this->GaussianKernel(0, this->linear_acceleration_noise_[1]);
+  car_state.linear_acceleration.z += this->GaussianKernel(0, this->linear_acceleration_noise_[2]);
 
   car_state.linear_acceleration_covariance[0] = pow(this->linear_acceleration_noise_[0], 2);
   car_state.linear_acceleration_covariance[4] = pow(this->linear_acceleration_noise_[1], 2);
   car_state.linear_acceleration_covariance[8] = pow(this->linear_acceleration_noise_[2], 2);
 
-  car_state.slip_angle = getSlipAngle();
-
-  car_state.state_of_charge = 999;
-
-  if (pub_car_state_->get_subscription_count() > 0) {
-    pub_car_state_->publish(car_state);
+  // Publish with noise
+  if (this->pub_car_state_noisy_->get_subscription_count() > 0) {
+    this->pub_car_state_noisy_->publish(car_state);
   }
 }
 

@@ -111,11 +111,13 @@ protected:
   double time_last_published_;
 
   std::string state_topic_name_;
+  std::string state_topic_name_noisy_;
   std::string wheel_speeds_topic_name_;
   std::string odom_topic_name_;
 
   // ROS Publishers
   rclcpp::Publisher<eufs_msgs::msg::CarState>::SharedPtr pub_car_state_;
+  rclcpp::Publisher<eufs_msgs::msg::CarState>::SharedPtr pub_car_state_noisy_;
   rclcpp::Publisher<eufs_msgs::msg::WheelSpeedsStamped>::SharedPtr pub_wheel_speeds_;
   rclcpp::Publisher<nav_msgs::msg::Odometry>::SharedPtr pub_odom_;
 
