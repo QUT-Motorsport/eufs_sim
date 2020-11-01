@@ -47,8 +47,8 @@ VehicleModel::VehicleModel(gazebo::physics::ModelPtr &_model,
   this->initVehicleParam(_sdf);
 
   // ROS Publishers
-  this->pub_car_state_ = rosnode->create_publisher<eufs_msgs::msg::CarState>(this->state_topic_name_, 1);
-  this->pub_car_state_noisy_ = rosnode->create_publisher<eufs_msgs::msg::CarState>(this->state_topic_name_noisy_, 1);
+  this->pub_ground_truth_car_state_ = rosnode->create_publisher<eufs_msgs::msg::CarState>(this->ground_truth_car_state_topic_, 1);
+  this->pub_localisation_car_state_ = rosnode->create_publisher<eufs_msgs::msg::CarState>(this->localisation_car_state_topic_, 1);
   this->pub_wheel_speeds_ = rosnode->create_publisher<eufs_msgs::msg::WheelSpeedsStamped>(this->wheel_speeds_topic_name_, 1);
   this->pub_odom_ = rosnode->create_publisher<nav_msgs::msg::Odometry>(this->odom_topic_name_, 1);
 
@@ -95,18 +95,18 @@ void VehicleModel::initParam(sdf::ElementPtr &_sdf) {
     this->wheel_speeds_topic_name_ = _sdf->GetElement("wheelSpeedsTopicName")->Get<std::string>();
   }
 
-  if (!_sdf->HasElement("stateTopicName")) {
-    RCLCPP_FATAL(this->rosnode->get_logger(), "gazebo_ros_race_car_model plugin missing <stateTopicName>, cannot proceed");
+  if (!_sdf->HasElement("groundTruthCarStateTopic")) {
+    RCLCPP_FATAL(this->rosnode->get_logger(), "gazebo_ros_race_car_model plugin missing <groundTruthCarStateTopic>, cannot proceed");
     return;
   } else {
-    this->state_topic_name_ = _sdf->GetElement("stateTopicName")->Get<std::string>();
+    this->ground_truth_car_state_topic_ = _sdf->GetElement("groundTruthCarStateTopic")->Get<std::string>();
   }
 
-  if (!_sdf->HasElement("stateTopicNameNoisy")) {
-    RCLCPP_FATAL(this->rosnode->get_logger(), "gazebo_ros_race_car_model plugin missing <stateTopicNameNoisy>, cannot proceed");
+  if (!_sdf->HasElement("localisationCarStateTopic")) {
+    RCLCPP_FATAL(this->rosnode->get_logger(), "gazebo_ros_race_car_model plugin missing <localisationCarStateTopic>, cannot proceed");
     return;
   } else {
-    this->state_topic_name_noisy_ = _sdf->GetElement("stateTopicNameNoisy")->Get<std::string>();
+    this->localisation_car_state_topic_ = _sdf->GetElement("localisationCarStateTopic")->Get<std::string>();
   }
 
   if (!_sdf->HasElement("odometryTopicName")) {
@@ -372,8 +372,8 @@ void VehicleModel::publishCarState() {
   car_state.state_of_charge = 999;
 
   // Publish ground_truth
-  if (this->pub_car_state_->get_subscription_count() > 0) {
-    this->pub_car_state_->publish(car_state);
+  if (this->pub_ground_truth_car_state_->get_subscription_count() > 0) {
+    this->pub_ground_truth_car_state_->publish(car_state);
   }
 
   // Add noise
@@ -426,8 +426,8 @@ void VehicleModel::publishCarState() {
   car_state.linear_acceleration_covariance[8] = pow(this->linear_acceleration_noise_[2], 2);
 
   // Publish with noise
-  if (this->pub_car_state_noisy_->get_subscription_count() > 0) {
-    this->pub_car_state_noisy_->publish(car_state);
+  if (this->pub_localisation_car_state_->get_subscription_count() > 0) {
+    this->pub_localisation_car_state_->publish(car_state);
   }
 }
 
