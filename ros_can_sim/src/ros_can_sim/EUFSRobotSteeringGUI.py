@@ -200,6 +200,11 @@ class EUFSRobotSteeringGUI(Plugin):
         self.topic = str(topic)
 
     def _on_topic_set(self, log=True):
+        # Publisher is unregistered when the topic is changed
+        # If the publisher has not been unregistered, do not need to set it
+        if self._publisher is not None:
+            return
+
         self._unregister_publisher()
         if self.topic == '':
             self.node.get_logger().error("Could NOT set EUFS Robot Steering GUI  publisher's topic to: " + self.topic)
@@ -209,7 +214,7 @@ class EUFSRobotSteeringGUI(Plugin):
         try:
             self._publisher = self.node.create_publisher(AckermannDriveStamped, self.topic, 10)
             if log:
-                self.node.get_logger().info("Set EUFS Robot Steering GUI publisher's topic to: " + self.topic)
+                self.node.get_logger().debug("Set EUFS Robot Steering GUI publisher's topic to: " + self.topic)
         except rclpy.exceptions.InvalidTopicNameException:
             self.node.get_logger().error("Could NOT set EUFS Robot Steering GUI  publisher's topic to: " + self.topic)
             return
