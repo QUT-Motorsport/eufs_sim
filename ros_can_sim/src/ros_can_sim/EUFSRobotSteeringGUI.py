@@ -83,6 +83,8 @@ class EUFSRobotSteeringGUI(Plugin):
 
         self._widget.topic_line_edit.textChanged.connect(
             self._on_topic_changed)
+        self._widget.topic_line_edit.editingFinished.connect(
+            self._on_topic_set)
         self._widget.stop_push_button.pressed.connect(self._on_stop_pressed)
 
         self._widget.linear_slider.valueChanged.connect(
@@ -193,17 +195,21 @@ class EUFSRobotSteeringGUI(Plugin):
         self._update_parameter_timer.start(100)
         self.zero_cmd_sent = False
 
-    @Slot(str)
     def _on_topic_changed(self, topic):
-        topic = str(topic)
+        self.topic = str(topic)
+
+    def _on_topic_set(self, log=True):
         self._unregister_publisher()
-        if topic == '':
+        if self.topic == '':
             return
 
         #Catches "topics can't end in backslash" error
         try:
-            self._publisher = self.node.create_publisher(AckermannDriveStamped, topic, 10)
+            self._publisher = self.node.create_publisher(AckermannDriveStamped, self.topic, 10)
+            if log:
+                self.node.get_logger().info("Set EUFS Robot Steering GUI publisher's topic to: " + self.topic)
         except rclpy.exceptions.InvalidTopicNameException:
+            self.node.get_logger().error("Could NOT set EUFS Robot Steering GUI  publisher's topic to: " + self.topic)
             return
 
     def _on_stop_pressed(self):
@@ -348,6 +354,9 @@ class EUFSRobotSteeringGUI(Plugin):
         self.node.declare_parameter('default_topic', value)
         value = self.node.get_parameter('default_topic').value
         self._widget.topic_line_edit.setText(value)
+
+        # In order to make the topic be set
+        self._on_topic_set(log=False)
 
         value = self._widget.max_linear_double_spin_box.value()
         value = instance_settings.value('vx_max', value)
