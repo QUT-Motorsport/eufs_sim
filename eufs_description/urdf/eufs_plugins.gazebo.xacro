@@ -21,7 +21,8 @@
       <referenceFrame>map</referenceFrame>
       <robotFrame>base_footprint</robotFrame>
       <publishTransform>$(arg publish_tf)</publishTransform>
-      <stateTopicName>/ground_truth/state</stateTopicName>
+      <groundTruthCarStateTopic>/ground_truth/state</groundTruthCarStateTopic>
+      <localisationCarStateTopic>/odometry_integration/car_state</localisationCarStateTopic>
       <wheelSpeedsTopicName>/ros_can/wheel_speeds</wheelSpeedsTopicName>
       <odometryTopicName>/ground_truth/odom</odometryTopicName>
       <positionNoise>0.0 0.0 0.0</positionNoise>
