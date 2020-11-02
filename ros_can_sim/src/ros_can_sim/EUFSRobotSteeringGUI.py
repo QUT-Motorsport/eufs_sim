@@ -196,11 +196,13 @@ class EUFSRobotSteeringGUI(Plugin):
         self.zero_cmd_sent = False
 
     def _on_topic_changed(self, topic):
+        self._unregister_publisher()
         self.topic = str(topic)
 
     def _on_topic_set(self, log=True):
         self._unregister_publisher()
         if self.topic == '':
+            self.node.get_logger().error("Could NOT set EUFS Robot Steering GUI  publisher's topic to: " + self.topic)
             return
 
         #Catches "topics can't end in backslash" error
