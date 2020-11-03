@@ -205,9 +205,8 @@ class EUFSRobotSteeringGUI(Plugin):
         if self._publisher is not None:
             return
 
-        self._unregister_publisher()
         if self.topic == '':
-            self.node.get_logger().error("Could NOT set EUFS Robot Steering GUI  publisher's topic to: " + self.topic)
+            self.node.get_logger().error("Could NOT set EUFS Robot Steering GUI publisher's topic to be empty")
             return
 
         #Catches "topics can't end in backslash" error
@@ -216,7 +215,7 @@ class EUFSRobotSteeringGUI(Plugin):
             if log:
                 self.node.get_logger().debug("Set EUFS Robot Steering GUI publisher's topic to: " + self.topic)
         except rclpy.exceptions.InvalidTopicNameException:
-            self.node.get_logger().error("Could NOT set EUFS Robot Steering GUI  publisher's topic to: " + self.topic)
+            self.node.get_logger().error("Could NOT set EUFS Robot Steering GUI publisher's topic to: " + self.topic)
             return
 
     def _on_stop_pressed(self):
