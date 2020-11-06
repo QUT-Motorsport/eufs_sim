@@ -240,7 +240,7 @@ namespace gazebo_plugins {
 
             processCones(ground_truth_cone_array_message);
 
-            ground_truth_cone_array_message.header.frame_id = "/" + this->cone_frame_;
+            ground_truth_cone_array_message.header.frame_id = this->cone_frame_;
             ground_truth_cone_array_message.header.stamp = this->rosnode_->now();
 
             return ground_truth_cone_array_message;
@@ -383,7 +383,7 @@ namespace gazebo_plugins {
 
         eufs_msgs::msg::ConeArrayWithCovariance
         GazeboConeGroundTruth::getTranslatedTrack(eufs_msgs::msg::ConeArrayWithCovariance cones) {
-            cones.header.frame_id = "/" + this->cone_frame_;
+            cones.header.frame_id = this->cone_frame_;
             cones.blue_cones = translateCones(cones.blue_cones);
             cones.yellow_cones = translateCones(cones.yellow_cones);
             cones.orange_cones = translateCones(cones.orange_cones);
@@ -464,7 +464,7 @@ namespace gazebo_plugins {
                 visualization_msgs::msg::Marker marker;
 
                 marker.header.stamp = this->rosnode_->now();
-                marker.header.frame_id = "/" + this->cone_frame_;
+                marker.header.frame_id = this->cone_frame_;
 
                 marker.id = id;
 
@@ -511,7 +511,7 @@ namespace gazebo_plugins {
             addNoiseToConeArray(cone_array_message_with_noise.big_orange_cones, noise);
             addNoiseToConeArray(cone_array_message_with_noise.unknown_color_cones, noise);
 
-            cone_array_message_with_noise.header.frame_id = "/" + this->cone_frame_;
+            cone_array_message_with_noise.header.frame_id = this->cone_frame_;
             cone_array_message_with_noise.header.stamp = this->rosnode_->now();
 
             return cone_array_message_with_noise;

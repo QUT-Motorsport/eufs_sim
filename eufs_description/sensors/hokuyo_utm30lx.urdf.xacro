@@ -60,7 +60,7 @@
 				</ray>
 				<plugin filename="libgazebo_ros_laser.so" name="${prefix}_controller">
 					<topicName>${prefix_topic}/scan</topicName>
-					<frameName>/${prefix}_link</frameName>
+					<frameName>${prefix}_link</frameName>
 				</plugin>
 			</sensor>
 		</gazebo>
