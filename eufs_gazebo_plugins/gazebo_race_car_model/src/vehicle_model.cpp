@@ -50,7 +50,9 @@ VehicleModel::VehicleModel(gazebo::physics::ModelPtr &_model,
   this->pub_ground_truth_car_state_ = rosnode->create_publisher<eufs_msgs::msg::CarState>(this->ground_truth_car_state_topic_, 1);
   this->pub_localisation_car_state_ = rosnode->create_publisher<eufs_msgs::msg::CarState>(this->localisation_car_state_topic_, 1);
   this->pub_wheel_speeds_ = rosnode->create_publisher<eufs_msgs::msg::WheelSpeedsStamped>(this->wheel_speeds_topic_name_, 1);
+  this->pub_ground_truth_wheel_speeds_ = rosnode->create_publisher<eufs_msgs::msg::WheelSpeedsStamped>(this->ground_truth_wheel_speeds_topic_name_, 1);
   this->pub_odom_ = rosnode->create_publisher<nav_msgs::msg::Odometry>(this->odom_topic_name_, 1);
+
 
   // ROS Subscriptions
   this->sub_cmd_ = rosnode->create_subscription<eufs_msgs::msg::AckermannDriveStamped>("/cmd", 1, std::bind(&VehicleModel::onCmd, this, std::placeholders::_1));
@@ -93,6 +95,13 @@ void VehicleModel::initParam(sdf::ElementPtr &_sdf) {
     return;
   } else {
     this->wheel_speeds_topic_name_ = _sdf->GetElement("wheelSpeedsTopicName")->Get<std::string>();
+  }
+
+  if (!_sdf->HasElement("groundTruthWheelSpeedsTopicName")) {
+    RCLCPP_FATAL(this->rosnode->get_logger(), "gazebo_ros_race_car_model plugin missing <groundTruthWheelSpeedsTopicName>, cannot proceed");
+    return;
+  } else {
+    this->ground_truth_wheel_speeds_topic_name_ = _sdf->GetElement("groundTruthWheelSpeedsTopicName")->Get<std::string>();
   }
 
   if (!_sdf->HasElement("groundTruthCarStateTopic")) {
@@ -475,9 +484,18 @@ void VehicleModel::publishWheelSpeeds() {
   float PI = 3.14159265;
   float wheel_circumference = 2 * PI * param_.tire.radius;
 
+  // Calculate Wheel speeds
   wheel_speeds.lb_speed = (state_.v_x / wheel_circumference) * 60;
   wheel_speeds.rb_speed = (state_.v_x / wheel_circumference) * 60;
 
+  // Publish ground truth
+  if (pub_ground_truth_wheel_speeds_->get_subscription_count() > 0) {
+    pub_ground_truth_wheel_speeds_->publish(wheel_speeds);
+  }
+
+  // Add Noise to Wheel speeds here
+
+  // Publish with Noise
   if (pub_wheel_speeds_->get_subscription_count() > 0) {
     pub_wheel_speeds_->publish(wheel_speeds);
   }
