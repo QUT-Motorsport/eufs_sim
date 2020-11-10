@@ -206,7 +206,7 @@ class EUFSRobotSteeringGUI(Plugin):
             return
 
         if self.topic == '':
-            self.node.get_logger().error("Could NOT set EUFS Robot Steering GUI publisher's topic to be empty")
+            self.node.get_logger().info("Could NOT set EUFS Robot Steering GUI publisher's topic to be empty")
             return
 
         #Catches "topics can't end in backslash" error
