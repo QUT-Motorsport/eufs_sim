@@ -24,6 +24,7 @@
       <groundTruthCarStateTopic>/ground_truth/state</groundTruthCarStateTopic>
       <localisationCarStateTopic>/odometry_integration/car_state</localisationCarStateTopic>
       <wheelSpeedsTopicName>/ros_can/wheel_speeds</wheelSpeedsTopicName>
+      <groundTruthWheelSpeedsTopicName>/ground_truth/wheel_speeds</groundTruthWheelSpeedsTopicName>
       <odometryTopicName>/ground_truth/odom</odometryTopicName>
       <positionNoise>0.0 0.0 0.0</positionNoise>
       <orientationNoise>0.0 0.0 0.0</orientationNoise> <!-- Yaw Pitch Roll -->
