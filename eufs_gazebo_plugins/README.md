@@ -31,6 +31,7 @@ Also provides ground truth state in the form of `nav_msgs/Odometry` and
 | `groundTruthCarStateTopic`   | string    | -                  | Required parameter. The topic in which to publish the ground truth eufs_msgs/CarState message. |
 | `localisationCarStateTopic`  | string    | -                  | Required parameter. The topic in which to publish the eufs_msgs/CarState message. |
 | `wheelSpeedsTopicName`       | string    | -                  | Required parameter. The topic in which to publish the eufs_msgs/WheelSpeedsStamped message. |
+| `groundTruthWheelSpeedsTopicName` | string | -                | Required parameter. The topic in which to publish the ground truth eufs_msgs/WheelSpeedsStamped message | 
 | `odometryTopicName`          | string    | -                  | Required parameter. The topic in which to publish the nav_msgs/Odometry message. |
 | `positionNoise`              | double[3] | `[0,0,0]`          | Position noise.            Inducted in the position fields and in the covariance. ([x, y, z]) |
 | `orientationNoise`           | double[3] | `[0,0,0]`          | Orientation noise.         Inducted in the position fields and in the covariance. ([yaw, pitch, roll]) |
@@ -60,6 +61,7 @@ This has to be inserted inside a robot URDF
       <groundTruthCarStateTopic>/ground_truth/state</groundTruthCarStateTopic>
       <localisationCarStateTopic>/odometry_integration/car_state</localisationCarStateTopic>
       <wheelSpeedsTopicName>/ros_can/wheel_speeds</wheelSpeedsTopicName>
+      <groundTruthWheelSpeedsTopicName>/ground_truth/wheel_speeds</groundTruthWheelSpeedsTopicName>
       <odometryTopicName>/ground_truth/odom</odometryTopicName>
       <positionNoise>0.0 0.0 0.0</positionNoise>
       <orientationNoise>0.0 0.0 0.0</orientationNoise>
