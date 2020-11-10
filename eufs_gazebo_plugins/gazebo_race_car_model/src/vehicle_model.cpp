@@ -53,7 +53,6 @@ VehicleModel::VehicleModel(gazebo::physics::ModelPtr &_model,
   this->pub_ground_truth_wheel_speeds_ = rosnode->create_publisher<eufs_msgs::msg::WheelSpeedsStamped>(this->ground_truth_wheel_speeds_topic_name_, 1);
   this->pub_odom_ = rosnode->create_publisher<nav_msgs::msg::Odometry>(this->odom_topic_name_, 1);
 
-
   // ROS Subscriptions
   this->sub_cmd_ = rosnode->create_subscription<eufs_msgs::msg::AckermannDriveStamped>("/cmd", 1, std::bind(&VehicleModel::onCmd, this, std::placeholders::_1));
 
@@ -493,7 +492,7 @@ void VehicleModel::publishWheelSpeeds() {
     pub_ground_truth_wheel_speeds_->publish(wheel_speeds);
   }
 
-  // Add Noise to Wheel speeds here
+  // TODO: Add Noise to Wheel speeds here
 
   // Publish with Noise
   if (pub_wheel_speeds_->get_subscription_count() > 0) {
