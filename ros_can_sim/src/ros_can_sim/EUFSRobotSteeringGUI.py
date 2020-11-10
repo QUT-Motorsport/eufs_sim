@@ -213,6 +213,8 @@ class EUFSRobotSteeringGUI(Plugin):
         try:
             self._publisher = self.node.create_publisher(AckermannDriveStamped, self.topic, 10)
             if log:
+                self.node.get_logger().info("Set EUFS Robot Steering GUI publisher's topic to: " + self.topic)
+            else:
                 self.node.get_logger().debug("Set EUFS Robot Steering GUI publisher's topic to: " + self.topic)
         except rclpy.exceptions.InvalidTopicNameException:
             self.node.get_logger().error("Could NOT set EUFS Robot Steering GUI publisher's topic to: " + self.topic)
