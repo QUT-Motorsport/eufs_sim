@@ -209,7 +209,7 @@ class EUFSRobotSteeringGUI(Plugin):
             self.node.get_logger().error("Could NOT set EUFS Robot Steering GUI publisher's topic to be empty")
             return
 
-        #Catches "topics can't end in backslash" error
+        # Catches "topics can't end in backslash" error
         try:
             self._publisher = self.node.create_publisher(AckermannDriveStamped, self.topic, 10)
             if log:
