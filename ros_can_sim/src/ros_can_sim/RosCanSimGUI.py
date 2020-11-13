@@ -115,28 +115,26 @@ class RosCanGUI(Plugin):
     def resetState(self):
         """Requests ros_can to reset it's state machine"""
         self.node.get_logger().debug("Requesting ros_can_sim reset")
-        try:
-            self.reset_srv.wait_for_service(timeout=1)  # 1 second
+
+        if self.reset_srv.wait_for_service(timeout_sec=1):
             request = Trigger.Request()
             result = self.reset_srv.call_async(request)
             self.node.get_logger().debug("ros_can_sim reset successful")
             self.node.get_logger().debug(result)
-        except:
-            self.node.get_logger().warn(
-                "Requested ros_can_sim reset but /ros_can/reset service is not available")
+        else:
+            self.node.get_logger().warn("/ros_can/reset service is not available")
 
     def requestEBS(self):
         """Requests ros_can to go into EMERGENCY_BRAKE state"""
         self.node.get_logger().debug("Requesting ros_can_sim reset")
-        try:
-            self.ebs_srv.wait_for_service(timeout=1)  # 1 second
+
+        if self.ebs_srv.wait_for_service(timeout_sec=1):
             request = Trigger.Request()
             result = self.ebs_srv.call_async(request)
             self.node.get_logger().debug("ros_can_sim reset successful")
             self.node.get_logger().debug(result)
-        except:
-            self.node.get_logger().warn(
-                "Requested ros_can_sim EBS but /ros_can/ebs service is not available")
+        else:
+            self.node.get_logger().warn("/ros_can/ebs service is not available")
 
     def stateCallback(self, msg):
         """Reads the ros_can state from the message
