@@ -46,7 +46,7 @@
       <cameraFOV>1.918889</cameraFOV><!--110 degrees-->
       <lidarFOV>6.283185</lidarFOV><!-- 360 degrees-->
       <lidarOn>true</lidarOn><!--If false, we only simulate camera measurements-->
-      <coneFrame>base_footprint</coneFrame>
+      <trackFrame>map</trackFrame>
       <groundTruthConesTopicName>/ground_truth/cones</groundTruthConesTopicName>
       <groundTruthConeMarkersTopicName>/ground_truth/cones/viz</groundTruthConeMarkersTopicName>
       <groundTruthTrackTopicName>/ground_truth/track</groundTruthTrackTopicName>

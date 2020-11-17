@@ -75,15 +75,12 @@ namespace eufs {
 
     void UpdateChild();
 
-    // Getting the track
-    eufs_msgs::msg::ConeArrayWithCovariance getTrackMessage();
-
-    // Getting the cone arrays
-    eufs_msgs::msg::ConeArrayWithCovariance getConeArrayMessage(eufs_msgs::msg::ConeArrayWithCovariance &track);
+    // Getting the cone array message
+    eufs_msgs::msg::ConeArrayWithCovariance getConeArraysMessage();
 
     void addConeToConeArray(eufs_msgs::msg::ConeArrayWithCovariance &ground_truth_cone_array, gazebo::physics::LinkPtr link);
 
-    void processCones(eufs_msgs::msg::ConeArrayWithCovariance &cones);
+    eufs_msgs::msg::ConeArrayWithCovariance processCones(eufs_msgs::msg::ConeArrayWithCovariance cones_to_process);
 
     std::pair<std::vector<eufs_msgs::msg::ConeWithCovariance>, std::vector<eufs_msgs::msg::ConeWithCovariance>>
       fovCones(std::vector<eufs_msgs::msg::ConeWithCovariance> conesToCheck);
@@ -91,19 +88,18 @@ namespace eufs {
     GazeboConeGroundTruth::ConeType getConeType(gazebo::physics::LinkPtr link);
 
     // Getting the cone marker array
-     visualization_msgs::msg::MarkerArray getConeMarkerArrayMessage(eufs_msgs::msg::ConeArrayWithCovariance &cone_array_message);
+     visualization_msgs::msg::MarkerArray getConeMarkerArrayMessage(eufs_msgs::msg::ConeArrayWithCovariance &cones_message);
      std::string cone_big_mesh_path;
      std::string cone_mesh_path;
 
       int addConeMarkers(std::vector<visualization_msgs::msg::Marker> &marker_array,
-                                                int marker_id, std::vector<eufs_msgs::msg::ConeWithCovariance> cones,
+                                                int marker_id, std::string frame,
+                                                std::vector<eufs_msgs::msg::ConeWithCovariance> cones,
                                                 float red, float green, float blue, bool big);
 
     // Add noise to the cone arrays
-    eufs_msgs::msg::ConeArrayWithCovariance getConeArrayMessageWithNoise(eufs_msgs::msg::ConeArrayWithCovariance &ground_truth_cone_array_message, ignition::math::Vector3d noise);
-
-    void addNoiseToConeArray(std::vector<eufs_msgs::msg::ConeWithCovariance> &cone_array, ignition::math::Vector3d noise);
-
+    eufs_msgs::msg::ConeArrayWithCovariance addNoisePerception(eufs_msgs::msg::ConeArrayWithCovariance &cones_message, ignition::math::Vector3d noise);
+    void addNoiseToConeArray(std::vector <eufs_msgs::msg::ConeWithCovariance> &cone_array, ignition::math::Vector3d noise);
     double GaussianKernel(double mu, double sigma);
 
       // Helper function for parameters
@@ -121,8 +117,9 @@ namespace eufs {
     bool inRangeOfLidar(eufs_msgs::msg::ConeWithCovariance cone);
     bool inFOVOfLidar(eufs_msgs::msg::ConeWithCovariance cone);
 
-    std::vector<eufs_msgs::msg::ConeWithCovariance> translateCones(std::vector<eufs_msgs::msg::ConeWithCovariance> cones);
-    eufs_msgs::msg::ConeArrayWithCovariance getTranslatedTrack(eufs_msgs::msg::ConeArrayWithCovariance cones);
+    std::vector<eufs_msgs::msg::ConeWithCovariance> translateCones(std::vector <eufs_msgs::msg::ConeWithCovariance> cones, ignition::math::Pose3d frame);
+    eufs_msgs::msg::ConeArrayWithCovariance translateMapFrame(eufs_msgs::msg::ConeArrayWithCovariance cones);
+    eufs_msgs::msg::ConeArrayWithCovariance translateBaseFootprintFrame(eufs_msgs::msg::ConeArrayWithCovariance cones);
 
     // Publishers
     rclcpp::Publisher<eufs_msgs::msg::ConeArrayWithCovariance>::SharedPtr ground_truth_cone_pub_;
@@ -137,6 +134,7 @@ namespace eufs {
     // Gazebo variables
     gazebo::physics::ModelPtr track_model;
     gazebo::physics::LinkPtr car_link;
+    ignition::math::Pose3d initial_car_pos_;
     ignition::math::Pose3d car_pos;
 
     // Parameters
@@ -156,6 +154,7 @@ namespace eufs {
     double update_rate_;
     rclcpp::Time time_last_published;
 
+    std::string track_frame_;
     std::string cone_frame_;
 
     bool simulate_perception_;
