@@ -544,11 +544,13 @@ void VehicleModel::publishOdom() {
 void VehicleModel::publishTf() {
   // Position
   tf2::Transform transform;
-  transform.setOrigin(tf2::Vector3(state_.x, state_.y, 0.0));
+  transform.setOrigin(tf2::Vector3(state_.x + this->GaussianKernel(0, this->position_noise_[0]),
+                                  state_.y + this->GaussianKernel(0, this->position_noise_[1]),
+                                  0.0));
 
   // Orientation
   tf2::Quaternion q;
-  q.setRPY(0.0, 0.0, state_.yaw);
+  q.setRPY(0.0, 0.0, state_.yaw + this->GaussianKernel(0, this->angular_velocity_noise_[2]));
   transform.setRotation(q);
 
   // Send TF
