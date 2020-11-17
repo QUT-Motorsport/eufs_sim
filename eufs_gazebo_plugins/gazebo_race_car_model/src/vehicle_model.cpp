@@ -24,7 +24,7 @@
  * SOFTWARE.
  */
 
-#include "vehicle_model.hpp"
+#include "gazebo_race_car_model/vehicle_model.hpp"
 
 namespace gazebo_plugins {
 namespace eufs {

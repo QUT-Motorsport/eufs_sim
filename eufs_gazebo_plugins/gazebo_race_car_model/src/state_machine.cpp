@@ -33,7 +33,7 @@
  */
 
 
-#include "state_machine.hpp"
+#include "gazebo_race_car_model/state_machine.hpp"
 #include <string>
 #include <vector>
 

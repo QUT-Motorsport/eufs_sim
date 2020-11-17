@@ -31,7 +31,7 @@
  * Can also simulate the perception stack by publishing cones with noise.
  **/
 
-#include "../include/eufs_gazebo_plugins/gazebo_cone_ground_truth.h"
+#include "gazebo_cone_ground_truth/gazebo_cone_ground_truth.hpp"
 
 namespace gazebo_plugins {
     namespace eufs {

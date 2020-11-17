@@ -23,7 +23,7 @@
  */
 
 // Main Include
-#include "gazebo_ros_race_car.hpp"
+#include "gazebo_race_car_model/gazebo_ros_race_car.hpp"
 
 // STD Include
 #include <algorithm>
