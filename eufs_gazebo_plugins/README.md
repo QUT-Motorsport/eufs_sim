@@ -86,7 +86,7 @@ Can also simulate the perception stack by publishing cones with noise.
 | `updateRate`                      | float     | 0.0                      | The rate at which this plugin publishes data. Default is as fast as possible. |
 | `viewDistance`                    | float     | 15.0                     | Distance from the car within which cones will be published |
 | `fov`                             | float     | 1.91986                  | Angle in front of the car within which the cones will be published |
-| `coneFrame`                       | string    | base_footprint           | The tf frame in which to publish data. |
+| `trackFrame`                      | string    | map                      | The tf frame in which to publish the track. |
 | `groundTruthConesTopicName`       | string    | -                        | Required parameter. The topic in which to publish the eufs_msgs/CarState message. |
 | `groundTruthConeMarkersTopicName` | string    | -                        | Required parameter. The topic in which to publish the eufs_msgs/CarState message. |
 | `simulatePerception`              | bool      | $arg simulate_perception | Should cones be published to the perception cones topic |
@@ -105,7 +105,7 @@ This has to be inserted inside a robot URDF
       <updateRate>25.0</updateRate>
       <viewDistance>15</viewDistance>
       <fov>1.91986</fov>
-      <coneFrame>base_footprint</coneFrame>
+      <trackFrame>map</trackFrame>
       <groundTruthConesTopicName>/ground_truth/cones</groundTruthConesTopicName>
       <groundTruthConeMarkersTopicName>/ground_truth/cones/viz</groundTruthConeMarkersTopicName>
       <simulatePerception>$(arg simulate_perception)</simulatePerception>
