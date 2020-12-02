@@ -46,9 +46,10 @@ StateMachine::StateMachine(std::shared_ptr<rclcpp::Node> rosnode) : rosnode(rosn
     as_state_ = eufs_msgs::msg::CanState::AS_OFF;
     ami_state_ = eufs_msgs::msg::CanState::AMI_NOT_SELECTED;
     driving_flag_ = false;
+    mission_completed_ = false;
 
     // Subscriptions
-    flag_sub_ = rosnode->create_subscription<std_msgs::msg::Bool>("/ros_can/mission_flag", 1, std::bind(&StateMachine::flagCallback, this, std::placeholders::_1));
+    completed_sub_ = rosnode->create_subscription<std_msgs::msg::Bool>("/ros_can/mission_completed", 1, std::bind(&StateMachine::completedCallback, this, std::placeholders::_1));
     set_mission_sub_ = rosnode->create_subscription<eufs_msgs::msg::CanState>("/ros_can/set_mission", 1, std::bind(&StateMachine::setMission, this, std::placeholders::_1));
 
     // Services
@@ -124,6 +125,7 @@ bool StateMachine::resetState(std::shared_ptr<std_srvs::srv::Trigger::Request> r
     as_state_ = eufs_msgs::msg::CanState::AS_OFF;
     ami_state_ = eufs_msgs::msg::CanState::AMI_NOT_SELECTED;
     driving_flag_ = false;
+    mission_completed_ = false;
     response->success = true;
     return response->success;
 }
@@ -135,6 +137,7 @@ bool StateMachine::requestEBS(std::shared_ptr<std_srvs::srv::Trigger::Request> r
     as_state_ = eufs_msgs::msg::CanState::AS_EMERGENCY_BRAKE;
     ami_state_ = eufs_msgs::msg::CanState::AMI_NOT_SELECTED;
     driving_flag_ = false;
+    mission_completed_ = false;
     response->success = true;
     return response->success;
 }
@@ -146,7 +149,7 @@ void StateMachine::updateState()
     switch (as_state_)
     {
         case eufs_msgs::msg::CanState::AS_OFF:
-            if ((ami_state_ != eufs_msgs::msg::CanState::AMI_NOT_SELECTED) && driving_flag_)
+            if (ami_state_ != eufs_msgs::msg::CanState::AMI_NOT_SELECTED)
             {
                 // first sleep for 5s as is with the real car
                 std::this_thread::sleep_for(5s);
@@ -158,17 +161,17 @@ void StateMachine::updateState()
             break;
 
         case eufs_msgs::msg::CanState::AS_READY:
-            if (driving_flag_)
-            {
-                as_state_ = eufs_msgs::msg::CanState::AS_DRIVING;
-                RCLCPP_DEBUG(rosnode->get_logger(), "state_machine :: switching to AS_DRIVING state");
-            }
+            std::this_thread::sleep_for(5s); 
+            as_state_ = eufs_msgs::msg::CanState::AS_DRIVING;
+            driving_flag_ = true;
+            RCLCPP_DEBUG(rosnode->get_logger(), "state_machine :: switching to AS_DRIVING state");
             break;
 
         case eufs_msgs::msg::CanState::AS_DRIVING:
-            if (!driving_flag_)
+            if (mission_completed_)
             {
                 as_state_ = eufs_msgs::msg::CanState::AS_FINISHED;
+                driving_flag_ = false;
                 RCLCPP_DEBUG(rosnode->get_logger(), "state_machine :: switching to AS_FINISHED state");
             }
             break;
@@ -285,10 +288,10 @@ std_msgs::msg::String StateMachine::makeStateString(const eufs_msgs::msg::CanSta
     return msg;
 }
 
-void StateMachine::flagCallback(const std_msgs::msg::Bool::SharedPtr msg)
+void StateMachine::completedCallback(const std_msgs::msg::Bool::SharedPtr msg)
 {
-    RCLCPP_DEBUG(rosnode->get_logger(), "state_machine :: setting driving flag to %d", msg->data);
-    driving_flag_ = msg->data;
+    RCLCPP_DEBUG(rosnode->get_logger(), "state_machine :: setting mission completed to %d", msg->data);
+    mission_completed_ = msg->data;
 }
 
 void StateMachine::spinOnce()

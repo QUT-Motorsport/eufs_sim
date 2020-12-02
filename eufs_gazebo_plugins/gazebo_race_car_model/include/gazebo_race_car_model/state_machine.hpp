@@ -84,10 +84,13 @@ private:
 
     bool driving_flag_; ///< mission flag as per ADS-DV specs
 
+    bool mission_completed_; ///< true only when software state machine has reached the Finished state
+
     rclcpp::Subscription<eufs_msgs::msg::CanState>::SharedPtr set_mission_sub_;
 
     // High level robot command
     rclcpp::Subscription<std_msgs::msg::Bool>::SharedPtr flag_sub_;
+    rclcpp::Subscription<std_msgs::msg::Bool>::SharedPtr completed_sub_;
 
     rclcpp::Publisher<eufs_msgs::msg::CanState>::SharedPtr state_pub_;
     rclcpp::Publisher<std_msgs::msg::String>::SharedPtr state_pub_str_;
@@ -95,12 +98,11 @@ private:
     rclcpp::Service<std_srvs::srv::Trigger>::SharedPtr reset_srv_;  ///< service to reset state machine
     rclcpp::Service<std_srvs::srv::Trigger>::SharedPtr ebs_srv_; ///< service to request an emergency brake
 
-
     /**
-      * Stores the state of the driving flag
-      * @param message of the driving flag
-      */
-    void flagCallback(const std_msgs::msg::Bool::SharedPtr msg);
+     * Stores the state of the mission complete flag
+     * @param message of mission complete
+     */
+    void completedCallback(const std_msgs::msg::Bool::SharedPtr msg);
 
     /**
       * Sets the mission of the car. Only available in simulation
