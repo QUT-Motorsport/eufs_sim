@@ -37,6 +37,10 @@ install(DIRECTORY tracks worlds
   DESTINATION share/${PROJECT_NAME}
 )
 
+install(DIRECTORY randgen_imgs
+  DESTINATION share/${PROJECT_NAME}
+)
+
 install(DIRECTORY launch
   DESTINATION share/${PROJECT_NAME}
   FILES_MATCHING PATTERN "*.launch" PATTERN "*.launch.py" PATTERN "*.txt"
