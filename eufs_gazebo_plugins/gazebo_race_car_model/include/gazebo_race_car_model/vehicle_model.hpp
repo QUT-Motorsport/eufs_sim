@@ -48,6 +48,8 @@
 #include <tf2/transform_datatypes.h>
 #include <tf2_ros/transform_broadcaster.h>
 #include <tf2/utils.h>
+// ROS  srvs
+#include <std_srvs/srv/trigger.hpp>
 
 namespace gazebo_plugins {
 namespace eufs {
@@ -65,9 +67,14 @@ public:
 
   StateMachine state_machine_;
 
+  // ROS Services
+  rclcpp::Service<std_srvs::srv::Trigger>::SharedPtr reset_vehicle_pos_srv;  ///< service to reset vehicle position
+
 protected:
   void setPositionFromWorld();
   ignition::math::Pose3d offset_;
+
+  bool resetVehiclePosition(std::shared_ptr<std_srvs::srv::Trigger::Request> request, std::shared_ptr<std_srvs::srv::Trigger::Response> response);
 
   void initParam(sdf::ElementPtr &_sdf);
 

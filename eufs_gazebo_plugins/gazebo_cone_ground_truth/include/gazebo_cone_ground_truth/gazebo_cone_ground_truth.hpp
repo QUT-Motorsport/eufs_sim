@@ -56,6 +56,9 @@
 
 #include <cmath>
 
+// ROS  srvs
+#include <std_srvs/srv/trigger.hpp>
+
 namespace gazebo_plugins {
 namespace eufs {
 
@@ -91,6 +94,9 @@ namespace eufs {
      visualization_msgs::msg::MarkerArray getConeMarkerArrayMessage(eufs_msgs::msg::ConeArrayWithCovariance &cones_message);
      std::string cone_big_mesh_path;
      std::string cone_mesh_path;
+
+     // Storing initial Track
+     eufs_msgs::msg::ConeArrayWithCovariance initial_track;
 
       int addConeMarkers(std::vector<visualization_msgs::msg::Marker> &marker_array,
                                                 int marker_id, std::string frame,
@@ -130,6 +136,12 @@ namespace eufs {
 
     rclcpp::Publisher<eufs_msgs::msg::ConeArrayWithCovariance>::SharedPtr perception_cone_pub_;
     rclcpp::Publisher<visualization_msgs::msg::MarkerArray>::SharedPtr perception_cone_marker_pub_;
+
+    // ROS Services
+    rclcpp::Service<std_srvs::srv::Trigger>::SharedPtr reset_cone_pos_srv;  ///< service to reset cone position
+
+    // Function for resetting cone positions
+    bool resetConePosition(std::shared_ptr<std_srvs::srv::Trigger::Request> request, std::shared_ptr<std_srvs::srv::Trigger::Response> response);
 
     // Gazebo variables
     gazebo::physics::ModelPtr track_model;

@@ -53,6 +53,9 @@ VehicleModel::VehicleModel(gazebo::physics::ModelPtr &_model,
   this->pub_ground_truth_wheel_speeds_ = rosnode->create_publisher<eufs_msgs::msg::WheelSpeedsStamped>(this->ground_truth_wheel_speeds_topic_name_, 1);
   this->pub_odom_ = rosnode->create_publisher<nav_msgs::msg::Odometry>(this->odom_topic_name_, 1);
 
+  // ROS Services
+  this->reset_vehicle_pos_srv = rosnode->create_service<std_srvs::srv::Trigger>("/ros_can/reset_vehicle_pos", std::bind(&VehicleModel::resetVehiclePosition, this, std::placeholders::_1, std::placeholders::_2));
+
   // ROS Subscriptions
   this->sub_cmd_ = rosnode->create_subscription<eufs_msgs::msg::AckermannDriveStamped>("/cmd", 1, std::bind(&VehicleModel::onCmd, this, std::placeholders::_1));
 
@@ -234,6 +237,30 @@ void VehicleModel::setPositionFromWorld() {
   state_.r   = 0.0;
   state_.a_x = 0.0;
   state_.a_y = 0.0;
+}
+
+bool VehicleModel::resetVehiclePosition(std::shared_ptr<std_srvs::srv::Trigger::Request> request, std::shared_ptr<std_srvs::srv::Trigger::Response> response)
+{
+    (void)request;   // suppress unused parameter warning
+    (void)response;  // suppress unused parameter warning
+
+    state_.x   = 0.0;
+    state_.y   = 0.0;
+    state_.yaw = 0.0;
+    state_.v_x = 0.0;
+    state_.v_y = 0.0;
+    state_.r   = 0.0;
+    state_.a_x = 0.0;
+    state_.a_y = 0.0;
+
+    const ignition::math::Vector3d vel(0.0, 0.0, 0.0);
+    const ignition::math::Vector3d angular(0.0, 0.0, 0.0);
+
+    model->SetWorldPose(offset_);
+    model->SetAngularVel(angular);
+    model->SetLinearVel(vel);
+
+    return response->success;
 }
 
 void VehicleModel::initModel(sdf::ElementPtr &_sdf) {

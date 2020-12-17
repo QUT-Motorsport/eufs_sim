@@ -69,6 +69,8 @@ class RosCanGUI(Plugin):
         self._widget.findChild(
             QPushButton, "ResetButton").clicked.connect(self.resetState)
         self._widget.findChild(
+            QPushButton, "ResetSimButton").clicked.connect(self.resetSim)
+        self._widget.findChild(
             QPushButton, "RequestEBS").clicked.connect(self.requestEBS)
         self._widget.findChild(
             QPushButton, "DriveButton").clicked.connect(self.justDrive)
@@ -82,6 +84,8 @@ class RosCanGUI(Plugin):
         # Services
         self.ebs_srv = self.node.create_client(Trigger, "/ros_can/ebs")
         self.reset_srv = self.node.create_client(Trigger, "/ros_can/reset")
+        self.reset_vehicle_pos_srv = self.node.create_client(Trigger, "/ros_can/reset_vehicle_pos")
+        self.reset_cone_pos_srv = self.node.create_client(Trigger, "/ros_can/reset_cone_pos")
 
         # Add widget to the user interface
         context.add_widget(self._widget)
@@ -123,6 +127,43 @@ class RosCanGUI(Plugin):
             self.node.get_logger().debug(result)
         else:
             self.node.get_logger().warn("/ros_can/reset service is not available")
+
+    def resetVehiclePos(self):
+        """Requests vehicle_model to reset it's position"""
+        self.node.get_logger().debug("Requesting vehicle_model position reset")
+
+        if self.reset_vehicle_pos_srv.wait_for_service(timeout_sec=1):
+            request = Trigger.Request()
+            result = self.reset_vehicle_pos_srv.call_async(request)
+            self.node.get_logger().debug("vehicle position reset successful")
+            self.node.get_logger().debug(result)
+        else:
+            self.node.get_logger().warn("/ros_can/reset_vehicle_pos service is not available")
+
+    def resetConePos(self):
+        """Requests gazebo_cone_ground_truth to reset cone position"""
+        self.node.get_logger().debug("Requesting gazebo_cone_ground_truth cone position reset")
+
+        if self.reset_cone_pos_srv.wait_for_service(timeout_sec=1):
+            request = Trigger.Request()
+            result = self.reset_cone_pos_srv.call_async(request)
+            self.node.get_logger().debug("cone position reset successful")
+            self.node.get_logger().debug(result)
+        else:
+            self.node.get_logger().warn("/ros_can/reset_cone_pos service is not available")
+
+    def resetSim(self):
+        """Requests state machine, vehicle position and cone position reset"""
+        self.node.get_logger().debug("Requesting Simulation Reset")
+
+        #Reset State Machine
+        self.resetState()
+
+        #Reset Vehicle Position
+        self.resetVehiclePos()
+
+        #Reset Cone Position
+        self.resetConePos()
 
     def requestEBS(self):
         """Requests ros_can to go into EMERGENCY_BRAKE state"""
