@@ -82,8 +82,6 @@ private:
 
     uint16_t ami_state_;  ///< mission status
 
-    bool driving_flag_; ///< mission flag as per ADS-DV specs
-
     bool mission_completed_; ///< true only when software state machine has reached the Finished state
 
     rclcpp::Subscription<eufs_msgs::msg::CanState>::SharedPtr set_mission_sub_;
