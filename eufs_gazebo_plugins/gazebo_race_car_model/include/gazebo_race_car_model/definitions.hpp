@@ -91,14 +91,14 @@ struct Input {
       double max_acc = param.input_ranges.acc.max;
       double min_acc = param.input_ranges.acc.min;
 
-//      double max_vel = param.input_ranges.vel.max;
-//      double min_vel = param.input_ranges.vel.min;
+      double max_vel = param.input_ranges.vel.max;
+      double min_vel = param.input_ranges.vel.min;
 
       double max_delta = param.input_ranges.delta.max;
       double min_delta = param.input_ranges.delta.min;
 
       acc = std::fmin(std::fmax(acc, min_acc), max_acc);
-//      vel = std::fmin(std::fmax(vel, min_vel), max_vel);
+      vel = std::fmin(std::fmax(vel, min_vel), max_vel);
       delta = std::fmin(std::fmax(delta, min_delta), max_delta);
   }
 

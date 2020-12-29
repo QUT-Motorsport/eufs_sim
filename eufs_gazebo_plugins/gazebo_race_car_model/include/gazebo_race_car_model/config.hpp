@@ -96,11 +96,14 @@ struct Param {
         };
 
         Range acc;
+        Range vel;
         Range delta;
         void print() {
             RCLCPP_DEBUG(rclcpp::get_logger("vehicle_model"), "Input ranges: ");
             RCLCPP_DEBUG(rclcpp::get_logger("vehicle_model"), "acc: ");
             acc.print();
+            RCLCPP_DEBUG(rclcpp::get_logger("vehicle_model"), "vel: ");
+            vel.print();
             RCLCPP_DEBUG(rclcpp::get_logger("vehicle_model"), "delta: ");
             delta.print();
         }
@@ -172,6 +175,8 @@ struct convert<Param::InputRanges> {
     static bool decode(const Node &node, Param::InputRanges &cType) {
         cType.acc.min   = node["acceleration"]["min"].as<double>();
         cType.acc.max   = node["acceleration"]["max"].as<double>();
+        cType.vel.min   = node["velocity"]["min"].as<double>();
+        cType.vel.max   = node["velocity"]["max"].as<double>();
         cType.delta.min = node["steering"]["min"].as<double>();
         cType.delta.max = node["steering"]["max"].as<double>();
         RCLCPP_DEBUG(rclcpp::get_logger("vehicle_model"), "LOADED InputRanges");
