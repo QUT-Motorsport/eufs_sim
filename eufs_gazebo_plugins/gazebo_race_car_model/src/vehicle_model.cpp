@@ -274,6 +274,11 @@ void VehicleModel::initVehicleParam(sdf::ElementPtr &_sdf) {
 void VehicleModel::printInfo() {}
 
 void VehicleModel::update(const double dt) {
+  if (input_.vel != 0.0) {
+    double current_speed = std::sqrt(std::pow(state_.v_x, 2) + std::pow(state_.v_y, 2));
+    input_.acc = (input_.vel - current_speed) / dt;
+    input_.validate(param_);
+  }
   input_.acc = this->rosnode->now().seconds() - time_last_cmd_ < 1.0 ? input_.acc : -1.0;
 
   left_steering_joint->SetPosition(0, input_.delta);
@@ -585,11 +590,13 @@ void VehicleModel::onCmd(const eufs_msgs::msg::AckermannDriveStamped::SharedPtr 
   // TODO: Should add delay to the controls
   if (state_machine_.canDrive()) {
     input_.delta = msg->drive.steering_angle;
-    input_.acc    = msg->drive.acceleration;
+    input_.acc = msg->drive.acceleration;
+    input_.vel = msg->drive.speed; 
   } else {
     // TODO: Should  do something else to stop the car but is this good for now
     input_.delta = 0;
-    input_.acc    = -100;
+    input_.acc = -100;
+    input_.vel = 0;
   }
 
   input_.validate(param_);
