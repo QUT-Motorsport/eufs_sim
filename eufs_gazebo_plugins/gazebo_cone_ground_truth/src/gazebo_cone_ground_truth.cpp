@@ -361,11 +361,10 @@ namespace gazebo_plugins {
             return cones;
         }
 
-        // Resets the position of cones to initial track model on request of "reset_cone_pos" service
+        // Resets the position of cones to initial track model
         bool GazeboConeGroundTruth::resetConePosition(std::shared_ptr<std_srvs::srv::Trigger::Request> request, std::shared_ptr<std_srvs::srv::Trigger::Response> response) {
             (void)request;   // suppress unused parameter warning
             (void)response;  // suppress unused parameter warning
-            // Service works
 
             gazebo::physics::Link_V links = this->track_model->GetLinks();
 
@@ -386,24 +385,24 @@ namespace gazebo_plugins {
                     switch (cone_type) {
                          case ConeType::blue:
                             cone = this->initial_track.blue_cones[blue_i];
-                            blue_i ++;
-                    break;
+                            blue_i++;
+                            break;
                         case ConeType::yellow:
                             cone = this->initial_track.yellow_cones[yellow_i];
-                            yellow_i ++;
-                    break;
+                            yellow_i++;
+                            break;
                         case ConeType::orange:
                             cone = this->initial_track.orange_cones[orange_i];
-                            orange_i ++;
-                    break;
+                            orange_i++;
+                            break;
                          case ConeType::big_orange:
                             cone = this->initial_track.big_orange_cones[big_orange_i];
-                            big_orange_i ++;
-                    break;
+                            big_orange_i++;
+                            break;
                          case ConeType::unknown:
                             cone = this->initial_track.unknown_color_cones[unknown_color_i];
-                            unknown_color_i ++;
-                    break;
+                            unknown_color_i++;
+                            break;
 
                     }
 

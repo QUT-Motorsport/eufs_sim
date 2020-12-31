@@ -68,7 +68,7 @@ public:
   StateMachine state_machine_;
 
   // ROS Services
-  rclcpp::Service<std_srvs::srv::Trigger>::SharedPtr reset_vehicle_pos_srv;  ///< service to reset vehicle position
+  rclcpp::Service<std_srvs::srv::Trigger>::SharedPtr reset_vehicle_pos_srv;  /// Service to reset vehicle position
 
 protected:
   void setPositionFromWorld();

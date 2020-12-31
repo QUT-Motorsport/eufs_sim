@@ -39,7 +39,7 @@
         <rect>
           <x>80</x>
           <y>20</y>
-          <width>160</width>
+          <width>120</width>
           <height>30</height>
         </rect>
       </property>
@@ -54,74 +54,14 @@
     <widget class="QPushButton" name="SetMissionButton">
       <property name="geometry">
         <rect>
-          <x>20</x>
-          <y>140</y>
-          <width>220</width>
+          <x>210</x>
+          <y>20</y>
+          <width>90</width>
           <height>30</height>
         </rect>
       </property>
       <property name="text">
         <string>Set Mission</string>
-      </property>
-      <property name="font">
-        <font>
-          <pointsize>10</pointsize>
-        </font>
-      </property>
-    </widget>
-
-    <!--Reset ros_can Button-->
-    <widget class="QPushButton" name="ResetButton">
-      <property name="geometry">
-        <rect>
-          <x>20</x>
-          <y>260</y>
-          <width>220</width>
-          <height>30</height>
-        </rect>
-      </property>
-      <property name="text">
-        <string>Reset State</string>
-      </property>
-      <property name="font">
-        <font>
-          <pointsize>10</pointsize>
-        </font>
-      </property>
-    </widget>
-
-    <!--Reset Simulation Button-->
-    <widget class="QPushButton" name="ResetSimButton">
-      <property name="geometry">
-        <rect>
-          <x>20</x>
-          <y>300</y>
-          <width>220</width>
-          <height>70</height>
-        </rect>
-      </property>
-      <property name="text">
-        <string>Reset Simulation</string>
-      </property>
-      <property name="font">
-        <font>
-          <pointsize>10</pointsize>
-        </font>
-      </property>
-    </widget>
-
-    <!--Request EBS Button-->
-    <widget class="QPushButton" name="RequestEBS">
-      <property name="geometry">
-        <rect>
-          <x>20</x>
-          <y>220</y>
-          <width>220</width>
-          <height>30</height>
-        </rect>
-      </property>
-      <property name="text">
-        <string>Request EBS</string>
       </property>
       <property name="font">
         <font>
@@ -154,7 +94,7 @@
         <rect>
           <x>80</x>
           <y>60</y>
-          <width>200</width>
+          <width>120</width>
           <height>30</height>
         </rect>
       </property>
@@ -168,12 +108,32 @@
       </property>
     </widget>
 
+    <!--Reset ros_can Button-->
+    <widget class="QPushButton" name="ResetButton">
+      <property name="geometry">
+        <rect>
+          <x>210</x>
+          <y>60</y>
+          <width>90</width>
+          <height>30</height>
+        </rect>
+      </property>
+      <property name="text">
+        <string>Reset State</string>
+      </property>
+      <property name="font">
+        <font>
+          <pointsize>10</pointsize>
+        </font>
+      </property>
+    </widget>
+
     <!-- Mission display -->
     <widget class="QLabel" name="MissionInfo">
       <property name="geometry">
         <rect>
           <x>20</x>
-          <y>90</y>
+          <y>100</y>
           <width>60</width>
           <height>30</height>
         </rect>
@@ -191,8 +151,8 @@
       <property name="geometry">
         <rect>
           <x>80</x>
-          <y>90</y>
-          <width>200</width>
+          <y>100</y>
+          <width>120</width>
           <height>30</height>
         </rect>
       </property>
@@ -210,14 +170,14 @@
     <widget class="QPushButton" name="DriveButton">
       <property name="geometry">
         <rect>
-          <x>20</x>
-          <y>180</y>
-          <width>220</width>
+          <x>210</x>
+          <y>100</y>
+          <width>90</width>
           <height>30</height>
         </rect>
       </property>
       <property name="text">
-        <string>Drive Manually</string>
+        <string>Manual Drive</string>
       </property>
       <property name="font">
         <font>
@@ -231,17 +191,57 @@
       <property name="geometry">
         <rect>
           <x>20</x>
-          <y>120</y>
+          <y>135</y>
           <width>300</width>
           <height>15</height>
         </rect>
       </property>
       <property name="text">
-        <string>Will move only in the DRIVING state</string>
+        <string>(Will move only in the DRIVING state)</string>
       </property>
       <property name="font">
         <font>
           <pointsize>8</pointsize>
+        </font>
+      </property>
+    </widget>
+
+    <!--Reset Simulation Button-->
+    <widget class="QPushButton" name="ResetSimButton">
+      <property name="geometry">
+        <rect>
+          <x>20</x>
+          <y>160</y>
+          <width>135</width>
+          <height>70</height>
+        </rect>
+      </property>
+      <property name="text">
+        <string>Reset Simulation</string>
+      </property>
+      <property name="font">
+        <font>
+          <pointsize>10</pointsize>
+        </font>
+      </property>
+    </widget>
+
+    <!--Request EBS Button-->
+    <widget class="QPushButton" name="RequestEBS">
+      <property name="geometry">
+        <rect>
+          <x>165</x>
+          <y>160</y>
+          <width>135</width>
+          <height>70</height>
+        </rect>
+      </property>
+      <property name="text">
+        <string>Request EBS</string>
+      </property>
+      <property name="font">
+        <font>
+          <pointsize>10</pointsize>
         </font>
       </property>
     </widget>

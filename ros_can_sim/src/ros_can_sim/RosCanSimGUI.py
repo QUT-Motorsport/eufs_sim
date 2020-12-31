@@ -129,13 +129,13 @@ class RosCanGUI(Plugin):
             self.node.get_logger().warn("/ros_can/reset service is not available")
 
     def resetVehiclePos(self):
-        """Requests vehicle_model to reset it's position"""
+        """Requests vehicle_model to reset its position"""
         self.node.get_logger().debug("Requesting vehicle_model position reset")
 
         if self.reset_vehicle_pos_srv.wait_for_service(timeout_sec=1):
             request = Trigger.Request()
             result = self.reset_vehicle_pos_srv.call_async(request)
-            self.node.get_logger().debug("vehicle position reset successful")
+            self.node.get_logger().debug("Vehicle position reset successful")
             self.node.get_logger().debug(result)
         else:
             self.node.get_logger().warn("/ros_can/reset_vehicle_pos service is not available")
@@ -147,7 +147,7 @@ class RosCanGUI(Plugin):
         if self.reset_cone_pos_srv.wait_for_service(timeout_sec=1):
             request = Trigger.Request()
             result = self.reset_cone_pos_srv.call_async(request)
-            self.node.get_logger().debug("cone position reset successful")
+            self.node.get_logger().debug("Cone position reset successful")
             self.node.get_logger().debug(result)
         else:
             self.node.get_logger().warn("/ros_can/reset_cone_pos service is not available")
