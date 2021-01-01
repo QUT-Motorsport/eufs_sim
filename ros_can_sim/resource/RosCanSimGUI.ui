@@ -70,70 +70,12 @@
       </property>
     </widget>
 
-    <!-- State display -->
-    <widget class="QLabel" name="StateInfo">
-      <property name="geometry">
-        <rect>
-          <x>20</x>
-          <y>60</y>
-          <width>60</width>
-          <height>30</height>
-        </rect>
-      </property>
-      <property name="text">
-        <string>State</string>
-      </property>
-      <property name="font">
-        <font>
-          <pointsize>10</pointsize>
-        </font>
-      </property>
-    </widget>
-    <widget class="QLabel" name="StateDisplay">
-      <property name="geometry">
-        <rect>
-          <x>80</x>
-          <y>60</y>
-          <width>120</width>
-          <height>30</height>
-        </rect>
-      </property>
-      <property name="text">
-        <string>UNKNOWN</string>
-      </property>
-      <property name="font">
-        <font>
-          <pointsize>10</pointsize>
-        </font>
-      </property>
-    </widget>
-
-    <!--Reset ros_can Button-->
-    <widget class="QPushButton" name="ResetButton">
-      <property name="geometry">
-        <rect>
-          <x>210</x>
-          <y>60</y>
-          <width>90</width>
-          <height>30</height>
-        </rect>
-      </property>
-      <property name="text">
-        <string>Reset State</string>
-      </property>
-      <property name="font">
-        <font>
-          <pointsize>10</pointsize>
-        </font>
-      </property>
-    </widget>
-
     <!-- Mission display -->
     <widget class="QLabel" name="MissionInfo">
       <property name="geometry">
         <rect>
           <x>20</x>
-          <y>100</y>
+          <y>60</y>
           <width>60</width>
           <height>30</height>
         </rect>
@@ -151,7 +93,7 @@
       <property name="geometry">
         <rect>
           <x>80</x>
-          <y>100</y>
+          <y>60</y>
           <width>120</width>
           <height>30</height>
         </rect>
@@ -171,13 +113,71 @@
       <property name="geometry">
         <rect>
           <x>210</x>
-          <y>100</y>
+          <y>60</y>
           <width>90</width>
           <height>30</height>
         </rect>
       </property>
       <property name="text">
         <string>Manual Drive</string>
+      </property>
+      <property name="font">
+        <font>
+          <pointsize>10</pointsize>
+        </font>
+      </property>
+    </widget>
+
+    <!-- State display -->
+    <widget class="QLabel" name="StateInfo">
+      <property name="geometry">
+        <rect>
+          <x>20</x>
+          <y>100</y>
+          <width>60</width>
+          <height>30</height>
+        </rect>
+      </property>
+      <property name="text">
+        <string>State</string>
+      </property>
+      <property name="font">
+        <font>
+          <pointsize>10</pointsize>
+        </font>
+      </property>
+    </widget>
+    <widget class="QLabel" name="StateDisplay">
+      <property name="geometry">
+        <rect>
+          <x>80</x>
+          <y>100</y>
+          <width>120</width>
+          <height>30</height>
+        </rect>
+      </property>
+      <property name="text">
+        <string>UNKNOWN</string>
+      </property>
+      <property name="font">
+        <font>
+          <pointsize>10</pointsize>
+        </font>
+      </property>
+    </widget>
+
+    <!--Reset ros_can Button-->
+    <widget class="QPushButton" name="ResetButton">
+      <property name="geometry">
+        <rect>
+          <x>210</x>
+          <y>100</y>
+          <width>90</width>
+          <height>30</height>
+        </rect>
+      </property>
+      <property name="text">
+        <string>Reset State</string>
       </property>
       <property name="font">
         <font>

@@ -47,9 +47,6 @@ namespace gazebo_plugins {
         void GazeboConeGroundTruth::Load(gazebo::physics::ModelPtr _parent, sdf::ElementPtr _sdf) {
             this->rosnode_ = gazebo_ros::Node::Get(_sdf);
 
-            // ROS Services
-            this->reset_cone_pos_srv = rosnode_->create_service<std_srvs::srv::Trigger>("/ros_can/reset_cone_pos", std::bind(&GazeboConeGroundTruth::resetConePosition, this, std::placeholders::_1, std::placeholders::_2));
-
             RCLCPP_DEBUG(this->rosnode_->get_logger(), "Loading ConeGroundTruthPlugin");
 
             this->time_last_published = rclcpp::Time(0);
@@ -144,6 +141,11 @@ namespace gazebo_plugins {
                             topic_name_, 1);
                 }
             }
+
+            // Setup Services
+
+            //Cone position reset service
+            this->reset_cone_pos_srv = this->rosnode_->create_service<std_srvs::srv::Trigger>("/ros_can/reset_cone_pos", std::bind(&GazeboConeGroundTruth::resetConePosition, this, std::placeholders::_1, std::placeholders::_2));
 
             std::string eufs_description_directory = ament_index_cpp::get_package_share_directory("eufs_description");
             cone_big_mesh_path = "file:///" + eufs_description_directory + "/meshes/cone_big.dae";
@@ -368,55 +370,55 @@ namespace gazebo_plugins {
 
             gazebo::physics::Link_V links = this->track_model->GetLinks();
 
-                // Initialise counters
-                int blue_i = 0;
-                int yellow_i = 0;
-                int orange_i = 0;
-                int big_orange_i = 0;
-                int unknown_color_i = 0;
+            // Initialise counters
+            int blue_i = 0;
+            int yellow_i = 0;
+            int orange_i = 0;
+            int big_orange_i = 0;
+            int unknown_color_i = 0;
 
-                // Loop through all cones
-                for (unsigned int i = 0; i < links.size(); i++) {
+            // Loop through all cones
+            for (unsigned int i = 0; i < links.size(); i++) {
 
-                    eufs_msgs::msg::ConeWithCovariance cone;
-                    ConeType cone_type = this->getConeType(links[i]);
+                eufs_msgs::msg::ConeWithCovariance cone;
+                ConeType cone_type = this->getConeType(links[i]);
 
-                    // sort by cone colour
-                    switch (cone_type) {
-                         case ConeType::blue:
-                            cone = this->initial_track.blue_cones[blue_i];
-                            blue_i++;
-                            break;
-                        case ConeType::yellow:
-                            cone = this->initial_track.yellow_cones[yellow_i];
-                            yellow_i++;
-                            break;
-                        case ConeType::orange:
-                            cone = this->initial_track.orange_cones[orange_i];
-                            orange_i++;
-                            break;
-                         case ConeType::big_orange:
-                            cone = this->initial_track.big_orange_cones[big_orange_i];
-                            big_orange_i++;
-                            break;
-                         case ConeType::unknown:
-                            cone = this->initial_track.unknown_color_cones[unknown_color_i];
-                            unknown_color_i++;
-                            break;
+                // sort by cone colour
+                switch (cone_type) {
+                    case ConeType::blue:
+                        cone = this->initial_track.blue_cones[blue_i];
+                        blue_i++;
+                        break;
+                    case ConeType::yellow:
+                        cone = this->initial_track.yellow_cones[yellow_i];
+                        yellow_i++;
+                        break;
+                    case ConeType::orange:
+                        cone = this->initial_track.orange_cones[orange_i];
+                        orange_i++;
+                        break;
+                    case ConeType::big_orange:
+                        cone = this->initial_track.big_orange_cones[big_orange_i];
+                        big_orange_i++;
+                        break;
+                    case ConeType::unknown:
+                        cone = this->initial_track.unknown_color_cones[unknown_color_i];
+                        unknown_color_i++;
+                        break;
 
-                    }
-
-                     // Initial position and velocity variables
-                     const ignition::math::Vector3d vel(0.0, 0.0, 0.0);
-                     const ignition::math::Vector3d angular(0.0, 0.0, 0.0);
-                     const ignition::math::Pose3d pos(cone.point.x, cone.point.y, cone.point.z, 0.0, 0.0, 0.0);
-
-
-                     // Set cone position to initial position (and velocity)
-                     links[i]->SetWorldPose(pos);
-                     links[i]->SetAngularVel(vel);
-                     links[i]->SetLinearVel(angular);
                 }
+
+                // Initial position and velocity variables
+                const ignition::math::Pose3d pos(cone.point.x, cone.point.y, cone.point.z, 0.0, 0.0, 0.0);
+                const ignition::math::Vector3d vel(0.0, 0.0, 0.0);
+                const ignition::math::Vector3d angular(0.0, 0.0, 0.0);
+
+
+                // Set cone position to initial position (and velocity)
+                links[i]->SetWorldPose(pos);
+                links[i]->SetAngularVel(vel);
+                links[i]->SetLinearVel(angular);
+            }
 
             return response->success;
         }
