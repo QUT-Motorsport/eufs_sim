@@ -142,6 +142,7 @@ class EufsLauncher(Plugin):
                 self.RENAME_FILE_HEADER = self._widget.findChild(QLabel, "RenameFileHeader")
                 self.NOISE_SLIDER = self._widget.findChild(QSlider, "Noisiness")
                 self.VEHICLE_MODEL_MENU = self._widget.findChild(QComboBox, "WhichVehicleModel")
+                self.COMMAND_MODE_MENU = self._widget.findChild(QComboBox, "WhichCommandMode")
                 self.CONE_NOISE_SLIDER = self._widget.findChild(QSlider, "ConeNoisiness")
                 self.COLOR_NOISE_SLIDER = self._widget.findChild(QSlider, "ConeColorNoisiness")
 
@@ -253,6 +254,16 @@ class EufsLauncher(Plugin):
                 for model in vehicle_models:
                         if model != default_model:
                                 self.VEHICLE_MODEL_MENU.addItem(model)
+
+                # Setup Command Modes menu
+                self.COMMAND_MODE_MENU.clear()
+                default_mode = self.default_config["eufs_launcher"]["default_command_mode"]
+                modes = ["acceleration", "velocity"]
+                if default_mode in modes:
+                        self.COMMAND_MODE_MENU.addItem(default_mode)
+                for mode in modes:
+                        if mode != default_mode:
+                                self.COMMAND_MODE_MENU.addItem(mode)
 
                 # Setup Conversion Tools dropdowns
                 for f in ["launch", "png", "csv"]:
@@ -1095,8 +1106,12 @@ class EufsLauncher(Plugin):
                 self.tell_launchella("With " + self.VEHICLE_MODEL_MENU.currentText() + "Vehicle Model")
                 vehicle_model = "vehicleModel:=" + self.VEHICLE_MODEL_MENU.currentText()
 
+                # Get command mode information
+                self.tell_launchella("With " + self.COMMAND_MODE_MENU.currentText() + " Command Mode")
+                command_mode = "commandMode:=" + self.COMMAND_MODE_MENU.currentText()
+
                 # Get checkbox parameter information
-                parameters_to_pass = ["track:=" + track_to_launch.split(".")[0], vehicle_model]
+                parameters_to_pass = ["track:=" + track_to_launch.split(".")[0], vehicle_model, command_mode]
                 for checkbox, param_if_on, param_if_off in self.checkbox_parameter_mapping:
                         if checkbox.isChecked():
                                 parameters_to_pass.extend(param_if_on)

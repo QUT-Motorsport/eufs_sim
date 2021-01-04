@@ -2,6 +2,7 @@
 <robot xmlns:xacro="http://www.ros.org/wiki/xacro">
   <xacro:arg name="publish_tf" default="false"/>
   <xacro:arg name="simulate_perception" default="false"/>
+  <xacro:arg name="command_mode" default="acceleration"/>
 
   <!-- Custom plugin which controls the car using a given vehicle model.
    It controls the car by setting its velocity and position
@@ -31,6 +32,7 @@
       <linearVelocityNoise>0.0 0.0 0.0</linearVelocityNoise>
       <angularVelocityNoise>0.0 0.0 0.0</angularVelocityNoise>  <!-- X Y Z -->
       <linearAccelerationNoise>0.0 0.0 0.0</linearAccelerationNoise>
+      <commandMode>$(arg command_mode)</commandMode>
     </plugin>
   </gazebo>
 

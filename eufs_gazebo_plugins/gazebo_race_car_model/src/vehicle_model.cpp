@@ -183,6 +183,21 @@ void VehicleModel::initParam(sdf::ElementPtr &_sdf) {
   if (this->linear_acceleration_noise_.size() != 3) {
     RCLCPP_FATAL(this->rosnode->get_logger(), "linearAccelerationNoise parameter vector is not of size 3");
   }
+
+  if (!_sdf->HasElement("commandMode")) {
+    RCLCPP_DEBUG(this->rosnode->get_logger(), "gazebo_ros_race_car_model plugin missing <commandMode>, defaults to acceleration");
+    this->command_mode_ = acceleration;
+  } else {
+    auto temp = _sdf->GetElement("commandMode")->Get<std::string>();
+    if (temp.compare("acceleration") == 0) {
+      this->command_mode_ = velocity;
+    } else if (temp.compare("velocity") == 0) {
+      this->command_mode_ = velocity;
+    } else {
+      RCLCPP_DEBUG(this->rosnode->get_logger(), "commandMode parameter string is invalid, defaults to acceleration");
+      this->command_mode_ = acceleration;
+    }
+  } 
 }
 
 std::vector<double> VehicleModel::ToQuaternion(std::vector<double> &euler) {
@@ -274,7 +289,7 @@ void VehicleModel::initVehicleParam(sdf::ElementPtr &_sdf) {
 void VehicleModel::printInfo() {}
 
 void VehicleModel::update(const double dt) {
-  if (input_.vel != 0.0) {
+  if (this->command_mode_ == velocity) {
     double current_speed = std::sqrt(std::pow(state_.v_x, 2) + std::pow(state_.v_y, 2));
     input_.acc = (input_.vel - current_speed) / dt;
     input_.validate(param_);

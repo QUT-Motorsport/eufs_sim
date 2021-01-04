@@ -17,6 +17,7 @@ def spawn_car(context, *args, **kwargs):
     namespace = get_argument(context, 'namespace')
     robot_name = get_argument(context, 'robot_name')
     vehicle_model = get_argument(context, 'vehicleModel')
+    command_mode = get_argument(context, 'commandMode')
     publish_tf = get_argument(context, 'publish_gt_tf')
     x = get_argument(context, 'x')
     y = get_argument(context, 'y')
@@ -38,6 +39,7 @@ def spawn_car(context, *args, **kwargs):
                              mappings={
                                  'robot_name': robot_name,
                                  'vehicle_model': vehicle_model,
+                                 'command_mode': command_mode,
                                  'config_file': config_file,
                                  'publish_tf': publish_tf,
                                  'simulate_perception': simulate_perception
@@ -109,6 +111,8 @@ def generate_launch_description():
 
         launch.actions.DeclareLaunchArgument('vehicleModel', default_value='DynamicBicycle',
                                              description='The vehicle model class to use in the gazebo_ros_race_car_model'),
+        launch.actions.DeclareLaunchArgument('commandMode', default_value='acceleration',
+                                             description='The command mode of the vehicle'),
         launch.actions.DeclareLaunchArgument('publish_gt_tf', default_value='false',
                                              description='If the gazebo_ros_race_car_model should publish the ground truth tf'),
 

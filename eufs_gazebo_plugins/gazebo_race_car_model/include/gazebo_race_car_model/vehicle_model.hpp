@@ -159,6 +159,13 @@ protected:
 
   // Parameters
   Param param_;
+
+  enum CommandMode {
+    acceleration,
+    velocity
+  };
+  CommandMode command_mode_;
+
 };
 
 typedef std::unique_ptr<VehicleModel> VehicleModelPtr;
