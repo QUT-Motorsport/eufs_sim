@@ -87,7 +87,6 @@ private:
     rclcpp::Subscription<eufs_msgs::msg::CanState>::SharedPtr set_mission_sub_;
 
     // High level robot command
-    rclcpp::Subscription<std_msgs::msg::Bool>::SharedPtr flag_sub_;
     rclcpp::Subscription<std_msgs::msg::Bool>::SharedPtr completed_sub_;
 
     rclcpp::Publisher<eufs_msgs::msg::CanState>::SharedPtr state_pub_;
