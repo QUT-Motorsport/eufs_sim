@@ -190,7 +190,6 @@
    </property>
   </widget>
 
-  <!--Drop-Down Box: Options added in code, impossible in a .ui file.-->
   <!-- This handles command mode selection-->
   <widget class="QLabel" name="CommandModeLabel">
    <property name="geometry">

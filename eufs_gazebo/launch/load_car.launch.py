@@ -112,7 +112,7 @@ def generate_launch_description():
         launch.actions.DeclareLaunchArgument('vehicleModel', default_value='DynamicBicycle',
                                              description='The vehicle model class to use in the gazebo_ros_race_car_model'),
         launch.actions.DeclareLaunchArgument('commandMode', default_value='acceleration',
-                                             description='The command mode of the vehicle'),
+                                             description='Determines whether to use acceleration or velocity to control the vehicle'),
         launch.actions.DeclareLaunchArgument('publish_gt_tf', default_value='false',
                                              description='If the gazebo_ros_race_car_model should publish the ground truth tf'),
 

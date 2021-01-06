@@ -257,13 +257,9 @@ class EufsLauncher(Plugin):
 
                 # Setup Command Modes menu
                 self.COMMAND_MODE_MENU.clear()
-                default_mode = self.default_config["eufs_launcher"]["default_command_mode"]
                 modes = ["acceleration", "velocity"]
-                if default_mode in modes:
-                        self.COMMAND_MODE_MENU.addItem(default_mode)
                 for mode in modes:
-                        if mode != default_mode:
-                                self.COMMAND_MODE_MENU.addItem(mode)
+                        self.COMMAND_MODE_MENU.addItem(mode)
 
                 # Setup Conversion Tools dropdowns
                 for f in ["launch", "png", "csv"]:
@@ -1107,7 +1103,7 @@ class EufsLauncher(Plugin):
                 vehicle_model = "vehicleModel:=" + self.VEHICLE_MODEL_MENU.currentText()
 
                 # Get command mode information
-                self.tell_launchella("With " + self.COMMAND_MODE_MENU.currentText() + " Command Mode")
+                self.tell_launchella("With Command Mode set to " + self.COMMAND_MODE_MENU.currentText())
                 command_mode = "commandMode:=" + self.COMMAND_MODE_MENU.currentText()
 
                 # Get checkbox parameter information

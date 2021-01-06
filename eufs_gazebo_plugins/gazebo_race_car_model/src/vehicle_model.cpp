@@ -190,7 +190,7 @@ void VehicleModel::initParam(sdf::ElementPtr &_sdf) {
   } else {
     auto temp = _sdf->GetElement("commandMode")->Get<std::string>();
     if (temp.compare("acceleration") == 0) {
-      this->command_mode_ = velocity;
+      this->command_mode_ = acceleration;
     } else if (temp.compare("velocity") == 0) {
       this->command_mode_ = velocity;
     } else {

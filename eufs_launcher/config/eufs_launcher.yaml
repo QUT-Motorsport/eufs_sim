@@ -10,9 +10,6 @@ eufs_launcher:
     # Default vehicle model to be selected in the launcher drop-down menu
     default_vehicle_model: "DynamicBicycle"
 
-    # Default command mode to be selected in the launcher drop-down menu
-    default_command_mode: "acceleration"
-
     # percent of possible noise pixels being utilized
     object_noise_default: 0
 
