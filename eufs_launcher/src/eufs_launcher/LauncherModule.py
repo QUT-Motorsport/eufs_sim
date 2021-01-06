@@ -257,8 +257,12 @@ class EufsLauncher(Plugin):
 
                 # Setup Command Modes menu
                 self.COMMAND_MODE_MENU.clear()
+                default_mode = self.default_config["eufs_launcher"]["default_command_mode"]
                 modes = ["acceleration", "velocity"]
+                if default_mode in modes:
+                    self.COMMAND_MODE_MENU.addItem(default_mode)
                 for mode in modes:
+                    if mode != default_mode:
                         self.COMMAND_MODE_MENU.addItem(mode)
 
                 # Setup Conversion Tools dropdowns
