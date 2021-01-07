@@ -147,9 +147,6 @@ void StateMachine::updateState()
         case eufs_msgs::msg::CanState::AS_OFF:
             if (ami_state_ != eufs_msgs::msg::CanState::AMI_NOT_SELECTED)
             {
-                // first sleep for 5s as is with the real car
-                std::this_thread::sleep_for(5s);
-
                 // now transition to new state
                 as_state_ = eufs_msgs::msg::CanState::AS_READY;
                 RCLCPP_DEBUG(rosnode->get_logger(), "state_machine :: switching to AS_READY state");
@@ -271,8 +268,13 @@ std_msgs::msg::String StateMachine::makeStateString(const eufs_msgs::msg::CanSta
             break;
     }
 
+    if (mission_completed_) {
+        str3 = "MISSION_COMPLETED:TRUE";
+    } else {
+        str3 = "MISSION_COMPLETED:FALSE";
+    }
     std_msgs::msg::String msg = std_msgs::msg::String();
-    msg.data = str1 + " " + str2;
+    msg.data = str1 + " " + str2 + " " + str3;
     return msg;
 }
 

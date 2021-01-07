@@ -82,7 +82,7 @@ private:
 
     uint16_t ami_state_;  ///< mission status
 
-    bool mission_completed_; ///< true only when software state machine has reached the Finished state
+    bool mission_completed_; ///< true only when selected mission has finished
 
     rclcpp::Subscription<eufs_msgs::msg::CanState>::SharedPtr set_mission_sub_;
 
