@@ -194,7 +194,7 @@ void VehicleModel::initParam(sdf::ElementPtr &_sdf) {
     } else if (temp.compare("velocity") == 0) {
       this->command_mode_ = velocity;
     } else {
-      RCLCPP_DEBUG(this->rosnode->get_logger(), "commandMode parameter string is invalid, defaults to acceleration");
+      RCLCPP_WARN(this->rosnode->get_logger(), "commandMode parameter string is invalid, defaults to acceleration");
       this->command_mode_ = acceleration;
     }
   } 
