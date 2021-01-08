@@ -9,6 +9,9 @@
     <!-- The vehicle model class -->
     <arg name="vehicleModel" default="DynamicBicycle"/>
 
+    <!-- The command mode of the vehicle -->
+    <arg name="commandMode" default="acceleration"/>
+
     <!-- Launch the Gazebo GUI -->
     <arg name="gazebo_gui" default="false"/>
 
@@ -25,6 +28,7 @@
     <!-- Launch the simulation -->
     <include file="$(find-pkg-share eufs_gazebo)/launch/$(var track).launch">
         <arg name="vehicleModel" value="$(var vehicleModel)"/>
+        <arg name="commandMode" value="$(var commandMode)"/>
         <arg name="gazebo_gui" value="$(var gazebo_gui)"/>
         <arg name="rviz" value="$(var rviz)"/>
         <arg name="publish_gt_tf" value="$(var publish_gt_tf)"/>
