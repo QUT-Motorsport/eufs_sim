@@ -280,8 +280,10 @@ std_msgs::msg::String StateMachine::makeStateString(const eufs_msgs::msg::CanSta
 
 void StateMachine::completedCallback(const std_msgs::msg::Bool::SharedPtr msg)
 {
-    RCLCPP_DEBUG(rosnode->get_logger(), "state_machine :: setting mission completed to %d", msg->data);
-    mission_completed_ = msg->data;
+    if (mission_completed_ != msg->data) {
+        RCLCPP_DEBUG(rosnode->get_logger(), "state_machine :: setting mission completed to %d", msg->data);
+        mission_completed_ = msg->data;
+    }
 }
 
 void StateMachine::spinOnce()
