@@ -80,10 +80,10 @@ struct State {
 };
 
 struct Input {
-  Input() : acc(0.0), delta(0.0) {}
+  Input() : acc(0.0), vel(0.0), delta(0.0)  {}
 
   std::string getString() {
-    return "acc:" + std::to_string(acc) + " | delta:" + std::to_string(delta);
+    return "acc:" + std::to_string(acc) + " | vel:" + std::to_string(vel) + " | delta:" + std::to_string(delta);
   }
 
   void validate(Param &param)
@@ -91,14 +91,19 @@ struct Input {
       double max_acc = param.input_ranges.acc.max;
       double min_acc = param.input_ranges.acc.min;
 
+      double max_vel = param.input_ranges.vel.max;
+      double min_vel = param.input_ranges.vel.min;
+
       double max_delta = param.input_ranges.delta.max;
       double min_delta = param.input_ranges.delta.min;
 
       acc = std::fmin(std::fmax(acc, min_acc), max_acc);
+      vel = std::fmin(std::fmax(vel, min_vel), max_vel);
       delta = std::fmin(std::fmax(delta, min_delta), max_delta);
   }
 
   double acc;
+  double vel;
   double delta;
 };
 

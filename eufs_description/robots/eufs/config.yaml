@@ -25,6 +25,9 @@ input_ranges:
   acceleration:
     max: 3
     min: -10
+  velocity:
+    max: 30
+    min: 0
   steering:
     max: 0.52
     min: -0.52
