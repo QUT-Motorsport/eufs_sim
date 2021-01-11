@@ -57,7 +57,12 @@ class RosCanGUI(Plugin):
                          CanState.AMI_ADS_EBS: "ADS_EBS",
                          CanState.AMI_DDT_INSPECTION_A: "DDT_INSPECTION_A",
                          CanState.AMI_DDT_INSPECTION_B: "DDT_INSPECTION_B",
-                         CanState.AMI_MANUAL: "MANUAL"}
+                         CanState.AMI_MANUAL: "JOYSTICK",
+                         30: "MANUAL"} 
+        # Manual mission also uses AMI_MANUAL, but is assigned another number to avoid overlap
+
+        # Keep track of current mission
+        self.mission = "NOT_SELECTED"
 
         for mission in self.missions.values():
             self._widget.findChild(
@@ -105,24 +110,29 @@ class RosCanGUI(Plugin):
 
         self.node.get_logger().debug("Sending mission request for " + str(mission))
 
-        # create message to be sent
-        mission_msg = CanState()
+        if mission == "MANUAL":
+            self.justDrive()
+        else:
+            # create message to be sent
+            mission_msg = CanState()
 
-        # find enumerated mission and set
-        for enum, mission_name in self.missions.items():
-            if mission_name == mission:
-                mission_msg.ami_state = enum
+            # find enumerated mission and set
+            for enum, mission_name in self.missions.items():
+                if mission_name == mission:
+                    mission_msg.ami_state = enum
+                    self.mission = mission_name
 
-        self.set_mission_pub.publish(mission_msg)
+            self.set_mission_pub.publish(mission_msg)
         self.node.get_logger().debug("Mission request sent successfully")
 
     def resetState(self):
-        """Requests ros_can to reset it's state machine"""
+        """Requests ros_can to reset its state machine"""
         self.node.get_logger().debug("Requesting ros_can_sim reset")
 
         if self.reset_srv.wait_for_service(timeout_sec=1):
             request = Trigger.Request()
             result = self.reset_srv.call_async(request)
+            self.mission = "NOT_SELECTED"
             self.node.get_logger().debug("ros_can_sim reset successful")
             self.node.get_logger().debug(result)
         else:
@@ -187,7 +197,7 @@ class RosCanGUI(Plugin):
         self._widget.findChild(QLabel, "StateDisplay").setText(
             self.states[msg.as_state])
         self._widget.findChild(QLabel, "MissionDisplay").setText(
-            self.missions[msg.ami_state])
+            self.mission)
 
     def justDrive(self):
         """overrides the state machine of the car and just makes it drive"""
@@ -196,7 +206,8 @@ class RosCanGUI(Plugin):
         state_msg = CanState()
         state_msg.as_state = CanState.AS_DRIVING
         state_msg.ami_state = CanState.AMI_MANUAL
-
+        
+        self.mission = "MANUAL"
         self.set_mission_pub.publish(state_msg)
 
     def shutdown_plugin(self):
