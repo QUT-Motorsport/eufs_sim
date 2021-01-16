@@ -57,9 +57,7 @@ class RosCanGUI(Plugin):
                          CanState.AMI_ADS_EBS: "ADS_EBS",
                          CanState.AMI_DDT_INSPECTION_A: "DDT_INSPECTION_A",
                          CanState.AMI_DDT_INSPECTION_B: "DDT_INSPECTION_B",
-                         CanState.AMI_JOYSTICK: "JOYSTICK",
-                         30: "MANUAL"} 
-        # Manual mission also uses AMI_MANUAL, but is assigned another number to avoid overlap
+                         CanState.AMI_JOYSTICK: "JOYSTICK"}
 
         # Keep track of current mission
         self.mission = "NOT_SELECTED"
@@ -110,19 +108,16 @@ class RosCanGUI(Plugin):
 
         self.node.get_logger().debug("Sending mission request for " + str(mission))
 
-        if mission == "MANUAL":
-            self.justDrive()
-        else:
-            # create message to be sent
-            mission_msg = CanState()
+        # create message to be sent
+        mission_msg = CanState()
 
-            # find enumerated mission and set
-            for enum, mission_name in self.missions.items():
-                if mission_name == mission:
-                    mission_msg.ami_state = enum
-                    self.mission = mission_name
+        # find enumerated mission and set
+        for enum, mission_name in self.missions.items():
+            if mission_name == mission:
+                mission_msg.ami_state = enum
+                self.mission = mission_name
 
-            self.set_mission_pub.publish(mission_msg)
+        self.set_mission_pub.publish(mission_msg)
         self.node.get_logger().debug("Mission request sent successfully")
 
     def resetState(self):
@@ -204,8 +199,8 @@ class RosCanGUI(Plugin):
 
         # create message to be sent
         state_msg = CanState()
-        state_msg.as_state = CanState.AS_DRIVING
-        state_msg.ami_state = CanState.AMI_JOYSTICK
+
+        # TODO: devise of a way to signal the car state machine to enter into manual mode
         
         self.mission = "MANUAL"
         self.set_mission_pub.publish(state_msg)
