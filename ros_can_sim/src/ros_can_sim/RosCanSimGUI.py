@@ -57,7 +57,7 @@ class RosCanGUI(Plugin):
                          CanState.AMI_ADS_EBS: "ADS_EBS",
                          CanState.AMI_DDT_INSPECTION_A: "DDT_INSPECTION_A",
                          CanState.AMI_DDT_INSPECTION_B: "DDT_INSPECTION_B",
-                         CanState.AMI_MANUAL: "JOYSTICK",
+                         CanState.AMI_JOYSTICK: "JOYSTICK",
                          30: "MANUAL"} 
         # Manual mission also uses AMI_MANUAL, but is assigned another number to avoid overlap
 
@@ -205,7 +205,7 @@ class RosCanGUI(Plugin):
         # create message to be sent
         state_msg = CanState()
         state_msg.as_state = CanState.AS_DRIVING
-        state_msg.ami_state = CanState.AMI_MANUAL
+        state_msg.ami_state = CanState.AMI_JOYSTICK
         
         self.mission = "MANUAL"
         self.set_mission_pub.publish(state_msg)

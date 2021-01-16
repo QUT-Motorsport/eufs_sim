@@ -102,8 +102,8 @@ void StateMachine::setMission(const eufs_msgs::msg::CanState::SharedPtr state)
             case eufs_msgs::msg::CanState::AMI_DDT_INSPECTION_B:
                 ami_state_ = eufs_msgs::msg::CanState::AMI_DDT_INSPECTION_B;
                 break;
-            case eufs_msgs::msg::CanState::AMI_MANUAL:
-                ami_state_ = eufs_msgs::msg::CanState::AMI_MANUAL;
+            case eufs_msgs::msg::CanState::AMI_JOYSTICK:
+                ami_state_ = eufs_msgs::msg::CanState::AMI_JOYSTICK;
                 break;
             default:
                 ami_state_ = eufs_msgs::msg::CanState::AMI_NOT_SELECTED;
@@ -260,8 +260,8 @@ std_msgs::msg::String StateMachine::makeStateString(const eufs_msgs::msg::CanSta
         case eufs_msgs::msg::CanState::AMI_AUTONOMOUS_DEMO:
           str2 = "AMI:BRAKETEST";
           break;
-        case eufs_msgs::msg::CanState::AMI_MANUAL:
-          str2 = "AMI:MANUAL";
+        case eufs_msgs::msg::CanState::AMI_JOYSTICK:
+          str2 = "AMI:JOYSTICK";
           break;
         default:
             str2 = "NO_SUCH_MESSAGE";
