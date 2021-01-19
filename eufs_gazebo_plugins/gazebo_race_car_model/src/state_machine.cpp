@@ -45,6 +45,7 @@ StateMachine::StateMachine(std::shared_ptr<rclcpp::Node> rosnode) : rosnode(rosn
     // init state machine state
     as_state_ = eufs_msgs::msg::CanState::AS_OFF;
     ami_state_ = eufs_msgs::msg::CanState::AMI_NOT_SELECTED;
+    manual_driving_ = false;
     mission_completed_ = false;
 
     // Subscriptions
@@ -52,6 +53,7 @@ StateMachine::StateMachine(std::shared_ptr<rclcpp::Node> rosnode) : rosnode(rosn
     set_mission_sub_ = rosnode->create_subscription<eufs_msgs::msg::CanState>("/ros_can/set_mission", 1, std::bind(&StateMachine::setMission, this, std::placeholders::_1));
 
     // Services
+    manual_driving_srv_ = rosnode->create_service<std_srvs::srv::Trigger>("/ros_can/manual_driving", std::bind(&StateMachine::setManualDriving, this, std::placeholders::_1, std::placeholders::_2));
     reset_srv_ = rosnode->create_service<std_srvs::srv::Trigger>("/ros_can/reset", std::bind(&StateMachine::resetState, this, std::placeholders::_1, std::placeholders::_2));
     ebs_srv_ = rosnode->create_service<std_srvs::srv::Trigger>("/ros_can/ebs", std::bind(&StateMachine::requestEBS, this, std::placeholders::_1, std::placeholders::_2));
 
@@ -66,12 +68,7 @@ StateMachine::~StateMachine()
 
 void StateMachine::setMission(const eufs_msgs::msg::CanState::SharedPtr state)
 {
-    if (state->as_state == eufs_msgs::msg::CanState::AS_DRIVING)
-    {
-        as_state_ = eufs_msgs::msg::CanState::AS_DRIVING;
-    }
-
-    if (ami_state_ == eufs_msgs::msg::CanState::AMI_NOT_SELECTED)
+    if (ami_state_ == eufs_msgs::msg::CanState::AMI_NOT_SELECTED && !manual_driving_)
     {
         switch (state->ami_state)
         {
@@ -116,6 +113,21 @@ void StateMachine::setMission(const eufs_msgs::msg::CanState::SharedPtr state)
     }
 }
 
+bool StateMachine::setManualDriving(std::shared_ptr<std_srvs::srv::Trigger::Request> request, std::shared_ptr<std_srvs::srv::Trigger::Response> response)
+{
+    (void)request;   // suppress unused parameter warning
+    (void)response;  // suppress unused parameter warning
+    if (as_state_ == eufs_msgs::msg::CanState::AS_OFF && ami_state_ == eufs_msgs::msg::CanState::AMI_NOT_SELECTED) {
+        manual_driving_ = true;
+        response->success = true;
+    } else {
+        response->success = false;
+    }
+    
+    return response->success;
+}
+
+
 bool StateMachine::resetState(std::shared_ptr<std_srvs::srv::Trigger::Request> request, std::shared_ptr<std_srvs::srv::Trigger::Response> response)
 {
     (void)request;   // suppress unused parameter warning
@@ -123,6 +135,7 @@ bool StateMachine::resetState(std::shared_ptr<std_srvs::srv::Trigger::Request> r
     as_state_ = eufs_msgs::msg::CanState::AS_OFF;
     ami_state_ = eufs_msgs::msg::CanState::AMI_NOT_SELECTED;
     mission_completed_ = false;
+    manual_driving_ = false;
     response->success = true;
     return response->success;
 }
@@ -199,9 +212,7 @@ void StateMachine::publishState()
 
 std_msgs::msg::String StateMachine::makeStateString(const eufs_msgs::msg::CanState &state)
 {
-    std::string str1;
-    std::string str2;
-    std::string str3;
+    std::string str1, str2, str3, str4;
 
     RCLCPP_DEBUG(rosnode->get_logger(), "AS STATE: %d", state.as_state);
     RCLCPP_DEBUG(rosnode->get_logger(), "AMI STATE: %d", state.ami_state);
@@ -268,11 +279,8 @@ std_msgs::msg::String StateMachine::makeStateString(const eufs_msgs::msg::CanSta
             break;
     }
 
-    if (mission_completed_) {
-        str3 = "MISSION_COMPLETED:TRUE";
-    } else {
-        str3 = "MISSION_COMPLETED:FALSE";
-    }
+    str3 = manual_driving_ ? "MANUAL_DRIVING:TRUE" : "MANUAL_DRIVING:FALSE";
+    str4 = mission_completed_ ? "MISSION_COMPLETED:TRUE" : "MISSION_COMPLETED:FALSE";
     std_msgs::msg::String msg = std_msgs::msg::String();
     msg.data = str1 + " " + str2 + " " + str3;
     return msg;
@@ -294,7 +302,7 @@ void StateMachine::spinOnce()
 }
 
 bool StateMachine::canDrive() {
-  return as_state_ == eufs_msgs::msg::CanState::AS_DRIVING;
+  return as_state_ == eufs_msgs::msg::CanState::AS_DRIVING || manual_driving_;
 }
 
 } // namespace eufs

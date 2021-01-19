@@ -59,8 +59,8 @@ class RosCanGUI(Plugin):
                          CanState.AMI_DDT_INSPECTION_B: "DDT_INSPECTION_B",
                          CanState.AMI_JOYSTICK: "JOYSTICK"}
 
-        # Keep track of current mission
-        self.mission = "NOT_SELECTED"
+        # Keep track of manual driving
+        self.manual_driving = False
 
         for mission in self.missions.values():
             self._widget.findChild(
@@ -76,7 +76,7 @@ class RosCanGUI(Plugin):
         self._widget.findChild(
             QPushButton, "RequestEBS").clicked.connect(self.requestEBS)
         self._widget.findChild(
-            QPushButton, "DriveButton").clicked.connect(self.justDrive)
+            QPushButton, "DriveButton").clicked.connect(self.setManualDriving)
 
         # Subscribers
         self.state_sub = self.node.create_subscription(CanState, "/ros_can/state", self.stateCallback, 10)
@@ -85,6 +85,7 @@ class RosCanGUI(Plugin):
         self.set_mission_pub = self.node.create_publisher(CanState, "/ros_can/set_mission", 1)
 
         # Services
+        self.manual_driving_srv = self.node.create_client(Trigger, "/ros_can/manual_driving")
         self.ebs_srv = self.node.create_client(Trigger, "/ros_can/ebs")
         self.reset_srv = self.node.create_client(Trigger, "/ros_can/reset")
         self.reset_vehicle_pos_srv = self.node.create_client(Trigger, "/ros_can/reset_vehicle_pos")
@@ -115,10 +116,19 @@ class RosCanGUI(Plugin):
         for enum, mission_name in self.missions.items():
             if mission_name == mission:
                 mission_msg.ami_state = enum
-                self.mission = mission_name
 
         self.set_mission_pub.publish(mission_msg)
         self.node.get_logger().debug("Mission request sent successfully")
+
+    def setManualDriving(self):
+        """overrides the state machine of the car and just makes it drive"""
+        self.node.get_logger().debug("Requesting manual driving")
+        if self.manual_driving_srv.wait_for_service(timeout_sec=1):
+            request = Trigger.Request()
+            result = self.manual_driving_srv.call_async(request)
+            result.add_done_callback(self.manualDrivingCallback)
+        else:
+            self.node.get_logger().debug("/ros_can/manual_driving service is not available")
 
     def resetState(self):
         """Requests ros_can to reset its state machine"""
@@ -127,7 +137,7 @@ class RosCanGUI(Plugin):
         if self.reset_srv.wait_for_service(timeout_sec=1):
             request = Trigger.Request()
             result = self.reset_srv.call_async(request)
-            self.mission = "NOT_SELECTED"
+            self.manual_driving = False
             self.node.get_logger().debug("ros_can_sim reset successful")
             self.node.get_logger().debug(result)
         else:
@@ -189,21 +199,22 @@ class RosCanGUI(Plugin):
         Args:
             msg (eufs_msgs/CanState): state of ros_can
         """
-        self._widget.findChild(QLabel, "StateDisplay").setText(
-            self.states[msg.as_state])
-        self._widget.findChild(QLabel, "MissionDisplay").setText(
-            self.mission)
+        if self.manual_driving:
+            self._widget.findChild(QLabel, "StateDisplay").setText("Manual Driving")
+            self._widget.findChild(QLabel, "MissionDisplay").setText("MANUAL")
+        else:
+            self._widget.findChild(QLabel, "StateDisplay").setText(
+                self.states[msg.as_state])
+            self._widget.findChild(QLabel, "MissionDisplay").setText(
+                self.missions[msg.ami_state])
 
-    def justDrive(self):
-        """overrides the state machine of the car and just makes it drive"""
-
-        # create message to be sent
-        state_msg = CanState()
-
-        # TODO: devise of a way to signal the car state machine to enter into manual mode
-        
-        self.mission = "MANUAL"
-        self.set_mission_pub.publish(state_msg)
+    def manualDrivingCallback(self, result):
+        """Reads the response returned by manual driving"""
+        if result.result().success:
+            self.manual_driving = True
+            self.node.get_logger().debug("Enabled manual driving")
+        else:
+            self.node.get_logger().debug("Failed to enable manual driving")
 
     def shutdown_plugin(self):
         """stop all publisher, subscriber and services
