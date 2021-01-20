@@ -94,6 +94,12 @@ def spawn_car(context, *args, **kwargs):
 def generate_launch_description():
     rqt_perspective_file = os.path.join(get_package_share_directory('eufs_gazebo'), 'config', 'eufs_sim.perspective')
 
+    rviz_config_file = os.path.join(get_package_share_directory('eufs_description'), 'config', 'rviz', 'default.rviz')
+
+    default_user_config_file = os.path.join(os.path.expanduser("~"), ".rviz2", "default.rviz")
+    if os.path.isfile(default_user_config_file):
+        rviz_config_file = default_user_config_file
+
     return launch.LaunchDescription([
         # Launch Arguments
         launch.actions.DeclareLaunchArgument('launch_group', default_value='default',
@@ -132,7 +138,7 @@ def generate_launch_description():
         launch_ros.actions.Node(
             name='rviz',
             package='rviz2', executable='rviz2',
-            # TODO: Add path to RViz config as argument
+            arguments=['-d', rviz_config_file],
             condition=launch.conditions.IfCondition(launch.substitutions.LaunchConfiguration('rviz'))
         ),
         launch_ros.actions.Node(
