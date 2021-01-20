@@ -199,14 +199,10 @@ class RosCanGUI(Plugin):
         Args:
             msg (eufs_msgs/CanState): state of ros_can
         """
-        if self.manual_driving:
-            self._widget.findChild(QLabel, "StateDisplay").setText("Manual Driving")
-            self._widget.findChild(QLabel, "MissionDisplay").setText("MANUAL")
-        else:
-            self._widget.findChild(QLabel, "StateDisplay").setText(
-                self.states[msg.as_state])
-            self._widget.findChild(QLabel, "MissionDisplay").setText(
-                self.missions[msg.ami_state])
+        self._widget.findChild(QLabel, "StateDisplay").setText(
+            "Manual Driving" if self.manual_driving else self.states[msg.as_state])
+        self._widget.findChild(QLabel, "MissionDisplay").setText(
+            self.missions[msg.ami_state])
 
     def manualDrivingCallback(self, result):
         """Reads the response returned by manual driving"""

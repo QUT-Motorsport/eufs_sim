@@ -68,8 +68,11 @@ StateMachine::~StateMachine()
 
 void StateMachine::setMission(const eufs_msgs::msg::CanState::SharedPtr state)
 {
-    if (ami_state_ == eufs_msgs::msg::CanState::AMI_NOT_SELECTED && !manual_driving_)
-    {
+    if (manual_driving_) {
+        RCLCPP_WARN(rosnode->get_logger(), "Failed to set mission as manual driving is enabled");
+    } else if (ami_state_ != eufs_msgs::msg::CanState::AMI_NOT_SELECTED) {
+        RCLCPP_WARN(rosnode->get_logger(), "Failed to set mission as a mission was set previously.");
+    } else {
         switch (state->ami_state)
         {
             case eufs_msgs::msg::CanState::AMI_ACCELERATION:
@@ -107,10 +110,6 @@ void StateMachine::setMission(const eufs_msgs::msg::CanState::SharedPtr state)
                 break;
         }
     }
-    else
-    {
-        RCLCPP_WARN(rosnode->get_logger(), "Failed to set mission as a mission was set previously");
-    }
 }
 
 bool StateMachine::setManualDriving(std::shared_ptr<std_srvs::srv::Trigger::Request> request, std::shared_ptr<std_srvs::srv::Trigger::Response> response)
@@ -122,6 +121,7 @@ bool StateMachine::setManualDriving(std::shared_ptr<std_srvs::srv::Trigger::Requ
         response->success = true;
     } else {
         response->success = false;
+        RCLCPP_WARN(rosnode->get_logger(), "Failed to enable manual driving as a mission was set previously");
     }
     
     return response->success;
