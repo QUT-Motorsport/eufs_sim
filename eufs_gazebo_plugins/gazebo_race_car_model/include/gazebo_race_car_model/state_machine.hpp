@@ -110,7 +110,7 @@ private:
     void setMission(const eufs_msgs::msg::CanState::SharedPtr state);
 
     /**
-     * Eables manual driving
+     * Enables manual driving
      */
     bool setManualDriving(std::shared_ptr<std_srvs::srv::Trigger::Request> request, std::shared_ptr<std_srvs::srv::Trigger::Response> response);
 
