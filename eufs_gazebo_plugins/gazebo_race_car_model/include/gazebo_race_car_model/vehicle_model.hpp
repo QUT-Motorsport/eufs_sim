@@ -61,7 +61,7 @@ public:
                std::shared_ptr<rclcpp::Node> rosnode,
                gazebo::transport::NodePtr &gznode);
 
-  void update(double dt);
+  void update(double dt, gazebo::common::Time current_time);
 
   void printInfo();
 
@@ -115,7 +115,7 @@ protected:
 
   // Rate to publish ros messages
   double publish_rate_;
-  double time_last_published_;
+  gazebo::common::Time time_last_published_;
 
   std::string ground_truth_car_state_topic_;
   std::string localisation_car_state_topic_;

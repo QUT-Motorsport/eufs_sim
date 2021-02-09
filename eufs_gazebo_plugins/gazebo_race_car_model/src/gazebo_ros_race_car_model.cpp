@@ -113,7 +113,7 @@ void RaceCarModelPlugin::update() {
 
   this->lastSimTime = curTime;
 
-  this->vehicle->update(dt);
+  this->vehicle->update(dt, curTime);
 }
 
 GZ_REGISTER_MODEL_PLUGIN(RaceCarModelPlugin)

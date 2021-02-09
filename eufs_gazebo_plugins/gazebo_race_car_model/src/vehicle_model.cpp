@@ -315,7 +315,7 @@ void VehicleModel::initVehicleParam(sdf::ElementPtr &_sdf) {
 
 void VehicleModel::printInfo() {}
 
-void VehicleModel::update(const double dt) {
+void VehicleModel::update(const double dt, gazebo::common::Time current_time) {
   if (this->command_mode_ == velocity) {
     double current_speed = std::sqrt(std::pow(state_.v_x, 2) + std::pow(state_.v_y, 2));
     input_.acc = (input_.vel - current_speed) / dt;
@@ -336,9 +336,7 @@ void VehicleModel::update(const double dt) {
 
   setModelState();
 
-  double current_time = this->rosnode->now().seconds();
-
-  double time_since_last_published = current_time - this->time_last_published_;
+  double time_since_last_published = (current_time - this->time_last_published_).Double();
 
   if (time_since_last_published < (1 / this->publish_rate_)) {
     return;
