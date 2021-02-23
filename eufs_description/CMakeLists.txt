@@ -23,7 +23,7 @@ if(BUILD_TESTING)
   ament_lint_auto_find_test_dependencies()
 endif()
 
-install(DIRECTORY meshes materials urdf models robots sensors
+install(DIRECTORY meshes materials urdf models robots sensors config
   DESTINATION share/${PROJECT_NAME}
 )
 
