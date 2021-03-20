@@ -45,7 +45,6 @@ StateMachine::StateMachine(std::shared_ptr<rclcpp::Node> rosnode) : rosnode(rosn
     // init state machine state
     as_state_ = eufs_msgs::msg::CanState::AS_OFF;
     ami_state_ = eufs_msgs::msg::CanState::AMI_NOT_SELECTED;
-    manual_driving_ = false;
     mission_completed_ = false;
 
     // Subscriptions
@@ -53,7 +52,6 @@ StateMachine::StateMachine(std::shared_ptr<rclcpp::Node> rosnode) : rosnode(rosn
     set_mission_sub_ = rosnode->create_subscription<eufs_msgs::msg::CanState>("/ros_can/set_mission", 1, std::bind(&StateMachine::setMission, this, std::placeholders::_1));
 
     // Services
-    manual_driving_srv_ = rosnode->create_service<std_srvs::srv::Trigger>("/ros_can/manual_driving", std::bind(&StateMachine::setManualDriving, this, std::placeholders::_1, std::placeholders::_2));
     reset_srv_ = rosnode->create_service<std_srvs::srv::Trigger>("/ros_can/reset", std::bind(&StateMachine::resetState, this, std::placeholders::_1, std::placeholders::_2));
     ebs_srv_ = rosnode->create_service<std_srvs::srv::Trigger>("/ros_can/ebs", std::bind(&StateMachine::requestEBS, this, std::placeholders::_1, std::placeholders::_2));
 
@@ -68,68 +66,52 @@ StateMachine::~StateMachine()
 
 void StateMachine::setMission(const eufs_msgs::msg::CanState::SharedPtr state)
 {
-    if (manual_driving_) {
-        RCLCPP_WARN(rosnode->get_logger(), "Failed to set mission as manual driving is enabled");
-    } else if (ami_state_ != eufs_msgs::msg::CanState::AMI_NOT_SELECTED) {
-        RCLCPP_WARN(rosnode->get_logger(), "Failed to set mission as a mission was set previously.");
-    } else {
-        switch (state->ami_state)
-        {
-            case eufs_msgs::msg::CanState::AMI_ACCELERATION:
-                ami_state_ = eufs_msgs::msg::CanState::AMI_ACCELERATION;
-                break;
-            case eufs_msgs::msg::CanState::AMI_SKIDPAD:
-                ami_state_ = eufs_msgs::msg::CanState::AMI_SKIDPAD;
-                break;
-            case eufs_msgs::msg::CanState::AMI_AUTOCROSS:
-                ami_state_ = eufs_msgs::msg::CanState::AMI_AUTOCROSS;
-                break;
-            case eufs_msgs::msg::CanState::AMI_TRACK_DRIVE:
-                ami_state_ = eufs_msgs::msg::CanState::AMI_TRACK_DRIVE;
-                break;
-            case eufs_msgs::msg::CanState::AMI_AUTONOMOUS_DEMO:
-                ami_state_ = eufs_msgs::msg::CanState::AMI_AUTONOMOUS_DEMO;
-                break;
-            case eufs_msgs::msg::CanState::AMI_ADS_INSPECTION:
-                ami_state_ = eufs_msgs::msg::CanState::AMI_ADS_INSPECTION;
-                break;
-            case eufs_msgs::msg::CanState::AMI_ADS_EBS:
-                ami_state_ = eufs_msgs::msg::CanState::AMI_ADS_EBS;
-                break;
-            case eufs_msgs::msg::CanState::AMI_DDT_INSPECTION_A:
-                ami_state_ = eufs_msgs::msg::CanState::AMI_DDT_INSPECTION_A;
-                break;
-            case eufs_msgs::msg::CanState::AMI_DDT_INSPECTION_B:
-                ami_state_ = eufs_msgs::msg::CanState::AMI_DDT_INSPECTION_B;
-                break;
-            case eufs_msgs::msg::CanState::AMI_JOYSTICK:
-                ami_state_ = eufs_msgs::msg::CanState::AMI_JOYSTICK;
-                break;
-            default:
-                ami_state_ = eufs_msgs::msg::CanState::AMI_NOT_SELECTED;
-                break;
-        }
+    if (ami_state_ != eufs_msgs::msg::CanState::AMI_NOT_SELECTED) 
+    {
+        RCLCPP_WARN(rosnode->get_logger(), "state_machine :: failed to set mission as a mission was set previously.");
+        return;
+    }
+
+    switch (state->ami_state)
+    {
+        case eufs_msgs::msg::CanState::AMI_ACCELERATION:
+            ami_state_ = eufs_msgs::msg::CanState::AMI_ACCELERATION;
+            break;
+        case eufs_msgs::msg::CanState::AMI_SKIDPAD:
+            ami_state_ = eufs_msgs::msg::CanState::AMI_SKIDPAD;
+            break;
+        case eufs_msgs::msg::CanState::AMI_AUTOCROSS:
+            ami_state_ = eufs_msgs::msg::CanState::AMI_AUTOCROSS;
+            break;
+        case eufs_msgs::msg::CanState::AMI_TRACK_DRIVE:
+            ami_state_ = eufs_msgs::msg::CanState::AMI_TRACK_DRIVE;
+            break;
+        case eufs_msgs::msg::CanState::AMI_AUTONOMOUS_DEMO:
+            ami_state_ = eufs_msgs::msg::CanState::AMI_AUTONOMOUS_DEMO;
+            break;
+        case eufs_msgs::msg::CanState::AMI_ADS_INSPECTION:
+            ami_state_ = eufs_msgs::msg::CanState::AMI_ADS_INSPECTION;
+            break;
+        case eufs_msgs::msg::CanState::AMI_ADS_EBS:
+            ami_state_ = eufs_msgs::msg::CanState::AMI_ADS_EBS;
+            break;
+        case eufs_msgs::msg::CanState::AMI_DDT_INSPECTION_A:
+            ami_state_ = eufs_msgs::msg::CanState::AMI_DDT_INSPECTION_A;
+            break;
+        case eufs_msgs::msg::CanState::AMI_DDT_INSPECTION_B:
+            ami_state_ = eufs_msgs::msg::CanState::AMI_DDT_INSPECTION_B;
+            break;
+        case eufs_msgs::msg::CanState::AMI_JOYSTICK:
+            ami_state_ = eufs_msgs::msg::CanState::AMI_JOYSTICK;
+            break;
+        case eufs_msgs::msg::CanState::AMI_MANUAL:
+            ami_state_ = eufs_msgs::msg::CanState::AMI_MANUAL;
+            break;
+        default:
+            ami_state_ = eufs_msgs::msg::CanState::AMI_NOT_SELECTED;
+            break;
     }
 }
-
-bool StateMachine::setManualDriving(std::shared_ptr<std_srvs::srv::Trigger::Request> request, std::shared_ptr<std_srvs::srv::Trigger::Response> response)
-{
-    (void)request;   // suppress unused parameter warning
-    (void)response;  // suppress unused parameter warning
-    if (manual_driving_) {
-        response->success = true;
-        RCLCPP_WARN(rosnode->get_logger(), "Manual driving is already enabled");
-    } else if (as_state_ == eufs_msgs::msg::CanState::AS_OFF && ami_state_ == eufs_msgs::msg::CanState::AMI_NOT_SELECTED) {
-        manual_driving_ = true;
-        response->success = true;
-    } else {
-        response->success = false;
-        RCLCPP_WARN(rosnode->get_logger(), "Failed to enable manual driving");
-    }
-    
-    return response->success;
-}
-
 
 bool StateMachine::resetState(std::shared_ptr<std_srvs::srv::Trigger::Request> request, std::shared_ptr<std_srvs::srv::Trigger::Response> response)
 {
@@ -138,7 +120,6 @@ bool StateMachine::resetState(std::shared_ptr<std_srvs::srv::Trigger::Request> r
     as_state_ = eufs_msgs::msg::CanState::AS_OFF;
     ami_state_ = eufs_msgs::msg::CanState::AMI_NOT_SELECTED;
     mission_completed_ = false;
-    manual_driving_ = false;
     response->success = true;
     return response->success;
 }
@@ -147,8 +128,9 @@ bool StateMachine::requestEBS(std::shared_ptr<std_srvs::srv::Trigger::Request> r
 {
     (void)request;   // suppress unused parameter warning
     (void)response;  // suppress unused parameter warning
-    if (manual_driving_) {
-        RCLCPP_WARN(rosnode->get_logger(), "EBS is unavilable in manual driving");
+    if (ami_state_ == eufs_msgs::msg::CanState::AMI_MANUAL) 
+    {
+        RCLCPP_WARN(rosnode->get_logger(), "state_machine :: EBS is unavailable in manual driving");
         return false; 
     }
     as_state_ = eufs_msgs::msg::CanState::AS_EMERGENCY_BRAKE;
@@ -165,7 +147,7 @@ void StateMachine::updateState()
     switch (as_state_)
     {
         case eufs_msgs::msg::CanState::AS_OFF:
-            if (ami_state_ != eufs_msgs::msg::CanState::AMI_NOT_SELECTED)
+            if (ami_state_ != eufs_msgs::msg::CanState::AMI_NOT_SELECTED && ami_state_ != eufs_msgs::msg::CanState::AMI_MANUAL)
             {
                 // now transition to new state
                 as_state_ = eufs_msgs::msg::CanState::AS_READY;
@@ -219,7 +201,7 @@ void StateMachine::publishState()
 
 std_msgs::msg::String StateMachine::makeStateString(const eufs_msgs::msg::CanState &state)
 {
-    std::string str1, str2, str3, str4;
+    std::string str1, str2, str3;
 
     RCLCPP_DEBUG(rosnode->get_logger(), "AS STATE: %d", state.as_state);
     RCLCPP_DEBUG(rosnode->get_logger(), "AMI STATE: %d", state.ami_state);
@@ -276,18 +258,20 @@ std_msgs::msg::String StateMachine::makeStateString(const eufs_msgs::msg::CanSta
             str2 = "AMI:DDT_INSPECTION_B";
             break;
         case eufs_msgs::msg::CanState::AMI_AUTONOMOUS_DEMO:
-          str2 = "AMI:BRAKETEST";
-          break;
+            str2 = "AMI:BRAKETEST";
+            break;
         case eufs_msgs::msg::CanState::AMI_JOYSTICK:
-          str2 = "AMI:JOYSTICK";
-          break;
+            str2 = "AMI:JOYSTICK";
+            break;
+        case eufs_msgs::msg::CanState::AMI_MANUAL:
+            str2 = "AMI:MANUAL";
+            break;
         default:
             str2 = "NO_SUCH_MESSAGE";
             break;
     }
 
-    str3 = manual_driving_ ? "MANUAL_DRIVING:TRUE" : "MANUAL_DRIVING:FALSE";
-    str4 = mission_completed_ ? "MISSION_COMPLETED:TRUE" : "MISSION_COMPLETED:FALSE";
+    str3 = mission_completed_ ? "MISSION_COMPLETED:TRUE" : "MISSION_COMPLETED:FALSE";
     std_msgs::msg::String msg = std_msgs::msg::String();
     msg.data = str1 + " " + str2 + " " + str3;
     return msg;
@@ -295,7 +279,15 @@ std_msgs::msg::String StateMachine::makeStateString(const eufs_msgs::msg::CanSta
 
 void StateMachine::completedCallback(const std_msgs::msg::Bool::SharedPtr msg)
 {
-    if (mission_completed_ != msg->data) {
+    if (mission_completed_ != msg->data) 
+    { 
+        if (ami_state_ == eufs_msgs::msg::CanState::AMI_MANUAL) 
+        {
+            RCLCPP_WARN(rosnode->get_logger(), "state_machine :: mission completion is not defined for the manual mission");
+            return;
+        }
+
+
         RCLCPP_DEBUG(rosnode->get_logger(), "state_machine :: setting mission completed to %d", msg->data);
         mission_completed_ = msg->data;
     }
@@ -308,8 +300,9 @@ void StateMachine::spinOnce()
 //    rclcpp::spin_some(this->rosnode);
 }
 
-bool StateMachine::canDrive() {
-  return as_state_ == eufs_msgs::msg::CanState::AS_DRIVING || manual_driving_;
+bool StateMachine::canDrive() 
+{
+  return as_state_ == eufs_msgs::msg::CanState::AS_DRIVING || ami_state_ == eufs_msgs::msg::CanState::AMI_MANUAL;
 }
 
 } // namespace eufs
