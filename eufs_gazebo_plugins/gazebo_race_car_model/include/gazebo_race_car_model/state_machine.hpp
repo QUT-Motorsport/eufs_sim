@@ -38,6 +38,7 @@
 #include <chrono>
 #include <thread>
 #include <iostream>
+#include <memory>
 
 #include <rclcpp/rclcpp.hpp>
 
@@ -49,6 +50,8 @@
 // ROS  srvs
 #include <std_srvs/srv/trigger.hpp>
 
+// Gazebo Includes
+#include <gazebo/common/Time.hh>
 
 /**
 * @class StateMachine
@@ -68,7 +71,7 @@ public:
     StateMachine(std::shared_ptr<rclcpp::Node> rosnode);  ///< Constructor
     ~StateMachine();  ///< Destructor
 
-    void spinOnce();  ///< Main operational loop
+    void spinOnce(gazebo::common::Time current_time);  ///< Main operational loop
 
     /**
      * Return if the car can drive based on the as_state
@@ -85,6 +88,8 @@ private:
     bool manual_driving_; ///< true only when the car is driving manually
 
     bool mission_completed_; ///< true only when selected mission has finished
+
+    std::unique_ptr<double> transition_begin_; ///< the world timestamp in which the transition from AS_READY to AS_DRIVING was begun - set to nullptr if there is no ongoing transition
 
     rclcpp::Subscription<eufs_msgs::msg::CanState>::SharedPtr set_mission_sub_;
 
@@ -128,7 +133,7 @@ private:
       * Loops through the internal state machine of the car
       * Based on: https://www.imeche.org/docs/default-source/1-oscar/formula-student/2019/fs-ai/ads-dv-software-interface-specification-v0-2.pdf?sfvrsn=2
       */
-    void updateState();
+    void updateState(gazebo::common::Time current_time);
 
     /**
       * Publishes internal state and mission in a eufs_msgs/msg/CanState.msg format

@@ -155,13 +155,12 @@ bool StateMachine::requestEBS(std::shared_ptr<std_srvs::srv::Trigger::Request> r
     ami_state_ = eufs_msgs::msg::CanState::AMI_NOT_SELECTED;
     mission_completed_ = false;
     response->success = true;
+    transition_begin_ = nullptr;
     return response->success;
 }
 
-void StateMachine::updateState()
+void StateMachine::updateState(gazebo::common::Time current_time)
 {
-    using namespace std::chrono_literals;
-
     switch (as_state_)
     {
         case eufs_msgs::msg::CanState::AS_OFF:
@@ -174,9 +173,17 @@ void StateMachine::updateState()
             break;
 
         case eufs_msgs::msg::CanState::AS_READY:
-            std::this_thread::sleep_for(5s); 
-            as_state_ = eufs_msgs::msg::CanState::AS_DRIVING;
-            RCLCPP_DEBUG(rosnode->get_logger(), "state_machine :: switching to AS_DRIVING state");
+            if (transition_begin_ == nullptr)
+            {
+                transition_begin_ = std::make_unique<double>(current_time.Double());
+            } 
+            else if (current_time.Double() - *transition_begin_ >= 5.0)
+            {
+                // Transition to driving.
+                as_state_ = eufs_msgs::msg::CanState::AS_DRIVING;
+                RCLCPP_DEBUG(rosnode->get_logger(), "state_machine :: switching to AS_DRIVING state");
+                transition_begin_ = nullptr;
+            } 
             break;
 
         case eufs_msgs::msg::CanState::AS_DRIVING:
@@ -301,9 +308,9 @@ void StateMachine::completedCallback(const std_msgs::msg::Bool::SharedPtr msg)
     }
 }
 
-void StateMachine::spinOnce()
+void StateMachine::spinOnce(gazebo::common::Time current_time)
 {
-    this->updateState();
+    this->updateState(current_time);
     this->publishState();
 //    rclcpp::spin_some(this->rosnode);
 }
