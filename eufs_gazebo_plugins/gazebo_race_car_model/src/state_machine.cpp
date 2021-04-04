@@ -47,6 +47,7 @@ StateMachine::StateMachine(std::shared_ptr<rclcpp::Node> rosnode) : rosnode(rosn
     ami_state_ = eufs_msgs::msg::CanState::AMI_NOT_SELECTED;
     manual_driving_ = false;
     mission_completed_ = false;
+    in_transition_ = false;
 
     // Subscriptions
     completed_sub_ = rosnode->create_subscription<std_msgs::msg::Bool>("/ros_can/mission_completed", 1, std::bind(&StateMachine::completedCallback, this, std::placeholders::_1));
@@ -155,7 +156,7 @@ bool StateMachine::requestEBS(std::shared_ptr<std_srvs::srv::Trigger::Request> r
     ami_state_ = eufs_msgs::msg::CanState::AMI_NOT_SELECTED;
     mission_completed_ = false;
     response->success = true;
-    transition_begin_ = nullptr;
+    in_transition_ = false;
     return response->success;
 }
 
@@ -173,16 +174,17 @@ void StateMachine::updateState(gazebo::common::Time current_time)
             break;
 
         case eufs_msgs::msg::CanState::AS_READY:
-            if (transition_begin_ == nullptr)
+            if (!in_transition_)
             {
-                transition_begin_ = std::make_unique<double>(current_time.Double());
+                transition_begin_ = current_time.Double();
+                in_transition_ = true;
             } 
-            else if (current_time.Double() - *transition_begin_ >= 5.0)
+            else if (current_time.Double() - transition_begin_ >= 5.0)
             {
                 // Transition to driving.
                 as_state_ = eufs_msgs::msg::CanState::AS_DRIVING;
                 RCLCPP_DEBUG(rosnode->get_logger(), "state_machine :: switching to AS_DRIVING state");
-                transition_begin_ = nullptr;
+                in_transition_ = false;
             } 
             break;
 

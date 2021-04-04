@@ -38,7 +38,6 @@
 #include <chrono>
 #include <thread>
 #include <iostream>
-#include <memory>
 
 #include <rclcpp/rclcpp.hpp>
 
@@ -89,7 +88,8 @@ private:
 
     bool mission_completed_; ///< true only when selected mission has finished
 
-    std::unique_ptr<double> transition_begin_; ///< the world timestamp in which the transition from AS_READY to AS_DRIVING was begun - set to nullptr if there is no ongoing transition
+    bool in_transition_; ///< true when the state machine is currently transitioning from AS_READY to AS_DRIVING
+    double transition_begin_; ///< the world timestamp in which the transition from AS_READY to AS_DRIVING was begun
 
     rclcpp::Subscription<eufs_msgs::msg::CanState>::SharedPtr set_mission_sub_;
 
