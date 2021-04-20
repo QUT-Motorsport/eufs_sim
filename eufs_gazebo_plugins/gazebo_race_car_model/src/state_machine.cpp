@@ -141,6 +141,7 @@ bool StateMachine::resetState(std::shared_ptr<std_srvs::srv::Trigger::Request> r
     mission_completed_ = false;
     manual_driving_ = false;
     response->success = true;
+    in_transition_ = false;
     return response->success;
 }
 
