@@ -74,6 +74,8 @@ class RosCanGUI(Plugin):
             QPushButton, "ResetSimButton").clicked.connect(self.resetSim)
         self._widget.findChild(
             QPushButton, "RequestEBS").clicked.connect(self.requestEBS)
+        self._widget.findChild(
+            QPushButton, "DriveButton").clicked.connect(self.setManualDriving)
 
         # Subscribers
         self.state_sub = self.node.create_subscription(CanState, "/ros_can/state", self.stateCallback, 10)
@@ -115,6 +117,12 @@ class RosCanGUI(Plugin):
 
         self.set_mission_pub.publish(mission_msg)
         self.node.get_logger().debug("Mission request sent successfully")
+
+    def setManualDriving(self):
+        # Change selected dropdown item to MANUAL
+        self._widget.findChild(
+            QComboBox, "MissionSelectMenu").setCurrentText(self.missions[CanState.AMI_MANUAL])
+        self.setMission()
 
     def resetState(self):
         """Requests ros_can to reset its state machine"""

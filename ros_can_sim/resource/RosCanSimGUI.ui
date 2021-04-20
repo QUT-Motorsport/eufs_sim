@@ -108,6 +108,26 @@
       </property>
     </widget>
 
+    <!-- Manual Launch Button-->
+    <widget class="QPushButton" name="DriveButton">
+      <property name="geometry">
+        <rect>
+          <x>210</x>
+          <y>60</y>
+          <width>90</width>
+          <height>30</height>
+        </rect>
+      </property>
+      <property name="text">
+        <string>Manual Drive</string>
+      </property>
+      <property name="font">
+        <font>
+          <pointsize>10</pointsize>
+        </font>
+      </property>
+    </widget>
+
     <!-- State display -->
     <widget class="QLabel" name="StateInfo">
       <property name="geometry">
