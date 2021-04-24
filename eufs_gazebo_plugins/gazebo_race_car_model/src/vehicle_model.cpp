@@ -353,7 +353,7 @@ void VehicleModel::update(const double dt, gazebo::common::Time current_time) {
     publishTf();
   }
 
-  state_machine_.spinOnce();
+  state_machine_.spinOnce(current_time);
 }
 
 void VehicleModel::updateState(State& state, Input& input, const double dt) {}
