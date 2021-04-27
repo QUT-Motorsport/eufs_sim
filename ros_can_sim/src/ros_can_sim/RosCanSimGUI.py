@@ -39,14 +39,14 @@ class RosCanGUI(Plugin):
             self._widget.setWindowTitle(
                 self._widget.windowTitle() + (' (%d)' % context.serial_number()))
 
-        # setup states and missions
-        # enumrations taken from CanState.msg
+        # Enumrations taken from CanState.msg
         self.states = {CanState.AS_OFF: "OFF",
                        CanState.AS_READY: "READY",
                        CanState.AS_DRIVING: "DRIVING",
                        CanState.AS_EMERGENCY_BRAKE: "EMERGENCY",
                        CanState.AS_FINISHED: "FINISHED"}
 
+        # Autonomous missions
         self.missions = {CanState.AMI_NOT_SELECTED: "NOT_SELECTED",
                          CanState.AMI_ACCELERATION: "ACCELERATION",
                          CanState.AMI_SKIDPAD: "SKIDPAD",
@@ -58,7 +58,6 @@ class RosCanGUI(Plugin):
                          CanState.AMI_DDT_INSPECTION_A: "DDT_INSPECTION_A",
                          CanState.AMI_DDT_INSPECTION_B: "DDT_INSPECTION_B",
                          CanState.AMI_JOYSTICK: "JOYSTICK",
-                         CanState.AMI_MANUAL: "MANUAL"
         }   
 
         for mission in self.missions.values():
@@ -119,10 +118,11 @@ class RosCanGUI(Plugin):
         self.node.get_logger().debug("Mission request sent successfully")
 
     def setManualDriving(self):
-        # Change selected dropdown item to MANUAL
-        self._widget.findChild(
-            QComboBox, "MissionSelectMenu").setCurrentText(self.missions[CanState.AMI_MANUAL])
-        self.setMission()
+        self.node.get_logger().debug("Sending manual mission request")
+        mission_msg = CanState()
+        mission_msg.ami_state = CanState.AMI_MANUAL
+        self.set_mission_pub.publish(mission_msg)
+        self.node.get_logger().debug("Mission request sent successfully")
 
     def resetState(self):
         """Requests ros_can to reset its state machine"""
@@ -192,10 +192,16 @@ class RosCanGUI(Plugin):
         Args:
             msg (eufs_msgs/CanState): state of ros_can
         """
-        self._widget.findChild(QLabel, "StateDisplay").setText(
-            "Manual Driving" if msg.ami_state == CanState.AMI_MANUAL else self.states[msg.as_state])
-        self._widget.findChild(QLabel, "MissionDisplay").setText(
-            self.missions[msg.ami_state])
+        if msg.ami_state == CanState.AMI_MANUAL:
+            self._widget.findChild(QLabel, "StateDisplay").setText(
+                "Manual Driving")
+            self._widget.findChild(QLabel, "MissionDisplay").setText(
+                "MANUAL")
+        else:
+            self._widget.findChild(QLabel, "StateDisplay").setText(
+                self.states[msg.as_state])
+            self._widget.findChild(QLabel, "MissionDisplay").setText(
+                self.missions[msg.ami_state])
 
     def shutdown_plugin(self):
         """stop all publisher, subscriber and services
