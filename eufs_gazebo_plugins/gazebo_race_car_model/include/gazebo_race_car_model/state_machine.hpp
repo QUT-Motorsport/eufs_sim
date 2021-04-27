@@ -84,8 +84,6 @@ private:
 
     uint16_t ami_state_;  ///< mission status
 
-    bool manual_driving_; ///< true only when the car is driving manually
-
     bool mission_completed_; ///< true only when selected mission has finished
 
     bool in_transition_; ///< true when the state machine is currently transitioning from AS_READY to AS_DRIVING
@@ -99,7 +97,6 @@ private:
     rclcpp::Publisher<eufs_msgs::msg::CanState>::SharedPtr state_pub_;
     rclcpp::Publisher<std_msgs::msg::String>::SharedPtr state_pub_str_;
 
-    rclcpp::Service<std_srvs::srv::Trigger>::SharedPtr manual_driving_srv_; ///<service to enable manual driving
     rclcpp::Service<std_srvs::srv::Trigger>::SharedPtr reset_srv_;  ///< service to reset state machine
     rclcpp::Service<std_srvs::srv::Trigger>::SharedPtr ebs_srv_; ///< service to request an emergency brake
 
@@ -113,11 +110,6 @@ private:
       * Sets the mission of the car. Only available in simulation
       */
     void setMission(const eufs_msgs::msg::CanState::SharedPtr state);
-
-    /**
-     * Enables manual driving
-     */
-    bool setManualDriving(std::shared_ptr<std_srvs::srv::Trigger::Request> request, std::shared_ptr<std_srvs::srv::Trigger::Response> response);
 
     /**
       * Resets the state of the internal state machine

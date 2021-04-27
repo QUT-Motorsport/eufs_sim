@@ -197,7 +197,7 @@
         </rect>
       </property>
       <property name="text">
-        <string>(Will move only in the DRIVING state)</string>
+        <string>(Will move only in DRIVING or Manual Driving)</string>
       </property>
       <property name="font">
         <font>
