@@ -130,13 +130,18 @@ bool StateMachine::requestEBS(std::shared_ptr<std_srvs::srv::Trigger::Request> r
 {
     (void)request;   // suppress unused parameter warning
     (void)response;  // suppress unused parameter warning
-    if (ami_state_ == eufs_msgs::msg::CanState::AMI_MANUAL) 
+    if (ami_state_ == eufs_msgs::msg::CanState::AMI_MANUAL || ami_state_ == eufs_msgs::msg::CanState::AMI_NOT_SELECTED) 
     {
-        RCLCPP_WARN(rosnode->get_logger(), "state_machine :: EBS is unavailable in manual driving");
+        RCLCPP_WARN(rosnode->get_logger(), "state_machine :: EBS is unavailable in current state");
         return false; 
     }
+    if (as_state_ == eufs_msgs::msg::CanState::AS_EMERGENCY_BRAKE) 
+    {
+        RCLCPP_WARN(rosnode->get_logger(), "state_machine :: EBS is already active");
+        return false;
+    }
+
     as_state_ = eufs_msgs::msg::CanState::AS_EMERGENCY_BRAKE;
-    ami_state_ = eufs_msgs::msg::CanState::AMI_NOT_SELECTED;
     mission_completed_ = false;
     response->success = true;
     in_transition_ = false;
