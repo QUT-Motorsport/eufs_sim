@@ -41,8 +41,10 @@ find_package(trajectory_msgs REQUIRED)
 find_package(eufs_msgs REQUIRED)
 find_package(visualization_msgs REQUIRED)
 find_package(yaml-cpp REQUIRED)
+find_package(eufs_models REQUIRED)
 
 link_directories(${gazebo_dev_LIBRARY_DIRS} ${YAML_CPP_INCLUDEDIR})
+link_libraries(eufs_models::eufs_models)
 
 option(ENABLE_PROFILER "Enable Ignition Profiler" FALSE)
 if(ENABLE_PROFILER)
@@ -68,6 +70,7 @@ ament_export_dependencies(gazebo_dev)
 ament_export_dependencies(gazebo_msgs)
 ament_export_dependencies(gazebo_ros)
 ament_export_dependencies(yaml-cpp)
+ament_export_dependencies(eufs_models)
 
 if(NOT WIN32)
   if(NOT APPLE)
@@ -82,6 +85,3 @@ if(NOT WIN32)
 endif()
 
 ament_package()
-
-install(FILES gazebo_race_car_model/src/models/models.txt
-  DESTINATION share/eufs_gazebo_plugins/gazebo_race_car_model/src/models)

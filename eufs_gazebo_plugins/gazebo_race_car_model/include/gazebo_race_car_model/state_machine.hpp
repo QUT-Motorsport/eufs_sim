@@ -62,31 +62,32 @@
 * Further specs: https://www.imeche.org/docs/default-source/1-oscar/formula-student/2019/fs-ai/ads-dv-software-interface-specification-v0-2.pdf?sfvrsn=2
 */
 
-namespace gazebo_plugins {
-namespace eufs {
+namespace eufs
+{
 
-class StateMachine {
-public:
-    StateMachine(std::shared_ptr<rclcpp::Node> rosnode);  ///< Constructor
-    ~StateMachine();  ///< Destructor
+  class StateMachine
+  {
+  public:
+    StateMachine(std::shared_ptr<rclcpp::Node> rosnode); ///< Constructor
+    ~StateMachine();                                     ///< Destructor
 
-    void spinOnce(gazebo::common::Time current_time);  ///< Main operational loop
+    void spinOnce(gazebo::common::Time current_time); ///< Main operational loop
 
     /**
      * Return if the car can drive based on the as_state
      */
     bool canDrive();
 
-private:
+  private:
     std::shared_ptr<rclcpp::Node> rosnode;
 
     uint16_t as_state_; ///< state machine state
 
-    uint16_t ami_state_;  ///< mission status
+    uint16_t ami_state_; ///< mission status
 
     bool mission_completed_; ///< true only when selected mission has finished
 
-    bool in_transition_; ///< true when the state machine is currently transitioning from AS_READY to AS_DRIVING
+    bool in_transition_;      ///< true when the state machine is currently transitioning from AS_READY to AS_DRIVING
     double transition_begin_; ///< the world timestamp in which the transition from AS_READY to AS_DRIVING was begun
 
     rclcpp::Subscription<eufs_msgs::msg::CanState>::SharedPtr set_mission_sub_;
@@ -97,8 +98,8 @@ private:
     rclcpp::Publisher<eufs_msgs::msg::CanState>::SharedPtr state_pub_;
     rclcpp::Publisher<std_msgs::msg::String>::SharedPtr state_pub_str_;
 
-    rclcpp::Service<std_srvs::srv::Trigger>::SharedPtr reset_srv_;  ///< service to reset state machine
-    rclcpp::Service<std_srvs::srv::Trigger>::SharedPtr ebs_srv_; ///< service to request an emergency brake
+    rclcpp::Service<std_srvs::srv::Trigger>::SharedPtr reset_srv_; ///< service to reset state machine
+    rclcpp::Service<std_srvs::srv::Trigger>::SharedPtr ebs_srv_;   ///< service to request an emergency brake
 
     /**
      * Stores the state of the mission complete flag
@@ -136,10 +137,8 @@ private:
       * Creates a std_msgs/msg/String.msg version of the internal state and mission
       */
     std_msgs::msg::String makeStateString(const eufs_msgs::msg::CanState &state);
-
-};
+  };
 
 } // namespace eufs
-} // namespace gazebo_plugins
 
 #endif //ROBOT_CONTROL_STATE_MACHINE_H

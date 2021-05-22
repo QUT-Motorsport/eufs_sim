@@ -1,81 +1,179 @@
-/*
- * AMZ-Driverless
- * Copyright (c) 2018 Authors:
- *   - Juraj Kabzan <kabzanj@gmail.com>
- *
- * Permission is hereby granted, free of charge, to any person obtaining a copy
- * of this software and associated documentation files (the "Software"), to deal
- * in the Software without restriction, including without limitation the rights
- * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
- * copies of the Software, and to permit persons to whom the Software is
- * furnished to do so, subject to the following conditions:
- *
- * The above copyright notice and this permission notice shall be included in all
- * copies or substantial portions of the Software.
- *
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
- * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
- * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
- * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
- * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
- * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
- * SOFTWARE.
- */
-
-
 #ifndef GAZEBO_ROS_RACE_CAR_HPP
 #define GAZEBO_ROS_RACE_CAR_HPP
 
 // ROS Includes
 #include "rclcpp/rclcpp.hpp"
+#include "tf2/transform_datatypes.h"
+#include "tf2_ros/transform_broadcaster.h"
+#include "tf2/utils.h"
+
+// ROS messages
+#include "eufs_msgs/msg/ackermann_drive_stamped.hpp"
+#include "eufs_msgs/msg/car_state.hpp"
+#include "eufs_msgs/msg/wheel_speeds_stamped.hpp"
+#include "nav_msgs/msg/odometry.hpp"
+#include "geometry_msgs/msg/pose_with_covariance_stamped.hpp"
+#include "geometry_msgs/msg/pose_with_covariance.hpp"
+#include "geometry_msgs/msg/twist_with_covariance.hpp"
+#include "geometry_msgs/msg/vector3.hpp"
+
+// ROS srvs
+#include <std_srvs/srv/trigger.hpp>
 
 // Gazebo Includes
-#include <gazebo/common/Time.hh>
-#include <gazebo/physics/physics.hh>
-#include <gazebo/transport/transport.hh>
-#include <gazebo/common/Plugin.hh>
-#include <gazebo_ros/node.hpp>
+#include "gazebo/common/Time.hh"
+#include "gazebo/physics/physics.hh"
+#include "gazebo/transport/transport.hh"
+#include "gazebo/common/Plugin.hh"
+#include "gazebo_ros/node.hpp"
 
-// ROS RACE CAR PLUGIN
-#include "vehicle_model.hpp"
-#include "../../src/models/dynamic_bicycle.cpp"
-#include "../../src/models/point_mass.cpp"
+// eufs_model vehicle models
+#include "eufs_models/vehicle_model.hpp"
+#include "eufs_models/dynamic_bicycle.hpp"
+#include "eufs_models/point_mass.hpp"
 
-namespace gazebo_plugins {
-namespace eufs {
+// eufs racecar state machine
+#include "state_machine.hpp"
 
-class RaceCarModelPlugin : public gazebo::ModelPlugin {
- public:
-  RaceCarModelPlugin();
+namespace gazebo_plugins
+{
 
-  ~RaceCarModelPlugin() override;
+  class RaceCarModelPlugin : public gazebo::ModelPlugin
+  {
+  public:
+    RaceCarModelPlugin();
 
-  void Reset() override;
+    ~RaceCarModelPlugin();
 
-  void Load(gazebo::physics::ModelPtr _parent, sdf::ElementPtr _sdf) override;
+    void Reset();
 
-  std::shared_ptr<rclcpp::Node> rosnode;
+    void Load(gazebo::physics::ModelPtr _parent, sdf::ElementPtr _sdf);
 
-  gazebo::physics::WorldPtr world;
+    // TODO(angus): delete if everything is working fine
+    // gazebo::transport::NodePtr gznode;
 
-  gazebo::physics::ModelPtr model;
+    void update();
+    void updateVehicle(double dt, gazebo::common::Time current_time);
 
-  gazebo::transport::NodePtr gznode;
+    void initModel(sdf::ElementPtr &plugin_sdf);
+    void initRacecarParam(sdf::ElementPtr &plugin_sdf);
+    void initVehicleModel(sdf::ElementPtr &plugin_sdf);
+    void setPositionFromWorld();
+    bool resetVehiclePosition(std::shared_ptr<std_srvs::srv::Trigger::Request> request, std::shared_ptr<std_srvs::srv::Trigger::Response> response);
+    void setModelState();
+    void publishCarState();
+    void publishWheelSpeeds();
+    void publishOdom();
+    void publishTf();
+    void onCmd(const eufs_msgs::msg::AckermannDriveStamped::SharedPtr msg);
 
- private:
-  void update();
+    eufs::State &getState() { return _state; }
+    eufs::Input &getInput() { return _input; }
 
-  double update_rate_;
+    ignition::math::Pose3d _offset;
+    double _update_rate;
+    gazebo::physics::WorldPtr _world;
 
-  gazebo::event::ConnectionPtr updateConnection;
+    gazebo::event::ConnectionPtr _updateConnection;
+    gazebo::common::Time _lastSimTime;
+    gazebo::transport::PublisherPtr _worldControlPub;
 
-  eufs::VehicleModelPtr vehicle;
+    // States
+    eufs::StateMachine *_state_machine;
+    eufs::State _state;
+    eufs::Input _input;
+    double _time_last_cmd;
 
-  gazebo::common::Time lastSimTime;
+    // Pointer to the vehicle model
+    eufs::VehicleModelPtr _vehicle;
 
-  gazebo::transport::PublisherPtr worldControlPub;
-};
+    // Pointer to the parent model
+    gazebo::physics::ModelPtr _model;
 
-} // namespace eufs
+    // ROS Node
+    gazebo_ros::Node::SharedPtr _rosnode;
+
+    // ROS TF
+    tf2_ros::TransformBroadcaster *_tf_br;
+
+    // Rate to publish ROS messages
+    double _publish_rate;
+    gazebo::common::Time _time_last_published;
+
+    // ROS parameters
+    std::string _ground_truth_car_state_topic;
+    std::string _localisation_car_state_topic;
+    std::string _wheel_speeds_topic_name;
+    std::string _ground_truth_wheel_speeds_topic_name;
+    std::string _odom_topic_name;
+
+    // ROS Publishers
+    rclcpp::Publisher<eufs_msgs::msg::CarState>::SharedPtr _pub_ground_truth_car_state;
+    rclcpp::Publisher<eufs_msgs::msg::CarState>::SharedPtr _pub_localisation_car_state;
+    rclcpp::Publisher<eufs_msgs::msg::WheelSpeedsStamped>::SharedPtr _pub_wheel_speeds;
+    rclcpp::Publisher<eufs_msgs::msg::WheelSpeedsStamped>::SharedPtr _pub_ground_truth_wheel_speeds;
+    rclcpp::Publisher<nav_msgs::msg::Odometry>::SharedPtr _pub_odom;
+
+    // ROS Subscriptions
+    rclcpp::Subscription<eufs_msgs::msg::AckermannDriveStamped>::SharedPtr _sub_cmd;
+
+    // ROS Services
+    rclcpp::Service<std_srvs::srv::Trigger>::SharedPtr _reset_vehicle_pos_srv; /// Service to reset vehicle position
+
+    // Racecar parameters
+    bool _publish_tf;
+    std::string _reference_frame;
+    std::string _robot_frame;
+
+    std::vector<double> _position_noise;
+    std::vector<double> _orientation_noise;
+    std::vector<double> _linear_velocity_noise;
+    std::vector<double> _angular_velocity_noise;
+    std::vector<double> _linear_acceleration_noise;
+
+    // Steering jointsState
+    gazebo::physics::JointPtr _left_steering_joint;
+    gazebo::physics::JointPtr _right_steering_joint;
+
+    // Wheels
+    gazebo::physics::JointPtr _front_left_wheel;
+    gazebo::physics::JointPtr _front_right_wheel;
+    gazebo::physics::JointPtr _rear_left_wheel;
+    gazebo::physics::JointPtr _rear_right_wheel;
+
+    enum CommandMode
+    {
+      acceleration,
+      velocity
+    };
+    CommandMode _command_mode;
+
+    /// @brief Converts an euler orientation to quaternion
+    std::vector<double> ToQuaternion(std::vector<double> &euler);
+
+    double GaussianKernel(double mu, double sigma)
+    {
+      // using Box-Muller transform to generate two independent standard
+      // normally distributed normal variables see wikipedia
+      unsigned seed = 0;
+      // normalized uniform random variable
+      double U = static_cast<double>(rand_r(&seed)) /
+                 static_cast<double>(RAND_MAX);
+
+      // normalized uniform random variable
+      double V = static_cast<double>(rand_r(&seed)) /
+                 static_cast<double>(RAND_MAX);
+
+      double X = sqrt(-2.0 * ::log(U)) * cos(2.0 * M_PI * V);
+      // double Y = sqrt(-2.0 * ::log(U)) * sin(2.0*M_PI * V);
+
+      // there are 2 indep. vars, we'll just use X
+      // scale to our mu and sigma
+      X = sigma * X + mu;
+      return X;
+    }
+  };
+
 } // namespace gazebo_plugins
+
 #endif // GAZEBO_ROS_RACE_CAR_HPP
