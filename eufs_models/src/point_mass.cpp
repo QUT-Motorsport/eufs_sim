@@ -2,23 +2,31 @@
 
 namespace eufs
 {
-
-  void PointMass::updateState(State &state, Input &input, const double dt)
+  namespace models
   {
-    state.a_x = input.acc * std::cos(input.delta);
-    state.a_y = input.acc * std::sin(input.delta);
+    PointMass::PointMass(std::string &yaml_file) : VehicleModel(yaml_file) {}
 
-    State x_dot{};
+    void PointMass::updateState(State &state, Input &input, const double dt)
+    {
+      _validateInput(input);
 
-    x_dot.x = state.v_x;
-    x_dot.y = state.v_y;
+      state.a_x = input.acc * std::cos(input.delta);
+      state.a_y = input.acc * std::sin(input.delta);
 
-    x_dot.v_x = state.a_x;
-    x_dot.v_y = state.a_y;
+      State x_dot{};
 
-    state = state + (x_dot * dt);
+      x_dot.x = state.v_x;
+      x_dot.y = state.v_y;
 
-    state.yaw = std::atan2(state.v_y, state.v_x);
-  }
+      x_dot.v_x = state.a_x;
+      x_dot.v_y = state.a_y;
 
+      state = state + (x_dot * dt);
+
+      state.yaw = std::atan2(state.v_y, state.v_x);
+
+      _validateState(state);
+    }
+
+  } // namespace models
 } // namespace eufs

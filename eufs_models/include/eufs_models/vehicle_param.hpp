@@ -29,83 +29,86 @@
 
 namespace eufs
 {
-
-    struct Param
+    namespace models
     {
-        Param(){};
-        Param(std::string &yaml_file)
-        {
-            YAML::Node config = YAML::LoadFile(yaml_file);
 
-            inertia = config["inertia"].as<Param::Inertia>();
-            kinematic = config["kinematics"].as<Param::Kinematic>();
-            tire = config["tire"].as<Param::Tire>();
-            aero = config["aero"].as<Param::Aero>();
-            input_ranges = config["input_ranges"].as<Param::InputRanges>();
-        }
-
-        struct Inertia
+        struct Param
         {
-            double m;
-            double g;
-            double I_z;
-        };
-
-        struct Kinematic
-        {
-            double l;
-            double b_F;
-            double b_R;
-            double w_front;
-            double l_F;
-            double l_R;
-            double axle_width;
-        };
-
-        struct Tire
-        {
-            double tire_coefficient;
-            double B;
-            double C;
-            double D;
-            double E;
-            double radius;
-        };
-
-        struct Aero
-        {
-            double c_down;
-            double c_drag;
-        };
-
-        struct InputRanges
-        {
-            struct Range
+            Param(){};
+            Param(std::string &yaml_file)
             {
-                double min;
-                double max;
+                YAML::Node config = YAML::LoadFile(yaml_file);
+
+                inertia = config["inertia"].as<Param::Inertia>();
+                kinematic = config["kinematics"].as<Param::Kinematic>();
+                tire = config["tire"].as<Param::Tire>();
+                aero = config["aero"].as<Param::Aero>();
+                input_ranges = config["input_ranges"].as<Param::InputRanges>();
+            }
+
+            struct Inertia
+            {
+                double m;
+                double g;
+                double I_z;
             };
 
-            Range acc;
-            Range vel;
-            Range delta;
+            struct Kinematic
+            {
+                double l;
+                double b_F;
+                double b_R;
+                double w_front;
+                double l_F;
+                double l_R;
+                double axle_width;
+            };
+
+            struct Tire
+            {
+                double tire_coefficient;
+                double B;
+                double C;
+                double D;
+                double E;
+                double radius;
+            };
+
+            struct Aero
+            {
+                double c_down;
+                double c_drag;
+            };
+
+            struct InputRanges
+            {
+                struct Range
+                {
+                    double min;
+                    double max;
+                };
+
+                Range acc;
+                Range vel;
+                Range delta;
+            };
+
+            Inertia inertia;
+            Kinematic kinematic;
+            Tire tire;
+            Aero aero;
+            InputRanges input_ranges;
         };
 
-        Inertia inertia;
-        Kinematic kinematic;
-        Tire tire;
-        Aero aero;
-        InputRanges input_ranges;
-    };
-
+    } // namespace models
 } // namespace eufs
 
 namespace YAML
 {
     template <>
-    struct convert<eufs::Param::Inertia>
+    struct convert<eufs::models::Param::Inertia>
     {
-        static bool decode(const Node &node, eufs::Param::Inertia &cType)
+        static bool decode(const Node &node, eufs::models::Param::Inertia &cType)
         {
             cType.m = node["m"].as<double>();
             cType.g = node["g"].as<double>();
@@ -115,9 +118,9 @@ namespace YAML
     };
 
     template <>
-    struct convert<eufs::Param::Kinematic>
+    struct convert<eufs::models::Param::Kinematic>
     {
-        static bool decode(const Node &node, eufs::Param::Kinematic &cType)
+        static bool decode(const Node &node, eufs::models::Param::Kinematic &cType)
         {
             cType.l = node["l"].as<double>();
             cType.b_F = node["b_F"].as<double>();
@@ -131,9 +134,9 @@ namespace YAML
     };
 
     template <>
-    struct convert<eufs::Param::Tire>
+    struct convert<eufs::models::Param::Tire>
     {
-        static bool decode(const Node &node, eufs::Param::Tire &cType)
+        static bool decode(const Node &node, eufs::models::Param::Tire &cType)
         {
             cType.tire_coefficient = node["tire_coefficient"].as<double>();
             cType.B = node["B"].as<double>() / cType.tire_coefficient;
@@ -146,9 +149,9 @@ namespace YAML
     };
 
     template <>
-    struct convert<eufs::Param::Aero>
+    struct convert<eufs::models::Param::Aero>
     {
-        static bool decode(const Node &node, eufs::Param::Aero &cType)
+        static bool decode(const Node &node, eufs::models::Param::Aero &cType)
         {
             cType.c_down = node["C_Down"].as<double>();
             cType.c_drag = node["C_drag"].as<double>();
@@ -157,9 +160,9 @@ namespace YAML
     };
 
     template <>
-    struct convert<eufs::Param::InputRanges>
+    struct convert<eufs::models::Param::InputRanges>
     {
-        static bool decode(const Node &node, eufs::Param::InputRanges &cType)
+        static bool decode(const Node &node, eufs::models::Param::InputRanges &cType)
         {
             cType.acc.min = node["acceleration"]["min"].as<double>();
             cType.acc.max = node["acceleration"]["max"].as<double>();

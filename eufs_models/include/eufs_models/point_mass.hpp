@@ -5,16 +5,17 @@
 
 namespace eufs
 {
-
-  class PointMass : public VehicleModel
+  namespace models
   {
-  public:
-    PointMass(Param &param) : VehicleModel(param){};
-    PointMass(std::string &yaml_file) : VehicleModel(yaml_file){};
 
-    void updateState(State &state, Input &input, const double dt) override;
-  };
+    class PointMass : public VehicleModel
+    {
+    public:
+      PointMass(std::string &yaml_file);
 
-}
+      void updateState(State &state, Input &input, const double dt);
+    };
 
+  } // namespace models
+} // namespace eufs
 #endif // EUFS_POINT_MASS_MODEL_HPP

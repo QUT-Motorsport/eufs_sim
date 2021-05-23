@@ -44,7 +44,6 @@ find_package(yaml-cpp REQUIRED)
 find_package(eufs_models REQUIRED)
 
 link_directories(${gazebo_dev_LIBRARY_DIRS} ${YAML_CPP_INCLUDEDIR})
-link_libraries(eufs_models::eufs_models)
 
 option(ENABLE_PROFILER "Enable Ignition Profiler" FALSE)
 if(ENABLE_PROFILER)

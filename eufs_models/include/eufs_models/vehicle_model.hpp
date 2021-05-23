@@ -1,34 +1,41 @@
 #ifndef EUFS_VEHICLE_MODEL_HPP
 #define EUFS_VEHICLE_MODEL_HPP
 
+#include <memory>
 #include "eufs_models/vehicle_input.hpp"
 #include "eufs_models/vehicle_param.hpp"
 #include "eufs_models/vehicle_state.hpp"
 
 namespace eufs
 {
-
-  class VehicleModel
+  namespace models
   {
-  public:
-    VehicleModel(Param &param) : _param(param){};
-    VehicleModel(std::string &yaml_file);
 
-    virtual void updateState(State &state, Input &input, const double dt);
+    class VehicleModel
+    {
+    public:
+      VehicleModel();
+      VehicleModel(std::string &yaml_file);
 
-    Param &getParam() { return _param; }
+      virtual void updateState(State &state, Input &input, const double dt) = 0;
 
-  protected:
-    Param _param;
-    unsigned seed = 0; // For the Gaussian Kernel random number generation
+      Param &getParam()
+      {
+        return _param;
+      }
 
-    void _validateInput(Input &input);
-    void _validateState(State &state);
-    double _gaussianKernel(double mu, double sigma);
-  };
+    protected:
+      Param _param;
+      unsigned seed = 0; // For the Gaussian Kernel random number generation
 
-  typedef std::unique_ptr<VehicleModel> VehicleModelPtr;
+      void _validateInput(Input &input);
+      void _validateState(State &state);
+      double _gaussianKernel(double mu, double sigma);
+    };
 
-}
+    typedef std::unique_ptr<VehicleModel> VehicleModelPtr;
+
+  } // namespace models
+} // namespace eufs
 
 #endif // EUFS_VEHICLE_MODEL_HPP
