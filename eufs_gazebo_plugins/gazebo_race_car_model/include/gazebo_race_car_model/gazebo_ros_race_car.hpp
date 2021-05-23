@@ -121,7 +121,6 @@ namespace gazebo_plugins
       // Gazebo
       gazebo::physics::WorldPtr world;
       gazebo::physics::ModelPtr model;
-      gazebo::transport::NodePtr gznode;
       gazebo::event::ConnectionPtr updateConnection;
       gazebo::common::Time lastSimTime;
       gazebo::transport::PublisherPtr worldControlPub;

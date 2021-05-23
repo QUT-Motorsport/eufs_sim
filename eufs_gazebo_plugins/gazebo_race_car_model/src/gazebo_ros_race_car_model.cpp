@@ -51,8 +51,8 @@ namespace gazebo_plugins
 
       this->model = _model;
       this->world = this->model->GetWorld();
-      this->gznode = gazebo::transport::NodePtr(new gazebo::transport::Node());
-      this->gznode->Init();
+      // this->gznode = gazebo::transport::NodePtr(new gazebo::transport::Node());
+      // this->gznode->Init();
 
       this->tf_br_ = std::make_unique<tf2_ros::TransformBroadcaster>(this->rosnode);
       this->state_machine_ = std::make_unique<StateMachine>(this->rosnode);
@@ -82,7 +82,6 @@ namespace gazebo_plugins
       // Connect to Gazebo
       this->updateConnection =
           gazebo::event::Events::ConnectWorldUpdateBegin(std::bind(&RaceCarModelPlugin::update, this));
-      this->worldControlPub = this->gznode->Advertise<gazebo::msgs::WorldControl>("~/world_control");
       this->lastSimTime = this->world->SimTime();
 
       // Set offset
