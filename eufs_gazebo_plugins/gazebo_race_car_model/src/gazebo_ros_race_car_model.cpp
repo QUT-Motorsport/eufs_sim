@@ -51,8 +51,6 @@ namespace gazebo_plugins
 
       this->model = _model;
       this->world = this->model->GetWorld();
-      // this->gznode = gazebo::transport::NodePtr(new gazebo::transport::Node());
-      // this->gznode->Init();
 
       this->tf_br_ = std::make_unique<tf2_ros::TransformBroadcaster>(this->rosnode);
       this->state_machine_ = std::make_unique<StateMachine>(this->rosnode);
