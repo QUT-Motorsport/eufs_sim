@@ -16,7 +16,6 @@ namespace eufs
       void updateState(State &state, Input &input, const double dt);
 
     private:
-      double _getSlipAngle(const State &x, const Input &u, bool isFront);
       State _f(const State &x, const Input &u, const double Fx, const double FyF, const double FyR);
       State _f_kin_correction(const State &x_in, const State &x_state, const Input &u, const double Fx, const double dt);
       double _getFx(const State &x, const Input &u);

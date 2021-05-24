@@ -401,7 +401,7 @@ namespace gazebo_plugins
       car_state.linear_acceleration.y = state.a_y;
       car_state.linear_acceleration.z = state.a_z;
 
-      car_state.slip_angle = state.slip_angle;
+      car_state.slip_angle = this->vehicle->getSlipAngle(this->state_, this->input_, true);
 
       car_state.state_of_charge = 999;
 

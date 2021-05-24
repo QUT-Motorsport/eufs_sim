@@ -24,6 +24,8 @@ namespace eufs
       void validateInput(Input &input);
       void validateState(State &state);
 
+      double getSlipAngle(const State &x, const Input &u, bool isFront);
+
     protected:
       Param _param;
     };

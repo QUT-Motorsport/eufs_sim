@@ -27,8 +27,7 @@ namespace eufs
             dt * r_z,
             dt * a_x,
             dt * a_y,
-            dt * a_z,
-            0}; // multiplication invalidates slip angle
+            dt * a_z};
       }
 
       State operator+(const State &x2) const
@@ -46,8 +45,7 @@ namespace eufs
             r_z + x2.r_z,
             a_x + x2.a_x,
             a_y + x2.a_y,
-            a_z + x2.a_z,
-            0}; // Addition invalidates slip angle
+            a_z + x2.a_z};
       }
 
       inline std::string getString() const
@@ -81,7 +79,6 @@ namespace eufs
       double a_x;
       double a_y;
       double a_z;
-      double slip_angle;
     };
 
   } // namespace models

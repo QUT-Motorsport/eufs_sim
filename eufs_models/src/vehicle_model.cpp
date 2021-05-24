@@ -27,5 +27,19 @@ namespace eufs
       input.vel = std::fmin(std::fmax(input.vel, min_vel), max_vel);
       input.delta = std::fmin(std::fmax(input.delta, min_delta), max_delta);
     }
+
+    double VehicleModel::getSlipAngle(const State &x, const Input &u, bool isFront)
+    {
+      double lever_arm_length_ = _param.kinematic.l * _param.kinematic.w_front;
+
+      if (!isFront)
+      {
+        double v_x = std::max(1.0, x.v_x);
+        return std::atan((x.v_y - lever_arm_length_ * x.r_z) / (v_x - 0.5 * _param.kinematic.axle_width * x.r_z));
+      }
+
+      double v_x = std::max(1.0, x.v_x);
+      return std::atan((x.v_y + lever_arm_length_ * x.r_z) / (v_x - 0.5 * _param.kinematic.axle_width * x.r_z)) - u.delta;
+    }
   } // namespace models
 } // namespace eufs
