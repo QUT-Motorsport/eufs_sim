@@ -19,18 +19,13 @@ namespace eufs
 
       virtual void updateState(State &state, Input &input, const double dt) = 0;
 
-      Param &getParam()
-      {
-        return _param;
-      }
+      Param &getParam() { return _param; }
+
+      void validateInput(Input &input);
+      void validateState(State &state);
 
     protected:
       Param _param;
-      unsigned seed = 0; // For the Gaussian Kernel random number generation
-
-      void _validateInput(Input &input);
-      void _validateState(State &state);
-      double _gaussianKernel(double mu, double sigma);
     };
 
     typedef std::unique_ptr<VehicleModel> VehicleModelPtr;

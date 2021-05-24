@@ -57,9 +57,7 @@
 
 // EUFS includes
 #include "state_machine.hpp"
-#include "eufs_models/vehicle_model.hpp"
-#include "eufs_models/dynamic_bicycle.hpp"
-#include "eufs_models/point_mass.hpp"
+#include "eufs_models/eufs_models.hpp"
 
 namespace gazebo_plugins
 {
@@ -83,10 +81,12 @@ namespace gazebo_plugins
     private:
       void update();
       void updateState(double dt, gazebo::common::Time current_time);
+      eufs_msgs::msg::CarState StateToCarStateMsg(const eufs::models::State &state);
 
       void InitVehicleModel(const sdf::ElementPtr &sdf);
       void InitParams(const sdf::ElementPtr &sdf);
-      void InitModel(const sdf::ElementPtr &sdf);
+      void InitModel(const sdf::ElementPtr &_sdf);
+      void InitNoise(const sdf::ElementPtr &sdf);
 
       void publishCarState();
       void publishWheelSpeeds();
@@ -97,12 +97,6 @@ namespace gazebo_plugins
 
       /// @brief Converts an euler orientation to quaternion
       std::vector<double> ToQuaternion(std::vector<double> &euler);
-
-      double getSlipAngle(bool isFront = true);
-
-      // Gaussian Kernel for random number generation
-      unsigned int seed = 0;
-      double GaussianKernel(double mu, double sigma);
 
       std::shared_ptr<rclcpp::Node> rosnode;
       eufs::models::VehicleModelPtr vehicle;
@@ -115,6 +109,7 @@ namespace gazebo_plugins
       std::unique_ptr<StateMachine> state_machine_;
       eufs::models::State state_;
       eufs::models::Input input_;
+      std::unique_ptr<eufs::models::Noise> noise_;
       double time_last_cmd_;
       ignition::math::Pose3d offset_;
 
@@ -157,13 +152,6 @@ namespace gazebo_plugins
       bool publish_tf_;
       std::string reference_frame_;
       std::string robot_frame_;
-
-      // Noise parameters
-      std::vector<double> position_noise_;
-      std::vector<double> orientation_noise_;
-      std::vector<double> linear_velocity_noise_;
-      std::vector<double> angular_velocity_noise_;
-      std::vector<double> linear_acceleration_noise_;
 
       // Steering jointsState
       gazebo::physics::JointPtr left_steering_joint;

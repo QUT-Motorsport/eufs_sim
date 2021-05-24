@@ -1,6 +1,7 @@
 #ifndef EUFS_MODELS_HPP
 #define EUFS_MODELS_HPP
 
+#include "eufs_models/noise.hpp"
 #include "eufs_models/vehicle_input.hpp"
 #include "eufs_models/vehicle_param.hpp"
 #include "eufs_models/vehicle_state.hpp"

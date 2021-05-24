@@ -8,7 +8,7 @@ namespace eufs
 
     void DynamicBicycle::updateState(State &state, Input &input, const double dt)
     {
-      _validateInput(input);
+      validateInput(input);
 
       double Fz = _getNormalForce(state);
 
@@ -30,7 +30,7 @@ namespace eufs
       state.a_y = x_dot_dyn.v_y;
       state.slip_angle = slipAngleFront;
 
-      _validateState(state);
+      validateState(state);
     }
 
     double DynamicBicycle::_getSlipAngle(const State &x, const Input &u, bool isFront)
@@ -40,11 +40,11 @@ namespace eufs
       if (!isFront)
       {
         double v_x = std::max(1.0, x.v_x);
-        return std::atan((x.v_y - lever_arm_length_ * x.r) / (v_x - 0.5 * _param.kinematic.axle_width * x.r));
+        return std::atan((x.v_y - lever_arm_length_ * x.r_z) / (v_x - 0.5 * _param.kinematic.axle_width * x.r_z));
       }
 
       double v_x = std::max(1.0, x.v_x);
-      return std::atan((x.v_y + lever_arm_length_ * x.r) / (v_x - 0.5 * _param.kinematic.axle_width * x.r)) - u.delta;
+      return std::atan((x.v_y + lever_arm_length_ * x.r_z) / (v_x - 0.5 * _param.kinematic.axle_width * x.r_z)) - u.delta;
     }
 
     State DynamicBicycle::_f(const State &x, const Input &u, const double Fx, const double FyF, const double FyR)
@@ -56,13 +56,18 @@ namespace eufs
       State x_dot{};
       x_dot.x = std::cos(x.yaw) * x.v_x - std::sin(x.yaw) * x.v_y;
       x_dot.y = std::sin(x.yaw) * x.v_x + std::cos(x.yaw) * x.v_y;
-      x_dot.yaw = x.r;
-      x_dot.v_x = (x.r * x.v_y) + (Fx - std::sin(u.delta) * FyF_tot) / _param.inertia.m;
-      x_dot.v_y = ((std::cos(u.delta) * FyF_tot) + FyR_tot) / _param.inertia.m - (x.r * v_x);
-      x_dot.r = (std::cos(u.delta) * FyF_tot * _param.kinematic.l_F - FyR_tot * _param.kinematic.l_R) / _param.inertia.I_z;
+      x_dot.z = 0;
+      x_dot.yaw = x.r_z;
+      x_dot.v_x = (x.r_z * x.v_y) + (Fx - std::sin(u.delta) * FyF_tot) / _param.inertia.m;
+      x_dot.v_y = ((std::cos(u.delta) * FyF_tot) + FyR_tot) / _param.inertia.m - (x.r_z * v_x);
+      x_dot.v_z = 0;
+      x_dot.r_x = 0;
+      x_dot.r_y = 0;
+      x_dot.r_z = (std::cos(u.delta) * FyF_tot * _param.kinematic.l_F - FyR_tot * _param.kinematic.l_R) / _param.inertia.I_z;
 
       x_dot.a_x = 0;
       x_dot.a_y = 0;
+      x_dot.a_z = 0;
 
       return x_dot;
     }
@@ -81,7 +86,7 @@ namespace eufs
       const double r = std::tan(u.delta) * x.v_x / _param.kinematic.l;
 
       x.v_y = blend * x.v_y + (1.0 - blend) * v_y;
-      x.r = blend * x.r + (1.0 - blend) * r;
+      x.r_z = blend * x.r_z + (1.0 - blend) * r;
       return x;
     }
 

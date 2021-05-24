@@ -27,6 +27,7 @@ def spawn_car(context, *args, **kwargs):
 
     simulate_perception = 'true' if launch_group == 'no_perception' else 'false'
     config_file = str(os.path.join(get_package_share_directory('eufs_description'), 'robots', robot_name, 'config.yaml'))
+    noise_file = str(os.path.join(get_package_share_directory('eufs_models'), 'config', 'noise.yaml'))
 
     xacro_path = os.path.join(get_package_share_directory('eufs_description'), 'robots', robot_name, 'robot.urdf.xacro')
     urdf_path = os.path.join(get_package_share_directory('eufs_description'), 'robots', robot_name, 'robot.urdf')
@@ -40,6 +41,7 @@ def spawn_car(context, *args, **kwargs):
                                  'vehicle_model': vehicle_model,
                                  'command_mode': command_mode,
                                  'config_file': config_file,
+                                 'noise_config': noise_file,
                                  'publish_tf': publish_tf,
                                  'simulate_perception': simulate_perception
                              })

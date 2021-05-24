@@ -57,3 +57,6 @@ ament_package()
 
 install(FILES models.txt
   DESTINATION share/eufs_models/models)
+
+install(FILES config/noise.yaml
+  DESTINATION share/eufs_models/config)

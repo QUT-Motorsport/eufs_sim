@@ -8,7 +8,7 @@ namespace eufs
 
     void PointMass::updateState(State &state, Input &input, const double dt)
     {
-      _validateInput(input);
+      validateInput(input);
 
       state.a_x = input.acc * std::cos(input.delta);
       state.a_y = input.acc * std::sin(input.delta);
@@ -25,7 +25,7 @@ namespace eufs
 
       state.yaw = std::atan2(state.v_y, state.v_x);
 
-      _validateState(state);
+      validateState(state);
     }
 
   } // namespace models

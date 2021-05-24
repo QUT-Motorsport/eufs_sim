@@ -64,6 +64,9 @@ namespace gazebo_plugins
       // Initialize handles to Gazebo vehicle components
       InitModel(_sdf);
 
+      // Initialize noise object
+      InitNoise(_sdf);
+
       // ROS Publishers
       this->pub_ground_truth_car_state_ = rosnode->create_publisher<eufs_msgs::msg::CarState>(this->ground_truth_car_state_topic_, 1);
       this->pub_localisation_car_state_ = rosnode->create_publisher<eufs_msgs::msg::CarState>(this->localisation_car_state_topic_, 1);
@@ -189,86 +192,6 @@ namespace gazebo_plugins
         this->odom_topic_name_ = sdf->GetElement("odometryTopicName")->Get<std::string>();
       }
 
-      if (!sdf->HasElement("positionNoise"))
-      {
-        RCLCPP_DEBUG(this->rosnode->get_logger(), "gazebo_ros_race_car_model plugin missing <positionNoise>, defaults to 0.0, 0.0, 0.0");
-        this->position_noise_ = {0.0, 0.0, 0.0};
-      }
-      else
-      {
-        auto temp = sdf->GetElement("positionNoise")->Get<ignition::math::Vector3d>();
-        this->position_noise_ = {temp.X(), temp.Y(), temp.Z()};
-      }
-
-      if (this->position_noise_.size() != 3)
-      {
-        RCLCPP_FATAL(this->rosnode->get_logger(), "positionNoise parameter vector is not of size 3");
-      }
-
-      if (!sdf->HasElement("orientationNoise"))
-      {
-        RCLCPP_DEBUG(this->rosnode->get_logger(), "gazebo_ros_race_car_model plugin missing <orientationNoise>, defaults to 0.0, 0.0, 0.0");
-        this->orientation_noise_ = {0.0, 0.0, 0.0};
-      }
-      else
-      {
-        auto temp = sdf->GetElement("orientationNoise")->Get<ignition::math::Vector3d>();
-        this->orientation_noise_ = {temp.X(), temp.Y(), temp.Z()};
-      }
-
-      if (this->orientation_noise_.size() != 3)
-      {
-        RCLCPP_FATAL(this->rosnode->get_logger(), "orientationNoise parameter vector is not of size 3");
-      }
-
-      if (!sdf->HasElement("linearVelocityNoise"))
-      {
-        RCLCPP_DEBUG(this->rosnode->get_logger(), "gazebo_ros_race_car_model plugin missing <linearVelocityNoise>, defaults to 0.0, 0.0, 0.0");
-        this->linear_velocity_noise_ = {0.0, 0.0, 0.0};
-      }
-      else
-      {
-        auto temp = sdf->GetElement("linearVelocityNoise")->Get<ignition::math::Vector3d>();
-        this->linear_velocity_noise_ = {temp.X(), temp.Y(), temp.Z()};
-      }
-
-      if (this->linear_velocity_noise_.size() != 3)
-      {
-        RCLCPP_FATAL(this->rosnode->get_logger(), "linearVelocityNoise parameter vector is not of size 3");
-      }
-
-      if (!sdf->HasElement("angularVelocityNoise"))
-      {
-        RCLCPP_DEBUG(this->rosnode->get_logger(), "gazebo_ros_race_car_model plugin missing <angularVelocityNoise>, defaults to 0.0, 0.0, 0.0");
-        this->angular_velocity_noise_ = {0.0, 0.0, 0.0};
-      }
-      else
-      {
-        auto temp = sdf->GetElement("angularVelocityNoise")->Get<ignition::math::Vector3d>();
-        this->angular_velocity_noise_ = {temp.X(), temp.Y(), temp.Z()};
-      }
-
-      if (this->angular_velocity_noise_.size() != 3)
-      {
-        RCLCPP_FATAL(this->rosnode->get_logger(), "angularVelocityNoise parameter vector is not of size 3");
-      }
-
-      if (!sdf->HasElement("linearAccelerationNoise"))
-      {
-        RCLCPP_DEBUG(this->rosnode->get_logger(), "gazebo_ros_race_car_model plugin missing <linearAccelerationNoise>, defaults to 0.0, 0.0, 0.0");
-        this->linear_acceleration_noise_ = {0.0, 0.0, 0.0};
-      }
-      else
-      {
-        auto temp = sdf->GetElement("linearAccelerationNoise")->Get<ignition::math::Vector3d>();
-        this->linear_acceleration_noise_ = {temp.X(), temp.Y(), temp.Z()};
-      }
-
-      if (this->linear_acceleration_noise_.size() != 3)
-      {
-        RCLCPP_FATAL(this->rosnode->get_logger(), "linearAccelerationNoise parameter vector is not of size 3");
-      }
-
       if (!sdf->HasElement("commandMode"))
       {
         RCLCPP_DEBUG(this->rosnode->get_logger(), "gazebo_ros_race_car_model plugin missing <commandMode>, defaults to acceleration");
@@ -355,6 +278,24 @@ namespace gazebo_plugins
       rear_right_wheel = model->GetJoint(rearRightWheelName);
     }
 
+    void RaceCarModelPlugin::InitNoise(const sdf::ElementPtr &sdf)
+    {
+      std::string yaml_name = "";
+      if (!sdf->HasElement("noise_config"))
+      {
+        RCLCPP_FATAL(this->rosnode->get_logger(), "gazebo_ros_race_car_model plugin missing <noise_config>, cannot proceed");
+        return;
+      }
+      else
+      {
+        yaml_name = sdf->GetElement("noise_config")->Get<std::string>();
+      }
+
+      // Create noise object
+      this->noise_ = std::make_unique<eufs::models::Noise>(yaml_name);
+      RCLCPP_INFO(this->rosnode->get_logger(), this->noise_->getString());
+    }
+
     void RaceCarModelPlugin::setPositionFromWorld()
     {
       offset_ = model->WorldPose();
@@ -367,24 +308,34 @@ namespace gazebo_plugins
 
       state_.x = 0.0;
       state_.y = 0.0;
+      state_.z = 0.0;
       state_.yaw = 0.0;
       state_.v_x = 0.0;
       state_.v_y = 0.0;
-      state_.r = 0.0;
+      state_.v_z = 0.0;
+      state_.r_x = 0.0;
+      state_.r_y = 0.0;
+      state_.r_z = 0.0;
       state_.a_x = 0.0;
       state_.a_y = 0.0;
+      state_.a_z = 0.0;
     }
 
     bool RaceCarModelPlugin::resetVehiclePosition(std::shared_ptr<std_srvs::srv::Trigger::Request>, std::shared_ptr<std_srvs::srv::Trigger::Response> response)
     {
       state_.x = 0.0;
       state_.y = 0.0;
+      state_.z = 0.0;
       state_.yaw = 0.0;
       state_.v_x = 0.0;
       state_.v_y = 0.0;
-      state_.r = 0.0;
+      state_.v_z = 0.0;
+      state_.r_x = 0.0;
+      state_.r_y = 0.0;
+      state_.r_z = 0.0;
       state_.a_x = 0.0;
       state_.a_y = 0.0;
+      state_.a_z = 0.0;
 
       const ignition::math::Vector3d vel(0.0, 0.0, 0.0);
       const ignition::math::Vector3d angular(0.0, 0.0, 0.0);
@@ -402,21 +353,21 @@ namespace gazebo_plugins
 
       double x = offset_.Pos().X() + state_.x * cos(offset_.Rot().Yaw()) - state_.y * sin(offset_.Rot().Yaw());
       double y = offset_.Pos().Y() + state_.x * sin(offset_.Rot().Yaw()) + state_.y * cos(offset_.Rot().Yaw());
-      double z = model->WorldPose().Pos().Z();
+      double z = state_.z;
 
       double vx = state_.v_x * cos(yaw) - state_.v_y * sin(yaw);
       double vy = state_.v_x * sin(yaw) + state_.v_y * cos(yaw);
 
       const ignition::math::Pose3d pose(x, y, z, 0, 0.0, yaw);
       const ignition::math::Vector3d vel(vx, vy, 0.0);
-      const ignition::math::Vector3d angular(0.0, 0.0, state_.r);
+      const ignition::math::Vector3d angular(0.0, 0.0, state_.r_z);
 
       model->SetWorldPose(pose);
       model->SetAngularVel(angular);
       model->SetLinearVel(vel);
     }
 
-    void RaceCarModelPlugin::publishCarState()
+    eufs_msgs::msg::CarState RaceCarModelPlugin::StateToCarStateMsg(const eufs::models::State &state)
     {
       // Publish Car Info
       eufs_msgs::msg::CarState car_state;
@@ -425,13 +376,11 @@ namespace gazebo_plugins
       car_state.header.frame_id = this->reference_frame_;
       car_state.child_frame_id = this->robot_frame_;
 
-      double z = model->WorldPose().Pos().Z();
+      car_state.pose.pose.position.x = state.x;
+      car_state.pose.pose.position.y = state.y;
+      car_state.pose.pose.position.z = state.z;
 
-      car_state.pose.pose.position.x = this->state_.x;
-      car_state.pose.pose.position.y = this->state_.y;
-      car_state.pose.pose.position.z = z;
-
-      std::vector<double> orientation = {state_.yaw, 0.0, 0.0};
+      std::vector<double> orientation = {state.yaw, 0.0, 0.0};
 
       orientation = this->ToQuaternion(orientation);
 
@@ -440,20 +389,28 @@ namespace gazebo_plugins
       car_state.pose.pose.orientation.z = orientation[2];
       car_state.pose.pose.orientation.w = orientation[3];
 
-      car_state.twist.twist.linear.x = state_.v_x;
-      car_state.twist.twist.linear.y = state_.v_y;
-      car_state.twist.twist.linear.z = 0;
-      car_state.twist.twist.angular.x = 0;
-      car_state.twist.twist.angular.y = 0;
-      car_state.twist.twist.angular.z = state_.r;
+      car_state.twist.twist.linear.x = state.v_x;
+      car_state.twist.twist.linear.y = state.v_y;
+      car_state.twist.twist.linear.z = state.v_z;
 
-      car_state.linear_acceleration.x = state_.a_x;
-      car_state.linear_acceleration.y = state_.a_y;
-      car_state.linear_acceleration.z = 0;
+      car_state.twist.twist.angular.x = state.r_x;
+      car_state.twist.twist.angular.y = state.r_y;
+      car_state.twist.twist.angular.z = state.r_z;
 
-      car_state.slip_angle = state_.slip_angle;
+      car_state.linear_acceleration.x = state.a_x;
+      car_state.linear_acceleration.y = state.a_y;
+      car_state.linear_acceleration.z = state.a_z;
+
+      car_state.slip_angle = state.slip_angle;
 
       car_state.state_of_charge = 999;
+
+      return car_state;
+    }
+
+    void RaceCarModelPlugin::publishCarState()
+    {
+      eufs_msgs::msg::CarState car_state = StateToCarStateMsg(this->state_);
 
       // Publish ground_truth
       if (this->pub_ground_truth_car_state_->get_subscription_count() > 0)
@@ -462,58 +419,35 @@ namespace gazebo_plugins
       }
 
       // Add noise
-      car_state.pose.pose.position.x += this->GaussianKernel(0, this->position_noise_[0]);
-      car_state.pose.pose.position.y += this->GaussianKernel(0, this->position_noise_[1]);
-      car_state.pose.pose.position.z += this->GaussianKernel(0, this->position_noise_[2]);
-
-      // Reset orientation
-      orientation = {state_.yaw, 0.0, 0.0};
-
-      orientation[0] += this->GaussianKernel(0, this->orientation_noise_[0]);
-      orientation[1] += this->GaussianKernel(0, this->orientation_noise_[1]);
-      orientation[2] += this->GaussianKernel(0, this->orientation_noise_[2]);
-
-      orientation = this->ToQuaternion(orientation);
-
-      car_state.pose.pose.orientation.x = orientation[0];
-      car_state.pose.pose.orientation.y = orientation[1];
-      car_state.pose.pose.orientation.z = orientation[2];
-      car_state.pose.pose.orientation.w = orientation[3];
-
-      car_state.twist.twist.linear.x += this->GaussianKernel(0, this->linear_velocity_noise_[0]);
-      car_state.twist.twist.linear.y += this->GaussianKernel(0, this->linear_velocity_noise_[1]);
-      car_state.twist.twist.linear.z += this->GaussianKernel(0, this->linear_velocity_noise_[2]);
-      car_state.twist.twist.angular.x += this->GaussianKernel(0, this->angular_velocity_noise_[0]);
-      car_state.twist.twist.angular.y += this->GaussianKernel(0, this->angular_velocity_noise_[1]);
-      car_state.twist.twist.angular.z += this->GaussianKernel(0, this->angular_velocity_noise_[2]);
+      eufs::models::State state_noisy = this->noise_->ApplyNoise(this->state_);
+      eufs_msgs::msg::CarState car_state_noisy = StateToCarStateMsg(state_noisy);
 
       // Fill in covariance matrix
-      car_state.pose.covariance[0] = pow(this->position_noise_[0], 2);
-      car_state.pose.covariance[7] = pow(this->position_noise_[1], 2);
-      car_state.pose.covariance[14] = pow(this->position_noise_[2], 2);
-      car_state.pose.covariance[21] = pow(this->orientation_noise_[0], 2);
-      car_state.pose.covariance[28] = pow(this->orientation_noise_[1], 2);
-      car_state.pose.covariance[35] = pow(this->orientation_noise_[2], 2);
+      const eufs::models::NoiseParam &noise_param = this->noise_->getNoiseParam();
+      car_state_noisy.pose.covariance[0] = pow(noise_param.position[0], 2);
+      car_state_noisy.pose.covariance[7] = pow(noise_param.position[1], 2);
+      car_state_noisy.pose.covariance[14] = pow(noise_param.position[2], 2);
 
-      car_state.twist.covariance[0] = pow(this->linear_velocity_noise_[0], 2);
-      car_state.twist.covariance[7] = pow(this->linear_velocity_noise_[1], 2);
-      car_state.twist.covariance[14] = pow(this->linear_velocity_noise_[2], 2);
-      car_state.twist.covariance[21] = pow(this->angular_velocity_noise_[0], 2);
-      car_state.twist.covariance[28] = pow(this->angular_velocity_noise_[1], 2);
-      car_state.twist.covariance[35] = pow(this->angular_velocity_noise_[2], 2);
+      car_state_noisy.pose.covariance[21] = pow(noise_param.orientation[0], 2);
+      car_state_noisy.pose.covariance[28] = pow(noise_param.orientation[1], 2);
+      car_state_noisy.pose.covariance[35] = pow(noise_param.orientation[2], 2);
 
-      car_state.linear_acceleration.x += this->GaussianKernel(0, this->linear_acceleration_noise_[0]);
-      car_state.linear_acceleration.y += this->GaussianKernel(0, this->linear_acceleration_noise_[1]);
-      car_state.linear_acceleration.z += this->GaussianKernel(0, this->linear_acceleration_noise_[2]);
+      car_state_noisy.twist.covariance[0] = pow(noise_param.linearVelocity[0], 2);
+      car_state_noisy.twist.covariance[7] = pow(noise_param.linearVelocity[1], 2);
+      car_state_noisy.twist.covariance[14] = pow(noise_param.linearVelocity[2], 2);
 
-      car_state.linear_acceleration_covariance[0] = pow(this->linear_acceleration_noise_[0], 2);
-      car_state.linear_acceleration_covariance[4] = pow(this->linear_acceleration_noise_[1], 2);
-      car_state.linear_acceleration_covariance[8] = pow(this->linear_acceleration_noise_[2], 2);
+      car_state_noisy.twist.covariance[21] = pow(noise_param.angularVelocity[0], 2);
+      car_state_noisy.twist.covariance[28] = pow(noise_param.angularVelocity[1], 2);
+      car_state_noisy.twist.covariance[35] = pow(noise_param.angularVelocity[2], 2);
+
+      car_state_noisy.linear_acceleration_covariance[0] = pow(noise_param.linearAcceleration[0], 2);
+      car_state_noisy.linear_acceleration_covariance[4] = pow(noise_param.linearAcceleration[1], 2);
+      car_state_noisy.linear_acceleration_covariance[8] = pow(noise_param.linearAcceleration[2], 2);
 
       // Publish with noise
       if (this->pub_localisation_car_state_->get_subscription_count() > 0)
       {
-        this->pub_localisation_car_state_->publish(car_state);
+        this->pub_localisation_car_state_->publish(car_state_noisy);
       }
     }
 
@@ -560,46 +494,44 @@ namespace gazebo_plugins
       odom.header.frame_id = this->reference_frame_;
       odom.child_frame_id = this->robot_frame_;
 
-      double z = model->WorldPose().Pos().Z();
+      eufs::models::State state_noisy = this->noise_->ApplyNoise(this->state_);
 
-      odom.pose.pose.position.x = this->state_.x + this->GaussianKernel(0, this->position_noise_[0]);
-      odom.pose.pose.position.y = this->state_.y + this->GaussianKernel(0, this->position_noise_[1]);
-      odom.pose.pose.position.z = z + this->GaussianKernel(0, this->position_noise_[2]);
+      odom.pose.pose.position.x = state_noisy.x;
+      odom.pose.pose.position.y = state_noisy.y;
+      odom.pose.pose.position.z = state_noisy.z;
 
-      std::vector<double> orientation = {state_.yaw, 0.0, 0.0};
-
-      orientation[0] += this->GaussianKernel(0, this->orientation_noise_[0]);
-      orientation[1] += this->GaussianKernel(0, this->orientation_noise_[1]);
-      orientation[2] += this->GaussianKernel(0, this->orientation_noise_[2]);
-
+      std::vector<double> orientation = {state_noisy.yaw, 0.0, 0.0};
       orientation = this->ToQuaternion(orientation);
-
       odom.pose.pose.orientation.x = orientation[0];
       odom.pose.pose.orientation.y = orientation[1];
       odom.pose.pose.orientation.z = orientation[2];
       odom.pose.pose.orientation.w = orientation[3];
 
-      odom.twist.twist.linear.x = state_.v_x + this->GaussianKernel(0, this->linear_velocity_noise_[0]);
-      odom.twist.twist.linear.y = state_.v_y + this->GaussianKernel(0, this->linear_velocity_noise_[1]);
-      odom.twist.twist.linear.z = 0 + this->GaussianKernel(0, this->linear_velocity_noise_[2]);
-      odom.twist.twist.angular.x = 0 + this->GaussianKernel(0, this->angular_velocity_noise_[0]);
-      odom.twist.twist.angular.y = 0 + this->GaussianKernel(0, this->angular_velocity_noise_[1]);
-      odom.twist.twist.angular.z = state_.r + this->GaussianKernel(0, this->angular_velocity_noise_[2]);
+      odom.twist.twist.linear.x = state_noisy.v_x;
+      odom.twist.twist.linear.y = state_noisy.v_y;
+      odom.twist.twist.linear.z = state_noisy.v_z;
+
+      odom.twist.twist.angular.x = state_noisy.r_x;
+      odom.twist.twist.angular.y = state_noisy.r_y;
+      odom.twist.twist.angular.z = state_noisy.r_z;
 
       // fill in covariance matrix
-      odom.pose.covariance[0] = pow(this->position_noise_[0], 2);
-      odom.pose.covariance[7] = pow(this->position_noise_[1], 2);
-      odom.pose.covariance[14] = pow(this->position_noise_[2], 2);
-      odom.pose.covariance[21] = pow(this->orientation_noise_[0], 2);
-      odom.pose.covariance[28] = pow(this->orientation_noise_[1], 2);
-      odom.pose.covariance[35] = pow(this->orientation_noise_[2], 2);
+      const eufs::models::NoiseParam &noise_param = this->noise_->getNoiseParam();
+      odom.pose.covariance[0] = pow(noise_param.position[0], 2);
+      odom.pose.covariance[7] = pow(noise_param.position[1], 2);
+      odom.pose.covariance[14] = pow(noise_param.position[2], 2);
 
-      odom.twist.covariance[0] = pow(this->linear_velocity_noise_[0], 2);
-      odom.twist.covariance[7] = pow(this->linear_velocity_noise_[1], 2);
-      odom.twist.covariance[14] = pow(this->linear_velocity_noise_[2], 2);
-      odom.twist.covariance[21] = pow(this->angular_velocity_noise_[0], 2);
-      odom.twist.covariance[28] = pow(this->angular_velocity_noise_[1], 2);
-      odom.twist.covariance[35] = pow(this->angular_velocity_noise_[2], 2);
+      odom.pose.covariance[21] = pow(noise_param.orientation[0], 2);
+      odom.pose.covariance[28] = pow(noise_param.orientation[1], 2);
+      odom.pose.covariance[35] = pow(noise_param.orientation[2], 2);
+
+      odom.twist.covariance[0] = pow(noise_param.linearVelocity[0], 2);
+      odom.twist.covariance[7] = pow(noise_param.linearVelocity[1], 2);
+      odom.twist.covariance[14] = pow(noise_param.linearVelocity[2], 2);
+
+      odom.twist.covariance[21] = pow(noise_param.angularVelocity[0], 2);
+      odom.twist.covariance[28] = pow(noise_param.angularVelocity[1], 2);
+      odom.twist.covariance[35] = pow(noise_param.angularVelocity[2], 2);
 
       if (pub_odom_->get_subscription_count() > 0)
       {
@@ -609,15 +541,15 @@ namespace gazebo_plugins
 
     void RaceCarModelPlugin::publishTf()
     {
+      eufs::models::State state_noisy = this->noise_->ApplyNoise(this->state_);
+
       // Position
       tf2::Transform transform;
-      transform.setOrigin(tf2::Vector3(state_.x + this->GaussianKernel(0, this->position_noise_[0]),
-                                       state_.y + this->GaussianKernel(0, this->position_noise_[1]),
-                                       0.0));
+      transform.setOrigin(tf2::Vector3(state_noisy.x, state_noisy.y, 0.0));
 
       // Orientation
       tf2::Quaternion q;
-      q.setRPY(0.0, 0.0, state_.yaw + this->GaussianKernel(0, this->angular_velocity_noise_[2]));
+      q.setRPY(0.0, 0.0, state_noisy.yaw);
       transform.setRotation(q);
 
       // Send TF
@@ -645,6 +577,9 @@ namespace gazebo_plugins
         return;
       }
 
+      // Update z value from simulation
+      state_.z = model->WorldPose().Pos().Z();
+
       this->lastSimTime = curTime;
       updateState(dt, curTime.Double());
     }
@@ -656,6 +591,8 @@ namespace gazebo_plugins
         double current_speed = std::sqrt(std::pow(state_.v_x, 2) + std::pow(state_.v_y, 2));
         input_.acc = (input_.vel - current_speed) / dt;
       }
+
+      // If last command was more than 1s ago, then slow down car
       input_.acc = this->rosnode->now().seconds() - time_last_cmd_ < 1.0 ? input_.acc : -1.0;
 
       this->vehicle->updateState(state_, input_, dt);
@@ -695,11 +632,13 @@ namespace gazebo_plugins
       }
       else
       {
-        // TODO: Should  do something else to stop the car but is this good for now
+        // TODO: Should do something else to stop the car but is this good for now
         input_.delta = 0;
         input_.acc = -100;
         input_.vel = 0;
       }
+
+      this->vehicle->validateInput(input_);
 
       time_last_cmd_ = this->rosnode->now().seconds();
     }
@@ -722,28 +661,6 @@ namespace gazebo_plugins
       q[3] = cy * cp * cr + sy * sp * sr; // w
 
       return q;
-    }
-
-    double RaceCarModelPlugin::GaussianKernel(double mu, double sigma)
-    {
-      // using Box-Muller transform to generate two independent standard
-      // normally distributed normal variables see wikipedia
-
-      // normalized uniform random variable
-      double U = static_cast<double>(rand_r(&seed)) /
-                 static_cast<double>(RAND_MAX);
-
-      // normalized uniform random variable
-      double V = static_cast<double>(rand_r(&seed)) /
-                 static_cast<double>(RAND_MAX);
-
-      double X = sqrt(-2.0 * ::log(U)) * cos(2.0 * M_PI * V);
-      // double Y = sqrt(-2.0 * ::log(U)) * sin(2.0*M_PI * V);
-
-      // there are 2 indep. vars, we'll just use X
-      // scale to our mu and sigma
-      X = sigma * X + mu;
-      return X;
     }
 
     GZ_REGISTER_MODEL_PLUGIN(RaceCarModelPlugin)
