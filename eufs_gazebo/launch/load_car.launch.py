@@ -141,6 +141,7 @@ def generate_launch_description():
             arguments=['-d', rviz_config_file],
             condition=launch.conditions.IfCondition(launch.substitutions.LaunchConfiguration('rviz'))
         ),
+
         launch_ros.actions.Node(
             name='eufs_sim_rqt',
             package='rqt_gui', executable='rqt_gui', output='screen',

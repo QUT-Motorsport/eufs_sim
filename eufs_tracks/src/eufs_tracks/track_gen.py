@@ -38,7 +38,7 @@ class Track(Node):
 
         # Car data in the format of ("car_start", x, y, yaw)
         # It can be left as ("car_start", 0, 0, 0), only relevant when fed into track_gen through
-        # `eufs_launcher/ConversionTools`
+        # `eufs_tracks/ConversionTools`
         # as in that case it needs to preserve car data so that the conversion is fully bijective.
         self.car_start_data = ("car_start", 0.0, 0.0, 0.0)
 
@@ -727,8 +727,8 @@ class Track(Node):
         track.save_csv(os.path.join(get_package_share_directory('eufs_gazebo'), "tracks", out_name))
 
 if __name__ == "__main__":
-    # Just a heads up, you can run this with a gui by running the launcher:
-    # `roslaunch eufs_launcher eufs_launcher.launch`
+    # Just a heads up, you can run this with a gui by running the track_generator:
+    # `ros2 launch eufs_tracks eufs_track_generator.launch.py`
     # And using the "Conversion Tools" section.
     parser = argparse.ArgumentParser(description="Generates a CSV file of cone\
                                      locations based on the SDF Gazebo models")

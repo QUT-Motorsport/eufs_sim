@@ -48,7 +48,7 @@ You can also include it in your `.bashrc` file.
 Now you can finally run our kickass simulation!!
 
 ```bash
-roslaunch eufs_launcher eufs_launcher.launch
+ros2 launch eufs_launcher eufs_launcher.launch.py
 ```
 
 You shold have something like this:
