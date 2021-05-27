@@ -1,11 +1,7 @@
 from PIL import Image
 from PIL import ImageDraw
 import math
-from .LauncherUtilities import (calculate_tangent_angle,
-                               get_points_from_component_list,
-                               compactify_points)
-from random import randrange, uniform
-from functools import reduce
+from random import uniform
 import os
 from ament_index_python.packages import get_package_share_directory
 from rclpy.node import Node
@@ -337,7 +333,7 @@ class ConversionTools(Node):
 
                 xys = compactify_points([
                         (int(x[0]), int(x[1])) for x
-                        in get_points_from_component_list(components)
+                        in ConversionTools.get_points_from_component_list(components)
                 ])
 
                 # We want to calculate direction of car position
@@ -438,6 +434,15 @@ class ConversionTools(Node):
                 return im_to_display
 
         @staticmethod
+        def get_points_from_component_list(comp_list):
+            """Grabs a list of points from a list of components"""
+            flat_list = []
+            for sublist in (points for name, points in comp_list):
+                for item in sublist:
+                    flat_list.append(item)
+            return flat_list
+
+        @staticmethod
         def comps_to_png(which_file, params, conversion_suffix="", override_name=None):
                 """
                 Converts raw track generator output to png.
@@ -458,7 +463,7 @@ class ConversionTools(Node):
 
                 xys = compactify_points([
                         (int(x[0]), int(x[1])) for x
-                        in get_points_from_component_list(components)
+                        in ConversionTools.get_points_from_component_list(components)
                 ])
 
                 # Create image to hold data
@@ -761,7 +766,7 @@ class ConversionTools(Node):
                         to put %FILENAME%/model.config and %FILENAME%/model.sdf
                                  in eufs_description/models
 
-                Our template files are stored in eufs_launcher/resource as:
+                Our template files are stored in eufs_tracks/resource as:
                         randgen_launch_template
                         randgen_world_template
                         randgen_model_template/model.config
@@ -805,7 +810,7 @@ class ConversionTools(Node):
                 version_number = ConversionTools.convert_version_metadata([pixels[loc[0], loc[1]]])
 
                 # Let's start filling in the .launch template:
-                launch_template_file = os.path.join(get_package_share_directory('eufs_launcher'),
+                launch_template_file = os.path.join(get_package_share_directory('eufs_tracks'),
                                                     'resource/randgen_launch_template'
                 )
                 launch_template = open(launch_template_file, "r")
@@ -859,7 +864,7 @@ class ConversionTools(Node):
                 launch_out.close()
 
                 # And now we start the template for the .world:
-                world_template_filepath = os.path.join(get_package_share_directory('eufs_launcher'),
+                world_template_filepath = os.path.join(get_package_share_directory('eufs_tracks'),
                                                        'resource/randgen_world_template'
                 )
                 world_template = open(world_template_filepath, "r")
@@ -892,7 +897,7 @@ class ConversionTools(Node):
                         os.mkdir(folder_path)
 
                 # Now let's do the .config
-                config_template_filepath = os.path.join(get_package_share_directory('eufs_launcher'),
+                config_template_filepath = os.path.join(get_package_share_directory('eufs_tracks'),
                                                         'resource/randgen_model_template/model.config'
                 )
                 config_template = open(config_template_filepath, "r")
@@ -913,7 +918,7 @@ class ConversionTools(Node):
 
                 # Now we create the .sdf
                 # This is fairly intensive
-                sdf_template_filepath = os.path.join(get_package_share_directory('eufs_launcher'),
+                sdf_template_filepath = os.path.join(get_package_share_directory('eufs_tracks'),
                                                      'resource/randgen_model_template/model.sdf'
                 )
                 sdf_template = open(sdf_template_filepath, "r")
@@ -973,7 +978,7 @@ class ConversionTools(Node):
                 sdf_big_orange_cone_model = join_cone_model_data("cone_big")
 
                 # Now let's load in the noise priorities
-                noise_priority_file = os.path.join(get_package_share_directory('eufs_launcher'),
+                noise_priority_file = os.path.join(get_package_share_directory('eufs_tracks'),
                                                    'resource/noiseFiles.txt'
                 )
                 noise_files = open(noise_priority_file, "r")
@@ -1555,7 +1560,7 @@ class ConversionTools(Node):
                              raw_lap_counters)
 
                 # Let's start filling in the .launch template:
-                launch_template_file = os.path.join(get_package_share_directory('eufs_launcher'),
+                launch_template_file = os.path.join(get_package_share_directory('eufs_tracks'),
                                                     'resource/randgen_launch_template'
                 )
                 launch_template = open(launch_template_file, "r")
@@ -1591,7 +1596,7 @@ class ConversionTools(Node):
                 launch_out.close()
 
                 # And now we start the template for the .world:
-                world_template_filepath = os.path.join(get_package_share_directory('eufs_launcher'),
+                world_template_filepath = os.path.join(get_package_share_directory('eufs_tracks'),
                                                        'resource/randgen_world_template'
                 )
                 world_template = open(world_template_filepath, "r")
@@ -1624,7 +1629,7 @@ class ConversionTools(Node):
                         os.mkdir(folder_path)
 
                 # Now let's do the .config
-                config_template_filepath = os.path.join(get_package_share_directory('eufs_launcher'),
+                config_template_filepath = os.path.join(get_package_share_directory('eufs_tracks'),
                                                         'resource/randgen_model_template/model.config'
                 )
                 config_template = open(config_template_filepath, "r")
@@ -1645,7 +1650,7 @@ class ConversionTools(Node):
 
                 # Now we create the .sdf
                 # This is fairly intensive
-                sdf_template_filepath = os.path.join(get_package_share_directory('eufs_launcher'),
+                sdf_template_filepath = os.path.join(get_package_share_directory('eufs_tracks'),
                                                      'resource/randgen_model_template/model.sdf'
                 )
                 sdf_template = open(sdf_template_filepath, "r")
@@ -1708,7 +1713,7 @@ class ConversionTools(Node):
                 sdf_big_orange_cone_model = join_cone_model_data("cone_big")
 
                 # Now let's load in the noise priorities
-                noise_priority_file = os.path.join(get_package_share_directory('eufs_launcher'),
+                noise_priority_file = os.path.join(get_package_share_directory('eufs_tracks'),
                                                    'resource/noiseFiles.txt'
                 )
                 noise_files = open(noise_priority_file, "r")
