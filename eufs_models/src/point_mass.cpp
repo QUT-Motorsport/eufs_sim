@@ -4,7 +4,8 @@ namespace eufs
 {
   namespace models
   {
-    PointMass::PointMass(std::string &yaml_file) : VehicleModel(yaml_file) {}
+
+    PointMass::PointMass(const std::string &yaml_file) : VehicleModel(yaml_file) {}
 
     void PointMass::updateState(State &state, Input &input, const double dt)
     {

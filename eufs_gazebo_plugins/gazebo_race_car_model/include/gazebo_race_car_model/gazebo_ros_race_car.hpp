@@ -72,21 +72,25 @@ namespace gazebo_plugins
       ~RaceCarModelPlugin() override;
 
       void Reset() override;
+      void Load(gazebo::physics::ModelPtr model, sdf::ElementPtr sdf) override;
 
-      void Load(gazebo::physics::ModelPtr _parent, sdf::ElementPtr _sdf) override;
-
-      eufs::models::State &getState() { return state_; }
-      eufs::models::Input &getInput() { return input_; }
+      eufs::models::State &getState() { return _state; }
+      eufs::models::Input &getInput() { return _input; }
 
     private:
       void update();
       void updateState(double dt, gazebo::common::Time current_time);
-      eufs_msgs::msg::CarState StateToCarStateMsg(const eufs::models::State &state);
 
-      void InitVehicleModel(const sdf::ElementPtr &sdf);
-      void InitParams(const sdf::ElementPtr &sdf);
-      void InitModel(const sdf::ElementPtr &_sdf);
-      void InitNoise(const sdf::ElementPtr &sdf);
+      void setPositionFromWorld();
+      bool resetVehiclePosition(std::shared_ptr<std_srvs::srv::Trigger::Request> request, std::shared_ptr<std_srvs::srv::Trigger::Response> response);
+      void setModelState();
+
+      void initVehicleModel(const sdf::ElementPtr &sdf);
+      void initParams(const sdf::ElementPtr &sdf);
+      void initModel(const sdf::ElementPtr &sdf);
+      void initNoise(const sdf::ElementPtr &sdf);
+
+      eufs_msgs::msg::CarState StateToCarStateMsg(const eufs::models::State &state);
 
       void publishCarState();
       void publishWheelSpeeds();
@@ -98,79 +102,67 @@ namespace gazebo_plugins
       /// @brief Converts an euler orientation to quaternion
       std::vector<double> ToQuaternion(std::vector<double> &euler);
 
-      std::shared_ptr<rclcpp::Node> rosnode;
-      eufs::models::VehicleModelPtr vehicle;
-
-      void setPositionFromWorld();
-      bool resetVehiclePosition(std::shared_ptr<std_srvs::srv::Trigger::Request> request, std::shared_ptr<std_srvs::srv::Trigger::Response> response);
-      void setModelState();
+      std::shared_ptr<rclcpp::Node> _rosnode;
+      eufs::models::VehicleModelPtr _vehicle;
 
       // States
-      std::unique_ptr<StateMachine> state_machine_;
-      eufs::models::State state_;
-      eufs::models::Input input_;
-      std::unique_ptr<eufs::models::Noise> noise_;
-      double time_last_cmd_;
-      ignition::math::Pose3d offset_;
+      std::unique_ptr<StateMachine> _state_machine;
+      eufs::models::State _state;
+      eufs::models::Input _input;
+      std::unique_ptr<eufs::models::Noise> _noise;
+      double _time_last_cmd;
+      ignition::math::Pose3d _offset;
 
       // Gazebo
-      gazebo::physics::WorldPtr world;
-      gazebo::physics::ModelPtr model;
-      gazebo::event::ConnectionPtr updateConnection;
-      gazebo::common::Time lastSimTime;
-      gazebo::transport::PublisherPtr worldControlPub;
+      gazebo::physics::WorldPtr _world;
+      gazebo::physics::ModelPtr _model;
+      gazebo::event::ConnectionPtr _update_connection;
+      gazebo::common::Time _last_sim_time;
 
       // Rate to publish ros messages
-      double update_rate_;
-      double publish_rate_;
-      gazebo::common::Time time_last_published_;
+      double _update_rate;
+      double _publish_rate;
+      gazebo::common::Time _time_last_published;
 
       // ROS TF
-      std::unique_ptr<tf2_ros::TransformBroadcaster> tf_br_;
+      bool _publish_tf;
+      std::string _reference_frame;
+      std::string _robot_frame;
+      std::unique_ptr<tf2_ros::TransformBroadcaster> _tf_br;
 
       // ROS topic parameters
-      std::string ground_truth_car_state_topic_;
-      std::string localisation_car_state_topic_;
-      std::string wheel_speeds_topic_name_;
-      std::string ground_truth_wheel_speeds_topic_name_;
-      std::string odom_topic_name_;
+      std::string _ground_truth_car_state_topic;
+      std::string _localisation_car_state_topic;
+      std::string _wheel_speeds_topic_name;
+      std::string _ground_truth_wheel_speeds_topic_name;
+      std::string _odom_topic_name;
 
       // ROS Publishers
-      rclcpp::Publisher<eufs_msgs::msg::CarState>::SharedPtr pub_ground_truth_car_state_;
-      rclcpp::Publisher<eufs_msgs::msg::CarState>::SharedPtr pub_localisation_car_state_;
-      rclcpp::Publisher<eufs_msgs::msg::WheelSpeedsStamped>::SharedPtr pub_wheel_speeds_;
-      rclcpp::Publisher<eufs_msgs::msg::WheelSpeedsStamped>::SharedPtr pub_ground_truth_wheel_speeds_;
-      rclcpp::Publisher<nav_msgs::msg::Odometry>::SharedPtr pub_odom_;
+      rclcpp::Publisher<eufs_msgs::msg::CarState>::SharedPtr _pub_ground_truth_car_state;
+      rclcpp::Publisher<eufs_msgs::msg::CarState>::SharedPtr _pub_localisation_car_state;
+      rclcpp::Publisher<eufs_msgs::msg::WheelSpeedsStamped>::SharedPtr _pub_wheel_speeds;
+      rclcpp::Publisher<eufs_msgs::msg::WheelSpeedsStamped>::SharedPtr _pub_ground_truth_wheel_speeds;
+      rclcpp::Publisher<nav_msgs::msg::Odometry>::SharedPtr _pub_odom;
 
       // ROS Subscriptions
-      rclcpp::Subscription<eufs_msgs::msg::AckermannDriveStamped>::SharedPtr sub_cmd_;
+      rclcpp::Subscription<eufs_msgs::msg::AckermannDriveStamped>::SharedPtr _sub_cmd;
 
       // ROS Services
-      rclcpp::Service<std_srvs::srv::Trigger>::SharedPtr reset_vehicle_pos_srv;
+      rclcpp::Service<std_srvs::srv::Trigger>::SharedPtr _reset_vehicle_pos_srv;
 
-      // Frame parameters
-      bool publish_tf_;
-      std::string reference_frame_;
-      std::string robot_frame_;
-
-      // Steering jointsState
-      gazebo::physics::JointPtr left_steering_joint;
-      gazebo::physics::JointPtr right_steering_joint;
-
-      // Wheels
-      gazebo::physics::JointPtr front_left_wheel;
-      gazebo::physics::JointPtr front_right_wheel;
-      gazebo::physics::JointPtr rear_left_wheel;
-      gazebo::physics::JointPtr rear_right_wheel;
+      // Steering joints state
+      gazebo::physics::JointPtr _left_steering_joint;
+      gazebo::physics::JointPtr _right_steering_joint;
 
       enum CommandMode
       {
         acceleration,
         velocity
       };
-      CommandMode command_mode_;
+      CommandMode _command_mode;
     };
 
   } // namespace eufs_plugins
 } // namespace gazebo_plugins
+
 #endif // GAZEBO_ROS_RACE_CAR_HPP

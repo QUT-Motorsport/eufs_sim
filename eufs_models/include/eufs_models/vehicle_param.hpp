@@ -34,8 +34,7 @@ namespace eufs
 
         struct Param
         {
-            Param(){};
-            Param(std::string &yaml_file)
+            Param(const std::string &yaml_file)
             {
                 YAML::Node config = YAML::LoadFile(yaml_file);
 
@@ -176,4 +175,4 @@ namespace YAML
 
 } // namespace YAML
 
-#endif // EUFS_VEHICLE_PARAM_HPP
+#endif //EUFS_VEHICLE_PARAM_HPP

@@ -9,4 +9,4 @@
 #include "eufs_models/dynamic_bicycle.hpp"
 #include "eufs_models/point_mass.hpp"
 
-#endif // EUFS_MODELS_HPP
+#endif //EUFS_MODELS_HPP

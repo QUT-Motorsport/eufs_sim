@@ -27,4 +27,5 @@ namespace eufs
 
   } // namespace models
 } // namespace eufs
+
 #endif //EUFS_VEHICLE_INPUT_HPP

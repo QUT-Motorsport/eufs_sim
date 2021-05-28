@@ -1,5 +1,5 @@
-#ifndef EUFS_DYNAMIC_BICYCLE_MODEL_HPP
-#define EUFS_DYNAMIC_BICYCLE_MODEL_HPP
+#ifndef EUFS_DYNAMIC_BICYCLE_HPP
+#define EUFS_DYNAMIC_BICYCLE_HPP
 
 #include "eufs_models/vehicle_model.hpp"
 
@@ -11,22 +11,23 @@ namespace eufs
     class DynamicBicycle : public VehicleModel
     {
     public:
-      DynamicBicycle(std::string &yaml_file);
+      DynamicBicycle(const std::string &yaml_file);
 
       void updateState(State &state, Input &input, const double dt);
 
     private:
       State _f(const State &x, const Input &u, const double Fx, const double FyF, const double FyR);
-      State _f_kin_correction(const State &x_in, const State &x_state, const Input &u, const double Fx, const double dt);
+      State _fKinCorrection(const State &x_in, const State &x_state, const Input &u, const double Fx, const double dt);
       double _getFx(const State &x, const Input &u);
       double _getNormalForce(const State &x);
       double _getFdown(const State &x);
       double _getFdrag(const State &x);
-      double _getFy(const double Fz, bool front, double slipAngle);
+      double _getFy(const double Fz, bool front, double slip_angle);
       double _getDownForceFront(const double Fz);
       double _getDownForceRear(const double Fz);
     };
 
   } // namespace models
 } // namespace eufs
-#endif // EUFS_DYNAMIC_BICYCLE_MODEL_HPP
+
+#endif //EUFS_DYNAMIC_BICYCLE_HPP

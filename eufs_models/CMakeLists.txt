@@ -15,15 +15,14 @@ if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
   add_compile_options(-Wall -Wextra -Wpedantic)
 endif()
 
-option(
-  BUILD_SHARED_LIBS
-  "Global flag to cause add_library() to create shared libraries if on. \
-If set to true, this will cause all libraries to be built shared \
-unless the library was explicitly added as a static library."
-  ON)
+# Global flag to cause add_library() to create shared libraries if on.
+# If set to true, this will cause all libraries to be built shared
+# unless the library was explicitly added as a static library.
+option(BUILD_SHARED_LIBS ON)
 
 # find dependencies
 find_package(ament_cmake REQUIRED)
+find_package(yaml-cpp REQUIRED)
 
 # build library
 add_library(${PROJECT_NAME}
@@ -34,13 +33,14 @@ add_library(${PROJECT_NAME}
 target_include_directories(${PROJECT_NAME} PUBLIC
   "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>"
   "$<INSTALL_INTERFACE:include>")
-#ament_target_dependencies(eufs_models)
+ament_target_dependencies(eufs_models
+  "yaml-cpp")
 
 # export library
 ament_export_include_directories(include)
 ament_export_libraries(${PROJECT_NAME})
 ament_export_targets(export_${PROJECT_NAME} HAS_LIBRARY_TARGET)
-#ament_export_dependencies()
+ament_export_dependencies(yaml-cpp)
 
 install(
   DIRECTORY include/

@@ -4,8 +4,8 @@ namespace eufs
 {
   namespace models
   {
-    VehicleModel::VehicleModel() {}
-    VehicleModel::VehicleModel(std::string &yaml_file) : _param(yaml_file) {}
+
+    VehicleModel::VehicleModel(const std::string &yaml_file) : _param(yaml_file) {}
 
     void VehicleModel::validateState(State &state)
     {
@@ -28,18 +28,19 @@ namespace eufs
       input.delta = std::fmin(std::fmax(input.delta, min_delta), max_delta);
     }
 
-    double VehicleModel::getSlipAngle(const State &x, const Input &u, bool isFront)
+    double VehicleModel::getSlipAngle(const State &x, const Input &u, bool is_front)
     {
-      double lever_arm_length_ = _param.kinematic.l * _param.kinematic.w_front;
+      double lever_arm_length = _param.kinematic.l * _param.kinematic.w_front;
 
-      if (!isFront)
+      if (!is_front)
       {
         double v_x = std::max(1.0, x.v_x);
-        return std::atan((x.v_y - lever_arm_length_ * x.r_z) / (v_x - 0.5 * _param.kinematic.axle_width * x.r_z));
+        return std::atan((x.v_y - lever_arm_length * x.r_z) / (v_x - 0.5 * _param.kinematic.axle_width * x.r_z));
       }
 
       double v_x = std::max(1.0, x.v_x);
-      return std::atan((x.v_y + lever_arm_length_ * x.r_z) / (v_x - 0.5 * _param.kinematic.axle_width * x.r_z)) - u.delta;
+      return std::atan((x.v_y + lever_arm_length * x.r_z) / (v_x - 0.5 * _param.kinematic.axle_width * x.r_z)) - u.delta;
     }
+
   } // namespace models
 } // namespace eufs

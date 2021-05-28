@@ -40,183 +40,183 @@ namespace gazebo_plugins
 
     RaceCarModelPlugin::~RaceCarModelPlugin()
     {
-      this->updateConnection.reset();
+      _update_connection.reset();
     }
 
-    void RaceCarModelPlugin::Load(gazebo::physics::ModelPtr _model, sdf::ElementPtr _sdf)
+    void RaceCarModelPlugin::Load(gazebo::physics::ModelPtr model, sdf::ElementPtr sdf)
     {
-      this->rosnode = gazebo_ros::Node::Get(_sdf);
+      _rosnode = gazebo_ros::Node::Get(sdf);
 
-      RCLCPP_DEBUG(this->rosnode->get_logger(), "Loading RaceCarModelPlugin");
+      RCLCPP_DEBUG(_rosnode->get_logger(), "Loading RaceCarModelPlugin");
 
-      this->model = _model;
-      this->world = this->model->GetWorld();
+      _model = model;
+      _world = _model->GetWorld();
 
-      this->tf_br_ = std::make_unique<tf2_ros::TransformBroadcaster>(this->rosnode);
-      this->state_machine_ = std::make_unique<StateMachine>(this->rosnode);
+      _tf_br = std::make_unique<tf2_ros::TransformBroadcaster>(_rosnode);
+      _state_machine = std::make_unique<StateMachine>(_rosnode);
 
       // Initialize parameters
-      InitParams(_sdf);
+      initParams(sdf);
 
       // Initialize vehicle model
-      InitVehicleModel(_sdf);
+      initVehicleModel(sdf);
 
       // Initialize handles to Gazebo vehicle components
-      InitModel(_sdf);
+      initModel(sdf);
 
       // Initialize noise object
-      InitNoise(_sdf);
+      initNoise(sdf);
 
       // ROS Publishers
-      this->pub_ground_truth_car_state_ = rosnode->create_publisher<eufs_msgs::msg::CarState>(this->ground_truth_car_state_topic_, 1);
-      this->pub_localisation_car_state_ = rosnode->create_publisher<eufs_msgs::msg::CarState>(this->localisation_car_state_topic_, 1);
-      this->pub_wheel_speeds_ = rosnode->create_publisher<eufs_msgs::msg::WheelSpeedsStamped>(this->wheel_speeds_topic_name_, 1);
-      this->pub_ground_truth_wheel_speeds_ = rosnode->create_publisher<eufs_msgs::msg::WheelSpeedsStamped>(this->ground_truth_wheel_speeds_topic_name_, 1);
-      this->pub_odom_ = rosnode->create_publisher<nav_msgs::msg::Odometry>(this->odom_topic_name_, 1);
+      _pub_ground_truth_car_state = _rosnode->create_publisher<eufs_msgs::msg::CarState>(_ground_truth_car_state_topic, 1);
+      _pub_localisation_car_state = _rosnode->create_publisher<eufs_msgs::msg::CarState>(_localisation_car_state_topic, 1);
+      _pub_wheel_speeds = _rosnode->create_publisher<eufs_msgs::msg::WheelSpeedsStamped>(_wheel_speeds_topic_name, 1);
+      _pub_ground_truth_wheel_speeds = _rosnode->create_publisher<eufs_msgs::msg::WheelSpeedsStamped>(_ground_truth_wheel_speeds_topic_name, 1);
+      _pub_odom = _rosnode->create_publisher<nav_msgs::msg::Odometry>(_odom_topic_name, 1);
 
       // ROS Services
-      this->reset_vehicle_pos_srv = rosnode->create_service<std_srvs::srv::Trigger>("/ros_can/reset_vehicle_pos", std::bind(&RaceCarModelPlugin::resetVehiclePosition, this, std::placeholders::_1, std::placeholders::_2));
+      _reset_vehicle_pos_srv = _rosnode->create_service<std_srvs::srv::Trigger>("/ros_can/reset_vehicle_pos", std::bind(&RaceCarModelPlugin::resetVehiclePosition, this, std::placeholders::_1, std::placeholders::_2));
 
       // ROS Subscriptions
-      this->sub_cmd_ = rosnode->create_subscription<eufs_msgs::msg::AckermannDriveStamped>("/cmd", 1, std::bind(&RaceCarModelPlugin::onCmd, this, std::placeholders::_1));
+      _sub_cmd = _rosnode->create_subscription<eufs_msgs::msg::AckermannDriveStamped>("/cmd", 1, std::bind(&RaceCarModelPlugin::onCmd, this, std::placeholders::_1));
 
       // Connect to Gazebo
-      this->updateConnection =
+      _update_connection =
           gazebo::event::Events::ConnectWorldUpdateBegin(std::bind(&RaceCarModelPlugin::update, this));
-      this->lastSimTime = this->world->SimTime();
+      _last_sim_time = _world->SimTime();
 
       // Set offset
-      this->setPositionFromWorld();
-      this->time_last_cmd_ = 0.0;
+      setPositionFromWorld();
+      _time_last_cmd = 0.0;
 
-      RCLCPP_INFO(this->rosnode->get_logger(), "RaceCarModelPlugin Loaded");
+      RCLCPP_INFO(_rosnode->get_logger(), "RaceCarModelPlugin Loaded");
     }
 
-    void RaceCarModelPlugin::InitParams(const sdf::ElementPtr &sdf)
+    void RaceCarModelPlugin::initParams(const sdf::ElementPtr &sdf)
     {
       if (!sdf->HasElement("update_rate"))
       {
-        this->update_rate_ = 1000.0;
+        _update_rate = 1000.0;
       }
       else
       {
-        this->update_rate_ = sdf->GetElement("update_rate")->Get<double>();
+        _update_rate = sdf->GetElement("update_rate")->Get<double>();
       }
 
       if (!sdf->HasElement("publish_rate"))
       {
-        this->publish_rate_ = 200.0;
+        _publish_rate = 200.0;
       }
       else
       {
-        this->publish_rate_ = sdf->GetElement("publish_rate")->Get<double>();
+        _publish_rate = sdf->GetElement("publish_rate")->Get<double>();
       }
 
       if (!sdf->HasElement("referenceFrame"))
       {
-        RCLCPP_DEBUG(this->rosnode->get_logger(), "gazebo_ros_race_car_model plugin missing <referenceFrame>, defaults to map");
-        this->reference_frame_ = "map";
+        RCLCPP_DEBUG(_rosnode->get_logger(), "gazebo_ros_race_car_model plugin missing <referenceFrame>, defaults to map");
+        _reference_frame = "map";
       }
       else
       {
-        this->reference_frame_ = sdf->GetElement("referenceFrame")->Get<std::string>();
+        _reference_frame = sdf->GetElement("referenceFrame")->Get<std::string>();
       }
 
       if (!sdf->HasElement("robotFrame"))
       {
-        RCLCPP_DEBUG(this->rosnode->get_logger(), "gazebo_ros_race_car_model plugin missing <robotFrame>, defaults to base_footprint");
-        this->robot_frame_ = "base_footprint";
+        RCLCPP_DEBUG(_rosnode->get_logger(), "gazebo_ros_race_car_model plugin missing <robotFrame>, defaults to base_footprint");
+        _robot_frame = "base_footprint";
       }
       else
       {
-        this->robot_frame_ = sdf->GetElement("robotFrame")->Get<std::string>();
+        _robot_frame = sdf->GetElement("robotFrame")->Get<std::string>();
       }
 
       if (!sdf->HasElement("publishTransform"))
       {
-        RCLCPP_DEBUG(this->rosnode->get_logger(), "gazebo_ros_race_car_model plugin missing <publishTransform>, defaults to false");
-        this->publish_tf_ = false;
+        RCLCPP_DEBUG(_rosnode->get_logger(), "gazebo_ros_race_car_model plugin missing <publishTransform>, defaults to false");
+        _publish_tf = false;
       }
       else
       {
-        this->publish_tf_ = sdf->GetElement("publishTransform")->Get<bool>();
+        _publish_tf = sdf->GetElement("publishTransform")->Get<bool>();
       }
 
       if (!sdf->HasElement("wheelSpeedsTopicName"))
       {
-        RCLCPP_FATAL(this->rosnode->get_logger(), "gazebo_ros_race_car_model plugin missing <wheelSpeedsTopicName>, cannot proceed");
+        RCLCPP_FATAL(_rosnode->get_logger(), "gazebo_ros_race_car_model plugin missing <wheelSpeedsTopicName>, cannot proceed");
         return;
       }
       else
       {
-        this->wheel_speeds_topic_name_ = sdf->GetElement("wheelSpeedsTopicName")->Get<std::string>();
+        _wheel_speeds_topic_name = sdf->GetElement("wheelSpeedsTopicName")->Get<std::string>();
       }
 
       if (!sdf->HasElement("groundTruthWheelSpeedsTopicName"))
       {
-        RCLCPP_FATAL(this->rosnode->get_logger(), "gazebo_ros_race_car_model plugin missing <groundTruthWheelSpeedsTopicName>, cannot proceed");
+        RCLCPP_FATAL(_rosnode->get_logger(), "gazebo_ros_race_car_model plugin missing <groundTruthWheelSpeedsTopicName>, cannot proceed");
         return;
       }
       else
       {
-        this->ground_truth_wheel_speeds_topic_name_ = sdf->GetElement("groundTruthWheelSpeedsTopicName")->Get<std::string>();
+        _ground_truth_wheel_speeds_topic_name = sdf->GetElement("groundTruthWheelSpeedsTopicName")->Get<std::string>();
       }
 
       if (!sdf->HasElement("groundTruthCarStateTopic"))
       {
-        RCLCPP_FATAL(this->rosnode->get_logger(), "gazebo_ros_race_car_model plugin missing <groundTruthCarStateTopic>, cannot proceed");
+        RCLCPP_FATAL(_rosnode->get_logger(), "gazebo_ros_race_car_model plugin missing <groundTruthCarStateTopic>, cannot proceed");
         return;
       }
       else
       {
-        this->ground_truth_car_state_topic_ = sdf->GetElement("groundTruthCarStateTopic")->Get<std::string>();
+        _ground_truth_car_state_topic = sdf->GetElement("groundTruthCarStateTopic")->Get<std::string>();
       }
 
       if (!sdf->HasElement("localisationCarStateTopic"))
       {
-        RCLCPP_FATAL(this->rosnode->get_logger(), "gazebo_ros_race_car_model plugin missing <localisationCarStateTopic>, cannot proceed");
+        RCLCPP_FATAL(_rosnode->get_logger(), "gazebo_ros_race_car_model plugin missing <localisationCarStateTopic>, cannot proceed");
         return;
       }
       else
       {
-        this->localisation_car_state_topic_ = sdf->GetElement("localisationCarStateTopic")->Get<std::string>();
+        _localisation_car_state_topic = sdf->GetElement("localisationCarStateTopic")->Get<std::string>();
       }
 
       if (!sdf->HasElement("odometryTopicName"))
       {
-        RCLCPP_FATAL(this->rosnode->get_logger(), "gazebo_ros_race_car_model plugin missing <odometryTopicName>, cannot proceed");
+        RCLCPP_FATAL(_rosnode->get_logger(), "gazebo_ros_race_car_model plugin missing <odometryTopicName>, cannot proceed");
         return;
       }
       else
       {
-        this->odom_topic_name_ = sdf->GetElement("odometryTopicName")->Get<std::string>();
+        _odom_topic_name = sdf->GetElement("odometryTopicName")->Get<std::string>();
       }
 
       if (!sdf->HasElement("commandMode"))
       {
-        RCLCPP_DEBUG(this->rosnode->get_logger(), "gazebo_ros_race_car_model plugin missing <commandMode>, defaults to acceleration");
-        this->command_mode_ = acceleration;
+        RCLCPP_DEBUG(_rosnode->get_logger(), "gazebo_ros_race_car_model plugin missing <commandMode>, defaults to acceleration");
+        _command_mode = acceleration;
       }
       else
       {
         auto temp = sdf->GetElement("commandMode")->Get<std::string>();
         if (temp.compare("acceleration") == 0)
         {
-          this->command_mode_ = acceleration;
+          _command_mode = acceleration;
         }
         else if (temp.compare("velocity") == 0)
         {
-          this->command_mode_ = velocity;
+          _command_mode = velocity;
         }
         else
         {
-          RCLCPP_WARN(this->rosnode->get_logger(), "commandMode parameter string is invalid, defaults to acceleration");
-          this->command_mode_ = acceleration;
+          RCLCPP_WARN(_rosnode->get_logger(), "commandMode parameter string is invalid, defaults to acceleration");
+          _command_mode = acceleration;
         }
       }
     }
 
-    void RaceCarModelPlugin::InitVehicleModel(const sdf::ElementPtr &sdf)
+    void RaceCarModelPlugin::initVehicleModel(const sdf::ElementPtr &sdf)
     {
       // Get the vehicle model from the sdf
       std::string vehicle_model_ = "";
@@ -232,7 +232,7 @@ namespace gazebo_plugins
       std::string yaml_name = "";
       if (!sdf->HasElement("yaml_config"))
       {
-        RCLCPP_FATAL(this->rosnode->get_logger(), "gazebo_ros_race_car_model plugin missing <yaml_config>, cannot proceed");
+        RCLCPP_FATAL(_rosnode->get_logger(), "gazebo_ros_race_car_model plugin missing <yaml_config>, cannot proceed");
         return;
       }
       else
@@ -240,50 +240,38 @@ namespace gazebo_plugins
         yaml_name = sdf->GetElement("yaml_config")->Get<std::string>();
       }
 
-      RCLCPP_DEBUG(this->rosnode->get_logger(), "RaceCarModelPlugin finished loading params");
+      RCLCPP_DEBUG(_rosnode->get_logger(), "RaceCarModelPlugin finished loading params");
 
       if (vehicle_model_ == "PointMass")
       {
-        this->vehicle = std::unique_ptr<eufs::models::VehicleModel>(new eufs::models::PointMass(yaml_name));
+        _vehicle = std::unique_ptr<eufs::models::VehicleModel>(new eufs::models::PointMass(yaml_name));
       }
       else if (vehicle_model_ == "DynamicBicycle")
       {
-        this->vehicle = std::unique_ptr<eufs::models::VehicleModel>(new eufs::models::DynamicBicycle(yaml_name));
+        _vehicle = std::unique_ptr<eufs::models::VehicleModel>(new eufs::models::DynamicBicycle(yaml_name));
       }
       else
       {
-        RCLCPP_FATAL(this->rosnode->get_logger(), "gazebo_ros_race_car_model plugin invalid vehicle model, cannot proceed");
+        RCLCPP_FATAL(_rosnode->get_logger(), "gazebo_ros_race_car_model plugin invalid vehicle model, cannot proceed");
         return;
       }
     }
 
-    void RaceCarModelPlugin::InitModel(const sdf::ElementPtr &_sdf)
+    void RaceCarModelPlugin::initModel(const sdf::ElementPtr &sdf)
     {
       // Steering joints
-      std::string leftSteeringJointName = model->GetName() + "::" + _sdf->Get<std::string>("front_left_wheel_steering");
-      left_steering_joint = model->GetJoint(leftSteeringJointName);
-      std::string rightSteeringJointName = model->GetName() + "::" + _sdf->Get<std::string>("front_right_wheel_steering");
-      right_steering_joint = model->GetJoint(rightSteeringJointName);
-
-      // Front wheels
-      std::string frontLeftWheelName = model->GetName() + "::" + _sdf->Get<std::string>("front_left_wheel");
-      front_left_wheel = model->GetJoint(frontLeftWheelName);
-      std::string frontRightWheelName = model->GetName() + "::" + _sdf->Get<std::string>("front_right_wheel");
-      front_right_wheel = model->GetJoint(frontRightWheelName);
-
-      // Rear wheels
-      std::string rearLeftWheelName = model->GetName() + "::" + _sdf->Get<std::string>("rear_left_wheel");
-      rear_left_wheel = model->GetJoint(rearLeftWheelName);
-      std::string rearRightWheelName = model->GetName() + "::" + _sdf->Get<std::string>("rear_right_wheel");
-      rear_right_wheel = model->GetJoint(rearRightWheelName);
+      std::string leftSteeringJointName = _model->GetName() + "::" + sdf->Get<std::string>("front_left_wheel_steering");
+      _left_steering_joint = _model->GetJoint(leftSteeringJointName);
+      std::string rightSteeringJointName = _model->GetName() + "::" + sdf->Get<std::string>("front_right_wheel_steering");
+      _right_steering_joint = _model->GetJoint(rightSteeringJointName);
     }
 
-    void RaceCarModelPlugin::InitNoise(const sdf::ElementPtr &sdf)
+    void RaceCarModelPlugin::initNoise(const sdf::ElementPtr &sdf)
     {
       std::string yaml_name = "";
       if (!sdf->HasElement("noise_config"))
       {
-        RCLCPP_FATAL(this->rosnode->get_logger(), "gazebo_ros_race_car_model plugin missing <noise_config>, cannot proceed");
+        RCLCPP_FATAL(_rosnode->get_logger(), "gazebo_ros_race_car_model plugin missing <noise_config>, cannot proceed");
         return;
       }
       else
@@ -292,79 +280,79 @@ namespace gazebo_plugins
       }
 
       // Create noise object
-      this->noise_ = std::make_unique<eufs::models::Noise>(yaml_name);
-      RCLCPP_INFO(this->rosnode->get_logger(), this->noise_->getString());
+      _noise = std::make_unique<eufs::models::Noise>(yaml_name);
+      RCLCPP_INFO(_rosnode->get_logger(), _noise->getString());
     }
 
     void RaceCarModelPlugin::setPositionFromWorld()
     {
-      offset_ = model->WorldPose();
+      _offset = _model->WorldPose();
 
-      RCLCPP_DEBUG(this->rosnode->get_logger(),
+      RCLCPP_DEBUG(_rosnode->get_logger(),
                    "Got starting offset %f %f %f",
-                   this->offset_.Pos()[0],
-                   this->offset_.Pos()[1],
-                   this->offset_.Pos()[2]);
+                   _offset.Pos()[0],
+                   _offset.Pos()[1],
+                   _offset.Pos()[2]);
 
-      state_.x = 0.0;
-      state_.y = 0.0;
-      state_.z = 0.0;
-      state_.yaw = 0.0;
-      state_.v_x = 0.0;
-      state_.v_y = 0.0;
-      state_.v_z = 0.0;
-      state_.r_x = 0.0;
-      state_.r_y = 0.0;
-      state_.r_z = 0.0;
-      state_.a_x = 0.0;
-      state_.a_y = 0.0;
-      state_.a_z = 0.0;
+      _state.x = 0.0;
+      _state.y = 0.0;
+      _state.z = 0.0;
+      _state.yaw = 0.0;
+      _state.v_x = 0.0;
+      _state.v_y = 0.0;
+      _state.v_z = 0.0;
+      _state.r_x = 0.0;
+      _state.r_y = 0.0;
+      _state.r_z = 0.0;
+      _state.a_x = 0.0;
+      _state.a_y = 0.0;
+      _state.a_z = 0.0;
     }
 
     bool RaceCarModelPlugin::resetVehiclePosition(std::shared_ptr<std_srvs::srv::Trigger::Request>, std::shared_ptr<std_srvs::srv::Trigger::Response> response)
     {
-      state_.x = 0.0;
-      state_.y = 0.0;
-      state_.z = 0.0;
-      state_.yaw = 0.0;
-      state_.v_x = 0.0;
-      state_.v_y = 0.0;
-      state_.v_z = 0.0;
-      state_.r_x = 0.0;
-      state_.r_y = 0.0;
-      state_.r_z = 0.0;
-      state_.a_x = 0.0;
-      state_.a_y = 0.0;
-      state_.a_z = 0.0;
+      _state.x = 0.0;
+      _state.y = 0.0;
+      _state.z = 0.0;
+      _state.yaw = 0.0;
+      _state.v_x = 0.0;
+      _state.v_y = 0.0;
+      _state.v_z = 0.0;
+      _state.r_x = 0.0;
+      _state.r_y = 0.0;
+      _state.r_z = 0.0;
+      _state.a_x = 0.0;
+      _state.a_y = 0.0;
+      _state.a_z = 0.0;
 
       const ignition::math::Vector3d vel(0.0, 0.0, 0.0);
       const ignition::math::Vector3d angular(0.0, 0.0, 0.0);
 
-      model->SetWorldPose(offset_);
-      model->SetAngularVel(angular);
-      model->SetLinearVel(vel);
+      _model->SetWorldPose(_offset);
+      _model->SetAngularVel(angular);
+      _model->SetLinearVel(vel);
 
       return response->success;
     }
 
     void RaceCarModelPlugin::setModelState()
     {
-      double yaw = state_.yaw + offset_.Rot().Yaw();
+      double yaw = _state.yaw + _offset.Rot().Yaw();
 
-      double x = offset_.Pos().X() + state_.x * cos(offset_.Rot().Yaw()) - state_.y * sin(offset_.Rot().Yaw());
-      double y = offset_.Pos().Y() + state_.x * sin(offset_.Rot().Yaw()) + state_.y * cos(offset_.Rot().Yaw());
-      double z = state_.z;
+      double x = _offset.Pos().X() + _state.x * cos(_offset.Rot().Yaw()) - _state.y * sin(_offset.Rot().Yaw());
+      double y = _offset.Pos().Y() + _state.x * sin(_offset.Rot().Yaw()) + _state.y * cos(_offset.Rot().Yaw());
+      double z = _state.z;
 
-      double vx = state_.v_x * cos(yaw) - state_.v_y * sin(yaw);
-      double vy = state_.v_x * sin(yaw) + state_.v_y * cos(yaw);
+      double vx = _state.v_x * cos(yaw) - _state.v_y * sin(yaw);
+      double vy = _state.v_x * sin(yaw) + _state.v_y * cos(yaw);
 
       const ignition::math::Pose3d pose(x, y, z, 0, 0.0, yaw);
       const ignition::math::Vector3d vel(vx, vy, 0.0);
-      const ignition::math::Vector3d angular(0.0, 0.0, state_.r_z);
+      const ignition::math::Vector3d angular(0.0, 0.0, _state.r_z);
 
-      model->SetWorldPose(pose);
-      model->SetAngularVel(angular);
-      model->SetLinearVel(vel);
+      _model->SetWorldPose(pose);
+      _model->SetAngularVel(angular);
+      _model->SetLinearVel(vel);
     }
 
     eufs_msgs::msg::CarState RaceCarModelPlugin::StateToCarStateMsg(const eufs::models::State &state)
@@ -372,9 +360,9 @@ namespace gazebo_plugins
       // Publish Car Info
       eufs_msgs::msg::CarState car_state;
 
-      car_state.header.stamp = this->rosnode->now();
-      car_state.header.frame_id = this->reference_frame_;
-      car_state.child_frame_id = this->robot_frame_;
+      car_state.header.stamp = _rosnode->now();
+      car_state.header.frame_id = _reference_frame;
+      car_state.child_frame_id = _robot_frame;
 
       car_state.pose.pose.position.x = state.x;
       car_state.pose.pose.position.y = state.y;
@@ -382,7 +370,7 @@ namespace gazebo_plugins
 
       std::vector<double> orientation = {state.yaw, 0.0, 0.0};
 
-      orientation = this->ToQuaternion(orientation);
+      orientation = ToQuaternion(orientation);
 
       car_state.pose.pose.orientation.x = orientation[0];
       car_state.pose.pose.orientation.y = orientation[1];
@@ -401,7 +389,7 @@ namespace gazebo_plugins
       car_state.linear_acceleration.y = state.a_y;
       car_state.linear_acceleration.z = state.a_z;
 
-      car_state.slip_angle = this->vehicle->getSlipAngle(this->state_, this->input_, true);
+      car_state.slip_angle = _vehicle->getSlipAngle(_state, _input, true);
 
       car_state.state_of_charge = 999;
 
@@ -410,20 +398,20 @@ namespace gazebo_plugins
 
     void RaceCarModelPlugin::publishCarState()
     {
-      eufs_msgs::msg::CarState car_state = StateToCarStateMsg(this->state_);
+      eufs_msgs::msg::CarState car_state = StateToCarStateMsg(_state);
 
       // Publish ground_truth
-      if (this->pub_ground_truth_car_state_->get_subscription_count() > 0)
+      if (_pub_ground_truth_car_state->get_subscription_count() > 0)
       {
-        this->pub_ground_truth_car_state_->publish(car_state);
+        _pub_ground_truth_car_state->publish(car_state);
       }
 
       // Add noise
-      eufs::models::State state_noisy = this->noise_->ApplyNoise(this->state_);
+      eufs::models::State state_noisy = _noise->applyNoise(_state);
       eufs_msgs::msg::CarState car_state_noisy = StateToCarStateMsg(state_noisy);
 
       // Fill in covariance matrix
-      const eufs::models::NoiseParam &noise_param = this->noise_->getNoiseParam();
+      const eufs::models::NoiseParam &noise_param = _noise->getNoiseParam();
       car_state_noisy.pose.covariance[0] = pow(noise_param.position[0], 2);
       car_state_noisy.pose.covariance[7] = pow(noise_param.position[1], 2);
       car_state_noisy.pose.covariance[14] = pow(noise_param.position[2], 2);
@@ -432,22 +420,22 @@ namespace gazebo_plugins
       car_state_noisy.pose.covariance[28] = pow(noise_param.orientation[1], 2);
       car_state_noisy.pose.covariance[35] = pow(noise_param.orientation[2], 2);
 
-      car_state_noisy.twist.covariance[0] = pow(noise_param.linearVelocity[0], 2);
-      car_state_noisy.twist.covariance[7] = pow(noise_param.linearVelocity[1], 2);
-      car_state_noisy.twist.covariance[14] = pow(noise_param.linearVelocity[2], 2);
+      car_state_noisy.twist.covariance[0] = pow(noise_param.linear_velocity[0], 2);
+      car_state_noisy.twist.covariance[7] = pow(noise_param.linear_velocity[1], 2);
+      car_state_noisy.twist.covariance[14] = pow(noise_param.linear_velocity[2], 2);
 
-      car_state_noisy.twist.covariance[21] = pow(noise_param.angularVelocity[0], 2);
-      car_state_noisy.twist.covariance[28] = pow(noise_param.angularVelocity[1], 2);
-      car_state_noisy.twist.covariance[35] = pow(noise_param.angularVelocity[2], 2);
+      car_state_noisy.twist.covariance[21] = pow(noise_param.angular_velocity[0], 2);
+      car_state_noisy.twist.covariance[28] = pow(noise_param.angular_velocity[1], 2);
+      car_state_noisy.twist.covariance[35] = pow(noise_param.angular_velocity[2], 2);
 
-      car_state_noisy.linear_acceleration_covariance[0] = pow(noise_param.linearAcceleration[0], 2);
-      car_state_noisy.linear_acceleration_covariance[4] = pow(noise_param.linearAcceleration[1], 2);
-      car_state_noisy.linear_acceleration_covariance[8] = pow(noise_param.linearAcceleration[2], 2);
+      car_state_noisy.linear_acceleration_covariance[0] = pow(noise_param.linear_acceleration[0], 2);
+      car_state_noisy.linear_acceleration_covariance[4] = pow(noise_param.linear_acceleration[1], 2);
+      car_state_noisy.linear_acceleration_covariance[8] = pow(noise_param.linear_acceleration[2], 2);
 
       // Publish with noise
-      if (this->pub_localisation_car_state_->get_subscription_count() > 0)
+      if (_pub_localisation_car_state->get_subscription_count() > 0)
       {
-        this->pub_localisation_car_state_->publish(car_state_noisy);
+        _pub_localisation_car_state->publish(car_state_noisy);
       }
     }
 
@@ -455,33 +443,33 @@ namespace gazebo_plugins
     {
       eufs_msgs::msg::WheelSpeedsStamped wheel_speeds;
 
-      wheel_speeds.header.stamp = this->rosnode->now();
-      wheel_speeds.header.frame_id = this->robot_frame_;
+      wheel_speeds.header.stamp = _rosnode->now();
+      wheel_speeds.header.frame_id = _robot_frame;
 
-      wheel_speeds.steering = input_.delta;
+      wheel_speeds.steering = _input.delta;
 
       wheel_speeds.lf_speed = 999;
       wheel_speeds.rf_speed = 999;
 
       float PI = 3.14159265;
-      float wheel_circumference = 2 * PI * this->vehicle->getParam().tire.radius;
+      float wheel_circumference = 2 * PI * _vehicle->getParam().tire.radius;
 
       // Calculate Wheel speeds
-      wheel_speeds.lb_speed = (state_.v_x / wheel_circumference) * 60;
-      wheel_speeds.rb_speed = (state_.v_x / wheel_circumference) * 60;
+      wheel_speeds.lb_speed = (_state.v_x / wheel_circumference) * 60;
+      wheel_speeds.rb_speed = (_state.v_x / wheel_circumference) * 60;
 
       // Publish ground truth
-      if (pub_ground_truth_wheel_speeds_->get_subscription_count() > 0)
+      if (_pub_ground_truth_wheel_speeds->get_subscription_count() > 0)
       {
-        pub_ground_truth_wheel_speeds_->publish(wheel_speeds);
+        _pub_ground_truth_wheel_speeds->publish(wheel_speeds);
       }
 
       // TODO: Add Noise to Wheel speeds here
 
       // Publish with Noise
-      if (pub_wheel_speeds_->get_subscription_count() > 0)
+      if (_pub_wheel_speeds->get_subscription_count() > 0)
       {
-        pub_wheel_speeds_->publish(wheel_speeds);
+        _pub_wheel_speeds->publish(wheel_speeds);
       }
     }
 
@@ -489,19 +477,19 @@ namespace gazebo_plugins
     {
       nav_msgs::msg::Odometry odom;
 
-      odom.header.stamp = this->rosnode->now();
+      odom.header.stamp = _rosnode->now();
 
-      odom.header.frame_id = this->reference_frame_;
-      odom.child_frame_id = this->robot_frame_;
+      odom.header.frame_id = _reference_frame;
+      odom.child_frame_id = _robot_frame;
 
-      eufs::models::State state_noisy = this->noise_->ApplyNoise(this->state_);
+      eufs::models::State state_noisy = _noise->applyNoise(_state);
 
       odom.pose.pose.position.x = state_noisy.x;
       odom.pose.pose.position.y = state_noisy.y;
       odom.pose.pose.position.z = state_noisy.z;
 
       std::vector<double> orientation = {state_noisy.yaw, 0.0, 0.0};
-      orientation = this->ToQuaternion(orientation);
+      orientation = ToQuaternion(orientation);
       odom.pose.pose.orientation.x = orientation[0];
       odom.pose.pose.orientation.y = orientation[1];
       odom.pose.pose.orientation.z = orientation[2];
@@ -516,7 +504,7 @@ namespace gazebo_plugins
       odom.twist.twist.angular.z = state_noisy.r_z;
 
       // fill in covariance matrix
-      const eufs::models::NoiseParam &noise_param = this->noise_->getNoiseParam();
+      const eufs::models::NoiseParam &noise_param = _noise->getNoiseParam();
       odom.pose.covariance[0] = pow(noise_param.position[0], 2);
       odom.pose.covariance[7] = pow(noise_param.position[1], 2);
       odom.pose.covariance[14] = pow(noise_param.position[2], 2);
@@ -525,23 +513,23 @@ namespace gazebo_plugins
       odom.pose.covariance[28] = pow(noise_param.orientation[1], 2);
       odom.pose.covariance[35] = pow(noise_param.orientation[2], 2);
 
-      odom.twist.covariance[0] = pow(noise_param.linearVelocity[0], 2);
-      odom.twist.covariance[7] = pow(noise_param.linearVelocity[1], 2);
-      odom.twist.covariance[14] = pow(noise_param.linearVelocity[2], 2);
+      odom.twist.covariance[0] = pow(noise_param.linear_velocity[0], 2);
+      odom.twist.covariance[7] = pow(noise_param.linear_velocity[1], 2);
+      odom.twist.covariance[14] = pow(noise_param.linear_velocity[2], 2);
 
-      odom.twist.covariance[21] = pow(noise_param.angularVelocity[0], 2);
-      odom.twist.covariance[28] = pow(noise_param.angularVelocity[1], 2);
-      odom.twist.covariance[35] = pow(noise_param.angularVelocity[2], 2);
+      odom.twist.covariance[21] = pow(noise_param.angular_velocity[0], 2);
+      odom.twist.covariance[28] = pow(noise_param.angular_velocity[1], 2);
+      odom.twist.covariance[35] = pow(noise_param.angular_velocity[2], 2);
 
-      if (pub_odom_->get_subscription_count() > 0)
+      if (_pub_odom->get_subscription_count() > 0)
       {
-        pub_odom_->publish(odom);
+        _pub_odom->publish(odom);
       }
     }
 
     void RaceCarModelPlugin::publishTf()
     {
-      eufs::models::State state_noisy = this->noise_->ApplyNoise(this->state_);
+      eufs::models::State state_noisy = _noise->applyNoise(_state);
 
       // Position
       tf2::Transform transform;
@@ -555,92 +543,92 @@ namespace gazebo_plugins
       // Send TF
       geometry_msgs::msg::TransformStamped transform_stamped;
 
-      transform_stamped.header.stamp = this->rosnode->now();
-      transform_stamped.header.frame_id = this->reference_frame_;
-      transform_stamped.child_frame_id = this->robot_frame_;
+      transform_stamped.header.stamp = _rosnode->now();
+      transform_stamped.header.frame_id = _reference_frame;
+      transform_stamped.child_frame_id = _robot_frame;
       tf2::convert(transform, transform_stamped.transform);
 
-      tf_br_->sendTransform(transform_stamped);
+      _tf_br->sendTransform(transform_stamped);
     }
 
     void RaceCarModelPlugin::Reset()
     {
-      this->lastSimTime = 0;
+      _last_sim_time = 0;
     }
 
     void RaceCarModelPlugin::update()
     {
-      gazebo::common::Time curTime = this->world->SimTime();
-      double dt = (curTime - this->lastSimTime).Double();
-      if (dt < (1 / this->update_rate_))
+      gazebo::common::Time curTime = _world->SimTime();
+      double dt = (curTime - _last_sim_time).Double();
+      if (dt < (1 / _update_rate))
       {
         return;
       }
 
       // Update z value from simulation
-      state_.z = model->WorldPose().Pos().Z();
+      _state.z = _model->WorldPose().Pos().Z();
 
-      this->lastSimTime = curTime;
+      _last_sim_time = curTime;
       updateState(dt, curTime.Double());
     }
 
     void RaceCarModelPlugin::updateState(const double dt, gazebo::common::Time current_time)
     {
-      if (this->command_mode_ == velocity)
+      if (_command_mode == velocity)
       {
-        double current_speed = std::sqrt(std::pow(state_.v_x, 2) + std::pow(state_.v_y, 2));
-        input_.acc = (input_.vel - current_speed) / dt;
+        double current_speed = std::sqrt(std::pow(_state.v_x, 2) + std::pow(_state.v_y, 2));
+        _input.acc = (_input.vel - current_speed) / dt;
       }
 
       // If last command was more than 1s ago, then slow down car
-      input_.acc = this->rosnode->now().seconds() - time_last_cmd_ < 1.0 ? input_.acc : -1.0;
+      _input.acc = _rosnode->now().seconds() - _time_last_cmd < 1.0 ? _input.acc : -1.0;
 
-      this->vehicle->updateState(state_, input_, dt);
+      _vehicle->updateState(_state, _input, dt);
 
-      left_steering_joint->SetPosition(0, input_.delta);
-      right_steering_joint->SetPosition(0, input_.delta);
+      _left_steering_joint->SetPosition(0, _input.delta);
+      _right_steering_joint->SetPosition(0, _input.delta);
       setModelState();
 
-      double time_since_last_published = (current_time - this->time_last_published_).Double();
-      if (time_since_last_published < (1 / this->publish_rate_))
+      double time_since_last_published = (current_time - _time_last_published).Double();
+      if (time_since_last_published < (1 / _publish_rate))
       {
         return;
       }
-      this->time_last_published_ = current_time;
+      _time_last_published = current_time;
 
       // Publish Everything
       publishCarState();
       publishWheelSpeeds();
       publishOdom();
 
-      if (this->publish_tf_)
+      if (_publish_tf)
       {
         publishTf();
       }
 
-      state_machine_->spinOnce(current_time);
+      _state_machine->spinOnce(current_time);
     }
 
     void RaceCarModelPlugin::onCmd(const eufs_msgs::msg::AckermannDriveStamped::SharedPtr msg)
     {
       // TODO: Should add delay to the controls
-      if (state_machine_->canDrive())
+      if (_state_machine->canDrive())
       {
-        input_.delta = msg->drive.steering_angle;
-        input_.acc = msg->drive.acceleration;
-        input_.vel = msg->drive.speed;
+        _input.delta = msg->drive.steering_angle;
+        _input.acc = msg->drive.acceleration;
+        _input.vel = msg->drive.speed;
       }
       else
       {
         // TODO: Should do something else to stop the car but is this good for now
-        input_.delta = 0;
-        input_.acc = -100;
-        input_.vel = 0;
+        _input.delta = 0;
+        _input.acc = -100;
+        _input.vel = 0;
       }
 
-      this->vehicle->validateInput(input_);
+      _vehicle->validateInput(_input);
 
-      time_last_cmd_ = this->rosnode->now().seconds();
+      _time_last_cmd = _rosnode->now().seconds();
     }
 
     std::vector<double> RaceCarModelPlugin::ToQuaternion(std::vector<double> &euler)

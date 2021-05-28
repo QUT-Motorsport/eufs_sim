@@ -11,7 +11,6 @@ namespace eufs
 
     struct State
     {
-
       State operator*(const double &dt) const
       {
         return {
@@ -66,21 +65,22 @@ namespace eufs
         return str;
       }
 
-      double x;
-      double y;
-      double z;
-      double yaw;
-      double v_x;
-      double v_y;
-      double v_z;
-      double r_x;
-      double r_y;
-      double r_z;
-      double a_x;
-      double a_y;
-      double a_z;
+      double x = 0;
+      double y = 0;
+      double z = 0;
+      double yaw = 0;
+      double v_x = 0;
+      double v_y = 0;
+      double v_z = 0;
+      double r_x = 0;
+      double r_y = 0;
+      double r_z = 0;
+      double a_x = 0;
+      double a_y = 0;
+      double a_z = 0;
     };
 
   } // namespace models
 } // namespace eufs
+
 #endif //EUFS_VEHICLE_STATE_HPP

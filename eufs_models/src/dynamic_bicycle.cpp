@@ -4,7 +4,8 @@ namespace eufs
 {
   namespace models
   {
-    DynamicBicycle::DynamicBicycle(std::string &yaml_file) : VehicleModel(yaml_file) {}
+
+    DynamicBicycle::DynamicBicycle(const std::string &yaml_file) : VehicleModel(yaml_file) {}
 
     void DynamicBicycle::updateState(State &state, Input &input, const double dt)
     {
@@ -12,18 +13,18 @@ namespace eufs
 
       double Fz = _getNormalForce(state);
 
-      double slipAngleFront = getSlipAngle(state, input, true);
-      double FyF = _getFy(Fz, true, slipAngleFront);
+      double slip_angle_front = getSlipAngle(state, input, true);
+      double FyF = _getFy(Fz, true, slip_angle_front);
 
-      double slipAngleBack = getSlipAngle(state, input, false);
-      double FyR = _getFy(Fz, false, slipAngleBack);
+      double slip_angle_back = getSlipAngle(state, input, false);
+      double FyR = _getFy(Fz, false, slip_angle_back);
 
       // Drivetrain Model
       const double Fx = _getFx(state, input);
       // Dynamics
       const auto x_dot_dyn = _f(state, input, Fx, FyF, FyR);
       const auto x_next_dyn = state + x_dot_dyn * dt;
-      state = _f_kin_correction(x_next_dyn, state, input, Fx, dt);
+      state = _fKinCorrection(x_next_dyn, state, input, Fx, dt);
 
       // Set the acceleration based on the change in velocity
       state.a_x = x_dot_dyn.v_x;
@@ -39,25 +40,21 @@ namespace eufs
       const double v_x = std::max(1.0, x.v_x);
 
       State x_dot{};
+
       x_dot.x = std::cos(x.yaw) * x.v_x - std::sin(x.yaw) * x.v_y;
       x_dot.y = std::sin(x.yaw) * x.v_x + std::cos(x.yaw) * x.v_y;
-      x_dot.z = 0;
+
       x_dot.yaw = x.r_z;
+
       x_dot.v_x = (x.r_z * x.v_y) + (Fx - std::sin(u.delta) * FyF_tot) / _param.inertia.m;
       x_dot.v_y = ((std::cos(u.delta) * FyF_tot) + FyR_tot) / _param.inertia.m - (x.r_z * v_x);
-      x_dot.v_z = 0;
-      x_dot.r_x = 0;
-      x_dot.r_y = 0;
-      x_dot.r_z = (std::cos(u.delta) * FyF_tot * _param.kinematic.l_F - FyR_tot * _param.kinematic.l_R) / _param.inertia.I_z;
 
-      x_dot.a_x = 0;
-      x_dot.a_y = 0;
-      x_dot.a_z = 0;
+      x_dot.r_z = (std::cos(u.delta) * FyF_tot * _param.kinematic.l_F - FyR_tot * _param.kinematic.l_R) / _param.inertia.I_z;
 
       return x_dot;
     }
 
-    State DynamicBicycle::_f_kin_correction(const State &x_in, const State &x_state, const Input &u, const double Fx, const double dt)
+    State DynamicBicycle::_fKinCorrection(const State &x_in, const State &x_state, const Input &u, const double Fx, const double dt)
     {
       State x = x_in;
       const double v_x_dot = Fx / (_param.inertia.m);
@@ -97,7 +94,7 @@ namespace eufs
       return _param.aero.c_drag * x.v_x * x.v_x;
     }
 
-    double DynamicBicycle::_getFy(const double Fz, bool front, double slipAngle)
+    double DynamicBicycle::_getFy(const double Fz, bool front, double slip_angle)
     {
       const double Fz_axle = front ? _getDownForceFront(Fz) : _getDownForceRear(Fz);
 
@@ -105,7 +102,7 @@ namespace eufs
       const double C = _param.tire.C;
       const double D = _param.tire.D;
       const double E = _param.tire.E;
-      const double mu_y = D * std::sin(C * std::atan(B * (1.0 - E) * slipAngle + E * std::atan(B * slipAngle)));
+      const double mu_y = D * std::sin(C * std::atan(B * (1.0 - E) * slip_angle + E * std::atan(B * slip_angle)));
       const double Fy = Fz_axle * mu_y;
       return Fy;
     }

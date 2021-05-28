@@ -143,4 +143,5 @@ namespace gazebo_plugins
 
   } // namespace eufs_plugins
 } // namespace gazebo_plugins
+
 #endif //ROBOT_CONTROL_STATE_MACHINE_H
