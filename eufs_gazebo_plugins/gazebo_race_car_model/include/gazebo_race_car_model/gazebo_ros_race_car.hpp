@@ -90,7 +90,7 @@ namespace gazebo_plugins
       void initModel(const sdf::ElementPtr &sdf);
       void initNoise(const sdf::ElementPtr &sdf);
 
-      eufs_msgs::msg::CarState StateToCarStateMsg(const eufs::models::State &state);
+      eufs_msgs::msg::CarState stateToCarStateMsg(const eufs::models::State &state);
 
       void publishCarState();
       void publishWheelSpeeds();

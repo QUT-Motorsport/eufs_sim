@@ -355,7 +355,7 @@ namespace gazebo_plugins
       _model->SetLinearVel(vel);
     }
 
-    eufs_msgs::msg::CarState RaceCarModelPlugin::StateToCarStateMsg(const eufs::models::State &state)
+    eufs_msgs::msg::CarState RaceCarModelPlugin::stateToCarStateMsg(const eufs::models::State &state)
     {
       // Publish Car Info
       eufs_msgs::msg::CarState car_state;
@@ -398,7 +398,7 @@ namespace gazebo_plugins
 
     void RaceCarModelPlugin::publishCarState()
     {
-      eufs_msgs::msg::CarState car_state = StateToCarStateMsg(_state);
+      eufs_msgs::msg::CarState car_state = stateToCarStateMsg(_state);
 
       // Publish ground_truth
       if (_pub_ground_truth_car_state->get_subscription_count() > 0)
@@ -408,7 +408,7 @@ namespace gazebo_plugins
 
       // Add noise
       eufs::models::State state_noisy = _noise->applyNoise(_state);
-      eufs_msgs::msg::CarState car_state_noisy = StateToCarStateMsg(state_noisy);
+      eufs_msgs::msg::CarState car_state_noisy = stateToCarStateMsg(state_noisy);
 
       // Fill in covariance matrix
       const eufs::models::NoiseParam &noise_param = _noise->getNoiseParam();
