@@ -281,7 +281,6 @@ namespace gazebo_plugins
 
       // Create noise object
       _noise = std::make_unique<eufs::models::Noise>(yaml_name);
-      RCLCPP_INFO(_rosnode->get_logger(), _noise->getString());
     }
 
     void RaceCarModelPlugin::setPositionFromWorld()
