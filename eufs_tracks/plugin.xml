@@ -1,0 +1,17 @@
+<library path="src">
+    <class name="EUFSTrackGenerator" type="eufs_tracks.TrackGeneratorModule.EUFSTrackGenerator" base_class_type="rqt_gui_py::Plugin">
+        <description>
+            A Python GUI plugin for generating and copying random tracks
+        </description>
+        <qtgui>
+            <group>
+                <label>EUFS</label>
+                <icon type="theme">folder</icon>
+                <statustip>Plugins related to EUFS</statustip>
+            </group>
+            <label>EUFS Track Generator</label>
+            <icon type="theme">application-other</icon>
+            <statustip>A Python GUI plugin for generating and copying random tracks</statustip>
+        </qtgui>
+    </class>
+</library>
