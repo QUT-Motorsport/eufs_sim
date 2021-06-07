@@ -565,7 +565,11 @@ namespace gazebo_plugins
       }
 
       // Update z value from simulation
-      _state.z = _model->WorldPose().Pos().Z();
+      // This allows the state to have the most up to date value of z. Without this
+      // the vehicle in simulation has problems interacting with the ground plane.
+      // This may cause problems if the vehicle models start to take into account z
+      // but because this simulation isn't for flying cars we should be ok (at least for now).
+       _state.z = _model->WorldPose().Pos().Z();
 
       _last_sim_time = curTime;
       updateState(dt, curTime.Double());
