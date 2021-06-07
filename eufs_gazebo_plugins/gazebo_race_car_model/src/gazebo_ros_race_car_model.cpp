@@ -625,8 +625,6 @@ namespace gazebo_plugins
         _input.vel = 0;
       }
 
-      _vehicle->validateInput(_input);
-
       _time_last_cmd = _rosnode->now().seconds();
     }
 
