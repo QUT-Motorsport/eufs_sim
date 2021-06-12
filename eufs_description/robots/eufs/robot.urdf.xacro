@@ -55,12 +55,13 @@
     LIDAR: 1.700 0.0 -0.150
     STEREO CAM: -0.110 0.0 0.800 -->
 
-    <!-- TODO: Add sensors back -->
-<!--
     <xacro:sensor_imu parent="base_footprint" prefix="imu">
         <origin xyz="0.0 0.0 0.0" rpy="0 0 0"/>
     </xacro:sensor_imu>
 
+    <!-- TODO: Add sensors back -->
+
+<!--
     <xacro:sensor_gps parent="base_footprint" prefix="gps">
         <origin xyz="0.0 0.0 0.4" rpy="0 0 0"/>
     </xacro:sensor_gps>
