@@ -23,6 +23,7 @@
   <depend>nav_msgs</depend>
   <depend>visualization_msgs</depend>
   <depend>yaml-cpp</depend>
+  <depend>eufs_models</depend>
 
   <depend>gazebo</depend>
 

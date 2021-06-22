@@ -1,9 +1,6 @@
 add_library(gazebo_race_car_model SHARED
   src/gazebo_ros_race_car_model.cpp
-  src/state_machine.cpp
-  src/vehicle_model.cpp
-  src/models/dynamic_bicycle.cpp
-  src/models/point_mass.cpp)
+  src/state_machine.cpp)
 
 ament_target_dependencies(gazebo_race_car_model
   "gazebo_dev"
@@ -14,10 +11,11 @@ ament_target_dependencies(gazebo_race_car_model
   "geometry_msgs"
   "tf2"
   "tf2_geometry_msgs"
-  "yaml-cpp")
+  "yaml-cpp"
+  "eufs_models")
 
 target_include_directories(gazebo_race_car_model PUBLIC include)
-target_link_libraries(gazebo_race_car_model ${YAML_CPP_LIBRARIES})
+target_link_libraries(gazebo_race_car_model eufs_models::eufs_models ${YAML_CPP_LIBRARIES})
 ament_export_libraries(gazebo_race_car_model)
 
 install(TARGETS gazebo_race_car_model

@@ -22,12 +22,31 @@
  * SOFTWARE.
  */
 
-
 #ifndef GAZEBO_ROS_RACE_CAR_HPP
 #define GAZEBO_ROS_RACE_CAR_HPP
 
+#include <memory>
+
 // ROS Includes
 #include "rclcpp/rclcpp.hpp"
+
+// ROS msgs
+#include "eufs_msgs/msg/ackermann_drive_stamped.hpp"
+#include "eufs_msgs/msg/car_state.hpp"
+#include "eufs_msgs/msg/wheel_speeds_stamped.hpp"
+#include "nav_msgs/msg/odometry.hpp"
+#include "geometry_msgs/msg/pose_with_covariance_stamped.hpp"
+#include "geometry_msgs/msg/pose_with_covariance.hpp"
+#include "geometry_msgs/msg/twist_with_covariance.hpp"
+#include "geometry_msgs/msg/vector3.hpp"
+
+// ROS TF2
+#include <tf2/transform_datatypes.h>
+#include <tf2_ros/transform_broadcaster.h>
+#include <tf2/utils.h>
+
+// ROS  srvs
+#include <std_srvs/srv/trigger.hpp>
 
 // Gazebo Includes
 #include <gazebo/common/Time.hh>
@@ -36,46 +55,114 @@
 #include <gazebo/common/Plugin.hh>
 #include <gazebo_ros/node.hpp>
 
-// ROS RACE CAR PLUGIN
-#include "vehicle_model.hpp"
-#include "../../src/models/dynamic_bicycle.cpp"
-#include "../../src/models/point_mass.cpp"
+// EUFS includes
+#include "state_machine.hpp"
+#include "eufs_models/eufs_models.hpp"
 
-namespace gazebo_plugins {
-namespace eufs {
+namespace gazebo_plugins
+{
+  namespace eufs_plugins
+  {
 
-class RaceCarModelPlugin : public gazebo::ModelPlugin {
- public:
-  RaceCarModelPlugin();
+    class RaceCarModelPlugin : public gazebo::ModelPlugin
+    {
+    public:
+      RaceCarModelPlugin();
 
-  ~RaceCarModelPlugin() override;
+      ~RaceCarModelPlugin() override;
 
-  void Reset() override;
+      void Reset() override;
+      void Load(gazebo::physics::ModelPtr model, sdf::ElementPtr sdf) override;
 
-  void Load(gazebo::physics::ModelPtr _parent, sdf::ElementPtr _sdf) override;
+      eufs::models::State &getState() { return _state; }
+      eufs::models::Input &getInput() { return _input; }
 
-  std::shared_ptr<rclcpp::Node> rosnode;
+    private:
+      void update();
+      void updateState(double dt, gazebo::common::Time current_time);
 
-  gazebo::physics::WorldPtr world;
+      void setPositionFromWorld();
+      bool resetVehiclePosition(std::shared_ptr<std_srvs::srv::Trigger::Request> request, std::shared_ptr<std_srvs::srv::Trigger::Response> response);
+      void setModelState();
 
-  gazebo::physics::ModelPtr model;
+      void initVehicleModel(const sdf::ElementPtr &sdf);
+      void initParams(const sdf::ElementPtr &sdf);
+      void initModel(const sdf::ElementPtr &sdf);
+      void initNoise(const sdf::ElementPtr &sdf);
 
-  gazebo::transport::NodePtr gznode;
+      eufs_msgs::msg::CarState stateToCarStateMsg(const eufs::models::State &state);
 
- private:
-  void update();
+      void publishCarState();
+      void publishWheelSpeeds();
+      void publishOdom();
+      void publishTf();
 
-  double update_rate_;
+      void onCmd(const eufs_msgs::msg::AckermannDriveStamped::SharedPtr msg);
 
-  gazebo::event::ConnectionPtr updateConnection;
+      /// @brief Converts an euler orientation to quaternion
+      std::vector<double> ToQuaternion(std::vector<double> &euler);
 
-  eufs::VehicleModelPtr vehicle;
+      std::shared_ptr<rclcpp::Node> _rosnode;
+      eufs::models::VehicleModelPtr _vehicle;
 
-  gazebo::common::Time lastSimTime;
+      // States
+      std::unique_ptr<StateMachine> _state_machine;
+      eufs::models::State _state;
+      eufs::models::Input _input;
+      std::unique_ptr<eufs::models::Noise> _noise;
+      double _time_last_cmd;
+      ignition::math::Pose3d _offset;
 
-  gazebo::transport::PublisherPtr worldControlPub;
-};
+      // Gazebo
+      gazebo::physics::WorldPtr _world;
+      gazebo::physics::ModelPtr _model;
+      gazebo::event::ConnectionPtr _update_connection;
+      gazebo::common::Time _last_sim_time;
 
-} // namespace eufs
+      // Rate to publish ros messages
+      double _update_rate;
+      double _publish_rate;
+      gazebo::common::Time _time_last_published;
+
+      // ROS TF
+      bool _publish_tf;
+      std::string _reference_frame;
+      std::string _robot_frame;
+      std::unique_ptr<tf2_ros::TransformBroadcaster> _tf_br;
+
+      // ROS topic parameters
+      std::string _ground_truth_car_state_topic;
+      std::string _localisation_car_state_topic;
+      std::string _wheel_speeds_topic_name;
+      std::string _ground_truth_wheel_speeds_topic_name;
+      std::string _odom_topic_name;
+
+      // ROS Publishers
+      rclcpp::Publisher<eufs_msgs::msg::CarState>::SharedPtr _pub_ground_truth_car_state;
+      rclcpp::Publisher<eufs_msgs::msg::CarState>::SharedPtr _pub_localisation_car_state;
+      rclcpp::Publisher<eufs_msgs::msg::WheelSpeedsStamped>::SharedPtr _pub_wheel_speeds;
+      rclcpp::Publisher<eufs_msgs::msg::WheelSpeedsStamped>::SharedPtr _pub_ground_truth_wheel_speeds;
+      rclcpp::Publisher<nav_msgs::msg::Odometry>::SharedPtr _pub_odom;
+
+      // ROS Subscriptions
+      rclcpp::Subscription<eufs_msgs::msg::AckermannDriveStamped>::SharedPtr _sub_cmd;
+
+      // ROS Services
+      rclcpp::Service<std_srvs::srv::Trigger>::SharedPtr _reset_vehicle_pos_srv;
+
+      // Steering joints state
+      gazebo::physics::JointPtr _left_steering_joint;
+      gazebo::physics::JointPtr _right_steering_joint;
+
+      enum CommandMode
+      {
+        acceleration,
+        velocity
+      };
+      CommandMode _command_mode;
+    };
+
+  } // namespace eufs_plugins
 } // namespace gazebo_plugins
+
 #endif // GAZEBO_ROS_RACE_CAR_HPP

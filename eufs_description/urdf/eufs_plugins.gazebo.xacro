@@ -19,6 +19,7 @@
       <rear_left_wheel>rear_left_wheel_joint</rear_left_wheel>
       <rear_right_wheel>rear_right_wheel_joint</rear_right_wheel>
       <yaml_config>$(arg config_file)</yaml_config>
+      <noise_config>$(arg noise_config)</noise_config>
       <referenceFrame>map</referenceFrame>
       <robotFrame>base_footprint</robotFrame>
       <publishTransform>$(arg publish_tf)</publishTransform>
@@ -27,11 +28,6 @@
       <wheelSpeedsTopicName>/ros_can/wheel_speeds</wheelSpeedsTopicName>
       <groundTruthWheelSpeedsTopicName>/ground_truth/wheel_speeds</groundTruthWheelSpeedsTopicName>
       <odometryTopicName>/ground_truth/odom</odometryTopicName>
-      <positionNoise>0.0 0.0 0.0</positionNoise>
-      <orientationNoise>0.0 0.0 0.0</orientationNoise> <!-- Yaw Pitch Roll -->
-      <linearVelocityNoise>0.0 0.0 0.0</linearVelocityNoise>
-      <angularVelocityNoise>0.0 0.0 0.0</angularVelocityNoise>  <!-- X Y Z -->
-      <linearAccelerationNoise>0.0 0.0 0.0</linearAccelerationNoise>
       <commandMode>$(arg command_mode)</commandMode>
     </plugin>
   </gazebo>

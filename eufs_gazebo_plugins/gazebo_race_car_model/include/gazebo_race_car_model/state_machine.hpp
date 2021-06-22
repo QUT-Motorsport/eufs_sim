@@ -62,84 +62,86 @@
 * Further specs: https://www.imeche.org/docs/default-source/1-oscar/formula-student/2019/fs-ai/ads-dv-software-interface-specification-v0-2.pdf?sfvrsn=2
 */
 
-namespace gazebo_plugins {
-namespace eufs {
+namespace gazebo_plugins
+{
+  namespace eufs_plugins
+  {
 
-class StateMachine {
-public:
-    StateMachine(std::shared_ptr<rclcpp::Node> rosnode);  ///< Constructor
-    ~StateMachine();  ///< Destructor
+    class StateMachine
+    {
+    public:
+      StateMachine(std::shared_ptr<rclcpp::Node> rosnode); ///< Constructor
+      ~StateMachine();                                     ///< Destructor
 
-    void spinOnce(gazebo::common::Time current_time);  ///< Main operational loop
+      void spinOnce(gazebo::common::Time current_time); ///< Main operational loop
 
-    /**
+      /**
      * Return if the car can drive based on the as_state
      */
-    bool canDrive();
+      bool canDrive();
 
-private:
-    std::shared_ptr<rclcpp::Node> rosnode;
+    private:
+      std::shared_ptr<rclcpp::Node> rosnode;
 
-    uint16_t as_state_; ///< state machine state
+      uint16_t as_state_; ///< state machine state
 
-    uint16_t ami_state_;  ///< mission status
+      uint16_t ami_state_; ///< mission status
 
-    bool mission_completed_; ///< true only when selected mission has finished
+      bool mission_completed_; ///< true only when selected mission has finished
 
-    bool in_transition_; ///< true when the state machine is currently transitioning from AS_READY to AS_DRIVING
-    double transition_begin_; ///< the world timestamp in which the transition from AS_READY to AS_DRIVING was begun
+      bool in_transition_;      ///< true when the state machine is currently transitioning from AS_READY to AS_DRIVING
+      double transition_begin_; ///< the world timestamp in which the transition from AS_READY to AS_DRIVING was begun
 
-    rclcpp::Subscription<eufs_msgs::msg::CanState>::SharedPtr set_mission_sub_;
+      rclcpp::Subscription<eufs_msgs::msg::CanState>::SharedPtr set_mission_sub_;
 
-    // High level robot command
-    rclcpp::Subscription<std_msgs::msg::Bool>::SharedPtr completed_sub_;
+      // High level robot command
+      rclcpp::Subscription<std_msgs::msg::Bool>::SharedPtr completed_sub_;
 
-    rclcpp::Publisher<eufs_msgs::msg::CanState>::SharedPtr state_pub_;
-    rclcpp::Publisher<std_msgs::msg::String>::SharedPtr state_pub_str_;
+      rclcpp::Publisher<eufs_msgs::msg::CanState>::SharedPtr state_pub_;
+      rclcpp::Publisher<std_msgs::msg::String>::SharedPtr state_pub_str_;
 
-    rclcpp::Service<std_srvs::srv::Trigger>::SharedPtr reset_srv_;  ///< service to reset state machine
-    rclcpp::Service<std_srvs::srv::Trigger>::SharedPtr ebs_srv_; ///< service to request an emergency brake
+      rclcpp::Service<std_srvs::srv::Trigger>::SharedPtr reset_srv_; ///< service to reset state machine
+      rclcpp::Service<std_srvs::srv::Trigger>::SharedPtr ebs_srv_;   ///< service to request an emergency brake
 
-    /**
+      /**
      * Stores the state of the mission complete flag
      * @param message of mission complete
      */
-    void completedCallback(const std_msgs::msg::Bool::SharedPtr msg);
+      void completedCallback(const std_msgs::msg::Bool::SharedPtr msg);
 
-    /**
+      /**
       * Sets the mission of the car. Only available in simulation
       */
-    void setMission(const eufs_msgs::msg::CanState::SharedPtr state);
+      void setMission(const eufs_msgs::msg::CanState::SharedPtr state);
 
-    /**
+      /**
       * Resets the state of the internal state machine
       */
-    bool resetState(std::shared_ptr<std_srvs::srv::Trigger::Request> request, std::shared_ptr<std_srvs::srv::Trigger::Response> response);
+      bool resetState(std::shared_ptr<std_srvs::srv::Trigger::Request> request, std::shared_ptr<std_srvs::srv::Trigger::Response> response);
 
-    /**
+      /**
       * Puts the car into EMERGENCY_BRAKE state and stops it
       */
-    bool requestEBS(std::shared_ptr<std_srvs::srv::Trigger::Request> request, std::shared_ptr<std_srvs::srv::Trigger::Response> response);
+      bool requestEBS(std::shared_ptr<std_srvs::srv::Trigger::Request> request, std::shared_ptr<std_srvs::srv::Trigger::Response> response);
 
-    /**
+      /**
       * Loops through the internal state machine of the car
       * Based on: https://www.imeche.org/docs/default-source/1-oscar/formula-student/2019/fs-ai/ads-dv-software-interface-specification-v0-2.pdf?sfvrsn=2
       */
-    void updateState(gazebo::common::Time current_time);
+      void updateState(gazebo::common::Time current_time);
 
-    /**
+      /**
       * Publishes internal state and mission in a eufs_msgs/msg/CanState.msg format
       */
-    void publishState();
+      void publishState();
 
-    /**
+      /**
       * Creates a std_msgs/msg/String.msg version of the internal state and mission
       */
-    std_msgs::msg::String makeStateString(const eufs_msgs::msg::CanState &state);
+      std_msgs::msg::String makeStateString(const eufs_msgs::msg::CanState &state);
+    };
 
-};
-
-} // namespace eufs
+  } // namespace eufs_plugins
 } // namespace gazebo_plugins
 
 #endif //ROBOT_CONTROL_STATE_MACHINE_H

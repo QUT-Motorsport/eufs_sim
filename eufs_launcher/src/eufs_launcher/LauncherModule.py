@@ -141,10 +141,8 @@ class EUFSLauncher(Plugin):
         self.VEHICLE_MODEL_MENU.clear()
 
         # Remove "blacklisted" files (ones that don't define vehicle models)
-        models_filepath = join(
-            get_package_share_directory('eufs_gazebo_plugins'),
-            'gazebo_race_car_model/src/models/models.txt'
-        )
+        models_filepath = join(get_package_share_directory('eufs_models'),
+                               'models/models.txt')
         vehicle_models_ = open(models_filepath, "r")
         vehicle_models = [model.strip() for model in vehicle_models_]  # remove \n
 

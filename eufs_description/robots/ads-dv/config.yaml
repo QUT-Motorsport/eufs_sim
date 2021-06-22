@@ -10,6 +10,7 @@ kinematics:
   b_F: 1.22         # From COG to front axle [m]
   b_R: 1.22         # From COG to rear axle [m]
   w_front: 0.5      # Percentage of weight front
+  axle_width: 1.4
 
 tire:
   tire_coefficient: 1.0
