@@ -7,7 +7,7 @@
         <geometry>
           <plane>
             <normal>0 0 1</normal>
-            <size>120 120</size>
+            <size>1000 1000</size>
           </plane>
         </geometry>
         <surface>
@@ -27,21 +27,6 @@
         </surface>
         <max_contacts>10</max_contacts>
       </collision>
-      <visual name='visual'>
-        <cast_shadows>0</cast_shadows>
-        <geometry>
-          <plane>
-            <normal>0 0 1</normal>
-            <size>120 120</size>
-          </plane>
-        </geometry>
-        <material>
-          <script>
-            <uri>file://gazebo.material</uri>
-            <name>Gazebo/Asphalt</name>
-          </script>
-        </material>
-      </visual>
       <self_collide>0</self_collide>
       <kinematic>0</kinematic>
       <gravity>1</gravity>

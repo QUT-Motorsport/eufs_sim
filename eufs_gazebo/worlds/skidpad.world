@@ -8,13 +8,8 @@
       </camera>
     </gui>
 
-    <!-- WORLD SETTINGS -->
+    <!-- WORLD SETTINGS --> 
     <scene>
-      <sky>
-        <clouds>
-          <speed>3</speed>
-        </clouds>
-      </sky>
       <ambient>1.0 1.0 1.0 1.0</ambient>
       <shadows>false</shadows>
     </scene>
