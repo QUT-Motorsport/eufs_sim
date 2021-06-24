@@ -284,8 +284,8 @@ class EUFSLauncher(Plugin):
 
     def load_track_dropdowns(self):
         """
-                Peruses file system for files to add to the drop-down menus of the launcher.
-                """
+        Peruses file system for files to add to the drop-down menus of the launcher.
+        """
 
         # Clear the dropdowns
         self.TRACK_SELECTOR.clear()
