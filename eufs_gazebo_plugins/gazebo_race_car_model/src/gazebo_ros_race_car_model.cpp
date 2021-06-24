@@ -76,6 +76,7 @@ namespace gazebo_plugins
 
       // ROS Services
       _reset_vehicle_pos_srv = _rosnode->create_service<std_srvs::srv::Trigger>("/ros_can/reset_vehicle_pos", std::bind(&RaceCarModelPlugin::resetVehiclePosition, this, std::placeholders::_1, std::placeholders::_2));
+      _command_mode_srv = _rosnode->create_service<std_srvs::srv::Trigger>("/race_car_model/command_mode", std::bind(&RaceCarModelPlugin::returnCommandMode, this, std::placeholders::_1, std::placeholders::_2));
 
       // ROS Subscriptions
       _sub_cmd = _rosnode->create_subscription<eufs_msgs::msg::AckermannDriveStamped>("/cmd", 1, std::bind(&RaceCarModelPlugin::onCmd, this, std::placeholders::_1));
@@ -332,6 +333,22 @@ namespace gazebo_plugins
       _model->SetLinearVel(vel);
 
       return response->success;
+    }
+
+    void RaceCarModelPlugin::returnCommandMode(std::shared_ptr<std_srvs::srv::Trigger::Request>, std::shared_ptr<std_srvs::srv::Trigger::Response> response)
+    {
+      std::string command_mode_str;
+      if (_command_mode == acceleration)
+      {
+        command_mode_str = "acceleration";
+      }
+      else
+      {
+        command_mode_str = "velocity";
+      }
+
+      response->success = true;
+      response->message = command_mode_str;
     }
 
     void RaceCarModelPlugin::setModelState()
