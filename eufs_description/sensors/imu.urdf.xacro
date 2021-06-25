@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <robot name="sensor_imu" xmlns:xacro="http://www.ros.org/wiki/xacro">
-    <xacro:macro name="sensor_imu" params="prefix parent *origin">
+    <xacro:macro name="sensor_imu" params="prefix parent *origin noise:=0.08">
         <joint name="${prefix}_base_joint" type="fixed">
             <axis xyz="1 0 0"/>
             <xacro:insert_block name="origin"/>
@@ -33,15 +33,59 @@
                 <update_rate>1000</update_rate>
                 <visualize>true</visualize>
                 <topic>__default_topic__</topic>
+                <imu>
+                    <angular_velocity>
+                        <x>
+                            <noise type="gaussian">
+                                <mean>0.0</mean>
+                                <stddev>${noise}</stddev>
+                            </noise>
+                        </x>
+
+                        <y>
+                            <noise type="gaussian">
+                                <mean>0.0</mean>
+                                <stddev>${noise}</stddev>
+                            </noise>
+                        </y>
+
+                        <z>
+                            <noise type="gaussian">
+                                <mean>0.0</mean>
+                                <stddev>${noise}</stddev>
+                            </noise>
+                        </z>
+                    </angular_velocity>
+
+                    <linear_acceleration>
+                        <x>
+                            <noise type="gaussian">
+                                <mean>0.0</mean>
+                                <stddev>${noise}</stddev>
+                            </noise>
+                        </x>
+
+                        <y>
+                            <noise type="gaussian">
+                                <mean>0.0</mean>
+                                <stddev>${noise}</stddev>
+                            </noise>
+                        </y>
+
+                        <z>
+                            <noise type="gaussian">
+                                <mean>0.0</mean>
+                                <stddev>${noise}</stddev>
+                            </noise>
+                        </z>
+                    </linear_acceleration>
+                </imu>
                 <plugin filename="libgazebo_ros_imu_sensor.so" name="${prefix}">
-                    <topicName>${prefix}</topicName>
-                    <bodyName>${prefix}_base_link</bodyName>
-                    <updateRateHZ>1000.0</updateRateHZ>
-                    <gaussianNoise>0.0</gaussianNoise>
-                    <xyzOffset>0 0 0</xyzOffset>
-                    <rpyOffset>0 0 0</rpyOffset>
-                    <frameName>${prefix}_base_link</frameName>
-                    <initialOrientationAsReference>false</initialOrientationAsReference>
+                    <ros>
+                        <remapping>~/out:=${prefix}</remapping>
+                    </ros>
+                    <frame_name>${prefix}_base_link</frame_name>
+                    <initial_orientation_as_reference>false</initial_orientation_as_reference>
                 </plugin>
                 <pose>0 0 0 0 0 0</pose>
             </sensor>
