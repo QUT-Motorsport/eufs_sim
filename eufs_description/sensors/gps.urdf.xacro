@@ -82,7 +82,7 @@
                 </gps>
                 <plugin name="${prefix}_controller" filename="libgazebo_ros_gps_sensor.so">
                     <ros>
-                        <remapping>~/out:=/gps</remapping>
+                        <remapping>~/out:=${prefix}</remapping>
                     </ros>
 
                     <frame_name>${prefix}_base_link</frame_name>
