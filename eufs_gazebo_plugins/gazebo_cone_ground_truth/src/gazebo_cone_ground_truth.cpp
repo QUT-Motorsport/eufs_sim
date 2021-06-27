@@ -55,11 +55,7 @@ namespace gazebo_plugins
 
             this->time_last_published = rclcpp::Time(0);
 
-#if GAZEBO_MAJOR_VERSION >= 8
             this->track_model = _parent->GetWorld()->ModelByName("track");
-#else
-            this->track_model = _parent->GetWorld()->GetModel("track");
-#endif
             this->car_link = _parent->GetLink("base_footprint");
 
             this->update_rate_ = getDoubleParameter(_sdf, "updateRate", 0, "0.0 (as fast as possible)");
@@ -172,11 +168,7 @@ namespace gazebo_plugins
             cone_big_mesh_path = "file:///" + eufs_description_directory + "/meshes/cone_big.dae";
             cone_mesh_path = "file:///" + eufs_description_directory + "/meshes/cone.dae";
 
-#if GAZEBO_MAJOR_VERSION >= 8
             this->initial_car_pos_ = this->car_link->WorldPose();
-#else
-            this->initial_car_pos_ = this->car_link->GetWorldPose().Ign();
-#endif
 
             this->update_connection_ = gazebo::event::Events::ConnectWorldUpdateBegin(
                 std::bind(&GazeboConeGroundTruth::UpdateChild, this));
@@ -209,11 +201,7 @@ namespace gazebo_plugins
                 return;
             }
 
-#if GAZEBO_MAJOR_VERSION >= 8
             this->car_pos = this->car_link->WorldPose();
-#else
-            this->car_pos = this->car_link->GetWorldPose().Ign();
-#endif
 
             // Get the track message
             eufs_msgs::msg::ConeArrayWithCovariance cone_arrays_message = getConeArraysMessage();
@@ -305,14 +293,8 @@ namespace gazebo_plugins
                                                        gazebo::physics::LinkPtr link)
         {
             geometry_msgs::msg::Point point;
-
-#if GAZEBO_MAJOR_VERSION >= 8
             point.x = link->WorldPose().Pos().X();
             point.y = link->WorldPose().Pos().Y();
-#else
-            point.x = link->GetWorldPose().Ign().Pos().X();
-            point.y = link->GetWorldPose().Ign().Pos().Y();
-#endif
             point.z = 0;
 
             ConeType cone_type = this->getConeType(link);
