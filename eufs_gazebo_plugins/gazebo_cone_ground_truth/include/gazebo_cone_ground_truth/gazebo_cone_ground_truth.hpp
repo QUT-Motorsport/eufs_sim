@@ -166,6 +166,7 @@ namespace gazebo_plugins
       double camera_fov;
       double camera_a;
       double camera_b;
+      double camera_noise_percentage;
       bool lidar_on;
 
       double update_rate_;

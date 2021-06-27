@@ -74,6 +74,7 @@ namespace gazebo_plugins
             this->camera_fov = getDoubleParameter(_sdf, "cameraFOV", 1.918889, "1.918889  (110 degrees)");
             this->camera_a = getDoubleParameter(_sdf, "perceptionCameraDepthNoiseParameterA", 0.0184, "0.0184");
             this->camera_b = getDoubleParameter(_sdf, "perceptionCameraDepthNoiseParameterB", 0.2106, "0.2106");
+            this->camera_noise_percentage = getDoubleParameter(_sdf, "perceptionCameraNoisePercentage", 0.4, "0.4");
             this->lidar_on = getBoolParameter(_sdf, "lidarOn", true, "true");
 
             this->track_frame_ = getStringParameter(_sdf, "trackFrame", "map", "map");
@@ -679,19 +680,20 @@ namespace gazebo_plugins
         {
             for (unsigned int i = 0; i < cone_array.size(); i++)
             {
-                // By default we use just lidar noise
-                auto x_noise = noise.X();
-                auto y_noise = noise.Y();
+                // Lidar noise
+                auto lidar_x_noise = noise.X();
+                auto lidar_y_noise = noise.Y();
 
-                // But if only the camera sees it, we use camera noise specifically
-                if (!inFOVOfLidar(cone_array[i]) || !inRangeOfLidar(cone_array[i]))
-                {
-                    auto dist = sqrt(
-                        cone_array[i].point.x * cone_array[i].point.x +
-                        cone_array[i].point.y * cone_array[i].point.y);
-                    x_noise = camera_a * std::exp(camera_b * dist);
-                    y_noise = x_noise / 5;
-                }
+                // Camera noise
+                auto dist = sqrt(
+                    cone_array[i].point.x * cone_array[i].point.x +
+                    cone_array[i].point.y * cone_array[i].point.y);
+                auto camera_x_noise = camera_a * std::exp(camera_b * dist);
+                auto camera_y_noise = camera_x_noise / 5;
+
+                // Fuse noise
+                auto x_noise = (camera_noise_percentage * camera_x_noise) + ((1 - camera_noise_percentage) * lidar_x_noise);
+                auto y_noise = (camera_noise_percentage * camera_y_noise) + ((1 - camera_noise_percentage) * lidar_y_noise);
 
                 // Apply noise
                 cone_array[i].point.x += GaussianKernel(0, x_noise);
