@@ -70,7 +70,7 @@ namespace gazebo_plugins
             this->camera_min_view_distance = getDoubleParameter(_sdf, "cameraMinViewDistance", 1, "1");
             this->lidar_x_view_distance = getDoubleParameter(_sdf, "lidarXViewDistance", 20, "20");
             this->lidar_y_view_distance = getDoubleParameter(_sdf, "lidarYViewDistance", 10, "10");
-            this->lidar_fov = getDoubleParameter(_sdf, "lidarFOV", 6.283185, "6.283185  (360 degrees)");
+            this->lidar_fov = getDoubleParameter(_sdf, "lidarFOV", 3.141593, "3.141593  (180 degrees)");
             this->camera_fov = getDoubleParameter(_sdf, "cameraFOV", 1.918889, "1.918889  (110 degrees)");
             this->camera_a = getDoubleParameter(_sdf, "perceptionCameraDepthNoiseParameterA", 0.0184, "0.0184");
             this->camera_b = getDoubleParameter(_sdf, "perceptionCameraDepthNoiseParameterB", 0.2106, "0.2106");
@@ -180,10 +180,10 @@ namespace gazebo_plugins
             this->update_connection_ = gazebo::event::Events::ConnectWorldUpdateBegin(
                 std::bind(&GazeboConeGroundTruth::UpdateChild, this));
 
-            RCLCPP_INFO(this->rosnode_->get_logger(), "ConeGroundTruthPlugin Loaded");
-
             //  Store initial track
             this->initial_track = this->getConeArraysMessage();
+
+            RCLCPP_INFO(this->rosnode_->get_logger(), "ConeGroundTruthPlugin Loaded");
 
         } // GazeboConeGroundTruth
 
