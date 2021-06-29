@@ -55,11 +55,7 @@ namespace gazebo_plugins
 
             this->time_last_published = rclcpp::Time(0);
 
-#if GAZEBO_MAJOR_VERSION >= 8
             this->track_model = _parent->GetWorld()->ModelByName("track");
-#else
-            this->track_model = _parent->GetWorld()->GetModel("track");
-#endif
             this->car_link = _parent->GetLink("base_footprint");
 
             this->update_rate_ = getDoubleParameter(_sdf, "updateRate", 0, "0.0 (as fast as possible)");
@@ -70,10 +66,11 @@ namespace gazebo_plugins
             this->camera_min_view_distance = getDoubleParameter(_sdf, "cameraMinViewDistance", 1, "1");
             this->lidar_x_view_distance = getDoubleParameter(_sdf, "lidarXViewDistance", 20, "20");
             this->lidar_y_view_distance = getDoubleParameter(_sdf, "lidarYViewDistance", 10, "10");
-            this->lidar_fov = getDoubleParameter(_sdf, "lidarFOV", 6.283185, "6.283185  (360 degrees)");
+            this->lidar_fov = getDoubleParameter(_sdf, "lidarFOV", 3.141593, "3.141593  (180 degrees)");
             this->camera_fov = getDoubleParameter(_sdf, "cameraFOV", 1.918889, "1.918889  (110 degrees)");
             this->camera_a = getDoubleParameter(_sdf, "perceptionCameraDepthNoiseParameterA", 0.0184, "0.0184");
             this->camera_b = getDoubleParameter(_sdf, "perceptionCameraDepthNoiseParameterB", 0.2106, "0.2106");
+            this->camera_noise_percentage = getDoubleParameter(_sdf, "perceptionCameraNoisePercentage", 0.4, "0.4");
             this->lidar_on = getBoolParameter(_sdf, "lidarOn", true, "true");
 
             this->track_frame_ = getStringParameter(_sdf, "trackFrame", "map", "map");
@@ -171,19 +168,15 @@ namespace gazebo_plugins
             cone_big_mesh_path = "file:///" + eufs_description_directory + "/meshes/cone_big.dae";
             cone_mesh_path = "file:///" + eufs_description_directory + "/meshes/cone.dae";
 
-#if GAZEBO_MAJOR_VERSION >= 8
             this->initial_car_pos_ = this->car_link->WorldPose();
-#else
-            this->initial_car_pos_ = this->car_link->GetWorldPose().Ign();
-#endif
 
             this->update_connection_ = gazebo::event::Events::ConnectWorldUpdateBegin(
                 std::bind(&GazeboConeGroundTruth::UpdateChild, this));
 
-            RCLCPP_INFO(this->rosnode_->get_logger(), "ConeGroundTruthPlugin Loaded");
-
             //  Store initial track
             this->initial_track = this->getConeArraysMessage();
+
+            RCLCPP_INFO(this->rosnode_->get_logger(), "ConeGroundTruthPlugin Loaded");
 
         } // GazeboConeGroundTruth
 
@@ -208,11 +201,7 @@ namespace gazebo_plugins
                 return;
             }
 
-#if GAZEBO_MAJOR_VERSION >= 8
             this->car_pos = this->car_link->WorldPose();
-#else
-            this->car_pos = this->car_link->GetWorldPose().Ign();
-#endif
 
             // Get the track message
             eufs_msgs::msg::ConeArrayWithCovariance cone_arrays_message = getConeArraysMessage();
@@ -304,14 +293,8 @@ namespace gazebo_plugins
                                                        gazebo::physics::LinkPtr link)
         {
             geometry_msgs::msg::Point point;
-
-#if GAZEBO_MAJOR_VERSION >= 8
             point.x = link->WorldPose().Pos().X();
             point.y = link->WorldPose().Pos().Y();
-#else
-            point.x = link->GetWorldPose().Ign().Pos().X();
-            point.y = link->GetWorldPose().Ign().Pos().Y();
-#endif
             point.z = 0;
 
             ConeType cone_type = this->getConeType(link);
@@ -679,19 +662,20 @@ namespace gazebo_plugins
         {
             for (unsigned int i = 0; i < cone_array.size(); i++)
             {
-                // By default we use just lidar noise
-                auto x_noise = noise.X();
-                auto y_noise = noise.Y();
+                // Lidar noise
+                auto lidar_x_noise = noise.X();
+                auto lidar_y_noise = noise.Y();
 
-                // But if only the camera sees it, we use camera noise specifically
-                if (!inFOVOfLidar(cone_array[i]) || !inRangeOfLidar(cone_array[i]))
-                {
-                    auto dist = sqrt(
-                        cone_array[i].point.x * cone_array[i].point.x +
-                        cone_array[i].point.y * cone_array[i].point.y);
-                    x_noise = camera_a * std::exp(camera_b * dist);
-                    y_noise = x_noise / 5;
-                }
+                // Camera noise
+                auto dist = sqrt(
+                    cone_array[i].point.x * cone_array[i].point.x +
+                    cone_array[i].point.y * cone_array[i].point.y);
+                auto camera_x_noise = camera_a * std::exp(camera_b * dist);
+                auto camera_y_noise = camera_x_noise / 5;
+
+                // Fuse noise
+                auto x_noise = (camera_noise_percentage * camera_x_noise) + ((1 - camera_noise_percentage) * lidar_x_noise);
+                auto y_noise = (camera_noise_percentage * camera_y_noise) + ((1 - camera_noise_percentage) * lidar_y_noise);
 
                 // Apply noise
                 cone_array[i].point.x += GaussianKernel(0, x_noise);
