@@ -83,6 +83,7 @@ namespace gazebo_plugins
 
       void setPositionFromWorld();
       bool resetVehiclePosition(std::shared_ptr<std_srvs::srv::Trigger::Request> request, std::shared_ptr<std_srvs::srv::Trigger::Response> response);
+      void returnCommandMode(std::shared_ptr<std_srvs::srv::Trigger::Request>, std::shared_ptr<std_srvs::srv::Trigger::Response> response);
       void setModelState();
 
       void initVehicleModel(const sdf::ElementPtr &sdf);
@@ -149,6 +150,7 @@ namespace gazebo_plugins
 
       // ROS Services
       rclcpp::Service<std_srvs::srv::Trigger>::SharedPtr _reset_vehicle_pos_srv;
+      rclcpp::Service<std_srvs::srv::Trigger>::SharedPtr _command_mode_srv;
 
       // Steering joints state
       gazebo::physics::JointPtr _left_steering_joint;

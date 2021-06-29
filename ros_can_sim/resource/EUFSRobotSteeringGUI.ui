@@ -18,24 +18,6 @@
       <item>
         <layout class="QHBoxLayout" name="horizontalLayout">
           <item>
-            <widget class="QLabel" name="InputSelectLabel">
-              <property name="text">
-                <string>Input</string>
-              </property>
-            </widget>
-          </item>
-          <item>
-            <widget class="QComboBox" name="input_select_menu">
-              <property name="toolTip">
-                <string>Select the input to be sent to the car</string>
-              </property>
-            </widget>
-          </item>
-        </layout>
-      </item>
-      <item>
-        <layout class="QHBoxLayout" name="horizontalLayout">
-          <item>
             <widget class="QLineEdit" name="topic_line_edit">
               <property name="toolTip">
                 <string>Topic to send AckermannDriveStamped message to</string>
@@ -48,7 +30,7 @@
           <item>
             <widget class="QPushButton" name="stop_push_button">
               <property name="toolTip">
-                <string>Reset velocities to zero</string>
+                <string>Reset sliders to zero</string>
               </property>
               <property name="text">
                 <string>Stop</string>
@@ -180,16 +162,13 @@
               <item>
                 <widget class="QDoubleSpinBox" name="max_linear_double_spin_box">
                   <property name="toolTip">
-                    <string>Maximum linear  velocity</string>
+                    <string>Maximum linear velocity</string>
                   </property>
                   <property name="maximum">
                     <double>10.000000000000000</double>
                   </property>
                   <property name="singleStep">
                     <double>0.100000000000000</double>
-                  </property>
-                  <property name="value">
-                    <double>1.000000000000000</double>
                   </property>
                 </widget>
               </item>
@@ -209,10 +188,10 @@
               <item>
                 <widget class="QLabel" name="current_linear_label">
                   <property name="toolTip">
-                    <string>Current linear velocity</string>
+                    <string>Current output</string>
                   </property>
                   <property name="text">
-                    <string>0.0 m/s</string>
+                    <string>0.00</string>
                   </property>
                 </widget>
               </item>
@@ -232,7 +211,7 @@
               <item>
                 <widget class="QDoubleSpinBox" name="min_linear_double_spin_box">
                   <property name="toolTip">
-                    <string>Minimum linear  velocity</string>
+                    <string>Minimum linear velocity</string>
                   </property>
                   <property name="minimum">
                     <double>-10.000000000000000</double>
@@ -242,9 +221,6 @@
                   </property>
                   <property name="singleStep">
                     <double>0.100000000000000</double>
-                  </property>
-                  <property name="value">
-                    <double>-1.000000000000000</double>
                   </property>
                 </widget>
               </item>
@@ -268,10 +244,10 @@
       <item>
         <widget class="QSlider" name="angular_slider">
           <property name="minimum">
-            <number>-3000</number>
+            <number>-1000</number>
           </property>
           <property name="maximum">
-            <number>3000</number>
+            <number>1000</number>
           </property>
           <property name="singleStep">
             <number>10</number>
@@ -301,7 +277,7 @@
                 </size>
               </property>
               <property name="toolTip">
-                <string>Increase angular velocity</string>
+                <string>Increase steering angle</string>
               </property>
               <property name="text">
                 <string>&lt;</string>
@@ -330,7 +306,7 @@
                 </size>
               </property>
               <property name="toolTip">
-                <string>Reset angular velocity</string>
+                <string>Reset steering angle</string>
               </property>
               <property name="text">
                 <string>0</string>
@@ -359,7 +335,7 @@
                 </size>
               </property>
               <property name="toolTip">
-                <string>Decrease angular velocity</string>
+                <string>Decrease steering angle</string>
               </property>
               <property name="text">
                 <string>&gt;</string>
@@ -373,7 +349,7 @@
           <item>
             <widget class="QDoubleSpinBox" name="max_angular_double_spin_box">
               <property name="toolTip">
-                <string>Maximum angular velocity</string>
+                <string>Maximum steering angle</string>
               </property>
               <property name="maximum">
                 <double>10.000000000000000</double>
@@ -382,7 +358,7 @@
                 <double>0.100000000000000</double>
               </property>
               <property name="value">
-                <double>3.000000000000000</double>
+                <double>1.000000000000000</double>
               </property>
             </widget>
           </item>
@@ -402,10 +378,10 @@
           <item>
             <widget class="QLabel" name="current_angular_label">
               <property name="toolTip">
-                <string>Current angular velocity</string>
+                <string>Current steering angle</string>
               </property>
               <property name="text">
-                <string>0.0 rad/s</string>
+                <string>0.0 rad</string>
               </property>
             </widget>
           </item>
@@ -425,7 +401,7 @@
           <item>
             <widget class="QDoubleSpinBox" name="min_angular_double_spin_box">
               <property name="toolTip">
-                <string>Minimum angular velocity</string>
+                <string>Minimum steering angle</string>
               </property>
               <property name="minimum">
                 <double>-10.000000000000000</double>
@@ -437,7 +413,7 @@
                 <double>0.100000000000000</double>
               </property>
               <property name="value">
-                <double>-3.000000000000000</double>
+                <double>-1.000000000000000</double>
               </property>
             </widget>
           </item>
