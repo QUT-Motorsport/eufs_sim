@@ -76,7 +76,7 @@
           <update_rate>60.0</update_rate>
           <visualize>true</visualize>
           <camera name="${prefix}_left">
-            <pose>0 0.06 0 0 0 0</pose>
+            <pose>0 0.0 0 0 0 0</pose>
             <horizontal_fov>1.91986</horizontal_fov>
             <image>
               <width>1280</width>
@@ -116,6 +116,10 @@
           <plugin name="stereo_camera_controller" filename="libgazebo_ros_camera.so">
             <ros>
               <parameter name="update_rate" type="double">60.0</parameter>
+              <remapping>/zed/zed_left/camera_info:=/zed/left/camera_info</remapping>
+              <remapping>/zed/zed_left/image_raw:=/zed/left/image_rect_color</remapping>
+              <remapping>/zed/zed_right/camera_info:=/zed/right/camera_info</remapping>
+              <remapping>/zed/zed_right/image_raw:=/zed/right/image_rect_color</remapping>
             </ros>
 
             <camera_name>${prefix}</camera_name>
