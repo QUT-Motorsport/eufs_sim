@@ -26,21 +26,21 @@
                     <box size=".001 .001 .001"/>
                 </geometry>
             </collision>
-            <!--            <visual>-->
-<!--                <origin rpy="0 0 0" xyz="0 0 0"/>-->
-<!--                <material name="gps_color">-->
-<!--                    <color rgba="1 1 1 1"/>-->
-<!--                </material>-->
-<!--                <geometry>-->
-<!--                    <mesh filename="file://$(find eufs_description)/meshes/antenna_3GO16.stl" scale="1.0 1.0 1.0"/>-->
-<!--                </geometry>-->
-<!--            </visual>-->
-<!--            <collision>-->
-<!--                <origin rpy="0 0 0" xyz="0 0 0"/>-->
-<!--                <geometry>-->
-<!--                    <mesh filename="file://$(find eufs_description)/meshes/antenna_3GO16.stl" scale="1.0 1.0 1.0"/>-->
-<!--                </geometry>-->
-<!--            </collision>-->
+<!--        <visual>-->
+<!--            <origin rpy="0 0 0" xyz="0 0 0"/>-->
+<!--            <material name="gps_color">-->
+<!--                <color rgba="1 1 1 1"/>-->
+<!--            </material>-->
+<!--            <geometry>-->
+<!--                <mesh filename="file://$(find eufs_description)/meshes/antenna_3GO16.stl" scale="1.0 1.0 1.0"/>-->
+<!--            </geometry>-->
+<!--        </visual>-->
+<!--        <collision>-->
+<!--            <origin rpy="0 0 0" xyz="0 0 0"/>-->
+<!--            <geometry>-->
+<!--                <mesh filename="file://$(find eufs_description)/meshes/antenna_3GO16.stl" scale="1.0 1.0 1.0"/>-->
+<!--            </geometry>-->
+<!--        </collision>-->
         </link>
         <gazebo reference="${prefix}_base_link">
             <material>Gazebo/White</material>
@@ -49,19 +49,19 @@
         <gazebo reference="${prefix}_base_link">
             <sensor name="gps" type="gps">
                 <always_on>true</always_on>
-                <update_rate>10</update_rate>
+                <update_rate>5</update_rate>
                 <gps>
                     <position_sensing>
                         <horizontal>
                             <noise type="gaussian">
                                 <mean>0.0</mean>
-                                <stddev>3</stddev>
+                                <stddev>2</stddev>
                             </noise>
                         </horizontal>
                         <vertical>
                             <noise type="gaussian">
                                 <mean>0.0</mean>
-                                <stddev>3</stddev>
+                                <stddev>2.5</stddev>
                             </noise>
                         </vertical>
                     </position_sensing>
@@ -69,13 +69,13 @@
                         <horizontal>
                             <noise type="gaussian">
                                 <mean>0.0</mean>
-                                <stddev>0.2</stddev>
+                                <stddev>0.1</stddev>
                             </noise>
                         </horizontal>
                         <vertical>
                             <noise type="gaussian">
                                 <mean>0.0</mean>
-                                <stddev>0.2</stddev>
+                                <stddev>0.1</stddev>
                             </noise>
                         </vertical>
                     </velocity_sensing>
