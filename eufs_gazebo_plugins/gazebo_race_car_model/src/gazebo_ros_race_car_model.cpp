@@ -76,6 +76,7 @@ namespace gazebo_plugins
 
       // ROS Services
       _reset_vehicle_pos_srv = _rosnode->create_service<std_srvs::srv::Trigger>("/ros_can/reset_vehicle_pos", std::bind(&RaceCarModelPlugin::resetVehiclePosition, this, std::placeholders::_1, std::placeholders::_2));
+      _command_mode_srv = _rosnode->create_service<std_srvs::srv::Trigger>("/race_car_model/command_mode", std::bind(&RaceCarModelPlugin::returnCommandMode, this, std::placeholders::_1, std::placeholders::_2));
 
       // ROS Subscriptions
       _sub_cmd = _rosnode->create_subscription<eufs_msgs::msg::AckermannDriveStamped>("/cmd", 1, std::bind(&RaceCarModelPlugin::onCmd, this, std::placeholders::_1));
@@ -334,6 +335,22 @@ namespace gazebo_plugins
       return response->success;
     }
 
+    void RaceCarModelPlugin::returnCommandMode(std::shared_ptr<std_srvs::srv::Trigger::Request>, std::shared_ptr<std_srvs::srv::Trigger::Response> response)
+    {
+      std::string command_mode_str;
+      if (_command_mode == acceleration)
+      {
+        command_mode_str = "acceleration";
+      }
+      else
+      {
+        command_mode_str = "velocity";
+      }
+
+      response->success = true;
+      response->message = command_mode_str;
+    }
+
     void RaceCarModelPlugin::setModelState()
     {
       double yaw = _state.yaw + _offset.Rot().Yaw();
@@ -440,35 +457,37 @@ namespace gazebo_plugins
 
     void RaceCarModelPlugin::publishWheelSpeeds()
     {
-      eufs_msgs::msg::WheelSpeedsStamped wheel_speeds;
+      eufs_msgs::msg::WheelSpeedsStamped wheel_speeds_stamped;
+      eufs_msgs::msg::WheelSpeeds wheel_speeds;
 
-      wheel_speeds.header.stamp = _rosnode->now();
-      wheel_speeds.header.frame_id = _robot_frame;
+      wheel_speeds_stamped.header.stamp = _rosnode->now();
+      wheel_speeds_stamped.header.frame_id = _robot_frame;
 
-      wheel_speeds.steering = _input.delta;
+      wheel_speeds = _vehicle->getWheelSpeeds(_state, _input);
 
-      wheel_speeds.lf_speed = 999;
-      wheel_speeds.rf_speed = 999;
-
-      float PI = 3.14159265;
-      float wheel_circumference = 2 * PI * _vehicle->getParam().tire.radius;
-
-      // Calculate Wheel speeds
-      wheel_speeds.lb_speed = (_state.v_x / wheel_circumference) * 60;
-      wheel_speeds.rb_speed = (_state.v_x / wheel_circumference) * 60;
+      wheel_speeds_stamped.steering = wheel_speeds.steering;
+      wheel_speeds_stamped.lf_speed = wheel_speeds.lf_speed;
+      wheel_speeds_stamped.rf_speed = wheel_speeds.rf_speed;
+      wheel_speeds_stamped.lb_speed = wheel_speeds.lb_speed;
+      wheel_speeds_stamped.rb_speed = wheel_speeds.rb_speed;
 
       // Publish ground truth
       if (_pub_ground_truth_wheel_speeds->get_subscription_count() > 0)
       {
-        _pub_ground_truth_wheel_speeds->publish(wheel_speeds);
+        _pub_ground_truth_wheel_speeds->publish(wheel_speeds_stamped);
       }
 
-      // TODO: Add Noise to Wheel speeds here
+      wheel_speeds = _noise->applyNoiseToWheelSpeeds(wheel_speeds);
+
+      wheel_speeds_stamped.lf_speed = wheel_speeds.lf_speed;
+      wheel_speeds_stamped.rf_speed = wheel_speeds.rf_speed;
+      wheel_speeds_stamped.lb_speed = wheel_speeds.lb_speed;
+      wheel_speeds_stamped.rb_speed = wheel_speeds.rb_speed;
 
       // Publish with Noise
       if (_pub_wheel_speeds->get_subscription_count() > 0)
       {
-        _pub_wheel_speeds->publish(wheel_speeds);
+        _pub_wheel_speeds->publish(wheel_speeds_stamped);
       }
     }
 

@@ -29,6 +29,7 @@
 # POSSIBILITY OF SUCH DAMAGE.
 
 import os
+import time
 
 # qt
 from qt_gui.plugin import Plugin
@@ -40,6 +41,7 @@ from python_qt_binding.QtWidgets import QComboBox, QShortcut, QWidget
 # ROS
 from ament_index_python.packages import get_package_share_directory
 import rclpy
+from std_srvs.srv import Trigger
 from eufs_msgs.msg import AckermannDriveStamped
 
 
@@ -52,6 +54,7 @@ class EUFSRobotSteeringGUI(Plugin):
         self.setObjectName('EUFSRobotSteeringGUI')
 
         self.node = context.node
+        self.logger = self.node.get_logger()
 
         # Create QWidget
         self._widget = QWidget()
@@ -75,11 +78,6 @@ class EUFSRobotSteeringGUI(Plugin):
         context.add_widget(self._widget)
 
         self._publisher = None
-
-        self.inputs = ["Speed", "Acceleration", "Jerk"]
-
-        self._widget.input_select_menu.addItems(self.inputs)
-        self._widget.input_select_menu.setCurrentIndex(1)
 
         self._widget.topic_line_edit.textChanged.connect(
             self._on_topic_changed)
@@ -188,12 +186,64 @@ class EUFSRobotSteeringGUI(Plugin):
         self._widget.decrease_angular_push_button.setToolTip(
             self._widget.decrease_angular_push_button.toolTip() + ' ' + self.tr('([Shift +] D)'))
 
+        # Service to query the launcher for command mode on startup
+        self.command_mode_srv = self.node.create_client(
+            Trigger, "/race_car_model/command_mode")
+        self.command_mode = self.request_command_mode()
+
+        # Configure default maximum slider value
+        default_vel_range = 5.00
+        default_acc_range = 1.00
+
+        if self.command_mode == "acceleration":
+            self._widget.max_linear_double_spin_box.setValue(default_acc_range)
+            self._widget.min_linear_double_spin_box.setValue(-default_acc_range)
+            self.slider_units = "m/s^2"
+        elif self.command_mode == "velocity":
+            self._widget.max_linear_double_spin_box.setValue(default_vel_range)
+            self._widget.min_linear_double_spin_box.setValue(-default_vel_range)
+            self.slider_units = "m/s"
+        else:
+            self.logger.error(
+                "Invalid command mode: '{}', must be 'acceleration' or 'velocity'".format(self.command_mode))
+
+        # Update sliders to use configurable units
+        self._widget.current_linear_label.setText(
+            ('%0.2f ' + self.slider_units) % (self._widget.linear_slider.value() / EUFSRobotSteeringGUI.slider_factor))
+
+        self._widget.max_linear_double_spin_box.setToolTip(
+            "Maximum linear " + self.command_mode)
+        self._widget.min_linear_double_spin_box.setToolTip(
+            "Minimum linear " + self.command_mode)
+        self._widget.reset_linear_push_button.setToolTip(
+            "Reset linear " + self.command_mode)
+        self._widget.increase_linear_push_button.setToolTip(
+            "Increase linear " + self.command_mode)
+        self._widget.decrease_linear_push_button.setToolTip(
+            "Decrease linear " + self.command_mode)
+
         # timer to consecutively send AckermannDriveStamped messages
         self._update_parameter_timer = QTimer(self)
         self._update_parameter_timer.timeout.connect(
             self._on_parameter_changed)
         self._update_parameter_timer.start(100)
         self.zero_cmd_sent = False
+
+    def request_command_mode(self):
+        """Requests command mode from launcher"""
+        while not self.command_mode_srv.wait_for_service(timeout_sec=4.0):
+            self.logger.debug('command mode service not available, waiting again...')
+
+        req = Trigger.Request()
+        future = self.command_mode_srv.call_async(req)
+
+        while not future.done():
+            self.logger.debug("Waiting for command mode request to complete...")
+            time.sleep(0.1)
+
+        self.logger.debug("command mode request completed.")
+        result = future.result()
+        return result.message
 
     def _on_topic_changed(self, topic):
         self._unregister_publisher()
@@ -206,18 +256,23 @@ class EUFSRobotSteeringGUI(Plugin):
             return
 
         if self.topic == '':
-            self.node.get_logger().error("Could NOT set EUFS Robot Steering GUI publisher's topic to be empty")
+            self.logger.error(
+                "Could NOT set EUFS Robot Steering GUI publisher's topic to be empty")
             return
 
         # Catches "topics can't end in backslash" error
         try:
-            self._publisher = self.node.create_publisher(AckermannDriveStamped, self.topic, 10)
+            self._publisher = self.node.create_publisher(
+                AckermannDriveStamped, self.topic, 10)
             if log:
-                self.node.get_logger().info("Set EUFS Robot Steering GUI publisher's topic to: " + self.topic)
+                self.logger.info(
+                    "Set EUFS Robot Steering GUI publisher's topic to: " + self.topic)
             else:
-                self.node.get_logger().debug("Set EUFS Robot Steering GUI publisher's topic to: " + self.topic)
+                self.logger.debug(
+                    "Set EUFS Robot Steering GUI publisher's topic to: " + self.topic)
         except rclpy.exceptions.InvalidTopicNameException:
-            self.node.get_logger().error("Could NOT set EUFS Robot Steering GUI publisher's topic to: " + self.topic)
+            self.logger.error(
+                "Could NOT set EUFS Robot Steering GUI publisher's topic to: " + self.topic)
             return
 
     def _on_stop_pressed(self):
@@ -232,12 +287,12 @@ class EUFSRobotSteeringGUI(Plugin):
 
     def _on_linear_slider_changed(self):
         self._widget.current_linear_label.setText(
-            '%0.2f m/s' % (self._widget.linear_slider.value() / EUFSRobotSteeringGUI.slider_factor))
+            ('%0.2f ' + self.slider_units) % (self._widget.linear_slider.value() / EUFSRobotSteeringGUI.slider_factor))
         self._on_parameter_changed()
 
     def _on_angular_slider_changed(self):
         self._widget.current_angular_label.setText(
-            '%0.2f rad/s' % (self._widget.angular_slider.value() / EUFSRobotSteeringGUI.slider_factor))
+            '%0.2f rad' % (self._widget.angular_slider.value() / EUFSRobotSteeringGUI.slider_factor))
         self._on_parameter_changed()
 
     def _on_increase_linear_pressed(self):
@@ -308,14 +363,10 @@ class EUFSRobotSteeringGUI(Plugin):
 
         drive.drive.acceleration = 0.0
         drive.drive.speed = 0.0
-        drive.drive.jerk = 0.0
-        input = self._widget.input_select_menu.currentIndex()
-        if self.inputs[input] == "Speed":
+        if self.command_mode == "velocity":
             drive.drive.speed = linear
-        elif self.inputs[input] == "Acceleration":
+        elif self.command_mode == "acceleration":
             drive.drive.acceleration = linear
-        elif self.inputs[input] == "Jerk":
-            drive.drive.jerk = linear
 
         drive.drive.steering_angle = angular
         drive.drive.steering_angle_velocity = 0.0
@@ -340,52 +391,57 @@ class EUFSRobotSteeringGUI(Plugin):
 
     def save_settings(self, plugin_settings, instance_settings):
         instance_settings.set_value(
-            'input', self.input)
+            'ackermann_topic', self._widget.topic_line_edit.text())
+
+        if self.command_mode == "velocity":
+            instance_settings.set_value(
+                'velx_max', self._widget.max_linear_double_spin_box.value())
+            instance_settings.set_value(
+                'velx_min', self._widget.min_linear_double_spin_box.value())
+        elif self.command_mode == "acceleration":
+            instance_settings.set_value(
+                'accx_max', self._widget.max_linear_double_spin_box.value())
+            instance_settings.set_value(
+                'accx_min', self._widget.min_linear_double_spin_box.value())
+
         instance_settings.set_value(
-            'topic', self._widget.topic_line_edit.text())
+            'w_max', self._widget.max_angular_double_spin_box.value())
         instance_settings.set_value(
-            'vx_max', self._widget.max_linear_double_spin_box.value())
-        instance_settings.set_value(
-            'vx_min', self._widget.min_linear_double_spin_box.value())
-        instance_settings.set_value(
-            'vw_max', self._widget.max_angular_double_spin_box.value())
-        instance_settings.set_value(
-            'vw_min', self._widget.min_angular_double_spin_box.value())
+            'w_min', self._widget.min_angular_double_spin_box.value())
+
+    def get_param(self, instance_settings, param_name, value):
+        value = instance_settings.value(param_name, value)
+        if not self.node.has_parameter('default_' + param_name):
+            self.node.declare_parameter('default_' + param_name, value)
+        value = self.node.get_parameter('default_' + param_name).value
+        return value
 
     def restore_settings(self, plugin_settings, instance_settings):
-        value = instance_settings.value('input', 1)
-        self.node.declare_parameter('default_input', value)
-        value = self.node.get_parameter('default_input').value
-        self.input = value
-
-        value = instance_settings.value('topic', '/rqt/command')
-        self.node.declare_parameter('default_topic', value)
-        value = self.node.get_parameter('default_topic').value
-        self._widget.topic_line_edit.setText(value)
+        value = self.get_param(instance_settings, 'ackermann_topic', '/rqt/command')
+        self._widget.topic_line_edit.setText(str(value))
 
         # In order to make the topic be set
         self._on_topic_set(log=False)
 
-        value = self._widget.max_linear_double_spin_box.value()
-        value = instance_settings.value('vx_max', value)
-        self.node.declare_parameter('default_vx_max', value)
-        value = self.node.get_parameter('default_vx_max').value
-        self._widget.max_linear_double_spin_box.setValue(float(value))
+        if self.command_mode == 'acceleration':
+            value = self.get_param(
+                instance_settings, 'acc_max',  self._widget.max_linear_double_spin_box.value())
+            self._widget.max_linear_double_spin_box.setValue(float(value))
+            value = self.get_param(
+                instance_settings, 'acc_min', self._widget.min_linear_double_spin_box.value())
+            self._widget.min_linear_double_spin_box.setValue(float(value))
 
-        value = self._widget.min_linear_double_spin_box.value()
-        value = instance_settings.value('vx_min', value)
-        self.node.declare_parameter('default_vx_min', value)
-        value = self.node.get_parameter('default_vx_min').value
-        self._widget.min_linear_double_spin_box.setValue(float(value))
+        elif self.command_mode == 'velocity':
+            value = self.get_param(
+                instance_settings, 'velx_max', self._widget.max_linear_double_spin_box.value())
+            self._widget.max_linear_double_spin_box.setValue(float(value))
+            value = self.get_param(
+                instance_settings, 'velx_min', self._widget.min_linear_double_spin_box.value())
+            self._widget.min_linear_double_spin_box.setValue(float(value))
 
-        value = self._widget.max_angular_double_spin_box.value()
-        value = instance_settings.value('vw_max', value)
-        self.node.declare_parameter('default_vw_max', value)
-        value = self.node.get_parameter('default_vw_max').value
+        value = self.get_param(
+            instance_settings, 'w_max', self._widget.max_angular_double_spin_box.value())
         self._widget.max_angular_double_spin_box.setValue(float(value))
-
-        value = self._widget.min_angular_double_spin_box.value()
-        value = instance_settings.value('vw_min', value)
-        self.node.declare_parameter('default_vw_min', value)
-        value = self.node.get_parameter('default_vw_min').value
+        value = self.get_param(
+            instance_settings, 'w_min', self._widget.min_angular_double_spin_box.value())
         self._widget.min_angular_double_spin_box.setValue(float(value))

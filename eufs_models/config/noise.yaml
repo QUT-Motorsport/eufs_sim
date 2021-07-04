@@ -13,3 +13,6 @@ noise:
 
   # X, Y, Z
   linearAccelerationNoise: [0.0, 0.0, 0.0]
+
+  # lf, rf, lb, rb
+  wheelSpeedNoise: [1.0, 1.0, 1.0, 1.0]
