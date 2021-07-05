@@ -15,9 +15,6 @@
   <!-- Imu -->
   <xacro:include filename="$(find eufs_description)/sensors/imu.urdf.xacro"/>
 
-  <!-- Imu hector -->
-  <xacro:include filename="$(find eufs_description)/sensors/imu_hector_plugin.urdf.xacro"/>
-
   <!-- Kinect -->
   <xacro:include filename="$(find eufs_description)/sensors/kinect.urdf.xacro"/>
 
