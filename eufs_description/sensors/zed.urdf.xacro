@@ -26,50 +26,50 @@
 
 
     <!-- Left and right frames -->
-    <link name="${prefix}_left_camera"/>
+    <link name="${prefix}_left_camera_frame"/>
 
-    <link name="${prefix}_right_camera"/>
+    <link name="${prefix}_right_camera_frame"/>
 
-    <link name="${prefix}_left_camera_optical"/>
+    <link name="${prefix}_left_camera_optical_frame"/>
 
-    <link name="${prefix}_right_camera_optical"/>
+    <link name="${prefix}_right_camera_optical_frame"/>
 
     <joint name="${prefix}_left_camera_joint" type="fixed">
       <parent link="${prefix}_center"/>
-      <child link="${prefix}_left_camera"/>
+      <child link="${prefix}_left_camera_frame"/>
       <origin xyz="0 0.06 0" rpy="0 0 0" />
     </joint>
 
     <joint name="${prefix}_right_camera_joint" type="fixed">
       <parent link="${prefix}_center"/>
-      <child link="${prefix}_right_camera"/>
+      <child link="${prefix}_right_camera_frame"/>
       <origin xyz="0 -0.06 0" rpy="0 0 0" />
     </joint>
 
     <joint name="left_camera_optical_joint" type="fixed">
       <origin xyz="0 0 0" rpy="0.0 0.0 0.0" />
-      <parent link="${prefix}_left_camera" />
-      <child link="${prefix}_left_camera_optical"/>
+      <parent link="${prefix}_left_camera_frame" />
+      <child link="${prefix}_left_camera_optical_frame"/>
     </joint>
 
     <joint name="right_camera_optical_joint" type="fixed">
       <origin xyz="0 0 0" rpy="0.0 0.0 0.0" />
-      <parent link="${prefix}_right_camera" />
-      <child link="${prefix}_right_camera_optical"/>
+      <parent link="${prefix}_right_camera_frame" />
+      <child link="${prefix}_right_camera_optical_frame"/>
     </joint>
 
     <!-- depth frame -->
-    <link name="${prefix}_depth_camera"/>
+    <link name="${prefix}_depth_camera_frame"/>
 
     <joint name="${prefix}_depth_camera" type="fixed">
       <parent link="${prefix}_center"/>
-      <child link="${prefix}_depth_camera"/>
+      <child link="${prefix}_depth_camera_frame"/>
       <origin xyz="0 0.06 0" rpy="-${0.5*pi} 0 -${0.5*pi}" />
     </joint>
 
     <!-- Simulate raw perception sensors only if we're not using the abstracted perception simulation -->
     <xacro:unless value="${active}">
-      <gazebo reference="${prefix}_left_camera_optical">
+      <gazebo reference="${prefix}_left_camera_optical_frame">
         <sensor type="multicamera" name="stereo_camera">
           <!-- see MultiSenseSLPlugin.h for available modes -->
           <update_rate>60.0</update_rate>
