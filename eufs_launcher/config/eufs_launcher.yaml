@@ -12,6 +12,9 @@ eufs_launcher:
   # Default command mode to be selected in the launcher drop-down menu
   default_command_mode: "acceleration"
 
+  # Default vehicle model config preset to be selected in the launcher drop-down menu
+  default_vehicle_preset: "DryTrack"
+
   # percent of possible noise pixels being utilized
   object_noise_default: 0
 
