@@ -5,6 +5,7 @@
 
 #include "yaml-cpp/yaml.h"
 #include "eufs_models/vehicle_state.hpp"
+#include "eufs_msgs/msg/wheel_speeds.hpp"
 
 namespace eufs
 {
@@ -18,19 +19,28 @@ namespace eufs
       double linear_velocity[3];
       double angular_velocity[3];
       double linear_acceleration[3];
+      double wheel_speed[4];
 
-      std::string array_to_str(const double arr[3])
+      std::string array_to_str(const double arr[], int len)
       {
-        return "[" + std::to_string(arr[0]) + "," + std::to_string(arr[1]) + "," + std::to_string(arr[2]) + "]";
+         std::string message;
+         for(int i = 0; i < len; i++)
+         {
+             message += std::to_string(arr[i]);
+             message += (i < len - 1) ? ", " : "";
+         }
+
+         return "[" + message + "]\n";
       }
 
       std::string to_str()
       {
-        return "position: " + array_to_str(position) +
-               " orientation: " + array_to_str(orientation) +
-               " linear_velocity: " + array_to_str(linear_velocity) +
-               " angular_velocity: " + array_to_str(angular_velocity) +
-               " linear_acceleration: " + array_to_str(linear_acceleration);
+        return "position: " + array_to_str(position, 3) +
+               " orientation: " + array_to_str(orientation, 3) +
+               " linear_velocity: " + array_to_str(linear_velocity, 3) +
+               " angular_velocity: " + array_to_str(angular_velocity, 3) +
+               " linear_acceleration: " + array_to_str(linear_acceleration, 3) +
+               " wheel_speed: " + array_to_str(wheel_speed, 4);
       }
     };
 
@@ -73,6 +83,19 @@ namespace eufs
         return new_state;
       }
 
+      eufs_msgs::msg::WheelSpeeds applyNoiseToWheelSpeeds(const eufs_msgs::msg::WheelSpeeds &wheel_speeds)
+      {
+        eufs_msgs::msg::WheelSpeeds new_wheel_speeds = wheel_speeds;
+
+        // Add noise to wheel speed
+        new_wheel_speeds.lf_speed += _gaussianKernel(0, _noise_param.wheel_speed[0]);
+        new_wheel_speeds.rf_speed += _gaussianKernel(0, _noise_param.wheel_speed[1]);
+        new_wheel_speeds.lb_speed += _gaussianKernel(0, _noise_param.wheel_speed[2]);
+        new_wheel_speeds.rb_speed += _gaussianKernel(0, _noise_param.wheel_speed[3]);
+
+        return new_wheel_speeds;
+      }
+
       const NoiseParam &getNoiseParam() { return _noise_param; }
 
       std::string getString() { return _noise_param.to_str(); }
@@ -80,11 +103,13 @@ namespace eufs
     private:
       NoiseParam _noise_param;
 
+      // Initialise seed for pseudo-random number generator
+      unsigned seed = 0.0;
+
       double _gaussianKernel(double mu, double sigma)
       {
         // using Box-Muller transform to generate two independent standard
         // normally distributed normal variables see wikipedia
-        unsigned seed = 0;
 
         // normalized uniform random variable
         double U = static_cast<double>(rand_r(&seed)) /
@@ -148,6 +173,14 @@ namespace YAML
         cType.linear_acceleration[0] = node["linearAccelerationNoise"][0].as<double>();
         cType.linear_acceleration[1] = node["linearAccelerationNoise"][1].as<double>();
         cType.linear_acceleration[2] = node["linearAccelerationNoise"][2].as<double>();
+      }
+
+      if (node["wheelSpeedNoise"])
+      {
+        cType.wheel_speed[0] = node["wheelSpeedNoise"][0].as<double>();
+        cType.wheel_speed[1] = node["wheelSpeedNoise"][1].as<double>();
+        cType.wheel_speed[2] = node["wheelSpeedNoise"][2].as<double>();
+        cType.wheel_speed[3] = node["wheelSpeedNoise"][3].as<double>();
       }
 
       return true;

@@ -43,7 +43,7 @@
       <lidarMinViewDistance>1</lidarMinViewDistance>
       <cameraMinViewDistance>1</cameraMinViewDistance>
       <cameraFOV>1.918889</cameraFOV><!--110 degrees-->
-      <lidarFOV>6.283185</lidarFOV><!-- 360 degrees-->
+      <lidarFOV>3.141593</lidarFOV><!-- 180 degrees-->
       <lidarOn>true</lidarOn><!--If false, we only simulate camera measurements-->
       <trackFrame>map</trackFrame>
       <groundTruthConesTopicName>/ground_truth/cones</groundTruthConesTopicName>

@@ -38,6 +38,10 @@ def generate_launch_description():
                               default_value='acceleration',
                               description="Determines the vehicle control mode (acceleration or velocity)"),
 
+        DeclareLaunchArgument(name='vehicleModelConfig',
+                              default_value='configDry.yaml',
+                              description="Determines the file from which the vehicle model parameters are read"),
+
         DeclareLaunchArgument(name='gazebo_gui',
                               default_value='false',
                               description="Condition to launch the Gazebo GUI"),

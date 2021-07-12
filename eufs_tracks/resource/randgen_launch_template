@@ -24,6 +24,10 @@
 
   <!-- The vehicle model class -->
   <arg name="vehicleModel" default="DynamicBicycle"/>
+  <!-- The command mode of the vehicle -->
+  <arg name="commandMode" default="acceleration"/>
+  <!-- The vehicle model config file -->
+  <arg name="vehicleModelConfig" default="configDry.yaml"/>
   <!-- Publish the ground truth tf -->
   <arg name="publish_gt_tf" default="false"/>
 
@@ -53,6 +57,8 @@
     <arg name="pitch" value="$(var pitch)"/>
     <arg name="yaw" value="$(var yaw)"/>
     <arg name="vehicleModel" value="$(var vehicleModel)"/>
+    <arg name="commandMode" value="$(var commandMode)"/>
+    <arg name="vehicleModelConfig" value="$(var vehicleModelConfig)"/>
     <arg name="show_rqt_gui" value="$(var show_rqt_gui)"/>
     <arg name="rviz" value="$(var rviz)"/>
     <arg name="publish_gt_tf" value="$(var publish_gt_tf)"/>

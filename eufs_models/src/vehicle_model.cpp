@@ -42,5 +42,23 @@ namespace eufs
       return std::atan((x.v_y + lever_arm_length * x.r_z) / (v_x - 0.5 * _param.kinematic.axle_width * x.r_z)) - u.delta;
     }
 
+    eufs_msgs::msg::WheelSpeeds VehicleModel::getWheelSpeeds(const State &state, const Input &input)
+    {
+      float PI = 3.14159265;
+      float wheel_circumference = 2 * PI * _param.tire.radius;
+
+      eufs_msgs::msg::WheelSpeeds wheel_speeds;
+
+      wheel_speeds.steering = input.delta;
+
+      wheel_speeds.lf_speed = 999;
+      wheel_speeds.rf_speed = 999;
+
+      // Calculate Wheel speeds
+      wheel_speeds.lb_speed = (state.v_x / wheel_circumference) * 60;
+      wheel_speeds.rb_speed = (state.v_x / wheel_circumference) * 60;
+
+      return wheel_speeds;
+    }
   } // namespace models
 } // namespace eufs

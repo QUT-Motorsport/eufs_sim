@@ -23,6 +23,7 @@ option(BUILD_SHARED_LIBS ON)
 # find dependencies
 find_package(ament_cmake REQUIRED)
 find_package(yaml-cpp REQUIRED)
+find_package(eufs_msgs REQUIRED)
 
 # build library
 add_library(${PROJECT_NAME}
@@ -33,9 +34,10 @@ add_library(${PROJECT_NAME}
 target_include_directories(${PROJECT_NAME} PUBLIC
   "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>"
   "$<INSTALL_INTERFACE:include>")
-target_link_libraries(eufs_models PRIVATE
+target_link_libraries(eufs_models
   ${YAML_CPP_LIBRARIES})
 ament_target_dependencies(eufs_models
+  "eufs_msgs"
   "yaml-cpp")
 
 # export library
