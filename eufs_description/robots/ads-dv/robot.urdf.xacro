@@ -2,30 +2,6 @@
 <robot name="eufs" xmlns:xacro="http://www.ros.org/wiki/xacro">
 
     <!-- ***************** -->
-    <!-- Imported elements -->
-    <!-- ***************** -->
-
-    <!--  Import the wheels  -->
-    <xacro:include filename="$(find eufs_description)/urdf/wheels.urdf.xacro"/>
-
-    <!-- Import EUFS base element with the chassis -->
-    <xacro:include filename="$(find eufs_description)/urdf/eufs_base.urdf.xacro">
-        <xacro:arg name="publish_tf" value="$(arg publish_tf)"/>
-        <xacro:arg name="simulate_perception" value="$(arg simulate_perception)"/>
-    </xacro:include>
-
-    <!-- Import all available sensors -->
-    <xacro:include filename="$(find eufs_description)/sensors/all_sensors.urdf.xacro" />
-
-    <!--  Include the plugins  -->
-    <xacro:arg name="publish_tf" default="false"/>
-    <xacro:arg name="simulate_perception" default="true"/>
-    <xacro:include filename="$(find eufs_description)/urdf/eufs_plugins.gazebo.xacro">
-        <xacro:arg name="publish_tf" value="$(arg publish_tf)"/>
-        <xacro:arg name="simulate_perception" value="$(arg simulate_perception)"/>
-    </xacro:include>
-
-    <!-- ***************** -->
     <!-- Config parameters -->
     <!-- ***************** -->
 
@@ -38,6 +14,27 @@
 
     <xacro:property name="PI" value="3.1415926535897931"/>
 
+    <!-- If the gazebo_ros_race_car_model should publish the ground truth tf -->
+    <xacro:arg name="publish_tf" default="false"/>
+    <!-- If the perception stack should be simulated or if sensors should be used -->
+    <xacro:arg name="simulate_perception" default="true"/>
+
+    <!-- ***************** -->
+    <!-- Imported elements -->
+    <!-- ***************** -->
+
+    <!--  Import the wheels  -->
+    <xacro:include filename="$(find eufs_description)/urdf/wheels.urdf.xacro"/>
+
+    <!-- Import EUFS base element with the chassis -->
+    <xacro:include filename="$(find eufs_description)/urdf/eufs_base.urdf.xacro"/>
+
+    <!-- Import all available sensors -->
+    <xacro:include filename="$(find eufs_description)/sensors/all_sensors.urdf.xacro" />
+
+    <!--  Include the plugins  -->
+    <xacro:include filename="$(find eufs_description)/urdf/eufs_plugins.gazebo.xacro"/>
+
     <!-- *************** -->
     <!-- Robots Elements -->
     <!-- *************** -->
@@ -46,8 +43,7 @@
     <xacro:eufs_base chassis_mesh="file://$(find eufs_description)/meshes/ads-dv.dae"/>
 
     <!-- Wheels -->
-    <xacro:wheels chassis_width="0.98" wheelbase="1.530"></xacro:wheels>
-
+    <xacro:wheels chassis_width="0.98" wheelbase="1.530" />
 
     <!-- *********************************************** -->
     <!--                 MAIN SENSORS                    -->
@@ -62,15 +58,10 @@
     <xacro:sensor_imu parent="base_footprint" prefix="imu">
         <origin xyz="0.0 0.0 0.0" rpy="0 0 0"/>
     </xacro:sensor_imu>
--->
-
-    <!-- TODO: Add sensors back -->
-<!--
 
     <xacro:sensor_gps parent="base_footprint" prefix="gps">
         <origin xyz="0.0 0.0 0.4" rpy="0 0 0"/>
     </xacro:sensor_gps>
-
 
     <xacro:VLP-16R parent="base_footprint" name="velodyne" topic="/velodyne_points" hz="10" samples="800" active="$(arg simulate_perception)">
         <origin xyz="1.58 0.0 -0.1" rpy="0 ${1*M_PI/180.0} 0"/>
