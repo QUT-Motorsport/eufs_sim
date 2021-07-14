@@ -75,7 +75,7 @@ namespace gazebo_plugins
       void Load(gazebo::physics::ModelPtr model, sdf::ElementPtr sdf) override;
 
       eufs::models::State &getState() { return _state; }
-      eufs::models::Input &getInput() { return _input; }
+      eufs::models::Input &getInput() { return _des_input; }
 
     private:
       void update();
@@ -109,16 +109,15 @@ namespace gazebo_plugins
       // States
       std::unique_ptr<StateMachine> _state_machine;
       eufs::models::State _state;
-      eufs::models::Input _input;
+      eufs::models::Input _des_input, _act_input;
       std::unique_ptr<eufs::models::Noise> _noise;
-      double _time_last_cmd;
       ignition::math::Pose3d _offset;
 
       // Gazebo
       gazebo::physics::WorldPtr _world;
       gazebo::physics::ModelPtr _model;
       gazebo::event::ConnectionPtr _update_connection;
-      gazebo::common::Time _last_sim_time;
+      gazebo::common::Time _last_sim_time, _last_cmd_time;
 
       // Rate to publish ros messages
       double _update_rate;
@@ -162,6 +161,13 @@ namespace gazebo_plugins
         velocity
       };
       CommandMode _command_mode;
+
+      // Command queue for control delays
+      std::queue<std::shared_ptr<eufs_msgs::msg::AckermannDriveStamped>> _command_Q;
+      std::queue<gazebo::common::Time> _cmd_time_Q;
+      double _control_delay;
+      // Steering rate limit variables
+      double _max_steering_rate, _steering_lock_time;
     };
 
   } // namespace eufs_plugins
