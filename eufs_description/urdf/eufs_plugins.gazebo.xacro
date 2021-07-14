@@ -29,6 +29,9 @@
       <groundTruthWheelSpeedsTopicName>/ground_truth/wheel_speeds</groundTruthWheelSpeedsTopicName>
       <odometryTopicName>/ground_truth/odom</odometryTopicName>
       <commandMode>$(arg command_mode)</commandMode>
+      <controlDelay>0.2</controlDelay>
+      <!-- The time in seconds it takes for the car to go from lock to lock -->
+      <steeringLockTime>1</steeringLockTime>
     </plugin>
   </gazebo>
 
