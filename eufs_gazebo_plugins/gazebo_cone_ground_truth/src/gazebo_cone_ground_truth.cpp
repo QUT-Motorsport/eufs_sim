@@ -246,7 +246,11 @@ namespace gazebo_plugins
             {
                 visualization_msgs::msg::MarkerArray ground_truth_cone_marker_array_message = getConeMarkerArrayMessage(
                     ground_truth_cones_message);
+
+                ground_truth_cone_markers_published = ground_truth_cone_marker_array_message.markers.size();
+                this->removeExcessCones(ground_truth_cone_marker_array_message.markers, ground_truth_cone_markers_published, prev_ground_truth_cone_markers_published);
                 this->ground_truth_cone_marker_pub_->publish(ground_truth_cone_marker_array_message);
+                this->prev_ground_truth_cone_markers_published = ground_truth_cone_markers_published;
             }
 
             // Publish the simulated perception cones if it has subscribers
@@ -265,8 +269,23 @@ namespace gazebo_plugins
                 {
                     visualization_msgs::msg::MarkerArray perception_cone_marker_array_message = getConeMarkerArrayMessage(
                         perception_cones_message);
+
+                    perception_cone_markers_published = perception_cone_marker_array_message.markers.size();
+                    this->removeExcessCones(perception_cone_marker_array_message.markers, perception_cone_markers_published, prev_perception_cone_markers_published);
                     this->perception_cone_marker_pub_->publish(perception_cone_marker_array_message);
+                    this->prev_perception_cone_markers_published = perception_cone_markers_published;
                 }
+            }
+        }
+
+        void GazeboConeGroundTruth::removeExcessCones(std::vector<visualization_msgs::msg::Marker> &marker_array, const int current_array_length, const int prev_array_length)
+        {
+            for (int i = current_array_length; i < prev_array_length; i++)
+            {
+                visualization_msgs::msg::Marker deleted_marker;
+                deleted_marker.id = i;
+                deleted_marker.action = deleted_marker.DELETE;
+                marker_array.push_back(deleted_marker);
             }
         }
 
