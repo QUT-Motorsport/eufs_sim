@@ -8,11 +8,11 @@
       <axis xyz="1 0 0"/>
       <xacro:insert_block name="origin"/>
       <parent link="${parent}"/>
-      <child link="${prefix}_center"/>
+      <child link="${prefix}_camera_center"/>
     </joint>
 
 
-    <link name="${prefix}_center">
+    <link name="${prefix}_camera_center">
       <visual>
         <origin xyz="0 0 0" rpy="0 0 0"/>
         <geometry>
@@ -35,13 +35,13 @@
     <link name="${prefix}_right_camera_optical_frame"/>
 
     <joint name="${prefix}_left_camera_joint" type="fixed">
-      <parent link="${prefix}_center"/>
+      <parent link="${prefix}_camera_center"/>
       <child link="${prefix}_left_camera_frame"/>
       <origin xyz="0 0.06 0" rpy="0 0 0" />
     </joint>
 
     <joint name="${prefix}_right_camera_joint" type="fixed">
-      <parent link="${prefix}_center"/>
+      <parent link="${prefix}_camera_center"/>
       <child link="${prefix}_right_camera_frame"/>
       <origin xyz="0 -0.06 0" rpy="0 0 0" />
     </joint>
@@ -62,7 +62,7 @@
     <link name="${prefix}_depth_camera_frame"/>
 
     <joint name="${prefix}_depth_camera" type="fixed">
-      <parent link="${prefix}_center"/>
+      <parent link="${prefix}_camera_center"/>
       <child link="${prefix}_depth_camera_frame"/>
       <origin xyz="0 0.06 0" rpy="-${0.5*pi} 0 -${0.5*pi}" />
     </joint>
