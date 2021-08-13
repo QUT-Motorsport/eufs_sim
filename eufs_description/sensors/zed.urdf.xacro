@@ -123,7 +123,7 @@
             </ros>
 
             <camera_name>${prefix}</camera_name>
-            <frame_name>${prefix}_left_camera_optical</frame_name>
+            <frame_name>${prefix}_left_camera_optical_frame</frame_name>
             <hack_baseline>0.120</hack_baseline>
             <triggered>false</triggered>
           </plugin>
@@ -156,7 +156,7 @@
             </ros>
 
             <camera_name>${prefix}</camera_name>
-            <frame_name>${prefix}_depth_camera</frame_name>
+            <frame_name>${prefix}_depth_camera_frame</frame_name>
             <hack_baseline>0.120</hack_baseline>
             <max_depth>20.0</max_depth>
             <min_depth>0.5</min_depth>
