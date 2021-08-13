@@ -59,15 +59,11 @@
         <origin xyz="0.0 0.0 0.0" rpy="0 0 0"/>
     </xacro:sensor_imu>
 
-    <!-- TODO: Add sensors back -->
-
-<!--
     <xacro:sensor_gps parent="base_footprint" prefix="gps">
         <origin xyz="0.0 0.0 0.4" rpy="0 0 0"/>
     </xacro:sensor_gps>
--->
 
-    <xacro:VLP-16R parent="base_footprint" name="velodyne" topic="/velodyne_points" hz="10" samples="800" active="$(arg simulate_perception)">
+    <xacro:VLP-16R parent="base_footprint" name="velodyne" topic="/velodyne_points" hz="10" active="$(arg simulate_perception)">
         <origin xyz="-0.15 0.0 0.79" rpy="0 ${1*M_PI/180.0} 0"/>
     </xacro:VLP-16R>
 

@@ -111,6 +111,7 @@ class EUFSLauncher(Plugin):
         self.NOISE_SLIDER = self._widget.findChild(QSlider, "Noisiness")
         self.VEHICLE_MODEL_MENU = self._widget.findChild(QComboBox, "WhichVehicleModel")
         self.COMMAND_MODE_MENU = self._widget.findChild(QComboBox, "WhichCommandMode")
+        self.MODEL_PRESET_MENU = self._widget.findChild(QComboBox, "WhichModelPreset")
         self.CONE_NOISE_SLIDER = self._widget.findChild(QSlider, "ConeNoisiness")
         self.COLOR_NOISE_SLIDER = self._widget.findChild(QSlider, "ConeColorNoisiness")
 
@@ -138,8 +139,6 @@ class EUFSLauncher(Plugin):
 
         # Setup Vehicle Models menu
         # Clear the dropdowns
-        self.VEHICLE_MODEL_MENU.clear()
-
         # Remove "blacklisted" files (ones that don't define vehicle models)
         models_filepath = join(get_package_share_directory('eufs_models'),
                                'models/models.txt')
@@ -147,21 +146,20 @@ class EUFSLauncher(Plugin):
         vehicle_models = [model.strip() for model in vehicle_models_]  # remove \n
 
         default_model = self.default_config["eufs_launcher"]["default_vehicle_model"]
-        if default_model in vehicle_models:
-            self.VEHICLE_MODEL_MENU.addItem(default_model)
-        for model in vehicle_models:
-            if model != default_model:
-                self.VEHICLE_MODEL_MENU.addItem(model)
+        self.setup_q_combo_box(self.VEHICLE_MODEL_MENU, default_model, vehicle_models)
 
         # Setup Command Modes menu
-        self.COMMAND_MODE_MENU.clear()
         default_mode = self.default_config["eufs_launcher"]["default_command_mode"]
         modes = ["acceleration", "velocity"]
-        if default_mode in modes:
-            self.COMMAND_MODE_MENU.addItem(default_mode)
-        for mode in modes:
-            if mode != default_mode:
-                self.COMMAND_MODE_MENU.addItem(mode)
+        self.setup_q_combo_box(self.COMMAND_MODE_MENU, default_mode, modes)
+
+        # Setup Conditions menu
+        default_mode = self.default_config["eufs_launcher"]["default_vehicle_preset"]
+        self.MODEL_CONFIGS = {
+            "DryTrack": "configDry.yaml",
+            "WetTrack": "configWet.yaml"
+        }
+        self.setup_q_combo_box(self.MODEL_PRESET_MENU, default_mode, self.MODEL_CONFIGS.keys())
 
         # Add buttons from yaml file
         checkboxes = OrderedDict(
@@ -281,6 +279,15 @@ class EUFSLauncher(Plugin):
         # use_gui is a special variable set by `eufs_launcher.py`
         if not use_gui:
             self.launch_button_pressed()
+
+    @staticmethod
+    def setup_q_combo_box(q_combo_box, default_mode, modes):
+        q_combo_box.clear()
+        if default_mode in modes:
+            q_combo_box.addItem(default_mode)
+        for mode in modes:
+            if mode != default_mode:
+                q_combo_box.addItem(mode)
 
     def load_track_dropdowns(self):
         """
@@ -522,13 +529,15 @@ class EUFSLauncher(Plugin):
 
         # Get vehicle model information
         self.logger.info("With " + self.VEHICLE_MODEL_MENU.currentText() + " Vehicle Model " +
-                         "using the " + self.COMMAND_MODE_MENU.currentText() + " command mode")
+                         "using the " + self.COMMAND_MODE_MENU.currentText() + " command mode. " +
+                         "Vehicle model config file is " + self.MODEL_CONFIGS[self.MODEL_PRESET_MENU.currentText()])
 
         vehicle_model = "vehicleModel:=" + self.VEHICLE_MODEL_MENU.currentText()
         command_mode = "commandMode:=" + self.COMMAND_MODE_MENU.currentText()
+        vehicle_model_config = "vehicleModelConfig:=" + self.MODEL_CONFIGS[self.MODEL_PRESET_MENU.currentText()]
 
         # Get checkbox parameter information
-        parameters_to_pass = ["track:=" + track_to_launch.split(".")[0], vehicle_model, command_mode]
+        parameters_to_pass = ["track:=" + track_to_launch.split(".")[0], vehicle_model, command_mode, vehicle_model_config]
         for checkbox, param_if_on, param_if_off in self.checkbox_parameter_mapping:
             if checkbox.isChecked():
                 parameters_to_pass.extend(param_if_on)

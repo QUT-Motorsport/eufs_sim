@@ -86,9 +86,11 @@ namespace gazebo_plugins
           gazebo::event::Events::ConnectWorldUpdateBegin(std::bind(&RaceCarModelPlugin::update, this));
       _last_sim_time = _world->SimTime();
 
+      _max_steering_rate = (_vehicle->getParam().input_ranges.delta.max - _vehicle->getParam().input_ranges.delta.min) /
+              _steering_lock_time;
+
       // Set offset
       setPositionFromWorld();
-      _time_last_cmd = 0.0;
 
       RCLCPP_INFO(_rosnode->get_logger(), "RaceCarModelPlugin Loaded");
     }
@@ -215,6 +217,26 @@ namespace gazebo_plugins
           _command_mode = acceleration;
         }
       }
+
+        if (!sdf->HasElement("controlDelay"))
+        {
+            RCLCPP_FATAL(_rosnode->get_logger(), "gazebo_ros_race_car_model plugin missing <controlDelay>, cannot proceed");
+            return;
+        }
+        else
+        {
+            _control_delay = sdf->GetElement("controlDelay")->Get<double>();
+        }
+
+        if (!sdf->HasElement("steeringLockTime"))
+        {
+            RCLCPP_FATAL(_rosnode->get_logger(), "gazebo_ros_race_car_model plugin missing <steeringLockTime>, cannot proceed");
+            return;
+        }
+        else
+        {
+            _steering_lock_time = sdf->GetElement("steeringLockTime")->Get<double>();
+        }
     }
 
     void RaceCarModelPlugin::initVehicleModel(const sdf::ElementPtr &sdf)
@@ -405,7 +427,7 @@ namespace gazebo_plugins
       car_state.linear_acceleration.y = state.a_y;
       car_state.linear_acceleration.z = state.a_z;
 
-      car_state.slip_angle = _vehicle->getSlipAngle(_state, _input, true);
+      car_state.slip_angle = _vehicle->getSlipAngle(_state, _act_input, true);
 
       car_state.state_of_charge = 999;
 
@@ -463,7 +485,7 @@ namespace gazebo_plugins
       wheel_speeds_stamped.header.stamp = _rosnode->now();
       wheel_speeds_stamped.header.frame_id = _robot_frame;
 
-      wheel_speeds = _vehicle->getWheelSpeeds(_state, _input);
+      wheel_speeds = _vehicle->getWheelSpeeds(_state, _act_input);
 
       wheel_speeds_stamped.steering = wheel_speeds.steering;
       wheel_speeds_stamped.lf_speed = wheel_speeds.lf_speed;
@@ -589,14 +611,32 @@ namespace gazebo_plugins
 
     void RaceCarModelPlugin::updateState(const double dt, gazebo::common::Time current_time)
     {
+        if(!_command_Q.empty())
+        {
+            gazebo::common::Time cmd_time = _cmd_time_Q.front();
+            if((current_time - cmd_time).Double() >= _control_delay)
+            {
+                std::shared_ptr<eufs_msgs::msg::AckermannDriveStamped> cmd = _command_Q.front();
+                _des_input.acc = cmd->drive.acceleration;
+                _des_input.vel = cmd->drive.speed;
+                _des_input.delta = cmd->drive.steering_angle;
+
+                _command_Q.pop();
+                _cmd_time_Q.pop();
+            }
+        }
+
       if (_command_mode == velocity)
       {
         double current_speed = std::sqrt(std::pow(_state.v_x, 2) + std::pow(_state.v_y, 2));
-        _input.acc = (_input.vel - current_speed) / dt;
+          _des_input.acc = (_des_input.vel - current_speed) / dt;
       }
 
       // If last command was more than 1s ago, then slow down car
-      _input.acc = _rosnode->now().seconds() - _time_last_cmd < 1.0 ? _input.acc : -1.0;
+      _act_input.acc = (current_time - _last_cmd_time) < 1.0 ? _des_input.acc : -1.0;
+      // Make sure steering rate is within limits
+      _act_input.delta += (_des_input.delta - _act_input.delta >= 0 ? 1 : -1) *
+              std::min(_max_steering_rate * dt, std::abs(_des_input.delta - _act_input.delta));
 
       // Update z value from simulation
       // This allows the state to have the most up to date value of z. Without this
@@ -605,10 +645,10 @@ namespace gazebo_plugins
       // but because this simulation isn't for flying cars we should be ok (at least for now).
        _state.z = _model->WorldPose().Pos().Z();
 
-      _vehicle->updateState(_state, _input, dt);
+      _vehicle->updateState(_state, _act_input, dt);
 
-      _left_steering_joint->SetPosition(0, _input.delta);
-      _right_steering_joint->SetPosition(0, _input.delta);
+      _left_steering_joint->SetPosition(0, _act_input.delta);
+      _right_steering_joint->SetPosition(0, _act_input.delta);
       setModelState();
 
       double time_since_last_published = (current_time - _time_last_published).Double();
@@ -633,22 +673,16 @@ namespace gazebo_plugins
 
     void RaceCarModelPlugin::onCmd(const eufs_msgs::msg::AckermannDriveStamped::SharedPtr msg)
     {
-      // TODO: Should add delay to the controls
-      if (_state_machine->canDrive())
-      {
-        _input.delta = msg->drive.steering_angle;
-        _input.acc = msg->drive.acceleration;
-        _input.vel = msg->drive.speed;
-      }
-      else
-      {
-        // TODO: Should do something else to stop the car but is this good for now
-        _input.delta = 0;
-        _input.acc = -100;
-        _input.vel = 0;
-      }
-
-      _time_last_cmd = _rosnode->now().seconds();
+        // Override commands if we're not in canDrive state
+        if (!_state_machine->canDrive())
+        {
+            msg->drive.steering_angle = 0;
+            msg->drive.acceleration = -100;
+            msg->drive.speed = 0;
+        }
+        _command_Q.push(msg);
+        _cmd_time_Q.push(_world->SimTime());
+        _last_cmd_time = _world->SimTime();
     }
 
     std::vector<double> RaceCarModelPlugin::ToQuaternion(std::vector<double> &euler)

@@ -230,6 +230,47 @@
    </property>
   </widget>
 
+  <!-- This handles Vehicle model preset selection-->
+  <widget class="QLabel" name="ModelPresetsLabel">
+   <property name="geometry">
+    <rect>
+     <x>170</x>
+     <y>350</y>
+     <width>100</width>
+     <height>30</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>Vehicle Model Presets:</string>
+   </property>
+   <property name="font">
+    <font>
+     <pointsize>9</pointsize>
+    </font>
+   </property>
+  </widget>
+  <widget class="QComboBox" name="WhichModelPreset">
+   <property name="geometry">
+    <rect>
+     <x>170</x>
+     <y>375</y>
+     <width>100</width>
+     <height>30</height>
+    </rect>
+   </property>
+   <property name="maximumSize">
+    <size>
+     <width>16777215</width>
+     <height>30</height>
+    </size>
+   </property>
+   <property name="font">
+    <font>
+     <pointsize>7</pointsize>
+    </font>
+   </property>
+  </widget>
+
   <!--Slider-->
   <!--This handles terrain noise generation-->
   <widget class="QLabel" name="NoiseLabel">

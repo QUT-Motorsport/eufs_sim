@@ -103,6 +103,14 @@ namespace gazebo_plugins
       // Storing initial Track
       eufs_msgs::msg::ConeArrayWithCovariance initial_track;
 
+      int ground_truth_cone_markers_published = 0;
+      int perception_cone_markers_published = 0;
+
+      int prev_ground_truth_cone_markers_published = 0;
+      int prev_perception_cone_markers_published = 0;
+
+      void removeExcessCones(std::vector<visualization_msgs::msg::Marker> &marker_array, const int current_array_length, const int prev_array_length);
+
       int addConeMarkers(std::vector<visualization_msgs::msg::Marker> &marker_array,
                          int marker_id, std::string frame,
                          std::vector<eufs_msgs::msg::ConeWithCovariance> cones,
