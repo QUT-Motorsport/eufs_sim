@@ -101,8 +101,8 @@ class EUFSLauncher(Plugin):
         self.MAX_CONE_NOISE = 0.4
         self.MAX_COLOR_NOISE = 1.0
 
-        # Store gazebo's path as it is used quite a lot:
-        self.GAZEBO = get_package_share_directory('eufs_gazebo')
+        # Store eufs_tracks' path as it is used quite a lot:
+        self.TRACKS = get_package_share_directory('eufs_tracks')
 
         # Give widget components permanent names
         self.TRACK_SELECTOR = self._widget.findChild(QComboBox, "WhichTrack")
@@ -140,6 +140,7 @@ class EUFSLauncher(Plugin):
         # Setup Vehicle Models menu
         # Clear the dropdowns
         # Remove "blacklisted" files (ones that don't define vehicle models)
+
         models_filepath = join(get_package_share_directory('eufs_models'),
                                'models/models.txt')
         vehicle_models_ = open(models_filepath, "r")
@@ -296,15 +297,15 @@ class EUFSLauncher(Plugin):
 
         # Clear the dropdowns
         self.TRACK_SELECTOR.clear()
-        # Get tracks from eufs_gazebo package
-        relevant_path = join(self.GAZEBO, 'launch')
+        # Get tracks from eufs_tracks package
+        relevant_path = join(self.TRACKS, 'launch')
         launch_files = [
             f for f in listdir(relevant_path) if isfile(join(relevant_path, f))
         ]
 
         # Remove "blacklisted" files (ones that don't define tracks)
         blacklist_filepath = join(
-            self.GAZEBO,
+            self.TRACKS,
             'launch/blacklist.txt'
         )
         blacklist_ = open(blacklist_filepath, "r")
@@ -414,7 +415,7 @@ class EUFSLauncher(Plugin):
         self.logger.info("Creating csv...")
         track_to_launch = self.TRACK_SELECTOR.currentText() + ".launch"
         full_path = join(
-            self.GAZEBO,
+            self.TRACKS,
             'launch',
             track_to_launch
         )
@@ -433,8 +434,8 @@ class EUFSLauncher(Plugin):
 
         # Remove relevant random noise tiles from the csv
         csv_path = join(
-            self.GAZEBO,
-            'tracks',
+            self.TRACKS,
+            'csv',
             "LAST_LAUNCH.csv"
         )
         loaded_csv = pd.read_csv(
@@ -505,7 +506,7 @@ class EUFSLauncher(Plugin):
             "launch",
             "csv",
             join(
-                self.GAZEBO,
+                self.TRACKS,
                 'launch',
                 "LAST_LAUNCH.launch"
             ),
@@ -519,8 +520,8 @@ class EUFSLauncher(Plugin):
             "csv",
             "launch",
             join(
-                self.GAZEBO,
-                'tracks',
+                self.TRACKS,
+                'csv',
                 "LAST_LAUNCH.csv"
             ),
             params={"keep_all_noise": False, "noise": 1},
@@ -561,8 +562,8 @@ class EUFSLauncher(Plugin):
         # Hard-Coded Map Effect
         if hasattr(self, "FAST_SLAM_LOAD_MAP") and self.FAST_SLAM_LOAD_MAP.isChecked():
             in_path = join(
-                self.GAZEBO,
-                'tracks',
+                self.TRACKS,
+                'csv',
                 "LAST_LAUNCH.csv"
             )
             the_csv = pd.read_csv(
@@ -583,8 +584,8 @@ class EUFSLauncher(Plugin):
                 if uniform(0, 1) < color_noise_level and row["tag"] in cone_types:
                     the_csv.at[index, "tag"] = "unknown_color"
             out_path = join(
-                self.GAZEBO,
-                'tracks',
+                self.TRACKS,
+                'csv',
                 "FAST_SLAM_PRELOADED_MAP.csv"
             )
             the_csv.to_csv(
@@ -601,15 +602,6 @@ class EUFSLauncher(Plugin):
                 ]
             )
             rospy.set_param("/slam/map_path", out_path)
-
-        # Auto-launch default scripts in yaml
-        scripts = self.default_config["eufs_launcher"]["on_startup"]
-        for key, value in scripts.items():
-            if "args" in scripts[key]:
-                cur_script_args = self.arg_to_list(scripts[key]["args"])
-            else:
-                cur_script_args = []
-            self.launch_node_with_args(scripts[key]["package"], scripts[key]["launch_file"], cur_script_args)
 
         self.LAUNCH_BUTTON.setEnabled(False)
 

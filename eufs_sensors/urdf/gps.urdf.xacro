@@ -1,0 +1,93 @@
+<?xml version="1.0"?>
+<robot name="sensor_gps" xmlns:xacro="http://www.ros.org/wiki/xacro">
+    <xacro:macro name="sensor_gps" params="prefix parent *origin">
+        <!-- ANTENNA GPS -->
+        <joint name="${prefix}_joint" type="fixed">
+            <axis xyz="0 1 0"/>
+            <xacro:insert_block name="origin"/>
+            <parent link="${parent}"/>
+            <child link="${prefix}_base_link"/>
+        </joint>
+        <link name="${prefix}_base_link">
+            <inertial>
+                <mass value="0.001"/>
+                <origin rpy="0 0 0" xyz="0 0 0"/>
+                <inertia ixx="0.0001" ixy="0" ixz="0" iyy="0.000001" iyz="0" izz="0.0001"/>
+            </inertial>
+            <visual>
+                <origin rpy="0 0 0" xyz="0 0 0"/>
+                <geometry>
+                    <box size="0.001 0.001 0.001"/>
+                </geometry>
+            </visual>
+            <collision>
+                <origin rpy="0 0 0" xyz="0 0 0"/>
+                <geometry>
+                    <box size=".001 .001 .001"/>
+                </geometry>
+            </collision>
+<!--        <visual>-->
+<!--            <origin rpy="0 0 0" xyz="0 0 0"/>-->
+<!--            <material name="gps_color">-->
+<!--                <color rgba="1 1 1 1"/>-->
+<!--            </material>-->
+<!--            <geometry>-->
+<!--                <mesh filename="file://$(find eufs_sensors)/meshes/antenna_3GO16.stl" scale="1.0 1.0 1.0"/>-->
+<!--            </geometry>-->
+<!--        </visual>-->
+<!--        <collision>-->
+<!--            <origin rpy="0 0 0" xyz="0 0 0"/>-->
+<!--            <geometry>-->
+<!--                <mesh filename="file://$(find eufs_sensors)/meshes/antenna_3GO16.stl" scale="1.0 1.0 1.0"/>-->
+<!--            </geometry>-->
+<!--        </collision>-->
+        </link>
+        <gazebo reference="${prefix}_base_link">
+            <material>Gazebo/White</material>
+            <gravity>true</gravity>
+        </gazebo>
+        <gazebo reference="${prefix}_base_link">
+            <sensor name="gps" type="gps">
+                <always_on>true</always_on>
+                <update_rate>5</update_rate>
+                <gps>
+                    <position_sensing>
+                        <horizontal>
+                            <noise type="gaussian">
+                                <mean>0.0</mean>
+                                <stddev>2</stddev>
+                            </noise>
+                        </horizontal>
+                        <vertical>
+                            <noise type="gaussian">
+                                <mean>0.0</mean>
+                                <stddev>2.5</stddev>
+                            </noise>
+                        </vertical>
+                    </position_sensing>
+                    <velocity_sensing>
+                        <horizontal>
+                            <noise type="gaussian">
+                                <mean>0.0</mean>
+                                <stddev>0.1</stddev>
+                            </noise>
+                        </horizontal>
+                        <vertical>
+                            <noise type="gaussian">
+                                <mean>0.0</mean>
+                                <stddev>0.1</stddev>
+                            </noise>
+                        </vertical>
+                    </velocity_sensing>
+                </gps>
+                <plugin name="${prefix}_controller" filename="libgazebo_ros_gps_sensor.so">
+                    <ros>
+                        <remapping>~/out:=${prefix}</remapping>
+                    </ros>
+
+                    <frame_name>${prefix}_base_link</frame_name>
+                </plugin>
+            </sensor>
+        </gazebo>
+    </xacro:macro>
+</robot>

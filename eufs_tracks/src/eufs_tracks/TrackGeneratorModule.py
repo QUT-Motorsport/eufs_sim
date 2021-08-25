@@ -59,7 +59,7 @@ class EUFSTrackGenerator(Plugin):
         self.MAX_COLOR_NOISE = 1.0
 
         # Store gazebo's path as it is used quite a lot:
-        self.GAZEBO = get_package_share_directory('eufs_gazebo')
+        self.TRACKS = get_package_share_directory('eufs_tracks')
 
         # Give widget components permanent names
         self.PRESET_SELECTOR = self._widget.findChild(QComboBox, "WhichPreset")
@@ -223,7 +223,7 @@ class EUFSTrackGenerator(Plugin):
         # For launch files, we also need to move around the model folders
         if ending == "launch":
             model_path = join(
-                get_package_share_directory('eufs_description'),
+                get_package_share_directory('eufs_tracks'),
                 'models',
                 raw_name_to
             )
@@ -232,13 +232,13 @@ class EUFSTrackGenerator(Plugin):
 
             # Copy sdf files
             path_from = join(
-                get_package_share_directory('eufs_description'),
+                get_package_share_directory('eufs_tracks'),
                 'models',
                 raw_name_from,
                 "model.sdf"
             )
             path_to = join(
-                get_package_share_directory('eufs_description'),
+                get_package_share_directory('eufs_tracks'),
                 'models',
                 raw_name_to,
                 "model.sdf"
@@ -247,13 +247,13 @@ class EUFSTrackGenerator(Plugin):
 
             # Copy config files
             path_from = join(
-                get_package_share_directory('eufs_description'),
+                get_package_share_directory('eufs_tracks'),
                 'models',
                 raw_name_from,
                 "model.config"
             )
             path_to = join(
-                get_package_share_directory('eufs_description'),
+                get_package_share_directory('eufs_tracks'),
                 'models',
                 raw_name_to,
                 "model.config"
@@ -262,12 +262,12 @@ class EUFSTrackGenerator(Plugin):
 
             # Copy launch files
             path_from = join(
-                self.GAZEBO,
+                self.TRACKS,
                 'launch',
                 file_to_copy_from
             )
             path_to = join(
-                self.GAZEBO,
+                self.TRACKS,
                 'launch',
                 raw_name_to + "." + ending
             )
@@ -276,13 +276,13 @@ class EUFSTrackGenerator(Plugin):
         # Copy pngs
         elif ending == "png":
             path_from = join(
-                self.GAZEBO,
-                'randgen_imgs',
+                self.TRACKS,
+                'image',
                 file_to_copy_from
             )
             path_to = join(
-                self.GAZEBO,
-                'randgen_imgs',
+                self.TRACKS,
+                'image',
                 raw_name_to + "." + ending
             )
             Converter.copy_file(path_from, path_to)
@@ -290,13 +290,13 @@ class EUFSTrackGenerator(Plugin):
         # Copy csvs
         elif ending == "csv":
             path_from = join(
-                self.GAZEBO,
-                'tracks',
+                self.TRACKS,
+                'csv',
                 file_to_copy_from
             )
             path_to = join(
-                self.GAZEBO,
-                'tracks',
+                self.TRACKS,
+                'csv',
                 raw_name_to + "." + ending
             )
             Converter.copy_file(path_from, path_to)
@@ -337,9 +337,9 @@ class EUFSTrackGenerator(Plugin):
         all_files = []
 
         if from_type == "launch":
-            # Get tracks from eufs_gazebo package
+            # Get tracks from eufs_tracks package
             relevant_path = join(
-                self.GAZEBO,
+                self.TRACKS,
                 'launch'
             )
             launch_files = [
@@ -348,7 +348,7 @@ class EUFSTrackGenerator(Plugin):
 
             # Remove "blacklisted" files (ones that don't define tracks)
             blacklist_filepath = join(
-                self.GAZEBO,
+                self.TRACKS,
                 'launch/blacklist.txt'
             )
             blacklist_ = open(blacklist_filepath, "r")
@@ -357,8 +357,8 @@ class EUFSTrackGenerator(Plugin):
         elif from_type == "png":
             # Get images
             relevant_path = join(
-                self.GAZEBO,
-                'randgen_imgs'
+                self.TRACKS,
+                'image'
             )
             all_files = [
                 f for f in listdir(relevant_path)
@@ -367,8 +367,8 @@ class EUFSTrackGenerator(Plugin):
         elif from_type == "csv":
             # Get csvs
             relevant_path = join(
-                self.GAZEBO,
-                'tracks'
+                self.TRACKS,
+                'csv'
             )
             all_files = [
                 f for f in listdir(relevant_path)
@@ -595,8 +595,8 @@ class EUFSTrackGenerator(Plugin):
             track_generator_full_stack = self.FULL_STACK_TRACK_GEN_BUTTON
             if track_generator_full_stack.isChecked():
                 csv_path = join(
-                    self.GAZEBO,
-                    'tracks/rand.csv'
+                    self.TRACKS,
+                    'csv/rand.csv'
                 )
                 Converter.convert(
                     "csv",
@@ -622,11 +622,11 @@ class EUFSTrackGenerator(Plugin):
 
         # Calculate correct full filepath for file to convert
         if from_type == "png":
-            filename = join(self.GAZEBO, 'randgen_imgs/' + filename)
+            filename = join(self.TRACKS, 'image/' + filename)
         elif from_type == "launch":
-            filename = join(self.GAZEBO, 'launch/' + filename)
+            filename = join(self.TRACKS, 'launch/' + filename)
         elif from_type == "csv":
-            filename = join(self.GAZEBO, 'tracks/' + filename)
+            filename = join(self.TRACKS, 'csv/' + filename)
 
         # Calculate some parameters
         suffix = "_CT" if self.SUFFIX_CHECKBOX.isChecked() else ""

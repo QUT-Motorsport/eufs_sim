@@ -700,22 +700,21 @@ class Track(Node):
                            a csv file for the track and for whatever reason you do not
                            desire to overwrite it.
         """
-        track_path = os.path.join(get_package_share_directory('eufs_description'), "models",
+        track_path = os.path.join(get_package_share_directory('eufs_tracks'), "models",
                                   track_name, "model.sdf")
 
-        # check if eufs_description exists
+        # check if eufs_tracks exists
         try:
-            assert os.path.isdir(get_package_share_directory('eufs_description'))
+            assert os.path.isdir(get_package_share_directory('eufs_tracks'))
         except:
-            raise(AssertionError(("Can't find eufs_description directory."
-                  "it is in the same location as eufs_gazebo!")))
+            raise(AssertionError("Can't find eufs_tracks"))
 
         # check if requested track exists
         try:
             assert os.path.exists(track_path)
         except:
             raise(AssertionError(("Can't find track called {} make sure that it is"
-                  "within eufs_description/models/".format(track_name))))
+                  "within eufs_tracks/models/".format(track_name))))
 
         track = Track()
         track.car_start_data = car_start_data
@@ -724,7 +723,7 @@ class Track(Node):
             track.generate_midpoints()
             track.generate_tracks()
         out_name = track_name+conversion_suffix if override_name is None else override_name
-        track.save_csv(os.path.join(get_package_share_directory('eufs_gazebo'), "tracks", out_name))
+        track.save_csv(os.path.join(get_package_share_directory('eufs_tracks'), "csv", out_name))
 
 if __name__ == "__main__":
     # Just a heads up, you can run this with a gui by running the track_generator:

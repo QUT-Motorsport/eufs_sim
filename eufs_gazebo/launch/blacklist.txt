@@ -1,6 +1,0 @@
-# Put things in here to remove them from the launcher
-blacklist.txt
-load_car.launch.py
-sbg_raw_data_simulator.launch
-LAST_LAUNCH.launch
-empty.launch
