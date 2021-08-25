@@ -1,0 +1,28 @@
+<?xml version="1.0"?>
+<?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
+<package format="3">
+  <name>eufs_racecar</name>
+  <version>0.1.0</version>
+  <description>The eufs_racecar package
+    Contains all of the 3D models and meshes relating to the car for
+    simulation purposes.
+  </description>
+
+  <maintainer email="siliconlad@protonmail.com">Angus Stewart</maintainer>
+  <maintainer email="niklasburggraaff@gmail.com">Niklas Burggraaff</maintainer>
+
+  <license>MIT</license>
+
+  <url type="website">http://eufs.co</url>
+  <url type="repository">https://gitlab.com/eufs/eufs_sim</url>
+  <url type="bugtracker">https://gitlab.com/eufs/eufs_sim/issues</url>
+
+  <buildtool_depend>ament_cmake</buildtool_depend>
+
+  <test_depend>ament_lint_auto</test_depend>
+  <test_depend>ament_lint_common</test_depend>
+
+  <export>
+    <build_type>ament_cmake</build_type>
+  </export>
+</package>

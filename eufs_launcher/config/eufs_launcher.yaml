@@ -26,13 +26,6 @@ eufs_launcher:
   # percent of cones where fastslam does not know their color if pre-loading map
   color_noise_default: 0
 
-  # Launch files to launch no matter what after the launch button is pressed
-  on_startup:
-    sbg_raw_data_simulator:
-      package: "eufs_gazebo"
-      launch_file: "sbg_raw_data_simulator.launch"
-      args: { "_imu_hz:=200", "_gps_hz:=5" }
-
   # Checkboxes to have in the config section.
   # `eufs_launcher` handles layout based on priority set.
   checkboxes:
@@ -87,10 +80,8 @@ eufs_launcher:
       "/gazebo",
       "/gazebo_gui",
       "/robot_state_publisher",
-      "/ros_can_sim",
       "/twist_to_ackermannDrive",
       "/spawn_platform",
       "/eufs_sim_rqt",
       "/wheel_odometry",
-      "/sbg_raw_data_simulator",
     }

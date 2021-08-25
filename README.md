@@ -60,9 +60,9 @@ Here you can select the options with which you want to launch
 the simulation. These options are desribed in more detail [below](#options).
 
 Using the default options this will launch a RQT with a steering GUI
-and our ros_can_sim GUI, alongside a default RViz window.
+and our Mission Control GUI, alongside a default RViz window.
 
-In the ros_can_sim GUI you can select the a mission from the
+In the Mission Control GUI you can select the a mission from the
 drop down menu, and hit 'Set Mission'. This will publish
 a `CanState` message to the `/ros_can/set_mission` topic.
 
@@ -130,7 +130,7 @@ A full manual of how to use the GUI is
 
 Additional sensors for testing are avilable via the
 `ros-melodic-robotnik-sensor` package. Some of them are already
-defined in `eufs_description/robots/eufs.urdf.xarco`. You can simply
+defined in `car/robots/eufs/robot.urdf.xarco`. You can simply
 commment them in and attach them appropriately to the car.
 
 ## 6. Known issues <a name="issues"></a>

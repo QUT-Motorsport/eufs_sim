@@ -27,21 +27,21 @@
   <!-- The command mode of the vehicle -->
   <arg name="commandMode" default="acceleration"/>
   <!-- The vehicle model config file -->
-  <arg name="vehicleModelConfig" default="configDry.yaml"/>
+  <arg name="vehicleModelConfig"/>
   <!-- Publish the ground truth tf -->
   <arg name="publish_gt_tf" default="false"/>
 
   <!-- Initial vehicle pose -->
-  <arg name="x" default="%PLACEX%"/>
-  <arg name="y" default="%PLACEY%"/>
+  <arg name="x" default="0.0"/>
+  <arg name="y" default="-14.4"/>
   <arg name="z" default="0.1"/>
   <arg name="roll" default="0.0"/>
   <arg name="pitch" default="0.0"/>
-  <arg name="yaw" default="%PLACEROTATION%"/>
+  <arg name="yaw" default="1.57079632679"/>
 
   <!-- Gazebo -->
   <include file="$(find-pkg-share gazebo_ros)/launch/gazebo.launch.py">
-    <arg name="world" value="$(find-pkg-share eufs_tracks)/worlds/%FILLNAME%.world"/>
+    <arg name="world" value="$(find-pkg-share eufs_tracks)/worlds/skidpad.world"/>
     <arg name="verbose" value="$(var verbose)"/>
     <arg name="gui" value="$(var gazebo_gui)"/>
     <arg name="pause" value="false"/>

@@ -8,7 +8,7 @@ from rclpy.node import Node
 import sys
 import pandas as pd
 from collections import OrderedDict
-sys.path.insert(1, os.path.join(get_package_share_directory('eufs_gazebo'), 'tracks'))  # nopep8
+sys.path.insert(1, os.path.join(get_package_share_directory('eufs_tracks'), 'csv'))  # nopep8
 from .track_gen import Track
 from .TrackGenerator import (
         compactify_points, cone_start,
@@ -262,7 +262,7 @@ class ConversionTools(Node):
                              override_name
                     )
                     new_file_array = which_file.split("/")
-                    new_file_array[-2] = "tracks"
+                    new_file_array[-2] = "csv"
                     which_file = "/".join(new_file_array)
                     return ConversionTools.csv_to_png(
                              which_file[:-7]+conversion_suffix+".csv",
@@ -425,8 +425,8 @@ class ConversionTools(Node):
                 df = pd.DataFrame(output, columns=output.keys())
                 df.to_csv(
                     os.path.join(
-                        get_package_share_directory('eufs_gazebo'),
-                        'tracks/'+GENERATED_FILENAME+'.csv'
+                        get_package_share_directory('eufs_tracks'),
+                        'csv/'+GENERATED_FILENAME+'.csv'
                     ),
                     index=False
                 )
@@ -593,8 +593,8 @@ class ConversionTools(Node):
                 )[0]
 
                 im2.save(
-                        os.path.join(get_package_share_directory('eufs_gazebo'),
-                                     'randgen_imgs/'+GENERATED_FILENAME+'.png')
+                        os.path.join(get_package_share_directory('eufs_tracks'),
+                                     'image/'+GENERATED_FILENAME+'.png')
                 )
                 return im
 
@@ -742,8 +742,8 @@ class ConversionTools(Node):
                 )[0]
 
                 im2.save(
-                        os.path.join(get_package_share_directory('eufs_gazebo'),
-                                     'randgen_imgs/'+GENERATED_FILENAME+'.png')
+                        os.path.join(get_package_share_directory('eufs_tracks'),
+                                     'image/'+GENERATED_FILENAME+'.png')
                 )
                 return im
 
@@ -761,10 +761,10 @@ class ConversionTools(Node):
                                    So if it is "foo", rand.png becomes randfoo.launch.
 
                 This is a multistep process - we need:
-                        to put %FILENAME%.launch in eufs_gazebo/launch
-                        to put %FILENAME%.world in eufs_gazebo/world
+                        to put %FILENAME%.launch in eufs_tracks/launch
+                        to put %FILENAME%.world in eufs_tracks/world
                         to put %FILENAME%/model.config and %FILENAME%/model.sdf
-                                 in eufs_description/models
+                                 in eufs_tracks/models
 
                 Our template files are stored in eufs_tracks/resource as:
                         randgen_launch_template
@@ -856,7 +856,7 @@ class ConversionTools(Node):
 
                 # Here we write out to our launch file.
                 launch_out_filename = 'launch/'+GENERATED_FILENAME+".launch"
-                launch_out_filepath = os.path.join(get_package_share_directory('eufs_gazebo'),
+                launch_out_filepath = os.path.join(get_package_share_directory('eufs_tracks'),
                                                    launch_out_filename
                 )
                 launch_out = open(launch_out_filepath, "w")
@@ -875,7 +875,7 @@ class ConversionTools(Node):
                 world_merged = GENERATED_FILENAME.join(world_merged.split("%FILLNAME%"))
 
                 # And now we write out.
-                world_out_filepath = os.path.join(get_package_share_directory('eufs_gazebo'),
+                world_out_filepath = os.path.join(get_package_share_directory('eufs_tracks'),
                                                   'worlds',
                                                   GENERATED_FILENAME+".world"
                 )
@@ -885,7 +885,7 @@ class ConversionTools(Node):
 
                 # And now we work on making the model folder:
                 # First we create the folder itself
-                folder_path = os.path.join(get_package_share_directory('eufs_description'),
+                folder_path = os.path.join(get_package_share_directory('eufs_tracks'),
                                            'models',
                                            GENERATED_FILENAME
                 )
@@ -907,7 +907,7 @@ class ConversionTools(Node):
                 config_merged = GENERATED_FILENAME.join(config_merged.split("%FILLNAME%"))
 
                 # Write out the config data
-                config_out_filepath = os.path.join(get_package_share_directory('eufs_description'),
+                config_out_filepath = os.path.join(get_package_share_directory('eufs_tracks'),
                                                    'models',
                                                    GENERATED_FILENAME,
                                                    "model.config"
@@ -1018,11 +1018,9 @@ class ConversionTools(Node):
                         x_cov_str = str(x_cov)
                         y_cov_str = str(y_cov)
                         xy_cov_str = str(xy_cov)
-                        self.get_logger().error(x_cov_str)
                         mod_with_cov = setup_covariance(x_cov_str, y_cov_str, xy_cov_str).join(
                                 mod_with_link2.split("%FILLCOVARIANCE%")
                         )
-                        self.get_logger().error(mod_with_cov)
                         return mod_with_cov
 
                 sdf_allmodels = ""
@@ -1159,7 +1157,7 @@ class ConversionTools(Node):
                 sdf_main = sdf_allmodels.join(sdf_main.split("%FILLDATA%"))
 
                 # Write it out.
-                sdf_out_filepath = os.path.join(get_package_share_directory('eufs_description'),
+                sdf_out_filepath = os.path.join(get_package_share_directory('eufs_tracks'),
                                                 'models',
                                                 GENERATED_FILENAME,
                                                 "model.sdf"
@@ -1432,8 +1430,8 @@ class ConversionTools(Node):
                 )[0]
 
                 # Save the image:
-                output_path = os.path.join(get_package_share_directory('eufs_gazebo'),
-                                           'randgen_imgs/' + filename + '.png'
+                output_path = os.path.join(get_package_share_directory('eufs_tracks'),
+                                           'image/' + filename + '.png'
                 )
                 im.save(output_path)
                 return im
@@ -1588,7 +1586,7 @@ class ConversionTools(Node):
 
                 # Here we write out to our launch file.
                 launch_out_filename = 'launch/'+GENERATED_FILENAME+".launch"
-                launch_out_filepath = os.path.join(get_package_share_directory('eufs_gazebo'),
+                launch_out_filepath = os.path.join(get_package_share_directory('eufs_tracks'),
                                                    launch_out_filename
                 )
                 launch_out = open(launch_out_filepath, "w")
@@ -1607,7 +1605,7 @@ class ConversionTools(Node):
                 world_merged = GENERATED_FILENAME.join(world_merged.split("%FILLNAME%"))
 
                 # And now we write out.
-                world_out_filepath = os.path.join(get_package_share_directory('eufs_gazebo'),
+                world_out_filepath = os.path.join(get_package_share_directory('eufs_tracks'),
                                                   'worlds',
                                                   GENERATED_FILENAME+".world"
                 )
@@ -1617,7 +1615,7 @@ class ConversionTools(Node):
 
                 # And now we work on making the model folder:
                 # First we create the folder itself
-                folder_path = os.path.join(get_package_share_directory('eufs_description'),
+                folder_path = os.path.join(get_package_share_directory('eufs_tracks'),
                                            'models',
                                            GENERATED_FILENAME
                 )
@@ -1639,7 +1637,7 @@ class ConversionTools(Node):
                 config_merged = GENERATED_FILENAME.join(config_merged.split("%FILLNAME%"))
 
                 # Write out the config data
-                config_out_filepath = os.path.join(get_package_share_directory('eufs_description'),
+                config_out_filepath = os.path.join(get_package_share_directory('eufs_tracks'),
                                                    'models',
                                                    GENERATED_FILENAME,
                                                    "model.config"
@@ -1838,7 +1836,7 @@ class ConversionTools(Node):
                 sdf_main = sdf_allmodels.join(sdf_main.split("%FILLDATA%"))
 
                 # Write it out.
-                sdf_out_filepath = os.path.join(get_package_share_directory('eufs_description'),
+                sdf_out_filepath = os.path.join(get_package_share_directory('eufs_tracks'),
                                                 'models',
                                                 GENERATED_FILENAME,
                                                 "model.sdf"

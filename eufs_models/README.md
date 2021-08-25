@@ -22,7 +22,7 @@ eufs::models::DynamicBicycle dynamic_bicycle_model = eufs::models::DynamicBicycl
 
 The `VehicleModel` class is a base class from which all implementations of vehicles models should inherit from. For examples, please take a look at the currently implemented models in the `src` directory (e.g `DynamicBicycle` or `PointMass`).
 
-Inherited models must implement the `updateState` virtual method. This method is reponsible for updating the provided state (`state`) based on the provided input (`input`) and change in time (`dt`). If using with `eufs_gazebo_plugins/gazebo_race_car_model`, this is the method that is used to update the state of the vehicle in the simulation.
+Inherited models must implement the `updateState` virtual method. This method is reponsible for updating the provided state (`state`) based on the provided input (`input`) and change in time (`dt`). If using with `eufs_plugins/gazebo_race_car_model`, this is the method that is used to update the state of the vehicle in the simulation.
 
 The other important aspect of the base class is the `_param` private attribute. This stores the various vehicle parameters in the `Param` struct defined in `vehicle_param.hpp`. The struct is initialized by the `Param` constructor via the `VehicleModel` constructor. Initialization requires a path to a yaml file. When implementing vehicle models make sure that your constructor calls the `VehicleModel` constructor with the path to the yaml file that contains your vehicle model parameters.
 

@@ -11,7 +11,7 @@ Provides the interface in order to generate random tracks according to a set of 
 There are no launch parameters for this GUI. As of now it is not configurable.
 
 ## Nodes:
-There is only one ros node associated with this package called `eufs_track_generator`. This is the Track Generator GUI Node. This node does not communicate with other nodes.
+There is only one ros node associated with this package called `eufs_tracks`. This is the Track Generator GUI Node. This node does not communicate with other nodes.
 
 ## How To Use the GUI
 
@@ -19,17 +19,17 @@ Basic instructions can be found in the main repository README.  Here lie the adv
 
 ### Editing the GUI's UI
 
-The File for editing the Launcher GUI's layout can be found in `eufs_track_generator/resource` in the `track_generator.ui` file.
-For adding additional options on launch, `eufs_track_generator/src/eufs_track_generator/TrackGeneratorModule.py` can be edited.
+The File for editing the Launcher GUI's layout can be found in `eufs_tracks/resource` in the `track_generator.ui` file.
+For adding additional options on launch, `eufs_tracks/src/eufs_tracks/TrackGeneratorModule.py` can be edited.
 However, at this point it is recommended to let the infrastructure team handle it.
 
 ### Image-to-Track
 
 #### Relevant Locations
 
-Images are expected to be in the `eufs_gazebo/randgen_imgs` folder in `.png` format.
+Images are expected to be in the `eufs_tracks/image` folder in `.png` format.
 
-When creating a track from an image, the launcher creates files based on templates found in `eufs_track_generator/resource` -
+When creating a track from an image, the launcher creates files based on templates found in `eufs_tracks/resource` -
 editing them will change the resultant track.
 
 #### Creating One's Own Image
@@ -71,8 +71,8 @@ which will be the direction the front of the car is facing.
 
 #### The Generated Track
 
-When loading an image with name `[name].png`, the track generator will create files `[name].launch` and `[name].world` in their relevant eufs_gazebo folders.
-It will also create a folder `[name]` in `eufs_description/models`, which has two files in it, `model.sdf` and `model.config`.
+When loading an image with name `[name].png`, the track generator will create files `[name].launch` and `[name].world` in their relevant eufs_tracks folders.
+It will also create a folder `[name]` in `eufs_tracks/models`, which has two files in it, `model.sdf` and `model.config`.
 If any of these files already exist, it will overwrite!  This is by design - loading the same image will give the same track, with the exception
 of the precise placement of noise objects which depend on the noise level selected in the gui and also random chance (unless at max or min noise).
 So if you want to save the precise noise data (which will be in the aforementioned `model.sdf`) then you should copy that file before loading the image again.
@@ -81,5 +81,5 @@ Note that this all applies to the file `rand.png` as well, which is the output f
 
 #### Noise
 
-Noise objects are chosen from `eufs_track_generator/resource/noiseFiles.txt` - feel free to add your own and edit the weights!
+Noise objects are chosen from `eufs_tracks/resource/noiseFiles.txt` - feel free to add your own and edit the weights!
 Full instructions are how to do so are inside the file itself.

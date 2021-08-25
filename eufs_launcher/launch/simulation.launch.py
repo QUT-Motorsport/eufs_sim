@@ -14,7 +14,7 @@ def launch_setup(context, *args, **kwargs):
     # Get arguments and store them so they can be passed into the simulation
     track = get_argument(context, 'track')
 
-    launch_file_path = os.path.join(get_package_share_directory('eufs_gazebo'), 'launch', str(track) + '.launch')
+    launch_file_path = os.path.join(get_package_share_directory('eufs_tracks'), 'launch', str(track) + '.launch')
     launch_description = AnyLaunchDescriptionSource(launch_file_path)
 
     return [

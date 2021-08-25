@@ -13,7 +13,7 @@ Provides the interface in order to launch the simulation. Controls the package u
 | ----- | ---- |  ------ | ------- |
 | config | string | config/eufs_launcher | File name of yaml file containing launcher defaults. |
 | config_loc | string | eufs_launcher | Directory name of yaml file to be used. |
-| gui | bool | True | Condition to launch the GUI. | 
+| gui | bool | True | Condition to launch the GUI. |
 
 ## Nodes:
 There is only one ros node associated with this package called `eufs_launcher`. This is the Launcher GUI Node. This node does not communicate with other nodes.
@@ -34,12 +34,12 @@ Noise is represented by `cyan` on an image.  Randomly generated images will have
 (more precisely, each pixel not between cones has a 1% chance of being noise).  The GUI's noise slider has no effect on pixel placement
 in randomly generated images.
 
-When the launcher reads an image file and converts it into a track, then it takes into account the noise slider.  
+When the launcher reads an image file and converts it into a track, then it takes into account the noise slider.
 If the noise slider is x% full, then every noise pixel has an x% chance of being realized in the final product.
 (so at 0% there is no noise and at 100% every noise pixel has a noise object on it).
 
-Noise objects are chosen from `eufs_track_generator/resource/noiseFiles.txt` - feel free to add your own and edit the weights!
+Noise objects are chosen from `eufs_tracks/resource/noiseFiles.txt` - feel free to add your own and edit the weights!
 Full instructions are how to do so are inside the file itself.
-You may wish to add a completely new model - for that, you need a .dae file to be placed in `eufs_description/meshes`.  If you have Blender,
+You may wish to add a completely new model - for that, you need a .dae file to be placed in `car/meshes`.  If you have Blender,
 these are easy to procure - Blender has an export-to-.dae option!  Even if you don't know how to use Blender to create objects, many people
 online have free resources for Blender, so you can load those up and then export.
