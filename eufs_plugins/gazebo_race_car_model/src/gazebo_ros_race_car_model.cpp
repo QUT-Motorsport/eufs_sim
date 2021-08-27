@@ -486,12 +486,7 @@ namespace gazebo_plugins
       wheel_speeds_stamped.header.frame_id = _robot_frame;
 
       wheel_speeds = _vehicle->getWheelSpeeds(_state, _act_input);
-
-      wheel_speeds_stamped.speeds.steering = wheel_speeds.steering;
-      wheel_speeds_stamped.speeds.lf_speed = wheel_speeds.lf_speed;
-      wheel_speeds_stamped.speeds.rf_speed = wheel_speeds.rf_speed;
-      wheel_speeds_stamped.speeds.lb_speed = wheel_speeds.lb_speed;
-      wheel_speeds_stamped.speeds.rb_speed = wheel_speeds.rb_speed;
+      wheel_speeds_stamped.speeds = wheel_speeds;
 
       // Publish ground truth
       if (_pub_ground_truth_wheel_speeds->get_subscription_count() > 0)
@@ -500,11 +495,7 @@ namespace gazebo_plugins
       }
 
       wheel_speeds = _noise->applyNoiseToWheelSpeeds(wheel_speeds);
-
-      wheel_speeds_stamped.speeds.lf_speed = wheel_speeds.lf_speed;
-      wheel_speeds_stamped.speeds.rf_speed = wheel_speeds.rf_speed;
-      wheel_speeds_stamped.speeds.lb_speed = wheel_speeds.lb_speed;
-      wheel_speeds_stamped.speeds.rb_speed = wheel_speeds.rb_speed;
+      wheel_speeds_stamped.speeds = wheel_speeds;
 
       // Publish with Noise
       if (_pub_wheel_speeds->get_subscription_count() > 0)
