@@ -214,8 +214,8 @@ namespace gazebo_plugins
             else
             {
                 RCLCPP_WARN(this->rosnode_->get_logger(), "Can only publish track to \"map\" or \"base_footprint\" "
-                                                          "frame and not: \"" +
-                                                              this->track_frame_ + "\"");
+                                                          "frame and not: \"%s\"",
+                            this->track_frame_.c_str());
                 return;
             }
 
@@ -648,7 +648,7 @@ namespace gazebo_plugins
                 marker.color.b = blue;
                 marker.color.a = 1.0;
 
-                marker.lifetime = rclcpp::Duration(0.2);
+                marker.lifetime = rclcpp::Duration::from_seconds(0.2);
 
                 marker_array.push_back(marker);
 
