@@ -1,11 +1,8 @@
 import math
-from PIL import Image
-from PIL import ImageDraw
 import random
 from rclpy.node import Node
 from scipy.special import binom
 from .LauncherUtilities import *
-import numpy as np
 import collections
 
 

@@ -8,10 +8,10 @@ from python_qt_binding import loadUi
 from python_qt_binding.QtWidgets import (QWidget, QComboBox, QPushButton, QSlider, QRadioButton, QCheckBox, QMainWindow,
                                          QLabel, QLineEdit, QApplication)
 
-from eufs_tracks.TrackGenerator import TrackGenerator as Generator
-from eufs_tracks.TrackGenerator import GeneratorContext
+from .TrackGenerator import TrackGenerator as Generator
+from .TrackGenerator import GeneratorContext
 
-from eufs_tracks.ConversionTools import ConversionTools as Converter
+from .ConversionTools import ConversionTools as Converter
 
 
 class EUFSTrackGenerator(Plugin):

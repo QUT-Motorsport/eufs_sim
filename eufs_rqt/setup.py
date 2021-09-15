@@ -4,7 +4,7 @@ package_name = 'eufs_rqt'
 
 setup(
     name=package_name,
-    version='0.0.0',
+    version='2.0.0',
     packages=[package_name],
     package_dir={'': 'src'},
     data_files=[
@@ -22,9 +22,9 @@ setup(
     ],
     install_requires=['setuptools'],
     zip_safe=True,
-    maintainer='Niklas Burggraaff',
-    maintainer_email='niklasburggraaff@gmail.com',
-    description='Package which currently just has rqt GUIs',
+    maintainer='Cameron Matthew',
+    maintainer_email='cambobmat@icloud.com',
+    description='RQT GUIs for eufs_sim',
     license='MIT',
     tests_require=['pytest'],
     scripts=['scripts/eufs_robot_steering_gui', 'scripts/mission_control_gui'],

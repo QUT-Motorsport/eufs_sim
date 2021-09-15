@@ -44,7 +44,10 @@ ament_target_dependencies(eufs_models
 ament_export_include_directories(include)
 ament_export_libraries(${PROJECT_NAME})
 ament_export_targets(export_${PROJECT_NAME} HAS_LIBRARY_TARGET)
+
+ament_export_dependencies(ament_cmake)
 ament_export_dependencies(yaml-cpp)
+ament_export_dependencies(eufs_msgs)
 
 install(
   DIRECTORY include/
