@@ -2,14 +2,11 @@
 <?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
 <package format="3">
   <name>eufs_sensors</name>
-  <version>0.1.0</version>
-  <description>The eufs_sensors package
-    Contains all of the files relating to the sensors for
-    simulation purposes.
-  </description>
+  <version>2.0.0</version>
+  <description>URDF and mesh files for various sensors.</description>
 
+  <maintainer email="cambobmat@icloud.com">Cameron Matthew</maintainer>
   <maintainer email="siliconlad@protonmail.com">Angus Stewart</maintainer>
-  <maintainer email="niklasburggraaff@gmail.com">Niklas Burggraaff</maintainer>
 
   <license>MIT</license>
 

@@ -12,9 +12,8 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 import xml.etree.ElementTree as ET
-from xml.etree.ElementTree import Element, SubElement, tostring
+from xml.etree.ElementTree import Element, SubElement
 from scipy import interpolate
-from scipy.spatial import cKDTree
 from xml.dom import minidom
 import argparse
 import os

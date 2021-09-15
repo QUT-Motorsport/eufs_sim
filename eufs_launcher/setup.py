@@ -4,7 +4,7 @@ package_name = 'eufs_launcher'
 
 setup(
     name=package_name,
-    version='0.0.0',
+    version='2.0.0',
     packages=[package_name],
     package_dir={'': 'src'},
     data_files=[
@@ -17,11 +17,11 @@ setup(
          ['resource/' + package_name]),
         ('share/' + package_name, ['package.xml']),
     ],
-    install_requires=['setuptools', 'scipy', 'pandas'],
+    install_requires=['setuptools'],
     zip_safe=True,
-    maintainer='Angus Stewart',
-    maintainer_email='siliconlad@protonmail.com',
-    description='This package Launches the simulation.',
+    maintainer='Cameron Matthew',
+    maintainer_email='cambobmat@icloud.com',
+    description='Configures and launches eufs_sim.',
     license='MIT',
     tests_require=['pytest'],
     scripts=['scripts/eufs_launcher'],
