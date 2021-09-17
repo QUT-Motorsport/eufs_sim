@@ -31,7 +31,7 @@
 #include "rclcpp/rclcpp.hpp"
 
 // ROS msgs
-#include "eufs_msgs/msg/ackermann_drive_stamped.hpp"
+#include "ackermann_msgs/msg/ackermann_drive_stamped.hpp"
 #include "eufs_msgs/msg/car_state.hpp"
 #include "eufs_msgs/msg/wheel_speeds_stamped.hpp"
 #include "nav_msgs/msg/odometry.hpp"
@@ -98,7 +98,7 @@ namespace gazebo_plugins
       void publishOdom();
       void publishTf();
 
-      void onCmd(const eufs_msgs::msg::AckermannDriveStamped::SharedPtr msg);
+      void onCmd(const ackermann_msgs::msg::AckermannDriveStamped::SharedPtr msg);
 
       /// @brief Converts an euler orientation to quaternion
       std::vector<double> ToQuaternion(std::vector<double> &euler);
@@ -145,7 +145,7 @@ namespace gazebo_plugins
       rclcpp::Publisher<nav_msgs::msg::Odometry>::SharedPtr _pub_odom;
 
       // ROS Subscriptions
-      rclcpp::Subscription<eufs_msgs::msg::AckermannDriveStamped>::SharedPtr _sub_cmd;
+      rclcpp::Subscription<ackermann_msgs::msg::AckermannDriveStamped>::SharedPtr _sub_cmd;
 
       // ROS Services
       rclcpp::Service<std_srvs::srv::Trigger>::SharedPtr _reset_vehicle_pos_srv;
@@ -163,7 +163,7 @@ namespace gazebo_plugins
       CommandMode _command_mode;
 
       // Command queue for control delays
-      std::queue<std::shared_ptr<eufs_msgs::msg::AckermannDriveStamped>> _command_Q;
+      std::queue<std::shared_ptr<ackermann_msgs::msg::AckermannDriveStamped>> _command_Q;
       std::queue<gazebo::common::Time> _cmd_time_Q;
       double _control_delay;
       // Steering rate limit variables
