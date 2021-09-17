@@ -10,6 +10,7 @@ ament_target_dependencies(gazebo_race_car_model
   "nav_msgs"
   "geometry_msgs"
   "tf2"
+  "ackermann_msgs"
   "tf2_ros"
   "std_srvs"
   "std_msgs"

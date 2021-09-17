@@ -42,7 +42,7 @@ from python_qt_binding.QtWidgets import QComboBox, QShortcut, QWidget
 from ament_index_python.packages import get_package_share_directory
 import rclpy
 from std_srvs.srv import Trigger
-from eufs_msgs.msg import AckermannDriveStamped
+from ackermann_msgs.msg import AckermannDriveStamped
 
 
 class EUFSRobotSteeringGUI(Plugin):

@@ -79,7 +79,7 @@ namespace gazebo_plugins
       _command_mode_srv = _rosnode->create_service<std_srvs::srv::Trigger>("/race_car_model/command_mode", std::bind(&RaceCarModelPlugin::returnCommandMode, this, std::placeholders::_1, std::placeholders::_2));
 
       // ROS Subscriptions
-      _sub_cmd = _rosnode->create_subscription<eufs_msgs::msg::AckermannDriveStamped>("/cmd", 1, std::bind(&RaceCarModelPlugin::onCmd, this, std::placeholders::_1));
+      _sub_cmd = _rosnode->create_subscription<ackermann_msgs::msg::AckermannDriveStamped>("/cmd", 1, std::bind(&RaceCarModelPlugin::onCmd, this, std::placeholders::_1));
 
       // Connect to Gazebo
       _update_connection =
@@ -607,7 +607,7 @@ namespace gazebo_plugins
         gazebo::common::Time cmd_time = _cmd_time_Q.front();
         if ((current_time - cmd_time).Double() >= _control_delay)
         {
-          std::shared_ptr<eufs_msgs::msg::AckermannDriveStamped> cmd = _command_Q.front();
+          std::shared_ptr<ackermann_msgs::msg::AckermannDriveStamped> cmd = _command_Q.front();
           _des_input.acc = cmd->drive.acceleration;
           _des_input.vel = cmd->drive.speed;
           _des_input.delta = cmd->drive.steering_angle;
@@ -662,7 +662,7 @@ namespace gazebo_plugins
       _state_machine->spinOnce(current_time);
     }
 
-    void RaceCarModelPlugin::onCmd(const eufs_msgs::msg::AckermannDriveStamped::SharedPtr msg)
+    void RaceCarModelPlugin::onCmd(const ackermann_msgs::msg::AckermannDriveStamped::SharedPtr msg)
     {
       // Override commands if we're not in canDrive state
       if (!_state_machine->canDrive())
