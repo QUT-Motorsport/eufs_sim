@@ -185,6 +185,11 @@ class EUFSTrackGenerator(Plugin):
 
         self.DEBUG_SHUTDOWN = False
 
+        # TEMPORARY: Disable Noise Slider as it's broken
+        self.NOISE_SLIDER.setVisible(False)
+        self._widget.findChild(QLabel, "NoiseLabel").setVisible(False)
+        self._widget.findChild(QLabel, 'ObjectNoiseToolTip').setVisible(False)
+
         # Looping over all widgest to fix scaling issue via manual scaling
         # Scaling done via magically comparing the width to the 'default' 1700 pixels
         rec = QApplication.desktop().screenGeometry()

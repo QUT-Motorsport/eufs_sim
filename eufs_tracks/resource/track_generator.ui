@@ -448,7 +448,7 @@
          </font>
      </property>
     </widget>
-    <widget class="QLabel" name="ObjectNoiseTooltip">
+    <widget class="QLabel" name="ObjectNoiseToolTip">
      <property name="geometry">
       <rect>
        <x>80</x>

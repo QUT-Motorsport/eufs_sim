@@ -113,7 +113,7 @@
    <property name="geometry">
     <rect>
      <x>120</x>
-     <y>210</y>
+     <y>200</y>
      <width>200</width>
      <height>27</height>
     </rect>
@@ -132,7 +132,7 @@
    <property name="geometry">
     <rect>
      <x>125</x>
-     <y>225</y>
+     <y>215</y>
      <width>200</width>
      <height>25</height>
     </rect>
@@ -153,7 +153,7 @@
    <property name="geometry">
     <rect>
      <x>60</x>
-     <y>290</y>
+     <y>240</y>
      <width>100</width>
      <height>30</height>
     </rect>
@@ -171,7 +171,7 @@
    <property name="geometry">
     <rect>
      <x>50</x>
-     <y>315</y>
+     <y>265</y>
      <width>100</width>
      <height>30</height>
     </rect>
@@ -194,7 +194,7 @@
    <property name="geometry">
     <rect>
      <x>60</x>
-     <y>350</y>
+     <y>300</y>
      <width>100</width>
      <height>30</height>
     </rect>
@@ -212,7 +212,7 @@
    <property name="geometry">
     <rect>
      <x>50</x>
-     <y>375</y>
+     <y>325</y>
      <width>100</width>
      <height>30</height>
     </rect>
@@ -235,7 +235,7 @@
    <property name="geometry">
     <rect>
      <x>170</x>
-     <y>350</y>
+     <y>300</y>
      <width>100</width>
      <height>30</height>
     </rect>
@@ -253,7 +253,7 @@
    <property name="geometry">
     <rect>
      <x>170</x>
-     <y>375</y>
+     <y>325</y>
      <width>100</width>
      <height>30</height>
     </rect>
@@ -309,7 +309,7 @@
        </font>
    </property>
   </widget>
-  <widget class="QLabel" name="ObjectNoiseTooltip">
+  <widget class="QLabel" name="ObjectNoiseToolTip">
    <property name="geometry">
     <rect>
      <x>100</x>
