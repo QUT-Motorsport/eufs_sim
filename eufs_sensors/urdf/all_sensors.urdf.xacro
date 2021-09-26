@@ -8,7 +8,7 @@
   <!-- Hokuyo utm30lx -->
   <xacro:include filename="$(find eufs_sensors)/urdf/hokuyo_utm30lx.urdf.xacro"/>
 
-  <!-- Velodyne VLP-16 -->
+  <!-- Velodyne VLP-16R -->
   <xacro:include filename="$(find eufs_sensors)/urdf/VLP-16R.urdf.xacro"/>
 
   <!-- Imu -->
