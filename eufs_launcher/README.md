@@ -1,45 +1,37 @@
-# EUFS Launcher
+# eufs_launcher
 
-The information here can be found at the [team wiki](https://gitlab.com/eufs/resources/wikis/Simulator/Image-To-Track-Conversion), which will be kept up-to-date.
+## LauncherModule
 
-## Plugins:
+Package that configures then launches eufs_sim.
 
-### LauncherModule
-Provides the interface in order to launch the simulation. Controls the package used to load the simulation, the track to load and other vehicle control parameters.
-
-#### Parameters:
+### Launch Parameters:
 
 | Name | Type | Default | Purpose |
 | ----- | ---- |  ------ | ------- |
-| config | string | config/eufs_launcher | File name of yaml file containing launcher defaults. |
-| config_loc | string | eufs_launcher | Directory name of yaml file to be used. |
-| gui | bool | True | Condition to launch the GUI. |
+| config     | string | config/eufs_launcher | Name of yaml file (relative to `config_loc`) containing launcher default configuration. |
+| config_loc | string | eufs_launcher        | Name of package containing the `config` file. |
+| gui        | bool   | true                 | Enable/disable GUI. |
 
-## Nodes:
-There is only one ros node associated with this package called `eufs_launcher`. This is the Launcher GUI Node. This node does not communicate with other nodes.
+### ROS 2 Nodes
+eufs_launcher can be launched as a ROS 2 node. See [eufs_launcher.launch.py](./launch/eufs_launcher.launch.py) for an example of how to launch.
 
-## How To Use the GUI
+This node has no services, publishers or subscribers.
 
-Basic instructions can be found in the main repository README.  Here lie the advanced usage notes.
+### GUI Components
+
+| Label | Type | Default | Purpose |
+| ----- | ---- | ------- | ------- |
+| Track                    | [QComboBox](https://doc.qt.io/qt-5/qcombobox.html)     | small_track    | Selects the world launch file in [eufs_tracks](../eufs_tracks/launch) to be launched. |
+| Launch!                  | [QPushButton](https://doc.qt.io/qt-5/qpushbutton.html) | -              | Launches eufs_sim with current launcher configuration. |
+| Vehicle Model            | [QComboBox](https://doc.qt.io/qt-5/qcombobox.html)     | DynamicBicycle | The [vehicle model sub-class](../eufs_models/src) to use. |
+| Command Mode             | [QComboBox](https://doc.qt.io/qt-5/qcombobox.html)     | acceleration   | Determines whether the vehicle is controlled using `acceleration` or `velocity`. Also determines the outputs of the [Robot Steering GUI](../eufs_rqt/src/eufs_rqt/EUFSRobotSteeringGUI.py). |
+| Vehicle Moodel Presets   | [QComboBox](https://doc.qt.io/qt-5/qcombobox.html)     | DryTrack       | Which vehicle model config file to use from [eufs_racecar](../eufs_racecar/robots). |
+| RViz                     | [QCheckBox](https://doc.qt.io/qt-5/qcheckbox.html)     | True           | Whether to launch RViz. |
+| Gazebo GUI               | [QCheckBox](https://doc.qt.io/qt-5/qcheckbox.html)     | False          | Whether to launch the Gazebo GUI (i.e [gzclient](http://gazebosim.org/tutorials?tut=components&cat=get_started), gzserver will still be launched). |
+| Use Simulated Perception | [QCheckBox](https://doc.qt.io/qt-5/qcheckbox.html)     | True           | Whether [gazebo_cone_ground_truth](../eufs_plugins/gazebo_cone_ground_truth/src/gazebo_cone_ground_truth.cpp) should publish cones with noise to 'simulate' the output of a perception system. |
+| Ground Truth TF          | [QCheckBox](https://doc.qt.io/qt-5/qcheckbox.html)     | False          | Whether [gazebo_ros_race_car_model](../eufs_plugins/gazebo_race_car_model/src/gazebo_ros_race_car_model.cpp) should publish ground truth transforms. |
 
 ### Editing the GUI's UI
 
-The File for editing the Launcher GUI's layout can be found in `eufs_launcher/resource` in the `launcher.ui` file.
-For adding additional options on launch, `eufs_launcher/src/eufs_launcher/LauncherModule.py` can be edited.
-However, at this point it is recommended to let the infrastructure team handle it.
-
-#### Noise
-
-Noise is represented by `cyan` on an image.  Randomly generated images will have approximately 1% of the image covered with noise.
-(more precisely, each pixel not between cones has a 1% chance of being noise).  The GUI's noise slider has no effect on pixel placement
-in randomly generated images.
-
-When the launcher reads an image file and converts it into a track, then it takes into account the noise slider.
-If the noise slider is x% full, then every noise pixel has an x% chance of being realized in the final product.
-(so at 0% there is no noise and at 100% every noise pixel has a noise object on it).
-
-Noise objects are chosen from `eufs_tracks/resource/noiseFiles.txt` - feel free to add your own and edit the weights!
-Full instructions are how to do so are inside the file itself.
-You may wish to add a completely new model - for that, you need a .dae file to be placed in `car/meshes`.  If you have Blender,
-these are easy to procure - Blender has an export-to-.dae option!  Even if you don't know how to use Blender to create objects, many people
-online have free resources for Blender, so you can load those up and then export.
+The file for editing the Launcher GUI's layout can be found in [launcher.ui](./resource/launcher.ui).
+For adding additional options on launch, see [LauncherModule.py](./src/eufs_launcher/LauncherModule.py).

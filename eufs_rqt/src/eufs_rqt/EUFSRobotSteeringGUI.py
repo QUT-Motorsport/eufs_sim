@@ -186,7 +186,7 @@ class EUFSRobotSteeringGUI(Plugin):
         self._widget.decrease_angular_push_button.setToolTip(
             self._widget.decrease_angular_push_button.toolTip() + ' ' + self.tr('([Shift +] D)'))
 
-        # Service to query the launcher for command mode on startup
+        # Service to query the race car model for command mode on startup
         self.command_mode_srv = self.node.create_client(
             Trigger, "/race_car_model/command_mode")
         self.command_mode = self.request_command_mode()
@@ -230,7 +230,7 @@ class EUFSRobotSteeringGUI(Plugin):
         self.zero_cmd_sent = False
 
     def request_command_mode(self):
-        """Requests command mode from launcher"""
+        """Requests command mode from race_car_model"""
         while not self.command_mode_srv.wait_for_service(timeout_sec=4.0):
             self.logger.debug('command mode service not available, waiting again...')
 
