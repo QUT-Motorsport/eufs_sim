@@ -1,0 +1,18 @@
+noise:
+  # X, Y, Z
+  positionNoise: [0.0, 0.0, 0.0]
+
+  # Yaw, Pitch, Roll
+  orientationNoise: [0.0, 0.0, 0.0]
+
+  # X, Y, Z
+  linearVelocityNoise: [0.0, 0.0, 0.0]
+
+  # X, Y, Z
+  angularVelocityNoise: [0.0, 0.0, 0.0]
+
+  # X, Y, Z
+  linearAccelerationNoise: [0.0, 0.0, 0.0]
+
+  # lf, rf, lb, rb
+  wheelSpeedNoise: [1.0, 1.0, 1.0, 1.0]

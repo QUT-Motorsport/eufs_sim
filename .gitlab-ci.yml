@@ -1,56 +1,51 @@
-image: ros:melodic-ros-core
+image: ros:foxy-ros-base-focal
 
 variables:
+  GIT_CLONE_PATH: $CI_BUILDS_DIR/$CI_CONCURRENT_PROJECT_ID/ros_ws/src/eufs_sim
   GIT_SUBMODULE_STRATEGY: recursive
 
-cache:
-  paths:
-    - ccache/
-
 before_script:
-# Add eufs package dependencies here, separated by spaces
- - export DEP_PACKAGES="eufs_msgs"
+  # Gives us access to other private repos
+  - "command -v ssh-agent >/dev/null || ( apt-get update -qq -y && apt-get install openssh-client -qq -y )"
+  - eval $(ssh-agent -s)
+  - echo "$SSH_PRIVATE_KEY" | tr -d '\r' | ssh-add - > /dev/null
+  - mkdir -p ~/.ssh
+  - chmod 700 ~/.ssh
+  - echo -e "Host *\n\tStrictHostKeyChecking no\n\n" > ~/.ssh/config
 
-# Install git
- - apt update >/dev/null && apt install -y git >/dev/null
+  # Configure git user to be able to use git commands
+  - git config --global user.email "eufs@eufs.com"
+  - git config --global user.name "eufs"
 
- - 'which ssh-agent || ( apt-get update -y && apt-get install openssh-client -y ) >/dev/null'
- - eval $(ssh-agent -s)
- - echo "$SSH_PRIVATE_KEY" | tr -d '\r' | ssh-add - > /dev/null
- - mkdir -p ~/.ssh
- - chmod 700 ~/.ssh
- - '[[ -f /.dockerenv ]] && echo -e "Host *\n\tStrictHostKeyChecking no\n\n" > ~/.ssh/config'
+  # Move out of GIT_CLONE_PATH
+  - cd $CI_BUILDS_DIR/$CI_CONCURRENT_PROJECT_ID/ros_ws
 
- - git config --global user.email "eufs_sim@eufs.com"
- - git config --global user.name "eufs_sim"
+  # Clone eufs_msgs
+  - rm -rf src/eufs_msgs
+  - git -C src clone -b ros2 git@gitlab.com:eufs/eufs_msgs.git
 
- - git clone --single-branch --branch gitlab_ci git@gitlab.com:eufs/resources.git
- - source resources/gitlab-ci.bash "$DEP_PACKAGES" >/dev/null
+  # Install ROS package dependencies
+  - apt-get update -qq
+  - rosdep update -q
+  - rosdep install -yq --from-paths src --ignore-src
+  - rm -rf /var/lib/apt/lists/*
+
+  # Source ROS
+  - . /opt/ros/$ROS_DISTRO/setup.sh
+
+  # Build eufs_msgs
+  - colcon build --packages-select eufs_msgs
+  - . install/setup.sh
 
 # stages
 stages:
-  - build
   - test
 
-# catkin tools
-catkin_tools:
-  stage: build
-  script:
-    - catkin build --summarize --no-status --force-color
-  rules:
-    - if: $CI_MERGE_REQUEST_ID
-    - if: $CI_COMMIT_BRANCH == "master"
-
-# roslint
-roslint:
+colcon:
   stage: test
   script:
-    - catkin build eufs_gazebo
-    - catkin build eufs_gazebo --no-deps --make-args roslint
-    - catkin build eufs_launcher
-    - catkin build eufs_launcher --no-deps --make-args roslint
-    - catkin build ros_can_sim
-    - catkin build ros_can_sim --no-deps --make-args roslint
+    - colcon build
+  # Only run on ros2 branch and merge requests
   rules:
     - if: $CI_MERGE_REQUEST_ID
-    - if: $CI_COMMIT_BRANCH == "master"
+    - if: $CI_COMMIT_BRANCH == "ros2"

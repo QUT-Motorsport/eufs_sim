@@ -1,0 +1,32 @@
+<library path="src">
+  <class name="mission_control_gui" type="eufs_rqt.MissionControlGUI.MissionControlGUI" base_class_type="rqt_gui_py::Plugin">
+    <description>
+      A GUI to control the state machine of the vehicle.
+    </description>
+    <qtgui>
+      <group>
+        <label>EUFS</label>
+        <icon type="theme">folder</icon>
+        <statustip>Plugins related to EUFS</statustip>
+      </group>
+      <label>mission_control GUI</label>
+      <icon type="theme">utilities-terminal</icon>
+      <statustip>Controls the state machine of the vehicle</statustip>
+    </qtgui>
+  </class>
+  <class name="eufs_robot_steering_gui" type="eufs_rqt.EUFSRobotSteeringGUI.EUFSRobotSteeringGUI" base_class_type="rqt_gui_py::Plugin">
+    <description>
+      A GUI to control steer the car using AckermannDriveStamped messages
+    </description>
+    <qtgui>
+      <group>
+        <label>EUFS</label>
+        <icon type="theme">folder</icon>
+        <statustip>Plugins related to EUFS</statustip>
+      </group>
+      <label>EUFS Robot Steering GUI</label>
+      <icon type="theme">utilities-system-monitor</icon>
+      <statustip>Controls the car using AckermannDriveStamped messages</statustip>
+    </qtgui>
+  </class>
+</library>

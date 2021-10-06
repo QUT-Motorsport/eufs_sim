@@ -1,0 +1,64 @@
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro">
+  <xacro:arg name="publish_tf" default="false"/>
+  <xacro:arg name="simulate_perception" default="false"/>
+  <xacro:arg name="command_mode" default="acceleration"/>
+
+  <!-- Custom plugin which controls the car using a given vehicle model.
+   It controls the car by setting its velocity and position
+   and the steering angle of the wheels -->
+  <gazebo>
+    <plugin name="race_car" filename="libgazebo_race_car_model.so">
+      <update_rate>1000.0</update_rate>
+      <publish_rate>200.0</publish_rate>
+      <vehicle_model>$(arg vehicle_model)</vehicle_model>
+      <front_left_wheel_steering>left_steering_hinge_joint</front_left_wheel_steering>
+      <front_right_wheel_steering>right_steering_hinge_joint</front_right_wheel_steering>
+      <front_left_wheel>front_left_wheel_joint</front_left_wheel>
+      <front_right_wheel>front_right_wheel_joint</front_right_wheel>
+      <rear_left_wheel>rear_left_wheel_joint</rear_left_wheel>
+      <rear_right_wheel>rear_right_wheel_joint</rear_right_wheel>
+      <yaml_config>$(arg config_file)</yaml_config>
+      <noise_config>$(arg noise_config)</noise_config>
+      <referenceFrame>map</referenceFrame>
+      <robotFrame>base_footprint</robotFrame>
+      <publishTransform>$(arg publish_tf)</publishTransform>
+      <groundTruthCarStateTopic>/ground_truth/state</groundTruthCarStateTopic>
+      <localisationCarStateTopic>/odometry_integration/car_state</localisationCarStateTopic>
+      <wheelSpeedsTopicName>/ros_can/wheel_speeds</wheelSpeedsTopicName>
+      <groundTruthWheelSpeedsTopicName>/ground_truth/wheel_speeds</groundTruthWheelSpeedsTopicName>
+      <odometryTopicName>/ground_truth/odom</odometryTopicName>
+      <commandMode>$(arg command_mode)</commandMode>
+      <controlDelay>0.2</controlDelay>
+      <!-- The time in seconds it takes for the car to go from lock to lock -->
+      <steeringLockTime>1</steeringLockTime>
+    </plugin>
+  </gazebo>
+
+  <gazebo>
+    <plugin name="cone_ground_truth" filename="libgazebo_cone_ground_truth.so">
+      <alwaysOn>true</alwaysOn>
+      <updateRate>25.0</updateRate>
+      <cameraViewDistance>15</cameraViewDistance>
+      <lidarViewDistance>100</lidarViewDistance>
+      <lidarXViewDistance>20</lidarXViewDistance>
+      <lidarYViewDistance>10</lidarYViewDistance>
+      <lidarMinViewDistance>1</lidarMinViewDistance>
+      <cameraMinViewDistance>1</cameraMinViewDistance>
+      <cameraFOV>1.918889</cameraFOV><!--110 degrees-->
+      <lidarFOV>3.141593</lidarFOV><!-- 180 degrees-->
+      <lidarOn>true</lidarOn><!--If false, we only simulate camera measurements-->
+      <trackFrame>map</trackFrame>
+      <groundTruthConesTopicName>/ground_truth/cones</groundTruthConesTopicName>
+      <groundTruthConeMarkersTopicName>/ground_truth/cones/viz</groundTruthConeMarkersTopicName>
+      <groundTruthTrackTopicName>/ground_truth/track</groundTruthTrackTopicName>
+      <simulatePerception>$(arg simulate_perception)</simulatePerception>
+      <perceptionConesTopicName>/fusion/cones</perceptionConesTopicName>
+      <perceptionConeMarkersTopicName>/fusion/cones/viz</perceptionConeMarkersTopicName>
+      <perceptionCameraDepthNoiseParameterA>0.0184</perceptionCameraDepthNoiseParameterA>
+      <perceptionCameraDepthNoiseParameterB>0.2106</perceptionCameraDepthNoiseParameterB>
+      <perceptionLidarNoise>0.03 0.03 0.0</perceptionLidarNoise>
+    </plugin>
+  </gazebo>
+
+</robot>

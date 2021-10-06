@@ -1,24 +1,10 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3.8
 
 import sys
 
-from eufs_launcher import LauncherModule
+from eufs_launcher.LauncherModule import EUFSLauncher
 from rqt_gui.main import Main
-import rospy
 
-LauncherModule.yaml_to_load = rospy.get_param(
-    "/eufs_launcher/config",
-    default = "config/eufs_launcher.yaml"
-)
-LauncherModule.loc_to_load = rospy.get_param(
-    "/eufs_launcher/config_loc",
-    default = "eufs_launcher"
-)
-LauncherModule.use_gui = rospy.get_param(
-    "/eufs_launcher/gui",
-    default = "True"
-)
-
-plugin = 'eufs_launcher'
+plugin = 'eufs_launcher.LauncherModule.EUFSLauncher'
 main = Main(filename=plugin)
 sys.exit(main.main(standalone=plugin))
