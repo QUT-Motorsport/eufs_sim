@@ -206,10 +206,12 @@ class MissionControlGUI(Plugin):
     def shutdown_plugin(self):
         """stop all publisher, subscriber and services
         necessary for clean shutdown"""
-        self.set_mission_pub.destroy()
-        self.state_sub.destroy()
-        self.ebs_srv.destroy()
-        self.reset_srv.destroy()
+        assert(self.node.destroy_publisher(self.set_mission_pub)), "Mission publisher could not be destroyed"
+        assert(self.node.destroy_subscription(self.state_sub)), "State subscriber could not be destroyed"
+        assert (self.node.destroy_client(self.ebs_srv)), "EBS client could not be destroyed"
+        assert (self.node.destroy_client(self.reset_srv)), "State reset client could not be destroyed"
+        # Note: do not destroy the node in shutdown_plugin as this could cause errors for the Robot Steering GUI
+        # Let ROS 2 clean up nodes
 
     def save_settings(self, plugin_settings, instance_settings):
         # don't know how to use
