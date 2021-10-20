@@ -264,6 +264,7 @@ class EUFSRobotSteeringGUI(Plugin):
         try:
             self._publisher = self.node.create_publisher(
                 AckermannDriveStamped, self.topic, 10)
+            self._update_parameter_timer.start(100)
             if log:
                 self.logger.info(
                     "Set EUFS Robot Steering GUI publisher's topic to: " + self.topic)
@@ -382,12 +383,15 @@ class EUFSRobotSteeringGUI(Plugin):
 
     def _unregister_publisher(self):
         if self._publisher is not None:
-            self._publisher.destroy()
+            self._update_parameter_timer.stop()
+            assert(self.node.destroy_publisher(self._publisher)), 'Publisher could not be destroyed.'
             self._publisher = None
 
     def shutdown_plugin(self):
         self._update_parameter_timer.stop()
         self._unregister_publisher()
+        # Note: do not destroy the node here as it could cause errors for the Mission Control GUI
+        # Let ROS 2 clean up nodes
 
     def save_settings(self, plugin_settings, instance_settings):
         instance_settings.set_value(
