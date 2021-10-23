@@ -1,5 +1,11 @@
 # eufs_tracks
 
+There are a number of wiki pages describing the design and usage of eufs_tracks, they can be found in the following locations:
+- [Track Models](https://gitlab.com/eufs/eufs_sim/-/wikis/Track-models)
+- [Random Track Generation](https://gitlab.com/eufs/eufs_sim/-/wikis/Simulation/Random-Track-Generation)
+- [Track Image File Format Specification](https://gitlab.com/eufs/eufs_sim/-/wikis/Simulation/Track-Image-File-Format-Specification)
+- [Image To Track Conversion](https://gitlab.com/eufs/eufs_sim/-/wikis/Simulation/Image-To-Track-Conversion)
+
 ## TrackGeneratorModule
 Provides the interface in order to generate random tracks according to a set of generation parameters. This also allows the user to convert between different track file types.
 

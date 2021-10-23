@@ -1,6 +1,8 @@
 # eufs_racecar
 This package contains robot [meshes](./meshes), [materials](./materials) and [urdf](./urdf) files.
 
+There is a tutorial on the wiki describing [How To Change The Car Model](https://gitlab.com/eufs/eufs_sim/-/wikis/How-To-Change-The-Car-Model).
+
 This also contains the launch file which loads the car into eufs_sim (also launches [RQT GUI's](../eufs_rqt/README.md) and [RViz](http://wiki.ros.org/rviz)).
 
 ## ROS 2 Nodes

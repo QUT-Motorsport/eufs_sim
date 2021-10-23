@@ -97,7 +97,7 @@ This has to be inserted inside a robot URDF.
 
 ## state_machine
 
-Simulates the state machine of the FSUK-AI DDT vehicle.
+Simulates the state machine of the FSUK-AI DDT vehicle. A design outline can be found on the [wiki](https://gitlab.com/eufs/eufs_sim/-/wikis/State-Machine).
 
 ### ROS 2 Publishers
 
