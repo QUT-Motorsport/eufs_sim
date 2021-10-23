@@ -2,6 +2,8 @@
 
 This package contains [meshes](./meshes) and [urdf](./urdf) files for the car sensor suite.
 
+A tutorial on [How To Add A New Sensor](https://gitlab.com/eufs/eufs_sim/-/wikis/How-To-Add-A-New-Sensor) can be found on the wiki.
+
 ## Sensor Parameters
 
 ### IMU

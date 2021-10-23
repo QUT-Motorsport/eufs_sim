@@ -2,7 +2,7 @@
 
 ## LauncherModule
 
-Package that configures then launches eufs_sim.
+Package that configures then launches eufs_sim. For a basic usage guide see [How To Launch eufs_sim](https://gitlab.com/eufs/eufs_sim/-/wikis/Simulation/How-To-Launch-eufs_sim).
 
 ### Launch Parameters:
 

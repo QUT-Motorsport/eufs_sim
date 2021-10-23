@@ -4,6 +4,8 @@ Contains the GUI's for controlling the vehicle.
 - [MissionControlGUI](./src/eufs_rqt/MissionControlGUI.py) - controls the [state_machine](../eufs_plugins/gazebo_race_car_model/src/state_machine.cpp). 
 - [RobotSteeringGUI](./src/eufs_rqt/EUFSRobotSteeringGUI.py) - controls the car using [ackermann_msgs/AckermannDriveStamped](http://docs.ros.org/en/jade/api/ackermann_msgs/html/msg/AckermannDriveStamped.html) messages (a fork of [rqt_robot_steering](https://github.com/ros-visualization/rqt_robot_steering)).
 
+For a basic usage guide see [How To Launch eufs_sim](https://gitlab.com/eufs/eufs_sim/-/wikis/Simulation/How-To-Launch-eufs_sim).
+
 ## Robot Steering GUI
 
 ### GUI Components

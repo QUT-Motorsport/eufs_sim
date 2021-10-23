@@ -3,6 +3,11 @@
 This package contains a library (`eufs_models`). This library implements numerous vehicle models. The current implemented vehicle models can be found 
 within the [src](./src) directory.
 
+An outline of the library design can be found [here](https://gitlab.com/eufs/eufs_sim/-/wikis/Library-Design).
+There are also wiki pages containing information on the physical models used in 
+[Point Mass](https://gitlab.com/eufs/eufs_sim/-/wikis/Point-Mass) and 
+[Dynamic Bicycle](https://gitlab.com/eufs/eufs_sim/-/wikis/Dynamic-Bicycle).
+
 ## models.txt
 
 The [models.txt](./models.txt) file contains the name of every vehicle model implemented in this library.

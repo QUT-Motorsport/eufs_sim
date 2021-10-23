@@ -20,6 +20,13 @@ In summary, teams can attempt the full competition, with their own vehicle model
 
 _Note_: eufs_sim will probably work with other versions of ROS 2 (e.g Foxy) but they are not actively supported by the maintainers.
 
+## Wiki
+EUFS have created a number of wiki pages covering basic "How to" tutorials, "Quick fixes", package design and more!
+This serves as an additional resource to help you understand and use eufs_sim.
+[This link](https://gitlab.com/eufs/eufs_sim/-/wikis/home) will take you to the wiki home page.
+A design overview can be found [here](https://gitlab.com/eufs/eufs_sim/-/wikis/Design-Overview).
+Finally, a series of quick fixes for eufs_sim are listed [on this page](https://gitlab.com/eufs/eufs_sim/-/wikis/Quick-Fixes).
+
 ## Getting Started
 
 For installation, setup, and initial launching, refer to the [Getting Started Guide](https://gitlab.com/eufs/eufs_sim/-/wikis/Getting-Started-Guide) on the Wiki.
