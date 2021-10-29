@@ -398,7 +398,8 @@ namespace gazebo_plugins
       // Publish Car Info
       eufs_msgs::msg::CarState car_state;
 
-      car_state.header.stamp = _rosnode->now();
+      car_state.header.stamp.sec = _last_sim_time.sec;
+      car_state.header.stamp.nanosec = _last_sim_time.nsec;
       car_state.header.frame_id = _reference_frame;
       car_state.child_frame_id = _robot_frame;
 
@@ -482,7 +483,8 @@ namespace gazebo_plugins
       eufs_msgs::msg::WheelSpeedsStamped wheel_speeds_stamped;
       eufs_msgs::msg::WheelSpeeds wheel_speeds;
 
-      wheel_speeds_stamped.header.stamp = _rosnode->now();
+      wheel_speeds_stamped.header.stamp.sec = _last_sim_time.sec;
+      wheel_speeds_stamped.header.stamp.nanosec = _last_sim_time.nsec;
       wheel_speeds_stamped.header.frame_id = _robot_frame;
 
       wheel_speeds = _vehicle->getWheelSpeeds(_state, _act_input);
@@ -508,7 +510,8 @@ namespace gazebo_plugins
     {
       nav_msgs::msg::Odometry odom;
 
-      odom.header.stamp = _rosnode->now();
+      odom.header.stamp.sec = _last_sim_time.sec;
+      odom.header.stamp.nanosec = _last_sim_time.nsec;
 
       odom.header.frame_id = _reference_frame;
       odom.child_frame_id = _robot_frame;
@@ -574,7 +577,8 @@ namespace gazebo_plugins
       // Send TF
       geometry_msgs::msg::TransformStamped transform_stamped;
 
-      transform_stamped.header.stamp = _rosnode->now();
+      transform_stamped.header.stamp.sec = _last_sim_time.sec;
+      transform_stamped.header.stamp.nanosec = _last_sim_time.nsec;
       transform_stamped.header.frame_id = _reference_frame;
       transform_stamped.child_frame_id = _robot_frame;
       tf2::convert(transform, transform_stamped.transform);
@@ -597,15 +601,15 @@ namespace gazebo_plugins
       }
 
       _last_sim_time = curTime;
-      updateState(dt, curTime.Double());
+      updateState(dt);
     }
 
-    void RaceCarModelPlugin::updateState(const double dt, gazebo::common::Time current_time)
+    void RaceCarModelPlugin::updateState(const double dt)
     {
       if (!_command_Q.empty())
       {
         gazebo::common::Time cmd_time = _cmd_time_Q.front();
-        if ((current_time - cmd_time).Double() >= _control_delay)
+        if ((_last_sim_time - cmd_time).Double() >= _control_delay)
         {
           std::shared_ptr<ackermann_msgs::msg::AckermannDriveStamped> cmd = _command_Q.front();
           _des_input.acc = cmd->drive.acceleration;
@@ -624,7 +628,7 @@ namespace gazebo_plugins
       }
 
       // If last command was more than 1s ago, then slow down car
-      _act_input.acc = (current_time - _last_cmd_time) < 1.0 ? _des_input.acc : -1.0;
+      _act_input.acc = (_last_sim_time - _last_cmd_time) < 1.0 ? _des_input.acc : -1.0;
       // Make sure steering rate is within limits
       _act_input.delta += (_des_input.delta - _act_input.delta >= 0 ? 1 : -1) *
                           std::min(_max_steering_rate * dt, std::abs(_des_input.delta - _act_input.delta));
@@ -642,12 +646,12 @@ namespace gazebo_plugins
       _right_steering_joint->SetPosition(0, _act_input.delta);
       setModelState();
 
-      double time_since_last_published = (current_time - _time_last_published).Double();
+      double time_since_last_published = (_last_sim_time - _time_last_published).Double();
       if (time_since_last_published < (1 / _publish_rate))
       {
         return;
       }
-      _time_last_published = current_time;
+      _time_last_published = _last_sim_time;
 
       // Publish Everything
       publishCarState();
@@ -659,7 +663,7 @@ namespace gazebo_plugins
         publishTf();
       }
 
-      _state_machine->spinOnce(current_time);
+      _state_machine->spinOnce(_last_sim_time);
     }
 
     void RaceCarModelPlugin::onCmd(const ackermann_msgs::msg::AckermannDriveStamped::SharedPtr msg)

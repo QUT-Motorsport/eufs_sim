@@ -39,6 +39,7 @@
 #include <gazebo/physics/Model.hh>
 #include <gazebo/physics/Link.hh>
 #include <gazebo/common/Plugin.hh>
+#include <gazebo/common/Time.hh>
 #include <gazebo_ros/node.hpp>
 
 #include "rclcpp/rclcpp.hpp"
@@ -178,7 +179,7 @@ namespace gazebo_plugins
       bool lidar_on;
 
       double update_rate_;
-      rclcpp::Time time_last_published;
+      gazebo::common::Time time_last_published;
 
       std::string track_frame_;
       std::string cone_frame_;
@@ -188,6 +189,7 @@ namespace gazebo_plugins
       ignition::math::Vector3d perception_lidar_noise_;
 
       // Required ROS gazebo plugin variables
+      gazebo::physics::WorldPtr _world;
       gazebo::event::ConnectionPtr update_connection_;
 
       gazebo_ros::Node::SharedPtr rosnode_;
