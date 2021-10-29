@@ -49,11 +49,12 @@ namespace gazebo_plugins
 
         void GazeboConeGroundTruth::Load(gazebo::physics::ModelPtr _parent, sdf::ElementPtr _sdf)
         {
+            this->_world = _parent->GetWorld();
             this->rosnode_ = gazebo_ros::Node::Get(_sdf);
 
             RCLCPP_DEBUG(this->rosnode_->get_logger(), "Loading ConeGroundTruthPlugin");
 
-            this->time_last_published = rclcpp::Time(0);
+            this->time_last_published = _world->SimTime();
 
             this->track_model = _parent->GetWorld()->ModelByName("track");
             this->car_link = _parent->GetLink("base_footprint");
@@ -183,13 +184,15 @@ namespace gazebo_plugins
         void GazeboConeGroundTruth::UpdateChild()
         {
             // Check if it is time to publish new data
-            if (this->rosnode_->now().seconds() - time_last_published.seconds() < (1.0 / this->update_rate_))
+            gazebo::common::Time cur_time = _world->SimTime();
+            double dt = (cur_time - time_last_published).Double();
+            if (dt < (1.0 / this->update_rate_))
             {
                 return;
             }
 
             // Update the time (This is here so that the time to publish all the messages does not affect the update rate)
-            this->time_last_published = this->rosnode_->now();
+            this->time_last_published = cur_time;
 
             // Check if there is a reason to publish the data
             if (this->ground_truth_cone_pub_->get_subscription_count() == 0 &&
@@ -294,7 +297,8 @@ namespace gazebo_plugins
         {
             eufs_msgs::msg::ConeArrayWithCovariance cone_arrays_message;
             cone_arrays_message.header.frame_id = "map";
-            cone_arrays_message.header.stamp = this->rosnode_->now();
+            cone_arrays_message.header.stamp.sec = this->time_last_published.sec;
+            cone_arrays_message.header.stamp.nanosec = this->time_last_published.nsec;
 
             if (this->track_model != nullptr)
             {
@@ -618,8 +622,8 @@ namespace gazebo_plugins
             for (unsigned int i = 0; i < cones.size(); i++)
             {
                 visualization_msgs::msg::Marker marker;
-
-                marker.header.stamp = this->rosnode_->now();
+                marker.header.stamp.sec = this->time_last_published.sec;
+                marker.header.stamp.nanosec = this->time_last_published.nsec;
                 marker.header.frame_id = frame;
 
                 marker.id = id;
@@ -671,7 +675,8 @@ namespace gazebo_plugins
             addNoiseToConeArray(cones_message_with_noise.unknown_color_cones, noise);
 
             cones_message_with_noise.header.frame_id = this->cone_frame_;
-            cones_message_with_noise.header.stamp = this->rosnode_->now();
+            cones_message_with_noise.header.stamp.sec = this->time_last_published.sec;
+            cones_message_with_noise.header.stamp.nanosec = this->time_last_published.nsec;
 
             return cones_message_with_noise;
         }

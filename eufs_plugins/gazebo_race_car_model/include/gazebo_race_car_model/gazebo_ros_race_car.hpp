@@ -79,7 +79,7 @@ namespace gazebo_plugins
 
     private:
       void update();
-      void updateState(double dt, gazebo::common::Time current_time);
+      void updateState(double dt);
 
       void setPositionFromWorld();
       bool resetVehiclePosition(std::shared_ptr<std_srvs::srv::Trigger::Request> request, std::shared_ptr<std_srvs::srv::Trigger::Response> response);
