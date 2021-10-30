@@ -217,23 +217,6 @@ class EUFSLauncher(Plugin):
                     self.arg_to_list(checkboxes[key]["parameter_triggering"]["if_on"]),
                     self.arg_to_list(checkboxes[key]["parameter_triggering"]["if_off"])
                 ))
-            if "ros_param_triggering" in checkboxes[key]:
-                # This handles ros parameters that need to be set
-                check = checkboxes[key]["ros_param_triggering"]
-                self.checkbox_effect_mapping.append((
-                    cur_cbox,
-                    (lambda check: (
-                        lambda: rospy.set_param(
-                            check["param_name"],
-                            check["if_on"]
-                        )
-                    ))(check),
-                    (lambda check: (
-                        lambda: rospy.set_param(
-                            check["param_name"],
-                            check["if_off"])
-                    ))(check)
-                ))
 
             setattr(self, checkboxes[key]["name"].upper(), cur_cbox)
             counter += 1
@@ -603,7 +586,6 @@ class EUFSLauncher(Plugin):
                     "xy_covariance"
                 ]
             )
-            rospy.set_param("/slam/map_path", out_path)
 
         self.LAUNCH_BUTTON.setEnabled(False)
 
