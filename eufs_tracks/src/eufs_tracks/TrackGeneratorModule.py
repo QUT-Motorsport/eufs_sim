@@ -161,11 +161,9 @@ class EUFSTrackGenerator(Plugin):
 
         self.update_converter_dropdown()
         self.CONVERT_FROM_MENU.currentTextChanged.connect(self.update_converter_dropdown)
-        self.CONVERT_TO_MENU.currentTextChanged.connect(self.update_midpoints_box)
         self.FILE_FOR_CONVERSION_BOX.currentTextChanged.connect(self.update_copier)
 
         # Prep midpoints checkbox
-        convert_to = self.CONVERT_TO_MENU.currentText()
         self.MIDPOINT_CHECKBOX.setChecked(True)
 
         # Suffix checkbox
@@ -211,10 +209,7 @@ class EUFSTrackGenerator(Plugin):
     def copy_button_pressed(self):
         """When copy button is pressed, launch ConversionTools"""
 
-        self.logger.info("Copying...")
-
         # Copy the current file
-        is_full_stack = self.FULL_STACK_COPY_BUTTON.isChecked()
         file_to_copy_to = self.RENAME_FILE_TEXTBOX.text()
         file_to_copy_from = self.FILE_FOR_CONVERSION_BOX.currentText()
         raw_name_to = file_to_copy_to.split(".")[0]
@@ -223,7 +218,10 @@ class EUFSTrackGenerator(Plugin):
 
         # Don't let them create null-named files
         if len(file_to_copy_to) == 0:
+            self.logger.warn("Cannot create copy with no file name.")
             return
+
+        self.logger.info("Copying...")
 
         # For launch files, we also need to move around the model folders
         if ending == "launch":
@@ -315,6 +313,8 @@ class EUFSTrackGenerator(Plugin):
                 params={"noise": self.get_noise_level()}
             )
 
+        self.logger.info("Copy created Successfully!")
+
     def get_noise_level(self):
         """Returns the object noise slider's noise level."""
 
@@ -327,14 +327,6 @@ class EUFSTrackGenerator(Plugin):
         """Change label to show current selected file for the copier"""
         copy_head = self.RENAME_FILE_HEADER
         copy_head.setText("Copy: " + self.FILE_FOR_CONVERSION_BOX.currentText())
-
-    def update_midpoints_box(self):
-        """
-                Controls the handling of the box that, when ticked,
-                tells the to-csv converter to calculate cone midpoints.
-                """
-        # Toggle checkbox
-        convert_to = self.CONVERT_TO_MENU.currentText()
 
     def update_converter_dropdown(self):
         """Keep the drop-down menus of ConversionTools in sync with the filesystem."""

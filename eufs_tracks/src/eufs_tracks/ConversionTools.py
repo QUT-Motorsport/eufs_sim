@@ -807,7 +807,6 @@ class ConversionTools(Node):
                                                                   ConversionTools.BOTTOM_RIGHT,
                                                                   im.size
                 )
-                version_number = ConversionTools.convert_version_metadata([pixels[loc[0], loc[1]]])
 
                 # Let's start filling in the .launch template:
                 launch_template_file = os.path.join(get_package_share_directory('eufs_tracks'),
@@ -936,17 +935,14 @@ class ConversionTools(Node):
                 # Here we break up sdf_split_again into its constituent parts
                 # At the end of this process we will have:
                 #        sdf_main:                  The global template for the sdf
-                #        sdf_model:                 The template for cone and noise models
-                #        sdf_model_with_collisions: Similar to sdf_model, but with collision data.
+                #        sdf_model_with_collisions: The template for cone and noise models with collision data.
                 #
-                # And the corresponding sdf_ghost_model and sdf_ghost_model_with_collisions
-                # which store inactive (hidden) models.
+                # And the corresponding sdf_ghost_model_with_collisions
+                # which stores inactive (hidden) models.
                 sdf_main = sdf_split_again[0]
                 sdf_split_along_collisions = sdf_split_again[6].split("%FILLCOLLISION%")
                 sdf_split_along_ghost_collisions = sdf_split_again[6].split("%FILLCOLLISION%")
-                sdf_model = sdf_split_again[3].join(sdf_split_along_collisions)
                 sdf_model_with_collisions = sdf_split_again[2].join(sdf_split_along_collisions)
-                sdf_ghost_model = sdf_split_again[3].join(sdf_split_along_ghost_collisions)
                 sdf_ghost_model_with_collisions = sdf_split_again[2].join(sdf_split_along_ghost_collisions)
 
                 # Let the sdf file know which launch file it represents.
@@ -1344,8 +1340,6 @@ class ConversionTools(Node):
                 final_cones = []
                 twidth = int((max_x - min_x + 20) / scale_desired)
                 theight = int((max_y - min_y + 20) / scale_desired)
-                car_x = int((raw_car_location[1] - min_x + 10) / scale_desired)
-                car_y = int((raw_car_location[2] - min_y + 10) / scale_desired)
                 for cone in all_cones:
                         new_x = int((cone[1] - min_x + 10) / scale_desired)
                         new_y = int((cone[2] - min_y + 10) / scale_desired)
@@ -1666,17 +1660,14 @@ class ConversionTools(Node):
                 # Here we break up sdf_split_again into its constituent parts
                 # At the end of this process we will have:
                 #        sdf_main:                  The global template for the sdf
-                #        sdf_model:                 The template for cone and noise models
-                #        sdf_model_with_collisions: Similar to sdf_model, but with collision data.
+                #        sdf_model_with_collisions: The template for cone and noise models with collision data.
                 #
-                # And the corresponding sdf_ghost_model and sdf_ghost_model_with_collisions
-                # which store inactive (hidden) models.
+                # And the corresponding sdf_ghost_model_with_collisions
+                # which stores inactive (hidden) models.
                 sdf_main = sdf_split_again[0]
                 sdf_split_along_collisions = sdf_split_again[6].split("%FILLCOLLISION%")
                 sdf_split_along_ghost_collisions = sdf_split_again[6].split("%FILLCOLLISION%")
-                sdf_model = sdf_split_again[3].join(sdf_split_along_collisions)
                 sdf_model_with_collisions = sdf_split_again[2].join(sdf_split_along_collisions)
-                sdf_ghost_model = sdf_split_again[3].join(sdf_split_along_ghost_collisions)
                 sdf_ghost_model_with_collisions = sdf_split_again[2].join(sdf_split_along_ghost_collisions)
 
                 # Let the sdf file know which launch file it represents.
