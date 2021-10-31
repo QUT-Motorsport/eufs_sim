@@ -27,7 +27,7 @@ from .TrackGenerator import get_cone_function
 # raw_data ("xys",this will be hidden from the user as it is only used to convert into .pngs)
 # raw_data may also be "comps", which is the output of TrackGenerator
 class ConversionTools(Node):
-        def __init__():
+        def __init__(self):
                 pass
 
         # Define colors for track gen and image reading
@@ -96,8 +96,7 @@ class ConversionTools(Node):
                 elif corner == ConversionTools.BOTTOM_RIGHT:
                         return (width - 6 + x, height - 6 + y)
                 else:
-                        self.get_logger().error("Error, not a valid corner!  Typo?: " + corner)
-                        return None
+                        raise Exception("Error, not a valid corner!  Typo?: " + corner)
 
         @staticmethod
         def get_raw_metadata(pixel_value):
