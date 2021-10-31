@@ -238,7 +238,7 @@ class Track(Node):
         Returns:
             Nothing
         """
-        assert self.blue_cones is not None or len(self.yellow_cones) != 0
+        assert self.blue_cones is not None or len(self.blue_cones) != 0
         assert self.yellow_cones is not None or len(self.yellow_cones) != 0
 
         midpoints = []
@@ -253,7 +253,7 @@ class Track(Node):
         if _plot:
             for blue_cone in self.blue_cones:
                 closest_cone, closest_dist = self.find_closest(blue_cone, self.yellow_cones)
-                self.plot_line(i, blue_cone)
+                self.plot_line(closest_cone, blue_cone)
                 plt.plot(
                     (closest_cone[0] + blue_cone[0]) / 2,
                     (closest_cone[1] + blue_cone[1]) / 2,
