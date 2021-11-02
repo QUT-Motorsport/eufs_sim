@@ -5,7 +5,8 @@ from ament_index_python.packages import get_package_share_directory
 
 from qt_gui.plugin import Plugin
 from python_qt_binding import loadUi
-from python_qt_binding.QtWidgets import (QWidget, QComboBox, QPushButton, QSlider, QRadioButton, QCheckBox, QMainWindow,
+from python_qt_binding.QtWidgets import (QWidget, QComboBox, QPushButton,
+                                         QSlider, QCheckBox,
                                          QLabel, QLineEdit, QApplication)
 
 from .TrackGenerator import TrackGenerator as Generator
@@ -29,11 +30,13 @@ class EUFSTrackGenerator(Plugin):
         self.node = context.node
 
         self.logger = self.node.get_logger()
+        Generator.pass_logger(self.logger)
 
         # Create QWidget
         self._widget = QWidget()
 
-        # Get path to UI file which should be in the "resource" folder of this package
+        # Get path to UI file which should be in the "resource" folder of
+        # this package
         self.main_ui_file = join(get_package_share_directory('eufs_tracks'),
                                  'resource',
                                  'track_generator.ui',
@@ -63,21 +66,30 @@ class EUFSTrackGenerator(Plugin):
 
         # Give widget components permanent names
         self.PRESET_SELECTOR = self._widget.findChild(QComboBox, "WhichPreset")
-        self.GENERATOR_BUTTON = self._widget.findChild(QPushButton, "GenerateButton")
+        self.GENERATOR_BUTTON = self._widget.findChild(QPushButton,
+                                                       "GenerateButton")
         self.NOISE_SLIDER = self._widget.findChild(QSlider, "Noisiness")
 
-        self.CONVERT_BUTTON = self._widget.findChild(QPushButton, "ConvertButton")
-        self.RENAME_BUTTON = self._widget.findChild(QPushButton, "RenameButton")
-        self.SKETCHER_BUTTON = self._widget.findChild(QPushButton, "SketcherButton")
+        self.CONVERT_BUTTON = self._widget.findChild(QPushButton,
+                                                     "ConvertButton")
+        self.RENAME_BUTTON = self._widget.findChild(QPushButton,
+                                                    "RenameButton")
+        self.SKETCHER_BUTTON = self._widget.findChild(QPushButton,
+                                                      "SketcherButton")
         self.LAX_CHECKBOX = self._widget.findChild(QCheckBox, "LaxCheckBox")
-        self.CONVERT_FROM_MENU = self._widget.findChild(QComboBox, "ConvertFrom")
+        self.CONVERT_FROM_MENU = self._widget.findChild(QComboBox,
+                                                        "ConvertFrom")
         self.CONVERT_TO_MENU = self._widget.findChild(QComboBox, "ConvertTo")
-        self.MIDPOINT_CHECKBOX = self._widget.findChild(QCheckBox, "MidpointBox")
-        self.USER_FEEDBACK_LABEL = self._widget.findChild(QLabel, "UserFeedbackLabel")
+        self.MIDPOINT_CHECKBOX = self._widget.findChild(QCheckBox,
+                                                        "MidpointBox")
+        self.USER_FEEDBACK_LABEL = self._widget.findChild(QLabel,
+                                                          "UserFeedbackLabel")
 
         self.SUFFIX_CHECKBOX = self._widget.findChild(QCheckBox, "SuffixBox")
-        self.RENAME_FILE_TEXTBOX = self._widget.findChild(QLineEdit, "RenameFileTextbox")
-        self.RENAME_FILE_HEADER = self._widget.findChild(QLabel, "RenameFileHeader")
+        self.RENAME_FILE_TEXTBOX = self._widget.findChild(QLineEdit,
+                                                          "RenameFileTextbox")
+        self.RENAME_FILE_HEADER = self._widget.findChild(QLabel,
+                                                         "RenameFileHeader")
 
         self.FILE_FOR_CONVERSION_BOX = self._widget.findChild(
             QComboBox,
@@ -92,25 +104,43 @@ class EUFSTrackGenerator(Plugin):
             "FullStackTrackGenButton"
         )
 
-        self.MIN_STRAIGHT_SLIDER = self._widget.findChild(QSlider, "Param_MIN_STRAIGHT")
-        self.MAX_STRAIGHT_SLIDER = self._widget.findChild(QSlider, "Param_MAX_STRAIGHT")
-        self.MIN_CTURN_SLIDER = self._widget.findChild(QSlider, "Param_MIN_CTURN")
-        self.MAX_CTURN_SLIDER = self._widget.findChild(QSlider, "Param_MAX_CTURN")
-        self.MIN_HAIRPIN_SLIDER = self._widget.findChild(QSlider, "Param_MIN_HAIRPIN")
-        self.MAX_HAIRPIN_SLIDER = self._widget.findChild(QSlider, "Param_MAX_HAIRPIN")
-        self.HAIRPIN_PAIRS_SLIDER = self._widget.findChild(QSlider, "Param_HAIRPIN_PAIRS")
-        self.MAX_LENGTH_SLIDER = self._widget.findChild(QSlider, "Param_MAX_LENGTH")
-        self.TRACK_WIDTH_SLIDER = self._widget.findChild(QSlider, "Param_TRACK_WIDTH")
+        self.MIN_STRAIGHT_SLIDER = self._widget.findChild(QSlider,
+                                                          "Param_MIN_STRAIGHT")
+        self.MAX_STRAIGHT_SLIDER = self._widget.findChild(QSlider,
+                                                          "Param_MAX_STRAIGHT")
+        self.MIN_CTURN_SLIDER = self._widget.findChild(QSlider,
+                                                       "Param_MIN_CTURN")
+        self.MAX_CTURN_SLIDER = self._widget.findChild(QSlider,
+                                                       "Param_MAX_CTURN")
+        self.MIN_HAIRPIN_SLIDER = self._widget.findChild(QSlider,
+                                                         "Param_MIN_HAIRPIN")
+        self.MAX_HAIRPIN_SLIDER = self._widget.findChild(QSlider,
+                                                         "Param_MAX_HAIRPIN")
+        self.HAIRPIN_PAIRS_SLIDER = self._widget.findChild(QSlider,
+                                                           "Param_HAIRPIN_PAIRS")
+        self.MAX_LENGTH_SLIDER = self._widget.findChild(QSlider,
+                                                        "Param_MAX_LENGTH")
+        self.TRACK_WIDTH_SLIDER = self._widget.findChild(QSlider,
+                                                         "Param_TRACK_WIDTH")
 
-        self.MIN_STRAIGHT_LABEL = self._widget.findChild(QLabel, "Label_MIN_STRAIGHT")
-        self.MAX_STRAIGHT_LABEL = self._widget.findChild(QLabel, "Label_MAX_STRAIGHT")
-        self.MIN_CTURN_LABEL = self._widget.findChild(QLabel, "Label_MIN_CTURN")
-        self.MAX_CTURN_LABEL = self._widget.findChild(QLabel, "Label_MAX_CTURN")
-        self.MIN_HAIRPIN_LABEL = self._widget.findChild(QLabel, "Label_MIN_HAIRPIN")
-        self.MAX_HAIRPIN_LABEL = self._widget.findChild(QLabel, "Label_MAX_HAIRPIN")
-        self.HAIRPIN_PAIRS_LABEL = self._widget.findChild(QLabel, "Label_HAIRPIN_PAIRS")
-        self.MAX_LENGTH_LABEL = self._widget.findChild(QLabel, "Label_MAX_LENGTH")
-        self.TRACK_WIDTH_LABEL = self._widget.findChild(QLabel, "Label_TRACK_WIDTH")
+        self.MIN_STRAIGHT_LABEL = self._widget.findChild(QLabel,
+                                                         "Label_MIN_STRAIGHT")
+        self.MAX_STRAIGHT_LABEL = self._widget.findChild(QLabel,
+                                                         "Label_MAX_STRAIGHT")
+        self.MIN_CTURN_LABEL = self._widget.findChild(QLabel,
+                                                      "Label_MIN_CTURN")
+        self.MAX_CTURN_LABEL = self._widget.findChild(QLabel,
+                                                      "Label_MAX_CTURN")
+        self.MIN_HAIRPIN_LABEL = self._widget.findChild(QLabel,
+                                                        "Label_MIN_HAIRPIN")
+        self.MAX_HAIRPIN_LABEL = self._widget.findChild(QLabel,
+                                                        "Label_MAX_HAIRPIN")
+        self.HAIRPIN_PAIRS_LABEL = self._widget.findChild(QLabel,
+                                                          "Label_HAIRPIN_PAIRS")
+        self.MAX_LENGTH_LABEL = self._widget.findChild(QLabel,
+                                                       "Label_MAX_LENGTH")
+        self.TRACK_WIDTH_LABEL = self._widget.findChild(QLabel,
+                                                        "Label_TRACK_WIDTH")
 
         # Get presets
         preset_names = Generator.get_preset_names()
@@ -160,8 +190,10 @@ class EUFSTrackGenerator(Plugin):
             self.CONVERT_TO_MENU.addItem(f)
 
         self.update_converter_dropdown()
-        self.CONVERT_FROM_MENU.currentTextChanged.connect(self.update_converter_dropdown)
-        self.FILE_FOR_CONVERSION_BOX.currentTextChanged.connect(self.update_copier)
+        self.CONVERT_FROM_MENU.currentTextChanged.connect(
+            self.update_converter_dropdown)
+        self.FILE_FOR_CONVERSION_BOX.currentTextChanged.connect(
+            self.update_copier)
 
         # Prep midpoints checkbox
         self.MIDPOINT_CHECKBOX.setChecked(True)
@@ -189,14 +221,16 @@ class EUFSTrackGenerator(Plugin):
         self._widget.findChild(QLabel, 'ObjectNoiseToolTip').setVisible(False)
 
         # Looping over all widgest to fix scaling issue via manual scaling
-        # Scaling done via magically comparing the width to the 'default' 1700 pixels
+        # Scaling done via magically comparing the width to the 'default'
+        # 1700 pixels
         rec = QApplication.desktop().screenGeometry()
         scaler_multiplier = rec.width() / 1700.0
         for widget in self._widget.children():
             if hasattr(widget, 'geometry'):
                 geom = widget.geometry()
                 new_width = (
-                    geom.width() * (scaler_multiplier) if not isinstance(widget, QLabel)
+                    geom.width() * (scaler_multiplier) if not isinstance(
+                        widget, QLabel)
                     else geom.width() * (scaler_multiplier) + 200
                 )
                 widget.setGeometry(
@@ -329,7 +363,8 @@ class EUFSTrackGenerator(Plugin):
         copy_head.setText("Copy: " + self.FILE_FOR_CONVERSION_BOX.currentText())
 
     def update_converter_dropdown(self):
-        """Keep the drop-down menus of ConversionTools in sync with the filesystem."""
+        """Keep the drop-down menus of ConversionTools in sync with the
+        filesystem."""
         from_type = self.CONVERT_FROM_MENU.currentText()
         all_files = []
 
@@ -340,7 +375,8 @@ class EUFSTrackGenerator(Plugin):
                 'launch'
             )
             launch_files = [
-                f for f in listdir(relevant_path) if isfile(join(relevant_path, f))
+                f for f in listdir(relevant_path) if
+                isfile(join(relevant_path, f))
             ]
 
             # Remove "blacklisted" files (ones that don't define tracks)
@@ -395,7 +431,8 @@ class EUFSTrackGenerator(Plugin):
         self.HAIRPIN_PAIRS = preset_data["MAX_HAIRPIN_PAIRS"]
         self.MAX_LENGTH = preset_data["MAX_LENGTH"]
         self.LAX_GENERATION = preset_data["LAX_GENERATION"]
-        self.TRACK_WIDTH = self.deconvert_track_width(preset_data["TRACK_WIDTH"])
+        self.TRACK_WIDTH = self.deconvert_track_width(
+            preset_data["TRACK_WIDTH"])
         self.LAX_CHECKBOX.setChecked(self.LAX_GENERATION)
 
     def keep_track_of_preset_changes(self):
@@ -404,7 +441,8 @@ class EUFSTrackGenerator(Plugin):
 
     def preset_changed(self):
         """
-                When preset is changed, set everything into motion that needs to happen.
+                When preset is changed, set everything into motion that
+                needs to happen.
 
                 Updates dropdowns and sliders.
                 """
@@ -416,7 +454,8 @@ class EUFSTrackGenerator(Plugin):
 
     def keep_track_of_slider_changes(self):
         """
-                Hooks up all sliders with functions to respond to their changes.
+                Hooks up all sliders with functions to respond to their
+                changes.
                 """
         self.MIN_STRAIGHT_SLIDER.valueChanged.connect(self.slider_changed)
         self.MAX_STRAIGHT_SLIDER.valueChanged.connect(self.slider_changed)
@@ -437,13 +476,18 @@ class EUFSTrackGenerator(Plugin):
 
     def keep_params_up_to_date(self):
         """This function keeps the labels next to the sliders up to date."""
-        self.MIN_STRAIGHT_LABEL.setText("MIN_STRAIGHT: " + str(self.MIN_STRAIGHT))
-        self.MAX_STRAIGHT_LABEL.setText("MAX_STRAIGHT: " + str(self.MAX_STRAIGHT))
+        self.MIN_STRAIGHT_LABEL.setText(
+            "MIN_STRAIGHT: " + str(self.MIN_STRAIGHT))
+        self.MAX_STRAIGHT_LABEL.setText(
+            "MAX_STRAIGHT: " + str(self.MAX_STRAIGHT))
         self.MIN_CTURN_LABEL.setText("MIN_CTURN: " + str(self.MIN_CTURN))
         self.MAX_CTURN_LABEL.setText("MAX_CTURN: " + str(self.MAX_CTURN))
-        self.MIN_HAIRPIN_LABEL.setText("MIN_HAIRPIN: " + str((self.MIN_HAIRPIN / 2.0)))
-        self.MAX_HAIRPIN_LABEL.setText("MAX_HAIRPIN: " + str((self.MAX_HAIRPIN / 2.0)))
-        self.HAIRPIN_PAIRS_LABEL.setText("HAIRPIN_PAIRS: " + str(self.HAIRPIN_PAIRS))
+        self.MIN_HAIRPIN_LABEL.setText(
+            "MIN_HAIRPIN: " + str((self.MIN_HAIRPIN / 2.0)))
+        self.MAX_HAIRPIN_LABEL.setText(
+            "MAX_HAIRPIN: " + str((self.MAX_HAIRPIN / 2.0)))
+        self.HAIRPIN_PAIRS_LABEL.setText(
+            "HAIRPIN_PAIRS: " + str(self.HAIRPIN_PAIRS))
         self.MAX_LENGTH_LABEL.setText("MAX_LENGTH: " + str(self.MAX_LENGTH))
         self.TRACK_WIDTH_LABEL.setText(
             "TRACK_WIDTH: " + str(self.convert_track_width(self.TRACK_WIDTH))
@@ -481,13 +525,16 @@ class EUFSTrackGenerator(Plugin):
                                 Straights are between 0 and 150
                                 Turns are between 0 and 50
                                 Hairpins are between 0 and 20,
-                                     and have half-step rather than integer step
+                                     and have half-step rather than integer
+                                     step
                                      (hence scaling by 2s)
                                 Hairpin pairs are between 0 and 5
                                 Max Length is between 200 and 2000
 
-                The values were chosen because the sliders needed min and max values, and
-                these values seemed to encompass the range of desired functionality.
+                The values were chosen because the sliders needed min and
+                max values, and
+                these values seemed to encompass the range of desired
+                functionality.
                 """
         min_straight = 0
         max_straight = 150
@@ -505,10 +552,14 @@ class EUFSTrackGenerator(Plugin):
         self.set_slider_data("Param_MAX_STRAIGHT", min_straight, max_straight)
         self.set_slider_data("Param_MIN_CTURN", min_turn, max_turn)
         self.set_slider_data("Param_MAX_CTURN", min_turn, max_turn)
-        self.set_slider_data("Param_MIN_HAIRPIN", min_hairpin * 2, max_hairpin * 2)
-        self.set_slider_data("Param_MAX_HAIRPIN", min_hairpin * 2, max_hairpin * 2)
-        self.set_slider_data("Param_HAIRPIN_PAIRS", min_hairpin_pairs, max_hairpin_pairs)
-        self.set_slider_data("Param_MAX_LENGTH", min_max_length, max_max_length)
+        self.set_slider_data("Param_MIN_HAIRPIN", min_hairpin * 2,
+                             max_hairpin * 2)
+        self.set_slider_data("Param_MAX_HAIRPIN", min_hairpin * 2,
+                             max_hairpin * 2)
+        self.set_slider_data("Param_HAIRPIN_PAIRS", min_hairpin_pairs,
+                             max_hairpin_pairs)
+        self.set_slider_data("Param_MAX_LENGTH", min_max_length,
+                             max_max_length)
         self.set_slider_data("Param_TRACK_WIDTH", min_width, max_width)
 
     def convert_track_width(self, w):
@@ -613,8 +664,8 @@ class EUFSTrackGenerator(Plugin):
         from_type = self.CONVERT_FROM_MENU.currentText()
         to_type = self.CONVERT_TO_MENU.currentText()
         filename = self.FILE_FOR_CONVERSION_BOX.currentText()
-        self.logger.info("Conversion Button Pressed!  From: " + from_type +
-                         " To: " + to_type + " For: " + filename)
+        self.logger.info("Conversion Button Pressed!  From: "
+                         + from_type + " To: " + to_type + " For: " + filename)
         midpoint_widget = self.MIDPOINT_CHECKBOX
 
         # Calculate correct full filepath for file to convert
@@ -640,5 +691,5 @@ class EUFSTrackGenerator(Plugin):
             },
             conversion_suffix=suffix
         )
-        self.logger.info("Conversion Succeeded!  From: " + from_type +
-                         " To: " + to_type + " For: " + filename)
+        self.logger.info("Conversion Succeeded!  From: "
+                         + from_type + " To: " + to_type + " For: " + filename)

@@ -10,6 +10,7 @@ from launch_ros.actions import Node
 
 from ament_index_python.packages import get_package_share_directory
 
+
 def spawn_car(context, *args, **kwargs):
     # Get the values of the arguments
     launch_group = get_argument(context, 'launch_group')
@@ -26,13 +27,18 @@ def spawn_car(context, *args, **kwargs):
     pitch = get_argument(context, 'pitch')
     yaw = get_argument(context, 'yaw')
 
-    simulate_perception = 'true' if launch_group == 'no_perception' else 'false'
+    simulate_perception = 'true' if launch_group == 'no_perception' else \
+        'false'
     config_file = str(os.path.join(get_package_share_directory(
         'eufs_racecar'), 'robots', robot_name, vehicle_model_config))
-    noise_file = str(os.path.join(get_package_share_directory('eufs_models'), 'config', 'noise.yaml'))
+    noise_file = str(
+        os.path.join(get_package_share_directory('eufs_models'), 'config',
+                     'noise.yaml'))
 
-    xacro_path = os.path.join(get_package_share_directory('eufs_racecar'), 'robots', robot_name, 'robot.urdf.xacro')
-    urdf_path = os.path.join(get_package_share_directory('eufs_racecar'), 'robots', robot_name, 'robot.urdf')
+    xacro_path = os.path.join(get_package_share_directory('eufs_racecar'),
+                              'robots', robot_name, 'robot.urdf.xacro')
+    urdf_path = os.path.join(get_package_share_directory('eufs_racecar'),
+                             'robots', robot_name, 'robot.urdf')
 
     if not os.path.isfile(urdf_path):
         os.mknod(urdf_path)
@@ -102,48 +108,75 @@ def spawn_car(context, *args, **kwargs):
 
 
 def generate_launch_description():
-    rqt_perspective_file = os.path.join(get_package_share_directory('eufs_rqt'), 'config', 'eufs_sim.perspective')
+    rqt_perspective_file = os.path.join(
+        get_package_share_directory('eufs_rqt'), 'config',
+        'eufs_sim.perspective')
 
-    rviz_config_file = os.path.join(get_package_share_directory('eufs_launcher'), 'config', 'default.rviz')
+    rviz_config_file = os.path.join(
+        get_package_share_directory('eufs_launcher'), 'config', 'default.rviz')
 
-    default_user_config_file = os.path.join(os.path.expanduser("~"), ".rviz2", "default.rviz")
+    default_user_config_file = os.path.join(os.path.expanduser("~"), ".rviz2",
+                                            "default.rviz")
     if os.path.isfile(default_user_config_file):
         rviz_config_file = default_user_config_file
 
     return LaunchDescription([
         # Launch Arguments
         DeclareLaunchArgument('launch_group', default_value='default',
-                              description='The launch group (default or no_perception)'),
+                              description='The launch group (default or '
+                                          'no_perception)'),
 
-        DeclareLaunchArgument('rviz', default_value='false', description='Launch RViz'),
+        DeclareLaunchArgument('rviz', default_value='false',
+                              description='Launch RViz'),
 
         DeclareLaunchArgument('show_rqt_gui', default_value='true',
-                              description='Show the RQT GUI (with ros_can_sim GUI and EUFS Robot Steering GUI)'),
+                              description='Show the RQT GUI (with '
+                                          'ros_can_sim GUI and EUFS Robot '
+                                          'Steering GUI)'),
 
-        DeclareLaunchArgument('namespace', default_value='eufs', description='Namespace of the gazebo robot'),
+        DeclareLaunchArgument('namespace', default_value='eufs',
+                              description='Namespace of the gazebo robot'),
 
         DeclareLaunchArgument('robot_name', default_value='eufs',
-                              description='The name of the robot (must be directory in eufs_racecar/robots called '
-                                          '{robot_name} with robot.urdf.xacro and {vehicle_model_config}'),
+                              description='The name of the robot (must be '
+                                          'directory in eufs_racecar/robots '
+                                          'called '
+                                          '{robot_name} with '
+                                          'robot.urdf.xacro and {'
+                                          'vehicle_model_config}'),
 
         DeclareLaunchArgument('vehicleModel', default_value='DynamicBicycle',
-                              description='The vehicle model class to use in the gazebo_ros_race_car_model'),
+                              description='The vehicle model class to use in '
+                                          'the gazebo_ros_race_car_model'),
 
         DeclareLaunchArgument('commandMode', default_value='acceleration',
-                              description='Determines whether to use acceleration or velocity to control the vehicle'),
+                              description='Determines whether to use '
+                                          'acceleration or velocity to '
+                                          'control the vehicle'),
 
-        DeclareLaunchArgument('vehicleModelConfig', default_value='configDry.yaml',
-                              description="Determines the file from which the vehicle model parameters are read"),
+        DeclareLaunchArgument('vehicleModelConfig',
+                              default_value='configDry.yaml',
+                              description="Determines the file from which "
+                                          "the vehicle model parameters are "
+                                          "read"),
 
         DeclareLaunchArgument('publish_gt_tf', default_value='false',
-                              description='If the gazebo_ros_race_car_model should publish the ground truth tf'),
+                              description='If the gazebo_ros_race_car_model '
+                                          'should publish the ground truth '
+                                          'tf'),
 
-        DeclareLaunchArgument('x', default_value='0', description='Vehicle initial x position'),
-        DeclareLaunchArgument('y', default_value='0', description='Vehicle initial y position'),
-        DeclareLaunchArgument('z', default_value='0', description='Vehicle initial z position'),
-        DeclareLaunchArgument('roll', default_value='0', description='Vehicle initial roll'),
-        DeclareLaunchArgument('pitch', default_value='0', description='Vehicle initial pitch'),
-        DeclareLaunchArgument('yaw', default_value='0', description='Vehicle initial yaw'),
+        DeclareLaunchArgument('x', default_value='0',
+                              description='Vehicle initial x position'),
+        DeclareLaunchArgument('y', default_value='0',
+                              description='Vehicle initial y position'),
+        DeclareLaunchArgument('z', default_value='0',
+                              description='Vehicle initial z position'),
+        DeclareLaunchArgument('roll', default_value='0',
+                              description='Vehicle initial roll'),
+        DeclareLaunchArgument('pitch', default_value='0',
+                              description='Vehicle initial pitch'),
+        DeclareLaunchArgument('yaw', default_value='0',
+                              description='Vehicle initial yaw'),
 
         Node(
             name='rviz',
@@ -158,13 +191,15 @@ def generate_launch_description():
             package='rqt_gui',
             executable='rqt_gui',
             output='screen',
-            arguments=['--force-discover', '--perspective-file', str(rqt_perspective_file)],
+            arguments=['--force-discover', '--perspective-file',
+                       str(rqt_perspective_file)],
             condition=IfCondition(LaunchConfiguration('show_rqt_gui'))
         ),
 
         # Spawn the car!!!
         OpaqueFunction(function=spawn_car)
     ])
+
 
 def get_argument(context, arg):
     return LaunchConfiguration(arg).perform(context)

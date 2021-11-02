@@ -24,7 +24,8 @@ class MissionControlGUI(Plugin):
         # Create QWidget
         self._widget = QWidget()
         # Get path to UI file which is a sibling of this file
-        ui_file = os.path.join(get_package_share_directory('eufs_rqt'), 'resource',
+        ui_file = os.path.join(get_package_share_directory('eufs_rqt'),
+                               'resource',
                                'MissionControlGUI.ui')
         # Extend the widget with all attributes and children from UI file
         loadUi(ui_file, self._widget)
@@ -37,7 +38,8 @@ class MissionControlGUI(Plugin):
         # tell from pane to pane.
         if context.serial_number() > 1:
             self._widget.setWindowTitle(
-                self._widget.windowTitle() + (' (%d)' % context.serial_number()))
+                self._widget.windowTitle() + (
+                    ' (%d)' % context.serial_number()))
 
         # Enumrations taken from CanState.msg
         self.states = {CanState.AS_OFF: "OFF",
@@ -58,7 +60,7 @@ class MissionControlGUI(Plugin):
                          CanState.AMI_DDT_INSPECTION_A: "DDT_INSPECTION_A",
                          CanState.AMI_DDT_INSPECTION_B: "DDT_INSPECTION_B",
                          CanState.AMI_JOYSTICK: "JOYSTICK",
-        }
+                         }
 
         for mission in self.missions.values():
             self._widget.findChild(
@@ -77,16 +79,22 @@ class MissionControlGUI(Plugin):
             QPushButton, "DriveButton").clicked.connect(self.setManualDriving)
 
         # Subscribers
-        self.state_sub = self.node.create_subscription(CanState, "/ros_can/state", self.stateCallback, 10)
+        self.state_sub = self.node.create_subscription(CanState,
+                                                       "/ros_can/state",
+                                                       self.stateCallback, 10)
 
         # Publishers
-        self.set_mission_pub = self.node.create_publisher(CanState, "/ros_can/set_mission", 1)
+        self.set_mission_pub = self.node.create_publisher(CanState,
+                                                          "/ros_can/set_mission",
+                                                          1)
 
         # Services
         self.ebs_srv = self.node.create_client(Trigger, "/ros_can/ebs")
         self.reset_srv = self.node.create_client(Trigger, "/ros_can/reset")
-        self.reset_vehicle_pos_srv = self.node.create_client(Trigger, "/ros_can/reset_vehicle_pos")
-        self.reset_cone_pos_srv = self.node.create_client(Trigger, "/ros_can/reset_cone_pos")
+        self.reset_vehicle_pos_srv = self.node.create_client(Trigger,
+                                                             "/ros_can/reset_vehicle_pos")
+        self.reset_cone_pos_srv = self.node.create_client(Trigger,
+                                                          "/ros_can/reset_cone_pos")
 
         # Add widget to the user interface
         context.add_widget(self._widget)
@@ -104,7 +112,8 @@ class MissionControlGUI(Plugin):
         mission = self._widget.findChild(
             QComboBox, "MissionSelectMenu").currentText()
 
-        self.node.get_logger().debug("Sending mission request for " + str(mission))
+        self.node.get_logger().debug(
+            "Sending mission request for " + str(mission))
 
         # create message to be sent
         mission_msg = CanState()
@@ -134,11 +143,13 @@ class MissionControlGUI(Plugin):
             self.node.get_logger().debug("state reset successful")
             self.node.get_logger().debug(result)
         else:
-            self.node.get_logger().warn("/ros_can/reset service is not available")
+            self.node.get_logger().warn(
+                "/ros_can/reset service is not available")
 
     def resetVehiclePos(self):
         """Requests race car model position reset"""
-        self.node.get_logger().debug("Requesting race_car_model position reset")
+        self.node.get_logger().debug(
+            "Requesting race_car_model position reset")
 
         if self.reset_vehicle_pos_srv.wait_for_service(timeout_sec=1):
             request = Trigger.Request()
@@ -146,11 +157,13 @@ class MissionControlGUI(Plugin):
             self.node.get_logger().debug("Vehicle position reset successful")
             self.node.get_logger().debug(result)
         else:
-            self.node.get_logger().warn("/ros_can/reset_vehicle_pos service is not available")
+            self.node.get_logger().warn(
+                "/ros_can/reset_vehicle_pos service is not available")
 
     def resetConePos(self):
         """Requests gazebo_cone_ground_truth to reset cone position"""
-        self.node.get_logger().debug("Requesting gazebo_cone_ground_truth cone position reset")
+        self.node.get_logger().debug(
+            "Requesting gazebo_cone_ground_truth cone position reset")
 
         if self.reset_cone_pos_srv.wait_for_service(timeout_sec=1):
             request = Trigger.Request()
@@ -158,19 +171,20 @@ class MissionControlGUI(Plugin):
             self.node.get_logger().debug("Cone position reset successful")
             self.node.get_logger().debug(result)
         else:
-            self.node.get_logger().warn("/ros_can/reset_cone_pos service is not available")
+            self.node.get_logger().warn(
+                "/ros_can/reset_cone_pos service is not available")
 
     def resetSim(self):
         """Requests state machine, vehicle position and cone position reset"""
         self.node.get_logger().debug("Requesting Simulation Reset")
 
-        #Reset State Machine
+        # Reset State Machine
         self.resetState()
 
-        #Reset Vehicle Position
+        # Reset Vehicle Position
         self.resetVehiclePos()
 
-        #Reset Cone Position
+        # Reset Cone Position
         self.resetConePos()
 
     def requestEBS(self):
@@ -183,7 +197,8 @@ class MissionControlGUI(Plugin):
             self.node.get_logger().debug("EBS successful")
             self.node.get_logger().debug(result)
         else:
-            self.node.get_logger().warn("/ros_can/ebs service is not available")
+            self.node.get_logger().warn(
+                "/ros_can/ebs service is not available")
 
     def stateCallback(self, msg):
         """Reads the robot state from the message
@@ -206,12 +221,16 @@ class MissionControlGUI(Plugin):
     def shutdown_plugin(self):
         """stop all publisher, subscriber and services
         necessary for clean shutdown"""
-        assert(self.node.destroy_publisher(self.set_mission_pub)), "Mission publisher could not be destroyed"
-        assert(self.node.destroy_subscription(self.state_sub)), "State subscriber could not be destroyed"
-        assert (self.node.destroy_client(self.ebs_srv)), "EBS client could not be destroyed"
-        assert (self.node.destroy_client(self.reset_srv)), "State reset client could not be destroyed"
-        # Note: do not destroy the node in shutdown_plugin as this could cause errors for the Robot Steering GUI
-        # Let ROS 2 clean up nodes
+        assert (self.node.destroy_publisher(
+            self.set_mission_pub)), "Mission publisher could not be destroyed"
+        assert (self.node.destroy_subscription(
+            self.state_sub)), "State subscriber could not be destroyed"
+        assert (self.node.destroy_client(
+            self.ebs_srv)), "EBS client could not be destroyed"
+        assert (self.node.destroy_client(
+            self.reset_srv)), "State reset client could not be destroyed"
+        # Note: do not destroy the node in shutdown_plugin as this could
+        # cause errors for the Robot Steering GUI. Let ROS 2 clean up nodes
 
     def save_settings(self, plugin_settings, instance_settings):
         # don't know how to use
