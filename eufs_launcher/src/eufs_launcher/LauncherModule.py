@@ -12,7 +12,8 @@ import pandas as pd
 from ament_index_python.packages import get_package_share_directory
 
 from python_qt_binding import loadUi
-from python_qt_binding.QtWidgets import QWidget, QComboBox, QPushButton, QSlider, QCheckBox, QLabel, QApplication
+from python_qt_binding.QtWidgets import QWidget, QComboBox, QPushButton, \
+    QSlider, QCheckBox, QLabel, QApplication
 from python_qt_binding.QtGui import QFont
 from qt_gui.plugin import Plugin
 
@@ -56,9 +57,11 @@ class EUFSLauncher(Plugin):
 
         # Load in eufs_launcher parameters
         # yaml_to_load is a special variable that is set by `eufs_launcher.py`
-        # in `eufs_launcher/scripts`.  It defaults to `config/eufs_launcher.yaml`, but
+        # in `eufs_launcher/scripts`.  It defaults to
+        # `config/eufs_launcher.yaml`, but
         # can be passed in using the `config` param.  Example:
-        # `ros2 launch eufs_launcher eufs_launcher.launch.py config:=config/example.yaml`
+        # `ros2 launch eufs_launcher eufs_launcher.launch.py
+        # config:=config/example.yaml`
         # Will load in example.yaml instead.
 
         yaml_loc = join(
@@ -76,7 +79,8 @@ class EUFSLauncher(Plugin):
         # Create QWidget
         self._widget = QWidget()
 
-        # Get path to UI file which should be in the "resource" folder of this package
+        # Get path to UI file which should be in the "resource" folder of
+        # this package
         self.main_ui_file = join(get_package_share_directory('eufs_launcher'),
                                  'resource',
                                  'launcher.ui',
@@ -94,7 +98,8 @@ class EUFSLauncher(Plugin):
         # plugin at once, these lines add number to make it easy to
         # tell from pane to pane.
         if context.serial_number() > 1:
-            the_title = (self._widget.windowTitle() + (' (%d)' % context.serial_number()))
+            the_title = (self._widget.windowTitle() + (
+                ' (%d)' % context.serial_number()))
             self._widget.setWindowTitle(the_title)
 
         # Set the magic number for the maximum cone noise allowed
@@ -106,14 +111,20 @@ class EUFSLauncher(Plugin):
 
         # Give widget components permanent names
         self.TRACK_SELECTOR = self._widget.findChild(QComboBox, "WhichTrack")
-        self.LAUNCH_BUTTON = self._widget.findChild(QPushButton, "LaunchButton")
+        self.LAUNCH_BUTTON = self._widget.findChild(QPushButton,
+                                                    "LaunchButton")
 
         self.NOISE_SLIDER = self._widget.findChild(QSlider, "Noisiness")
-        self.VEHICLE_MODEL_MENU = self._widget.findChild(QComboBox, "WhichVehicleModel")
-        self.COMMAND_MODE_MENU = self._widget.findChild(QComboBox, "WhichCommandMode")
-        self.MODEL_PRESET_MENU = self._widget.findChild(QComboBox, "WhichModelPreset")
-        self.CONE_NOISE_SLIDER = self._widget.findChild(QSlider, "ConeNoisiness")
-        self.COLOR_NOISE_SLIDER = self._widget.findChild(QSlider, "ConeColorNoisiness")
+        self.VEHICLE_MODEL_MENU = self._widget.findChild(QComboBox,
+                                                         "WhichVehicleModel")
+        self.COMMAND_MODE_MENU = self._widget.findChild(QComboBox,
+                                                        "WhichCommandMode")
+        self.MODEL_PRESET_MENU = self._widget.findChild(QComboBox,
+                                                        "WhichModelPreset")
+        self.CONE_NOISE_SLIDER = self._widget.findChild(QSlider,
+                                                        "ConeNoisiness")
+        self.COLOR_NOISE_SLIDER = self._widget.findChild(QSlider,
+                                                         "ConeColorNoisiness")
 
         # Check the file directory to update drop-down menu
         self.load_track_dropdowns()
@@ -144,23 +155,29 @@ class EUFSLauncher(Plugin):
         models_filepath = join(get_package_share_directory('eufs_models'),
                                'models/models.txt')
         vehicle_models_ = open(models_filepath, "r")
-        vehicle_models = [model.strip() for model in vehicle_models_]  # remove \n
+        vehicle_models = [model.strip() for model in
+                          vehicle_models_]  # remove \n
 
-        default_model = self.default_config["eufs_launcher"]["default_vehicle_model"]
-        self.setup_q_combo_box(self.VEHICLE_MODEL_MENU, default_model, vehicle_models)
+        default_model = self.default_config["eufs_launcher"][
+            "default_vehicle_model"]
+        self.setup_q_combo_box(self.VEHICLE_MODEL_MENU, default_model,
+                               vehicle_models)
 
         # Setup Command Modes menu
-        default_mode = self.default_config["eufs_launcher"]["default_command_mode"]
+        default_mode = self.default_config["eufs_launcher"][
+            "default_command_mode"]
         modes = ["acceleration", "velocity"]
         self.setup_q_combo_box(self.COMMAND_MODE_MENU, default_mode, modes)
 
         # Setup Conditions menu
-        default_mode = self.default_config["eufs_launcher"]["default_vehicle_preset"]
+        default_mode = self.default_config["eufs_launcher"][
+            "default_vehicle_preset"]
         self.MODEL_CONFIGS = {
             "DryTrack": "configDry.yaml",
             "WetTrack": "configWet.yaml"
         }
-        self.setup_q_combo_box(self.MODEL_PRESET_MENU, default_mode, self.MODEL_CONFIGS.keys())
+        self.setup_q_combo_box(self.MODEL_PRESET_MENU, default_mode,
+                               self.MODEL_CONFIGS.keys())
 
         # Add buttons from yaml file
         checkboxes = OrderedDict(
@@ -188,10 +205,12 @@ class EUFSLauncher(Plugin):
                     cur_cbox_args = self.arg_to_list(checkboxes[key]["args"])
                 else:
                     cur_cbox_args = []
-                # The weird double-lambda thing is because python lambda-captures
+                # The weird double-lambda thing is because python
+                # lambda-captures
                 # by reference, not value, and so consequently since the `key`
                 # variable is used every loop, at the end of the loops all of
-                # these lambda functions would actually be refering to the *last*
+                # these lambda functions would actually be refering to the
+                # *last*
                 # loop's key, not each individual loop's key.
                 # To solve that, we force key into a local variable by wrapping
                 # our contents with a lambda taking it as a parameter, then
@@ -214,8 +233,10 @@ class EUFSLauncher(Plugin):
                 # checkbox is on or off
                 self.checkbox_parameter_mapping.append((
                     cur_cbox,
-                    self.arg_to_list(checkboxes[key]["parameter_triggering"]["if_on"]),
-                    self.arg_to_list(checkboxes[key]["parameter_triggering"]["if_off"])
+                    self.arg_to_list(
+                        checkboxes[key]["parameter_triggering"]["if_on"]),
+                    self.arg_to_list(
+                        checkboxes[key]["parameter_triggering"]["if_off"])
                 ))
 
             setattr(self, checkboxes[key]["name"].upper(), cur_cbox)
@@ -244,14 +265,16 @@ class EUFSLauncher(Plugin):
         self.DEBUG_SHUTDOWN = False
 
         # Looping over all widgest to fix scaling issue via manual scaling
-        # Scaling done via magically comparing the width to the 'default' 1700 pixels
+        # Scaling done via magically comparing the width to the 'default'
+        # 1700 pixels
         rec = QApplication.desktop().screenGeometry()
         scaler_multiplier = rec.width() / 1700.0
         for widget in self._widget.children():
             if hasattr(widget, 'geometry'):
                 geom = widget.geometry()
                 new_width = (
-                    geom.width() * (scaler_multiplier) if not isinstance(widget, QLabel)
+                    geom.width() * (scaler_multiplier) if not isinstance(
+                        widget, QLabel)
                     else geom.width() * (scaler_multiplier) + 200
                 )
                 widget.setGeometry(
@@ -277,7 +300,8 @@ class EUFSLauncher(Plugin):
 
     def load_track_dropdowns(self):
         """
-        Peruses file system for files to add to the drop-down menus of the launcher.
+        Peruses file system for files to add to the drop-down menus of the
+        launcher.
         """
 
         # Clear the dropdowns
@@ -316,18 +340,24 @@ class EUFSLauncher(Plugin):
         """Returns the object noise slider's noise level."""
 
         noise_level_widget = self.NOISE_SLIDER
-        numerator = (1.0 * (noise_level_widget.value() - noise_level_widget.minimum()))
-        denominator = (noise_level_widget.maximum() - noise_level_widget.minimum())
+        numerator = (1.0 * (
+            noise_level_widget.value() - noise_level_widget.minimum()))
+        denominator = (
+            noise_level_widget.maximum()
+            - noise_level_widget.minimum())
         return numerator / denominator
 
     def set_noise_level(self, new_noise_level):
         """
                 Sets the object noise slider's level.
-                Code may look complicated, but it's really just inverting get_noise_level to solve
+                Code may look complicated, but it's really just inverting
+                get_noise_level to solve
                 for `noise_level_widget.value()`
                 """
         noise_level_widget = self.NOISE_SLIDER
-        denominator = (noise_level_widget.maximum() - noise_level_widget.minimum())
+        denominator = (
+            noise_level_widget.maximum()
+            - noise_level_widget.minimum())
         numerator = new_noise_level * denominator
         new_value = numerator + noise_level_widget.minimum()
         noise_level_widget.setValue(
@@ -338,18 +368,24 @@ class EUFSLauncher(Plugin):
         """Returns the cone noise slider's noise level."""
 
         noise_level_widget = self.CONE_NOISE_SLIDER
-        numerator = (1.0 * (noise_level_widget.value() - noise_level_widget.minimum()))
-        denominator = (noise_level_widget.maximum() - noise_level_widget.minimum())
+        numerator = (1.0 * (
+            noise_level_widget.value() - noise_level_widget.minimum()))
+        denominator = (
+            noise_level_widget.maximum()
+            - noise_level_widget.minimum())
         return self.MAX_CONE_NOISE * numerator / denominator
 
     def set_cone_noise_level(self, new_noise_level):
         """
                 Sets the cone noise slider's level.
-                Code may look complicated, but it's really just inverting get_cone_noise_level to solve
+                Code may look complicated, but it's really just inverting
+                get_cone_noise_level to solve
                 for `cone_noise_level_widget.value()`
                 """
         noise_level_widget = self.CONE_NOISE_SLIDER
-        denominator = (noise_level_widget.maximum() - noise_level_widget.minimum())
+        denominator = (
+            noise_level_widget.maximum()
+            - noise_level_widget.minimum())
         numerator = new_noise_level * denominator / self.MAX_CONE_NOISE
         new_value = numerator + noise_level_widget.minimum()
         noise_level_widget.setValue(
@@ -360,18 +396,24 @@ class EUFSLauncher(Plugin):
         """Returns the color noise slider's noise level."""
 
         noise_level_widget = self.COLOR_NOISE_SLIDER
-        numerator = (1.0 * (noise_level_widget.value() - noise_level_widget.minimum()))
-        denominator = (noise_level_widget.maximum() - noise_level_widget.minimum())
+        numerator = (1.0 * (
+            noise_level_widget.value() - noise_level_widget.minimum()))
+        denominator = (
+            noise_level_widget.maximum()
+            - noise_level_widget.minimum())
         return self.MAX_COLOR_NOISE * numerator / denominator
 
     def set_color_noise_level(self, new_noise_level):
         """
                 Sets the color noise slider's level.
-                Code may look complicated, but it's really just inverting get_color_noise_level to solve
+                Code may look complicated, but it's really just inverting
+                get_color_noise_level to solve
                 for `color_noise_level_widget.value()`
                 """
         noise_level_widget = self.COLOR_NOISE_SLIDER
-        denominator = (noise_level_widget.maximum() - noise_level_widget.minimum())
+        denominator = (
+            noise_level_widget.maximum()
+            - noise_level_widget.minimum())
         numerator = new_noise_level * denominator / self.MAX_COLOR_NOISE
         new_value = numerator + noise_level_widget.minimum()
         noise_level_widget.setValue(
@@ -391,7 +433,8 @@ class EUFSLauncher(Plugin):
                 Here is our pre-launch process:
                 1: Create csv from track_to_launch
                 2: Kill random noise tiles in accordance with the noise value
-                3: Shuffle cone positions slightly in accordance with cone noise value
+                3: Shuffle cone positions slightly in accordance with cone
+                noise value
                 4: Convert that to "LAST_LAUNCH.launch"
                 Launch LAST_LAUNCH.launch
                 """
@@ -415,7 +458,9 @@ class EUFSLauncher(Plugin):
         noise_level = self.get_noise_level()
         cone_noise_level = self.get_cone_noise_level()
         color_noise_level = self.get_color_noise_level()
-        self.logger.info("Launching " + track_to_launch + " With Noise Level: " + str(noise_level))
+        self.logger.info(
+            "Launching " + track_to_launch + " With Noise Level: " + str(
+                noise_level))
 
         # Remove relevant random noise tiles from the csv
         csv_path = join(
@@ -437,12 +482,9 @@ class EUFSLauncher(Plugin):
             skiprows=1
         )
         loaded_csv = loaded_csv[
-            (
-                    (loaded_csv["tag"] != "inactive_noise") &
-                    (loaded_csv["tag"] != "active_noise")
-            ) |
-            (uniform(0, 1) < noise_level)
-            ]
+            ((loaded_csv["tag"] != "inactive_noise") & (loaded_csv["tag"] != "active_noise"))
+            | (uniform(0, 1) < noise_level)
+        ]
 
         for idx, val in loaded_csv.iterrows():
             # Activate remaining noise
@@ -456,8 +498,10 @@ class EUFSLauncher(Plugin):
                 uniform_radius = uniform(0, cone_noise_level)
                 del_x = uniform_radius * math.cos(uniform_angle)
                 del_y = uniform_radius * math.sin(uniform_angle)
-                loaded_csv.loc[idx, "x"] = float(loaded_csv.loc[idx, "x"]) + del_x
-                loaded_csv.loc[idx, "y"] = float(loaded_csv.loc[idx, "y"]) + del_y
+                loaded_csv.loc[idx, "x"] = float(
+                    loaded_csv.loc[idx, "x"]) + del_x
+                loaded_csv.loc[idx, "y"] = float(
+                    loaded_csv.loc[idx, "y"]) + del_y
 
         loaded_csv.to_csv(
             csv_path,
@@ -484,7 +528,8 @@ class EUFSLauncher(Plugin):
         track_to_launch = "LAST_LAUNCH.launch"
 
         # Re-create csv file because the csv-to-launch file re-centers the data
-        # A different fix would be to add another metapixel to trackimages that stores
+        # A different fix would be to add another metapixel to trackimages
+        # that stores
         # What the car's position should be.
         # But this will work for now
         Converter.convert(
@@ -499,7 +544,8 @@ class EUFSLauncher(Plugin):
         )
 
         # And now strip the launch file of the metadata that causes warnings
-        # This step is non-essential, but will result in a lot of terminal warnings
+        # This step is non-essential, but will result in a lot of terminal
+        # warnings
         # if left out
         Converter.convert(
             "csv",
@@ -514,17 +560,25 @@ class EUFSLauncher(Plugin):
         )
 
         # Get vehicle model information
-        self.logger.info("With " + self.VEHICLE_MODEL_MENU.currentText() + " Vehicle Model " +
-                         "using the " + self.COMMAND_MODE_MENU.currentText() + " command mode. " +
-                         "Vehicle model config file is " + self.MODEL_CONFIGS[self.MODEL_PRESET_MENU.currentText()])
+        self.logger.info(
+            "With " + self.VEHICLE_MODEL_MENU.currentText() + " Vehicle Model "
+            + "using the " + self.COMMAND_MODE_MENU.currentText()
+            + " command mode. "
+            + "Vehicle model config file is "
+            + self.MODEL_CONFIGS[self.MODEL_PRESET_MENU.currentText()])
 
-        vehicle_model = "vehicleModel:=" + self.VEHICLE_MODEL_MENU.currentText()
+        vehicle_model = "vehicleModel:=" + \
+                        self.VEHICLE_MODEL_MENU.currentText()
         command_mode = "commandMode:=" + self.COMMAND_MODE_MENU.currentText()
-        vehicle_model_config = "vehicleModelConfig:=" + self.MODEL_CONFIGS[self.MODEL_PRESET_MENU.currentText()]
+        vehicle_model_config = "vehicleModelConfig:=" + self.MODEL_CONFIGS[
+            self.MODEL_PRESET_MENU.currentText()]
 
         # Get checkbox parameter information
-        parameters_to_pass = ["track:=" + track_to_launch.split(".")[0], vehicle_model, command_mode, vehicle_model_config]
-        for checkbox, param_if_on, param_if_off in self.checkbox_parameter_mapping:
+        parameters_to_pass = ["track:=" + track_to_launch.split(".")[0],
+                              vehicle_model, command_mode,
+                              vehicle_model_config]
+        for checkbox, param_if_on, param_if_off in \
+                self.checkbox_parameter_mapping:
             if checkbox.isChecked():
                 parameters_to_pass.extend(param_if_on)
             else:
@@ -545,7 +599,9 @@ class EUFSLauncher(Plugin):
                 effect_off()
 
         # Hard-Coded Map Effect
-        if hasattr(self, "FAST_SLAM_LOAD_MAP") and self.FAST_SLAM_LOAD_MAP.isChecked():
+        if hasattr(self,
+                   "FAST_SLAM_LOAD_MAP") and \
+                self.FAST_SLAM_LOAD_MAP.isChecked():
             in_path = join(
                 self.TRACKS,
                 'csv',

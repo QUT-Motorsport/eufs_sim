@@ -1,31 +1,27 @@
-#ifndef EUFS_VEHICLE_INPUT_HPP
-#define EUFS_VEHICLE_INPUT_HPP
+#ifndef EUFS_MODELS_INCLUDE_EUFS_MODELS_VEHICLE_INPUT_HPP_
+#define EUFS_MODELS_INCLUDE_EUFS_MODELS_VEHICLE_INPUT_HPP_
 
-#include <string>
 #include <math.h>
 
-namespace eufs
-{
-  namespace models
-  {
+#include <string>
 
-    struct Input
-    {
-      Input() : acc(0.0), vel(0.0), delta(0.0) {}
+namespace eufs {
+namespace models {
 
-      std::string getString()
-      {
-        return "acc:" + std::to_string(acc) +
-               " | vel:" + std::to_string(vel) +
-               " | delta:" + std::to_string(delta);
-      }
+struct Input {
+  Input() : acc(0.0), vel(0.0), delta(0.0) {}
 
-      double acc;
-      double vel;
-      double delta;
-    };
+  std::string getString() {
+    return "acc:" + std::to_string(acc) + " | vel:" + std::to_string(vel) +
+           " | delta:" + std::to_string(delta);
+  }
 
-  } // namespace models
-} // namespace eufs
+  double acc;
+  double vel;
+  double delta;
+};
 
-#endif //EUFS_VEHICLE_INPUT_HPP
+}  // namespace models
+}  // namespace eufs
+
+#endif  // EUFS_MODELS_INCLUDE_EUFS_MODELS_VEHICLE_INPUT_HPP_
