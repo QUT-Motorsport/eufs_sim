@@ -54,6 +54,12 @@ check_clone:
 
 build:
   stage: build
+  before_script:
+    # This before_script is for dealing with the fact that GIT_STRATEGY: none doesn't imply a clean working directory. 
+    # see: https://gitlab.com/gitlab-org/gitlab/-/issues/17103
+    - shopt -s extglob dotglob
+    - rm -rf !(src) 
+    - shopt -u extglob dotglob
   script:
     # Install ROS package dependencies
     - apt-get update -qq
@@ -75,16 +81,16 @@ build:
 flake8:
   stage: test
   image: python:3.8-alpine
-  dependencies: [build] # use dependencies to only retrieve artifacts from build stage
+  dependencies: []
   before_script:
     - python3 -m pip install flake8
   script:
-    - python3 -m flake8 $PROJECT_BASE_DIR --config=$PROJECT_BASE_DIR/.flake8 --output-file "flake8-report.txt"
+    - python3 -m flake8 . --config=.flake8 --output-file "flake8-report.txt"
   after_script:
     - python3 -m pip install "flake8-junit-report"
     - python3 -m junit_conversor "flake8-report.txt" "flake8-results.xml"
   variables:
-    GIT_STRATEGY: none
+    GIT_SUBMODULE_STRATEGY: none
   artifacts:
     expire_in: 30 days
     reports:
@@ -93,13 +99,13 @@ flake8:
 cpplint:
   stage: test
   image: python:3.8-alpine
-  dependencies: [build] # use dependencies to only retrieve artifacts from build stage
+  dependencies: []
   before_script:
     - python3 -m pip install cpplint
   script:
-    - cpplint --recursive --output=junit $PROJECT_BASE_DIR > cpplint-results.xml 2>&1
+    - cpplint --recursive --output=junit . > cpplint-results.xml 2>&1
   variables:
-    GIT_STRATEGY: none
+    GIT_SUBMODULE_STRATEGY: none
   artifacts:
     expire_in: 30 days
     reports:
@@ -107,6 +113,12 @@ cpplint:
 
 test:
   stage: test
+  before_script:
+    # This before_script is for dealing with the fact that GIT_STRATEGY: none doesn't imply a clean working directory. 
+    # see: https://gitlab.com/gitlab-org/gitlab/-/issues/17103
+    - shopt -s extglob dotglob
+    - rm -rf !(src|build|install) 
+    - shopt -u extglob dotglob
   dependencies: [build] # use dependencies to only retrieve artifacts from build stage
   script:
     - . /opt/ros/$ROS_DISTRO/setup.sh
