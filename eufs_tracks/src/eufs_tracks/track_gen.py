@@ -36,15 +36,18 @@ class Track(Node):
         self.lap_counters = None
 
         # Car data in the format of ("car_start", x, y, yaw)
-        # It can be left as ("car_start", 0, 0, 0), only relevant when fed into track_gen through
+        # It can be left as ("car_start", 0, 0, 0), only relevant when fed
+        # into track_gen through
         # `eufs_tracks/ConversionTools`
-        # as in that case it needs to preserve car data so that the conversion is fully bijective.
+        # as in that case it needs to preserve car data so that the
+        # conversion is fully bijective.
         self.car_start_data = ("car_start", 0.0, 0.0, 0.0)
 
     def load_csv(self, file_path):
         """Loads CSV file of cone location data and store it in the class.
         CSV file must have a 1 line header and then each row should have
-        the format tag, x, y where tag is either "big", "blue", "orange" or "big_orange"
+        the format tag, x, y where tag is either "big", "blue", "orange" or
+        "big_orange"
 
         Args:
             file_path (str): the path to the CSV file to load
@@ -71,9 +74,11 @@ class Track(Node):
             skiprows=1
         )
         self.blue_cones = np.array(data[data.tag == "blue"][["x", "y"]])
-        self.car = np.array(data[data.tag == "car_start"][["x", "y", "direction"]])
+        self.car = np.array(
+            data[data.tag == "car_start"][["x", "y", "direction"]])
         self.yellow_cones = np.array(data[data.tag == "yellow"][["x", "y"]])
-        self.big_orange_cones = np.array(data[data.tag == "big_orange"][["x", "y"]])
+        self.big_orange_cones = np.array(
+            data[data.tag == "big_orange"][["x", "y"]])
         self.orange_cones = np.array(data[data.tag == "orange"][["x", "y"]])
 
     def load_sdf(self, file_path):
@@ -124,13 +129,15 @@ class Track(Node):
                     orange.append(pose + cov_info)
                 elif "lap_counter" == mesh_str.split(";")[0]:
                     # Lap counter number stored in other part of `mesh_str`
-                    lap_counters.append((pose + cov_info, mesh_str.split(";")[1]))
+                    lap_counters.append(
+                        (pose + cov_info, mesh_str.split(";")[1]))
                 elif "active_noise" == mesh_str:
                     active_noise.append(pose + cov_info)
                 elif "inactive_noise" == mesh_str:
                     inactive_noise.append(pose + cov_info)
                 else:
-                    self.get_logger().error("[track_gen.py] No such object: " + mesh_str)
+                    self.get_logger().error(
+                        "[track_gen.py] No such object: " + mesh_str)
 
         """
         # handle hidden links
@@ -142,7 +149,8 @@ class Track(Node):
 
         """
         # handle includes
-        # note, since some names mismatch (cone vs orange_cone), this section might
+        # note, since some names mismatch (cone vs orange_cone),
+        this section might
         # be out of date and require maintenance
         if len(root[0].findall("include")) != 0:
             for child in root[0].iter("include"):
@@ -189,8 +197,8 @@ class Track(Node):
 
         if len(lap_counters) != 0:
             lc = [None, None]
-            lc[0] = np.array([l[0] for l in lap_counters], dtype="float64")
-            lc[1] = np.array([l[1] for l in lap_counters], dtype="int")
+            lc[0] = np.array([lap_counter[0] for lap_counter in lap_counters], dtype="float64")
+            lc[1] = np.array([lap_counter[1] for lap_counter in lap_counters], dtype="int")
             self.lap_counters = lc
 
     def generate_tracks(self):
@@ -238,13 +246,14 @@ class Track(Node):
         Returns:
             Nothing
         """
-        assert self.blue_cones is not None or len(self.yellow_cones) != 0
+        assert self.blue_cones is not None or len(self.blue_cones) != 0
         assert self.yellow_cones is not None or len(self.yellow_cones) != 0
 
         midpoints = []
 
         for blue_cone in self.blue_cones:
-            closest_cone, closest_dist = self.find_closest(blue_cone, self.yellow_cones)
+            closest_cone, closest_dist = self.find_closest(blue_cone,
+                                                           self.yellow_cones)
             midpoints.append([
                 (closest_cone[0] + blue_cone[0]) / 2,
                 (closest_cone[1] + blue_cone[1]) / 2]
@@ -252,8 +261,9 @@ class Track(Node):
 
         if _plot:
             for blue_cone in self.blue_cones:
-                closest_cone, closest_dist = self.find_closest(blue_cone, self.yellow_cones)
-                self.plot_line(i, blue_cone)
+                closest_cone, closest_dist = self.find_closest(blue_cone,
+                                                               self.yellow_cones)
+                self.plot_line(closest_cone, blue_cone)
                 plt.plot(
                     (closest_cone[0] + blue_cone[0]) / 2,
                     (closest_cone[1] + blue_cone[1]) / 2,
@@ -281,7 +291,8 @@ class Track(Node):
 
         # Deal with blue cones
         if self.blue_cones.size is not None:
-            plt.scatter(self.blue_cones[:, 0], self.blue_cones[:, 1], c="b", alpha="0.5")
+            plt.scatter(self.blue_cones[:, 0], self.blue_cones[:, 1], c="b",
+                        alpha="0.5")
 
             if self.blue_track is not None:
                 plt.plot(self.blue_track[:, 0], self.blue_track[:, 1], "b-")
@@ -290,15 +301,18 @@ class Track(Node):
 
         # Deal with yellow cones
         if self.yellow_cones.size is not None:
-            plt.scatter(self.yellow_cones[:, 0], self.yellow_cones[:, 1], c="y", alpha="0.5")
+            plt.scatter(self.yellow_cones[:, 0], self.yellow_cones[:, 1],
+                        c="y", alpha="0.5")
 
             if self.yellow_track is not None:
-                plt.plot(self.yellow_track[:, 0], self.yellow_track[:, 1], "y-")
+                plt.plot(self.yellow_track[:, 0], self.yellow_track[:, 1],
+                         "y-")
         else:
             print("Warning: no yellow/yellow cones")
 
         if self.big_orange_cones is not None:
-            plt.scatter(self.big_orange_cones[:, 0], self.big_orange_cones[:, 1], c="r", alpha="0.5")
+            plt.scatter(self.big_orange_cones[:, 0],
+                        self.big_orange_cones[:, 1], c="r", alpha="0.5")
         else:
             print("Warning: no big cones")
 
@@ -328,7 +342,8 @@ class Track(Node):
             filename = filename + ".csv"
 
         df = pd.DataFrame(
-            columns=["tag", "x", "y", "direction", "x_variance", "y_variance", "xy_covariance"]
+            columns=["tag", "x", "y", "direction", "x_variance", "y_variance",
+                     "xy_covariance"]
         )
 
         # assuming there always are blue and yellow cones
@@ -357,11 +372,14 @@ class Track(Node):
                 ]
             )
             df = df.append(empty)
-            df["x"] = np.hstack((df["x"].dropna().values, self.big_orange_cones[:, 0]))
-            df["y"] = np.hstack((df["y"].dropna().values, self.big_orange_cones[:, 1]))
+            df["x"] = np.hstack(
+                (df["x"].dropna().values, self.big_orange_cones[:, 0]))
+            df["y"] = np.hstack(
+                (df["y"].dropna().values, self.big_orange_cones[:, 1]))
             df["tag"].iloc[-self.big_orange_cones.shape[0]:] = "big_orange"
             df["direction"] = np.hstack((
-                df["direction"].dropna().values, [0 for _ in self.big_orange_cones[:, 2]]
+                df["direction"].dropna().values,
+                [0 for _ in self.big_orange_cones[:, 2]]
             ))
             df["x_variance"] = np.hstack((
                 df["x_variance"].dropna().values, self.big_orange_cones[:, 2]
@@ -370,7 +388,8 @@ class Track(Node):
                 df["y_variance"].dropna().values, self.big_orange_cones[:, 3]
             ))
             df["xy_covariance"] = np.hstack((
-                df["xy_covariance"].dropna().values, self.big_orange_cones[:, 4]
+                df["xy_covariance"].dropna().values,
+                self.big_orange_cones[:, 4]
             ))
 
         if self.orange_cones is not None:
@@ -383,11 +402,14 @@ class Track(Node):
                 ]
             )
             df = df.append(empty)
-            df["x"] = np.hstack((df["x"].dropna().values, self.orange_cones[:, 0]))
-            df["y"] = np.hstack((df["y"].dropna().values, self.orange_cones[:, 1]))
+            df["x"] = np.hstack(
+                (df["x"].dropna().values, self.orange_cones[:, 0]))
+            df["y"] = np.hstack(
+                (df["y"].dropna().values, self.orange_cones[:, 1]))
             df["tag"].iloc[-self.orange_cones.shape[0]:] = "orange"
             df["direction"] = np.hstack((
-                df["direction"].dropna().values, [0 for _ in self.orange_cones[:, 2]]
+                df["direction"].dropna().values,
+                [0 for _ in self.orange_cones[:, 2]]
             ))
             df["x_variance"] = np.hstack((
                 df["x_variance"].dropna().values, self.orange_cones[:, 2]
@@ -409,20 +431,26 @@ class Track(Node):
                 ]
             )
             df = df.append(empty)
-            df["x"] = np.hstack((df["x"].dropna().values, self.midpoints[:, 0]))
-            df["y"] = np.hstack((df["y"].dropna().values, self.midpoints[:, 1]))
+            df["x"] = np.hstack(
+                (df["x"].dropna().values, self.midpoints[:, 0]))
+            df["y"] = np.hstack(
+                (df["y"].dropna().values, self.midpoints[:, 1]))
             df["tag"].iloc[-self.midpoints.shape[0]:] = "midpoint"
             df["direction"] = np.hstack((
-                df["direction"].dropna().values, [0 for _ in self.midpoints[:, 1]]
+                df["direction"].dropna().values,
+                [0 for _ in self.midpoints[:, 1]]
             ))
             df["x_variance"] = np.hstack((
-                df["x_variance"].dropna().values, [0.01 for _ in self.midpoints[:, 1]]
+                df["x_variance"].dropna().values,
+                [0.01 for _ in self.midpoints[:, 1]]
             ))
             df["y_variance"] = np.hstack((
-                df["y_variance"].dropna().values, [0.01 for _ in self.midpoints[:, 1]]
+                df["y_variance"].dropna().values,
+                [0.01 for _ in self.midpoints[:, 1]]
             ))
             df["xy_covariance"] = np.hstack((
-                df["xy_covariance"].dropna().values, [0 for _ in self.midpoints[:, 1]]
+                df["xy_covariance"].dropna().values,
+                [0 for _ in self.midpoints[:, 1]]
             ))
 
         if self.active_noise is not None:
@@ -435,11 +463,14 @@ class Track(Node):
                 ]
             )
             df = df.append(empty)
-            df["x"] = np.hstack((df["x"].dropna().values, self.active_noise[:, 0]))
-            df["y"] = np.hstack((df["y"].dropna().values, self.active_noise[:, 1]))
+            df["x"] = np.hstack(
+                (df["x"].dropna().values, self.active_noise[:, 0]))
+            df["y"] = np.hstack(
+                (df["y"].dropna().values, self.active_noise[:, 1]))
             df["tag"].iloc[-self.active_noise.shape[0]:] = "active_noise"
             df["direction"] = np.hstack((
-                df["direction"].dropna().values, [0 for _ in self.active_noise[:, 2]]
+                df["direction"].dropna().values,
+                [0 for _ in self.active_noise[:, 2]]
             ))
             df["x_variance"] = np.hstack((
                 df["x_variance"].dropna().values, self.active_noise[:, 2]
@@ -461,11 +492,14 @@ class Track(Node):
                 ]
             )
             df = df.append(empty)
-            df["x"] = np.hstack((df["x"].dropna().values, self.inactive_noise[:, 0]))
-            df["y"] = np.hstack((df["y"].dropna().values, self.inactive_noise[:, 1]))
+            df["x"] = np.hstack(
+                (df["x"].dropna().values, self.inactive_noise[:, 0]))
+            df["y"] = np.hstack(
+                (df["y"].dropna().values, self.inactive_noise[:, 1]))
             df["tag"].iloc[-self.inactive_noise.shape[0]:] = "inactive_noise"
             df["direction"] = np.hstack((
-                df["direction"].dropna().values, [0 for _ in self.inactive_noise[:, 2]]
+                df["direction"].dropna().values,
+                [0 for _ in self.inactive_noise[:, 2]]
             ))
             df["x_variance"] = np.hstack((
                 df["x_variance"].dropna().values, self.inactive_noise[:, 2]
@@ -489,9 +523,12 @@ class Track(Node):
                 ]
             )
             df = df.append(empty)
-            df["x"] = np.hstack((df["x"].dropna().values, position_values[:, 0]))
-            df["y"] = np.hstack((df["y"].dropna().values, position_values[:, 1]))
-            df["direction"] = np.hstack((df["direction"].dropna().values, lap_values))
+            df["x"] = np.hstack(
+                (df["x"].dropna().values, position_values[:, 0]))
+            df["y"] = np.hstack(
+                (df["y"].dropna().values, position_values[:, 1]))
+            df["direction"] = np.hstack(
+                (df["direction"].dropna().values, lap_values))
             df["tag"].iloc[-position_values.shape[0]:] = "lap_counter"
             df["x_variance"] = np.hstack((
                 df["x_variance"].dropna().values, position_values[:, 2]
@@ -585,9 +622,8 @@ class Track(Node):
             name = SubElement(include, "name")
             name.text = "big_cone_" + str(i)
 
-        tree = ET.ElementTree(root)
-
-        xmlstr = minidom.parseString(ET.tostring(root)).toprettyxml(indent="   ")
+        xmlstr = minidom.parseString(ET.tostring(root)).toprettyxml(
+            indent="   ")
 
         with open("model.sdf", "w") as f:
             f.write(xmlstr)
@@ -622,7 +658,7 @@ class Track(Node):
         """
         # drop the point if in points
         points = self.remove_point(p, ps)
-        dist_2 = np.sum((points - p)**2, axis=1)
+        dist_2 = np.sum((points - p) ** 2, axis=1)
         return points[np.argmin(dist_2), :], np.min(dist_2)
 
     def plot_line(self, a, b, marker_style="ro-"):
@@ -655,7 +691,8 @@ class Track(Node):
         ordered.append(current_point)
 
         while points.shape[0] != 0:
-            closest_cone, closest_dist = self.find_closest(current_point, points)
+            closest_cone, closest_dist = self.find_closest(current_point,
+                                                           points)
             ordered.append(closest_cone)
             points = self.remove_point(closest_cone, points)
             current_point = closest_cone
@@ -682,38 +719,51 @@ class Track(Node):
         """
         Creates a csv from the sdf passed in (through track_name)
 
-        track_name:        The name (not path) of the folder of the sdf for the track.
-                           For example, if you desire a csv for the track with sdf stored
-                           in YourTrack/model.sdf, then track_name should be "YourTrack".
+        track_name:        The name (not path) of the folder of the sdf for
+        the track.
+                           For example, if you desire a csv for the track
+                           with sdf stored
+                           in YourTrack/model.sdf, then track_name should be
+                           "YourTrack".
 
-        midpoints:         A boolean, when true the csv will also be populated with data
+        midpoints:         A boolean, when true the csv will also be
+        populated with data
                            about the midpoints of cones in the track
 
-        car_start_data:    Information about the start location of the car, as it
-                           cannot be gleaned from the sdf.  It is used to preserve
-                           information so that csvs can be converted back to .launches,
-                           and is not necessary if you do not desire that functionality.
+        car_start_data:    Information about the start location of the car,
+        as it
+                           cannot be gleaned from the sdf.  It is used to
+                           preserve
+                           information so that csvs can be converted back to
+                           .launches,
+                           and is not necessary if you do not desire that
+                           functionality.
 
-        conversion_suffix: This string will be appended to the end of track_name when
-                           naming the csv file.  It is useful if there may already be
-                           a csv file for the track and for whatever reason you do not
+        conversion_suffix: This string will be appended to the end of
+        track_name when
+                           naming the csv file.  It is useful if there may
+                           already be
+                           a csv file for the track and for whatever reason
+                           you do not
                            desire to overwrite it.
         """
-        track_path = os.path.join(get_package_share_directory('eufs_tracks'), "models",
+        track_path = os.path.join(get_package_share_directory('eufs_tracks'),
+                                  "models",
                                   track_name, "model.sdf")
 
         # check if eufs_tracks exists
         try:
             assert os.path.isdir(get_package_share_directory('eufs_tracks'))
-        except:
-            raise(AssertionError("Can't find eufs_tracks"))
+        except AssertionError:
+            raise (AssertionError("Can't find eufs_tracks"))
 
         # check if requested track exists
         try:
             assert os.path.exists(track_path)
-        except:
-            raise(AssertionError(("Can't find track called {} make sure that it is"
-                  "within eufs_tracks/models/".format(track_name))))
+        except AssertionError:
+            raise (AssertionError(
+                ("Can't find track called {} make sure that it is"
+                 "within eufs_tracks/models/".format(track_name))))
 
         track = Track()
         track.car_start_data = car_start_data
@@ -721,8 +771,12 @@ class Track(Node):
         if midpoints:
             track.generate_midpoints()
             track.generate_tracks()
-        out_name = track_name+conversion_suffix if override_name is None else override_name
-        track.save_csv(os.path.join(get_package_share_directory('eufs_tracks'), "csv", out_name))
+        out_name = track_name + conversion_suffix if override_name is None \
+            else override_name
+        track.save_csv(
+            os.path.join(get_package_share_directory('eufs_tracks'), "csv",
+                         out_name))
+
 
 if __name__ == "__main__":
     # Just a heads up, you can run this with a gui by running the track_generator:
@@ -732,8 +786,9 @@ if __name__ == "__main__":
                                      locations based on the SDF Gazebo models")
     parser.add_argument('track_name', metavar='track_name', type=str,
                         help="the name of the Gazebo model track")
-    parser.add_argument('--midpoints', metavar='midpoints', type=bool, default=False,
+    parser.add_argument('--midpoints', metavar='midpoints', type=bool,
+                        default=False,
                         help="If true, midpoints will be generated and saved in the CSV")
 
     args = parser.parse_args()
-    runConverter(args.track_name, args.midpoints)
+    Track.runConverter(args.track_name, args.midpoints)
