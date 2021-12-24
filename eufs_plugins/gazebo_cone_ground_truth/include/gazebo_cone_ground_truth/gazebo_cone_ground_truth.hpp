@@ -185,6 +185,7 @@ class GazeboConeGroundTruth : public gazebo::ModelPlugin {
   double camera_b;
   double camera_noise_percentage;
   bool lidar_on;
+  bool pub_ground_truth;
 
   double update_rate_;
   gazebo::common::Time time_last_published;

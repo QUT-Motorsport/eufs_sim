@@ -67,6 +67,16 @@ eufs_launcher:
         if_on: { "publish_gt_tf:=true" }
         if_off: { "publish_gt_tf:=false" }
 
+    pub_ground_truth:
+      priority: 5
+      name: "Publish_Ground_Truth_Checkbox"
+      label: "Publish Ground Truth"
+      checked_on_default: Yes
+      parameter_triggering:
+        if_on: { "pub_ground_truth:=true" }
+        if_off: { "pub_ground_truth:=false" }
+
+
   # Some nodes fail to shutdown
   # I have some theories as to why that is, but for now the solution is
   # just to manually kill all nodes that fail to quit.
