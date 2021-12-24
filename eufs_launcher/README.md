@@ -30,6 +30,7 @@ This node has no services, publishers or subscribers.
 | Gazebo GUI               | [QCheckBox](https://doc.qt.io/qt-5/qcheckbox.html)     | False          | Whether to launch the Gazebo GUI (i.e [gzclient](http://gazebosim.org/tutorials?tut=components&cat=get_started), gzserver will still be launched). |
 | Use Simulated Perception | [QCheckBox](https://doc.qt.io/qt-5/qcheckbox.html)     | True           | Whether [gazebo_cone_ground_truth](../eufs_plugins/gazebo_cone_ground_truth/src/gazebo_cone_ground_truth.cpp) should publish cones with noise to 'simulate' the output of a perception system. |
 | Ground Truth TF          | [QCheckBox](https://doc.qt.io/qt-5/qcheckbox.html)     | False          | Whether [gazebo_ros_race_car_model](../eufs_plugins/gazebo_race_car_model/src/gazebo_ros_race_car_model.cpp) should publish ground truth transforms. |
+| Publish Ground Truth     | [QCheckBox](https://doc.qt.io/qt-5/qcheckbox.html)     | True           | Whether to publish ground truth topics. |
 
 ### Editing the GUI's UI
 

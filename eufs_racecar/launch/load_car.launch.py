@@ -20,6 +20,7 @@ def spawn_car(context, *args, **kwargs):
     command_mode = get_argument(context, 'commandMode')
     vehicle_model_config = get_argument(context, "vehicleModelConfig")
     publish_tf = get_argument(context, 'publish_gt_tf')
+    pub_ground_truth = get_argument(context, 'pub_ground_truth')
     x = get_argument(context, 'x')
     y = get_argument(context, 'y')
     z = get_argument(context, 'z')
@@ -51,7 +52,8 @@ def spawn_car(context, *args, **kwargs):
                                  'config_file': config_file,
                                  'noise_config': noise_file,
                                  'publish_tf': publish_tf,
-                                 'simulate_perception': simulate_perception
+                                 'simulate_perception': simulate_perception,
+                                 'pub_ground_truth': pub_ground_truth,
                              })
     out = xacro.open_output(urdf_path)
     out.write(doc.toprettyxml(indent='  '))

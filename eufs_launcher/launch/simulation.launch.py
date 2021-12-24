@@ -66,6 +66,11 @@ def generate_launch_description():
                               description="Condition to use ground truth "
                                           "transform"),
 
+        DeclareLaunchArgument(name='pub_ground_truth',
+                              default_value='true',
+                              description="Condition to publish ground "
+                                          "truth"),
+
         # Set to 'no_perception' to turn off the perception code and use
         # ground truth cones.
         DeclareLaunchArgument(name='launch_group',

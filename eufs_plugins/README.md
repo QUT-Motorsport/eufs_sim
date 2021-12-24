@@ -37,6 +37,7 @@ NB: if a parameter has no default value, a value must be provided.
 | `commandMode`                     | string    | `acceleration`     | Whether to accept `acceleration` or `velocity` control commands. |
 | `controlDelay`                    | double    | -                  | Time taken for the simulated vehicle to enact a command (seconds). |
 | `steeringLockTime`                | double    | -                  | Time taken to sweep between min and max steering lock (seconds). |
+| `pubGroundTruth`                  | bool      | -                  | Whether to publish ground truth topics. |
 
 
 ### Example usage
@@ -151,6 +152,7 @@ NB: if a parameter has no default value, a value must be provided.
 | `perceptionCameraDepthNoiseParameterA` | double    | 0.0184             | Noise weighting parameter for camera depth noise contribution. |
 | `perceptionCameraDepthNoiseParameterB` | double    | 0.2106             | Noise weighting parameter for camera depth noise contribution. |
 | `perceptionLidarNoise`                 | double[3] | `[0.03,0.03, 0.0]` | Noise weighting parameters for lidar noise contribution. |
+| `pubGroundTruth`                       | bool      | -                  | Whether to publish ground truth topics. |
 
 #### Lidar View Distance Parameters (more detail):
 

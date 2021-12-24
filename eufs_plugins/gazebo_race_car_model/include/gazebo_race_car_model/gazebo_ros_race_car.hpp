@@ -156,6 +156,9 @@ class RaceCarModelPlugin : public gazebo::ModelPlugin {
   gazebo::physics::JointPtr _left_steering_joint;
   gazebo::physics::JointPtr _right_steering_joint;
 
+  // Stop Ground truth
+  bool _pub_ground_truth;
+
   enum CommandMode { acceleration, velocity };
   CommandMode _command_mode;
 

@@ -216,6 +216,14 @@ void RaceCarModelPlugin::initParams(const sdf::ElementPtr &sdf) {
   } else {
     _steering_lock_time = sdf->GetElement("steeringLockTime")->Get<double>();
   }
+
+  if (!sdf->HasElement("pubGroundTruth")) {
+    RCLCPP_FATAL(_rosnode->get_logger(),
+                 "gazebo_ros_race_car_model plugin missing <pubGroundTruth>, cannot proceed");
+    return;
+  } else {
+    _pub_ground_truth = sdf->GetElement("pubGroundTruth")->Get<bool>();
+  }
 }
 
 void RaceCarModelPlugin::initVehicleModel(const sdf::ElementPtr &sdf) {
@@ -401,8 +409,8 @@ eufs_msgs::msg::CarState RaceCarModelPlugin::stateToCarStateMsg(const eufs::mode
 void RaceCarModelPlugin::publishCarState() {
   eufs_msgs::msg::CarState car_state = stateToCarStateMsg(_state);
 
-  // Publish ground_truth
-  if (_pub_ground_truth_car_state->get_subscription_count() > 0) {
+  // Publish the ground truth car state if it has subscribers and is allowed to publish
+  if (_pub_ground_truth_car_state->get_subscription_count() > 0 && _pub_ground_truth) {
     _pub_ground_truth_car_state->publish(car_state);
   }
 
@@ -449,8 +457,8 @@ void RaceCarModelPlugin::publishWheelSpeeds() {
   wheel_speeds = _vehicle->getWheelSpeeds(_state, _act_input);
   wheel_speeds_stamped.speeds = wheel_speeds;
 
-  // Publish ground truth
-  if (_pub_ground_truth_wheel_speeds->get_subscription_count() > 0) {
+  // Publish the ground truth wheel speeds if it has subscribers and is allowed to publish
+  if (_pub_ground_truth_wheel_speeds->get_subscription_count() > 0 && _pub_ground_truth) {
     _pub_ground_truth_wheel_speeds->publish(wheel_speeds_stamped);
   }
 
@@ -511,7 +519,8 @@ void RaceCarModelPlugin::publishOdom() {
   odom.twist.covariance[28] = pow(noise_param.angular_velocity[1], 2);
   odom.twist.covariance[35] = pow(noise_param.angular_velocity[2], 2);
 
-  if (_pub_odom->get_subscription_count() > 0) {
+  // Publish the ground truth odom if it has subscribers and is allowed to publish
+  if (_pub_odom->get_subscription_count() > 0 && _pub_ground_truth) {
     _pub_odom->publish(odom);
   }
 }
