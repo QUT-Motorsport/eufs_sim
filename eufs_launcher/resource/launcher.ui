@@ -13,9 +13,6 @@
   <property name="windowTitle">
    <string>EUFS Launcher</string>
   </property>
-
-  <!--Drop-Down Box: Options added in code, impossible in a .ui file.-->
-  <!--This handles track selection.-->
   <widget class="QLabel" name="TrackLabel">
    <property name="geometry">
     <rect>
@@ -25,13 +22,13 @@
      <height>27</height>
     </rect>
    </property>
+   <property name="font">
+    <font>
+     <pointsize>7</pointsize>
+    </font>
+   </property>
    <property name="text">
     <string>Track: </string>
-   </property>
-   <property name="font">
-       <font>
-            <pointsize>7</pointsize>
-       </font>
    </property>
   </widget>
   <widget class="QComboBox" name="WhichTrack">
@@ -39,17 +36,16 @@
     <rect>
      <x>90</x>
      <y>50</y>
-     <width>250</width>
+     <width>221</width>
      <height>27</height>
     </rect>
    </property>
    <property name="font">
-       <font>
-            <pointsize>7</pointsize>
-       </font>
+    <font>
+     <pointsize>7</pointsize>
+    </font>
    </property>
   </widget>
-
   <widget class="QLabel" name="LauncherLabel">
    <property name="geometry">
     <rect>
@@ -59,16 +55,15 @@
      <height>27</height>
     </rect>
    </property>
+   <property name="font">
+    <font>
+     <pointsize>14</pointsize>
+    </font>
+   </property>
    <property name="text">
     <string>EUFS Launcher</string>
    </property>
-   <property name="font">
-       <font>
-            <pointsize>14</pointsize>
-       </font>
-   </property>
   </widget>
-
   <widget class="QLabel" name="LauncherSubLabel">
    <property name="geometry">
     <rect>
@@ -78,17 +73,15 @@
      <height>27</height>
     </rect>
    </property>
+   <property name="font">
+    <font>
+     <pointsize>8</pointsize>
+    </font>
+   </property>
    <property name="text">
     <string>Launches one of our fixed tracks, great for reproducability!</string>
    </property>
-   <property name="font">
-       <font>
-            <pointsize>8</pointsize>
-       </font>
-   </property>
   </widget>
-
-  <!--Actual Launch Button-->
   <widget class="QPushButton" name="LaunchButton">
    <property name="geometry">
     <rect>
@@ -98,17 +91,15 @@
      <height>100</height>
     </rect>
    </property>
-   <property name="text" >
-      <string>Launch!</string>
-    </property>
-    <property name="font">
-       <font>
-            <pointsize>10</pointsize>
-       </font>
+   <property name="font">
+    <font>
+     <pointsize>10</pointsize>
+    </font>
+   </property>
+   <property name="text">
+    <string>Launch!</string>
    </property>
   </widget>
-
-  <!-- Launcher Parameters! -->
   <widget class="QLabel" name="LauncherParametersLabel">
    <property name="geometry">
     <rect>
@@ -118,16 +109,15 @@
      <height>27</height>
     </rect>
    </property>
+   <property name="font">
+    <font>
+     <pointsize>14</pointsize>
+    </font>
+   </property>
    <property name="text">
     <string>Launcher Parameters</string>
    </property>
-   <property name="font">
-       <font>
-            <pointsize>14</pointsize>
-       </font>
-   </property>
   </widget>
-
   <widget class="QLabel" name="LauncherParametersSubLabel">
    <property name="geometry">
     <rect>
@@ -137,18 +127,15 @@
      <height>25</height>
     </rect>
    </property>
+   <property name="font">
+    <font>
+     <pointsize>8</pointsize>
+    </font>
+   </property>
    <property name="text">
     <string>For customizing your experience!</string>
    </property>
-   <property name="font">
-       <font>
-            <pointsize>8</pointsize>
-       </font>
-   </property>
   </widget>
-
-  <!--Drop-Down Box: Options added in code, impossible in a .ui file.-->
-  <!--This handles vehicle model selection.-->
   <widget class="QLabel" name="VehicleModelLabel">
    <property name="geometry">
     <rect>
@@ -158,13 +145,13 @@
      <height>30</height>
     </rect>
    </property>
-   <property name="text">
-    <string>Vehicle Model: </string>
-   </property>
    <property name="font">
     <font>
      <pointsize>9</pointsize>
     </font>
+   </property>
+   <property name="text">
+    <string>Vehicle Model: </string>
    </property>
   </widget>
   <widget class="QComboBox" name="WhichVehicleModel">
@@ -188,8 +175,6 @@
     </font>
    </property>
   </widget>
-
-  <!-- This handles command mode selection-->
   <widget class="QLabel" name="CommandModeLabel">
    <property name="geometry">
     <rect>
@@ -199,13 +184,13 @@
      <height>30</height>
     </rect>
    </property>
-   <property name="text">
-    <string>Command Mode: </string>
-   </property>
    <property name="font">
     <font>
      <pointsize>9</pointsize>
     </font>
+   </property>
+   <property name="text">
+    <string>Command Mode: </string>
    </property>
   </widget>
   <widget class="QComboBox" name="WhichCommandMode">
@@ -229,8 +214,6 @@
     </font>
    </property>
   </widget>
-
-  <!-- This handles Vehicle model preset selection-->
   <widget class="QLabel" name="ModelPresetsLabel">
    <property name="geometry">
     <rect>
@@ -240,13 +223,13 @@
      <height>30</height>
     </rect>
    </property>
-   <property name="text">
-    <string>Vehicle Model Presets:</string>
-   </property>
    <property name="font">
     <font>
      <pointsize>9</pointsize>
     </font>
+   </property>
+   <property name="text">
+    <string>Vehicle Model Presets:</string>
    </property>
   </widget>
   <widget class="QComboBox" name="WhichModelPreset">
@@ -270,9 +253,6 @@
     </font>
    </property>
   </widget>
-
-  <!--Slider-->
-  <!--This handles terrain noise generation-->
   <widget class="QLabel" name="NoiseLabel">
    <property name="geometry">
     <rect>
@@ -282,13 +262,13 @@
      <height>27</height>
     </rect>
    </property>
+   <property name="font">
+    <font>
+     <pointsize>7</pointsize>
+    </font>
+   </property>
    <property name="text">
     <string>Object Noise:</string>
-   </property>
-   <property name="font">
-       <font>
-            <pointsize>7</pointsize>
-       </font>
    </property>
   </widget>
   <widget class="QSlider" name="Noisiness">
@@ -300,13 +280,13 @@
      <height>30</height>
     </rect>
    </property>
+   <property name="font">
+    <font>
+     <pointsize>7</pointsize>
+    </font>
+   </property>
    <property name="orientation">
-      <enum>Qt::Horizontal</enum>
-    </property>
-    <property name="font">
-       <font>
-            <pointsize>7</pointsize>
-       </font>
+    <enum>Qt::Horizontal</enum>
    </property>
   </widget>
   <widget class="QLabel" name="ObjectNoiseToolTip">
@@ -318,17 +298,15 @@
      <height>27</height>
     </rect>
    </property>
+   <property name="font">
+    <font>
+     <pointsize>7</pointsize>
+    </font>
+   </property>
    <property name="text">
     <string>Quantity of non-cone objects to place on the track.</string>
    </property>
-   <property name="font">
-       <font>
-            <pointsize>7</pointsize>
-       </font>
-   </property>
   </widget>
-
-  <!--This handles cone noise generation-->
   <widget class="QLabel" name="ConeNoiseLabel">
    <property name="geometry">
     <rect>
@@ -338,13 +316,13 @@
      <height>27</height>
     </rect>
    </property>
+   <property name="font">
+    <font>
+     <pointsize>7</pointsize>
+    </font>
+   </property>
    <property name="text">
     <string>Cone Noise:</string>
-   </property>
-   <property name="font">
-       <font>
-            <pointsize>7</pointsize>
-       </font>
    </property>
   </widget>
   <widget class="QSlider" name="ConeNoisiness">
@@ -356,17 +334,15 @@
      <height>30</height>
     </rect>
    </property>
+   <property name="font">
+    <font>
+     <pointsize>7</pointsize>
+    </font>
+   </property>
    <property name="orientation">
-      <enum>Qt::Horizontal</enum>
-    </property>
-    <property name="font">
-       <font>
-            <pointsize>7</pointsize>
-       </font>
+    <enum>Qt::Horizontal</enum>
    </property>
   </widget>
-
-  <!--This handles cone color noise generation-->
   <widget class="QLabel" name="ConeColorNoiseLabel">
    <property name="geometry">
     <rect>
@@ -376,13 +352,13 @@
      <height>27</height>
     </rect>
    </property>
+   <property name="font">
+    <font>
+     <pointsize>7</pointsize>
+    </font>
+   </property>
    <property name="text">
     <string>Color Noise:</string>
-   </property>
-   <property name="font">
-       <font>
-            <pointsize>7</pointsize>
-       </font>
    </property>
   </widget>
   <widget class="QSlider" name="ConeColorNoisiness">
@@ -394,17 +370,34 @@
      <height>30</height>
     </rect>
    </property>
+   <property name="font">
+    <font>
+     <pointsize>7</pointsize>
+    </font>
+   </property>
    <property name="orientation">
-      <enum>Qt::Horizontal</enum>
-    </property>
-    <property name="font">
-       <font>
-            <pointsize>7</pointsize>
-       </font>
+    <enum>Qt::Horizontal</enum>
    </property>
   </widget>
-
-</widget>
-<resources/>
-<connections/>
+  <widget class="QPushButton" name="RefreshTrackButton">
+   <property name="geometry">
+    <rect>
+     <x>320</x>
+     <y>50</y>
+     <width>71</width>
+     <height>25</height>
+    </rect>
+   </property>
+   <property name="font">
+    <font>
+     <pointsize>7</pointsize>
+    </font>
+   </property>
+   <property name="text">
+    <string>Refresh</string>
+   </property>
+  </widget>
+ </widget>
+ <resources/>
+ <connections/>
 </ui>

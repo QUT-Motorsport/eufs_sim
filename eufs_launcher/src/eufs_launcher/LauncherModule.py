@@ -113,6 +113,8 @@ class EUFSLauncher(Plugin):
         self.TRACK_SELECTOR = self._widget.findChild(QComboBox, "WhichTrack")
         self.LAUNCH_BUTTON = self._widget.findChild(QPushButton,
                                                     "LaunchButton")
+        self.REFRESH_TRACK_BUTTON = self._widget.findChild(QPushButton, 
+                                                    "RefreshTrackButton")
 
         self.NOISE_SLIDER = self._widget.findChild(QSlider, "Noisiness")
         self.VEHICLE_MODEL_MENU = self._widget.findChild(QComboBox,
@@ -131,6 +133,9 @@ class EUFSLauncher(Plugin):
 
         # Hook up buttons to onclick functions
         self.LAUNCH_BUTTON.clicked.connect(self.launch_button_pressed)
+
+        # Hook up refresh track button to onclick functions
+        self.REFRESH_TRACK_BUTTON.clicked.connect(self.load_track_dropdowns)
 
         # Create array of popen processes
         self.popens = []
