@@ -461,7 +461,7 @@ class EUFSRobotSteeringGUI(Plugin):
 
     def restore_settings(self, plugin_settings, instance_settings):
         value = self.get_param(instance_settings, 'ackermann_topic',
-                               '/rqt/command')
+                               '/cmd')
         self._widget.topic_line_edit.setText(str(value))
 
         # In order to make the topic be set

@@ -61,7 +61,7 @@
                   "type": "repr"
                 },
                 "topic": {
-                  "repr": "'/rqt/command'",
+                  "repr": "'/cmd'",
                   "type": "repr"
                 },
                 "vw_max": {
