@@ -22,6 +22,7 @@ This node has no services, publishers or subscribers.
 | Label | Type | Default | Purpose |
 | ----- | ---- | ------- | ------- |
 | Track                    | [QComboBox](https://doc.qt.io/qt-5/qcombobox.html)     | small_track    | Selects the world launch file in [eufs_tracks](../eufs_tracks/launch) to be launched. |
+| Refresh                  | [QPushButton](https://doc.qt.io/qt-5/qpushbutton.html) | -              | Refreshes the track dropdown menu- checking if the track list has changed. |
 | Launch!                  | [QPushButton](https://doc.qt.io/qt-5/qpushbutton.html) | -              | Launches eufs_sim with current launcher configuration. |
 | Vehicle Model            | [QComboBox](https://doc.qt.io/qt-5/qcombobox.html)     | DynamicBicycle | The [vehicle model sub-class](../eufs_models/src) to use. |
 | Command Mode             | [QComboBox](https://doc.qt.io/qt-5/qcombobox.html)     | acceleration   | Determines whether the vehicle is controlled using `acceleration` or `velocity`. Also determines the outputs of the [Robot Steering GUI](../eufs_rqt/src/eufs_rqt/EUFSRobotSteeringGUI.py). |

@@ -36,7 +36,7 @@
     <rect>
      <x>90</x>
      <y>50</y>
-     <width>250</width>
+     <width>221</width>
      <height>27</height>
     </rect>
    </property>
@@ -377,6 +377,24 @@
    </property>
    <property name="orientation">
     <enum>Qt::Horizontal</enum>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="RefreshTrackButton">
+   <property name="geometry">
+    <rect>
+     <x>320</x>
+     <y>50</y>
+     <width>71</width>
+     <height>25</height>
+    </rect>
+   </property>
+   <property name="font">
+    <font>
+     <pointsize>7</pointsize>
+    </font>
+   </property>
+   <property name="text">
+    <string>Refresh</string>
    </property>
   </widget>
  </widget>
