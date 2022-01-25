@@ -41,7 +41,7 @@
 
   <!-- Gazebo -->
   <include file="$(find-pkg-share gazebo_ros)/launch/gazebo.launch.py">
-    <arg name="world" value="$(find-pkg-share eufs_tracks)/worlds/hairpins_smooth.world"/>
+    <arg name="world" value="$(find-pkg-share eufs_tracks)/worlds/comp_2021.world"/>
     <arg name="verbose" value="$(var verbose)"/>
     <arg name="gui" value="$(var gazebo_gui)"/>
     <arg name="pause" value="false"/>
