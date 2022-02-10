@@ -629,6 +629,8 @@ eufs_msgs::msg::ConeArrayWithCovariance GazeboConeGroundTruth::addNoisePerceptio
   addNoiseToConeArray(cones_message_with_noise.big_orange_cones, noise);
   addNoiseToConeArray(cones_message_with_noise.unknown_color_cones, noise);
 
+  randomChangeConeColor(cones_message_with_noise.blue_cones, cones_message_with_noise.yellow_cones, cones_message_with_noise.orange_cones, cones_message_with_noise.big_orange_cones, cones_message_with_noise.unknown_color_cones);
+
   cones_message_with_noise.header.frame_id = this->cone_frame_;
   cones_message_with_noise.header.stamp.sec = this->time_last_published.sec;
   cones_message_with_noise.header.stamp.nanosec = this->time_last_published.nsec;
@@ -679,6 +681,157 @@ double GazeboConeGroundTruth::GaussianKernel(double mu, double sigma) {
   // scale to our mu and sigma
   X = sigma * X + mu;
   return X;
+}
+
+void GazeboConeGroundTruth::randomChangeConeColor(
+    std::vector<eufs_msgs::msg::ConeWithCovariance> &blue,
+    std::vector<eufs_msgs::msg::ConeWithCovariance> &yellow,
+    std::vector<eufs_msgs::msg::ConeWithCovariance> &orange,
+    std::vector<eufs_msgs::msg::ConeWithCovariance> &big_orange,
+    std::vector<eufs_msgs::msg::ConeWithCovariance> &unknown_color) {
+
+  auto it = blue.begin();
+  while (it != blue.end())
+  {
+    double U = static_cast<double>(rand_r(&this->seed)) / static_cast<double>(RAND_MAX);
+    if (U >= 0.9)
+    {
+      double V = static_cast<double>(rand_r(&this->seed)) / static_cast<double>(RAND_MAX);
+      if(0 < V && V <= 0.2 ){
+        yellow.insert(yellow.end(),blue[it - blue.begin()]);
+      }
+      else if(0.2 < V && V <= 0.4){
+        orange.insert(orange.end(),blue[it - blue.begin()]);
+      }
+      else if(0.4 < V && V <= 0.6){
+        big_orange.insert(big_orange.end(),blue[it - blue.begin()]);
+      }
+      else if(0.6 < V && V <= 0.8){
+        unknown_color.insert(unknown_color.end(),blue[it - blue.begin()]);
+      }
+      else if(0.8 < V && V <= 1){}
+      it = blue.erase(it);
+    }
+    else {
+      ++it;
+    }
+  }
+
+  it = yellow.begin();
+  while (it != yellow.end())
+  {
+    double U = static_cast<double>(rand_r(&this->seed)) / static_cast<double>(RAND_MAX);
+    if (U >= 0.9)
+    {
+      double V = static_cast<double>(rand_r(&this->seed)) / static_cast<double>(RAND_MAX);
+      if(0 < V && V <= 0.2 ){
+        blue.insert(blue.end(),yellow[it - yellow.begin()]);
+      }
+      else if(0.2 < V && V <= 0.4){
+        orange.insert(orange.end(),yellow[it - yellow.begin()]);
+      }
+      else if(0.4 < V && V <= 0.6){
+        big_orange.insert(big_orange.end(),yellow[it - yellow.begin()]);
+      }
+      else if(0.6 < V && V <= 0.8){
+        unknown_color.insert(unknown_color.end(),yellow[it - yellow.begin()]);
+      }
+      else if(0.8 < V && V <= 1){}
+      it = yellow.erase(it);
+    }
+    else {
+      ++it;
+    }
+  }
+
+  it = orange.begin();
+  while (it != orange.end())
+  {
+    double U = static_cast<double>(rand_r(&this->seed)) / static_cast<double>(RAND_MAX);
+    if (U >= 0.9)
+    {
+      double V = static_cast<double>(rand_r(&this->seed)) / static_cast<double>(RAND_MAX);
+      if(0 < V && V <= 0.2 ){
+        yellow.insert(yellow.end(),orange[it - orange.begin()]);
+      }
+      else if(0.2 < V && V <= 0.4){
+        blue.insert(blue.end(),orange[it - orange.begin()]);
+      }
+      else if(0.4 < V && V <= 0.6){
+        big_orange.insert(big_orange.end(),orange[it - orange.begin()]);
+      }
+      else if(0.6 < V && V <= 0.8){
+        unknown_color.insert(unknown_color.end(),orange[it - orange.begin()]);
+      }
+      else if(0.8 < V && V <= 1){}
+      it = orange.erase(it);
+    }
+    else {
+      ++it;
+    }
+  }
+
+  it = big_orange.begin();
+  while (it != big_orange.end())
+  {
+    double U = static_cast<double>(rand_r(&this->seed)) / static_cast<double>(RAND_MAX);
+    if (U >= 0.9)
+    {
+      double V = static_cast<double>(rand_r(&this->seed)) / static_cast<double>(RAND_MAX);
+      if(0 < V && V <= 0.2 ){
+        yellow.insert(yellow.end(),big_orange[it - big_orange.begin()]);
+      }
+      else if(0.2 < V && V <= 0.4){
+        orange.insert(orange.end(),big_orange[it - big_orange.begin()]);
+      }
+      else if(0.4 < V && V <= 0.6){
+        blue.insert(blue.end(),big_orange[it - big_orange.begin()]);
+      }
+      else if(0.6 < V && V <= 0.8){
+        unknown_color.insert(unknown_color.end(),big_orange[it - big_orange.begin()]);
+      }
+      else if(0.8 < V && V <= 1){}
+      it = big_orange.erase(it);
+    }
+    else {
+      ++it;
+    }
+  }
+
+  it = unknown_color.begin();
+  while (it != unknown_color.end())
+  {
+    double U = static_cast<double>(rand_r(&this->seed)) / static_cast<double>(RAND_MAX);
+    if (U >= 0.9)
+    {
+      double V = static_cast<double>(rand_r(&this->seed)) / static_cast<double>(RAND_MAX);
+      if(0 < V && V <= 0.2 ){
+        yellow.insert(yellow.end(),unknown_color[it - unknown_color.begin()]);
+      }
+      else if(0.2 < V && V <= 0.4){
+        orange.insert(orange.end(),unknown_color[it - unknown_color.begin()]);
+      }
+      else if(0.4 < V && V <= 0.6){
+        big_orange.insert(big_orange.end(),unknown_color[it - unknown_color.begin()]);
+      }
+      else if(0.6 < V && V <= 0.8){
+        blue.insert(blue.end(),unknown_color[it - unknown_color.begin()]);
+      }
+      else if(0.8 < V && V <= 1){}
+      it = unknown_color.erase(it);
+    }
+    else {
+      ++it;
+    }
+  }
+
+  //big_orange.resize(big_orange.size() + blue.size() + yellow.size() + orange.size());
+  //big_orange.insert(big_orange.end(), blue.begin(), blue.end());
+  //big_orange.insert(big_orange.end(), yellow.begin(), yellow.end());
+  //big_orange.insert(big_orange.end(), orange.begin(), orange.end());
+  //blue.clear();
+  //yellow.clear();
+  //orange.clear();
 }
 
 // Helper function for parameters

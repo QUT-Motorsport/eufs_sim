@@ -120,6 +120,12 @@ class GazeboConeGroundTruth : public gazebo::ModelPlugin {
                            ignition::math::Vector3d noise);
   double GaussianKernel(double mu, double sigma);
 
+  void randomChangeConeColor(std::vector<eufs_msgs::msg::ConeWithCovariance> &blue,
+                             std::vector<eufs_msgs::msg::ConeWithCovariance> &yellow,
+                             std::vector<eufs_msgs::msg::ConeWithCovariance> &orange,
+                             std::vector<eufs_msgs::msg::ConeWithCovariance> &big_orange,
+                             std::vector<eufs_msgs::msg::ConeWithCovariance> &unknown_color);
+
   // Helper function for parameters
   bool getBoolParameter(sdf::ElementPtr _sdf, const char *element, bool default_value,
                         const char *default_description);
