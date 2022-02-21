@@ -26,9 +26,9 @@
 #define EUFS_PLUGINS_GAZEBO_RACE_CAR_MODEL_INCLUDE_GAZEBO_RACE_CAR_MODEL_GAZEBO_ROS_RACE_CAR_HPP_
 
 #include <memory>
-#include <vector>
-#include <string>
 #include <queue>
+#include <string>
+#include <vector>
 // ROS Includes
 #include "rclcpp/rclcpp.hpp"
 
@@ -59,7 +59,7 @@
 
 // EUFS includes
 #include "eufs_models/eufs_models.hpp"
-#include "state_machine.hpp"
+#include "gazebo_race_car_model/state_machine.hpp"
 
 namespace gazebo_plugins {
 namespace eufs_plugins {
