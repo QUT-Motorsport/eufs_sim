@@ -11,6 +11,7 @@ from ament_index_python.packages import get_package_share_directory
 import rclpy
 from eufs_msgs.msg import CanState
 from std_srvs.srv import Trigger
+from eufs_msgs.srv import SetCanState
 
 
 class MissionControlGUI(Plugin):
@@ -84,13 +85,11 @@ class MissionControlGUI(Plugin):
                                                        self.stateCallback, 10)
 
         # Publishers
-        self.set_mission_pub = self.node.create_publisher(CanState,
-                                                          "/ros_can/set_mission",
-                                                          1)
 
         # Services
         self.ebs_srv = self.node.create_client(Trigger, "/ros_can/ebs")
         self.reset_srv = self.node.create_client(Trigger, "/ros_can/reset")
+        self.set_mission_cli = self.node.create_client(SetCanState, "/ros_can/set_mission")
         self.reset_vehicle_pos_srv = self.node.create_client(Trigger,
                                                              "/ros_can/reset_vehicle_pos")
         self.reset_cone_pos_srv = self.node.create_client(Trigger,
@@ -105,10 +104,23 @@ class MissionControlGUI(Plugin):
     def ros_spin(self):
         rclpy.spin(self.node)
 
-    def setMission(self):
+    def sendRequest(self, mission_ami_state):
         """Sends a mission request to the simulated ros_can
-        The mission request is of message type eufs_msgs/CanState
-        where only the ami_mission field is used"""
+        The mission request is of message type eufs_msgs/srv/SetCanState
+        where only the ami_state field is used.
+        """
+        if self.set_mission_cli.wait_for_service(timeout_sec=1):
+            request = SetCanState.Request()
+            request.ami_state = mission_ami_state
+            result = self.set_mission_cli.call_async(request)
+            self.node.get_logger().debug("Mission request sent successfully")
+            self.node.get_logger().debug(result)
+        else:
+            self.node.get_logger().warn(
+                "/ros_can/set_mission service is not available")
+
+    def setMission(self):
+        """Requests ros_can to set mission"""
         mission = self._widget.findChild(
             QComboBox, "MissionSelectMenu").currentText()
 
@@ -122,16 +134,15 @@ class MissionControlGUI(Plugin):
         for enum, mission_name in self.missions.items():
             if mission_name == mission:
                 mission_msg.ami_state = enum
+                break
 
-        self.set_mission_pub.publish(mission_msg)
-        self.node.get_logger().debug("Mission request sent successfully")
+        self.sendRequest(mission_msg.ami_state)
 
     def setManualDriving(self):
         self.node.get_logger().debug("Sending manual mission request")
         mission_msg = CanState()
         mission_msg.ami_state = CanState.AMI_MANUAL
-        self.set_mission_pub.publish(mission_msg)
-        self.node.get_logger().debug("Mission request sent successfully")
+        self.sendRequest(mission_msg.ami_state)
 
     def resetState(self):
         """Requests state_machine reset"""
@@ -221,8 +232,8 @@ class MissionControlGUI(Plugin):
     def shutdown_plugin(self):
         """stop all publisher, subscriber and services
         necessary for clean shutdown"""
-        assert (self.node.destroy_publisher(
-            self.set_mission_pub)), "Mission publisher could not be destroyed"
+        assert (self.node.destroy_client(
+            self.set_mission_cli)), "Mission client could not be destroyed"
         assert (self.node.destroy_subscription(
             self.state_sub)), "State subscriber could not be destroyed"
         assert (self.node.destroy_client(
