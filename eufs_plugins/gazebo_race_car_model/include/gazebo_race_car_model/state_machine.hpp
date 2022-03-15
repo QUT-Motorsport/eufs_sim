@@ -51,6 +51,7 @@
 
 // ROS  srvs
 #include <std_srvs/srv/trigger.hpp>
+#include <eufs_msgs/srv/set_can_state.hpp>
 
 
 
@@ -94,7 +95,6 @@ class StateMachine {
   double transition_begin_;  ///< the world timestamp in which the transition from AS_READY to
                              ///< AS_DRIVING was begun
 
-  rclcpp::Subscription<eufs_msgs::msg::CanState>::SharedPtr set_mission_sub_;
 
   // High level robot command
   rclcpp::Subscription<std_msgs::msg::Bool>::SharedPtr completed_sub_;
@@ -106,6 +106,8 @@ class StateMachine {
       reset_srv_;  ///< service to reset state machine
   rclcpp::Service<std_srvs::srv::Trigger>::SharedPtr
       ebs_srv_;  ///< service to request an emergency brake
+  rclcpp::Service<eufs_msgs::srv::SetCanState>::SharedPtr
+      set_mission_srv_;  ///< service to set mission
 
   /**
    * Stores the state of the mission complete flag
@@ -116,7 +118,8 @@ class StateMachine {
   /**
    * Sets the mission of the car. Only available in simulation
    */
-  void setMission(const eufs_msgs::msg::CanState::SharedPtr state);
+  bool setMission(std::shared_ptr<eufs_msgs::srv::SetCanState::Request> request,
+                  std::shared_ptr<eufs_msgs::srv::SetCanState::Response> response);
 
   /**
    * Resets the state of the internal state machine
