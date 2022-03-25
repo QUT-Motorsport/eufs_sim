@@ -76,7 +76,7 @@ def spawn_car(context, *args, **kwargs):
                 '-R', roll,
                 '-P', pitch,
                 '-Y', yaw,
-                '-spawn_service_timeout', '30.0',
+                '-spawn_service_timeout', '60.0',
                 '--ros-args', '--log-level', 'warn'
             ]
         ),
