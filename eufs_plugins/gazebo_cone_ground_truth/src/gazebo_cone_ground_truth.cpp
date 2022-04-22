@@ -33,6 +33,7 @@
  **/
 
 #include "gazebo_cone_ground_truth/gazebo_cone_ground_truth.hpp"
+#include "yaml-cpp/yaml.h"
 
 namespace gazebo_plugins {
 namespace eufs_plugins {
@@ -79,6 +80,37 @@ void GazeboConeGroundTruth::Load(gazebo::physics::ModelPtr _parent, sdf::Element
 
   this->perception_lidar_noise_ =
       getVector3dParameter(_sdf, "perceptionNoise", {0.03, 0.03, 0.0}, "0.03, 0.03, 0.0");
+
+
+  // Load camera Info parameter
+  std::string random_cone_color_yaml = "";
+  if (!_sdf->HasElement("random_cone_settings")) {
+    RCLCPP_FATAL(rosnode_->get_logger(),
+                 "gazebo_cone_ground_truth plugin missing <random_cone_settings>, cannot proceed");
+    return;
+  } else {
+    random_cone_color_yaml = _sdf->GetElement("random_cone_settings")->Get<std::string>();
+  }
+
+  std::cout << random_cone_color_yaml << std::endl;
+
+  YAML::Node random_cone_color_settings;
+  try {
+      random_cone_color_settings = YAML::LoadFile(random_cone_color_yaml);
+  }
+  catch(std::exception &e) {
+      RCLCPP_FATAL(this->rosnode_->get_logger(), "Unable to load %s due to %s error.",
+      random_cone_color_yaml.c_str(), e.what());
+      RCLCPP_FATAL(this->rosnode_->get_logger(),
+      "BoundingBoxes plugin will not load.");
+      RCLCPP_INFO(this->rosnode_->get_logger(),
+      "TIP: You may want to re-check the path to your yaml file in the share directory");
+  }
+
+  double test = random_cone_color_settings["test"].as<double>();
+
+  std::cout << test << std::endl;
+
 
   // Setup the publishers
 

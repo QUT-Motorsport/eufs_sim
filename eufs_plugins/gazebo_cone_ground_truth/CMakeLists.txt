@@ -13,6 +13,9 @@ ament_target_dependencies(gazebo_cone_ground_truth
 
 target_include_directories(gazebo_cone_ground_truth PUBLIC include)
 
+
+install(DIRECTORY config DESTINATION share/${PROJECT_NAME}/gazebo_cone_ground_truth)
+
 ament_export_libraries(gazebo_cone_ground_truth)
 
 install(TARGETS gazebo_cone_ground_truth

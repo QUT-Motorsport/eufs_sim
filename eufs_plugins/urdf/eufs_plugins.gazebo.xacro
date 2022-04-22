@@ -58,6 +58,7 @@
       <perceptionCameraDepthNoiseParameterA>0.0184</perceptionCameraDepthNoiseParameterA>
       <perceptionCameraDepthNoiseParameterB>0.2106</perceptionCameraDepthNoiseParameterB>
       <perceptionLidarNoise>0.03 0.03 0.0</perceptionLidarNoise>
+      <random_cone_settings>$(arg random_color_config)</random_cone_settings>
     </plugin>
   </gazebo>
 

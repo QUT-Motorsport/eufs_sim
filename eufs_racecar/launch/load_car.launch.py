@@ -40,6 +40,10 @@ def spawn_car(context, *args, **kwargs):
     urdf_path = os.path.join(get_package_share_directory('eufs_racecar'),
                              'robots', robot_name, 'robot.urdf')
 
+    random_cone_color = str(
+    os.path.join(get_package_share_directory('eufs_plugins'), 'gazebo_cone_ground_truth', 
+                    'config', 'randomConeColor.yaml'))
+
     if not os.path.isfile(urdf_path):
         os.mknod(urdf_path)
 
@@ -51,7 +55,8 @@ def spawn_car(context, *args, **kwargs):
                                  'config_file': config_file,
                                  'noise_config': noise_file,
                                  'publish_tf': publish_tf,
-                                 'simulate_perception': simulate_perception
+                                 'simulate_perception': simulate_perception,
+                                 'random_color_config' : random_cone_color
                              })
     out = xacro.open_output(urdf_path)
     out.write(doc.toprettyxml(indent='  '))
