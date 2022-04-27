@@ -72,6 +72,41 @@ class GazeboConeGroundTruth : public gazebo::ModelPlugin {
 
   // Gazebo plugin functions
 
+  double blueMismatch = 0.0;
+  double b2y = 0.0;
+  double b2o = 0.0;
+  double b2O = 0.0;
+  double b2u = 0.0;
+  double b2v = 0.0;
+
+  double yellowMismatch = 0.0;
+  double y2b = 0.0;
+  double y2o = 0.0;
+  double y2O = 0.0;
+  double y2u = 0.0;
+  double y2v = 0.0;
+
+  double orangeMismatch = 0.0;
+  double o2y = 0.0;
+  double o2b = 0.0;
+  double o2O = 0.0;
+  double o2u = 0.0;
+  double o2v = 0.0;
+
+  double bigOrangeMismatch = 0.0;
+  double O2y = 0.0;
+  double O2o = 0.0;
+  double O2b = 0.0;
+  double O2u = 0.0;
+  double O2v = 0.0;
+
+  double unknownMismatch = 0.0;
+  double u2y = 0.0;
+  double u2o = 0.0;
+  double u2O = 0.0;
+  double u2b = 0.0;
+  double u2v = 0.0;
+
   void Load(gazebo::physics::ModelPtr _parent, sdf::ElementPtr _sdf);
 
   void UpdateChild();

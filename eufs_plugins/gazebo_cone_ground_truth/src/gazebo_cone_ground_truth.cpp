@@ -33,6 +33,7 @@
  **/
 
 #include "gazebo_cone_ground_truth/gazebo_cone_ground_truth.hpp"
+
 #include "yaml-cpp/yaml.h"
 
 namespace gazebo_plugins {
@@ -81,7 +82,6 @@ void GazeboConeGroundTruth::Load(gazebo::physics::ModelPtr _parent, sdf::Element
   this->perception_lidar_noise_ =
       getVector3dParameter(_sdf, "perceptionNoise", {0.03, 0.03, 0.0}, "0.03, 0.03, 0.0");
 
-
   // Load camera Info parameter
   std::string random_cone_color_yaml = "";
   if (!_sdf->HasElement("random_cone_settings")) {
@@ -96,21 +96,49 @@ void GazeboConeGroundTruth::Load(gazebo::physics::ModelPtr _parent, sdf::Element
 
   YAML::Node random_cone_color_settings;
   try {
-      random_cone_color_settings = YAML::LoadFile(random_cone_color_yaml);
-  }
-  catch(std::exception &e) {
-      RCLCPP_FATAL(this->rosnode_->get_logger(), "Unable to load %s due to %s error.",
-      random_cone_color_yaml.c_str(), e.what());
-      RCLCPP_FATAL(this->rosnode_->get_logger(),
-      "BoundingBoxes plugin will not load.");
-      RCLCPP_INFO(this->rosnode_->get_logger(),
-      "TIP: You may want to re-check the path to your yaml file in the share directory");
+    random_cone_color_settings = YAML::LoadFile(random_cone_color_yaml);
+  } catch (std::exception &e) {
+    RCLCPP_FATAL(this->rosnode_->get_logger(), "Unable to load %s due to %s error.",
+                 random_cone_color_yaml.c_str(), e.what());
+    RCLCPP_FATAL(this->rosnode_->get_logger(), "BoundingBoxes plugin will not load.");
+    RCLCPP_INFO(this->rosnode_->get_logger(),
+                "TIP: You may want to re-check the path to your yaml file in the share directory");
   }
 
-  double test = random_cone_color_settings["test"].as<double>();
+  blueMismatch = random_cone_color_settings["blueMismatch"].as<double>();
+  b2y = random_cone_color_settings["blueToYellow"].as<double>();
+  b2o = random_cone_color_settings["blueToOrange"].as<double>();
+  b2O = random_cone_color_settings["blueToBigOrange"].as<double>();
+  b2u = random_cone_color_settings["blueToUnknown"].as<double>();
+  b2v = random_cone_color_settings["blueToVoid"].as<double>();
 
-  std::cout << test << std::endl;
+  yellowMismatch = random_cone_color_settings["yellowMismatch"].as<double>();
+  y2b = random_cone_color_settings["yellowToBlue"].as<double>();
+  y2o = random_cone_color_settings["yellowToOrange"].as<double>();
+  y2O = random_cone_color_settings["yellowToBigOrange"].as<double>();
+  y2u = random_cone_color_settings["yellowToUnknown"].as<double>();
+  y2v = random_cone_color_settings["yellowToVoid"].as<double>();
 
+  orangeMismatch = random_cone_color_settings["orangeMismatch"].as<double>();
+  o2y = random_cone_color_settings["orangeToYellow"].as<double>();
+  o2b = random_cone_color_settings["orangeToBlue"].as<double>();
+  o2O = random_cone_color_settings["orangeToBigOrange"].as<double>();
+  o2u = random_cone_color_settings["orangeToUnknown"].as<double>();
+  o2v = random_cone_color_settings["orangeToVoid"].as<double>();
+
+  bigOrangeMismatch = random_cone_color_settings["bigOrangeMismatch"].as<double>();
+  O2y = random_cone_color_settings["bigOrangeToYellow"].as<double>();
+  O2o = random_cone_color_settings["bigOrangeToOrange"].as<double>();
+  O2b = random_cone_color_settings["bigOrangeToBlue"].as<double>();
+  O2u = random_cone_color_settings["bigOrangeToUnknown"].as<double>();
+  O2v = random_cone_color_settings["bigOrangeToVoid"].as<double>();
+
+  unknownMismatch = random_cone_color_settings["unknownMismatch"].as<double>();
+  u2y = random_cone_color_settings["unknownToYellow"].as<double>();
+  u2o = random_cone_color_settings["unknownToOrange"].as<double>();
+  u2O = random_cone_color_settings["unknownToBigOrange"].as<double>();
+  u2b = random_cone_color_settings["unknownToBlue"].as<double>();
+  u2v = random_cone_color_settings["unknownToVoid"].as<double>();
 
   // Setup the publishers
 
@@ -727,17 +755,17 @@ void GazeboConeGroundTruth::randomChangeConeColor(
   auto it = blue.begin();
   while (it != blue.end()) {
     double U = static_cast<double>(rand_r(&this->seed)) / static_cast<double>(RAND_MAX);
-    if (U >= 0.9) {
+    if (U >= (1 - blueMismatch)) {
       double V = static_cast<double>(rand_r(&this->seed)) / static_cast<double>(RAND_MAX);
-      if (0 < V && V <= 0.2) {
+      if (0 < V && V <= b2y) {
         yellow.insert(yellow.end(), blue[it - blue.begin()]);
-      } else if (0.2 < V && V <= 0.4) {
+      } else if (b2y < V && V <= b2y + b2o) {
         orange.insert(orange.end(), blue[it - blue.begin()]);
-      } else if (0.4 < V && V <= 0.6) {
+      } else if (b2y + b2o < V && V <= b2y + b2o + b2O) {
         big_orange.insert(big_orange.end(), blue[it - blue.begin()]);
-      } else if (0.6 < V && V <= 0.8) {
+      } else if (b2y + b2o + b2O < V && V <= b2y + b2o + b2O + b2u) {
         unknown_color.insert(unknown_color.end(), blue[it - blue.begin()]);
-      } else if (0.8 < V && V <= 1) {
+      } else if (b2y + b2o + b2O + b2u < V && V <= 1) {
       }
       it = blue.erase(it);
     } else {
@@ -748,17 +776,17 @@ void GazeboConeGroundTruth::randomChangeConeColor(
   it = yellow.begin();
   while (it != yellow.end()) {
     double U = static_cast<double>(rand_r(&this->seed)) / static_cast<double>(RAND_MAX);
-    if (U >= 0.9) {
+    if (U >= (1 - yellowMismatch)) {
       double V = static_cast<double>(rand_r(&this->seed)) / static_cast<double>(RAND_MAX);
-      if (0 < V && V <= 0.2) {
+      if (0 < V && V <= y2b) {
         blue.insert(blue.end(), yellow[it - yellow.begin()]);
-      } else if (0.2 < V && V <= 0.4) {
+      } else if (y2b < V && V <= y2b + y2o) {
         orange.insert(orange.end(), yellow[it - yellow.begin()]);
-      } else if (0.4 < V && V <= 0.6) {
+      } else if (y2b + y2o < V && V <= y2b + y2o + y2O) {
         big_orange.insert(big_orange.end(), yellow[it - yellow.begin()]);
-      } else if (0.6 < V && V <= 0.8) {
+      } else if (y2b + y2o + y2O < V && V <= y2b + y2o + y2O + y2u) {
         unknown_color.insert(unknown_color.end(), yellow[it - yellow.begin()]);
-      } else if (0.8 < V && V <= 1) {
+      } else if (y2b + y2o + y2O + y2u < V && V <= 1) {
       }
       it = yellow.erase(it);
     } else {
@@ -769,17 +797,17 @@ void GazeboConeGroundTruth::randomChangeConeColor(
   it = orange.begin();
   while (it != orange.end()) {
     double U = static_cast<double>(rand_r(&this->seed)) / static_cast<double>(RAND_MAX);
-    if (U >= 0.9) {
+    if (U >= (1 - orangeMismatch)) {
       double V = static_cast<double>(rand_r(&this->seed)) / static_cast<double>(RAND_MAX);
-      if (0 < V && V <= 0.2) {
+      if (0 < V && V <= o2y) {
         yellow.insert(yellow.end(), orange[it - orange.begin()]);
-      } else if (0.2 < V && V <= 0.4) {
+      } else if (o2y < V && V <= o2y + o2b) {
         blue.insert(blue.end(), orange[it - orange.begin()]);
-      } else if (0.4 < V && V <= 0.6) {
+      } else if (o2y + o2b < V && V <= o2y + o2b + o2O) {
         big_orange.insert(big_orange.end(), orange[it - orange.begin()]);
-      } else if (0.6 < V && V <= 0.8) {
+      } else if (o2y + o2b + o2O < V && V <= o2y + o2b + o2O + o2u) {
         unknown_color.insert(unknown_color.end(), orange[it - orange.begin()]);
-      } else if (0.8 < V && V <= 1) {
+      } else if (o2y + o2b + o2O + o2u < V && V <= 1) {
       }
       it = orange.erase(it);
     } else {
@@ -790,17 +818,17 @@ void GazeboConeGroundTruth::randomChangeConeColor(
   it = big_orange.begin();
   while (it != big_orange.end()) {
     double U = static_cast<double>(rand_r(&this->seed)) / static_cast<double>(RAND_MAX);
-    if (U >= 0.9) {
+    if (U >= (1 - bigOrangeMismatch)) {
       double V = static_cast<double>(rand_r(&this->seed)) / static_cast<double>(RAND_MAX);
-      if (0 < V && V <= 0.2) {
+      if (0 < V && V <= O2y) {
         yellow.insert(yellow.end(), big_orange[it - big_orange.begin()]);
-      } else if (0.2 < V && V <= 0.4) {
+      } else if (O2y < V && V <= O2y + O2o) {
         orange.insert(orange.end(), big_orange[it - big_orange.begin()]);
-      } else if (0.4 < V && V <= 0.6) {
+      } else if (O2y + O2o < V && V <= O2y + O2o + O2b) {
         blue.insert(blue.end(), big_orange[it - big_orange.begin()]);
-      } else if (0.6 < V && V <= 0.8) {
+      } else if (O2y + O2o + O2b < V && V <= O2y + O2o + O2b + O2u) {
         unknown_color.insert(unknown_color.end(), big_orange[it - big_orange.begin()]);
-      } else if (0.8 < V && V <= 1) {
+      } else if (O2y + O2o + O2b + O2u < V && V <= 1) {
       }
       it = big_orange.erase(it);
     } else {
@@ -811,31 +839,23 @@ void GazeboConeGroundTruth::randomChangeConeColor(
   it = unknown_color.begin();
   while (it != unknown_color.end()) {
     double U = static_cast<double>(rand_r(&this->seed)) / static_cast<double>(RAND_MAX);
-    if (U >= 0.9) {
+    if (U >= (1 - unknownMismatch)) {
       double V = static_cast<double>(rand_r(&this->seed)) / static_cast<double>(RAND_MAX);
-      if (0 < V && V <= 0.2) {
+      if (0 < V && V <= u2y) {
         yellow.insert(yellow.end(), unknown_color[it - unknown_color.begin()]);
-      } else if (0.2 < V && V <= 0.4) {
+      } else if (u2y < V && V <= u2y + u2o) {
         orange.insert(orange.end(), unknown_color[it - unknown_color.begin()]);
-      } else if (0.4 < V && V <= 0.6) {
+      } else if (u2y + u2o < V && V <= u2y + u2o + u2O) {
         big_orange.insert(big_orange.end(), unknown_color[it - unknown_color.begin()]);
-      } else if (0.6 < V && V <= 0.8) {
+      } else if (u2y + u2o + u2O < V && V <= u2y + u2o + u2O + u2b) {
         blue.insert(blue.end(), unknown_color[it - unknown_color.begin()]);
-      } else if (0.8 < V && V <= 1) {
+      } else if (u2y + u2o + u2O + u2b < V && V <= 1) {
       }
       it = unknown_color.erase(it);
     } else {
       ++it;
     }
   }
-
-  // big_orange.resize(big_orange.size() + blue.size() + yellow.size() + orange.size());
-  // big_orange.insert(big_orange.end(), blue.begin(), blue.end());
-  // big_orange.insert(big_orange.end(), yellow.begin(), yellow.end());
-  // big_orange.insert(big_orange.end(), orange.begin(), orange.end());
-  // blue.clear();
-  // yellow.clear();
-  // orange.clear();
 }
 
 // Helper function for parameters
