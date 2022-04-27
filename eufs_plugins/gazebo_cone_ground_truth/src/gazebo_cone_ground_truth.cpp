@@ -127,11 +127,11 @@ void GazeboConeGroundTruth::Load(gazebo::physics::ModelPtr _parent, sdf::Element
   o2v = random_cone_color_settings["orangeToVoid"].as<double>();
 
   bigOrangeMismatch = random_cone_color_settings["bigOrangeMismatch"].as<double>();
-  O2y = random_cone_color_settings["bigOrangeToYellow"].as<double>();
-  O2o = random_cone_color_settings["bigOrangeToOrange"].as<double>();
-  O2b = random_cone_color_settings["bigOrangeToBlue"].as<double>();
-  O2u = random_cone_color_settings["bigOrangeToUnknown"].as<double>();
-  O2v = random_cone_color_settings["bigOrangeToVoid"].as<double>();
+  bO2y = random_cone_color_settings["bigOrangeToYellow"].as<double>();
+  bO2o = random_cone_color_settings["bigOrangeToOrange"].as<double>();
+  bO2b = random_cone_color_settings["bigOrangeToBlue"].as<double>();
+  bO2u = random_cone_color_settings["bigOrangeToUnknown"].as<double>();
+  bO2v = random_cone_color_settings["bigOrangeToVoid"].as<double>();
 
   unknownMismatch = random_cone_color_settings["unknownMismatch"].as<double>();
   u2y = random_cone_color_settings["unknownToYellow"].as<double>();

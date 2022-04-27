@@ -94,11 +94,11 @@ class GazeboConeGroundTruth : public gazebo::ModelPlugin {
   double o2v = 0.0;
 
   double bigOrangeMismatch = 0.0;
-  double O2y = 0.0;
-  double O2o = 0.0;
-  double O2b = 0.0;
-  double O2u = 0.0;
-  double O2v = 0.0;
+  double bO2y = 0.0;
+  double bO2o = 0.0;
+  double bO2b = 0.0;
+  double bO2u = 0.0;
+  double bO2v = 0.0;
 
   double unknownMismatch = 0.0;
   double u2y = 0.0;
