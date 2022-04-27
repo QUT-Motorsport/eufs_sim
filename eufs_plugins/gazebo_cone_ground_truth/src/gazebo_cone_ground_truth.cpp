@@ -828,15 +828,15 @@ void GazeboConeGroundTruth::randomChangeConeColor(
     double U = static_cast<double>(rand_r(&this->seed)) / static_cast<double>(RAND_MAX);
     if (U >= (1 - bigOrangeMismatch)) {
       double V = static_cast<double>(rand_r(&this->seed)) / static_cast<double>(RAND_MAX);
-      if (0 < V && V <= O2y) {
+      if (0 < V && V <= bO2y) {
         yellow.insert(yellow.end(), big_orange[it - big_orange.begin()]);
-      } else if (O2y < V && V <= O2y + O2o) {
+      } else if (bO2y < V && V <= bO2y + bO2o) {
         orange.insert(orange.end(), big_orange[it - big_orange.begin()]);
-      } else if (O2y + O2o < V && V <= O2y + O2o + O2b) {
+      } else if (bO2y + bO2o < V && V <= bO2y + bO2o + bO2b) {
         blue.insert(blue.end(), big_orange[it - big_orange.begin()]);
-      } else if (O2y + O2o + O2b < V && V <= O2y + O2o + O2b + O2u) {
+      } else if (bO2y + bO2o + bO2b < V && V <= bO2y + bO2o + bO2b + bO2u) {
         unknown_color.insert(unknown_color.end(), big_orange[it - big_orange.begin()]);
-      } else if (O2y + O2o + O2b + O2u < V && V <= 1) {
+      } else if (bO2y + bO2o + bO2b + bO2u < V && V <= 1) {
       }
       it = big_orange.erase(it);
     } else {
