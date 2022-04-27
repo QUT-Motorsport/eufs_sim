@@ -12,7 +12,7 @@ For a basic usage guide see [How To Launch eufs_sim](https://gitlab.com/eufs/euf
 
 | Label | Type | Default | Purpose |
 | ----- | ---- | ------- | ------- |
-| -    | [QLineEdit](https://doc.qt.io/qt-5/qlineedit.html)              | /rqt/command | Determines the topic to which the Robot Steering GUI commands are published (as [ackermann_msgs/AckermannDriveStamped](http://docs.ros.org/en/jade/api/ackermann_msgs/html/msg/AckermannDriveStamped.html) messages). |
+| -    | [QLineEdit](https://doc.qt.io/qt-5/qlineedit.html)              | /cmd | Determines the topic to which the Robot Steering GUI commands are published (as [ackermann_msgs/AckermannDriveStamped](http://docs.ros.org/en/jade/api/ackermann_msgs/html/msg/AckermannDriveStamped.html) messages). |
 | Stop | [QPushButton](https://doc.qt.io/qt-5/qpushbutton.html)          | -            | Resets sliders to zero. |
 | -    | [QSlider](https://doc.qt.io/qt-5/qslider.html) (vertical)       | 0            | Linear velocity/acceleration (m/s or m/s^2) sent on commands topic. |
 | -    | [QSlider](https://doc.qt.io/qt-5/qslider.html) (horizontal)     | 0            | Steering angle (radians) sent on commands topic. |
@@ -30,7 +30,7 @@ The +/- and >/< [QPushButtons](https://doc.qt.io/qt-5/qpushbutton.html) incremen
 ### ROS 2 Publishers
 
 The [Robot Steering GUI](./src/eufs_rqt/EUFSRobotSteeringGUI.py) doesn't use a publisher with a static topic name, instead the topic name can be set dynamically via a textbox input on the GUI.
-By default, the topic used is `/rqt/command`. 
+By default, the topic used is `/cmd`. 
 
 The GUI publishes vehicle command onto this topic using [ackermann_msgs/AckermannDriveStamped](http://docs.ros.org/en/jade/api/ackermann_msgs/html/msg/AckermannDriveStamped.html) messages.
 

@@ -51,8 +51,6 @@ StateMachine::StateMachine(std::shared_ptr<rclcpp::Node> rosnode) : rosnode(rosn
   completed_sub_ = rosnode->create_subscription<std_msgs::msg::Bool>(
       "/ros_can/mission_completed", 1,
       std::bind(&StateMachine::completedCallback, this, std::placeholders::_1));
-  set_mission_sub_ = rosnode->create_subscription<eufs_msgs::msg::CanState>(
-      "/ros_can/set_mission", 1, std::bind(&StateMachine::setMission, this, std::placeholders::_1));
 
   // Services
   reset_srv_ = rosnode->create_service<std_srvs::srv::Trigger>(
@@ -61,6 +59,9 @@ StateMachine::StateMachine(std::shared_ptr<rclcpp::Node> rosnode) : rosnode(rosn
   ebs_srv_ = rosnode->create_service<std_srvs::srv::Trigger>(
       "/ros_can/ebs",
       std::bind(&StateMachine::requestEBS, this, std::placeholders::_1, std::placeholders::_2));
+  set_mission_srv_ = rosnode->create_service<eufs_msgs::srv::SetCanState>(
+      "/ros_can/set_mission",
+      std::bind(&StateMachine::setMission, this, std::placeholders::_1,  std::placeholders::_2));
 
   // Publishers
   state_pub_ = rosnode->create_publisher<eufs_msgs::msg::CanState>("/ros_can/state", 1);
@@ -69,14 +70,15 @@ StateMachine::StateMachine(std::shared_ptr<rclcpp::Node> rosnode) : rosnode(rosn
 
 StateMachine::~StateMachine() {}
 
-void StateMachine::setMission(const eufs_msgs::msg::CanState::SharedPtr state) {
+bool StateMachine::setMission(std::shared_ptr<eufs_msgs::srv::SetCanState::Request> request,
+                              std::shared_ptr<eufs_msgs::srv::SetCanState::Response> response) {
   if (ami_state_ != eufs_msgs::msg::CanState::AMI_NOT_SELECTED) {
     RCLCPP_WARN(rosnode->get_logger(),
                 "state_machine :: failed to set mission as a mission was set previously.");
-    return;
+    return false;
   }
 
-  switch (state->ami_state) {
+  switch (request->ami_state) {
     case eufs_msgs::msg::CanState::AMI_ACCELERATION:
       ami_state_ = eufs_msgs::msg::CanState::AMI_ACCELERATION;
       break;
@@ -114,6 +116,8 @@ void StateMachine::setMission(const eufs_msgs::msg::CanState::SharedPtr state) {
       ami_state_ = eufs_msgs::msg::CanState::AMI_NOT_SELECTED;
       break;
   }
+  response->success = true;
+  return response->success;
 }
 
 bool StateMachine::resetState(std::shared_ptr<std_srvs::srv::Trigger::Request> request,

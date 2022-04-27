@@ -180,6 +180,14 @@ void GazeboConeGroundTruth::Load(gazebo::physics::ModelPtr _parent, sdf::Element
         this->rosnode_->create_publisher<visualization_msgs::msg::MarkerArray>(viz_topic, 1);
   }
 
+  if (!_sdf->HasElement("pubGroundTruth")) {
+    RCLCPP_FATAL(this->rosnode_->get_logger(),
+                 "state_ground_truth plugin missing <pubGroundTruth>, cannot proceed");
+    return;
+  } else {
+    pub_ground_truth = _sdf->GetElement("pubGroundTruth")->Get<bool>();
+  }
+
   if (this->simulate_perception_) {
     // Camera cone publisher
     if (!_sdf->HasElement("perceptionConesTopicName")) {
@@ -271,13 +279,13 @@ void GazeboConeGroundTruth::UpdateChild() {
     return;
   }
 
-  // Publish the ground truth track if it has subscribers
-  if (this->ground_truth_track_pub_->get_subscription_count() > 0) {
+  // Publish the ground truth track if it has subscribers and is allowed to publish
+  if (this->ground_truth_track_pub_->get_subscription_count() > 0 && pub_ground_truth) {
     this->ground_truth_track_pub_->publish(ground_truth_track_message);
   }
 
-  // Publish the ground truth track markers if it has subscribers
-  if (this->ground_truth_track_viz_pub_->get_subscription_count() > 0) {
+  // Publish the ground truth track markers if it has subscribers and is allowed to publish
+  if (this->ground_truth_track_viz_pub_->get_subscription_count() > 0 && pub_ground_truth) {
     visualization_msgs::msg::MarkerArray ground_truth_track_marker_array_message =
         getConeMarkerArrayMessage(ground_truth_track_message);
     this->ground_truth_track_viz_pub_->publish(ground_truth_track_marker_array_message);
@@ -286,13 +294,13 @@ void GazeboConeGroundTruth::UpdateChild() {
   eufs_msgs::msg::ConeArrayWithCovariance ground_truth_cones_message =
       processCones(cone_arrays_message);
 
-  // Publish the ground truth cones if it has subscribers
-  if (this->ground_truth_cone_pub_->get_subscription_count() > 0) {
+  // Publish the ground truth cones if it has subscribers and is allowed to publish
+  if (this->ground_truth_cone_pub_->get_subscription_count() > 0 && pub_ground_truth) {
     this->ground_truth_cone_pub_->publish(ground_truth_cones_message);
   }
 
-  // Publish the ground truth cone markers if it has subscribers
-  if (this->ground_truth_cone_marker_pub_->get_subscription_count() > 0) {
+  // Publish the ground truth cone markers if it has subscribers and is allowed to publish
+  if (this->ground_truth_cone_marker_pub_->get_subscription_count() > 0 && pub_ground_truth) {
     visualization_msgs::msg::MarkerArray ground_truth_cone_marker_array_message =
         getConeMarkerArrayMessage(ground_truth_cones_message);
 

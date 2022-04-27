@@ -32,6 +32,7 @@
       <controlDelay>0.2</controlDelay>
       <!-- The time in seconds it takes for the car to go from lock to lock -->
       <steeringLockTime>1</steeringLockTime>
+      <pubGroundTruth>$(arg pub_ground_truth)</pubGroundTruth>
     </plugin>
   </gazebo>
 
@@ -58,7 +59,7 @@
       <perceptionCameraDepthNoiseParameterA>0.0184</perceptionCameraDepthNoiseParameterA>
       <perceptionCameraDepthNoiseParameterB>0.2106</perceptionCameraDepthNoiseParameterB>
       <perceptionLidarNoise>0.03 0.03 0.0</perceptionLidarNoise>
-      <random_cone_settings>$(arg random_color_config)</random_cone_settings>
+      <pubGroundTruth>$(arg pub_ground_truth)</pubGroundTruth>
     </plugin>
   </gazebo>
 
