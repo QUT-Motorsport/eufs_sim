@@ -41,10 +41,6 @@ def spawn_car(context, *args, **kwargs):
     urdf_path = os.path.join(get_package_share_directory('eufs_racecar'),
                              'robots', robot_name, 'robot.urdf')
 
-    random_cone_color = str(
-        os.path.join(get_package_share_directory('eufs_plugins'), 'gazebo_cone_ground_truth',
-                     'config', 'randomConeColor.yaml'))
-
     if not os.path.isfile(urdf_path):
         os.mknod(urdf_path)
 
