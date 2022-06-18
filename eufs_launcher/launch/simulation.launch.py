@@ -29,6 +29,7 @@ def launch_setup(context, *args, **kwargs):
 
 
 def generate_launch_description():
+
     return LaunchDescription([
 
         DeclareLaunchArgument(name='track',
@@ -77,6 +78,11 @@ def generate_launch_description():
                               default_value='default',
                               description="Determines which launch files are "
                                           "used in the state_machine node"),
+
+        DeclareLaunchArgument(name='robot_name',
+                              default_value='eufs',
+                              description="Determines which robot urdf is"
+                                          "used in the sim"),
 
         OpaqueFunction(function=launch_setup),
     ])

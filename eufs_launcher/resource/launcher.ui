@@ -253,6 +253,45 @@
     </font>
    </property>
   </widget>
+ <widget class="QLabel" name="RobotNameLabel">
+   <property name="geometry">
+    <rect>
+     <x>300</x>
+     <y>320</y>
+     <width>100</width>
+     <height>30</height>
+    </rect>
+   </property>
+   <property name="font">
+    <font>
+     <pointsize>9</pointsize>
+    </font>
+   </property>
+   <property name="text">
+    <string>Robot name:</string>
+   </property>
+  </widget>
+  <widget class="QComboBox" name="WhichRobotName">
+   <property name="geometry">
+    <rect>
+     <x>290</x>
+     <y>345</y>
+     <width>100</width>
+     <height>30</height>
+    </rect>
+   </property>
+   <property name="maximumSize">
+    <size>
+     <width>16777215</width>
+     <height>30</height>
+    </size>
+   </property>
+   <property name="font">
+    <font>
+     <pointsize>7</pointsize>
+    </font>
+   </property>
+  </widget>
   <widget class="QLabel" name="NoiseLabel">
    <property name="geometry">
     <rect>
