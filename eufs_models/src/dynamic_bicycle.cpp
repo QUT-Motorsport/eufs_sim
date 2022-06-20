@@ -34,7 +34,6 @@ State DynamicBicycle::_f(const State &x, const Input &u, const double Fx, const 
                          const double FyR) {
   const double FyF_tot = 2 * FyF;
   const double FyR_tot = 2 * FyR;
-  const double v_x = std::max(1.0, x.v_x);
 
   State x_dot{};
 
@@ -44,7 +43,7 @@ State DynamicBicycle::_f(const State &x, const Input &u, const double Fx, const 
   x_dot.yaw = x.r_z;
 
   x_dot.v_x = (x.r_z * x.v_y) + (Fx - std::sin(u.delta) * FyF_tot) / _param.inertia.m;
-  x_dot.v_y = ((std::cos(u.delta) * FyF_tot) + FyR_tot) / _param.inertia.m - (x.r_z * v_x);
+  x_dot.v_y = ((std::cos(u.delta) * FyF_tot) + FyR_tot) / _param.inertia.m - (x.r_z * x.v_x);
 
   x_dot.r_z =
       (std::cos(u.delta) * FyF_tot * _param.kinematic.l_F - FyR_tot * _param.kinematic.l_R) /
