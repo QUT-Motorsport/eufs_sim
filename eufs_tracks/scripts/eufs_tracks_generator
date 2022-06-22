@@ -2,9 +2,9 @@
 
 import sys
 
-from eufs_tracks.TrackGeneratorModule import EUFSTrackGenerator
+from eufs_tracks.track_generator import EUFSTracksGUI
 from rqt_gui.main import Main
 
-plugin = 'eufs_tracks.TrackGeneratorModule.EUFSTrackGenerator'
+plugin = 'eufs_tracks.track_generator.EUFSTracksGUI'
 main = Main(filename=plugin)
 sys.exit(main.main(standalone=plugin))
