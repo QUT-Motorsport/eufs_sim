@@ -50,7 +50,7 @@ eufs_launcher:
         # Note that this is working as intended - "no_perception" means
         # No real perception!  In which case we use the simulated perception.
         if_on: { "launch_group:=no_perception" }
-        if_off: {}
+        if_off: { "launch_group:=default" }
 
     gazebo_gui:
       priority: 3
@@ -78,23 +78,3 @@ eufs_launcher:
       parameter_triggering:
         if_on: { "pub_ground_truth:=true" }
         if_off: { "pub_ground_truth:=false" }
-
-
-  # Some nodes fail to shutdown
-  # I have some theories as to why that is, but for now the solution is
-  # just to manually kill all nodes that fail to quit.
-  # I believe it has to do with how the launcher is launching some nodes
-  # via Popen and not through the ROS API.  This was a necessity in Kinetic,
-  # but now that we're in Melodic it is potentially possible to go through the ROS API.
-  nodes_to_kill:
-    {
-      "/cone_ground_truth",
-      "/eufs/controller_spawner",
-      "/gazebo",
-      "/gazebo_gui",
-      "/robot_state_publisher",
-      "/twist_to_ackermannDrive",
-      "/spawn_platform",
-      "/eufs_sim_rqt",
-      "/wheel_odometry",
-    }

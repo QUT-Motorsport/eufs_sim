@@ -32,6 +32,7 @@
   <arg name="vehicleModelConfig"/>
   <!-- Publish the ground truth tf -->
   <arg name="publish_gt_tf" default="false"/>
+  <!-- Publish ground truth -->
   <arg name="pub_ground_truth" default="true"/>
 
   <!-- Initial vehicle pose -->

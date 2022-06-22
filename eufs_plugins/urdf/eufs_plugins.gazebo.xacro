@@ -3,6 +3,7 @@
   <xacro:arg name="publish_tf" default="false"/>
   <xacro:arg name="simulate_perception" default="false"/>
   <xacro:arg name="command_mode" default="acceleration"/>
+  <xacro:arg name="pub_ground_truth" default="true"/>
 
   <!-- Custom plugin which controls the car using a given vehicle model.
    It controls the car by setting its velocity and position
