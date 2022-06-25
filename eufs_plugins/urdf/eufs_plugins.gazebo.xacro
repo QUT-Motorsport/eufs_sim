@@ -40,7 +40,7 @@
   <gazebo>
     <plugin name="cone_ground_truth" filename="libgazebo_cone_ground_truth.so">
       <alwaysOn>true</alwaysOn>
-      <updateRate>25.0</updateRate>
+      <updateRate>100.0</updateRate>
       <cameraViewDistance>15</cameraViewDistance>
       <lidarViewDistance>100</lidarViewDistance>
       <lidarXViewDistance>20</lidarXViewDistance>
@@ -61,6 +61,20 @@
       <perceptionCameraDepthNoiseParameterB>0.2106</perceptionCameraDepthNoiseParameterB>
       <perceptionLidarNoise>0.03 0.03 0.0</perceptionLidarNoise>
       <pubGroundTruth>$(arg pub_ground_truth)</pubGroundTruth>
+    </plugin>
+  </gazebo>
+
+  <gazebo>
+    <plugin name="bounding_boxes" filename="libgazebo_simulate_bounding_boxes.so">
+      <config_file>$(arg bounding_box_settings)</config_file>
+      <publish_rate>50.0</publish_rate>
+      <targetFrame>zed_right_camera_optical_frame</targetFrame>
+      <sourceFrame>base_footprint</sourceFrame>
+      <cameraWidth>1280</cameraWidth>
+      <cameraHeight>720</cameraHeight>
+      <gtBoundingBoxesTopic>ground_truth/bounding_boxes</gtBoundingBoxesTopic>
+      <noisyBoundingBoxesTopic>noisy_bounding_boxes</noisyBoundingBoxesTopic>
+      <customCameraInfo>custom_camera_info</customCameraInfo>
     </plugin>
   </gazebo>
 

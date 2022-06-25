@@ -36,6 +36,8 @@ find_package(visualization_msgs REQUIRED)
 find_package(eufs_models REQUIRED)
 find_package(ackermann_msgs REQUIRED)
 find_package(ament_index_cpp REQUIRED)
+find_package(image_geometry REQUIRED)
+find_package(yaml_cpp_vendor REQUIRED)
 
 link_directories(${gazebo_dev_LIBRARY_DIRS})
 
@@ -53,6 +55,7 @@ endif()
 
 add_subdirectory(gazebo_cone_ground_truth)
 add_subdirectory(gazebo_race_car_model)
+add_subdirectory(gazebo_simulate_bounding_boxes)
 
 ament_export_libraries(gazebo_ros_template2)
 
@@ -73,6 +76,8 @@ ament_export_dependencies(visualization_msgs)
 ament_export_dependencies(eufs_models)
 ament_export_dependencies(ackermann_msgs)
 ament_export_dependencies(ament_index_cpp)
+ament_export_dependencies(yaml_cpp_vendor)
+
 
 if(NOT WIN32)
   if(NOT APPLE)
