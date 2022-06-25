@@ -68,7 +68,7 @@
     <!-- Front and rear wheel descriptions -->
     <!-- ********************************* -->
 
-    <!-- Description of how a front wheel is connected to the base_footprint -->
+    <!-- Description of how a front wheel is connected to the chassis -->
     <xacro:macro name="front_wheel"
                  params="lr_prefix lr_reflect">
 
@@ -77,7 +77,7 @@
                      ${lr_reflect * ((chassis_width - wheel_width) / 2)}
                      0"
                 rpy="0 0 0"/>
-        <parent link="base_footprint"/>
+        <parent link="chassis"/>
         <child link="${lr_prefix}_steering_hinge"/>
         <axis xyz="0 0 1"/>
         <limit lower="${config['input_ranges']['steering']['min']}" upper="${config['input_ranges']['steering']['max']}" effort="10000000" velocity="1000000"/>
@@ -109,7 +109,7 @@
       <xacro:wheel lr_prefix="${lr_prefix}" fr_prefix="front"/>
     </xacro:macro>
 
-    <!-- Description of how a rear wheel is connected to the base_footprint -->
+    <!-- Description of how a rear wheel is connected to the chassis -->
     <xacro:macro name="rear_wheel"
                  params="lr_prefix lr_reflect">
 
@@ -118,7 +118,7 @@
                      ${lr_reflect * ((chassis_width - wheel_width) / 2)}
                      0"
                 rpy="0 0 0"/>
-        <parent link="base_footprint"/>
+        <parent link="chassis"/>
         <child link="${lr_prefix}_rear_wheel"/>
         <axis xyz="0 1 0"/>
         <limit lower="0" upper="0" effort="10000000" velocity="1000000"/>
