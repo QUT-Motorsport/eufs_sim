@@ -15,6 +15,9 @@ eufs_launcher:
   # Default vehicle model config preset to be selected in the launcher drop-down menu
   default_vehicle_preset: "DryTrack"
 
+  # Default robot urdf to be selected in the launcher drop-down menu
+  default_robot_name: "eufs"
+
   # percent of possible noise pixels being utilized
   object_noise_default: 0
 

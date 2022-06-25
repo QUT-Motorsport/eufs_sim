@@ -10,13 +10,45 @@ variables:
   PROJECT_BASE_DIR: $CI_PROJECT_DIR/src/eufs_sim
 
 stages:
-  - .pre
+  - lint
   - build
-  - test
 
-setup:
-  stage: .pre
+flake8:
+  stage: lint
+  image: python:3.8-alpine
+  dependencies: []
+  before_script:
+    - python3 -m pip install flake8
   script:
+    - python3 -m flake8 . --config=.flake8 --output-file "flake8-report.txt"
+  after_script:
+    - python3 -m pip install "flake8-junit-report"
+    - python3 -m junit_conversor "flake8-report.txt" "flake8-results.xml"
+  variables:
+    GIT_SUBMODULE_STRATEGY: none
+  artifacts:
+    expire_in: 30 days
+    reports:
+      junit: flake8-results.xml
+
+cpplint:
+  stage: lint
+  image: python:3.8-alpine
+  dependencies: []
+  before_script:
+    - python3 -m pip install cpplint
+  script:
+    - cpplint --recursive --output=junit . > cpplint-results.xml 2>&1
+  variables:
+    GIT_SUBMODULE_STRATEGY: none
+  artifacts:
+    expire_in: 30 days
+    reports:
+      junit: cpplint-results.xml
+
+build:
+  stage: build
+  before_script:
     # Gives us access to other private repos
     - "command -v ssh-agent > /dev/null || ( apt-get update -qq -y > /dev/null && apt-get install openssh-client -qq -y > /dev/null)"
     - eval $(ssh-agent -s)
@@ -37,99 +69,24 @@ setup:
 
     # Clone eufs_msgs
     - git -C $CI_PROJECT_DIR/src clone -b master git@gitlab.com:eufs/eufs_msgs.git
-  variables:
-    GIT_STRATEGY: clone
-  artifacts:
-    expire_in: 1h
-    paths:
-      - $CI_PROJECT_DIR
 
-# check that submodule pointers are not corrupt
-check_clone:
-  stage: build
-  dependencies: []
-  script:
-    - git submodule sync
-    - git submodule update --init
+    # Setup EUFS rosdep sources
+    - echo "yaml https://gitlab.com/eufs/eufs_rosdep/-/raw/master/python.yaml" >> /etc/ros/rosdep/sources.list.d/19-eufs.list
 
-build:
-  stage: build
-  before_script:
-    # This before_script is for dealing with the fact that GIT_STRATEGY: none doesn't imply a clean working directory. 
-    # see: https://gitlab.com/gitlab-org/gitlab/-/issues/17103
-    - shopt -s extglob dotglob
-    - rm -rf !(src) 
-    - shopt -u extglob dotglob
-  script:
     # Install ROS package dependencies
     - apt-get update -qq
     - apt-get install python3-pip -qq -y # install pip for certain rosdep packages
     - rosdep update -q --rosdistro=$ROS_DISTRO
-    - rosdep install -y -q --from-paths $PROJECT_BASE_DIR src/eufs_msgs --ignore-src # only choose the required packages
+    - rosdep install -y -q --from-paths $CI_PROJECT_DIR/src --ignore-src # only choose the required packages
     - rm -rf /var/lib/apt/lists/*
-
-    # Build packages.
+  script:
     - . /opt/ros/$ROS_DISTRO/setup.sh
     - colcon build
-  variables:
-    GIT_STRATEGY: none
-  artifacts:
-    expire_in: 1h
-    paths:
-      - $CI_PROJECT_DIR
-
-flake8:
-  stage: test
-  image: python:3.8-alpine
-  dependencies: []
-  before_script:
-    - python3 -m pip install flake8
-  script:
-    - python3 -m flake8 . --config=.flake8 --output-file "flake8-report.txt"
-  after_script:
-    - python3 -m pip install "flake8-junit-report"
-    - python3 -m junit_conversor "flake8-report.txt" "flake8-results.xml"
-  variables:
-    GIT_SUBMODULE_STRATEGY: none
-  artifacts:
-    expire_in: 30 days
-    reports:
-      junit: flake8-results.xml
-
-cpplint:
-  stage: test
-  image: python:3.8-alpine
-  dependencies: []
-  before_script:
-    - python3 -m pip install cpplint
-  script:
-    - cpplint --recursive --output=junit . > cpplint-results.xml 2>&1
-  variables:
-    GIT_SUBMODULE_STRATEGY: none
-  artifacts:
-    expire_in: 30 days
-    reports:
-      junit: cpplint-results.xml
-
-test:
-  stage: test
-  before_script:
-    # This before_script is for dealing with the fact that GIT_STRATEGY: none doesn't imply a clean working directory. 
-    # see: https://gitlab.com/gitlab-org/gitlab/-/issues/17103
-    - shopt -s extglob dotglob
-    - rm -rf !(src|build|install) 
-    - shopt -u extglob dotglob
-  dependencies: [build] # use dependencies to only retrieve artifacts from build stage
-  script:
-    - . /opt/ros/$ROS_DISTRO/setup.sh
-    - colcon test --base-paths $PROJECT_BASE_DIR
+    - colcon test --base-paths $PROJECT_BASE_DIR --return-code-on-test-failure
     - colcon test-result --all | grep xml | cut -d":" -f1 | xargs $PROJECT_BASE_DIR/.gitlab-ci/merge-test-results $CI_PROJECT_DIR/test-results.xml > /dev/null
   variables:
-    GIT_STRATEGY: none
+    GIT_STRATEGY: clone
   artifacts:
     expire_in: 30 days
     reports:
       junit: test-results.xml
-
-
-

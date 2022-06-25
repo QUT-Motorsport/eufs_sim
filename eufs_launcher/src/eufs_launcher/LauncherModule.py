@@ -126,6 +126,8 @@ class EUFSLauncher(Plugin):
                                                         "ConeNoisiness")
         self.COLOR_NOISE_SLIDER = self._widget.findChild(QSlider,
                                                          "ConeColorNoisiness")
+        self.ROBOT_NAME_MENU = self._widget.findChild(QComboBox,
+                                                      "WhichRobotName")
 
         # Check the file directory to update drop-down menu
         self.load_track_dropdowns()
@@ -182,6 +184,15 @@ class EUFSLauncher(Plugin):
         }
         self.setup_q_combo_box(self.MODEL_PRESET_MENU, default_mode,
                                self.MODEL_CONFIGS.keys())
+
+        # Setup Robot Name menu
+        default_mode = self.default_config["eufs_launcher"][
+            "default_robot_name"]
+        robots_filepath = join(get_package_share_directory('eufs_racecar'),
+                               'robots')
+        modes = listdir(robots_filepath)
+        self.setup_q_combo_box(self.ROBOT_NAME_MENU, default_mode,
+                               modes)
 
         # Add buttons from yaml file
         checkboxes = OrderedDict(
@@ -569,18 +580,21 @@ class EUFSLauncher(Plugin):
             + "using the " + self.COMMAND_MODE_MENU.currentText()
             + " command mode. "
             + "Vehicle model config file is "
-            + self.MODEL_CONFIGS[self.MODEL_PRESET_MENU.currentText()])
+            + self.MODEL_CONFIGS[self.MODEL_PRESET_MENU.currentText()]
+            + ". Robot urdf is "
+            + self.ROBOT_NAME_MENU.currentText())
 
         vehicle_model = "vehicleModel:=" + \
                         self.VEHICLE_MODEL_MENU.currentText()
         command_mode = "commandMode:=" + self.COMMAND_MODE_MENU.currentText()
         vehicle_model_config = "vehicleModelConfig:=" + self.MODEL_CONFIGS[
             self.MODEL_PRESET_MENU.currentText()]
+        robot_name = "robot_name:=" + self.ROBOT_NAME_MENU.currentText()
 
         # Get checkbox parameter information
         parameters_to_pass = ["track:=" + track_to_launch.split(".")[0],
                               vehicle_model, command_mode,
-                              vehicle_model_config]
+                              vehicle_model_config, robot_name]
         for checkbox, param_if_on, param_if_off in \
                 self.checkbox_parameter_mapping:
             if checkbox.isChecked():
