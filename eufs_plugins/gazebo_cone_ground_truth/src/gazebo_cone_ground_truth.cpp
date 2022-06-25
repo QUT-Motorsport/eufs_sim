@@ -88,57 +88,18 @@ void GazeboConeGroundTruth::Load(gazebo::physics::ModelPtr _parent, sdf::Element
                  "gazebo_cone_ground_truth plugin missing <random_cone_settings>, cannot proceed");
     return;
   } else {
-    random_cone_color_yaml = _sdf->GetElement("random_cone_settings")->Get<std::string>();
+    random_cone_color_yaml = _sdf->GetElement("recolour_config")->Get<std::string>();
   }
 
-  YAML::Node random_cone_color_settings;
   try {
-    random_cone_color_settings = YAML::LoadFile(random_cone_color_yaml);
+    recolour_config = YAML::LoadFile(random_cone_color_yaml);
   } catch (std::exception &e) {
     RCLCPP_FATAL(this->rosnode_->get_logger(), "Unable to load %s due to %s error.",
                  random_cone_color_yaml.c_str(), e.what());
-    RCLCPP_FATAL(this->rosnode_->get_logger(), "Simulate random cone color plugin will not load.");
-    RCLCPP_INFO(this->rosnode_->get_logger(),
-                "TIP: You may want to re-check the path to your yaml file in the share directory");
+    RCLCPP_FATAL(this->rosnode_->get_logger(), "Cone recolouring yaml will not load, cannot proceed");
   }
 
-  blueMismatch = random_cone_color_settings["blueMismatch"].as<double>();
-  b2y = random_cone_color_settings["blueToYellow"].as<double>();
-  b2o = random_cone_color_settings["blueToOrange"].as<double>();
-  b2O = random_cone_color_settings["blueToBigOrange"].as<double>();
-  b2u = random_cone_color_settings["blueToUnknown"].as<double>();
-  b2v = random_cone_color_settings["blueToVoid"].as<double>();
-
-  yellowMismatch = random_cone_color_settings["yellowMismatch"].as<double>();
-  y2b = random_cone_color_settings["yellowToBlue"].as<double>();
-  y2o = random_cone_color_settings["yellowToOrange"].as<double>();
-  y2O = random_cone_color_settings["yellowToBigOrange"].as<double>();
-  y2u = random_cone_color_settings["yellowToUnknown"].as<double>();
-  y2v = random_cone_color_settings["yellowToVoid"].as<double>();
-
-  orangeMismatch = random_cone_color_settings["orangeMismatch"].as<double>();
-  o2y = random_cone_color_settings["orangeToYellow"].as<double>();
-  o2b = random_cone_color_settings["orangeToBlue"].as<double>();
-  o2O = random_cone_color_settings["orangeToBigOrange"].as<double>();
-  o2u = random_cone_color_settings["orangeToUnknown"].as<double>();
-  o2v = random_cone_color_settings["orangeToVoid"].as<double>();
-
-  bigOrangeMismatch = random_cone_color_settings["bigOrangeMismatch"].as<double>();
-  bO2y = random_cone_color_settings["bigOrangeToYellow"].as<double>();
-  bO2o = random_cone_color_settings["bigOrangeToOrange"].as<double>();
-  bO2b = random_cone_color_settings["bigOrangeToBlue"].as<double>();
-  bO2u = random_cone_color_settings["bigOrangeToUnknown"].as<double>();
-  bO2v = random_cone_color_settings["bigOrangeToVoid"].as<double>();
-
-  unknownMismatch = random_cone_color_settings["unknownMismatch"].as<double>();
-  u2y = random_cone_color_settings["unknownToYellow"].as<double>();
-  u2o = random_cone_color_settings["unknownToOrange"].as<double>();
-  u2O = random_cone_color_settings["unknownToBigOrange"].as<double>();
-  u2b = random_cone_color_settings["unknownToBlue"].as<double>();
-  u2v = random_cone_color_settings["unknownToVoid"].as<double>();
-
   // Setup the publishers
-
   // Ground truth cone publisher
   if (!_sdf->HasElement("groundTruthConesTopicName")) {
     RCLCPP_FATAL(this->rosnode_->get_logger(),
@@ -751,6 +712,35 @@ double GazeboConeGroundTruth::GaussianKernel(double mu, double sigma) {
   return X;
 }
 
+void GazeboConeGroundTruth::randomChangeConeColour(std::vector<eufs_msgs::msg::ConeWithCovariance> &blue,
+    std::vector<eufs_msgs::msg::ConeWithCovariance> &yellow,
+    std::vector<eufs_msgs::msg::ConeWithCovariance> &orange,
+    std::vector<eufs_msgs::msg::ConeWithCovariance> &big_orange,
+    std::vector<eufs_msgs::msg::ConeWithCovariance> &unknown_color) {
+  auto it =
+}
+
+void GazeboConeGroundTruth::shiftWithProbability(
+    std::vector<eufs_msgs::msg::ConeWithCovariance> &source
+    std::vector<std::vector<eufs_msgs::msg::ConeWithCovariance>> &targets) {
+  auto it = source.begin;
+  while (it != source.end()) {
+     for (const)
+
+  }
+}
+
+std::vector<eufs_msgs::msg::ConeWithCovariance> GazeboConeGroundTruth::pickWithProbabilty(
+    std::vector<std::vector<eufs_msgs::msg::ConeWithCovariance>> &targets
+    const std::vector<double> weights) {
+      if (targets.size() != weights.size() || std::accumulate(weights.begin(), weights.end(), 0.0) != 1.0;) {
+        RCLCPP_FATAL(rosnode_->get_logger(), "Cone colouring config is not formatted correctly, cannot proceed")
+      }
+      else {
+
+      }
+    }
+
 void GazeboConeGroundTruth::randomChangeConeColor(
     std::vector<eufs_msgs::msg::ConeWithCovariance> &blue,
     std::vector<eufs_msgs::msg::ConeWithCovariance> &yellow,
@@ -868,7 +858,7 @@ bool GazeboConeGroundTruth::getBoolParameter(sdf::ElementPtr _sdf, const char *e
                                              bool default_value, const char *default_description) {
   if (!_sdf->HasElement(element)) {
     RCLCPP_DEBUG(this->rosnode_->get_logger(),
-                 "state_ground_truth plugin missing <%s>, defaults to %s", element,
+                 "cone_ground_truth plugin missing <%s>, defaults to %s", element,
                  default_description);
     return default_value;
   } else {
@@ -881,7 +871,7 @@ double GazeboConeGroundTruth::getDoubleParameter(sdf::ElementPtr _sdf, const cha
                                                  const char *default_description) {
   if (!_sdf->HasElement(element)) {
     RCLCPP_DEBUG(this->rosnode_->get_logger(),
-                 "state_ground_truth plugin missing <%s>, defaults to %s", element,
+                 "cone_ground_truth plugin missing <%s>, defaults to %s", element,
                  default_description);
     return default_value;
   } else {
@@ -894,7 +884,7 @@ std::string GazeboConeGroundTruth::getStringParameter(sdf::ElementPtr _sdf, cons
                                                       const char *default_description) {
   if (!_sdf->HasElement(element)) {
     RCLCPP_DEBUG(this->rosnode_->get_logger(),
-                 "state_ground_truth plugin missing <%s>, defaults to %s", element,
+                 "cone_ground_truth plugin missing <%s>, defaults to %s", element,
                  default_description);
     return default_value;
   } else {
@@ -907,7 +897,7 @@ ignition::math::Vector3d GazeboConeGroundTruth::getVector3dParameter(
     const char *default_description) {
   if (!_sdf->HasElement(element)) {
     RCLCPP_DEBUG(this->rosnode_->get_logger(),
-                 "state_ground_truth plugin missing <%s>, defaults to %s", element,
+                 "cone_ground_truth plugin missing <%s>, defaults to %s", element,
                  default_description);
     return default_value;
   } else {

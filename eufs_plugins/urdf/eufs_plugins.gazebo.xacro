@@ -50,6 +50,7 @@
       <lidarFOV>3.141593</lidarFOV><!-- 180 degrees-->
       <lidarOn>true</lidarOn><!--If false, we only simulate camera measurements-->
       <trackFrame>map</trackFrame>
+      <recolour_config>$(arg recolour_config)</recolour_config>
       <groundTruthConesTopicName>/ground_truth/cones</groundTruthConesTopicName>
       <groundTruthConeMarkersTopicName>/ground_truth/cones/viz</groundTruthConeMarkersTopicName>
       <groundTruthTrackTopicName>/ground_truth/track</groundTruthTrackTopicName>
