@@ -43,7 +43,7 @@
     <xacro:eufs_base chassis_mesh="file://$(find eufs_racecar)/meshes/sisu-20d.dae"/>
 
     <!-- Wheels -->
-    <xacro:wheels chassis_width="1.6" wheelbase="1.580" />
+    <xacro:wheels chassis_width="1.6" wheelbase="1.580"/>
 
     <!-- *********************************************** -->
     <!--                 MAIN SENSORS                    -->
