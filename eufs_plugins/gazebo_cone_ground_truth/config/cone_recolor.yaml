@@ -4,20 +4,20 @@
 # Ensure probabilities sum to 1.0
 
 blue:
-  blue: 0.64
+  blue: 0.69
   yellow: 0.0005
   orange: 0.0
   big_orange: 0.0
   unknown_color: 0.0
-  undetected: 0.3595
+  undetected: 0.3095
 
 yellow:
   blue: 0.0005
-  yellow: 0.64
+  yellow: 0.69
   orange: 0.0
   big_orange: 0.0
   unknown_color: 0.0
-  undetected: 0.3595
+  undetected: 0.3095
 
 orange:
   blue: 0.0

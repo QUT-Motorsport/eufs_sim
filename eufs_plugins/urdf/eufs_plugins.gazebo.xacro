@@ -41,10 +41,10 @@
     <plugin name="cone_ground_truth" filename="libgazebo_cone_ground_truth.so">
       <alwaysOn>true</alwaysOn>
       <updateRate>100.0</updateRate>
-      <cameraViewDistance>10</cameraViewDistance>
-      <lidarViewDistance>10</lidarViewDistance>
-      <lidarXViewDistance>10</lidarXViewDistance>
-      <lidarYViewDistance>10</lidarYViewDistance>
+      <cameraViewDistance>15</cameraViewDistance>
+      <lidarViewDistance>100</lidarViewDistance>
+      <lidarXViewDistance>20</lidarXViewDistance>
+      <lidarYViewDistance>20</lidarYViewDistance>
       <lidarMinViewDistance>1</lidarMinViewDistance>
       <cameraFOV>3.491</cameraFOV><!--200 degrees-->
       <cameraMinViewDistance>0.5</cameraMinViewDistance>
@@ -56,8 +56,8 @@
       <groundTruthTrackTopicName>/ground_truth/track</groundTruthTrackTopicName>
       <simulatePerception>$(arg simulate_perception)</simulatePerception>
       <perceptionConesTopicName>/fusion/cones</perceptionConesTopicName>
-      <perceptionCameraDepthNoiseParameterA>0.02</perceptionCameraDepthNoiseParameterA>
-      <perceptionCameraDepthNoiseParameterB>0.45</perceptionCameraDepthNoiseParameterB>
+      <perceptionCameraDepthNoiseParameterA>0.01</perceptionCameraDepthNoiseParameterA>
+      <perceptionCameraDepthNoiseParameterB>0.5</perceptionCameraDepthNoiseParameterB>
       <perceptionLidarNoise>0.03 0.03 0.0</perceptionLidarNoise>
       <pubGroundTruth>$(arg pub_ground_truth)</pubGroundTruth>
     </plugin>
