@@ -114,8 +114,8 @@ class BoundingBoxesPlugin : public gazebo::ModelPlugin {
   tf2::Transform transform;
 
   // cone_info
-  struct ConeInfo small_cones {0.15, 0.37};
-  struct ConeInfo big_cones {0.18, 0.57};
+  struct ConeInfo small_cones {0.11, 0.31};
+  struct ConeInfo big_cones {0.13, 0.53};
 
   // Utility
   std::vector<int> bounding_box_vector;
@@ -145,6 +145,12 @@ class BoundingBoxesPlugin : public gazebo::ModelPlugin {
   // Rate to publish ros messages
   double _publish_rate;
   gazebo::common::Time _last_sim_time;
+
+  // Bounding Box Variables
+  cv::Point2d top_left_point;
+  cv::Point2d top_right_point;
+  cv::Point2d bottom_left_point;
+  cv::Point2d bottom_right_point;
 };
 
 }  // namespace eufs_plugins

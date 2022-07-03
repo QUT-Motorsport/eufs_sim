@@ -614,7 +614,8 @@ std::string GazeboConeGroundTruth::pickColorWithProbability(
     return color;
 }
 
-std::map<std::string, std::vector<eufs_msgs::msg::ConeWithCovariance>> GazeboConeGroundTruth::swapConeColors(
+std::map<std::string, std::vector<eufs_msgs::msg::ConeWithCovariance>>
+ GazeboConeGroundTruth::swapConeColors(
   std::map<std::string, std::vector<eufs_msgs::msg::ConeWithCovariance>> color_map) {
   std::map<std::string, std::vector<eufs_msgs::msg::ConeWithCovariance>> new_map;
   for (auto const& [color, source] : color_map) {
