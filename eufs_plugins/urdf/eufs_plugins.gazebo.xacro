@@ -47,18 +47,16 @@
       <lidarYViewDistance>10</lidarYViewDistance>
       <lidarMinViewDistance>1</lidarMinViewDistance>
       <cameraMinViewDistance>1</cameraMinViewDistance>
-      <cameraFOV>1.918889</cameraFOV><!--110 degrees-->
+      <cameraFOV>3.491</cameraFOV><!--200 degrees-->
       <lidarFOV>3.141593</lidarFOV><!-- 180 degrees-->
       <lidarOn>true</lidarOn><!--If false, we only simulate camera measurements-->
       <trackFrame>map</trackFrame>
       <groundTruthConesTopicName>/ground_truth/cones</groundTruthConesTopicName>
-      <groundTruthConeMarkersTopicName>/ground_truth/cones/viz</groundTruthConeMarkersTopicName>
       <groundTruthTrackTopicName>/ground_truth/track</groundTruthTrackTopicName>
       <simulatePerception>$(arg simulate_perception)</simulatePerception>
       <perceptionConesTopicName>/fusion/cones</perceptionConesTopicName>
-      <perceptionConeMarkersTopicName>/fusion/cones/viz</perceptionConeMarkersTopicName>
-      <perceptionCameraDepthNoiseParameterA>0.0184</perceptionCameraDepthNoiseParameterA>
-      <perceptionCameraDepthNoiseParameterB>0.2106</perceptionCameraDepthNoiseParameterB>
+      <perceptionCameraDepthNoiseParameterA>0.02</perceptionCameraDepthNoiseParameterA>
+      <perceptionCameraDepthNoiseParameterB>0.3</perceptionCameraDepthNoiseParameterB>
       <perceptionLidarNoise>0.03 0.03 0.0</perceptionLidarNoise>
       <pubGroundTruth>$(arg pub_ground_truth)</pubGroundTruth>
     </plugin>

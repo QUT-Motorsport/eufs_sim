@@ -54,8 +54,6 @@
 #include <gazebo/physics/World.hh>
 #include <gazebo_ros/node.hpp>
 #include <geometry_msgs/msg/point.hpp>
-#include <visualization_msgs/msg/marker.hpp>
-#include <visualization_msgs/msg/marker_array.hpp>
 
 #include "rclcpp/rclcpp.hpp"
 
@@ -91,27 +89,11 @@ class GazeboConeGroundTruth : public gazebo::ModelPlugin {
 
   GazeboConeGroundTruth::ConeType getConeType(gazebo::physics::LinkPtr link);
 
-  // Getting the cone marker array
-  visualization_msgs::msg::MarkerArray getConeMarkerArrayMessage(
-      eufs_msgs::msg::ConeArrayWithCovariance &cones_message);
   std::string cone_big_mesh_path;
   std::string cone_mesh_path;
 
   // Storing initial Track
   eufs_msgs::msg::ConeArrayWithCovariance initial_track;
-
-  int ground_truth_cone_markers_published = 0;
-  int perception_cone_markers_published = 0;
-
-  int prev_ground_truth_cone_markers_published = 0;
-  int prev_perception_cone_markers_published = 0;
-
-  void removeExcessCones(std::vector<visualization_msgs::msg::Marker> &marker_array,
-                         const int current_array_length, const int prev_array_length);
-
-  int addConeMarkers(std::vector<visualization_msgs::msg::Marker> &marker_array, int marker_id,
-                     std::string frame, std::vector<eufs_msgs::msg::ConeWithCovariance> cones,
-                     float red, float green, float blue, bool big);
 
   // Add noise to the cone arrays
   eufs_msgs::msg::ConeArrayWithCovariance addNoisePerception(
@@ -149,13 +131,8 @@ class GazeboConeGroundTruth : public gazebo::ModelPlugin {
 
   // Publishers
   rclcpp::Publisher<eufs_msgs::msg::ConeArrayWithCovariance>::SharedPtr ground_truth_cone_pub_;
-  rclcpp::Publisher<visualization_msgs::msg::MarkerArray>::SharedPtr ground_truth_cone_marker_pub_;
-
   rclcpp::Publisher<eufs_msgs::msg::ConeArrayWithCovariance>::SharedPtr ground_truth_track_pub_;
-  rclcpp::Publisher<visualization_msgs::msg::MarkerArray>::SharedPtr ground_truth_track_viz_pub_;
-
   rclcpp::Publisher<eufs_msgs::msg::ConeArrayWithCovariance>::SharedPtr perception_cone_pub_;
-  rclcpp::Publisher<visualization_msgs::msg::MarkerArray>::SharedPtr perception_cone_marker_pub_;
 
   // Services
   rclcpp::Service<std_srvs::srv::Trigger>::SharedPtr
