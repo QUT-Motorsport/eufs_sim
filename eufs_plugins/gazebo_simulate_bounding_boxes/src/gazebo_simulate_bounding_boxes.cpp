@@ -268,18 +268,32 @@ std::tuple<std::vector<std::vector<double>>, std::vector<std::vector<double>>>
 
     // Ground Truth Bounding Boxes
     double y_min, y_max, z_min, z_max;
-    y_min = new_point.y() + cone_info_.radius;
-    y_max = new_point.y() - cone_info_.radius;
-    z_max = new_point.z() + cone_info_.height;
+    y_min = new_point.y();
     z_min = new_point.z();
+    y_max = new_point.y() - 2 * cone_info_.radius;
+    z_max = new_point.z() + cone_info_.height;
 
-    cv::Point2d top_left_point = camera_model.project3dToPixel(
-                                  cv::Point3d(-y_min, -z_max, new_point.x()));
-    cv::Point2d bottom_right_point = camera_model.project3dToPixel(
-                                  cv::Point3d(-y_max, -z_min, new_point.x()));
+    // For some reason, defining this in the header file messes up the bounding boxes visualizer
+    // but defining it here seems to work.
+    std::vector<double> ground_truth_bounding_box;
 
-    std::vector<double> ground_truth_bounding_box {bottom_right_point.x, top_left_point.y,
-                                      top_left_point.x, bottom_right_point.y};
+    // For right cones
+    if (new_point.y() < 0) {
+    top_left_point = camera_model.project3dToPixel(
+                                  cv::Point3d(-y_min, -z_max, new_point.x() + cone_info_.radius));
+    bottom_right_point = camera_model.project3dToPixel(
+                                  cv::Point3d(-y_max, -z_min, new_point.x() - cone_info_.radius));
+    ground_truth_bounding_box.insert(ground_truth_bounding_box.end(), {bottom_right_point.x,
+                                      top_left_point.y, top_left_point.x, bottom_right_point.y});
+    } else {
+    // For left cones
+    top_right_point = camera_model.project3dToPixel(
+                                  cv::Point3d(-y_max, -z_max, new_point.x() + cone_info_.radius));
+    bottom_left_point = camera_model.project3dToPixel(
+                                  cv::Point3d(-y_min, -z_min, new_point.x() - cone_info_.radius));
+    ground_truth_bounding_box.insert(ground_truth_bounding_box.end(), {top_right_point.x,
+                                     top_right_point.y, bottom_left_point.x, bottom_left_point.y});
+    }
 
     // Noisy Bounding Boxes
     // Randomize seed to generate different normal distribution value
@@ -292,10 +306,23 @@ std::tuple<std::vector<std::vector<double>>, std::vector<std::vector<double>>>
     double gaussian_noise_width = static_cast<double>(distNRadius(seed_width));
     double gaussian_noise_height = static_cast<double>(distNHeight(seed_height));
 
-    std::vector<double> noisy_bounding_box {bottom_right_point.x + gaussian_noise_width,
-                                            top_left_point.y + gaussian_noise_height,
-                                            top_left_point.x - gaussian_noise_width,
-                                            bottom_right_point.y - gaussian_noise_height};
+    std::vector<double> noisy_bounding_box;
+
+    // For right cones
+    if (new_point.y() < 0) {
+      noisy_bounding_box.insert(noisy_bounding_box.end(),
+                                {bottom_right_point.x + gaussian_noise_width,
+                                  top_left_point.y + gaussian_noise_height,
+                                  top_left_point.x - gaussian_noise_width,
+                                  bottom_right_point.y - gaussian_noise_height});
+    } else {
+    // For left cones
+      noisy_bounding_box.insert(noisy_bounding_box.end(),
+                                {top_right_point.x + gaussian_noise_width,
+                                  top_right_point.y + gaussian_noise_height,
+                                  bottom_left_point.x - gaussian_noise_width,
+                                  bottom_left_point.y - gaussian_noise_height});
+    }
 
     // Add noise to the bounding box
     add_gaussian_noise_to_bounding_box(noisy_bounding_box, seed_bounding_box);
