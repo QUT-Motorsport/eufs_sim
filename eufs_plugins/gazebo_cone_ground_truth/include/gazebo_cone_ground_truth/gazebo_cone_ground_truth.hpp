@@ -54,10 +54,9 @@
 #include <string>
 #include <utility>
 #include <vector>
-#include <visualization_msgs/msg/marker.hpp>
-#include <visualization_msgs/msg/marker_array.hpp>
 
 #include "rclcpp/rclcpp.hpp"
+#include "yaml-cpp/yaml.h"
 
 // ROS  srvs
 #include <std_srvs/srv/trigger.hpp>
@@ -71,42 +70,6 @@ class GazeboConeGroundTruth : public gazebo::ModelPlugin {
   GazeboConeGroundTruth();
 
   // Gazebo plugin functions
-
-  double blueMismatch = 0.0;
-  double b2y = 0.0;
-  double b2o = 0.0;
-  double b2O = 0.0;
-  double b2u = 0.0;
-  double b2v = 0.0;
-
-  double yellowMismatch = 0.0;
-  double y2b = 0.0;
-  double y2o = 0.0;
-  double y2O = 0.0;
-  double y2u = 0.0;
-  double y2v = 0.0;
-
-  double orangeMismatch = 0.0;
-  double o2y = 0.0;
-  double o2b = 0.0;
-  double o2O = 0.0;
-  double o2u = 0.0;
-  double o2v = 0.0;
-
-  double bigOrangeMismatch = 0.0;
-  double bO2y = 0.0;
-  double bO2o = 0.0;
-  double bO2b = 0.0;
-  double bO2u = 0.0;
-  double bO2v = 0.0;
-
-  double unknownMismatch = 0.0;
-  double u2y = 0.0;
-  double u2o = 0.0;
-  double u2O = 0.0;
-  double u2b = 0.0;
-  double u2v = 0.0;
-
   void Load(gazebo::physics::ModelPtr _parent, sdf::ElementPtr _sdf);
 
   void UpdateChild();
@@ -126,27 +89,11 @@ class GazeboConeGroundTruth : public gazebo::ModelPlugin {
 
   GazeboConeGroundTruth::ConeType getConeType(gazebo::physics::LinkPtr link);
 
-  // Getting the cone marker array
-  visualization_msgs::msg::MarkerArray getConeMarkerArrayMessage(
-      eufs_msgs::msg::ConeArrayWithCovariance &cones_message);
   std::string cone_big_mesh_path;
   std::string cone_mesh_path;
 
   // Storing initial Track
   eufs_msgs::msg::ConeArrayWithCovariance initial_track;
-
-  int ground_truth_cone_markers_published = 0;
-  int perception_cone_markers_published = 0;
-
-  int prev_ground_truth_cone_markers_published = 0;
-  int prev_perception_cone_markers_published = 0;
-
-  void removeExcessCones(std::vector<visualization_msgs::msg::Marker> &marker_array,
-                         const int current_array_length, const int prev_array_length);
-
-  int addConeMarkers(std::vector<visualization_msgs::msg::Marker> &marker_array, int marker_id,
-                     std::string frame, std::vector<eufs_msgs::msg::ConeWithCovariance> cones,
-                     float red, float green, float blue, bool big);
 
   // Add noise to the cone arrays
   eufs_msgs::msg::ConeArrayWithCovariance addNoisePerception(
@@ -155,11 +102,10 @@ class GazeboConeGroundTruth : public gazebo::ModelPlugin {
                            ignition::math::Vector3d noise);
   double GaussianKernel(double mu, double sigma);
 
-  void randomChangeConeColor(std::vector<eufs_msgs::msg::ConeWithCovariance> &blue,
-                             std::vector<eufs_msgs::msg::ConeWithCovariance> &yellow,
-                             std::vector<eufs_msgs::msg::ConeWithCovariance> &orange,
-                             std::vector<eufs_msgs::msg::ConeWithCovariance> &big_orange,
-                             std::vector<eufs_msgs::msg::ConeWithCovariance> &unknown_color);
+  // Returns pointer to cone array at random given weights
+  std::string pickColorWithProbability(const YAML::Node weights);
+  std::map<std::string, std::vector<eufs_msgs::msg::ConeWithCovariance>> swapConeColors(
+    std::map<std::string, std::vector<eufs_msgs::msg::ConeWithCovariance>> color_map);
 
   // Helper function for parameters
   bool getBoolParameter(sdf::ElementPtr _sdf, const char *element, bool default_value,
@@ -190,13 +136,8 @@ class GazeboConeGroundTruth : public gazebo::ModelPlugin {
 
   // Publishers
   rclcpp::Publisher<eufs_msgs::msg::ConeArrayWithCovariance>::SharedPtr ground_truth_cone_pub_;
-  rclcpp::Publisher<visualization_msgs::msg::MarkerArray>::SharedPtr ground_truth_cone_marker_pub_;
-
   rclcpp::Publisher<eufs_msgs::msg::ConeArrayWithCovariance>::SharedPtr ground_truth_track_pub_;
-  rclcpp::Publisher<visualization_msgs::msg::MarkerArray>::SharedPtr ground_truth_track_viz_pub_;
-
   rclcpp::Publisher<eufs_msgs::msg::ConeArrayWithCovariance>::SharedPtr perception_cone_pub_;
-  rclcpp::Publisher<visualization_msgs::msg::MarkerArray>::SharedPtr perception_cone_marker_pub_;
 
   // Services
   rclcpp::Service<std_srvs::srv::Trigger>::SharedPtr
@@ -227,7 +168,7 @@ class GazeboConeGroundTruth : public gazebo::ModelPlugin {
   double camera_noise_percentage;
   bool lidar_on;
   bool pub_ground_truth;
-  YAML::Node recolour_config;
+  YAML::Node recolor_config;
 
   double update_rate_;
   gazebo::common::Time time_last_published;

@@ -34,8 +34,6 @@
 
 #include "gazebo_cone_ground_truth/gazebo_cone_ground_truth.hpp"
 
-#include "yaml-cpp/yaml.h"
-
 namespace gazebo_plugins {
 namespace eufs_plugins {
 
@@ -83,20 +81,20 @@ void GazeboConeGroundTruth::Load(gazebo::physics::ModelPtr _parent, sdf::Element
       getVector3dParameter(_sdf, "perceptionNoise", {0.03, 0.03, 0.0}, "0.03, 0.03, 0.0");
 
   std::string random_cone_color_yaml = "";
-  if (!_sdf->HasElement("random_cone_settings")) {
-    RCLCPP_FATAL(rosnode_->get_logger(),
-                 "gazebo_cone_ground_truth plugin missing <random_cone_settings>, cannot proceed");
+  if (!_sdf->HasElement("recolor_config")) {
+    RCLCPP_FATAL(this->rosnode_->get_logger(),
+                 "gazebo_cone_ground_truth plugin missing <recolor_config>, cannot proceed");
     return;
   } else {
-    random_cone_color_yaml = _sdf->GetElement("recolour_config")->Get<std::string>();
+    random_cone_color_yaml = _sdf->GetElement("recolor_config")->Get<std::string>();
   }
 
   try {
-    recolour_config = YAML::LoadFile(random_cone_color_yaml);
+    recolor_config = YAML::LoadFile(random_cone_color_yaml);
   } catch (std::exception &e) {
     RCLCPP_FATAL(this->rosnode_->get_logger(), "Unable to load %s due to %s error.",
                  random_cone_color_yaml.c_str(), e.what());
-    RCLCPP_FATAL(this->rosnode_->get_logger(), "Cone recolouring yaml will not load, cannot proceed");
+    RCLCPP_FATAL(this->rosnode_->get_logger(), "Cone recoloring yaml will not load, cannot proceed");
   }
 
   // Setup the publishers
@@ -111,19 +109,6 @@ void GazeboConeGroundTruth::Load(gazebo::physics::ModelPtr _parent, sdf::Element
         this->rosnode_->create_publisher<eufs_msgs::msg::ConeArrayWithCovariance>(topic_name_, 1);
   }
 
-  // Ground truth cone marker publisher
-  if (!_sdf->HasElement("groundTruthConeMarkersTopicName")) {
-    RCLCPP_FATAL(
-        this->rosnode_->get_logger(),
-        "state_ground_truth plugin missing <groundTruthConeMarkersTopicName>, cannot proceed");
-    return;
-  } else {
-    std::string topic_name_ =
-        _sdf->GetElement("groundTruthConeMarkersTopicName")->Get<std::string>();
-    this->ground_truth_cone_marker_pub_ =
-        this->rosnode_->create_publisher<visualization_msgs::msg::MarkerArray>(topic_name_, 1);
-  }
-
   // Ground truth track publisher
   if (!_sdf->HasElement("groundTruthTrackTopicName")) {
     RCLCPP_FATAL(this->rosnode_->get_logger(),
@@ -133,9 +118,6 @@ void GazeboConeGroundTruth::Load(gazebo::physics::ModelPtr _parent, sdf::Element
     std::string topic_name_ = _sdf->GetElement("groundTruthTrackTopicName")->Get<std::string>();
     this->ground_truth_track_pub_ =
         this->rosnode_->create_publisher<eufs_msgs::msg::ConeArrayWithCovariance>(topic_name_, 1);
-    std::string viz_topic = topic_name_ + "/viz";
-    this->ground_truth_track_viz_pub_ =
-        this->rosnode_->create_publisher<visualization_msgs::msg::MarkerArray>(viz_topic, 1);
   }
 
   if (!_sdf->HasElement("pubGroundTruth")) {
@@ -156,19 +138,6 @@ void GazeboConeGroundTruth::Load(gazebo::physics::ModelPtr _parent, sdf::Element
       std::string topic_name_ = _sdf->GetElement("perceptionConesTopicName")->Get<std::string>();
       this->perception_cone_pub_ =
           this->rosnode_->create_publisher<eufs_msgs::msg::ConeArrayWithCovariance>(topic_name_, 1);
-    }
-
-    // Camera cone marker publisher
-    if (!_sdf->HasElement("perceptionConeMarkersTopicName")) {
-      RCLCPP_FATAL(
-          this->rosnode_->get_logger(),
-          "state_ground_truth plugin missing <perceptionConeMarkersTopicName>, cannot proceed");
-      return;
-    } else {
-      std::string topic_name_ =
-          _sdf->GetElement("perceptionConeMarkersTopicName")->Get<std::string>();
-      this->perception_cone_marker_pub_ =
-          this->rosnode_->create_publisher<visualization_msgs::msg::MarkerArray>(topic_name_, 1);
     }
   }
 
@@ -208,12 +177,9 @@ void GazeboConeGroundTruth::UpdateChild() {
 
   // Check if there is a reason to publish the data
   if (this->ground_truth_cone_pub_->get_subscription_count() == 0 &&
-      this->ground_truth_cone_marker_pub_->get_subscription_count() == 0 &&
       this->ground_truth_track_pub_->get_subscription_count() == 0 &&
-      this->ground_truth_track_viz_pub_->get_subscription_count() == 0 &&
       (!this->simulate_perception_ ||
-       (this->perception_cone_pub_->get_subscription_count() == 0 &&
-        this->perception_cone_marker_pub_->get_subscription_count() == 0))) {
+       (this->perception_cone_pub_->get_subscription_count() == 0))) {
     RCLCPP_DEBUG(this->rosnode_->get_logger(),
                  "Nobody is listening to cone_ground_truth. Doing nothing");
     return;
@@ -242,67 +208,18 @@ void GazeboConeGroundTruth::UpdateChild() {
     this->ground_truth_track_pub_->publish(ground_truth_track_message);
   }
 
-  // Publish the ground truth track markers if it has subscribers and is allowed to publish
-  if (this->ground_truth_track_viz_pub_->get_subscription_count() > 0 && pub_ground_truth) {
-    visualization_msgs::msg::MarkerArray ground_truth_track_marker_array_message =
-        getConeMarkerArrayMessage(ground_truth_track_message);
-    this->ground_truth_track_viz_pub_->publish(ground_truth_track_marker_array_message);
-  }
-
-  eufs_msgs::msg::ConeArrayWithCovariance ground_truth_cones_message =
-      processCones(cone_arrays_message);
+  eufs_msgs::msg::ConeArrayWithCovariance ground_truth_cones_message = processCones(cone_arrays_message);
 
   // Publish the ground truth cones if it has subscribers and is allowed to publish
   if (this->ground_truth_cone_pub_->get_subscription_count() > 0 && pub_ground_truth) {
     this->ground_truth_cone_pub_->publish(ground_truth_cones_message);
   }
 
-  // Publish the ground truth cone markers if it has subscribers and is allowed to publish
-  if (this->ground_truth_cone_marker_pub_->get_subscription_count() > 0 && pub_ground_truth) {
-    visualization_msgs::msg::MarkerArray ground_truth_cone_marker_array_message =
-        getConeMarkerArrayMessage(ground_truth_cones_message);
-
-    ground_truth_cone_markers_published = ground_truth_cone_marker_array_message.markers.size();
-    this->removeExcessCones(ground_truth_cone_marker_array_message.markers,
-                            ground_truth_cone_markers_published,
-                            prev_ground_truth_cone_markers_published);
-    this->ground_truth_cone_marker_pub_->publish(ground_truth_cone_marker_array_message);
-    this->prev_ground_truth_cone_markers_published = ground_truth_cone_markers_published;
-  }
-
   // Publish the simulated perception cones if it has subscribers
-  if (this->simulate_perception_ &&
-      (this->perception_cone_pub_->get_subscription_count() > 0 ||
-       this->perception_cone_marker_pub_->get_subscription_count() > 0)) {
+  if (this->simulate_perception_ && this->perception_cone_pub_->get_subscription_count() > 0) {
     eufs_msgs::msg::ConeArrayWithCovariance perception_cones_message =
         addNoisePerception(ground_truth_cones_message, perception_lidar_noise_);
-
-    if (this->perception_cone_pub_->get_subscription_count() > 0) {
-      this->perception_cone_pub_->publish(perception_cones_message);
-    }
-
-    if (this->perception_cone_marker_pub_->get_subscription_count() > 0) {
-      visualization_msgs::msg::MarkerArray perception_cone_marker_array_message =
-          getConeMarkerArrayMessage(perception_cones_message);
-
-      perception_cone_markers_published = perception_cone_marker_array_message.markers.size();
-      this->removeExcessCones(perception_cone_marker_array_message.markers,
-                              perception_cone_markers_published,
-                              prev_perception_cone_markers_published);
-      this->perception_cone_marker_pub_->publish(perception_cone_marker_array_message);
-      this->prev_perception_cone_markers_published = perception_cone_markers_published;
-    }
-  }
-}
-
-void GazeboConeGroundTruth::removeExcessCones(
-    std::vector<visualization_msgs::msg::Marker> &marker_array, const int current_array_length,
-    const int prev_array_length) {
-  for (int i = current_array_length; i < prev_array_length; i++) {
-    visualization_msgs::msg::Marker deleted_marker;
-    deleted_marker.id = i;
-    deleted_marker.action = deleted_marker.DELETE;
-    marker_array.push_back(deleted_marker);
+    this->perception_cone_pub_->publish(perception_cones_message);
   }
 }
 
@@ -433,7 +350,7 @@ bool GazeboConeGroundTruth::resetConePosition(
     eufs_msgs::msg::ConeWithCovariance cone;
     ConeType cone_type = this->getConeType(links[i]);
 
-    // sort by cone colour
+    // sort by cone color
     switch (cone_type) {
       case ConeType::blue:
         cone = this->initial_track.blue_cones[blue_i];
@@ -579,71 +496,6 @@ GazeboConeGroundTruth::ConeType GazeboConeGroundTruth::getConeType(gazebo::physi
   return ConeType::unknown;
 }
 
-// Getting the cone marker array
-
-visualization_msgs::msg::MarkerArray GazeboConeGroundTruth::getConeMarkerArrayMessage(
-    eufs_msgs::msg::ConeArrayWithCovariance &cones_message) {
-  visualization_msgs::msg::MarkerArray ground_truth_cone_marker_array;
-  std::string frame = cones_message.header.frame_id;
-
-  int marker_id = 0;
-  marker_id = addConeMarkers(ground_truth_cone_marker_array.markers, marker_id, frame,
-                             cones_message.blue_cones, 0.2, 0.2, 1, false);
-  marker_id = addConeMarkers(ground_truth_cone_marker_array.markers, marker_id, frame,
-                             cones_message.yellow_cones, 1, 1, 0, false);
-  marker_id = addConeMarkers(ground_truth_cone_marker_array.markers, marker_id, frame,
-                             cones_message.orange_cones, 1, 0.549, 0, false);
-  marker_id = addConeMarkers(ground_truth_cone_marker_array.markers, marker_id, frame,
-                             cones_message.big_orange_cones, 1, 0.271, 0, true);
-  marker_id = addConeMarkers(ground_truth_cone_marker_array.markers, marker_id, frame,
-                             cones_message.unknown_color_cones, 0.7, 0.7, 0.7, false);
-
-  return ground_truth_cone_marker_array;
-}
-
-int GazeboConeGroundTruth::addConeMarkers(
-    std::vector<visualization_msgs::msg::Marker> &marker_array, int marker_id, std::string frame,
-    std::vector<eufs_msgs::msg::ConeWithCovariance> cones, float red, float green, float blue,
-    bool big) {
-  int id = marker_id;
-  for (unsigned int i = 0; i < cones.size(); i++) {
-    visualization_msgs::msg::Marker marker;
-    marker.header.stamp.sec = this->time_last_published.sec;
-    marker.header.stamp.nanosec = this->time_last_published.nsec;
-    marker.header.frame_id = frame;
-
-    marker.id = id;
-
-    marker.type = marker.MESH_RESOURCE;
-    marker.action = marker.ADD;
-
-    marker.pose.position.x = cones[i].point.x;
-    marker.pose.position.y = cones[i].point.y;
-
-    marker.scale.x = 1.5;
-    marker.scale.y = 1.5;
-    marker.scale.z = 1.5;
-
-    if (big) {
-      marker.mesh_resource = cone_big_mesh_path;
-    } else {
-      marker.mesh_resource = cone_mesh_path;
-    }
-
-    marker.color.r = red;
-    marker.color.g = green;
-    marker.color.b = blue;
-    marker.color.a = 1.0;
-
-    marker.lifetime = rclcpp::Duration::from_seconds(0.2);
-
-    marker_array.push_back(marker);
-
-    id++;
-  }
-  return id;
-}
-
 // Add noise to the cone arrays
 eufs_msgs::msg::ConeArrayWithCovariance GazeboConeGroundTruth::addNoisePerception(
     eufs_msgs::msg::ConeArrayWithCovariance &cones_message, ignition::math::Vector3d noise) {
@@ -655,15 +507,25 @@ eufs_msgs::msg::ConeArrayWithCovariance GazeboConeGroundTruth::addNoisePerceptio
   addNoiseToConeArray(cones_message_with_noise.big_orange_cones, noise);
   addNoiseToConeArray(cones_message_with_noise.unknown_color_cones, noise);
 
-  randomChangeConeColor(cones_message_with_noise.blue_cones, cones_message_with_noise.yellow_cones,
-                        cones_message_with_noise.orange_cones,
-                        cones_message_with_noise.big_orange_cones,
-                        cones_message_with_noise.unknown_color_cones);
+  std::map<std::string, std::vector<eufs_msgs::msg::ConeWithCovariance>> color_map = {
+    {"blue", cones_message_with_noise.blue_cones},
+    {"yellow", cones_message_with_noise.yellow_cones},
+    {"orange", cones_message_with_noise.orange_cones},
+    {"big_orange", cones_message_with_noise.big_orange_cones},
+    {"unknown_color", cones_message_with_noise.unknown_color_cones}};
+
+  color_map = swapConeColors(color_map);
+
+  cones_message_with_noise.blue_cones = color_map["blue"];
+  cones_message_with_noise.yellow_cones = color_map["yellow"];
+  cones_message_with_noise.orange_cones = color_map["orange"];
+  cones_message_with_noise.big_orange_cones = color_map["big_orange"];
+  cones_message_with_noise.unknown_color_cones = color_map["unknown_color"];
+
 
   cones_message_with_noise.header.frame_id = this->cone_frame_;
   cones_message_with_noise.header.stamp.sec = this->time_last_published.sec;
   cones_message_with_noise.header.stamp.nanosec = this->time_last_published.nsec;
-
   return cones_message_with_noise;
 }
 
@@ -677,7 +539,7 @@ void GazeboConeGroundTruth::addNoiseToConeArray(
     // Camera noise
     auto dist = sqrt(cone_array[i].point.x * cone_array[i].point.x +
                      cone_array[i].point.y * cone_array[i].point.y);
-    auto camera_x_noise = camera_a * std::exp(camera_b * dist);
+    auto camera_x_noise = camera_a * std::fmin(70.0, std::exp(camera_b * dist));
     auto camera_y_noise = camera_x_noise / 5;
 
     // Fuse noise
@@ -686,9 +548,25 @@ void GazeboConeGroundTruth::addNoiseToConeArray(
     auto y_noise = (camera_noise_percentage * camera_y_noise) +
                    ((1 - camera_noise_percentage) * lidar_y_noise);
 
-    // Apply noise
-    cone_array[i].point.x += GaussianKernel(0, x_noise);
-    cone_array[i].point.y += GaussianKernel(0, y_noise);
+    // Add noise in direction of cone position vector
+    double par_x = cone_array[i].point.x / dist;
+    double par_y = cone_array[i].point.y / dist;
+
+    // Generate perpendicular unit vector
+    auto perp_x = -1.0 * par_y;
+    auto perp_y = par_x;
+
+    // Create noise vector
+    auto par_noise = GaussianKernel(0, x_noise);
+    par_x *= par_noise;
+    par_y *= par_noise;
+    auto perp_noise = GaussianKernel(0, y_noise);
+    perp_x *= perp_noise;
+    perp_y *= perp_noise;
+
+    // Add noise vector to cone pose
+    cone_array[i].point.x += par_x + perp_x;
+    cone_array[i].point.y += par_y + perp_y;
     cone_array[i].covariance = {x_noise, 0, 0, y_noise};
   }
 }
@@ -712,145 +590,42 @@ double GazeboConeGroundTruth::GaussianKernel(double mu, double sigma) {
   return X;
 }
 
-void GazeboConeGroundTruth::randomChangeConeColour(std::vector<eufs_msgs::msg::ConeWithCovariance> &blue,
-    std::vector<eufs_msgs::msg::ConeWithCovariance> &yellow,
-    std::vector<eufs_msgs::msg::ConeWithCovariance> &orange,
-    std::vector<eufs_msgs::msg::ConeWithCovariance> &big_orange,
-    std::vector<eufs_msgs::msg::ConeWithCovariance> &unknown_color) {
-  auto it =
+// Returns pointer to cone array at random given weights
+std::string GazeboConeGroundTruth::pickColorWithProbability (
+  const YAML::Node weights) {
+    double rand = static_cast<double>(rand_r(&this->seed)) / static_cast<double>(RAND_MAX);
+    float sum = 0.0;
+    std::string color = "";
+    for (YAML::const_iterator it = weights.begin(); it != weights.end(); it++) {
+      sum += it->second.as<float>();
+      if (rand <= sum && color.empty()) {
+          color = it->first.as<std::string>();
+        }
+      }
+    if (sum != 1.0f or color.empty()) {
+      RCLCPP_WARN_ONCE(this->rosnode_->get_logger(), "Cone mis-coloring config invalid");
+      RCLCPP_WARN_ONCE(this->rosnode_->get_logger(), "Total probability  %s config is %f", color.c_str(), sum);
+    }
+    return color;
 }
 
-void GazeboConeGroundTruth::shiftWithProbability(
-    std::vector<eufs_msgs::msg::ConeWithCovariance> &source
-    std::vector<std::vector<eufs_msgs::msg::ConeWithCovariance>> &targets) {
-  auto it = source.begin;
-  while (it != source.end()) {
-     for (const)
-
-  }
-}
-
-std::vector<eufs_msgs::msg::ConeWithCovariance> GazeboConeGroundTruth::pickWithProbabilty(
-    std::vector<std::vector<eufs_msgs::msg::ConeWithCovariance>> &targets
-    const std::vector<double> weights) {
-      if (targets.size() != weights.size() || std::accumulate(weights.begin(), weights.end(), 0.0) != 1.0;) {
-        RCLCPP_FATAL(rosnode_->get_logger(), "Cone colouring config is not formatted correctly, cannot proceed")
-      }
-      else {
-
+std::map<std::string, std::vector<eufs_msgs::msg::ConeWithCovariance>> GazeboConeGroundTruth::swapConeColors (
+  std::map<std::string, std::vector<eufs_msgs::msg::ConeWithCovariance>> color_map) {
+  std::map<std::string, std::vector<eufs_msgs::msg::ConeWithCovariance>> new_map;
+  for (auto const& [color, source] : color_map) {
+    for (auto cone : source) {
+      std::string rand_color = pickColorWithProbability(recolor_config[color]);
+      if (rand_color != "undetected") {
+        if (!new_map.count(rand_color)) {
+          std::vector<eufs_msgs::msg::ConeWithCovariance> new_cones = {cone};
+          new_map.insert({rand_color, new_cones});
+        } else {
+          new_map.find(rand_color)->second.push_back(cone);
+        }
       }
     }
-
-void GazeboConeGroundTruth::randomChangeConeColor(
-    std::vector<eufs_msgs::msg::ConeWithCovariance> &blue,
-    std::vector<eufs_msgs::msg::ConeWithCovariance> &yellow,
-    std::vector<eufs_msgs::msg::ConeWithCovariance> &orange,
-    std::vector<eufs_msgs::msg::ConeWithCovariance> &big_orange,
-    std::vector<eufs_msgs::msg::ConeWithCovariance> &unknown_color) {
-  auto it = blue.begin();
-  while (it != blue.end()) {
-    double U = static_cast<double>(rand_r(&this->seed)) / static_cast<double>(RAND_MAX);
-    if (U >= (1 - blueMismatch)) {
-      double V = static_cast<double>(rand_r(&this->seed)) / static_cast<double>(RAND_MAX);
-      if (0 < V && V <= b2y) {
-        yellow.insert(yellow.end(), blue[it - blue.begin()]);
-      } else if (b2y < V && V <= b2y + b2o) {
-        orange.insert(orange.end(), blue[it - blue.begin()]);
-      } else if (b2y + b2o < V && V <= b2y + b2o + b2O) {
-        big_orange.insert(big_orange.end(), blue[it - blue.begin()]);
-      } else if (b2y + b2o + b2O < V && V <= b2y + b2o + b2O + b2u) {
-        unknown_color.insert(unknown_color.end(), blue[it - blue.begin()]);
-      } else if (b2y + b2o + b2O + b2u < V && V <= 1) {
-      }
-      it = blue.erase(it);
-    } else {
-      ++it;
-    }
   }
-
-  it = yellow.begin();
-  while (it != yellow.end()) {
-    double U = static_cast<double>(rand_r(&this->seed)) / static_cast<double>(RAND_MAX);
-    if (U >= (1 - yellowMismatch)) {
-      double V = static_cast<double>(rand_r(&this->seed)) / static_cast<double>(RAND_MAX);
-      if (0 < V && V <= y2b) {
-        blue.insert(blue.end(), yellow[it - yellow.begin()]);
-      } else if (y2b < V && V <= y2b + y2o) {
-        orange.insert(orange.end(), yellow[it - yellow.begin()]);
-      } else if (y2b + y2o < V && V <= y2b + y2o + y2O) {
-        big_orange.insert(big_orange.end(), yellow[it - yellow.begin()]);
-      } else if (y2b + y2o + y2O < V && V <= y2b + y2o + y2O + y2u) {
-        unknown_color.insert(unknown_color.end(), yellow[it - yellow.begin()]);
-      } else if (y2b + y2o + y2O + y2u < V && V <= 1) {
-      }
-      it = yellow.erase(it);
-    } else {
-      ++it;
-    }
-  }
-
-  it = orange.begin();
-  while (it != orange.end()) {
-    double U = static_cast<double>(rand_r(&this->seed)) / static_cast<double>(RAND_MAX);
-    if (U >= (1 - orangeMismatch)) {
-      double V = static_cast<double>(rand_r(&this->seed)) / static_cast<double>(RAND_MAX);
-      if (0 < V && V <= o2y) {
-        yellow.insert(yellow.end(), orange[it - orange.begin()]);
-      } else if (o2y < V && V <= o2y + o2b) {
-        blue.insert(blue.end(), orange[it - orange.begin()]);
-      } else if (o2y + o2b < V && V <= o2y + o2b + o2O) {
-        big_orange.insert(big_orange.end(), orange[it - orange.begin()]);
-      } else if (o2y + o2b + o2O < V && V <= o2y + o2b + o2O + o2u) {
-        unknown_color.insert(unknown_color.end(), orange[it - orange.begin()]);
-      } else if (o2y + o2b + o2O + o2u < V && V <= 1) {
-      }
-      it = orange.erase(it);
-    } else {
-      ++it;
-    }
-  }
-
-  it = big_orange.begin();
-  while (it != big_orange.end()) {
-    double U = static_cast<double>(rand_r(&this->seed)) / static_cast<double>(RAND_MAX);
-    if (U >= (1 - bigOrangeMismatch)) {
-      double V = static_cast<double>(rand_r(&this->seed)) / static_cast<double>(RAND_MAX);
-      if (0 < V && V <= bO2y) {
-        yellow.insert(yellow.end(), big_orange[it - big_orange.begin()]);
-      } else if (bO2y < V && V <= bO2y + bO2o) {
-        orange.insert(orange.end(), big_orange[it - big_orange.begin()]);
-      } else if (bO2y + bO2o < V && V <= bO2y + bO2o + bO2b) {
-        blue.insert(blue.end(), big_orange[it - big_orange.begin()]);
-      } else if (bO2y + bO2o + bO2b < V && V <= bO2y + bO2o + bO2b + bO2u) {
-        unknown_color.insert(unknown_color.end(), big_orange[it - big_orange.begin()]);
-      } else if (bO2y + bO2o + bO2b + bO2u < V && V <= 1) {
-      }
-      it = big_orange.erase(it);
-    } else {
-      ++it;
-    }
-  }
-
-  it = unknown_color.begin();
-  while (it != unknown_color.end()) {
-    double U = static_cast<double>(rand_r(&this->seed)) / static_cast<double>(RAND_MAX);
-    if (U >= (1 - unknownMismatch)) {
-      double V = static_cast<double>(rand_r(&this->seed)) / static_cast<double>(RAND_MAX);
-      if (0 < V && V <= u2y) {
-        yellow.insert(yellow.end(), unknown_color[it - unknown_color.begin()]);
-      } else if (u2y < V && V <= u2y + u2o) {
-        orange.insert(orange.end(), unknown_color[it - unknown_color.begin()]);
-      } else if (u2y + u2o < V && V <= u2y + u2o + u2O) {
-        big_orange.insert(big_orange.end(), unknown_color[it - unknown_color.begin()]);
-      } else if (u2y + u2o + u2O < V && V <= u2y + u2o + u2O + u2b) {
-        blue.insert(blue.end(), unknown_color[it - unknown_color.begin()]);
-      } else if (u2y + u2o + u2O + u2b < V && V <= 1) {
-      }
-      it = unknown_color.erase(it);
-    } else {
-      ++it;
-    }
-  }
+  return new_map;
 }
 
 // Helper function for parameters

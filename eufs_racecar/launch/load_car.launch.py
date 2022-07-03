@@ -34,8 +34,8 @@ def spawn_car(context, *args, **kwargs):
     config_file = join(get_package_share_directory('eufs_racecar'), 'robots', robot_name,
                        vehicle_model_config)
     noise_file = join(get_package_share_directory('eufs_models'), 'config', 'noise.yaml')
-    recolour_config = join(get_package_share_directory('eufs_plugins'), 'config',
-                           'cone_recolour.yaml')
+    recolor_config = join(get_package_share_directory('eufs_plugins'), 'config',
+                           'cone_recolor.yaml')
 
     xacro_path = join(get_package_share_directory('eufs_racecar'),
                               'robots', robot_name, 'robot.urdf.xacro')
@@ -52,7 +52,7 @@ def spawn_car(context, *args, **kwargs):
                                  'command_mode': command_mode,
                                  'config_file': config_file,
                                  'noise_config': noise_file,
-                                 'recolour_config': recolour_config,
+                                 'recolor_config': recolor_config,
                                  'publish_tf': publish_tf,
                                  'simulate_perception': simulate_perception,
                                  'pub_ground_truth': pub_ground_truth,
