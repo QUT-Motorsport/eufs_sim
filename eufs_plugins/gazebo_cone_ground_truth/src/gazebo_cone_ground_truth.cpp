@@ -94,7 +94,8 @@ void GazeboConeGroundTruth::Load(gazebo::physics::ModelPtr _parent, sdf::Element
   } catch (std::exception &e) {
     RCLCPP_FATAL(this->rosnode_->get_logger(), "Unable to load %s due to %s error.",
                  random_cone_color_yaml.c_str(), e.what());
-    RCLCPP_FATAL(this->rosnode_->get_logger(), "Cone recoloring yaml will not load, cannot proceed");
+    RCLCPP_FATAL(this->rosnode_->get_logger(),
+    "Cone recoloring yaml will not load, cannot proceed");
   }
 
   // Setup the publishers
@@ -593,7 +594,7 @@ double GazeboConeGroundTruth::GaussianKernel(double mu, double sigma) {
 }
 
 // Returns pointer to cone array at random given weights
-std::string GazeboConeGroundTruth::pickColorWithProbability (
+std::string GazeboConeGroundTruth::pickColorWithProbability(
   const YAML::Node weights) {
     double rand = static_cast<double>(rand_r(&this->seed)) / static_cast<double>(RAND_MAX);
     float sum = 0.0;
@@ -604,14 +605,16 @@ std::string GazeboConeGroundTruth::pickColorWithProbability (
           color = it->first.as<std::string>();
         }
       }
-    if (sum != 1.0f or color.empty()) {
-      RCLCPP_WARN_ONCE(this->rosnode_->get_logger(), "Cone mis-coloring config invalid");
-      RCLCPP_WARN_ONCE(this->rosnode_->get_logger(), "Total probability  %s config is %f", color.c_str(), sum);
+    if (sum != 1.0f || color.empty()) {
+      RCLCPP_WARN_ONCE(this->rosnode_->get_logger(),
+      "Cone mis-coloring config invalid");
+      RCLCPP_WARN_ONCE(this->rosnode_->get_logger(),
+      "Total probability  %s config is %f", color.c_str(), sum);
     }
     return color;
 }
 
-std::map<std::string, std::vector<eufs_msgs::msg::ConeWithCovariance>> GazeboConeGroundTruth::swapConeColors (
+std::map<std::string, std::vector<eufs_msgs::msg::ConeWithCovariance>> GazeboConeGroundTruth::swapConeColors(
   std::map<std::string, std::vector<eufs_msgs::msg::ConeWithCovariance>> color_map) {
   std::map<std::string, std::vector<eufs_msgs::msg::ConeWithCovariance>> new_map;
   for (auto const& [color, source] : color_map) {

@@ -35,15 +35,15 @@ def spawn_car(context, *args, **kwargs):
                        vehicle_model_config)
     noise_file = join(get_package_share_directory('eufs_models'), 'config', 'noise.yaml')
     recolor_config = join(get_package_share_directory('eufs_plugins'), 'config',
-                           'cone_recolor.yaml')
+                          'cone_recolor.yaml')
     bounding_boxes_file = str(
         os.path.join(get_package_share_directory('eufs_plugins'),
                      'gazebo_simulate_bounding_boxes', 'config', 'boundingBoxes.yaml'))
 
     xacro_path = join(get_package_share_directory('eufs_racecar'),
-                              'robots', robot_name, 'robot.urdf.xacro')
+                      'robots', robot_name, 'robot.urdf.xacro')
     urdf_path = join(get_package_share_directory('eufs_racecar'),
-                             'robots', robot_name, 'robot.urdf')
+                     'robots', robot_name, 'robot.urdf')
 
     if not isfile(urdf_path):
         os.mknod(urdf_path)
@@ -116,15 +116,14 @@ def spawn_car(context, *args, **kwargs):
 
 
 def generate_launch_description():
-    rqt_perspective_file = join(
-        get_package_share_directory('eufs_rqt'), 'config',
-        'eufs_sim.perspective')
+    rqt_perspective_file = join(get_package_share_directory('eufs_rqt'),
+                                'config', 'eufs_sim.perspective')
 
     rviz_config_file = join(
         get_package_share_directory('eufs_launcher'), 'config', 'default.rviz')
 
-    default_user_config_file = join(os.path.expanduser("~"), ".rviz2",
-                                            "default.rviz")
+    default_user_config_file = join(os.path.expanduser("~"),
+                                    ".rviz2", "default.rviz")
     if os.path.isfile(default_user_config_file):
         rviz_config_file = default_user_config_file
 

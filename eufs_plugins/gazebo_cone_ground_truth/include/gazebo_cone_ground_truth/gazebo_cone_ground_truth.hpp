@@ -54,6 +54,7 @@
 #include <string>
 #include <utility>
 #include <vector>
+#include <map>
 
 #include "rclcpp/rclcpp.hpp"
 #include "yaml-cpp/yaml.h"
