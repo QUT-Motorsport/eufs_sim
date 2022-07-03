@@ -41,22 +41,23 @@
     <plugin name="cone_ground_truth" filename="libgazebo_cone_ground_truth.so">
       <alwaysOn>true</alwaysOn>
       <updateRate>100.0</updateRate>
-      <cameraViewDistance>15</cameraViewDistance>
-      <lidarViewDistance>100</lidarViewDistance>
-      <lidarXViewDistance>20</lidarXViewDistance>
+      <cameraViewDistance>10</cameraViewDistance>
+      <lidarViewDistance>10</lidarViewDistance>
+      <lidarXViewDistance>10</lidarXViewDistance>
       <lidarYViewDistance>10</lidarYViewDistance>
       <lidarMinViewDistance>1</lidarMinViewDistance>
-      <cameraMinViewDistance>1</cameraMinViewDistance>
       <cameraFOV>3.491</cameraFOV><!--200 degrees-->
+      <cameraMinViewDistance>0.5</cameraMinViewDistance>
       <lidarFOV>3.141593</lidarFOV><!-- 180 degrees-->
       <lidarOn>true</lidarOn><!--If false, we only simulate camera measurements-->
       <trackFrame>map</trackFrame>
+      <recolor_config>$(arg recolor_config)</recolor_config>
       <groundTruthConesTopicName>/ground_truth/cones</groundTruthConesTopicName>
       <groundTruthTrackTopicName>/ground_truth/track</groundTruthTrackTopicName>
       <simulatePerception>$(arg simulate_perception)</simulatePerception>
       <perceptionConesTopicName>/fusion/cones</perceptionConesTopicName>
       <perceptionCameraDepthNoiseParameterA>0.02</perceptionCameraDepthNoiseParameterA>
-      <perceptionCameraDepthNoiseParameterB>0.3</perceptionCameraDepthNoiseParameterB>
+      <perceptionCameraDepthNoiseParameterB>0.45</perceptionCameraDepthNoiseParameterB>
       <perceptionLidarNoise>0.03 0.03 0.0</perceptionLidarNoise>
       <pubGroundTruth>$(arg pub_ground_truth)</pubGroundTruth>
     </plugin>

@@ -80,8 +80,24 @@ void GazeboConeGroundTruth::Load(gazebo::physics::ModelPtr _parent, sdf::Element
   this->perception_lidar_noise_ =
       getVector3dParameter(_sdf, "perceptionNoise", {0.03, 0.03, 0.0}, "0.03, 0.03, 0.0");
 
-  // Setup the publishers
+  std::string random_cone_color_yaml = "";
+  if (!_sdf->HasElement("recolor_config")) {
+    RCLCPP_FATAL(this->rosnode_->get_logger(),
+                 "gazebo_cone_ground_truth plugin missing <recolor_config>, cannot proceed");
+    return;
+  } else {
+    random_cone_color_yaml = _sdf->GetElement("recolor_config")->Get<std::string>();
+  }
 
+  try {
+    recolor_config = YAML::LoadFile(random_cone_color_yaml);
+  } catch (std::exception &e) {
+    RCLCPP_FATAL(this->rosnode_->get_logger(), "Unable to load %s due to %s error.",
+                 random_cone_color_yaml.c_str(), e.what());
+    RCLCPP_FATAL(this->rosnode_->get_logger(), "Cone recoloring yaml will not load, cannot proceed");
+  }
+
+  // Setup the publishers
   // Ground truth cone publisher
   if (!_sdf->HasElement("groundTruthConesTopicName")) {
     RCLCPP_FATAL(this->rosnode_->get_logger(),
@@ -336,7 +352,7 @@ bool GazeboConeGroundTruth::resetConePosition(
     eufs_msgs::msg::ConeWithCovariance cone;
     ConeType cone_type = this->getConeType(links[i]);
 
-    // sort by cone colour
+    // sort by cone color
     switch (cone_type) {
       case ConeType::blue:
         cone = this->initial_track.blue_cones[blue_i];
@@ -493,10 +509,25 @@ eufs_msgs::msg::ConeArrayWithCovariance GazeboConeGroundTruth::addNoisePerceptio
   addNoiseToConeArray(cones_message_with_noise.big_orange_cones, noise);
   addNoiseToConeArray(cones_message_with_noise.unknown_color_cones, noise);
 
+  std::map<std::string, std::vector<eufs_msgs::msg::ConeWithCovariance>> color_map = {
+    {"blue", cones_message_with_noise.blue_cones},
+    {"yellow", cones_message_with_noise.yellow_cones},
+    {"orange", cones_message_with_noise.orange_cones},
+    {"big_orange", cones_message_with_noise.big_orange_cones},
+    {"unknown_color", cones_message_with_noise.unknown_color_cones}};
+
+  color_map = swapConeColors(color_map);
+
+  cones_message_with_noise.blue_cones = color_map["blue"];
+  cones_message_with_noise.yellow_cones = color_map["yellow"];
+  cones_message_with_noise.orange_cones = color_map["orange"];
+  cones_message_with_noise.big_orange_cones = color_map["big_orange"];
+  cones_message_with_noise.unknown_color_cones = color_map["unknown_color"];
+
+
   cones_message_with_noise.header.frame_id = this->cone_frame_;
   cones_message_with_noise.header.stamp.sec = this->time_last_published.sec;
   cones_message_with_noise.header.stamp.nanosec = this->time_last_published.nsec;
-
   return cones_message_with_noise;
 }
 
@@ -510,7 +541,7 @@ void GazeboConeGroundTruth::addNoiseToConeArray(
     // Camera noise
     auto dist = sqrt(cone_array[i].point.x * cone_array[i].point.x +
                      cone_array[i].point.y * cone_array[i].point.y);
-    auto camera_x_noise = camera_a * std::exp(camera_b * dist);
+    auto camera_x_noise = camera_a * std::fmin(70.0, std::exp(camera_b * dist));
     auto camera_y_noise = camera_x_noise / 5;
 
     // Fuse noise
@@ -519,9 +550,25 @@ void GazeboConeGroundTruth::addNoiseToConeArray(
     auto y_noise = (camera_noise_percentage * camera_y_noise) +
                    ((1 - camera_noise_percentage) * lidar_y_noise);
 
-    // Apply noise
-    cone_array[i].point.x += GaussianKernel(0, x_noise);
-    cone_array[i].point.y += GaussianKernel(0, y_noise);
+    // Add noise in direction of cone position vector
+    double par_x = cone_array[i].point.x / dist;
+    double par_y = cone_array[i].point.y / dist;
+
+    // Generate perpendicular unit vector
+    auto perp_x = -1.0 * par_y;
+    auto perp_y = par_x;
+
+    // Create noise vector
+    auto par_noise = GaussianKernel(0, x_noise);
+    par_x *= par_noise;
+    par_y *= par_noise;
+    auto perp_noise = GaussianKernel(0, y_noise);
+    perp_x *= perp_noise;
+    perp_y *= perp_noise;
+
+    // Add noise vector to cone pose
+    cone_array[i].point.x += par_x + perp_x;
+    cone_array[i].point.y += par_y + perp_y;
     cone_array[i].covariance = {x_noise, 0, 0, y_noise};
   }
 }
@@ -545,12 +592,50 @@ double GazeboConeGroundTruth::GaussianKernel(double mu, double sigma) {
   return X;
 }
 
+// Returns pointer to cone array at random given weights
+std::string GazeboConeGroundTruth::pickColorWithProbability (
+  const YAML::Node weights) {
+    double rand = static_cast<double>(rand_r(&this->seed)) / static_cast<double>(RAND_MAX);
+    float sum = 0.0;
+    std::string color = "";
+    for (YAML::const_iterator it = weights.begin(); it != weights.end(); it++) {
+      sum += it->second.as<float>();
+      if (rand <= sum && color.empty()) {
+          color = it->first.as<std::string>();
+        }
+      }
+    if (sum != 1.0f or color.empty()) {
+      RCLCPP_WARN_ONCE(this->rosnode_->get_logger(), "Cone mis-coloring config invalid");
+      RCLCPP_WARN_ONCE(this->rosnode_->get_logger(), "Total probability  %s config is %f", color.c_str(), sum);
+    }
+    return color;
+}
+
+std::map<std::string, std::vector<eufs_msgs::msg::ConeWithCovariance>> GazeboConeGroundTruth::swapConeColors (
+  std::map<std::string, std::vector<eufs_msgs::msg::ConeWithCovariance>> color_map) {
+  std::map<std::string, std::vector<eufs_msgs::msg::ConeWithCovariance>> new_map;
+  for (auto const& [color, source] : color_map) {
+    for (auto cone : source) {
+      std::string rand_color = pickColorWithProbability(recolor_config[color]);
+      if (rand_color != "undetected") {
+        if (!new_map.count(rand_color)) {
+          std::vector<eufs_msgs::msg::ConeWithCovariance> new_cones = {cone};
+          new_map.insert({rand_color, new_cones});
+        } else {
+          new_map.find(rand_color)->second.push_back(cone);
+        }
+      }
+    }
+  }
+  return new_map;
+}
+
 // Helper function for parameters
 bool GazeboConeGroundTruth::getBoolParameter(sdf::ElementPtr _sdf, const char *element,
                                              bool default_value, const char *default_description) {
   if (!_sdf->HasElement(element)) {
     RCLCPP_DEBUG(this->rosnode_->get_logger(),
-                 "state_ground_truth plugin missing <%s>, defaults to %s", element,
+                 "cone_ground_truth plugin missing <%s>, defaults to %s", element,
                  default_description);
     return default_value;
   } else {
@@ -563,7 +648,7 @@ double GazeboConeGroundTruth::getDoubleParameter(sdf::ElementPtr _sdf, const cha
                                                  const char *default_description) {
   if (!_sdf->HasElement(element)) {
     RCLCPP_DEBUG(this->rosnode_->get_logger(),
-                 "state_ground_truth plugin missing <%s>, defaults to %s", element,
+                 "cone_ground_truth plugin missing <%s>, defaults to %s", element,
                  default_description);
     return default_value;
   } else {
@@ -576,7 +661,7 @@ std::string GazeboConeGroundTruth::getStringParameter(sdf::ElementPtr _sdf, cons
                                                       const char *default_description) {
   if (!_sdf->HasElement(element)) {
     RCLCPP_DEBUG(this->rosnode_->get_logger(),
-                 "state_ground_truth plugin missing <%s>, defaults to %s", element,
+                 "cone_ground_truth plugin missing <%s>, defaults to %s", element,
                  default_description);
     return default_value;
   } else {
@@ -589,7 +674,7 @@ ignition::math::Vector3d GazeboConeGroundTruth::getVector3dParameter(
     const char *default_description) {
   if (!_sdf->HasElement(element)) {
     RCLCPP_DEBUG(this->rosnode_->get_logger(),
-                 "state_ground_truth plugin missing <%s>, defaults to %s", element,
+                 "cone_ground_truth plugin missing <%s>, defaults to %s", element,
                  default_description);
     return default_value;
   } else {

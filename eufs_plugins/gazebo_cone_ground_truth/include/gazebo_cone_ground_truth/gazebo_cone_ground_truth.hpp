@@ -37,10 +37,6 @@
 
 #include <ament_index_cpp/get_package_share_directory.hpp>
 #include <cmath>
-#include <string>
-#include <memory>
-#include <utility>
-#include <vector>
 #include <eufs_msgs/msg/car_state.hpp>
 #include <eufs_msgs/msg/cone_array.hpp>
 #include <eufs_msgs/msg/cone_array_with_covariance.hpp>
@@ -54,8 +50,13 @@
 #include <gazebo/physics/World.hh>
 #include <gazebo_ros/node.hpp>
 #include <geometry_msgs/msg/point.hpp>
+#include <memory>
+#include <string>
+#include <utility>
+#include <vector>
 
 #include "rclcpp/rclcpp.hpp"
+#include "yaml-cpp/yaml.h"
 
 // ROS  srvs
 #include <std_srvs/srv/trigger.hpp>
@@ -69,7 +70,6 @@ class GazeboConeGroundTruth : public gazebo::ModelPlugin {
   GazeboConeGroundTruth();
 
   // Gazebo plugin functions
-
   void Load(gazebo::physics::ModelPtr _parent, sdf::ElementPtr _sdf);
 
   void UpdateChild();
@@ -101,6 +101,11 @@ class GazeboConeGroundTruth : public gazebo::ModelPlugin {
   void addNoiseToConeArray(std::vector<eufs_msgs::msg::ConeWithCovariance> &cone_array,
                            ignition::math::Vector3d noise);
   double GaussianKernel(double mu, double sigma);
+
+  // Returns pointer to cone array at random given weights
+  std::string pickColorWithProbability(const YAML::Node weights);
+  std::map<std::string, std::vector<eufs_msgs::msg::ConeWithCovariance>> swapConeColors(
+    std::map<std::string, std::vector<eufs_msgs::msg::ConeWithCovariance>> color_map);
 
   // Helper function for parameters
   bool getBoolParameter(sdf::ElementPtr _sdf, const char *element, bool default_value,
@@ -163,6 +168,7 @@ class GazeboConeGroundTruth : public gazebo::ModelPlugin {
   double camera_noise_percentage;
   bool lidar_on;
   bool pub_ground_truth;
+  YAML::Node recolor_config;
 
   double update_rate_;
   gazebo::common::Time time_last_published;

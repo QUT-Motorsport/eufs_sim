@@ -13,6 +13,8 @@ ament_target_dependencies(gazebo_cone_ground_truth
 
 target_include_directories(gazebo_cone_ground_truth PUBLIC include)
 
+install(FILES config/cone_recolor.yaml DESTINATION share/${PROJECT_NAME}/config)
+
 ament_export_libraries(gazebo_cone_ground_truth)
 
 install(TARGETS gazebo_cone_ground_truth
