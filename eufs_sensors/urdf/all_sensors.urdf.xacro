@@ -8,7 +8,7 @@
   <!-- Velodyne VLP-16R -->
   <xacro:include filename="$(find eufs_sensors)/urdf/VLP-16R.urdf.xacro"/>
 
-  <!-- Imu -->
+  <!--IMU -->
   <xacro:include filename="$(find eufs_sensors)/urdf/imu.urdf.xacro"/>
 
   <!-- ZED Stereo camera -->

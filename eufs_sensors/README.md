@@ -6,7 +6,7 @@ A tutorial on [How To Add A New Sensor](https://gitlab.com/eufs/eufs_sim/-/wikis
 
 ## Sensor Parameters
 
-### IMU
+### IMU (both SBG and ZED camera)
 
 | Name | Default | Purpose |
 | ---- | ------- | ------- |

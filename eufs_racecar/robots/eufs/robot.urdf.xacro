@@ -55,7 +55,7 @@
     LIDAR: 1.700 0.0 -0.150
     STEREO CAM: -0.110 0.0 0.800 -->
 
-    <xacro:sensor_imu parent="chassis" prefix="imu">
+    <xacro:sensor_imu parent="chassis" prefix="sbg_imu" topic_prefix="">
         <origin xyz="0.0 0.0 0.0" rpy="0 0 0"/>
     </xacro:sensor_imu>
 
@@ -70,5 +70,9 @@
     <xacro:zed_camera parent="chassis" prefix="zed" active="$(arg simulate_perception)">
         <origin xyz="-0.08 0.0 0.76" rpy="0 0 0"/>
     </xacro:zed_camera>
+
+    <xacro:sensor_imu parent="chassis" prefix="zed_imu" topic_prefix="/camera">
+        <origin xyz="-0.08 0.0 0.76" rpy="0 0 0"/>
+    </xacro:sensor_imu>
 
 </robot>
