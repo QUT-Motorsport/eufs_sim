@@ -13,7 +13,7 @@ target_include_directories(gazebo_simulate_bounding_boxes PUBLIC include)
 
 ament_export_libraries(gazebo_simulate_bounding_boxes)
 
-install(DIRECTORY config DESTINATION share/${PROJECT_NAME}/gazebo_simulate_bounding_boxes)
+install(DIRECTORY config DESTINATION share/${PROJECT_NAME} FILES_MATCHING PATTERN "*.yaml")
 
 install(TARGETS gazebo_simulate_bounding_boxes
   ARCHIVE DESTINATION lib

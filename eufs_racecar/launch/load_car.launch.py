@@ -36,9 +36,8 @@ def spawn_car(context, *args, **kwargs):
     noise_file = join(get_package_share_directory('eufs_models'), 'config', 'noise.yaml')
     recolor_config = join(get_package_share_directory('eufs_plugins'), 'config',
                           'cone_recolor.yaml')
-    bounding_boxes_file = str(
-        os.path.join(get_package_share_directory('eufs_plugins'),
-                     'gazebo_simulate_bounding_boxes', 'config', 'boundingBoxes.yaml'))
+    bounding_boxes_file = os.path.join(get_package_share_directory('eufs_plugins'),
+                                       'config', 'boundingBoxes.yaml')
 
     xacro_path = join(get_package_share_directory('eufs_racecar'),
                       'robots', robot_name, 'robot.urdf.xacro')
