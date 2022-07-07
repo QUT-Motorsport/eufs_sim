@@ -31,9 +31,9 @@ big_orange:
   blue: 0.0
   yellow: 0.0
   orange: 0.1
-  big_orange: 0.6
+  big_orange: 0.5
   unknown_color: 0.0
-  undetected: 0.3
+  undetected: 0.4
 
 unknown_color:
   blue: 0.0

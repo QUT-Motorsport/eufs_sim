@@ -38,7 +38,7 @@
   </gazebo>
 
   <gazebo>
-    <plugin name="cone_ground_truth" filename="libgazebo_cone_ground_truth.so">
+    <plugin name="gz_ground_truth_cones" filename="libgazebo_ground_truth_cones.so">
       <alwaysOn>true</alwaysOn>
       <updateRate>100.0</updateRate>
       <cameraViewDistance>15</cameraViewDistance>
@@ -46,7 +46,7 @@
       <lidarXViewDistance>20</lidarXViewDistance>
       <lidarYViewDistance>20</lidarYViewDistance>
       <lidarMinViewDistance>1</lidarMinViewDistance>
-      <cameraFOV>3.491</cameraFOV><!--200 degrees-->
+      <cameraFOV>2.09</cameraFOV><!--120 degrees-->
       <cameraMinViewDistance>0.5</cameraMinViewDistance>
       <lidarFOV>3.141593</lidarFOV><!-- 180 degrees-->
       <lidarOn>true</lidarOn><!--If false, we only simulate camera measurements-->
@@ -64,7 +64,37 @@
   </gazebo>
 
   <gazebo>
-    <plugin name="bounding_boxes" filename="libgazebo_simulate_bounding_boxes.so">
+    <plugin name="gz_camera_0_cones" filename="libgazebo_camera_cones.so">
+      <alwaysOn>true</alwaysOn>
+      <updateRate>15.0</updateRate>
+      <cameraViewDistance>13</cameraViewDistance>
+      <cameraFOV>2.09</cameraFOV><!--120 degrees-->
+      <cameraMinViewDistance>0.5</cameraMinViewDistance>
+      <cameraTF>0.204 0.074 0.706 0 0 0.79</cameraTF>
+      <recolorConfig>cone_recolor.yaml</recolorConfig>
+      <cameraConesTopicName>/camera_0/cones</cameraConesTopicName>
+      <perceptionCameraDepthNoiseParameterA>0.01</perceptionCameraDepthNoiseParameterA>
+      <perceptionCameraDepthNoiseParameterB>0.5</perceptionCameraDepthNoiseParameterB>
+    </plugin>
+  </gazebo>
+
+  <gazebo>
+    <plugin name="gz_camera_1_cones" filename="libgazebo_camera_cones.so">
+      <alwaysOn>true</alwaysOn>
+      <updateRate>15.0</updateRate>
+      <cameraViewDistance>13</cameraViewDistance>
+      <cameraFOV>2.09</cameraFOV><!--120 degrees-->
+      <cameraMinViewDistance>0.5</cameraMinViewDistance>
+      <cameraTF>0.204 -0.074 0.706 0.0 0.0 -0.79</cameraTF>
+      <recolorConfig>cone_recolor.yaml</recolorConfig>
+      <cameraConesTopicName>/camera_1/cones</cameraConesTopicName>
+      <perceptionCameraDepthNoiseParameterA>0.01</perceptionCameraDepthNoiseParameterA>
+      <perceptionCameraDepthNoiseParameterB>0.5</perceptionCameraDepthNoiseParameterB>
+    </plugin>
+  </gazebo>
+
+  <gazebo>
+    <plugin name="gz_bounding_boxes" filename="libgazebo_simulate_bounding_boxes.so">
       <config_file>$(arg bounding_box_settings)</config_file>
       <publish_rate>50.0</publish_rate>
       <targetFrame>zed_right_camera_optical_frame</targetFrame>
