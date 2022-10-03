@@ -209,7 +209,7 @@ void BoundingBoxesPlugin::update_msg(
   push_back_bounding_boxes_msg(bounding_boxes_msg, blue_cones, "blue");
   push_back_bounding_boxes_msg(bounding_boxes_msg, yellow_cones, "yellow");
   push_back_bounding_boxes_msg(bounding_boxes_msg, orange_cones, "orange");
-  push_back_bounding_boxes_msg(bounding_boxes_msg, big_orange_cones, "big orange");
+  push_back_bounding_boxes_msg(bounding_boxes_msg, big_orange_cones, "big-orange");
 }
 
 void BoundingBoxesPlugin::getTransform(
@@ -361,9 +361,9 @@ void BoundingBoxesPlugin::push_back_bounding_boxes_msg(
   eufs_msgs::msg::BoundingBox bounding_box_msg;
   bounding_box_msg.color = color;
   bounding_box_msg.xmax = bounding_boxes_vector[i][0];
-  bounding_box_msg.ymax = bounding_boxes_vector[i][1];
+  bounding_box_msg.ymax = bounding_boxes_vector[i][3];
   bounding_box_msg.xmin = bounding_boxes_vector[i][2];
-  bounding_box_msg.ymin = bounding_boxes_vector[i][3];
+  bounding_box_msg.ymin = bounding_boxes_vector[i][1];
   bounding_boxes_msg.bounding_boxes.push_back(bounding_box_msg);
   }
 }
