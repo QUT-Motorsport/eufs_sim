@@ -175,7 +175,7 @@ Visualization Manager:
         Durability Policy: Volatile
         History Policy: Keep Last
         Reliability Policy: Reliable
-        Value: /fusion/cones
+        Value: /cones
       Value: false
     - Class: eufs_rviz_plugins/ConeArrayWithCovariance
       Enabled: true
