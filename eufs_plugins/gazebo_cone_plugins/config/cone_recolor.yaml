@@ -1,0 +1,44 @@
+# Probabilities for swapping cone colors are stored in the following format
+# ground_truth_color:
+#   new_color: <probability of switch from ground_truth_color to new_color>
+# Ensure probabilities sum to 1.0
+
+blue:
+  blue: 1.0
+  yellow: 0.0
+  orange: 0.0
+  big_orange: 0.0
+  unknown_color: 0.0
+  undetected: 0.0
+
+yellow:
+  blue: 0.0
+  yellow: 1.0
+  orange: 0.0
+  big_orange: 0.0
+  unknown_color: 0.0
+  undetected: 0.0
+
+orange:
+  blue: 0.0
+  yellow: 0.0
+  orange: 1.0
+  big_orange: 0.0
+  unknown_color: 0.0
+  undetected: 0.0
+
+big_orange:
+  blue: 0.0
+  yellow: 0.0
+  orange: 0.0
+  big_orange: 1.0
+  unknown_color: 0.0
+  undetected: 0.0
+
+unknown_color:
+  blue: 0.0
+  yellow: 0.0
+  orange: 0.0
+  big_orange: 0.0
+  unknown_color: 1.0
+  undetected: 0.0

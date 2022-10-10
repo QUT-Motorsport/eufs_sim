@@ -1,4 +1,6 @@
 import os
+from os.path import join
+from os.path import isfile
 
 import xacro
 
@@ -28,20 +30,21 @@ def spawn_car(context, *args, **kwargs):
     pitch = get_argument(context, 'pitch')
     yaw = get_argument(context, 'yaw')
 
-    simulate_perception = 'true' if launch_group == 'no_perception' else \
-        'false'
-    config_file = str(os.path.join(get_package_share_directory(
-        'eufs_racecar'), 'robots', robot_name, vehicle_model_config))
-    noise_file = str(
-        os.path.join(get_package_share_directory('eufs_models'), 'config',
-                     'noise.yaml'))
+    simulate_perception = 'true' if launch_group == 'no_perception' else 'false'
+    config_file = join(get_package_share_directory('eufs_racecar'), 'robots', robot_name,
+                       vehicle_model_config)
+    noise_file = join(get_package_share_directory('eufs_models'), 'config', 'noise.yaml')
+    recolor_config = join(get_package_share_directory('eufs_plugins'), 'config',
+                          'cone_recolor.yaml')
+    bounding_boxes_file = os.path.join(get_package_share_directory('eufs_plugins'),
+                                       'config', 'boundingBoxes.yaml')
 
-    xacro_path = os.path.join(get_package_share_directory('eufs_racecar'),
-                              'robots', robot_name, 'robot.urdf.xacro')
-    urdf_path = os.path.join(get_package_share_directory('eufs_racecar'),
-                             'robots', robot_name, 'robot.urdf')
+    xacro_path = join(get_package_share_directory('eufs_racecar'),
+                      'robots', robot_name, 'robot.urdf.xacro')
+    urdf_path = join(get_package_share_directory('eufs_racecar'),
+                     'robots', robot_name, 'robot.urdf')
 
-    if not os.path.isfile(urdf_path):
+    if not isfile(urdf_path):
         os.mknod(urdf_path)
 
     doc = xacro.process_file(xacro_path,
@@ -51,9 +54,11 @@ def spawn_car(context, *args, **kwargs):
                                  'command_mode': command_mode,
                                  'config_file': config_file,
                                  'noise_config': noise_file,
+                                 'recolor_config': recolor_config,
                                  'publish_tf': publish_tf,
                                  'simulate_perception': simulate_perception,
                                  'pub_ground_truth': pub_ground_truth,
+                                 'bounding_box_settings': bounding_boxes_file,
                              })
     out = xacro.open_output(urdf_path)
     out.write(doc.toprettyxml(indent='  '))
@@ -110,15 +115,14 @@ def spawn_car(context, *args, **kwargs):
 
 
 def generate_launch_description():
-    rqt_perspective_file = os.path.join(
-        get_package_share_directory('eufs_rqt'), 'config',
-        'eufs_sim.perspective')
+    rqt_perspective_file = join(get_package_share_directory('eufs_rqt'),
+                                'config', 'eufs_sim.perspective')
 
-    rviz_config_file = os.path.join(
+    rviz_config_file = join(
         get_package_share_directory('eufs_launcher'), 'config', 'default.rviz')
 
-    default_user_config_file = os.path.join(os.path.expanduser("~"), ".rviz2",
-                                            "default.rviz")
+    default_user_config_file = join(os.path.expanduser("~"),
+                                    ".rviz2", "default.rviz")
     if os.path.isfile(default_user_config_file):
         rviz_config_file = default_user_config_file
 

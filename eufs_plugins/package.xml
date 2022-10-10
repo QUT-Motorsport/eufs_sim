@@ -31,6 +31,7 @@
   <depend>nav_msgs</depend>
   <depend>visualization_msgs</depend>
   <depend>std_msgs</depend>
+  <depend>image_geometry</depend>
 
   <depend>eufs_models</depend>
   <depend>eufs_msgs</depend>

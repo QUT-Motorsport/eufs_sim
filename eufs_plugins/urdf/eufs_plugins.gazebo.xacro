@@ -3,6 +3,7 @@
   <xacro:arg name="publish_tf" default="false"/>
   <xacro:arg name="simulate_perception" default="false"/>
   <xacro:arg name="command_mode" default="acceleration"/>
+  <xacro:arg name="pub_ground_truth" default="true"/>
 
   <!-- Custom plugin which controls the car using a given vehicle model.
    It controls the car by setting its velocity and position
@@ -37,29 +38,72 @@
   </gazebo>
 
   <gazebo>
-    <plugin name="cone_ground_truth" filename="libgazebo_cone_ground_truth.so">
+    <plugin name="gz_ground_truth_cones" filename="libgazebo_ground_truth_cones.so">
       <alwaysOn>true</alwaysOn>
-      <updateRate>25.0</updateRate>
+      <updateRate>100.0</updateRate>
       <cameraViewDistance>15</cameraViewDistance>
       <lidarViewDistance>100</lidarViewDistance>
       <lidarXViewDistance>20</lidarXViewDistance>
-      <lidarYViewDistance>10</lidarYViewDistance>
+      <lidarYViewDistance>20</lidarYViewDistance>
       <lidarMinViewDistance>1</lidarMinViewDistance>
-      <cameraMinViewDistance>1</cameraMinViewDistance>
-      <cameraFOV>1.918889</cameraFOV><!--110 degrees-->
+      <cameraFOV>2.09</cameraFOV><!--120 degrees-->
+      <cameraMinViewDistance>0.5</cameraMinViewDistance>
       <lidarFOV>3.141593</lidarFOV><!-- 180 degrees-->
       <lidarOn>true</lidarOn><!--If false, we only simulate camera measurements-->
       <trackFrame>map</trackFrame>
+      <recolor_config>$(arg recolor_config)</recolor_config>
       <groundTruthConesTopicName>/ground_truth/cones</groundTruthConesTopicName>
-      <groundTruthConeMarkersTopicName>/ground_truth/cones/viz</groundTruthConeMarkersTopicName>
       <groundTruthTrackTopicName>/ground_truth/track</groundTruthTrackTopicName>
       <simulatePerception>$(arg simulate_perception)</simulatePerception>
-      <perceptionConesTopicName>/fusion/cones</perceptionConesTopicName>
-      <perceptionConeMarkersTopicName>/fusion/cones/viz</perceptionConeMarkersTopicName>
-      <perceptionCameraDepthNoiseParameterA>0.0184</perceptionCameraDepthNoiseParameterA>
-      <perceptionCameraDepthNoiseParameterB>0.2106</perceptionCameraDepthNoiseParameterB>
+      <perceptionConesTopicName>/cones</perceptionConesTopicName>
+      <perceptionCameraDepthNoiseParameterA>0.01</perceptionCameraDepthNoiseParameterA>
+      <perceptionCameraDepthNoiseParameterB>0.5</perceptionCameraDepthNoiseParameterB>
       <perceptionLidarNoise>0.03 0.03 0.0</perceptionLidarNoise>
       <pubGroundTruth>$(arg pub_ground_truth)</pubGroundTruth>
+    </plugin>
+  </gazebo>
+
+  <gazebo>
+    <plugin name="gz_camera_0_cones" filename="libgazebo_camera_cones.so">
+      <alwaysOn>true</alwaysOn>
+      <updateRate>15.0</updateRate>
+      <cameraViewDistance>13</cameraViewDistance>
+      <cameraFOV>2.09</cameraFOV><!--120 degrees-->
+      <cameraMinViewDistance>0.5</cameraMinViewDistance>
+      <cameraTF>0.204 0.074 0.706 0 0 0.79</cameraTF>
+      <recolorConfig>cone_recolor.yaml</recolorConfig>
+      <cameraConesTopicName>/camera_0/cones</cameraConesTopicName>
+      <perceptionCameraDepthNoiseParameterA>0.01</perceptionCameraDepthNoiseParameterA>
+      <perceptionCameraDepthNoiseParameterB>0.5</perceptionCameraDepthNoiseParameterB>
+    </plugin>
+  </gazebo>
+
+  <gazebo>
+    <plugin name="gz_camera_1_cones" filename="libgazebo_camera_cones.so">
+      <alwaysOn>true</alwaysOn>
+      <updateRate>15.0</updateRate>
+      <cameraViewDistance>13</cameraViewDistance>
+      <cameraFOV>2.09</cameraFOV><!--120 degrees-->
+      <cameraMinViewDistance>0.5</cameraMinViewDistance>
+      <cameraTF>0.204 -0.074 0.706 0.0 0.0 -0.79</cameraTF>
+      <recolorConfig>cone_recolor.yaml</recolorConfig>
+      <cameraConesTopicName>/camera_1/cones</cameraConesTopicName>
+      <perceptionCameraDepthNoiseParameterA>0.01</perceptionCameraDepthNoiseParameterA>
+      <perceptionCameraDepthNoiseParameterB>0.5</perceptionCameraDepthNoiseParameterB>
+    </plugin>
+  </gazebo>
+
+  <gazebo>
+    <plugin name="gz_bounding_boxes" filename="libgazebo_simulate_bounding_boxes.so">
+      <config_file>$(arg bounding_box_settings)</config_file>
+      <publish_rate>50.0</publish_rate>
+      <targetFrame>zed_right_camera_optical_frame</targetFrame>
+      <sourceFrame>base_footprint</sourceFrame>
+      <cameraWidth>1280</cameraWidth>
+      <cameraHeight>720</cameraHeight>
+      <gtBoundingBoxesTopic>ground_truth/bounding_boxes</gtBoundingBoxesTopic>
+      <noisyBoundingBoxesTopic>noisy_bounding_boxes</noisyBoundingBoxesTopic>
+      <customCameraInfo>custom_camera_info</customCameraInfo>
     </plugin>
   </gazebo>
 

@@ -2,13 +2,15 @@
 <robot name="eufs" xmlns:xacro="http://www.ros.org/wiki/xacro">
   <xacro:macro name="eufs_base" params="chassis_mesh">
 
+    <xacro:property name="wheel_diameter" value="0.505"/>
+
     <!-- BASE FOOTPRINT -->
     <link name="base_footprint"/>
 
     <joint name="chassis_joint" type="fixed">
       <parent link="base_footprint"/>
       <child link="chassis"/>
-      <origin xyz="0 0 0"
+      <origin xyz="0 0 ${wheel_diameter/2}"
               rpy="0 0 0"/>
       <axis xyz="1 0 0"/>
     </joint>

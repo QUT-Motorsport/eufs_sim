@@ -208,3 +208,52 @@ This has to be inserted inside a robot URDF.
 | Service Name | Type | Purpose |
 | ------------ | ---- | ------- |
 | `/ros_can/reset_cone_pos` | [std_srvs/Trigger](http://docs.ros.org/en/melodic/api/std_srvs/html/srv/Trigger.html) | Resets cone positions to initial track layout. |
+
+## gazebo_simulate_bounding_boxes
+
+Publishes synthesized bounding boxes.
+
+Note : Bounding boxes depend on the ground truth cones topic. Its publish rate is limited to that of the ground truth cones topic.
+
+### Parameters
+
+
+| Name | Type | Default | Purpose |
+| ----- | ---- |  ------ | -------|
+| `publish_rate`                  | double   | 50.0                             | Sets the publish rate of the bounding boxes topics.                           |
+| `config_file`                   | string   | boundingBoxes.yaml               | Retrieves the config file which contains the camera callibration settings and noises for the bounding boxes.|
+| `targetFrame`                   | string   | "zed_right_camera_optical_frame" | Target frame must be any camera_optical_frame link.                          |
+| `sourceFrame`                   | string   | "base_footprint"                 | Source frame from which the position of the `cones` are translated to.       |
+| `cameraWidth`                   | int      | 1280                             | Camera resolution (width).                                                   |
+| `cameraHeight`                  | int      | 720                              | Camera resolution (height).                                                  |
+| `simulateBoundingBoxesTopicName`| string   | "bounding_boxes"                 | Topic which publishes bounding boxes of type `eufs_msgs/msg/BoundingBoxes`.  |
+| `custom_camera_info`            | string   |  "customCameraInfo"              | Topic name of custom camera info.                                            |
+
+
+### Example usage
+
+This has to be inserted inside a robot URDF.
+
+```xml
+  <gazebo>
+    <plugin name="bounding_boxes" filename="libgazebo_simulate_bounding_boxes.so">
+      <config_file>config/boundingBoxes.yaml</config_file>
+      <publish_rate>50.0</publish_rate>
+      <targetFrame>zed_right_camera_optical_frame</targetFrame>
+      <sourceFrame>base_footprint</sourceFrame>
+      <cameraWidth>1280</cameraWidth>
+      <cameraHeight>720</cameraHeight>
+      <gtBoundingBoxesTopic>ground_truth/bounding_boxes</gtBoundingBoxesTopic>
+      <noisyBoundingBoxesTopic>noisy_bounding_boxes</noisyBoundingBoxesTopic>
+      <customCameraInfo>custom_camera_info</customCameraInfo>
+    </plugin>
+  </gazebo>
+```
+
+### ROS 2 Publishers
+
+| Topic Name | Type | Purpose |
+| ---------- | ---- | ------- |
+| `gtBoundingBoxesTopic` parameter value           | [eufs_msgs/msg/BoundingBoxes](https://gitlab.com/eufs/eufs_msgs/-/blob/master/msg/BoundingBoxes.msg) | Publishes the ground truth bounding boxes.
+| `noisyBoundingBoxesTopic` parameter value        | [eufs_msgs/msg/BoundingBoxes](https://gitlab.com/eufs/eufs_msgs/-/blob/master/msg/BoundingBoxes.msg) | Publishes bounding boxes with gaussian noise.
+| `customCameraInfo` parameter value               | [sensor_msgs/msg/CameraInfo](http://docs.ros.org/en/noetic/api/sensor_msgs/html/msg/CameraInfo.html) | Contains the cameraInfo which will then be used to perform image projection from 3D plane to 2D plane.

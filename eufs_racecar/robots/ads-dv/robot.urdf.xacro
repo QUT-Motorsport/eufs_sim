@@ -40,35 +40,39 @@
     <!-- *************** -->
 
     <!-- Chassis of the car -->
-    <xacro:eufs_base chassis_mesh="file://$(find eufs_racecar)/meshes/ads-dv.dae"/>
+    <xacro:eufs_base chassis_mesh="file://$(find eufs_racecar)/meshes/ads_dv_chassis.dae"/>
 
     <!-- Wheels -->
-    <xacro:wheels chassis_width="0.98" wheelbase="1.530" />
+    <xacro:wheels chassis_width="1.15" wheelbase="1.532"/>
 
     <!-- *********************************************** -->
     <!--                 MAIN SENSORS                    -->
     <!-- *********************************************** -->
 
     <!--     LOCATIONS: (XYZ)
-    IMU: 0.0 0.0 0.170
-    GPS: -0.110 0.0 0.9
-    LIDAR: 1.700 0.0 -0.150
-    STEREO CAM: -0.110 0.0 0.800 -->
+    IMU: 0.0 0.0 0.0
+    GPS: 0.463 0.0679 0.224
+    LIDAR: 0.243 0.0 0.324
+    STEREO CAM: 0.334 0.0 0.295 -->
 
-    <xacro:sensor_imu parent="base_footprint" prefix="imu">
+    <xacro:sensor_imu parent="chassis" prefix="imu" topic_prefix="">
         <origin xyz="0.0 0.0 0.0" rpy="0 0 0"/>
     </xacro:sensor_imu>
 
-    <xacro:sensor_gps parent="base_footprint" prefix="gps">
-        <origin xyz="0.0 0.0 0.4" rpy="0 0 0"/>
+    <xacro:sensor_gps parent="chassis" prefix="gps">
+        <origin xyz="0.463 0.06792 0.224" rpy="0 0 0"/>
     </xacro:sensor_gps>
 
-    <xacro:VLP-16R parent="base_footprint" name="velodyne" topic="/velodyne_points" hz="10" samples="800" active="$(arg simulate_perception)">
-	<origin xyz="0.59 0.0 0.51" rpy="0 ${10*M_PI/180.0} 0"/>
+    <xacro:VLP-16R parent="chassis" name="velodyne" topic="/velodyne_points" hz="10" samples="800" active="$(arg simulate_perception)">
+	    <origin xyz="0.243 0.0 0.324" rpy="0 ${6.1*M_PI/180.0} 0"/>
     </xacro:VLP-16R>
 
-    <xacro:zed_camera parent="base_footprint" prefix="zed" active="$(arg simulate_perception)">
-	<origin xyz="0.12 0.0 0.76" rpy="0 ${10.15*M_PI/180.0} 0"/>
+    <xacro:zed_camera parent="chassis" prefix="zed" active="$(arg simulate_perception)">
+	    <origin xyz="0.334 0.0 0.295" rpy="0 ${10.15*M_PI/180.0} 0"/>
     </xacro:zed_camera>
+
+    <xacro:sensor_imu parent="chassis" prefix="zed_imu" topic_prefix="/camera">
+        <origin xyz="0.334 0.0 0.295" rpy="0 ${10.15*M_PI/180.0} 0"/>
+    </xacro:sensor_imu>
 
 </robot>
