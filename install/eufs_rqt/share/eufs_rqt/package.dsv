@@ -1,6 +1,0 @@
-source;share/eufs_rqt/hook/pythonpath.ps1
-source;share/eufs_rqt/hook/pythonpath.dsv
-source;share/eufs_rqt/hook/pythonpath.sh
-source;share/eufs_rqt/hook/ament_prefix_path.ps1
-source;share/eufs_rqt/hook/ament_prefix_path.dsv
-source;share/eufs_rqt/hook/ament_prefix_path.sh
