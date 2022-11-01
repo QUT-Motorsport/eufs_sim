@@ -1,0 +1,32 @@
+<library path="src">
+    <class name="EUFSTracksGUI" type="eufs_tracks.track_generator.EUFSTracksGUI" base_class_type="rqt_gui_py::Plugin">
+        <description>
+            A Python GUI plugin for generating random tracks
+        </description>
+        <qtgui>
+            <group>
+                <label>EUFS</label>
+                <icon type="theme">folder</icon>
+                <statustip>Plugins related to EUFS</statustip>
+            </group>
+            <label>EUFS Track Generator</label>
+            <icon type="theme">application-other</icon>
+            <statustip>A Python GUI plugin for generating random tracks</statustip>
+        </qtgui>
+    </class>
+    <class name="EUFSConverterGUI" type="eufs_tracks.converter_tool.EUFSConverterGUI" base_class_type="rqt_gui_py::Plugin">
+        <description>
+            A Python GUI plugin for converting tracks to different formats
+        </description>
+        <qtgui>
+            <group>
+                <label>EUFS</label>
+                <icon type="theme">folder</icon>
+                <statustip>Plugins related to EUFS</statustip>
+            </group>
+            <label>EUFS Track Converter</label>
+            <icon type="theme">application-other</icon>
+            <statustip>A Python GUI plugin for converting tracks to different formats</statustip>
+        </qtgui>
+    </class>
+</library>

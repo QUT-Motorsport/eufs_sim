@@ -1,0 +1,45 @@
+<?xml version="1.0"?>
+<robot name="eufs" xmlns:xacro="http://www.ros.org/wiki/xacro">
+  <xacro:macro name="eufs_base" params="chassis_mesh">
+
+    <xacro:property name="wheel_diameter" value="0.505"/>
+
+    <!-- BASE FOOTPRINT -->
+    <link name="base_footprint"/>
+
+    <joint name="chassis_joint" type="fixed">
+      <parent link="base_footprint"/>
+      <child link="chassis"/>
+      <origin xyz="0 0 ${wheel_diameter/2}"
+              rpy="0 0 0"/>
+      <axis xyz="1 0 0"/>
+    </joint>
+
+    <link name="chassis">
+      <visual>
+        <origin xyz="0 0 0" rpy="0 0 0" />
+        <geometry>
+          <mesh filename="${chassis_mesh}"/>
+        </geometry>
+      </visual>
+      <inertial>
+        <origin xyz="0 0 0" rpy="0 0 0" />
+        <mass value="140" />
+        <inertia
+            ixx="16.3"
+            ixy="0"
+            ixz="0"
+            iyy="33.6"
+            iyz="0"
+            izz="47.9" />
+      </inertial>
+      <collision>
+        <origin xyz="0 0 0" rpy="0 0 0" />
+        <geometry>
+          <mesh filename="${chassis_mesh}"/>
+        </geometry>
+      </collision>
+    </link>
+
+  </xacro:macro>
+</robot>

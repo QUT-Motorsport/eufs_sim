@@ -33,6 +33,8 @@
  **/
 
 #include "gazebo_cone_plugins/gazebo_ground_truth_cones.hpp"
+#include "eigen3/Eigen/Core"
+#include "eigen3/Eigen/Dense"
 
 namespace gazebo_plugins {
 namespace eufs_plugins {
@@ -273,7 +275,34 @@ void GazeboGroundTruthCones::addConeToConeArray(
 
   eufs_msgs::msg::ConeWithCovariance cone = eufs_msgs::msg::ConeWithCovariance();
   cone.point = point;
-  cone.covariance = {0, 0, 0, 0};
+
+  // Creation of the covariance of the cones
+
+  // Firstly, calculate magnitude of vector from car to point
+  double magnitude = sqrt(pow(point.x, 2) + pow(point.y, 2));
+  // Create first eigenvector to be parallel to vector to point
+  Eigen::Vector2d e_vec1(point.x / magnitude, point.y / magnitude);
+  // Create 2nd eigenvector for vector perpendicular to e1
+  Eigen::Vector2d e_vec2(e_vec1(1) * (-1), e_vec1(0));
+  // We specify our covariance using the equation defined in a research paper (TODO insert paper)
+  double e_val1 = 5 * 0.0184 * exp(0.2106 * magnitude);
+  double e_val2 = e_val1 / 5;
+
+  // Create matrix for basis consisting of eigenvectors
+  Eigen::Matrix2d basis;
+  basis << e_vec2, e_vec1;
+  // Create matrix to store variance values
+  Eigen::Matrix2d diag_mat;
+  diag_mat << e_val2, 0, 0, e_val1;
+  // Convert cov matrix back to standard basis
+  Eigen::Matrix2d cov_mat = basis * diag_mat * basis.inverse();
+  // Flatten cov matrix so it can be passed to cone object
+  std::array<double, 4> flattened_cov_mat = {
+      {cov_mat(0, 0), cov_mat(0, 1), cov_mat(1, 0), cov_mat(1, 1)}};
+
+  cone.covariance = flattened_cov_mat;
+
+
 
   switch (cone_type) {
     case ConeType::blue:

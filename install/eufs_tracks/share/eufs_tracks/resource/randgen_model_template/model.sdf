@@ -1,0 +1,59 @@
+<?xml version='1.0'?>
+<sdf version='1.6'>
+  <model name='track'>
+    %FILLDATA%
+    <static>0</static>
+    <allow_auto_disable>1</allow_auto_disable>
+  </model>
+</sdf>
+$===$
+    <link name='%LINKTYPE%_%LINKNUM%'>
+      <pose frame=''>%PLACEX% %PLACEY% 0.15 0 -0 0</pose>
+      %FILLCOVARIANCE%
+      %FILLCOLLISION%
+      <visual name="visual">
+        <geometry>
+          <mesh>
+            <uri>%MODELNAME%</uri>
+          </mesh>
+        </geometry>
+      </visual>
+    </link>
+$===$
+      <collision name="collision">
+        <geometry>
+          <mesh>
+            <uri>%MODELNAME%</uri>
+          </mesh>
+        </geometry>
+      </collision>
+$===$
+      <collision name="collision">
+        <geometry>
+          <mesh>
+            <uri>file://NoiseCube.dae</uri>
+          </mesh>
+        </geometry>
+      </collision>
+$===$
+    <ghostlink name='%LINKTYPE%_%LINKNUM%'>
+      <pose frame=''>%PLACEX% %PLACEY% 0.15 0 -0 0</pose>
+      %FILLCOVARIANCE%
+      %FILLCOLLISION%
+      <visual name="visual">
+        <geometry>
+          <mesh>
+            <uri>%MODELNAME%</uri>
+          </mesh>
+        </geometry>
+      </visual>
+    </ghostlink>
+$===$
+      <covariance x="%XCOV%" y="%YCOV%" xy="%XYCOV%"/>
+$===$
+    <include>
+      <pose>%PLACEX% %PLACEY% 0.15 0 0 0</pose>
+      <uri>%MODELNAME%</uri>
+      <name>%LINKTYPE%_%LINKNUM%</name>
+      %FILLCOVARIANCE%
+    </include>

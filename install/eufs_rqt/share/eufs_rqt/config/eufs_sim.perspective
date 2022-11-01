@@ -1,0 +1,113 @@
+{
+  "keys": {},
+  "groups": {
+    "mainwindow": {
+      "keys": {
+        "geometry": {
+          "repr(QByteArray.hex)": "QtCore.QByteArray(b'01d9d0cb000300000000006400000064000002ca0000024a0000006400000089000002ca0000024a000000000000000007800000006400000089000002ca0000024a')",
+          "type": "repr(QByteArray.hex)",
+          "pretty-print": "     d d   J d     J      d     J"
+        },
+        "state": {
+          "repr(QByteArray.hex)": "QtCore.QByteArray(b'000000ff00000000fd00000001000000030000026700000196fc0100000004fb00000030005f005f0044006f0063006b0057006900640067006500740043006f006e007400610069006e00650072005f005f00310100000000000002580000000000000000fb0000005c0065007500660073005f006c00610075006e0063006800650072005f005f0045007500660073004c00610075006e0063006800650072005f005f0031005f005f0045007500660073004c00610075006e00630068006500720055004901000000000000050f0000000000000000fb0000007a0072006f0073005f00630061006e005f00730069006d005f005f0065007500660073005f0072006f0062006f0074005f007300740065006500720069006e0067005f006700750069005f005f0031005f005f00450055004600530052006f0062006f0074005300740065006500720069006e00670047005500490100000000000001260000012500fffffffb000000580072006f0073005f00630061006e005f00730069006d005f005f0072006f0073005f00630061006e005f00730069006d005f006700750069005f005f0031005f005f0052006f007300430061006e00530069006d00550069010000012c0000013b000000e700ffffff000002670000000000000004000000040000000800000008fc00000001000000030000000100000036004d0069006e0069006d0069007a006500640044006f0063006b00570069006400670065007400730054006f006f006c0062006100720000000000ffffffff0000000000000000')",
+          "type": "repr(QByteArray.hex)",
+          "pretty-print": "                 0__DockWidgetContainer__1          \\eufs_launcher__EufsLauncher__1__EufsLauncherUI          zeufs_rqt__eufs_robot_steering_gui__1__EUFSRobotSteeringGUI          Xeufs_rqt__mission_control_gui__1__RosCanSimUi                            6MinimizedDockWidgetsToolbar        "
+        }
+      },
+      "groups": {
+        "toolbar_areas": {
+          "keys": {
+            "MinimizedDockWidgetsToolbar": {
+              "repr": "8",
+              "type": "repr"
+            }
+          },
+          "groups": {}
+        }
+      }
+    },
+    "pluginmanager": {
+      "keys": {
+        "running-plugins": {
+          "repr": "{'eufs_rqt/eufs_robot_steering_gui': [1], 'eufs_rqt/mission_control_gui': [1]}",
+          "type": "repr"
+        }
+      },
+      "groups": {
+        "plugin__eufs_rqt__eufs_robot_steering_gui__1": {
+          "keys": {},
+          "groups": {
+            "dock_widget__EUFSRobotSteeringGUI": {
+              "keys": {
+                "dock_widget_title": {
+                  "repr": "'EUFS Robot Steering GUI '",
+                  "type": "repr"
+                },
+                "dockable": {
+                  "repr": "True",
+                  "type": "repr"
+                },
+                "parent": {
+                  "repr": "None",
+                  "type": "repr"
+                }
+              },
+              "groups": {}
+            },
+            "plugin": {
+              "keys": {
+                "input": {
+                  "repr": "1",
+                  "type": "repr"
+                },
+                "topic": {
+                  "repr": "'/cmd'",
+                  "type": "repr"
+                },
+                "vw_max": {
+                  "repr": "3.0",
+                  "type": "repr"
+                },
+                "vw_min": {
+                  "repr": "-3.0",
+                  "type": "repr"
+                },
+                "vx_max": {
+                  "repr": "1.0",
+                  "type": "repr"
+                },
+                "vx_min": {
+                  "repr": "-1.0",
+                  "type": "repr"
+                }
+              },
+              "groups": {}
+            }
+          }
+        },
+        "plugin__eufs_rqt__mission_control_gui__1": {
+          "keys": {},
+          "groups": {
+            "dock_widget__RosCanSimUi": {
+              "keys": {
+                "dock_widget_title": {
+                  "repr": "'Mission Control GUI'",
+                  "type": "repr"
+                },
+                "dockable": {
+                  "repr": "True",
+                  "type": "repr"
+                },
+                "parent": {
+                  "repr": "None",
+                  "type": "repr"
+                }
+              },
+              "groups": {}
+            }
+          }
+        }
+      }
+    }
+  }
+}

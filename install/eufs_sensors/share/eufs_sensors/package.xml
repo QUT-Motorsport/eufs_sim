@@ -1,0 +1,28 @@
+<?xml version="1.0"?>
+<?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
+<package format="3">
+  <name>eufs_sensors</name>
+  <version>2.0.0</version>
+  <description>URDF and mesh files for various sensors.</description>
+
+  <maintainer email="cambobmat@icloud.com">Cameron Matthew</maintainer>
+  <maintainer email="siliconlad@protonmail.com">Angus Stewart</maintainer>
+
+  <license>MIT</license>
+
+  <url type="website">http://eufs.co</url>
+  <url type="repository">https://gitlab.com/eufs/eufs_sim</url>
+  <url type="bugtracker">https://gitlab.com/eufs/eufs_sim/issues</url>
+
+  <buildtool_depend>ament_cmake</buildtool_depend>
+
+  <depend>xacro</depend>
+  <depend>gazebo_plugins</depend>
+
+  <test_depend>ament_lint_auto</test_depend>
+  <test_depend>ament_lint_common</test_depend>
+
+  <export>
+    <build_type>ament_cmake</build_type>
+  </export>
+</package>

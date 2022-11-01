@@ -1,0 +1,38 @@
+<?xml version="1.0"?>
+<?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
+<package format="3">
+  <name>eufs_launcher</name>
+  <version>2.0.0</version>
+  <description>Configures and launches eufs_sim.</description>
+
+  <maintainer email="cambobmat@icloud.com">Cameron Matthew</maintainer>
+  <maintainer email="siliconlad@protonmail.com">Angus Stewart</maintainer>
+
+  <license>MIT</license>
+
+  <url type="website">http://eufs.co</url>
+  <url type="repository">https://gitlab.com/eufs/eufs_sim</url>
+  <url type="bugtracker">https://gitlab.com/eufs/eufs_sim/issues</url>
+
+  <depend>rclpy</depend>
+  <depend>rqt_gui</depend>
+
+  <depend>launch</depend>
+  <depend>launch_ros</depend>
+
+  <depend>python3-yaml</depend>
+  <depend>python3-pandas</depend>
+  <depend>python3-qt5-bindings</depend>
+  <depend>eufs_tracks</depend>
+  <depend>ament_index_python</depend>
+
+  <test_depend>ament_copyright</test_depend>
+  <test_depend>ament_flake8</test_depend>
+  <test_depend>ament_pep257</test_depend>
+  <test_depend>python3-pytest</test_depend>
+
+  <export>
+    <build_type>ament_python</build_type>
+    <rqt_gui plugin="${prefix}/plugin.xml"/>
+  </export>
+</package>

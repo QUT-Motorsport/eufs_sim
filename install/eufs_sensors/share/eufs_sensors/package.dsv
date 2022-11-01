@@ -1,0 +1,8 @@
+source;share/eufs_sensors/hook/cmake_prefix_path.ps1
+source;share/eufs_sensors/hook/cmake_prefix_path.dsv
+source;share/eufs_sensors/hook/cmake_prefix_path.sh
+source;share/eufs_sensors/local_setup.bash
+source;share/eufs_sensors/local_setup.dsv
+source;share/eufs_sensors/local_setup.ps1
+source;share/eufs_sensors/local_setup.sh
+source;share/eufs_sensors/local_setup.zsh

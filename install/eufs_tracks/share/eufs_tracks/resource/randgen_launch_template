@@ -1,0 +1,74 @@
+<?xml version="1.0"?>
+<launch>
+
+  <!-- Gazebo arguments -->
+  <set_env name="GAZEBO_MODEL_PATH" value="$(find-pkg-share eufs_tracks)/models"/>
+  <set_env name="GAZEBO_RESOURCE_PATH" value="$(find-pkg-share eufs_sensors)/meshes:$(find-pkg-share eufs_tracks)/meshes:$(find-pkg-share eufs_tracks)/materials:$(find-pkg-share eufs_racecar)/meshes:$(find-pkg-share eufs_racecar)/materials:/usr/share/gazebo-11"/>
+  <set_env name="GAZEBO_PLUGIN_PATH" value="/opt/ros/$(env ROS_DISTRO)/lib/:$(env EUFS_MASTER)/install/eufs_plugins"/>
+
+  <!-- Verbose argument passed to Gazebo -->
+  <arg name="verbose" default="false"/>
+
+  <!-- Namespace of the gazebo robot  -->
+  <arg name="namespace" default="eufs"/>
+
+  <!-- The launch group (default or no_perception) -->
+  <arg name="launch_group" default="default"/>
+
+  <!-- Launch the Gazebo GUI -->
+  <arg name="gazebo_gui" default="true"/>
+  <!-- Show the RQT GUI (with Mission Control GUI and EUFS Robot Steering GUI) -->
+  <arg name="show_rqt_gui" default="true"/>
+  <!-- Launch RViz -->
+  <arg name="rviz" default="false"/>
+
+  <!-- The vehicle model class -->
+  <arg name="vehicleModel" default="DynamicBicycle"/>
+  <!-- The command mode of the vehicle -->
+  <arg name="commandMode" default="acceleration"/>
+  <!-- The robot urdf used in sim -->
+  <arg name="robot_name" default="eufs"/>
+  <!-- The vehicle model config file -->
+  <arg name="vehicleModelConfig" default="configDry.yaml"/>
+  <!-- Publish the ground truth tf -->
+  <arg name="publish_gt_tf" default="false"/>
+  <!-- Publish ground truth -->
+  <arg name="pub_ground_truth" default="true"/>
+
+  <!-- Initial vehicle pose -->
+  <arg name="x" default="%PLACEX%"/>
+  <arg name="y" default="%PLACEY%"/>
+  <arg name="z" default="0.1"/>
+  <arg name="roll" default="0.0"/>
+  <arg name="pitch" default="0.0"/>
+  <arg name="yaw" default="%PLACEROTATION%"/>
+
+  <!-- Gazebo -->
+  <include file="$(find-pkg-share gazebo_ros)/launch/gazebo.launch.py">
+    <arg name="world" value="$(find-pkg-share eufs_tracks)/worlds/%FILLNAME%.world"/>
+    <arg name="verbose" value="$(var verbose)"/>
+    <arg name="gui" value="$(var gazebo_gui)"/>
+    <arg name="pause" value="false"/>
+  </include>
+
+  <!--Launch car & controller.-->
+  <include file="$(find-pkg-share eufs_racecar)/launch/load_car.launch.py">
+    <arg name="namespace" value="$(var namespace)"/>
+    <arg name="x" value="$(var x)"/>
+    <arg name="y" value="$(var y)"/>
+    <arg name="z" value="$(var z)"/>
+    <arg name="roll" value="$(var roll)"/>
+    <arg name="pitch" value="$(var pitch)"/>
+    <arg name="yaw" value="$(var yaw)"/>
+    <arg name="vehicleModel" value="$(var vehicleModel)"/>
+    <arg name="commandMode" value="$(var commandMode)"/>
+    <arg name="robot_name" value="$(var robot_name)"/>
+    <arg name="vehicleModelConfig" value="$(var vehicleModelConfig)"/>
+    <arg name="show_rqt_gui" value="$(var show_rqt_gui)"/>
+    <arg name="rviz" value="$(var rviz)"/>
+    <arg name="publish_gt_tf" value="$(var publish_gt_tf)"/>
+    <arg name="pub_ground_truth" value="$(var pub_ground_truth)"/>
+    <arg name="launch_group" value="$(var launch_group)"/>
+  </include>
+
+</launch>

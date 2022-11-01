@@ -1,0 +1,80 @@
+# Configures what nodes get automatically launched on startup, along with
+# what config checkboxes exist and their default values.
+
+eufs_launcher:
+  # Default launch file to be selected in the launcher drop-down menu
+  # Make sure to add the .launch suffix, i.e. "small_track.launch"
+  base_track: "small_track.launch"
+
+  # Default vehicle model to be selected in the launcher drop-down menu
+  default_vehicle_model: "DynamicBicycle"
+
+  # Default command mode to be selected in the launcher drop-down menu
+  default_command_mode: "acceleration"
+
+  # Default vehicle model config preset to be selected in the launcher drop-down menu
+  default_vehicle_preset: "DryTrack"
+
+  # Default robot urdf to be selected in the launcher drop-down menu
+  default_robot_name: "eufs"
+
+  # percent of possible noise pixels being utilized
+  object_noise_default: 0
+
+  # radius in meters where cones may be placed away from ground truth
+  # Range in launcher is between 0 and 0.4
+  # I like 0.05 but by default this should stay 0 to not confuse anyone
+  cone_noise_default: 0
+
+  # percent of cones where fastslam does not know their color if pre-loading map
+  color_noise_default: 0
+
+  # Checkboxes to have in the config section.
+  # `eufs_launcher` handles layout based on priority set.
+  checkboxes:
+    rviz:
+      priority: 1
+      name: "RViz_Checkbox"
+      label: "RViz"
+      checked_on_default: Yes
+      parameter_triggering:
+        if_on: { "rviz:=true" }
+        if_off: { "rviz:=false" }
+
+    perception:
+      priority: 2
+      name: "Perception_Checkbox"
+      label: "Use Simulated Perception"
+      checked_on_default: Yes
+      parameter_triggering:
+        # Note that this is working as intended - "no_perception" means
+        # No real perception!  In which case we use the simulated perception.
+        if_on: { "launch_group:=no_perception" }
+        if_off: { "launch_group:=default" }
+
+    gazebo_gui:
+      priority: 3
+      name: "Gazebo_GUI_Checkbox"
+      label: "Gazebo GUI"
+      checked_on_default: No
+      parameter_triggering:
+        if_on: { "gazebo_gui:=true" }
+        if_off: { "gazebo_gui:=false" }
+
+    ground_truth_transform:
+      priority: 4
+      name: "Ground_Truth_Transform"
+      label: "Ground Truth TF"
+      checked_on_default: No
+      parameter_triggering:
+        if_on: { "publish_gt_tf:=true" }
+        if_off: { "publish_gt_tf:=false" }
+
+    pub_ground_truth:
+      priority: 5
+      name: "Publish_Ground_Truth_Checkbox"
+      label: "Publish Ground Truth"
+      checked_on_default: Yes
+      parameter_triggering:
+        if_on: { "pub_ground_truth:=true" }
+        if_off: { "pub_ground_truth:=false" }
