@@ -264,7 +264,7 @@ eufs_msgs::msg::ConeArrayWithCovariance GazeboGroundTruthCones::getConeArraysMes
 }
 
 void GazeboGroundTruthCones::addConeToConeArray(
-    eufs_msgs::msg::ConeArrayWithCovariance &ground_truth_cone_array,
+    eufs_msgs::msg::ConeArrayWithCovariance & ground_truth_cone_array,
     gazebo::physics::LinkPtr link) {
   geometry_msgs::msg::Point point;
   point.x = link->WorldPose().Pos().X();
@@ -275,32 +275,7 @@ void GazeboGroundTruthCones::addConeToConeArray(
 
   eufs_msgs::msg::ConeWithCovariance cone = eufs_msgs::msg::ConeWithCovariance();
   cone.point = point;
-
-  // Creation of the covariance of the cones
-
-  // Firstly, calculate magnitude of vector from car to point
-  double magnitude = sqrt(pow(point.x, 2) + pow(point.y, 2));
-  // Create first eigenvector to be parallel to vector to point
-  Eigen::Vector2d e_vec1(point.x / magnitude, point.y / magnitude);
-  // Create 2nd eigenvector for vector perpendicular to e1
-  Eigen::Vector2d e_vec2(e_vec1(1) * (-1), e_vec1(0));
-  // We specify our covariance using the equation defined in a research paper (TODO insert paper)
-  double e_val1 = 5 * 0.0184 * exp(0.2106 * magnitude);
-  double e_val2 = e_val1 / 5;
-
-  // Create matrix for basis consisting of eigenvectors
-  Eigen::Matrix2d basis;
-  basis << e_vec2, e_vec1;
-  // Create matrix to store variance values
-  Eigen::Matrix2d diag_mat;
-  diag_mat << e_val2, 0, 0, e_val1;
-  // Convert cov matrix back to standard basis
-  Eigen::Matrix2d cov_mat = basis * diag_mat * basis.inverse();
-  // Flatten cov matrix so it can be passed to cone object
-  std::array<double, 4> flattened_cov_mat = {
-      {cov_mat(0, 0), cov_mat(0, 1), cov_mat(1, 0), cov_mat(1, 1)}};
-
-  cone.covariance = flattened_cov_mat;
+  cone.covariance = {0, 0, 0, 0};
 
 
 
@@ -560,6 +535,8 @@ eufs_msgs::msg::ConeArrayWithCovariance GazeboGroundTruthCones::addNoisePercepti
     eufs_msgs::msg::ConeArrayWithCovariance &cones_message, ignition::math::Vector3d noise) {
   eufs_msgs::msg::ConeArrayWithCovariance cones_message_with_noise = cones_message;
 
+  std::cout << "Test" << std::endl;
+
   addNoiseToConeArray(cones_message_with_noise.blue_cones, noise);
   addNoiseToConeArray(cones_message_with_noise.yellow_cones, noise);
   addNoiseToConeArray(cones_message_with_noise.orange_cones, noise);
@@ -626,7 +603,37 @@ void GazeboGroundTruthCones::addNoiseToConeArray(
     // Add noise vector to cone pose
     cone_array[i].point.x += par_x + perp_x;
     cone_array[i].point.y += par_y + perp_y;
-    cone_array[i].covariance = {x_noise, 0, 0, y_noise};
+
+    // Calculation of covariance
+
+    // Obtain magnitude of vector from car to cone 
+    double magnitude = sqrt(pow(cone_array[i].point.x, 2) + pow(cone_array[i].point.y, 2));
+
+    // Create eigenvectors which are parallel and perpendicular to: vector to point
+    Eigen::Vector2d e_vec1(cone_array[i].point.x / magnitude, cone_array[i].point.y / magnitude);
+    Eigen::Vector2d e_vec2(e_vec1(1) * (-1), e_vec1(0));
+
+    // Specify the covariance constants. This values have been found in a research paper (TODO insert paper)  
+    double e_val1 = 5 * 0.0184 * exp(0.2106 * magnitude);
+    double e_val2 = e_val1 / 5;
+
+    // Create matrix for basis consisting of eigenvectors
+    Eigen::Matrix2d basis;
+    basis << e_vec2, e_vec1;
+    // Create matrix to store variance values
+    Eigen::Matrix2d diag_mat;
+    diag_mat << e_val2, 0, 0, e_val1;
+
+    // Convert cov matrix back to standard basis
+    Eigen::Matrix2d cov_mat = basis * diag_mat * basis.inverse();
+    // Flatten cov matrix so it can be passed to cone object
+    std::array<double, 4> flattened_cov_mat = {
+        {cov_mat(0, 0)*100, cov_mat(0, 1), cov_mat(1, 0), cov_mat(1, 1)}};
+
+    std::cout << cov_mat(0, 0) << std::endl;
+    
+    // Update the covariance of the cones
+    cone_array[i].covariance = flattened_cov_mat;
   }
 }
 
