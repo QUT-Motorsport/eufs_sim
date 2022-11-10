@@ -614,8 +614,8 @@ void GazeboGroundTruthCones::addNoiseToConeArray(
     Eigen::Vector2d e_vec2(e_vec1(1) * (-1), e_vec1(0));
 
     // Specify the covariance constants. This values have been found in a research paper (TODO insert paper)  
-    double e_val1 = 5 * 0.0184 * exp(0.2106 * magnitude);
-    double e_val2 = e_val1 / 5;
+    double e_val1 = x_noise;
+    double e_val2 = y_noise;
 
     // Create matrix for basis consisting of eigenvectors
     Eigen::Matrix2d basis;
@@ -628,7 +628,7 @@ void GazeboGroundTruthCones::addNoiseToConeArray(
     Eigen::Matrix2d cov_mat = basis * diag_mat * basis.inverse();
     // Flatten cov matrix so it can be passed to cone object
     std::array<double, 4> flattened_cov_mat = {
-        {cov_mat(0, 0)*100, cov_mat(0, 1), cov_mat(1, 0), cov_mat(1, 1)}};
+        {cov_mat(0, 0), cov_mat(0, 1), cov_mat(1, 0), cov_mat(1, 1)}};
 
     std::cout << cov_mat(0, 0) << std::endl;
     
