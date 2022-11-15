@@ -278,7 +278,6 @@ void GazeboGroundTruthCones::addConeToConeArray(
   cone.covariance = {0, 0, 0, 0};
 
 
-
   switch (cone_type) {
     case ConeType::blue:
       ground_truth_cone_array.blue_cones.push_back(cone);
@@ -535,7 +534,6 @@ eufs_msgs::msg::ConeArrayWithCovariance GazeboGroundTruthCones::addNoisePercepti
     eufs_msgs::msg::ConeArrayWithCovariance &cones_message, ignition::math::Vector3d noise) {
   eufs_msgs::msg::ConeArrayWithCovariance cones_message_with_noise = cones_message;
 
-  std::cout << "Test" << std::endl;
 
   addNoiseToConeArray(cones_message_with_noise.blue_cones, noise);
   addNoiseToConeArray(cones_message_with_noise.yellow_cones, noise);
