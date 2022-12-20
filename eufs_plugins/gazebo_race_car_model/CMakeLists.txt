@@ -13,6 +13,7 @@ find_package(geometry_msgs REQUIRED)
 find_package(tf2 REQUIRED)
 find_package(ackermann_msgs REQUIRED)
 find_package(tf2_ros REQUIRED)
+find_package(tf2_geometry_msgs REQUIRED)
 find_package(std_srvs REQUIRED)
 find_package(eufs_models REQUIRED)
 
@@ -26,6 +27,7 @@ ament_target_dependencies(gazebo_race_car_model
   "tf2"
   "ackermann_msgs"
   "tf2_ros"
+  "tf2_geometry_msgs"
   "std_srvs"
   "std_msgs"
   "eufs_models")

@@ -7,7 +7,10 @@ ament_target_dependencies(gazebo_simulate_bounding_boxes
   "rclcpp"
   "sensor_msgs"
   "eufs_msgs"
-  "image_geometry")
+  "image_geometry"
+  "tf2"
+  "tf2_ros"
+  "tf2_geometry_msgs")
 
 target_include_directories(gazebo_simulate_bounding_boxes PUBLIC include)
 
