@@ -183,10 +183,10 @@ class EUFSLauncher(Plugin):
                 else:
                     new_width = geom.width() * scalar_multiplier + 200
                 widget.setGeometry(
-                    geom.x() * scalar_multiplier,
-                    geom.y() * scalar_multiplier,
-                    new_width,
-                    geom.height() * (scalar_multiplier)
+                    int(geom.x() * scalar_multiplier),
+                    int(geom.y() * scalar_multiplier),
+                    int(new_width),
+                    int(geom.height() * (scalar_multiplier))
                 )
 
         # If use_gui is false, we jump straight into launching the track
