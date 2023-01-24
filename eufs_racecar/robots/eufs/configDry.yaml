@@ -20,7 +20,7 @@ tire:
   radius: 0.2525
 
 aero:
-  C_Down: 1.9 # F_Downforce = C_Downforce*v_x^2
+  C_Down: 3.22455 # F_Downforce = C_Downforce*v_x^2
   C_drag: 1.44475  # F_Drag = C_Drag*v_x^2
 
 input_ranges:
