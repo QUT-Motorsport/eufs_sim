@@ -98,8 +98,8 @@
             <pose>0 -0.12 0 0 0 0</pose>
             <horizontal_fov>1.91986</horizontal_fov>
             <image>
-              <width>1280</width>
-              <height>720</height>
+              <width>4416</width>
+              <height>1242</height>
               <format>B8G8R8</format>
             </image>
             <clip>
