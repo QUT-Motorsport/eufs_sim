@@ -1,4 +1,5 @@
 <?xml version="1.0"?>
+<xacro:include filename="global_sensor_variables.xacro"/> <!--making a refference to the file with all the global variable so its easier -->
 <robot xmlns:xacro="http://www.ros.org/wiki/xacro" name="VLP-16">
   <xacro:property name="M_PI" value="3.1415926535897931" />
   <xacro:macro name="VLP-16R" params="*origin parent:=base_footprint name:=velodyne active topic:=/velodyne_points hz:=10 lasers:=40 samples:=350 min_range:=0.2 max_range:=100.0 noise:=0.008 min_angle:=-2 max_angle:=2">
