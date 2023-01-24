@@ -49,30 +49,38 @@
     <!--                 MAIN SENSORS                    -->
     <!-- *********************************************** -->
 
-    <!--     LOCATIONS: (XYZ)
+    <!--     LOCATIONS: (XYZ) - original values
     IMU: 0.0 0.0 0.170
     GPS: -0.110 0.0 0.9
     LIDAR: 1.700 0.0 -0.150
     STEREO CAM: -0.110 0.0 0.800 -->
+
+    <!--     LOCATIONS: (XYZ) - new values measured on 24/01/23
+    IMU: 0.0 0.0 0.0
+    GPS: 1.220 0.0 0.530
+    LIDAR: 1.590 0.0 0.130
+    STEREO CAM: 0.370 0.0 0.900 -->
+
+
 
     <xacro:sensor_imu parent="chassis" prefix="sbg_imu" topic_prefix="">
         <origin xyz="0.0 0.0 0.0" rpy="0 0 0"/>
     </xacro:sensor_imu>
 
     <xacro:sensor_gps parent="chassis" prefix="gps">
-        <origin xyz="0.0 0.0 0.4" rpy="0 0 0"/>
+        <origin xyz="1.220 0.0 0.530" rpy="0 0 0"/>
     </xacro:sensor_gps>
 
     <xacro:VLP-16R parent="chassis" name="velodyne" topic="/velodyne_points" hz="10" active="$(arg simulate_perception)">
-        <origin xyz="-0.15 0.0 0.79" rpy="0 ${1*M_PI/180.0} 0"/>
+        <origin xyz="1.590 0.0 0.130" rpy="0 ${1*M_PI/180.0} 0"/>
     </xacro:VLP-16R>
 
     <xacro:zed_camera parent="chassis" prefix="zed" active="$(arg simulate_perception)">
-        <origin xyz="-0.08 0.0 0.76" rpy="0 0 0"/>
+        <origin xyz="0.0 0.0 0.0" rpy="0 0 0"/>
     </xacro:zed_camera>
 
     <xacro:sensor_imu parent="chassis" prefix="zed_imu" topic_prefix="/camera">
-        <origin xyz="-0.08 0.0 0.76" rpy="0 0 0"/>
+        <origin xyz="0.0 0.0 0.0" rpy="0 0 0"/>
     </xacro:sensor_imu>
 
 </robot>
