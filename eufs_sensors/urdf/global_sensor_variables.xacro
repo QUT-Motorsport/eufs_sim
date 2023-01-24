@@ -1,5 +1,0 @@
-<?xml version="1.0"?>
-<xacro:define name="gps_sensor" value="3.14"/>
-<xacro:define name="zed_cam_sensor" value="3.14"/>
-<xacro:define name="imu_sensor" value="3.14"/>
-<xacro:define name="VLP-16R_sensor" value="3.14"/>
