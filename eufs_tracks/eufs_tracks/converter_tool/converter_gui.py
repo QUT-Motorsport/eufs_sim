@@ -89,10 +89,10 @@ class EUFSConverterGUI(Plugin):
                     else geom.width() * (scaler_multiplier) + 200
                 )
                 widget.setGeometry(
-                    geom.x() * scaler_multiplier,
-                    geom.y() * scaler_multiplier,
-                    new_width,
-                    geom.height() * (scaler_multiplier)
+                    int(geom.x() * scaler_multiplier),
+                    int(geom.y() * scaler_multiplier),
+                    int(new_width),
+                    int(geom.height() * (scaler_multiplier))
                 )
 
     ################
