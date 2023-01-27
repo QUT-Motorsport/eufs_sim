@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <robot xmlns:xacro="http://www.ros.org/wiki/xacro" name="VLP-16">
   <xacro:property name="M_PI" value="3.1415926535897931" />
-  <xacro:macro name="VLP-16R" params="*origin parent:=base_footprint name:=velodyne active topic:=/velodyne_points hz:=100 lasers:=32 samples:=350 min_range:=0.2 max_range:=200.0 noise:=0.008 min_angle:=-1.5707963 max_angle:=1.5707963">
+  <xacro:macro name="VLP-16R" params="*origin parent:=base_footprint name:=velodyne active topic:=/velodyne_points hz:=10 lasers:=40 samples:=600 min_range:=0.2 max_range:=200.0 noise:=0.01 min_angle:=-1.5707963 max_angle:=1.5707963">
 
     <joint name="${name}_base_mount_joint" type="fixed">
       <xacro:insert_block name="origin" />
@@ -75,7 +75,7 @@
               <vertical>
                 <samples>${lasers}</samples>
                 <resolution>1.0</resolution>
-                <min_angle>-${15.0*M_PI/180.0}</min_angle>
+                <min_angle>-${10.0*M_PI/180.0}</min_angle>
                 <max_angle> ${15.0*M_PI/180.0}</max_angle>
               </vertical>
             </scan>
