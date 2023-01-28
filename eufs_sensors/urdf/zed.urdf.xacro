@@ -152,7 +152,7 @@
 
           <plugin name="${prefix}_controller" filename="libgazebo_ros_camera.so">
             <ros>
-              <parameter name="update_rate" type="double">60.0</parameter>
+              <parameter name="update_rate" type="double">30.0</parameter>
               <remapping>/zed/depth/camera_info:=/zed2i/zed_node/depth/camera_info</remapping>
               <remapping>/zed/depth/image_raw:=/zed2i/zed_node/depth/depth_registered</remapping>
             </ros>
