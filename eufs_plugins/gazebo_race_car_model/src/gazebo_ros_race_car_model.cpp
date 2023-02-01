@@ -538,6 +538,9 @@ void RaceCarModelPlugin::publishOdom() {
   ts.twist.angular.y = state_noisy.r_y;
   ts.twist.angular.z = state_noisy.r_z;
 
+  ts.header.stamp.sec = _last_sim_time.sec;
+  ts.header.stamp.nanosec = _last_sim_time.nsec;
+
     // Publish velocity for imu on QEV3
   _pub_velocity->publish(ts);
 
