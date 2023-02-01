@@ -72,6 +72,9 @@ void RaceCarModelPlugin::Load(gazebo::physics::ModelPtr model, sdf::ElementPtr s
   _pub_ground_truth_wheel_speeds = _rosnode->create_publisher<eufs_msgs::msg::WheelSpeedsStamped>(
       _ground_truth_wheel_speeds_topic_name, 1);
   _pub_odom = _rosnode->create_publisher<nav_msgs::msg::Odometry>(_odom_topic_name, 1);
+// ROS publisher for QEV3 imu velocity
+_pub_velocity = _rosnode->create_publisher<geometry_msgs::msg::TwistStamped>("imu/velocity", 1);
+
 
   // ROS Services
   _reset_vehicle_pos_srv = _rosnode->create_service<std_srvs::srv::Trigger>(
@@ -523,6 +526,21 @@ void RaceCarModelPlugin::publishOdom() {
   if (_pub_odom->get_subscription_count() > 0 && _pub_ground_truth) {
     _pub_odom->publish(odom);
   }
+
+  // Velocity for QEV3 imu velocity
+  geometry_msgs::msg::TwistStamped ts;
+ 
+  ts.twist.linear.x = state_noisy.v_x;
+  ts.twist.linear.y = state_noisy.v_y;
+  ts.twist.linear.z = state_noisy.v_z;
+
+  ts.twist.angular.x = state_noisy.r_x;
+  ts.twist.angular.y = state_noisy.r_y;
+  ts.twist.angular.z = state_noisy.r_z;
+
+    // Publish velocity for imu on QEV3
+  _pub_velocity->publish(ts);
+
 }
 
 void RaceCarModelPlugin::publishTf() {
@@ -611,6 +629,7 @@ void RaceCarModelPlugin::updateState(const double dt) {
   publishCarState();
   publishWheelSpeeds();
   publishOdom();
+
 
   if (_publish_tf) {
     publishTf();
