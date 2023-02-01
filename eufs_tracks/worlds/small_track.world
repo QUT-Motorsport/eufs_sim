@@ -22,8 +22,8 @@
       <heading_deg>180</heading_deg>
 
       <!-- Appleton Tower coordinates -->
-      <latitude_deg>55.944400</latitude_deg>
-      <longitude_deg>-3.18629</longitude_deg>
+      <latitude_deg>-27.69056</latitude_deg>
+      <longitude_deg>152.65461</longitude_deg>
     </spherical_coordinates>
 
     <light name='sun' type='directional'>

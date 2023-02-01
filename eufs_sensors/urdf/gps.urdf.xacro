@@ -87,7 +87,6 @@
                         <remapping>~/out:=/imu/nav_sat_fix</remapping>
 
                     </ros>
-
                     <frame_name>${prefix}_base_link</frame_name>
                 </plugin>
             </sensor>
