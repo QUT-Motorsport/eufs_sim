@@ -161,6 +161,17 @@ void GazeboGroundTruthCones::Load(gazebo::physics::ModelPtr _parent, sdf::Elemen
           this->rosnode_->create_publisher<eufs_msgs::msg::ConeArrayWithCovariance>(
               topic_name_, 1);
     }
+
+    if (!_sdf->HasElement("perceptionTrackTopicName")) {
+      RCLCPP_FATAL(this->rosnode_->get_logger(),
+                   "state_ground_truth plugin missing <perceptionTrackTopicName>, cannot proceed");
+      return;
+    } else {
+      std::string topic_name_ = _sdf->GetElement("perceptionTrackTopicName")->Get<std::string>();
+      this->perception_track_pub_ =
+          this->rosnode_->create_publisher<eufs_msgs::msg::ConeArrayWithCovariance>(
+              topic_name_, 1);
+    }
   }
 
   // Setup Services
@@ -200,7 +211,8 @@ void GazeboGroundTruthCones::UpdateChild() {
   if (this->ground_truth_cone_pub_->get_subscription_count() == 0 &&
       this->ground_truth_track_pub_->get_subscription_count() == 0 &&
       (!this->simulate_perception_ ||
-       this->perception_cone_pub_->get_subscription_count() == 0)) {
+       this->perception_cone_pub_->get_subscription_count() == 0 ||
+       this->perception_track_pub_->get_subscription_count() == 0)) {
     RCLCPP_DEBUG(this->rosnode_->get_logger(),
                  "Nobody is listening to cone_ground_truth. Doing nothing");
     return;
@@ -238,11 +250,32 @@ void GazeboGroundTruthCones::UpdateChild() {
   }
 
   // Publish the simulated perception cones if it has subscribers
-  if (this->simulate_perception_ &&
-      this->perception_cone_pub_->get_subscription_count() > 0) {
-    eufs_msgs::msg::ConeArrayWithCovariance perception_cones_message =
-        addNoisePerception(ground_truth_cones_message, perception_lidar_noise_);
-    this->perception_cone_pub_->publish(perception_cones_message);
+  if (this->simulate_perception_) {
+    if (this->perception_track_pub_->get_subscription_count() > 0) {
+      eufs_msgs::msg::ConeArrayWithCovariance perception_track_message;
+      if (this->perception_track_initialized) {
+        perception_track_message = this->perception_track_data;
+      } else {
+        perception_track_message =
+            addNoisePerception(ground_truth_track_message, perception_lidar_noise_);
+        this->perception_track_data = perception_track_message;
+        this->perception_track_initialized = true;
+      }
+      this->perception_track_pub_->publish(perception_track_message);
+    }
+
+    if (this->perception_cone_pub_->get_subscription_count() > 0) {
+      eufs_msgs::msg::ConeArrayWithCovariance perception_cones_message;
+      if (this->perception_cone_initialized) {
+        perception_cones_message = this->perception_cone_data;
+      } else {
+        perception_cones_message =
+            addNoisePerception(ground_truth_cones_message, perception_lidar_noise_);
+        this->perception_cone_data = perception_cones_message;
+        this->perception_cone_initialized = true;
+      }
+      this->perception_cone_pub_->publish(perception_cones_message);
+    }
   }
 }
 

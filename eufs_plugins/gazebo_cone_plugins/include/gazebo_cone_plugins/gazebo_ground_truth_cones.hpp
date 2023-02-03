@@ -136,6 +136,7 @@ class GazeboGroundTruthCones : public gazebo::ModelPlugin {
   rclcpp::Publisher<eufs_msgs::msg::ConeArrayWithCovariance>::SharedPtr ground_truth_cone_pub_;
   rclcpp::Publisher<eufs_msgs::msg::ConeArrayWithCovariance>::SharedPtr ground_truth_track_pub_;
   rclcpp::Publisher<eufs_msgs::msg::ConeArrayWithCovariance>::SharedPtr perception_cone_pub_;
+  rclcpp::Publisher<eufs_msgs::msg::ConeArrayWithCovariance>::SharedPtr perception_track_pub_;
 
   // Services
   rclcpp::Service<std_srvs::srv::Trigger>::SharedPtr
@@ -150,6 +151,13 @@ class GazeboGroundTruthCones : public gazebo::ModelPlugin {
   gazebo::physics::LinkPtr car_link;
   ignition::math::Pose3d initial_car_pos_;
   ignition::math::Pose3d car_pos;
+
+  // Noisy perception cone and track data is only calculated once
+  eufs_msgs::msg::ConeArrayWithCovariance perception_cone_data { };
+  bool perception_cone_initialized { false };
+
+  eufs_msgs::msg::ConeArrayWithCovariance perception_track_data { };
+  bool perception_track_initialized { false };
 
   // Parameters
 
