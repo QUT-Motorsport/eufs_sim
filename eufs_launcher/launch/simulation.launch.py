@@ -62,6 +62,16 @@ def generate_launch_description():
             default_value='default',
             description="Determines which launch files are used in the state_machine node"),
 
+        DeclareLaunchArgument(
+            name='lidar',
+            default_value='on',
+            description="Determines if the lidar is on or not"),
+        
+        DeclareLaunchArgument(
+            name='camera',
+            default_value='on',
+            description="Determines if the camera is on or not"),
+        
         IncludeLaunchDescription(
             FrontendLaunchDescriptionSource(
                 PathJoinSubstitution([
@@ -80,6 +90,8 @@ def generate_launch_description():
                 ('publish_gt_tf', LaunchConfiguration('publish_gt_tf')),
                 ('pub_ground_truth', LaunchConfiguration('pub_ground_truth')),
                 ('launch_group', LaunchConfiguration('launch_group')),
+                ('camera', LaunchConfiguration('camera')),
+                ('lidar', LaunchConfiguration('lidar')),
             ]
         ),
     ])
