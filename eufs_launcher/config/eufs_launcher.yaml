@@ -78,3 +78,21 @@ eufs_launcher:
       parameter_triggering:
         if_on: { "pub_ground_truth:=true" }
         if_off: { "pub_ground_truth:=false" }
+
+    pub_ground_truth:
+      priority: 6
+      name: "Lidar_Checkbox"
+      label: "Lidar"
+      checked_on_default: No
+      parameter_triggering:
+        if_on: { "lidar:=true" }
+        if_off: { "lidar:=false" }
+
+      pub_ground_truth:
+      priority: 7
+      name: "Camera_Checkbox"
+      label: "Camera"
+      checked_on_default: Yes
+      parameter_triggering:
+        if_on: { "camera:=true" }
+        if_off: { "camera:=false" }
