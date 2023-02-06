@@ -18,8 +18,10 @@
     <xacro:arg name="publish_tf" default="false"/>
     <!-- If the perception stack should be simulated or if sensors should be used -->
     <xacro:arg name="simulate_perception" default="true"/>
-    <!-- If the lidar perception stack should be simulated or if sensors should be used -->
-    <xacro:arg name="simulate_lidar" default="true"/>
+    <!-- If the camera should be simulated or if sensors should be removed -->
+    <xacro:arg name="simulate_camera" default="true"/>
+    <!-- If the lidar should be simulated or if sensors should be removed -->
+    <xacro:arg name="simulate_lidar" default="false"/>
 
 
     <!-- ***************** -->
@@ -74,11 +76,12 @@
         <origin xyz="1.220 0.0 0.530" rpy="0 0 0"/>
     </xacro:sensor_gps>
 
-    <xacro:VLP-16R parent="chassis" name="velodyne" topic="/velodyne_points" hz="10" active="$(arg simulate_perception)">
+<!--  <xacro:VLP-16R parent="chassis" name="velodyne" topic="/velodyne_points" hz="10" active= $(arg simulate_perception) --> 
+    <xacro:VLP-16R parent="chassis" name="velodyne" topic="/velodyne_points" hz="10" active="$(arg simulate_lidar)">
         <origin xyz="1.590 0.0 -0.15" rpy="0 0 0"/>
     </xacro:VLP-16R>
 
-    <xacro:zed_camera parent="chassis" prefix="zed" active="$(arg simulate_perception)">
+    <xacro:zed_camera parent="chassis" prefix="zed" active="$(arg simulate_camera)">">
         <origin xyz="-0.370 0.0 0.900" rpy="0 0 0"/>
     </xacro:zed_camera>
 

@@ -63,14 +63,16 @@ def generate_launch_description():
             description="Determines which launch files are used in the state_machine node"),
 
         DeclareLaunchArgument(
-            name='lidar',
-            default_value='on',
-            description="Determines if the lidar is on or not"),
-        
-        DeclareLaunchArgument(
             name='camera',
-            default_value='on',
-            description="Determines if the camera is on or not"),
+            default_value='default',
+            description="Condition to enable camera"),
+
+        DeclareLaunchArgument(
+            name='lidar',
+            default_value='default',
+            description="Condition to enable lidar"),
+        
+
         
         IncludeLaunchDescription(
             FrontendLaunchDescriptionSource(
