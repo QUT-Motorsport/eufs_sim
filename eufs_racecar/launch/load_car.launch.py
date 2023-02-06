@@ -29,8 +29,14 @@ def spawn_car(context, *args, **kwargs):
     roll = get_argument(context, 'roll')
     pitch = get_argument(context, 'pitch')
     yaw = get_argument(context, 'yaw')
+    # Custome check boxes
+    camera = get_argumet(context, 'camera')
+    lidar = get_argument(context, 'lidar')
 
     simulate_perception = 'true' if launch_group == 'no_perception' else 'false'
+    simulate_lidar = 'true' if lidar == 'true' else 'fase'
+    simulate_camera = 'true' if camera == 'true' else 'fase'
+
     config_file = join(get_package_share_directory('eufs_racecar'), 'robots', robot_name,
                        vehicle_model_config)
     noise_file = join(get_package_share_directory('eufs_models'), 'config', 'noise.yaml')
@@ -57,6 +63,8 @@ def spawn_car(context, *args, **kwargs):
                                  'recolor_config': recolor_config,
                                  'publish_tf': publish_tf,
                                  'simulate_perception': simulate_perception,
+                                 'simulate_lidar' : simulate_lidar,
+                                 'simulate_camera' : simulate_camera,
                                  'pub_ground_truth': pub_ground_truth,
                                  'bounding_box_settings': bounding_boxes_file,
                              })
@@ -129,6 +137,10 @@ def generate_launch_description():
     return LaunchDescription([
         # Launch Arguments
         DeclareLaunchArgument('launch_group', default_value='default',
+                              description='The launch group (default or '
+                                          'no_perception)'),
+        # Custome launch argumetns
+        DeclareLaunchArgument('camera', default_value='default',
                               description='The launch group (default or '
                                           'no_perception)'),
 
