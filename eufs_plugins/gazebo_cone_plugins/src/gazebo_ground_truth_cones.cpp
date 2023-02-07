@@ -240,6 +240,8 @@ void GazeboGroundTruthCones::UpdateChild() {
   if (this->ground_truth_track_pub_->get_subscription_count() > 0 && pub_ground_truth) {
     this->ground_truth_track_pub_->publish(ground_truth_track_message);
   }
+  std::vector<driverless_msgs::msg::Cone> ground_truth_track_qutms_message =
+      cone_array_with_covariance_to_cone_list(ground_truth_track_message);
 
   eufs_msgs::msg::ConeArrayWithCovariance ground_truth_cones_message =
       processCones(cone_arrays_message);
@@ -277,6 +279,38 @@ void GazeboGroundTruthCones::UpdateChild() {
       this->perception_cone_pub_->publish(perception_cones_message);
     }
   }
+}
+
+// Generating ConeDetectionStamped msgs
+std::vector<driverless_msgs::msg::Cone> cone_array_with_covariance_to_cone_list(const eufs_msgs::msg::ConeArrayWithCovariance& eufs_cones)
+{
+    std::vector<driverless_msgs::msg::Cone> internal_cones;
+    for (const auto& eufs_cone : eufs_cones.blue_cones) {
+        driverless_msgs::msg::Cone internal_cone;
+        internal_cone.location = eufs_cone.point;
+        internal_cone.color = driverless_msgs::msg::Cone::BLUE;
+        internal_cones.push_back(internal_cone);
+    }
+    for (const auto& eufs_cone : eufs_cones.yellow_cones) {
+        driverless_msgs::msg::Cone internal_cone;
+        internal_cone.location = eufs_cone.point;
+        internal_cone.color = driverless_msgs::msg::Cone::YELLOW;
+        internal_cones.push_back(internal_cone);
+    }
+    for (const auto& eufs_cone : eufs_cones.orange_cones) {
+        driverless_msgs::msg::Cone internal_cone;
+        internal_cone.location = eufs_cone.point;
+        internal_cone.color = driverless_msgs::msg::Cone::ORANGE_SMALL;
+        internal_cones.push_back(internal_cone);
+    }
+    for (const auto& eufs_cone : eufs_cones.big_orange_cones) {
+        driverless_msgs::msg::Cone internal_cone;
+        internal_cone.location = eufs_cone.point;
+        internal_cone.color = driverless_msgs::msg::Cone::ORANGE_BIG;
+        internal_cones.push_back(internal_cone);
+    }
+
+    return internal_cones;
 }
 
 // Getting the track

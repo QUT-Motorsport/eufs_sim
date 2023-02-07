@@ -62,6 +62,11 @@
 // ROS  srvs
 #include <std_srvs/srv/trigger.hpp>
 
+// QUTMS messages
+#include <driverless_msgs/msg/cone.hpp>
+#include <driverless_msgs/msg/cone_detection_stamped.hpp>
+
+
 namespace gazebo_plugins {
 namespace eufs_plugins {
 class GazeboGroundTruthCones : public gazebo::ModelPlugin {
@@ -135,6 +140,9 @@ class GazeboGroundTruthCones : public gazebo::ModelPlugin {
       eufs_msgs::msg::ConeArrayWithCovariance cones);
   eufs_msgs::msg::ConeArrayWithCovariance translateBaseFootprintFrame(
       eufs_msgs::msg::ConeArrayWithCovariance cones);
+// QUTMS driverless messages
+  std::vector<driverless_msgs::msg::Cone> cone_array_with_covariance_to_cone_list(const eufs_msgs::msg::ConeArrayWithCovariance& eufs_cones);
+
 
   // Publishers
   rclcpp::Publisher<eufs_msgs::msg::ConeArrayWithCovariance>::SharedPtr ground_truth_cone_pub_;

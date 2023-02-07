@@ -11,7 +11,8 @@ ament_target_dependencies(gazebo_ground_truth_cones
   "std_srvs"
   "eufs_msgs"
   "geometry_msgs"
-  "ament_index_cpp")
+  "ament_index_cpp"
+  "driverless_msgs")
 
 target_include_directories(gazebo_ground_truth_cones PUBLIC include)
 
@@ -31,7 +32,8 @@ ament_target_dependencies(gazebo_camera_cones
         "gazebo_ros"
         "rclcpp"
         "eufs_msgs"
-        "ament_index_cpp")
+        "ament_index_cpp"
+        "driverless_msgs")
 
 target_include_directories(gazebo_camera_cones PUBLIC include)
 
