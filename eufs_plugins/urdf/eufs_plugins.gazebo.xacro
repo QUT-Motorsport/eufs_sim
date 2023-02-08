@@ -55,8 +55,8 @@
       <groundTruthConesTopicName>/ground_truth/cones</groundTruthConesTopicName>
       <groundTruthTrackTopicName>/ground_truth/track</groundTruthTrackTopicName>
       <simulatePerception>$(arg simulate_perception)</simulatePerception>
-      <perceptionConesTopicName>/ground_truth/noisy_cones</perceptionConesTopicName>
-      <perceptionTrackTopicName>/ground_truth/noisy_track</perceptionTrackTopicName>
+      <perceptionConesTopicName>/simulated_noise/cones</perceptionConesTopicName>
+      <perceptionTrackTopicName>/simulated_noise/track</perceptionTrackTopicName>
       <perceptionCameraDepthNoiseParameterA>0.01</perceptionCameraDepthNoiseParameterA>
       <perceptionCameraDepthNoiseParameterB>0.5</perceptionCameraDepthNoiseParameterB>
       <perceptionLidarNoise>0.03 0.03 0.0</perceptionLidarNoise>
