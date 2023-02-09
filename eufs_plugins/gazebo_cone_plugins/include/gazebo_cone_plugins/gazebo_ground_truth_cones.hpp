@@ -68,6 +68,10 @@ class GazeboGroundTruthCones : public gazebo::ModelPlugin {
  public:
   enum ConeType { blue, yellow, orange, big_orange, unknown };
 
+
+
+
+
   GazeboGroundTruthCones();
 
   // Gazebo plugin functions
