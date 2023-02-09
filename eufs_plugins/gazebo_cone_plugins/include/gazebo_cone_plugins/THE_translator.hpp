@@ -1,52 +1,39 @@
-/**
- * @file gazebo_cone_ground_truth.h
- * @author Niklas Burggraaff <s1902977@ed.ac.uk>
- * @date Mar 10, 2020
- * @copyright 2020 Edinburgh University Formula Student (EUFS)
- * @brief ground truth cone Gazebo plugin
- *
- * @details Provides ground truth cones in simulation in the form of
- *`eufs_msgs/ConeArrayWithCovariance`. Can also simulate the perception stack by publishing cones
- *with noise.
- **/
-
-#ifndef EUFS_PLUGINS_GAZEBO_CONE_PLUGINS_INCLUDE_GAZEBO_CONE_PLUGINS_GAZEBO_GROUND_TRUTH_CONES_HPP_
-#define EUFS_PLUGINS_GAZEBO_CONE_PLUGINS_INCLUDE_GAZEBO_CONE_PLUGINS_GAZEBO_GROUND_TRUTH_CONES_HPP_
-
-#include <ament_index_cpp/get_package_share_directory.hpp>
 #include <cmath>
-#include <eufs_msgs/msg/car_state.hpp>
-#include <eufs_msgs/msg/cone_array.hpp>
-#include <eufs_msgs/msg/cone_array_with_covariance.hpp>
-#include <eufs_msgs/msg/cone_with_covariance.hpp>
-#include <eufs_msgs/msg/point_array.hpp>
-#include <gazebo/common/Plugin.hh>
-#include <gazebo/common/Time.hh>
-#include <gazebo/gazebo.hh>
-#include <gazebo/physics/Link.hh>
-#include <gazebo/physics/Model.hh>
-#include <gazebo/physics/World.hh>
-#include <gazebo_ros/node.hpp>
-#include <geometry_msgs/msg/point.hpp>
-#include <memory>
-#include <string>
-#include <utility>
 #include <vector>
-#include <map>
 
-#include "rclcpp/rclcpp.hpp"
-#include "yaml-cpp/yaml.h"
+#include "driverless_msgs/msg/cone_detection_stamped.hpp"
+#include "driverless_msgs/msg/cone.hpp"
+#include "eufs_msgs/msg/cone_array_with_covariance.hpp"
 
-// ROS  srvs
-#include <std_srvs/srv/trigger.hpp>
+const float MAX_ANGLE = 0.15;
 
+std::vector<driverless_msgs::msg::Cone> cone_array_with_covariance_to_cone_list(const eufs_msgs::msg::ConeArrayWithCovariance& eufs_cones)
+{
+    std::vector<driverless_msgs::msg::Cone> internal_cones;
+    for (const auto& eufs_cone : eufs_cones.blue_cones) {
+        driverless_msgs::msg::Cone internal_cone;
+        internal_cone.location = eufs_cone.point;
+        internal_cone.color = driverless_msgs::msg::Cone::BLUE;
+        internal_cones.push_back(internal_cone);
+    }
+    for (const auto& eufs_cone : eufs_cones.yellow_cones) {
+        driverless_msgs::msg::Cone internal_cone;
+        internal_cone.location = eufs_cone.point;
+        internal_cone.color = driverless_msgs::msg::Cone::YELLOW;
+        internal_cones.push_back(internal_cone);
+    }
+    for (const auto& eufs_cone : eufs_cones.orange_cones) {
+        driverless_msgs::msg::Cone internal_cone;
+        internal_cone.location = eufs_cone.point;
+        internal_cone.color = driverless_msgs::msg::Cone::ORANGE_SMALL;
+        internal_cones.push_back(internal_cone);
+    }
+    for (const auto& eufs_cone : eufs_cones.big_orange_cones) {
+        driverless_msgs::msg::Cone internal_cone;
+        internal_cone.location = eufs_cone.point;
+        internal_cone.color = driverless_msgs::msg::Cone::ORANGE_BIG;
+        internal_cones.push_back(internal_cone);
+    }
 
-
-
-
-
-
-
-
-
-#endif 
+    return internal_cones;
+}
