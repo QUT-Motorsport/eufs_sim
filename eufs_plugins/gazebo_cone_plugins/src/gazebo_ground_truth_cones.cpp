@@ -132,6 +132,10 @@ void GazeboGroundTruthCones::Load(gazebo::physics::ModelPtr _parent, sdf::Elemen
     this->ground_truth_track_qutms_pub =
         this->rosnode_->create_publisher<driverless_msgs::msg::ConeDetectionStamped>(
             ("ground_truth/global_map"), 1);
+              
+    this->ground_truth_cones_qutms_pub =
+        this->rosnode_->create_publisher<driverless_msgs::msg::ConeDetectionStamped>(
+            ("ground_truth/local_map"), 1);
   }
 
   // Ground truth track publisher
@@ -245,7 +249,7 @@ void GazeboGroundTruthCones::UpdateChild() {
   if (this->ground_truth_track_pub_->get_subscription_count() > 0 && pub_ground_truth) {
     this->ground_truth_track_pub_->publish(ground_truth_track_message);
   }
-  
+  // Publish QUTMS ground truth global map from ground truth track message
   std::vector<driverless_msgs::msg::Cone> ground_truth_track_qutms_list =
       cone_array_with_covariance_to_cone_list(ground_truth_track_message);
 
@@ -264,6 +268,18 @@ void GazeboGroundTruthCones::UpdateChild() {
   if (this->ground_truth_cone_pub_->get_subscription_count() > 0 && pub_ground_truth) {
     this->ground_truth_cone_pub_->publish(ground_truth_cones_message);
   }
+
+ // Publish QUTMS ground truth local map from ground truth cones message
+  std::vector<driverless_msgs::msg::Cone> ground_truth_cones_qutms_list =
+      cone_array_with_covariance_to_cone_list(ground_truth_cones_message);
+
+    driverless_msgs::msg::ConeDetectionStamped ground_truth_cones_qutms_message;
+    ground_truth_cones_qutms_message.cones = ground_truth_cones_qutms_list;
+    ground_truth_cones_qutms_message.header.frame_id = "ground_truth_local_map";
+    ground_truth_cones_qutms_message.header.stamp.sec = this->time_last_published.sec;
+    ground_truth_cones_qutms_message.header.stamp.nanosec = this->time_last_published.nsec;
+    
+  this->ground_truth_cones_qutms_pub->publish(ground_truth_cones_qutms_message);  
 
   // Publish the simulated perception cones if it has subscribers
   if (this->simulate_perception_) {
