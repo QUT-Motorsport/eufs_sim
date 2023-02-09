@@ -127,6 +127,11 @@ void GazeboGroundTruthCones::Load(gazebo::physics::ModelPtr _parent, sdf::Elemen
     this->ground_truth_cone_pub_ =
         this->rosnode_->create_publisher<eufs_msgs::msg::ConeArrayWithCovariance>(
             topic_name_, 1);
+
+  // QUTMS
+    this->ground_truth_track_qutms_pub =
+        this->rosnode_->create_publisher<driverless_msgs::msg::ConeDetectionStamped>(
+            ("ground_truth/global_map"), 1);
   }
 
   // Ground truth track publisher
@@ -240,12 +245,21 @@ void GazeboGroundTruthCones::UpdateChild() {
   if (this->ground_truth_track_pub_->get_subscription_count() > 0 && pub_ground_truth) {
     this->ground_truth_track_pub_->publish(ground_truth_track_message);
   }
-  std::vector<driverless_msgs::msg::Cone> ground_truth_track_qutms_message =
+  
+  std::vector<driverless_msgs::msg::Cone> ground_truth_track_qutms_list =
       cone_array_with_covariance_to_cone_list(ground_truth_track_message);
+
+    driverless_msgs::msg::ConeDetectionStamped ground_truth_track_qutms_message;
+    ground_truth_track_qutms_message.cones = ground_truth_track_qutms_list;
+    ground_truth_track_qutms_message.header.frame_id = "ground_truth_global_map";
+    ground_truth_track_qutms_message.header.stamp.sec = this->time_last_published.sec;
+    ground_truth_track_qutms_message.header.stamp.nanosec = this->time_last_published.nsec;
+    
+    this->ground_truth_track_qutms_pub->publish(ground_truth_track_qutms_message);
 
   eufs_msgs::msg::ConeArrayWithCovariance ground_truth_cones_message =
       processCones(cone_arrays_message);
-
+  
   // Publish the ground truth cones if it has subscribers and is allowed to publish
   if (this->ground_truth_cone_pub_->get_subscription_count() > 0 && pub_ground_truth) {
     this->ground_truth_cone_pub_->publish(ground_truth_cones_message);
@@ -282,7 +296,7 @@ void GazeboGroundTruthCones::UpdateChild() {
 }
 
 // Generating ConeDetectionStamped msgs
-std::vector<driverless_msgs::msg::Cone> cone_array_with_covariance_to_cone_list(const eufs_msgs::msg::ConeArrayWithCovariance& eufs_cones)
+std::vector<driverless_msgs::msg::Cone> GazeboGroundTruthCones::cone_array_with_covariance_to_cone_list(const eufs_msgs::msg::ConeArrayWithCovariance& eufs_cones)
 {
     std::vector<driverless_msgs::msg::Cone> internal_cones;
     for (const auto& eufs_cone : eufs_cones.blue_cones) {

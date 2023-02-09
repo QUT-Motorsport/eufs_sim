@@ -149,6 +149,8 @@ class GazeboGroundTruthCones : public gazebo::ModelPlugin {
   rclcpp::Publisher<eufs_msgs::msg::ConeArrayWithCovariance>::SharedPtr ground_truth_track_pub_;
   rclcpp::Publisher<eufs_msgs::msg::ConeArrayWithCovariance>::SharedPtr perception_cone_pub_;
   rclcpp::Publisher<eufs_msgs::msg::ConeArrayWithCovariance>::SharedPtr perception_track_pub_;
+// QUTMS publishers
+  rclcpp::Publisher<driverless_msgs::msg::ConeDetectionStamped>::SharedPtr ground_truth_track_qutms_pub;
 
   // Services
   rclcpp::Service<std_srvs::srv::Trigger>::SharedPtr
