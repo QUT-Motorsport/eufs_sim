@@ -91,7 +91,7 @@ class EUFSLauncher(Plugin):
 
         # Setup Command Modes menu
         default_mode = self.default_config["eufs_launcher"]["default_command_mode"]
-        modes = ["acceleration", "velocity"]
+        modes = ["velocity", "acceleration"]
         EUFSLauncher.setup_q_combo_box(self.COMMAND_MODE_MENU, default_mode, modes)
 
         # Setup Conditions menu

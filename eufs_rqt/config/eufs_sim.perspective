@@ -61,7 +61,7 @@
                   "type": "repr"
                 },
                 "topic": {
-                  "repr": "'/cmd'",
+                  "repr": "'/control/driving_command'",
                   "type": "repr"
                 },
                 "vw_max": {

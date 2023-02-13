@@ -86,7 +86,7 @@ _pub_velocity = _rosnode->create_publisher<geometry_msgs::msg::TwistStamped>("im
 
   // ROS Subscriptions
   _sub_cmd = _rosnode->create_subscription<ackermann_msgs::msg::AckermannDriveStamped>(
-      "/cmd", 1, std::bind(&RaceCarModelPlugin::onCmd, this, std::placeholders::_1));
+      "/control/driving_command", 1, std::bind(&RaceCarModelPlugin::onCmd, this, std::placeholders::_1));
 
   // Connect to Gazebo
   _update_connection =
