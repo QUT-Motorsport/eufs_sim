@@ -69,7 +69,7 @@
       <alwaysOn>true</alwaysOn>
       <updateRate>15.0</updateRate>
       <cameraViewDistance>13</cameraViewDistance>
-      <cameraFOV>2.09</cameraFOV><!--120 degrees-->
+      <cameraFOV>2.09</cameraFOV>
       <cameraMinViewDistance>0.5</cameraMinViewDistance>
       <cameraTF>0.204 0.074 0.706 0 0 0.79</cameraTF>
       <recolorConfig>cone_recolor.yaml</recolorConfig>
@@ -84,7 +84,7 @@
       <alwaysOn>true</alwaysOn>
       <updateRate>15.0</updateRate>
       <cameraViewDistance>13</cameraViewDistance>
-      <cameraFOV>2.09</cameraFOV><!--120 degrees-->
+      <cameraFOV>2.09</cameraFOV>
       <cameraMinViewDistance>0.5</cameraMinViewDistance>
       <cameraTF>0.204 -0.074 0.706 0.0 0.0 -0.79</cameraTF>
       <recolorConfig>cone_recolor.yaml</recolorConfig>
