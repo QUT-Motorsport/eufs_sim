@@ -10,7 +10,7 @@ eufs_launcher:
   default_vehicle_model: "DynamicBicycle"
 
   # Default command mode to be selected in the launcher drop-down menu
-  default_command_mode: "acceleration"
+  default_command_mode: "velocity"
 
   # Default vehicle model config preset to be selected in the launcher drop-down menu
   default_vehicle_preset: "DryTrack"
