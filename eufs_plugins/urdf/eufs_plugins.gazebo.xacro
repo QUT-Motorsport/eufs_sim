@@ -92,9 +92,9 @@
       <perceptionCameraDepthNoiseParameterA>0.01</perceptionCameraDepthNoiseParameterA>
       <perceptionCameraDepthNoiseParameterB>0.5</perceptionCameraDepthNoiseParameterB>
     </plugin>
-  </gazebo> -->
-
-  <!-- <gazebo>
+  </gazebo> 
+  
+  <gazebo>
     <plugin name="gz_bounding_boxes" filename="libgazebo_simulate_bounding_boxes.so">
       <config_file>$(arg bounding_box_settings)</config_file>
       <publish_rate>50.0</publish_rate>
