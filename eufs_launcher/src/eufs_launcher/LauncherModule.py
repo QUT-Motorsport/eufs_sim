@@ -69,6 +69,8 @@ class EUFSLauncher(Plugin):
         # Give widget components permanent names
         self.TRACK_SELECTOR = self._widget.findChild(QComboBox, "WhichTrack")
         self.LAUNCH_BUTTON = self._widget.findChild(QPushButton, "LaunchButton")
+        self.GENERATOR_BUTTON = self._widget.findChild(QPushButton, "Trackgenerator")
+        self.CONVERTER_BUTTON = self._widget.findChild(QPushButton, "Trackconverter")
         self.REFRESH_TRACK_BUTTON = self._widget.findChild(QPushButton, "RefreshTrackButton")
         self.VEHICLE_MODEL_MENU = self._widget.findChild(QComboBox, "WhichVehicleModel")
         self.COMMAND_MODE_MENU = self._widget.findChild(QComboBox, "WhichCommandMode")
@@ -81,7 +83,8 @@ class EUFSLauncher(Plugin):
         # Hook up buttons to onclick functions
         self.LAUNCH_BUTTON.clicked.connect(self.launch_button_pressed)
         self.REFRESH_TRACK_BUTTON.clicked.connect(self.load_track_dropdowns)
-
+        self.GENERATOR_BUTTON.clicked.connect(self.generator_button_pressed)
+        self.CONVERTER_BUTTON.clicked.connect(self.converter_button_pressed)
         # Setup Vehicle Models menu
         models_filepath = join(get_package_share_directory('eufs_models'), 'models/models.txt')
         vehicle_models_ = open(models_filepath, "r")
@@ -276,7 +279,22 @@ class EUFSLauncher(Plugin):
                 effect_off()
 
         self.LAUNCH_BUTTON.setEnabled(False)
-
+    
+    def generator_button_pressed(self):
+        self.launch_with_args('eufs_tracks', 'launch/eufs_track_generator.launch.py')
+    def converter_button_pressed(self):
+        self.launch_with_args('eufs_launcher', 'simulation.launch.py')
+    
+    
+    
+    
+    def launch_with_args(self, package, launch_file):
+    """Launches ros node."""
+    command = ["ros2", "launch", package, launch_file]
+    self.logger.info(f"Command: {' '.join(command)}")
+    process = Popen(command)
+    self.popens.append(process)
+    
     def launch_with_args(self, package, launch_file, args):
         """Launches ros node."""
         command = ["ros2", "launch", package, launch_file, "use_sim_time:=true"] + args

@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>441</width>
+    <width>440</width>
     <height>503</height>
    </rect>
   </property>
@@ -308,6 +308,42 @@
    </property>
    <property name="text">
     <string>Refresh</string>
+   </property>
+  </widget>
+     <widget class="QPushButton" name="Trackconverter">
+   <property name="geometry">
+    <rect>
+     <x>50</x>
+     <y>400</y>
+     <width>170</width>
+     <height>100</height>
+    </rect>
+   </property>
+   <property name="font">
+    <font>
+     <pointsize>10</pointsize>
+    </font>
+   </property>
+   <property name="text">
+    <string>track converter</string>
+   </property>
+  </widget>
+       <widget class="QPushButton" name="Trackgenerator">
+   <property name="geometry">
+    <rect>
+     <x>220</x>
+     <y>400</y>
+     <width>170</width>
+     <height>100</height>
+    </rect>
+   </property>
+   <property name="font">
+    <font>
+     <pointsize>10</pointsize>
+    </font>
+   </property>
+   <property name="text">
+    <string>track generator</string>
    </property>
   </widget>
  </widget>
