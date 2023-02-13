@@ -65,6 +65,7 @@
 // QUTMS messages
 #include <driverless_msgs/msg/cone.hpp>
 #include <driverless_msgs/msg/cone_detection_stamped.hpp>
+#include <driverless_msgs/msg/track_detection_stamped.hpp>
 
 namespace gazebo_plugins {
 namespace eufs_plugins {
@@ -146,9 +147,13 @@ class GazeboGroundTruthCones : public gazebo::ModelPlugin {
   rclcpp::Publisher<eufs_msgs::msg::ConeArrayWithCovariance>::SharedPtr perception_track_pub_;
   // QUTMS publishers
   rclcpp::Publisher<driverless_msgs::msg::ConeDetectionStamped>::SharedPtr
-      ground_truth_track_qutms_pub;
+      ground_truth_track_qutms_pub_;
   rclcpp::Publisher<driverless_msgs::msg::ConeDetectionStamped>::SharedPtr
-      ground_truth_cones_qutms_pub;
+      ground_truth_cone_qutms_pub_;
+  rclcpp::Publisher<driverless_msgs::msg::ConeDetectionStamped>::SharedPtr
+      perception_track_qutms_pub_;
+  rclcpp::Publisher<driverless_msgs::msg::ConeDetectionStamped>::SharedPtr
+      perception_cone_qutms_pub_;
 
   // Services
   rclcpp::Service<std_srvs::srv::Trigger>::SharedPtr
@@ -164,15 +169,13 @@ class GazeboGroundTruthCones : public gazebo::ModelPlugin {
   ignition::math::Pose3d initial_car_pos_;
   ignition::math::Pose3d car_pos;
 
-  // Noisy perception cone and track data is only calculated once
-  eufs_msgs::msg::ConeArrayWithCovariance perception_cone_data{};
-  bool perception_cone_initialized{false};
-
+  // Noisy perception track data is only calculated once
   eufs_msgs::msg::ConeArrayWithCovariance perception_track_data{};
   bool perception_track_initialized{false};
+  driverless_msgs::msg::ConeDetectionStamped perception_track_qutms_data{};
+  bool perception_track_qutms_initialized{false};
 
   // Parameters
-
   double lidar_total_view_distance;
   double camera_total_view_distance;
   double lidar_min_view_distance;
