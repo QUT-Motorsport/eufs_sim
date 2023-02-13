@@ -28,6 +28,7 @@
  * @brief simulate bounding boxes Gazebo plugin
  *
  * @details Provides simulated bounding boxes for the use of perception
+ * 
  * It publishes to the /simulate_bounding_boxes_topic.
  **/
 
