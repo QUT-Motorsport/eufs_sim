@@ -64,7 +64,7 @@
     </plugin>
   </gazebo>
 
-  <gazebo>
+  <!-- <gazebo>
     <plugin name="gz_camera_0_cones" filename="libgazebo_camera_cones.so">
       <alwaysOn>true</alwaysOn>
       <updateRate>15.0</updateRate>
@@ -92,7 +92,7 @@
       <perceptionCameraDepthNoiseParameterA>0.01</perceptionCameraDepthNoiseParameterA>
       <perceptionCameraDepthNoiseParameterB>0.5</perceptionCameraDepthNoiseParameterB>
     </plugin>
-  </gazebo>
+  </gazebo> -->
 
   <!-- <gazebo>
     <plugin name="gz_bounding_boxes" filename="libgazebo_simulate_bounding_boxes.so">
