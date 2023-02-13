@@ -94,7 +94,7 @@
     </plugin>
   </gazebo>
 
-  <gazebo>
+  <!-- <gazebo>
     <plugin name="gz_bounding_boxes" filename="libgazebo_simulate_bounding_boxes.so">
       <config_file>$(arg bounding_box_settings)</config_file>
       <publish_rate>50.0</publish_rate>
@@ -106,6 +106,6 @@
       <noisyBoundingBoxesTopic>noisy_bounding_boxes</noisyBoundingBoxesTopic>
       <customCameraInfo>custom_camera_info</customCameraInfo>
     </plugin>
-  </gazebo>
+  </gazebo> -->
 
 </robot>
