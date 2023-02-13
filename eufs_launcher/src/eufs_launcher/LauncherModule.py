@@ -281,19 +281,16 @@ class EUFSLauncher(Plugin):
         self.LAUNCH_BUTTON.setEnabled(False)
     
     def generator_button_pressed(self):
-        self.launch_with_args('eufs_tracks', 'launch/eufs_track_generator.launch.py')
+        self.launch_without_args('eufs_tracks', 'launch/eufs_track_generator.launch.py')
     def converter_button_pressed(self):
-        self.launch_with_args('eufs_launcher', 'simulation.launch.py')
+        self.launch_without_args('eufs_launcher', 'simulation.launch.py')
     
-    
-    
-    
-    def launch_with_args(self, package, launch_file):
-    """Launches ros node."""
-    command = ["ros2", "launch", package, launch_file]
-    self.logger.info(f"Command: {' '.join(command)}")
-    process = Popen(command)
-    self.popens.append(process)
+    def launch_without_args(self, package, launch_file):
+        """Launches ros node."""
+        command = ["ros2", "launch", package, launch_file]
+        self.logger.info(f"Command: {' '.join(command)}")
+        process = Popen(command)
+        self.popens.append(process)
     
     def launch_with_args(self, package, launch_file, args):
         """Launches ros node."""
