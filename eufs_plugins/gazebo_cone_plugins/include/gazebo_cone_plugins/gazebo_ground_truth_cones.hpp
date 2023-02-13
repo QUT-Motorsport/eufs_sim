@@ -50,11 +50,11 @@
 #include <gazebo/physics/World.hh>
 #include <gazebo_ros/node.hpp>
 #include <geometry_msgs/msg/point.hpp>
+#include <map>
 #include <memory>
 #include <string>
 #include <utility>
 #include <vector>
-#include <map>
 
 #include "rclcpp/rclcpp.hpp"
 #include "yaml-cpp/yaml.h"
@@ -66,16 +66,11 @@
 #include <driverless_msgs/msg/cone.hpp>
 #include <driverless_msgs/msg/cone_detection_stamped.hpp>
 
-
 namespace gazebo_plugins {
 namespace eufs_plugins {
 class GazeboGroundTruthCones : public gazebo::ModelPlugin {
  public:
   enum ConeType { blue, yellow, orange, big_orange, unknown };
-
-
-
-
 
   GazeboGroundTruthCones();
 
@@ -112,7 +107,7 @@ class GazeboGroundTruthCones : public gazebo::ModelPlugin {
   // Returns pointer to cone array at random given weights
   std::string pickColorWithProbability(const YAML::Node weights);
   std::map<std::string, std::vector<eufs_msgs::msg::ConeWithCovariance>> swapConeColors(
-    std::map<std::string, std::vector<eufs_msgs::msg::ConeWithCovariance>> color_map);
+      std::map<std::string, std::vector<eufs_msgs::msg::ConeWithCovariance>> color_map);
 
   // Helper function for parameters
   bool getBoolParameter(sdf::ElementPtr _sdf, const char *element, bool default_value,
@@ -140,18 +135,20 @@ class GazeboGroundTruthCones : public gazebo::ModelPlugin {
       eufs_msgs::msg::ConeArrayWithCovariance cones);
   eufs_msgs::msg::ConeArrayWithCovariance translateBaseFootprintFrame(
       eufs_msgs::msg::ConeArrayWithCovariance cones);
-// QUTMS driverless messages
-  std::vector<driverless_msgs::msg::Cone> cone_array_with_covariance_to_cone_list(const eufs_msgs::msg::ConeArrayWithCovariance& eufs_cones);
-
+  // QUTMS driverless messages
+  driverless_msgs::msg::ConeDetectionStamped cone_array_to_cone_detection(
+      const eufs_msgs::msg::ConeArrayWithCovariance &eufs_cones);
 
   // Publishers
   rclcpp::Publisher<eufs_msgs::msg::ConeArrayWithCovariance>::SharedPtr ground_truth_cone_pub_;
   rclcpp::Publisher<eufs_msgs::msg::ConeArrayWithCovariance>::SharedPtr ground_truth_track_pub_;
   rclcpp::Publisher<eufs_msgs::msg::ConeArrayWithCovariance>::SharedPtr perception_cone_pub_;
   rclcpp::Publisher<eufs_msgs::msg::ConeArrayWithCovariance>::SharedPtr perception_track_pub_;
-// QUTMS publishers
-  rclcpp::Publisher<driverless_msgs::msg::ConeDetectionStamped>::SharedPtr ground_truth_track_qutms_pub;
-  rclcpp::Publisher<driverless_msgs::msg::ConeDetectionStamped>::SharedPtr ground_truth_cones_qutms_pub;
+  // QUTMS publishers
+  rclcpp::Publisher<driverless_msgs::msg::ConeDetectionStamped>::SharedPtr
+      ground_truth_track_qutms_pub;
+  rclcpp::Publisher<driverless_msgs::msg::ConeDetectionStamped>::SharedPtr
+      ground_truth_cones_qutms_pub;
 
   // Services
   rclcpp::Service<std_srvs::srv::Trigger>::SharedPtr
@@ -168,11 +165,11 @@ class GazeboGroundTruthCones : public gazebo::ModelPlugin {
   ignition::math::Pose3d car_pos;
 
   // Noisy perception cone and track data is only calculated once
-  eufs_msgs::msg::ConeArrayWithCovariance perception_cone_data { };
-  bool perception_cone_initialized { false };
+  eufs_msgs::msg::ConeArrayWithCovariance perception_cone_data{};
+  bool perception_cone_initialized{false};
 
-  eufs_msgs::msg::ConeArrayWithCovariance perception_track_data { };
-  bool perception_track_initialized { false };
+  eufs_msgs::msg::ConeArrayWithCovariance perception_track_data{};
+  bool perception_track_initialized{false};
 
   // Parameters
 

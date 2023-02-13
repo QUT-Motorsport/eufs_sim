@@ -33,6 +33,7 @@
  **/
 
 #include "gazebo_cone_plugins/gazebo_ground_truth_cones.hpp"
+
 #include "eigen3/Eigen/Core"
 #include "eigen3/Eigen/Dense"
 
@@ -56,47 +57,31 @@ void GazeboGroundTruthCones::Load(gazebo::physics::ModelPtr _parent, sdf::Elemen
   this->track_model = _parent->GetWorld()->ModelByName("track");
   this->car_link = _parent->GetLink("base_footprint");
 
-  this->update_rate_ = getDoubleParameter(_sdf, "updateRate", 0,
-                                          "0.0 (as fast as possible)");
+  this->update_rate_ = getDoubleParameter(_sdf, "updateRate", 0, "0.0 (as fast as possible)");
 
-  this->lidar_total_view_distance = getDoubleParameter(_sdf, "lidarViewDistance",
-                                                       100, "100");
-  this->camera_total_view_distance = getDoubleParameter(_sdf, "cameraViewDistance",
-                                                        10, "10");
-  this->lidar_min_view_distance = getDoubleParameter(_sdf, "lidarMinViewDistance",
-                                                     1, "1");
-  this->camera_min_view_distance = getDoubleParameter(_sdf, "cameraMinViewDistance",
-                                                      1, "1");
-  this->lidar_x_view_distance = getDoubleParameter(_sdf, "lidarXViewDistance",
-                                                   20, "20");
-  this->lidar_y_view_distance = getDoubleParameter(_sdf, "lidarYViewDistance",
-                                                   10, "10");
-  this->lidar_fov = getDoubleParameter(_sdf, "lidarFOV", 3.141593,
-                                       "3.141593  (180 degrees)");
-  this->camera_fov = getDoubleParameter(_sdf, "cameraFOV", 1.918889,
-                                        "1.918889  (110 degrees)");
+  this->lidar_total_view_distance = getDoubleParameter(_sdf, "lidarViewDistance", 100, "100");
+  this->camera_total_view_distance = getDoubleParameter(_sdf, "cameraViewDistance", 10, "10");
+  this->lidar_min_view_distance = getDoubleParameter(_sdf, "lidarMinViewDistance", 1, "1");
+  this->camera_min_view_distance = getDoubleParameter(_sdf, "cameraMinViewDistance", 1, "1");
+  this->lidar_x_view_distance = getDoubleParameter(_sdf, "lidarXViewDistance", 20, "20");
+  this->lidar_y_view_distance = getDoubleParameter(_sdf, "lidarYViewDistance", 10, "10");
+  this->lidar_fov = getDoubleParameter(_sdf, "lidarFOV", 3.141593, "3.141593  (180 degrees)");
+  this->camera_fov = getDoubleParameter(_sdf, "cameraFOV", 1.918889, "1.918889  (110 degrees)");
   this->camera_a =
-      getDoubleParameter(_sdf, "perceptionCameraDepthNoiseParameterA",
-                         0.0184, "0.0184");
+      getDoubleParameter(_sdf, "perceptionCameraDepthNoiseParameterA", 0.0184, "0.0184");
   this->camera_b =
-      getDoubleParameter(_sdf, "perceptionCameraDepthNoiseParameterB",
-                         0.2106, "0.2106");
+      getDoubleParameter(_sdf, "perceptionCameraDepthNoiseParameterB", 0.2106, "0.2106");
   this->camera_noise_percentage =
-      getDoubleParameter(_sdf, "perceptionCameraNoisePercentage", 0.4,
-                         "0.4");
-  this->lidar_on = getBoolParameter(_sdf, "lidarOn", true,
-                                    "true");
+      getDoubleParameter(_sdf, "perceptionCameraNoisePercentage", 0.4, "0.4");
+  this->lidar_on = getBoolParameter(_sdf, "lidarOn", true, "true");
 
-  this->track_frame_ = getStringParameter(_sdf, "trackFrame", "map",
-                                          "map");
+  this->track_frame_ = getStringParameter(_sdf, "trackFrame", "map", "map");
   this->cone_frame_ = "base_footprint";
 
-  this->simulate_perception_ = getBoolParameter(_sdf, "simulatePerception",
-                                                false, "false");
+  this->simulate_perception_ = getBoolParameter(_sdf, "simulatePerception", false, "false");
 
   this->perception_lidar_noise_ =
-      getVector3dParameter(_sdf, "perceptionNoise",
-                           {0.03, 0.03, 0.0}, "0.03, 0.03, 0.0");
+      getVector3dParameter(_sdf, "perceptionNoise", {0.03, 0.03, 0.0}, "0.03, 0.03, 0.0");
 
   std::string random_cone_color_yaml = "";
   if (!_sdf->HasElement("recolor_config")) {
@@ -113,7 +98,7 @@ void GazeboGroundTruthCones::Load(gazebo::physics::ModelPtr _parent, sdf::Elemen
     RCLCPP_FATAL(this->rosnode_->get_logger(), "Unable to load %s due to %s error.",
                  random_cone_color_yaml.c_str(), e.what());
     RCLCPP_FATAL(this->rosnode_->get_logger(),
-    "Cone recoloring yaml will not load, cannot proceed");
+                 "Cone recoloring yaml will not load, cannot proceed");
   }
 
   // Setup the publishers
@@ -125,14 +110,13 @@ void GazeboGroundTruthCones::Load(gazebo::physics::ModelPtr _parent, sdf::Elemen
   } else {
     std::string topic_name_ = _sdf->GetElement("groundTruthConesTopicName")->Get<std::string>();
     this->ground_truth_cone_pub_ =
-        this->rosnode_->create_publisher<eufs_msgs::msg::ConeArrayWithCovariance>(
-            topic_name_, 1);
+        this->rosnode_->create_publisher<eufs_msgs::msg::ConeArrayWithCovariance>(topic_name_, 1);
 
-  // QUTMS
+    // QUTMS
     this->ground_truth_track_qutms_pub =
         this->rosnode_->create_publisher<driverless_msgs::msg::ConeDetectionStamped>(
             ("ground_truth/global_map"), 1);
-              
+
     this->ground_truth_cones_qutms_pub =
         this->rosnode_->create_publisher<driverless_msgs::msg::ConeDetectionStamped>(
             ("ground_truth/local_map"), 1);
@@ -146,8 +130,7 @@ void GazeboGroundTruthCones::Load(gazebo::physics::ModelPtr _parent, sdf::Elemen
   } else {
     std::string topic_name_ = _sdf->GetElement("groundTruthTrackTopicName")->Get<std::string>();
     this->ground_truth_track_pub_ =
-        this->rosnode_->create_publisher<eufs_msgs::msg::ConeArrayWithCovariance>(
-            topic_name_, 1);
+        this->rosnode_->create_publisher<eufs_msgs::msg::ConeArrayWithCovariance>(topic_name_, 1);
   }
 
   if (!_sdf->HasElement("pubGroundTruth")) {
@@ -167,8 +150,7 @@ void GazeboGroundTruthCones::Load(gazebo::physics::ModelPtr _parent, sdf::Elemen
     } else {
       std::string topic_name_ = _sdf->GetElement("perceptionConesTopicName")->Get<std::string>();
       this->perception_cone_pub_ =
-          this->rosnode_->create_publisher<eufs_msgs::msg::ConeArrayWithCovariance>(
-              topic_name_, 1);
+          this->rosnode_->create_publisher<eufs_msgs::msg::ConeArrayWithCovariance>(topic_name_, 1);
     }
 
     if (!_sdf->HasElement("perceptionTrackTopicName")) {
@@ -178,8 +160,7 @@ void GazeboGroundTruthCones::Load(gazebo::physics::ModelPtr _parent, sdf::Elemen
     } else {
       std::string topic_name_ = _sdf->GetElement("perceptionTrackTopicName")->Get<std::string>();
       this->perception_track_pub_ =
-          this->rosnode_->create_publisher<eufs_msgs::msg::ConeArrayWithCovariance>(
-              topic_name_, 1);
+          this->rosnode_->create_publisher<eufs_msgs::msg::ConeArrayWithCovariance>(topic_name_, 1);
     }
   }
 
@@ -187,11 +168,8 @@ void GazeboGroundTruthCones::Load(gazebo::physics::ModelPtr _parent, sdf::Elemen
 
   // Cone position reset service
   this->reset_cone_pos_srv = this->rosnode_->create_service<std_srvs::srv::Trigger>(
-      "/ros_can/reset_cone_pos",
-      std::bind(&GazeboGroundTruthCones::resetConePosition,
-                        this,
-                        std::placeholders::_1,
-                        std::placeholders::_2));
+      "/ros_can/reset_cone_pos", std::bind(&GazeboGroundTruthCones::resetConePosition, this,
+                                           std::placeholders::_1, std::placeholders::_2));
 
   this->initial_car_pos_ = this->car_link->WorldPose();
 
@@ -219,9 +197,8 @@ void GazeboGroundTruthCones::UpdateChild() {
   // Check if there is a reason to publish the data
   if (this->ground_truth_cone_pub_->get_subscription_count() == 0 &&
       this->ground_truth_track_pub_->get_subscription_count() == 0 &&
-      (!this->simulate_perception_ ||
-       this->perception_cone_pub_->get_subscription_count() == 0 ||
-       this->perception_track_pub_->get_subscription_count() == 0)) {
+      this->perception_cone_pub_->get_subscription_count() == 0 &&
+      this->perception_track_pub_->get_subscription_count() == 0) {
     RCLCPP_DEBUG(this->rosnode_->get_logger(),
                  "Nobody is listening to cone_ground_truth. Doing nothing");
     return;
@@ -245,41 +222,38 @@ void GazeboGroundTruthCones::UpdateChild() {
     return;
   }
 
+  // Track from global view
   // Publish the ground truth track if it has subscribers and is allowed to publish
   if (this->ground_truth_track_pub_->get_subscription_count() > 0 && pub_ground_truth) {
     this->ground_truth_track_pub_->publish(ground_truth_track_message);
   }
-  // Publish QUTMS ground truth global map from ground truth track message
-  std::vector<driverless_msgs::msg::Cone> ground_truth_track_qutms_list =
-      cone_array_with_covariance_to_cone_list(ground_truth_track_message);
 
-    driverless_msgs::msg::ConeDetectionStamped ground_truth_track_qutms_message;
-    ground_truth_track_qutms_message.cones = ground_truth_track_qutms_list;
-    ground_truth_track_qutms_message.header.frame_id = "ground_truth_global_map";
-    ground_truth_track_qutms_message.header.stamp.sec = this->time_last_published.sec;
-    ground_truth_track_qutms_message.header.stamp.nanosec = this->time_last_published.nsec;
-    
-    this->ground_truth_track_qutms_pub->publish(ground_truth_track_qutms_message);
-
+  // Cones from local view
   eufs_msgs::msg::ConeArrayWithCovariance ground_truth_cones_message =
       processCones(cone_arrays_message);
-  
   // Publish the ground truth cones if it has subscribers and is allowed to publish
   if (this->ground_truth_cone_pub_->get_subscription_count() > 0 && pub_ground_truth) {
     this->ground_truth_cone_pub_->publish(ground_truth_cones_message);
   }
 
- // Publish QUTMS ground truth local map from ground truth cones message
-  std::vector<driverless_msgs::msg::Cone> ground_truth_cones_qutms_list =
-      cone_array_with_covariance_to_cone_list(ground_truth_cones_message);
+  // Publish QUTMS ground truth as cone detection stamped
+  // Cones from global view
+  driverless_msgs::msg::ConeDetectionStamped ground_truth_track_qutms_message =
+      cone_array_to_cone_detection(ground_truth_track_message);
+  ground_truth_track_qutms_message.header.frame_id = "ground_truth_global_map";
+  // Publish the ground truth cones if it has subscribers and is allowed to publish
+  if (this->ground_truth_track_qutms_pub->get_subscription_count() > 0 && pub_ground_truth) {
+    this->ground_truth_track_qutms_pub->publish(ground_truth_track_qutms_message);
+  }
 
-    driverless_msgs::msg::ConeDetectionStamped ground_truth_cones_qutms_message;
-    ground_truth_cones_qutms_message.cones = ground_truth_cones_qutms_list;
-    ground_truth_cones_qutms_message.header.frame_id = "ground_truth_local_map";
-    ground_truth_cones_qutms_message.header.stamp.sec = this->time_last_published.sec;
-    ground_truth_cones_qutms_message.header.stamp.nanosec = this->time_last_published.nsec;
-    
-  this->ground_truth_cones_qutms_pub->publish(ground_truth_cones_qutms_message);  
+  // Cones from local view
+  driverless_msgs::msg::ConeDetectionStamped ground_truth_cones_qutms_message =
+      cone_array_to_cone_detection(ground_truth_cones_message);
+  ground_truth_track_qutms_message.header.frame_id = "ground_truth_global_map";
+  // Publish the ground truth cones if it has subscribers and is allowed to publish
+  if (this->ground_truth_cones_qutms_pub->get_subscription_count() > 0 && pub_ground_truth) {
+    this->ground_truth_cones_qutms_pub->publish(ground_truth_cones_qutms_message);
+  }
 
   // Publish the simulated perception cones if it has subscribers
   if (this->simulate_perception_) {
@@ -298,49 +272,50 @@ void GazeboGroundTruthCones::UpdateChild() {
 
     if (this->perception_cone_pub_->get_subscription_count() > 0) {
       eufs_msgs::msg::ConeArrayWithCovariance perception_cones_message;
-      if (this->perception_cone_initialized) {
-        perception_cones_message = this->perception_cone_data;
-      } else {
-        perception_cones_message =
-            addNoisePerception(ground_truth_cones_message, perception_lidar_noise_);
-        this->perception_cone_data = perception_cones_message;
-        this->perception_cone_initialized = true;
-      }
+      perception_cones_message =
+          addNoisePerception(ground_truth_cones_message, perception_lidar_noise_);
+      this->perception_cone_data = perception_cones_message;
+      this->perception_cone_initialized = true;
       this->perception_cone_pub_->publish(perception_cones_message);
     }
   }
 }
 
 // Generating ConeDetectionStamped msgs
-std::vector<driverless_msgs::msg::Cone> GazeboGroundTruthCones::cone_array_with_covariance_to_cone_list(const eufs_msgs::msg::ConeArrayWithCovariance& eufs_cones)
-{
-    std::vector<driverless_msgs::msg::Cone> internal_cones;
-    for (const auto& eufs_cone : eufs_cones.blue_cones) {
-        driverless_msgs::msg::Cone internal_cone;
-        internal_cone.location = eufs_cone.point;
-        internal_cone.color = driverless_msgs::msg::Cone::BLUE;
-        internal_cones.push_back(internal_cone);
-    }
-    for (const auto& eufs_cone : eufs_cones.yellow_cones) {
-        driverless_msgs::msg::Cone internal_cone;
-        internal_cone.location = eufs_cone.point;
-        internal_cone.color = driverless_msgs::msg::Cone::YELLOW;
-        internal_cones.push_back(internal_cone);
-    }
-    for (const auto& eufs_cone : eufs_cones.orange_cones) {
-        driverless_msgs::msg::Cone internal_cone;
-        internal_cone.location = eufs_cone.point;
-        internal_cone.color = driverless_msgs::msg::Cone::ORANGE_SMALL;
-        internal_cones.push_back(internal_cone);
-    }
-    for (const auto& eufs_cone : eufs_cones.big_orange_cones) {
-        driverless_msgs::msg::Cone internal_cone;
-        internal_cone.location = eufs_cone.point;
-        internal_cone.color = driverless_msgs::msg::Cone::ORANGE_BIG;
-        internal_cones.push_back(internal_cone);
-    }
+driverless_msgs::msg::ConeDetectionStamped GazeboGroundTruthCones::cone_array_to_cone_detection(
+    const eufs_msgs::msg::ConeArrayWithCovariance &eufs_cones) {
+  std::vector<driverless_msgs::msg::Cone> internal_cones;
+  for (const auto &eufs_cone : eufs_cones.blue_cones) {
+    driverless_msgs::msg::Cone internal_cone;
+    internal_cone.location = eufs_cone.point;
+    internal_cone.color = driverless_msgs::msg::Cone::BLUE;
+    internal_cones.push_back(internal_cone);
+  }
+  for (const auto &eufs_cone : eufs_cones.yellow_cones) {
+    driverless_msgs::msg::Cone internal_cone;
+    internal_cone.location = eufs_cone.point;
+    internal_cone.color = driverless_msgs::msg::Cone::YELLOW;
+    internal_cones.push_back(internal_cone);
+  }
+  for (const auto &eufs_cone : eufs_cones.orange_cones) {
+    driverless_msgs::msg::Cone internal_cone;
+    internal_cone.location = eufs_cone.point;
+    internal_cone.color = driverless_msgs::msg::Cone::ORANGE_SMALL;
+    internal_cones.push_back(internal_cone);
+  }
+  for (const auto &eufs_cone : eufs_cones.big_orange_cones) {
+    driverless_msgs::msg::Cone internal_cone;
+    internal_cone.location = eufs_cone.point;
+    internal_cone.color = driverless_msgs::msg::Cone::ORANGE_BIG;
+    internal_cones.push_back(internal_cone);
+  }
 
-    return internal_cones;
+  driverless_msgs::msg::ConeDetectionStamped cone_detection_message;
+  cone_detection_message.cones = internal_cones;
+  cone_detection_message.header.stamp.sec = this->time_last_published.sec;
+  cone_detection_message.header.stamp.nanosec = this->time_last_published.nsec;
+
+  return cone_detection_message;
 }
 
 // Getting the track
@@ -361,7 +336,7 @@ eufs_msgs::msg::ConeArrayWithCovariance GazeboGroundTruthCones::getConeArraysMes
 }
 
 void GazeboGroundTruthCones::addConeToConeArray(
-    eufs_msgs::msg::ConeArrayWithCovariance & ground_truth_cone_array,
+    eufs_msgs::msg::ConeArrayWithCovariance &ground_truth_cone_array,
     gazebo::physics::LinkPtr link) {
   geometry_msgs::msg::Point point;
   point.x = link->WorldPose().Pos().X();
@@ -373,7 +348,6 @@ void GazeboGroundTruthCones::addConeToConeArray(
   eufs_msgs::msg::ConeWithCovariance cone = eufs_msgs::msg::ConeWithCovariance();
   cone.point = point;
   cone.covariance = {0, 0, 0, 0};
-
 
   switch (cone_type) {
     case ConeType::blue:
@@ -396,8 +370,7 @@ void GazeboGroundTruthCones::addConeToConeArray(
 
 eufs_msgs::msg::ConeArrayWithCovariance GazeboGroundTruthCones::processCones(
     eufs_msgs::msg::ConeArrayWithCovariance cones_to_process) {
-  eufs_msgs::msg::ConeArrayWithCovariance cones =
-      translateBaseFootprintFrame(cones_to_process);
+  eufs_msgs::msg::ConeArrayWithCovariance cones = translateBaseFootprintFrame(cones_to_process);
 
   std::vector<eufs_msgs::msg::ConeWithCovariance> new_blue;
   std::vector<eufs_msgs::msg::ConeWithCovariance> new_yellow;
@@ -415,32 +388,28 @@ eufs_msgs::msg::ConeArrayWithCovariance GazeboGroundTruthCones::processCones(
   copy(no_color.begin(), no_color.end(), new_unknown.rbegin());
 
   // yellow
-  std::tie(color, no_color) =
-      GazeboGroundTruthCones::fovCones(cones.yellow_cones);
+  std::tie(color, no_color) = GazeboGroundTruthCones::fovCones(cones.yellow_cones);
   new_yellow.resize(new_yellow.size() + color.size());
   copy(color.begin(), color.end(), new_yellow.rbegin());
   new_unknown.resize(new_unknown.size() + no_color.size());
   copy(no_color.begin(), no_color.end(), new_unknown.rbegin());
 
   // orange
-  std::tie(color, no_color) =
-      GazeboGroundTruthCones::fovCones(cones.orange_cones);
+  std::tie(color, no_color) = GazeboGroundTruthCones::fovCones(cones.orange_cones);
   new_orange.resize(new_orange.size() + color.size());
   copy(color.begin(), color.end(), new_orange.rbegin());
   new_unknown.resize(new_unknown.size() + no_color.size());
   copy(no_color.begin(), no_color.end(), new_unknown.rbegin());
 
   // big_orange
-  std::tie(color, no_color) =
-      GazeboGroundTruthCones::fovCones(cones.big_orange_cones);
+  std::tie(color, no_color) = GazeboGroundTruthCones::fovCones(cones.big_orange_cones);
   new_big_orange.resize(new_big_orange.size() + color.size());
   copy(color.begin(), color.end(), new_big_orange.rbegin());
   new_unknown.resize(new_unknown.size() + no_color.size());
   copy(no_color.begin(), no_color.end(), new_unknown.rbegin());
 
   // unknown
-  std::tie(color, no_color) =
-      GazeboGroundTruthCones::fovCones(cones.unknown_color_cones);
+  std::tie(color, no_color) = GazeboGroundTruthCones::fovCones(cones.unknown_color_cones);
   new_unknown.resize(new_unknown.size() + color.size());
   copy(color.begin(), color.end(), new_unknown.rbegin());
   new_unknown.resize(new_unknown.size() + no_color.size());
@@ -501,8 +470,7 @@ bool GazeboGroundTruthCones::resetConePosition(
     }
 
     // Initial position and velocity variables
-    const ignition::math::Pose3d pos(cone.point.x, cone.point.y, cone.point.z,
-                                     0.0, 0.0, 0.0);
+    const ignition::math::Pose3d pos(cone.point.x, cone.point.y, cone.point.z, 0.0, 0.0, 0.0);
     const ignition::math::Vector3d vel(0.0, 0.0, 0.0);
     const ignition::math::Vector3d angular(0.0, 0.0, 0.0);
 
@@ -530,8 +498,8 @@ bool GazeboGroundTruthCones::inRangeOfLidar(eufs_msgs::msg::ConeWithCovariance c
   auto dist = (cone.point.x * cone.point.x) + (cone.point.y * cone.point.y);
   return lidar_min_view_distance * lidar_min_view_distance < dist &&
          dist < lidar_total_view_distance * lidar_total_view_distance &&
-         abs(cone.point.x) < lidar_x_view_distance && abs(cone.point.y) <
-                                                          lidar_y_view_distance && this->lidar_on;
+         abs(cone.point.x) < lidar_x_view_distance && abs(cone.point.y) < lidar_y_view_distance &&
+         this->lidar_on;
 }
 
 bool GazeboGroundTruthCones::inFOVOfLidar(eufs_msgs::msg::ConeWithCovariance cone) {
@@ -566,10 +534,8 @@ eufs_msgs::msg::ConeArrayWithCovariance GazeboGroundTruthCones::translateMapFram
   cones.blue_cones = translateCones(cones.blue_cones, this->initial_car_pos_);
   cones.yellow_cones = translateCones(cones.yellow_cones, this->initial_car_pos_);
   cones.orange_cones = translateCones(cones.orange_cones, this->initial_car_pos_);
-  cones.big_orange_cones = translateCones(cones.big_orange_cones,
-                                          this->initial_car_pos_);
-  cones.unknown_color_cones = translateCones(cones.unknown_color_cones,
-                                             this->initial_car_pos_);
+  cones.big_orange_cones = translateCones(cones.big_orange_cones, this->initial_car_pos_);
+  cones.unknown_color_cones = translateCones(cones.unknown_color_cones, this->initial_car_pos_);
   return cones;
 }
 
@@ -603,8 +569,8 @@ GazeboGroundTruthCones::fovCones(std::vector<eufs_msgs::msg::ConeWithCovariance>
   return std::make_pair(cones_in_view, cones_in_view_without_color);
 }
 
-GazeboGroundTruthCones::ConeType
-GazeboGroundTruthCones::getConeType(gazebo::physics::LinkPtr link) {
+GazeboGroundTruthCones::ConeType GazeboGroundTruthCones::getConeType(
+    gazebo::physics::LinkPtr link) {
   std::string link_name = link->GetName();
 
   if (link_name.substr(0, 9) == "blue_cone") {
@@ -631,7 +597,6 @@ eufs_msgs::msg::ConeArrayWithCovariance GazeboGroundTruthCones::addNoisePercepti
     eufs_msgs::msg::ConeArrayWithCovariance &cones_message, ignition::math::Vector3d noise) {
   eufs_msgs::msg::ConeArrayWithCovariance cones_message_with_noise = cones_message;
 
-
   addNoiseToConeArray(cones_message_with_noise.blue_cones, noise);
   addNoiseToConeArray(cones_message_with_noise.yellow_cones, noise);
   addNoiseToConeArray(cones_message_with_noise.orange_cones, noise);
@@ -639,11 +604,11 @@ eufs_msgs::msg::ConeArrayWithCovariance GazeboGroundTruthCones::addNoisePercepti
   addNoiseToConeArray(cones_message_with_noise.unknown_color_cones, noise);
 
   std::map<std::string, std::vector<eufs_msgs::msg::ConeWithCovariance>> color_map = {
-    {"blue", cones_message_with_noise.blue_cones},
-    {"yellow", cones_message_with_noise.yellow_cones},
-    {"orange", cones_message_with_noise.orange_cones},
-    {"big_orange", cones_message_with_noise.big_orange_cones},
-    {"unknown_color", cones_message_with_noise.unknown_color_cones}};
+      {"blue", cones_message_with_noise.blue_cones},
+      {"yellow", cones_message_with_noise.yellow_cones},
+      {"orange", cones_message_with_noise.orange_cones},
+      {"big_orange", cones_message_with_noise.big_orange_cones},
+      {"unknown_color", cones_message_with_noise.unknown_color_cones}};
 
   color_map = swapConeColors(color_map);
 
@@ -652,7 +617,6 @@ eufs_msgs::msg::ConeArrayWithCovariance GazeboGroundTruthCones::addNoisePercepti
   cones_message_with_noise.orange_cones = color_map["orange"];
   cones_message_with_noise.big_orange_cones = color_map["big_orange"];
   cones_message_with_noise.unknown_color_cones = color_map["unknown_color"];
-
 
   cones_message_with_noise.header.frame_id = this->cone_frame_;
   cones_message_with_noise.header.stamp.sec = this->time_last_published.sec;
@@ -701,7 +665,7 @@ void GazeboGroundTruthCones::addNoiseToConeArray(
 
     // Calculation of covariance
 
-    // Obtain magnitude of vector from car to cone 
+    // Obtain magnitude of vector from car to cone
     double magnitude = sqrt(pow(cone_array[i].point.x, 2) + pow(cone_array[i].point.y, 2));
 
     // Create eigenvectors which are parallel and perpendicular to: vector to point
@@ -724,7 +688,7 @@ void GazeboGroundTruthCones::addNoiseToConeArray(
     // Flatten cov matrix so it can be passed to cone object
     std::array<double, 4> flattened_cov_mat = {
         {cov_mat(0, 0), cov_mat(0, 1), cov_mat(1, 0), cov_mat(1, 1)}};
-    
+
     // Update the covariance of the cones
     cone_array[i].covariance = flattened_cov_mat;
   }
@@ -750,31 +714,29 @@ double GazeboGroundTruthCones::GaussianKernel(double mu, double sigma) {
 }
 
 // Returns pointer to cone array at random given weights
-std::string GazeboGroundTruthCones::pickColorWithProbability(
-  const YAML::Node weights) {
-    double rand = static_cast<double>(rand_r(&this->seed)) / static_cast<double>(RAND_MAX);
-    float sum = 0.0;
-    std::string color = "";
-    for (YAML::const_iterator it = weights.begin(); it != weights.end(); it++) {
-      sum += it->second.as<float>();
-      if (rand <= sum && color.empty()) {
-          color = it->first.as<std::string>();
-        }
-      }
-    if (sum != 1.0f || color.empty()) {
-      RCLCPP_WARN_ONCE(this->rosnode_->get_logger(),
-      "Cone mis-coloring config invalid");
-      RCLCPP_WARN_ONCE(this->rosnode_->get_logger(),
-      "Total probability  %s config is %f", color.c_str(), sum);
+std::string GazeboGroundTruthCones::pickColorWithProbability(const YAML::Node weights) {
+  double rand = static_cast<double>(rand_r(&this->seed)) / static_cast<double>(RAND_MAX);
+  float sum = 0.0;
+  std::string color = "";
+  for (YAML::const_iterator it = weights.begin(); it != weights.end(); it++) {
+    sum += it->second.as<float>();
+    if (rand <= sum && color.empty()) {
+      color = it->first.as<std::string>();
     }
-    return color;
+  }
+  if (sum != 1.0f || color.empty()) {
+    RCLCPP_WARN_ONCE(this->rosnode_->get_logger(), "Cone mis-coloring config invalid");
+    RCLCPP_WARN_ONCE(this->rosnode_->get_logger(), "Total probability  %s config is %f",
+                     color.c_str(), sum);
+  }
+  return color;
 }
 
 std::map<std::string, std::vector<eufs_msgs::msg::ConeWithCovariance>>
 GazeboGroundTruthCones::swapConeColors(
-  std::map<std::string, std::vector<eufs_msgs::msg::ConeWithCovariance>> color_map) {
+    std::map<std::string, std::vector<eufs_msgs::msg::ConeWithCovariance>> color_map) {
   std::map<std::string, std::vector<eufs_msgs::msg::ConeWithCovariance>> new_map;
-  for (auto const& [color, source] : color_map) {
+  for (auto const &[color, source] : color_map) {
     for (auto cone : source) {
       std::string rand_color = pickColorWithProbability(recolor_config[color]);
       if (rand_color != "undetected") {
@@ -792,7 +754,7 @@ GazeboGroundTruthCones::swapConeColors(
 
 // Helper function for parameters
 bool GazeboGroundTruthCones::getBoolParameter(sdf::ElementPtr _sdf, const char *element,
-                                             bool default_value, const char *default_description) {
+                                              bool default_value, const char *default_description) {
   if (!_sdf->HasElement(element)) {
     RCLCPP_DEBUG(this->rosnode_->get_logger(),
                  "cone_ground_truth plugin missing <%s>, defaults to %s", element,
@@ -804,8 +766,8 @@ bool GazeboGroundTruthCones::getBoolParameter(sdf::ElementPtr _sdf, const char *
 }
 
 double GazeboGroundTruthCones::getDoubleParameter(sdf::ElementPtr _sdf, const char *element,
-                                                 double default_value,
-                                                 const char *default_description) {
+                                                  double default_value,
+                                                  const char *default_description) {
   if (!_sdf->HasElement(element)) {
     RCLCPP_DEBUG(this->rosnode_->get_logger(),
                  "cone_ground_truth plugin missing <%s>, defaults to %s", element,
@@ -817,8 +779,8 @@ double GazeboGroundTruthCones::getDoubleParameter(sdf::ElementPtr _sdf, const ch
 }
 
 std::string GazeboGroundTruthCones::getStringParameter(sdf::ElementPtr _sdf, const char *element,
-                                                      std::string default_value,
-                                                      const char *default_description) {
+                                                       std::string default_value,
+                                                       const char *default_description) {
   if (!_sdf->HasElement(element)) {
     RCLCPP_DEBUG(this->rosnode_->get_logger(),
                  "cone_ground_truth plugin missing <%s>, defaults to %s", element,
