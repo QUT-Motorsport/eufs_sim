@@ -11,7 +11,7 @@
 
     <xacro:property name="wheel_mass" value="10.0"/>
 
-    <xacro:property name="wheel_diameter" value="0.505"/>
+    <xacro:property name="wheel_diameter" value="0.4064"/>
     <xacro:property name="wheel_width" value="0.2"/>
 
     <xacro:property name="wheel_friction_mu1" value="2"/>
@@ -19,6 +19,10 @@
     <xacro:property name="wheel_friction_kp" value="1e8"/>
 
     <xacro:property name="steering_hinge_mass" value="1"/>
+
+    <material name="black">
+        <color rgba="0 0 0 1"/>
+    </material>
 
     <!-- ***************** -->
     <!-- Wheel description -->
@@ -42,9 +46,10 @@
         <visual>
           <origin xyz="0 0 0" rpy="${degrees_90} 0 0"/>
           <geometry>
-            <mesh filename="file://$(find eufs_racecar)/meshes/wheel_${lr_prefix}.dae"/>
+            <cylinder radius="${wheel_diameter / 2}" length="${wheel_width}"/>
+            <!-- <mesh filename="file://$(find eufs_racecar)/meshes/wheel_${lr_prefix}.dae"/> -->
           </geometry>
-          <material name="tire_mat"/>
+          <material name="black"/>
         </visual>
 
         <collision>
