@@ -2,7 +2,7 @@
 <robot xmlns:xacro="http://www.ros.org/wiki/xacro">
   <xacro:arg name="publish_tf" default="false"/>
   <xacro:arg name="simulate_perception" default="false"/>
-  <xacro:arg name="command_mode" default="acceleration"/>
+  <xacro:arg name="command_mode" default="velocity"/>
   <xacro:arg name="pub_ground_truth" default="true"/>
 
   <!-- Custom plugin which controls the car using a given vehicle model.
@@ -12,28 +12,27 @@
     <plugin name="race_car" filename="libgazebo_race_car_model.so">
       <update_rate>1000.0</update_rate>
       <publish_rate>200.0</publish_rate>
-      <vehicle_model>$(arg vehicle_model)</vehicle_model>
       <front_left_wheel_steering>left_steering_hinge_joint</front_left_wheel_steering>
       <front_right_wheel_steering>right_steering_hinge_joint</front_right_wheel_steering>
       <front_left_wheel>front_left_wheel_joint</front_left_wheel>
       <front_right_wheel>front_right_wheel_joint</front_right_wheel>
       <rear_left_wheel>rear_left_wheel_joint</rear_left_wheel>
       <rear_right_wheel>rear_right_wheel_joint</rear_right_wheel>
-      <yaml_config>$(arg config_file)</yaml_config>
-      <noise_config>$(arg noise_config)</noise_config>
       <referenceFrame>map</referenceFrame>
       <robotFrame>base_footprint</robotFrame>
-      <publishTransform>$(arg publish_tf)</publishTransform>
       <groundTruthCarStateTopic>/ground_truth/state</groundTruthCarStateTopic>
       <localisationCarStateTopic>/odometry_integration/car_state</localisationCarStateTopic>
       <wheelSpeedsTopicName>/ros_can/wheel_speeds</wheelSpeedsTopicName>
       <groundTruthWheelSpeedsTopicName>/ground_truth/wheel_speeds</groundTruthWheelSpeedsTopicName>
       <odometryTopicName>/ground_truth/odom</odometryTopicName>
-      <commandMode>$(arg command_mode)</commandMode>
       <controlDelay>0.2</controlDelay>
-      <!-- The time in seconds it takes for the car to go from lock to lock -->
-      <steeringLockTime>1</steeringLockTime>
+      <steeringLockTime>1</steeringLockTime> 
       <pubGroundTruth>$(arg pub_ground_truth)</pubGroundTruth>
+      <publishTransform>$(arg publish_tf)</publishTransform>
+      <commandMode>$(arg command_mode)</commandMode>
+      <yaml_config>$(arg config_file)</yaml_config>
+      <noise_config>$(arg noise_config)</noise_config>
+      <vehicle_model>$(arg vehicle_model)</vehicle_model>
     </plugin>
   </gazebo>
 
@@ -51,16 +50,16 @@
       <lidarFOV>3.141593</lidarFOV><!-- 180 degrees-->
       <lidarOn>true</lidarOn><!--If false, we only simulate camera measurements-->
       <trackFrame>map</trackFrame>
-      <recolor_config>$(arg recolor_config)</recolor_config>
       <groundTruthConesTopicName>/ground_truth/cones</groundTruthConesTopicName>
       <groundTruthTrackTopicName>/ground_truth/track</groundTruthTrackTopicName>
-      <simulatePerception>$(arg simulate_perception)</simulatePerception>
       <perceptionConesTopicName>/simulated_noise/cones</perceptionConesTopicName>
       <perceptionTrackTopicName>/simulated_noise/track</perceptionTrackTopicName>
       <perceptionCameraDepthNoiseParameterA>0.01</perceptionCameraDepthNoiseParameterA>
       <perceptionCameraDepthNoiseParameterB>0.5</perceptionCameraDepthNoiseParameterB>
       <perceptionLidarNoise>0.03 0.03 0.0</perceptionLidarNoise>
       <pubGroundTruth>$(arg pub_ground_truth)</pubGroundTruth>
+      <simulatePerception>$(arg simulate_perception)</simulatePerception>
+      <recolor_config>$(arg recolor_config)</recolor_config>
     </plugin>
   </gazebo>
 
