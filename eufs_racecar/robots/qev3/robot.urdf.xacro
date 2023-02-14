@@ -76,10 +76,9 @@
         <origin xyz="1.220 0.0 0.530" rpy="0 0 0"/>
     </xacro:sensor_gps>
 
-<!--  <xacro:VLP-16R parent="chassis" name="velodyne" topic="/velodyne_points" hz="10" active= $(arg simulate_perception) --> 
-    <xacro:VLP-16R parent="chassis" name="velodyne" topic="/velodyne_points" hz="10" active="$(arg simulate_lidar)">
+    <xacro:VLP-32C parent="chassis" name="velodyne" topic="/velodyne_points" hz="10" active="$(arg simulate_lidar)">
         <origin xyz="1.590 0.0 -0.15" rpy="0 0 0"/>
-    </xacro:VLP-16R>
+    </xacro:VLP-32C>
 
     <xacro:zed_camera parent="chassis" prefix="zed" active="$(arg simulate_camera)">
         <origin xyz="-0.370 0.0 0.900" rpy="0 0 0"/>
