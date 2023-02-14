@@ -79,6 +79,7 @@ void GazeboGroundTruthCones::Load(gazebo::physics::ModelPtr _parent, sdf::Elemen
   this->cone_frame_ = "base_footprint";
 
   this->simulate_perception_ = getBoolParameter(_sdf, "simulatePerception", false, "false");
+  this->pub_ground_truth = getBoolParameter(_sdf, "pubGroundTruth", true, "true");
 
   this->perception_lidar_noise_ =
       getVector3dParameter(_sdf, "perceptionNoise", {0.03, 0.03, 0.0}, "0.03, 0.03, 0.0");
@@ -103,33 +104,27 @@ void GazeboGroundTruthCones::Load(gazebo::physics::ModelPtr _parent, sdf::Elemen
 
   // Setup the publishers
   // Ground truth cone publisher
-  if (!_sdf->HasElement("groundTruthConesTopicName")) {
-    RCLCPP_FATAL(this->rosnode_->get_logger(),
-                 "state_ground_truth plugin missing <groundTruthConesTopicName>, cannot proceed");
-    return;
-  } else {
-    std::string topic_name_ = _sdf->GetElement("groundTruthConesTopicName")->Get<std::string>();
-    this->ground_truth_cone_pub_ =
-        this->rosnode_->create_publisher<eufs_msgs::msg::ConeArrayWithCovariance>(topic_name_, 1);
-  }
+  if (this->pub_ground_truth) {
+    if (!_sdf->HasElement("groundTruthConesTopicName")) {
+      RCLCPP_FATAL(this->rosnode_->get_logger(),
+                  "state_ground_truth plugin missing <groundTruthConesTopicName>, cannot proceed");
+      return;
+    } else {
+      std::string topic_name_ = _sdf->GetElement("groundTruthConesTopicName")->Get<std::string>();
+      this->ground_truth_cone_pub_ =
+          this->rosnode_->create_publisher<eufs_msgs::msg::ConeArrayWithCovariance>(topic_name_, 1);
+    }
 
-  // Ground truth track publisher
-  if (!_sdf->HasElement("groundTruthTrackTopicName")) {
-    RCLCPP_FATAL(this->rosnode_->get_logger(),
-                 "state_ground_truth plugin missing <groundTruthTrackTopicName>, cannot proceed");
-    return;
-  } else {
-    std::string topic_name_ = _sdf->GetElement("groundTruthTrackTopicName")->Get<std::string>();
-    this->ground_truth_track_pub_ =
-        this->rosnode_->create_publisher<eufs_msgs::msg::ConeArrayWithCovariance>(topic_name_, 1);
-  }
-
-  if (!_sdf->HasElement("pubGroundTruth")) {
-    RCLCPP_FATAL(this->rosnode_->get_logger(),
-                 "state_ground_truth plugin missing <pubGroundTruth>, cannot proceed");
-    return;
-  } else {
-    pub_ground_truth = _sdf->GetElement("pubGroundTruth")->Get<bool>();
+    // Ground truth track publisher
+    if (!_sdf->HasElement("groundTruthTrackTopicName")) {
+      RCLCPP_FATAL(this->rosnode_->get_logger(),
+                  "state_ground_truth plugin missing <groundTruthTrackTopicName>, cannot proceed");
+      return;
+    } else {
+      std::string topic_name_ = _sdf->GetElement("groundTruthTrackTopicName")->Get<std::string>();
+      this->ground_truth_track_pub_ =
+          this->rosnode_->create_publisher<eufs_msgs::msg::ConeArrayWithCovariance>(topic_name_, 1);
+    }
   }
 
   if (this->simulate_perception_) {
