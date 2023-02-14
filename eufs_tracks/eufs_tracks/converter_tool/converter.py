@@ -255,11 +255,15 @@ class Converter(Node):
                     type, so check the docstrings of the specific desired conversion function for
                     full information.
         """
-
+        # file directories
+        directory_share = get_package_share_directory("eufs_tracks")
+        directory_sim = os.path.join(os.path.dirname(__file__), '..', '..', '..', '..', '..', '..', '..', 'eufs_sim', 'eufs_tracks')
+        
         if cfrom == "launch" and cto == "csv":
             return Converter.launch_to_csv(which_file, params)
+
         elif cfrom == "csv" and cto == "launch":
-            return Converter.csv_to_launch(which_file, params)
+            return Converter.csv_to_launch(which_file, directory_share, params), Converter.csv_to_launch(which_file, directory_sim, params)
         return None
 
     @staticmethod
@@ -283,7 +287,7 @@ class Converter(Node):
         )
 
     @staticmethod
-    def csv_to_launch(which_file, params={}):
+    def csv_to_launch(which_file, which_directory, params={}):
         """
         Converts a .csv to a .launch
 
@@ -291,7 +295,7 @@ class Converter(Node):
         """
 
         # Save eufs_tracks directory
-        TRACKS_SHARE = get_package_share_directory("eufs_tracks")
+        TRACKS_SHARE = which_directory
 
         # Use override name if provided
         GENERATED_FILENAME = params.get("override_name", which_file.split("/")[-1].split(".")[0])
