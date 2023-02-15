@@ -45,7 +45,7 @@
       <lidarXViewDistance>15</lidarXViewDistance>
       <lidarYViewDistance>15</lidarYViewDistance>
       <lidarMinViewDistance>1</lidarMinViewDistance>
-      <cameraFOV>2.09</cameraFOV><!--120 degrees-->
+      <cameraFOV>1.91986</cameraFOV><!--110 degrees-->
       <cameraMinViewDistance>0.5</cameraMinViewDistance>
       <lidarFOV>3.141593</lidarFOV><!-- 180 degrees-->
       <lidarOn>true</lidarOn><!--If false, we only simulate camera measurements-->

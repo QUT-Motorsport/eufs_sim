@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
-<robot name="sensor_imu" xmlns:xacro="http://www.ros.org/wiki/xacro">
-    <xacro:macro name="sensor_imu" params="prefix parent topic_prefix *origin noise:=0.08">
+<robot name="SBG_IMU_sensor" xmlns:xacro="http://www.ros.org/wiki/xacro">
+    <xacro:macro name="SBG_IMU_sensor" params="prefix parent *origin noise:=0.08">
         <joint name="${prefix}_base_joint" type="fixed">
             <axis xyz="1 0 0"/>
             <xacro:insert_block name="origin"/>
@@ -82,7 +82,7 @@
                 </imu>
                 <plugin filename="libgazebo_ros_imu_sensor.so" name="${prefix}">
                     <ros>
-                        <remapping>~/out:=${topic_prefix}/imu/data</remapping>
+                        <remapping>~/out:=/imu/data</remapping>
                     </ros>
                     <frame_name>${prefix}_base_link</frame_name>
                     <initial_orientation_as_reference>false</initial_orientation_as_reference>

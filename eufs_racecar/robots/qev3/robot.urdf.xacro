@@ -14,10 +14,6 @@
 
     <xacro:property name="PI" value="3.1415926535897931"/>
 
-    <!-- If the gazebo_ros_race_car_model should publish the ground truth tf -->
-    <xacro:arg name="publish_tf" default="false"/>
-    <!-- If the perception stack should be simulated or if sensors should be used -->
-    <xacro:arg name="simulate_perception" default="true"/>
     <!-- If the camera should be simulated or if sensors should be removed -->
     <xacro:arg name="simulate_camera" default="true"/>
     <!-- If the lidar should be simulated or if sensors should be removed -->
@@ -34,11 +30,21 @@
     <!-- Import EUFS base element with the chassis -->
     <xacro:include filename="$(find eufs_racecar)/urdf/eufs_base.urdf.xacro" />
 
-    <!-- Import all available sensors -->
-    <xacro:include filename="$(find eufs_sensors)/urdf/all_sensors.urdf.xacro" />
-
     <!--  Include the plugins  -->
     <xacro:include filename="$(find eufs_plugins)/urdf/eufs_plugins.gazebo.xacro" />
+
+    <!-- Import all available sensors -->
+    <!-- GPS -->
+    <xacro:include filename="$(find eufs_sensors)/urdf/SBG_GPS.urdf.xacro"/>
+
+    <!--IMU -->
+    <xacro:include filename="$(find eufs_sensors)/urdf/SBG_IMU.urdf.xacro"/>
+
+    <!-- Velodyne VLP-32C -->
+    <xacro:include filename="$(find eufs_sensors)/urdf/VLP-32C.urdf.xacro"/>
+
+    <!-- ZED Stereo camera -->
+    <xacro:include filename="$(find eufs_sensors)/urdf/ZED2i.urdf.xacro"/>
 
     <!-- *************** -->
     <!-- Robots Elements -->
@@ -66,26 +72,19 @@
     LIDAR: 1.590 0.0 0.130
     STEREO CAM: -0.370 0.0 0.900 -->
 
-
-
-    <xacro:sensor_imu parent="chassis" prefix="sbg_imu" topic_prefix="">
+    <xacro:SBG_IMU_sensor parent="chassis" prefix="imu">
         <origin xyz="0.0 0.0 0.0" rpy="0 0 0"/>
-    </xacro:sensor_imu>
+    </xacro:SBG_IMU_sensor>
 
-    <xacro:sensor_gps parent="chassis" prefix="gps">
+    <xacro:SBG_GPS_sensor parent="chassis" prefix="sbg">
         <origin xyz="1.220 0.0 0.530" rpy="0 0 0"/>
-    </xacro:sensor_gps>
+    </xacro:SBG_GPS_sensor>
 
-    <xacro:VLP-32C parent="chassis" name="velodyne" topic="/velodyne_points" hz="10" active="$(arg simulate_lidar)">
+    <xacro:VLP-32C_LiDAR parent="chassis" prefix="velodyne" hz="10" active="$(arg simulate_lidar)">
         <origin xyz="1.590 0.0 -0.15" rpy="0 0 0"/>
-    </xacro:VLP-32C>
+    </xacro:VLP-32C_LiDAR>
 
-    <xacro:zed_camera parent="chassis" prefix="zed" active="$(arg simulate_camera)">
+    <xacro:ZED2i_camera parent="chassis" prefix="zed2i" active="$(arg simulate_camera)">
         <origin xyz="-0.370 0.0 0.900" rpy="0 0 0"/>
-    </xacro:zed_camera>
-
-    <!-- <xacro:sensor_imu parent="chassis" prefix="zed_imu" topic_prefix="/camera"> -->
-        <!-- <origin xyz="0.0 0.0 0.0" rpy="0 0 0"/> -->
-    <!-- </xacro:sensor_imu> -->
-
+    </xacro:ZED2i_camera>
 </robot>

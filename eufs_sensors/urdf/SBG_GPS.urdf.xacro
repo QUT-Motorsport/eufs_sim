@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
-<robot name="sensor_gps" xmlns:xacro="http://www.ros.org/wiki/xacro">
-    <xacro:macro name="sensor_gps" params="prefix parent *origin">
+<robot name="SBG_GPS_sensor" xmlns:xacro="http://www.ros.org/wiki/xacro">
+    <xacro:macro name="SBG_GPS_sensor" params="prefix parent *origin">
         <!-- ANTENNA GPS -->
         <joint name="${prefix}_joint" type="fixed">
             <axis xyz="0 1 0"/>
@@ -80,12 +80,10 @@
                         </vertical>
                     </velocity_sensing>
                 </gps>
-                <plugin name="${prefix}_controller" filename="libgazebo_ros_gps_sensor.so">
+                <plugin name="gps_controller" filename="libgazebo_ros_gps_sensor.so">
                     <ros>
-                        <!--remapping gps to nav_sat for QEV3 imu -->
-                        <!-- <remapping>~/out:=${prefix}</remapping> (original code) -->
                         <remapping>~/out:=/imu/nav_sat_fix</remapping>
-
+                        <remapping>~/vel:=/imu/gps_vel</remapping>
                     </ros>
                     <frame_name>${prefix}_base_link</frame_name>
                 </plugin>
