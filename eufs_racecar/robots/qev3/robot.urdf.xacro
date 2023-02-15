@@ -30,21 +30,21 @@
     <!-- Import EUFS base element with the chassis -->
     <xacro:include filename="$(find eufs_racecar)/urdf/eufs_base.urdf.xacro" />
 
-    <!--  Include the plugins  -->
-    <xacro:include filename="$(find eufs_plugins)/urdf/eufs_plugins.gazebo.xacro" />
-
     <!-- Import all available sensors -->
     <!-- GPS -->
-    <xacro:include filename="$(find eufs_sensors)/urdf/SBG_GPS.urdf.xacro"/>
+    <xacro:include filename="$(find eufs_racecar)/urdf/SBG_GPS.urdf.xacro"/>
 
     <!--IMU -->
-    <xacro:include filename="$(find eufs_sensors)/urdf/SBG_IMU.urdf.xacro"/>
+    <xacro:include filename="$(find eufs_racecar)/urdf/SBG_IMU.urdf.xacro"/>
 
     <!-- Velodyne VLP-32C -->
-    <xacro:include filename="$(find eufs_sensors)/urdf/VLP-32C.urdf.xacro"/>
+    <xacro:include filename="$(find eufs_racecar)/urdf/VLP-32C.urdf.xacro"/>
 
     <!-- ZED Stereo camera -->
-    <xacro:include filename="$(find eufs_sensors)/urdf/ZED2i.urdf.xacro"/>
+    <xacro:include filename="$(find eufs_racecar)/urdf/ZED2i.urdf.xacro"/>
+
+    <!--  Include the plugins  -->
+    <xacro:include filename="$(find eufs_plugins)/urdf/eufs_plugins.gazebo.xacro" />
 
     <!-- *************** -->
     <!-- Robots Elements -->
