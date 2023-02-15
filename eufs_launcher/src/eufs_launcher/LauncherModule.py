@@ -109,8 +109,8 @@ class EUFSLauncher(Plugin):
 
         # Setup Robot Name menu
         default_mode = self.default_config["eufs_launcher"]["default_robot_name"]
-        robots_filepath = join(get_package_share_directory('eufs_racecar'), 'robots')
-        modes = listdir(robots_filepath)
+        racecars_filepath = join(get_package_share_directory('eufs_racecar'), 'racecars')
+        modes = listdir(racecars_filepath)
         EUFSLauncher.setup_q_combo_box(self.ROBOT_NAME_MENU, default_mode, modes)
 
         # Add buttons from yaml file

@@ -17,7 +17,7 @@ data_files = [
 
 # Add all robot sub-directories
 # This is required as setuptools doesn't currently support recursive glob
-for directory in glob("robots/*"):
+for directory in glob("racecars/*"):
     data_file = (join(share_directory, directory), glob(directory + "/*"))
     data_files.append(data_file)
 

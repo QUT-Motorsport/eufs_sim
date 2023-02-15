@@ -37,7 +37,7 @@ def spawn_car(context, *args, **kwargs):
     simulate_lidar = 'true' if lidar == 'true' else 'false'
     simulate_camera = 'true' if camera == 'true' else 'false'
 
-    config_file = join(get_package_share_directory('eufs_racecar'), 'robots', robot_name,
+    config_file = join(get_package_share_directory('eufs_racecar'), 'racecars', robot_name,
                        vehicle_model_config)
     noise_file = join(get_package_share_directory('eufs_models'), 'config', 'noise.yaml')
     recolor_config = join(get_package_share_directory('eufs_plugins'), 'config',
@@ -46,9 +46,9 @@ def spawn_car(context, *args, **kwargs):
                                        'config', 'boundingBoxes.yaml')
 
     xacro_path = join(get_package_share_directory('eufs_racecar'),
-                      'robots', robot_name, 'robot.urdf.xacro')
+                      'racecars', robot_name, 'robot.urdf.xacro')
     urdf_path = join(get_package_share_directory('eufs_racecar'),
-                     'robots', robot_name, 'robot.urdf')
+                     'racecars', robot_name, 'robot.urdf')
 
     if not isfile(urdf_path):
         os.mknod(urdf_path)
@@ -161,7 +161,7 @@ def generate_launch_description():
 
         DeclareLaunchArgument('robot_name', default_value='eufs',
                               description='The name of the robot (must be '
-                                          'directory in eufs_racecar/robots '
+                                          'directory in eufs_racecar/racecars '
                                           'called '
                                           '{robot_name} with '
                                           'robot.urdf.xacro and {'

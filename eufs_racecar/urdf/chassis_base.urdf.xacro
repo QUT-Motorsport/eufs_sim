@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
-<robot name="eufs" xmlns:xacro="http://www.ros.org/wiki/xacro">
-  <xacro:macro name="eufs_base" params="chassis_mesh">
+<robot name="chassis_base" xmlns:xacro="http://www.ros.org/wiki/xacro">
+  <xacro:macro name="chassis_base" params="chassis_mesh">
 
     <xacro:property name="wheel_diameter" value="0.505"/>
 

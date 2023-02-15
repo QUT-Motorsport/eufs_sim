@@ -16,7 +16,7 @@
       <visual>
         <origin xyz="0 0 0" rpy="0 0 0"/>
         <geometry>
-          <mesh filename="file://$(find eufs_sensors)/meshes/zed.dae" />
+          <mesh filename="file://$(find eufs_racecar)/meshes/zed.dae" />
         </geometry>
         <material name="light_grey">
           <color rgba="0.8 0.8 0.8 0.8"/>

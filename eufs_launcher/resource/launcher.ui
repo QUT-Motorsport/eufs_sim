@@ -268,7 +268,7 @@
     </font>
    </property>
    <property name="text">
-    <string>Robot name:</string>
+    <string>Racecar name:</string>
    </property>
   </widget>
   <widget class="QComboBox" name="WhichRobotName">

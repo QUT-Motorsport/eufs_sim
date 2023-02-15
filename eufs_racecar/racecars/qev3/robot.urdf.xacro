@@ -8,17 +8,16 @@
     <!--  Load the config file  -->
     <xacro:property name="config" value="${load_yaml('$(arg config_file)')}"/>
 
-    <!-- ***************** -->
-    <!-- Global parameters -->
-    <!-- ***************** -->
-
-    <xacro:property name="PI" value="3.1415926535897931"/>
-
     <!-- If the camera should be simulated or if sensors should be removed -->
     <xacro:arg name="simulate_camera" default="true"/>
     <!-- If the lidar should be simulated or if sensors should be removed -->
     <xacro:arg name="simulate_lidar" default="false"/>
 
+    <!-- ***************** -->
+    <!-- Global parameters -->
+    <!-- ***************** -->
+
+    <xacro:property name="PI" value="3.1415926535897931"/>
 
     <!-- ***************** -->
     <!-- Imported elements -->
@@ -28,7 +27,7 @@
     <xacro:include filename="$(find eufs_racecar)/urdf/wheels.urdf.xacro"/>
 
     <!-- Import EUFS base element with the chassis -->
-    <xacro:include filename="$(find eufs_racecar)/urdf/eufs_base.urdf.xacro" />
+    <xacro:include filename="$(find eufs_racecar)/urdf/chassis_base.urdf.xacro" />
 
     <!-- Import all available sensors -->
     <!-- GPS -->
@@ -51,7 +50,7 @@
     <!-- *************** -->
 
     <!-- Chassis of the car -->
-    <xacro:eufs_base chassis_mesh="file://$(find eufs_racecar)/meshes/lando.dae"/>
+    <xacro:chassis_base chassis_mesh="file://$(find eufs_racecar)/meshes/lando.dae"/>
 
     <!-- Wheels -->
     <xacro:wheels chassis_width="1.6" wheelbase="1.580"/>
