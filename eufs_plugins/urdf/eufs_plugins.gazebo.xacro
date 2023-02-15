@@ -25,8 +25,8 @@
       <wheelSpeedsTopicName>/ros_can/wheel_speeds</wheelSpeedsTopicName>
       <groundTruthWheelSpeedsTopicName>/ground_truth/wheel_speeds</groundTruthWheelSpeedsTopicName>
       <odometryTopicName>/ground_truth/odom</odometryTopicName>
-      <controlDelay>0.2</controlDelay>
-      <steeringLockTime>1</steeringLockTime> 
+      <controlDelay>0.020</controlDelay>
+      <steeringLockTime>1.5</steeringLockTime> 
       <pubGroundTruth>$(arg pub_ground_truth)</pubGroundTruth>
       <publishTransform>$(arg publish_tf)</publishTransform>
       <commandMode>$(arg command_mode)</commandMode>

@@ -607,7 +607,7 @@ void RaceCarModelPlugin::updateState(const double dt) {
   // Make sure steering rate is within limits
   _act_input.delta +=
       (_des_input.delta - _act_input.delta >= 0 ? 1 : -1) *
-      std::min(_max_steering_rate * dt, std::abs(_des_input.delta - _act_input.delta));
+      std::min(_max_steering_rate * dt, std::abs(_des_input.delta));
 
   // Update z value from simulation
   // This allows the state to have the most up to date value of z. Without this
