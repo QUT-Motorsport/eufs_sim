@@ -1,5 +1,5 @@
 inertia:
-  m:        321     # Weight of the Vehicle [kg]
+  m:        235     # Weight of the Vehicle [kg]
   g:        9.81    # Gravity force         [m/s^2]
   I_z:      31.27   # Inertial force I_zz   [kg/m^2]
 
