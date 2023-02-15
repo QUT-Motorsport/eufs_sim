@@ -28,9 +28,8 @@
 // STD Include
 #include <algorithm>
 #include <fstream>
-#include <mutex>  // NOLINT(build/c++11)
+#include <mutex>   // NOLINT(build/c++11)
 #include <thread>  // NOLINT(build/c++11)
-
 
 namespace gazebo_plugins {
 namespace eufs_plugins {
@@ -72,9 +71,8 @@ void RaceCarModelPlugin::Load(gazebo::physics::ModelPtr model, sdf::ElementPtr s
   _pub_ground_truth_wheel_speeds = _rosnode->create_publisher<eufs_msgs::msg::WheelSpeedsStamped>(
       _ground_truth_wheel_speeds_topic_name, 1);
   _pub_odom = _rosnode->create_publisher<nav_msgs::msg::Odometry>(_odom_topic_name, 1);
-// ROS publisher for QEV3 imu velocity
-_pub_velocity = _rosnode->create_publisher<geometry_msgs::msg::TwistStamped>("imu/velocity", 1);
-
+  // ROS publisher for QEV3 imu velocity
+  _pub_velocity = _rosnode->create_publisher<geometry_msgs::msg::TwistStamped>("imu/velocity", 1);
 
   // ROS Services
   _reset_vehicle_pos_srv = _rosnode->create_service<std_srvs::srv::Trigger>(
@@ -86,7 +84,8 @@ _pub_velocity = _rosnode->create_publisher<geometry_msgs::msg::TwistStamped>("im
 
   // ROS Subscriptions
   _sub_cmd = _rosnode->create_subscription<ackermann_msgs::msg::AckermannDriveStamped>(
-      "/control/driving_command", 1, std::bind(&RaceCarModelPlugin::onCmd, this, std::placeholders::_1));
+      "/control/driving_command", 1,
+      std::bind(&RaceCarModelPlugin::onCmd, this, std::placeholders::_1));
 
   // Connect to Gazebo
   _update_connection =
@@ -529,7 +528,7 @@ void RaceCarModelPlugin::publishOdom() {
 
   // Velocity for QEV3 imu velocity
   geometry_msgs::msg::TwistStamped ts;
- 
+
   ts.twist.linear.x = state_noisy.v_x;
   ts.twist.linear.y = state_noisy.v_y;
   ts.twist.linear.z = state_noisy.v_z;
@@ -541,9 +540,8 @@ void RaceCarModelPlugin::publishOdom() {
   ts.header.stamp.sec = _last_sim_time.sec;
   ts.header.stamp.nanosec = _last_sim_time.nsec;
 
-    // Publish velocity for imu on QEV3
+  // Publish velocity for imu on QEV3
   _pub_velocity->publish(ts);
-
 }
 
 void RaceCarModelPlugin::publishTf() {
@@ -590,7 +588,7 @@ void RaceCarModelPlugin::updateState(const double dt) {
       std::shared_ptr<ackermann_msgs::msg::AckermannDriveStamped> cmd = _command_Q.front();
       _des_input.acc = cmd->drive.acceleration;
       _des_input.vel = cmd->drive.speed;
-      _des_input.delta = cmd->drive.steering_angle;
+      _des_input.delta = cmd->drive.steering_angle * 3.1415 / 180;
 
       _command_Q.pop();
       _cmd_time_Q.pop();
@@ -607,7 +605,7 @@ void RaceCarModelPlugin::updateState(const double dt) {
   // Make sure steering rate is within limits
   _act_input.delta +=
       (_des_input.delta - _act_input.delta >= 0 ? 1 : -1) *
-      std::min(_max_steering_rate * dt, std::abs(_des_input.delta));
+      std::min(_max_steering_rate * dt, std::abs(_des_input.delta - _act_input.delta));
 
   // Update z value from simulation
   // This allows the state to have the most up to date value of z. Without this
@@ -632,7 +630,6 @@ void RaceCarModelPlugin::updateState(const double dt) {
   publishCarState();
   publishWheelSpeeds();
   publishOdom();
-
 
   if (_publish_tf) {
     publishTf();
