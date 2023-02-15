@@ -84,8 +84,8 @@
         <origin xyz="-0.370 0.0 0.900" rpy="0 0 0"/>
     </xacro:zed_camera>
 
-    <xacro:sensor_imu parent="chassis" prefix="zed_imu" topic_prefix="/camera">
-        <origin xyz="0.0 0.0 0.0" rpy="0 0 0"/>
-    </xacro:sensor_imu>
+    <!-- <xacro:sensor_imu parent="chassis" prefix="zed_imu" topic_prefix="/camera"> -->
+        <!-- <origin xyz="0.0 0.0 0.0" rpy="0 0 0"/> -->
+    <!-- </xacro:sensor_imu> -->
 
 </robot>
