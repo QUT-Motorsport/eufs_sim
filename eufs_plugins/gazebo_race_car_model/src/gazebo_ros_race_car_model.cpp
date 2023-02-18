@@ -73,6 +73,7 @@ void RaceCarModelPlugin::Load(gazebo::physics::ModelPtr model, sdf::ElementPtr s
   _pub_odom = _rosnode->create_publisher<nav_msgs::msg::Odometry>(_odom_topic_name, 1);
   // ROS publisher for QEV3 imu velocity
   _pub_velocity = _rosnode->create_publisher<geometry_msgs::msg::TwistStamped>("imu/velocity", 1);
+  _pub_qutms_pose = _rosnode->create_publisher<geometry_msgs::msg::PoseWithCovarianceStamped>("slam/car_pose", 1);
 
   // ROS Services
   _reset_vehicle_pos_srv = _rosnode->create_service<std_srvs::srv::Trigger>(
@@ -118,7 +119,7 @@ void RaceCarModelPlugin::initParams(const sdf::ElementPtr &sdf) {
   if (!sdf->HasElement("referenceFrame")) {
     RCLCPP_DEBUG(_rosnode->get_logger(),
                  "gazebo_ros_race_car_model plugin missing <referenceFrame>, defaults to map");
-    _reference_frame = "map";
+    _reference_frame = "track";
   } else {
     _reference_frame = sdf->GetElement("referenceFrame")->Get<std::string>();
   }
@@ -446,6 +447,14 @@ void RaceCarModelPlugin::publishCarState() {
   if (_pub_localisation_car_state->get_subscription_count() > 0) {
     _pub_localisation_car_state->publish(car_state_noisy);
   }
+
+  // QUTMS
+  if (_pub_qutms_pose->get_subscription_count() > 0) {
+    geometry_msgs::msg::PoseWithCovarianceStamped pose_w_cov_msg;
+    pose_w_cov_msg.header = car_state_noisy.header;
+    pose_w_cov_msg.pose = car_state_noisy.pose;
+    _pub_qutms_pose->publish(pose_w_cov_msg);
+  }
 }
 
 void RaceCarModelPlugin::publishWheelSpeeds() {
@@ -588,7 +597,7 @@ void RaceCarModelPlugin::updateState(const double dt) {
       std::shared_ptr<ackermann_msgs::msg::AckermannDriveStamped> cmd = _command_Q.front();
       _des_input.acc = cmd->drive.acceleration;
       _des_input.vel = cmd->drive.speed;
-      _des_input.delta = cmd->drive.steering_angle * 3.1415 / 180;
+      _des_input.delta = cmd->drive.steering_angle * 3.1415 / 180 / (90/26); // scales from steering wheel 90* to front wheels 26*
 
       _command_Q.pop();
       _cmd_time_Q.pop();
@@ -601,7 +610,8 @@ void RaceCarModelPlugin::updateState(const double dt) {
   }
 
   // If last command was more than 1s ago, then slow down car
-  _act_input.acc = (_last_sim_time - _last_cmd_time) < 1.0 ? _des_input.acc : -1.0;
+  _act_input.acc = (_last_sim_time - _last_cmd_time) < 10.0 ? _des_input.acc : -1.0;
+  // _act_input.acc = _des_input.acc;
   // Make sure steering rate is within limits
   _act_input.delta +=
       (_des_input.delta - _act_input.delta >= 0 ? 1 : -1) *

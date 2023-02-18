@@ -41,7 +41,6 @@
 #include "geometry_msgs/msg/twist_with_covariance.hpp"
 #include "geometry_msgs/msg/vector3.hpp"
 #include "nav_msgs/msg/odometry.hpp"
-
 // include msg for vel
 #include "geometry_msgs/msg/twist_stamped.hpp"
 
@@ -148,10 +147,9 @@ class RaceCarModelPlugin : public gazebo::ModelPlugin {
   rclcpp::Publisher<eufs_msgs::msg::WheelSpeedsStamped>::SharedPtr _pub_wheel_speeds;
   rclcpp::Publisher<eufs_msgs::msg::WheelSpeedsStamped>::SharedPtr _pub_ground_truth_wheel_speeds;
   rclcpp::Publisher<nav_msgs::msg::Odometry>::SharedPtr _pub_odom;
-// ROS publisher for QEV3 imu velocity
+  // ROS publisher for QEV3 imu velocity
   rclcpp::Publisher<geometry_msgs::msg::TwistStamped>::SharedPtr _pub_velocity;
-
-
+  rclcpp::Publisher<geometry_msgs::msg::PoseWithCovarianceStamped>::SharedPtr _pub_qutms_pose;
 
   // ROS Subscriptions
   rclcpp::Subscription<ackermann_msgs::msg::AckermannDriveStamped>::SharedPtr _sub_cmd;

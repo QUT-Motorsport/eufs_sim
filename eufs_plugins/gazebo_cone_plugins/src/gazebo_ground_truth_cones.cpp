@@ -75,7 +75,7 @@ void GazeboGroundTruthCones::Load(gazebo::physics::ModelPtr _parent, sdf::Elemen
       getDoubleParameter(_sdf, "perceptionCameraNoisePercentage", 0.4, "0.4");
   this->lidar_on = getBoolParameter(_sdf, "lidarOn", true, "true");
 
-  this->track_frame_ = getStringParameter(_sdf, "trackFrame", "map", "map");
+  this->track_frame_ = getStringParameter(_sdf, "trackFrame", "track", "track");
   this->cone_frame_ = "base_footprint";
 
   this->simulate_perception_ = getBoolParameter(_sdf, "simulatePerception", false, "false");
@@ -213,7 +213,7 @@ void GazeboGroundTruthCones::UpdateChild() {
   eufs_msgs::msg::ConeArrayWithCovariance cone_arrays_message = getConeArraysMessage();
 
   eufs_msgs::msg::ConeArrayWithCovariance ground_truth_track_message;
-  if (this->track_frame_ == "map") {
+  if (this->track_frame_ == "track") {
     ground_truth_track_message = translateMapFrame(cone_arrays_message);
   } else if (this->track_frame_ == "base_footprint") {
     ground_truth_track_message = translateBaseFootprintFrame(cone_arrays_message);
@@ -233,7 +233,7 @@ void GazeboGroundTruthCones::UpdateChild() {
   // Publish QUTMS ground truth as cone detection stamped
   driverless_msgs::msg::ConeDetectionStamped ground_truth_track_qutms_message =
       cone_array_to_cone_detection(ground_truth_track_message);
-  ground_truth_track_qutms_message.header.frame_id = "map";
+  ground_truth_track_qutms_message.header.frame_id = "track";
   if (this->ground_truth_track_qutms_pub_->get_subscription_count() > 0 && pub_ground_truth) {
     this->ground_truth_track_qutms_pub_->publish(ground_truth_track_qutms_message);
   }
@@ -273,7 +273,7 @@ void GazeboGroundTruthCones::UpdateChild() {
     // QUTMS
     driverless_msgs::msg::ConeDetectionStamped perception_track_qutms_message =
         cone_array_to_cone_detection(perception_track_message);
-    perception_track_qutms_message.header.frame_id = "map";
+    perception_track_qutms_message.header.frame_id = "track";
     // Only apply noise once, have we seen this track before?
     if (!this->perception_track_qutms_initialized) {
       this->perception_track_qutms_data = perception_track_qutms_message;
@@ -343,7 +343,7 @@ driverless_msgs::msg::ConeDetectionStamped GazeboGroundTruthCones::cone_array_to
 // Getting the track
 eufs_msgs::msg::ConeArrayWithCovariance GazeboGroundTruthCones::getConeArraysMessage() {
   eufs_msgs::msg::ConeArrayWithCovariance cone_arrays_message;
-  cone_arrays_message.header.frame_id = "map";
+  cone_arrays_message.header.frame_id = "track";
   cone_arrays_message.header.stamp.sec = this->time_last_published.sec;
   cone_arrays_message.header.stamp.nanosec = this->time_last_published.nsec;
 
@@ -552,7 +552,7 @@ std::vector<eufs_msgs::msg::ConeWithCovariance> GazeboGroundTruthCones::translat
 
 eufs_msgs::msg::ConeArrayWithCovariance GazeboGroundTruthCones::translateMapFrame(
     eufs_msgs::msg::ConeArrayWithCovariance cones) {
-  cones.header.frame_id = "map";
+  cones.header.frame_id = "track";
   cones.blue_cones = translateCones(cones.blue_cones, this->initial_car_pos_);
   cones.yellow_cones = translateCones(cones.yellow_cones, this->initial_car_pos_);
   cones.orange_cones = translateCones(cones.orange_cones, this->initial_car_pos_);
