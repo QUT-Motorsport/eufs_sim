@@ -1,0 +1,24 @@
+{
+    "configurations": [
+        {
+            "browse": {
+                "databaseFilename": "${default}",
+                "limitSymbolsToIncludedHeaders": false
+            },
+            "includePath": [
+                "/opt/ros/humble/include/**",
+                "/usr/include/**",
+                "${workspaceFolder}/build/driverless_msgs/rosidl_generator_cpp",
+                "${workspaceFolder}/install/driverless_msgs/include/**",
+                "${workspaceFolder}/install/eufs_msgs/include/**",
+                "${workspaceFolder}/eufs_plugins/gazebo_cone_plugins/include"
+            ],
+            "name": "ROS",
+            "intelliSenseMode": "gcc-x64",
+            "compilerPath": "/usr/bin/gcc",
+            "cStandard": "gnu11",
+            "cppStandard": "c++14"
+        }
+    ],
+    "version": 4
+}
