@@ -7,8 +7,7 @@ Panels:
         - /Global Options1
         - /Status1
         - /RobotModel1/Description Topic1
-        - /Perception Cones1
-      Splitter Ratio: 0.5
+      Splitter Ratio: 0.5058823823928833
     Tree Height: 725
   - Class: rviz_common/Selection
     Name: Selection
@@ -76,7 +75,7 @@ Visualization Manager:
           Show Axes: false
           Show Trail: false
           Value: true
-        gps_base_link:
+        imu_base_link:
           Alpha: 1
           Show Axes: false
           Show Trail: false
@@ -109,7 +108,7 @@ Visualization Manager:
           Alpha: 1
           Show Axes: false
           Show Trail: false
-        sbg_imu_base_link:
+        sbg_base_link:
           Alpha: 1
           Show Axes: false
           Show Trail: false
@@ -124,33 +123,28 @@ Visualization Manager:
           Show Axes: false
           Show Trail: false
           Value: true
-        zed_camera_center:
+        zed2i_camera_center:
           Alpha: 1
           Show Axes: false
           Show Trail: false
           Value: true
-        zed_depth_camera_frame:
+        zed2i_depth_camera_frame:
           Alpha: 1
           Show Axes: false
           Show Trail: false
-        zed_imu_base_link:
+        zed2i_left_camera_frame:
           Alpha: 1
           Show Axes: false
           Show Trail: false
-          Value: true
-        zed_left_camera_frame:
+        zed2i_left_camera_optical_frame:
           Alpha: 1
           Show Axes: false
           Show Trail: false
-        zed_left_camera_optical_frame:
+        zed2i_right_camera_frame:
           Alpha: 1
           Show Axes: false
           Show Trail: false
-        zed_right_camera_frame:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-        zed_right_camera_optical_frame:
+        zed2i_right_camera_optical_frame:
           Alpha: 1
           Show Axes: false
           Show Trail: false
@@ -165,23 +159,36 @@ Visualization Manager:
     - Class: eufs_rviz_plugins/ConeArrayWithCovariance
       Color: 200; 200; 200
       Color Display: Cone
-      Enabled: true
+      Enabled: false
       Name: Ground Truth Cones
       Namespaces:
-        cone: true
-        covariance: true
+        {}
       Topic:
         Depth: 5
         Durability Policy: Volatile
         History Policy: Keep Last
         Reliability Policy: Reliable
         Value: /ground_truth/cones
-      Value: true
+      Value: false
+    - Class: eufs_rviz_plugins/ConeArrayWithCovariance
+      Color: 200; 200; 200
+      Color Display: Cone
+      Enabled: false
+      Name: Perception Cones
+      Namespaces:
+        {}
+      Topic:
+        Depth: 5
+        Durability Policy: Volatile
+        History Policy: Keep Last
+        Reliability Policy: Reliable
+        Value: /simulated_noise/cones
+      Value: false
     - Class: eufs_rviz_plugins/ConeArrayWithCovariance
       Color: 200; 200; 200
       Color Display: Cone
       Enabled: true
-      Name: Perception Cones
+      Name: Ground Truth Track
       Namespaces:
         cone: true
         covariance: true
@@ -190,7 +197,34 @@ Visualization Manager:
         Durability Policy: Volatile
         History Policy: Keep Last
         Reliability Policy: Reliable
-        Value: /simulated_noise/cones
+        Value: /ground_truth/track
+      Value: true
+    - Class: eufs_rviz_plugins/ConeArrayWithCovariance
+      Color: 200; 200; 200
+      Color Display: Cone
+      Enabled: false
+      Name: Perception Track
+      Namespaces:
+        {}
+      Topic:
+        Depth: 5
+        Durability Policy: Volatile
+        History Policy: Keep Last
+        Reliability Policy: Reliable
+        Value: /ground_truth/track
+      Value: false
+    - Class: rviz_default_plugins/Marker
+      Enabled: true
+      Name: Path
+      Namespaces:
+        current_path: true
+      Topic:
+        Depth: 5
+        Durability Policy: Volatile
+        Filter size: 10
+        History Policy: Keep Last
+        Reliability Policy: Reliable
+        Value: /markers/path_line
       Value: true
   Enabled: true
   Global Options:
@@ -294,5 +328,5 @@ Window Geometry:
   Views:
     collapsed: false
   Width: 1848
-  X: 40
-  Y: -5
+  X: 2329
+  Y: 25
