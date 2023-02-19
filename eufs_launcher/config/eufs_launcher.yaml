@@ -65,7 +65,7 @@ eufs_launcher:
       priority: 4
       name: "Ground_Truth_Transform"
       label: "Ground Truth TF"
-      checked_on_default: No
+      checked_on_default: Yes
       parameter_triggering:
         if_on: { "publish_gt_tf:=true" }
         if_off: { "publish_gt_tf:=false" }
@@ -83,7 +83,7 @@ eufs_launcher:
       priority: 6
       name: "Camera_Checkbox"
       label: "Camera"
-      checked_on_default: Yes
+      checked_on_default: No
       parameter_triggering:
         if_on: { "camera:=false" }
         if_off: { "camera:=true" }
