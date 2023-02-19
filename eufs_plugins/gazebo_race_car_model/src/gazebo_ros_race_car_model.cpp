@@ -652,11 +652,13 @@ void RaceCarModelPlugin::updateState(const double dt) {
 }
 
 void RaceCarModelPlugin::onCmd(const ackermann_msgs::msg::AckermannDriveStamped::SharedPtr msg) {
-  // Override commands if we're not in canDrive state
+  RCLCPP_DEBUG(_rosnode->get_logger(), "Last time: %f", (_world->SimTime() - _last_cmd_time).Double());
+  while ((_world->SimTime() - _last_cmd_time).Double() < _control_delay) {
+    RCLCPP_DEBUG(_rosnode->get_logger(), "Waiting until control delay is over");
+  }
   _last_cmd.drive.acceleration = msg->drive.acceleration;
   _last_cmd.drive.speed = msg->drive.speed;
   _last_cmd.drive.steering_angle = msg->drive.steering_angle;
-  RCLCPP_DEBUG(_rosnode->get_logger(), "Last time: %f", (_world->SimTime() - _last_cmd_time).Double());
   _last_cmd_time = _world->SimTime();
 }
 
