@@ -607,6 +607,7 @@ void RaceCarModelPlugin::updateState(const double dt) {
       (_des_input.delta - _act_input.delta >= 0 ? 1 : -1) *
       std::min(_max_steering_rate * dt, std::abs(_des_input.delta - _act_input.delta));
 
+  // Ensure vehicle can drive
   if (!_state_machine->canDrive()) {
     _act_input.acc = -1.0;
     _act_input.vel = 0.0;
@@ -615,7 +616,7 @@ void RaceCarModelPlugin::updateState(const double dt) {
 
   counter++;
   if (counter == 100) {
-    RCLCPP_INFO(_rosnode->get_logger(), "AS ready: %i, time: %f, accel %f", _state_machine->canDrive(), (_last_sim_time - _last_cmd_time).Double(), _act_input.acc);
+    RCLCPP_DEBUG(_rosnode->get_logger(), "steering %f", _act_input.delta);
     counter = 0;
   }
 
@@ -655,7 +656,7 @@ void RaceCarModelPlugin::onCmd(const ackermann_msgs::msg::AckermannDriveStamped:
   _last_cmd.drive.acceleration = msg->drive.acceleration;
   _last_cmd.drive.speed = msg->drive.speed;
   _last_cmd.drive.steering_angle = msg->drive.steering_angle;
-  RCLCPP_INFO(_rosnode->get_logger(), "Last time: %f", (_world->SimTime() - _last_cmd_time).Double());
+  RCLCPP_DEBUG(_rosnode->get_logger(), "Last time: %f", (_world->SimTime() - _last_cmd_time).Double());
   _last_cmd_time = _world->SimTime();
 }
 
