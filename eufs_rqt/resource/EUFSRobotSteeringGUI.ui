@@ -244,16 +244,16 @@
       <item>
         <widget class="QSlider" name="angular_slider">
           <property name="minimum">
-            <number>-1000</number>
+            <number>-90000</number>
           </property>
           <property name="maximum">
-            <number>1000</number>
+            <number>90000</number>
           </property>
           <property name="singleStep">
-            <number>10</number>
+            <number>1000</number>
           </property>
           <property name="pageStep">
-            <number>100</number>
+            <number>10000</number>
           </property>
           <property name="orientation">
             <enum>Qt::Horizontal</enum>
@@ -352,13 +352,13 @@
                 <string>Maximum steering angle</string>
               </property>
               <property name="maximum">
-                <double>10.000000000000000</double>
+                <double>90.000000000000000</double>
               </property>
               <property name="singleStep">
-                <double>0.100000000000000</double>
+                <double>1.0000000000000000</double>
               </property>
               <property name="value">
-                <double>1.000000000000000</double>
+                <double>90.000000000000000</double>
               </property>
             </widget>
           </item>
@@ -381,7 +381,7 @@
                 <string>Current steering angle</string>
               </property>
               <property name="text">
-                <string>0.0 rad</string>
+                <string>0.0 degrees</string>
               </property>
             </widget>
           </item>
@@ -404,16 +404,13 @@
                 <string>Minimum steering angle</string>
               </property>
               <property name="minimum">
-                <double>-10.000000000000000</double>
-              </property>
-              <property name="maximum">
-                <double>0.000000000000000</double>
+                <double>-90.000000000000000</double>
               </property>
               <property name="singleStep">
-                <double>0.100000000000000</double>
+                <double>1.00000000000000000</double>
               </property>
               <property name="value">
-                <double>-1.000000000000000</double>
+                <double>-90.000000000000000</double>
               </property>
             </widget>
           </item>

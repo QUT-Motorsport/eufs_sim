@@ -318,7 +318,7 @@ class EUFSRobotSteeringGUI(Plugin):
 
     def _on_angular_slider_changed(self):
         self._widget.current_angular_label.setText(
-            '%0.2f rad' % (
+            '%0.2f degrees' % (
                 self._widget.angular_slider.value()
                 / EUFSRobotSteeringGUI.slider_factor))
         self._on_parameter_changed()
