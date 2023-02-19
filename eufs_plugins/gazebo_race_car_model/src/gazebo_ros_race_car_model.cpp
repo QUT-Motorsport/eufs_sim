@@ -304,6 +304,10 @@ void RaceCarModelPlugin::setPositionFromWorld() {
   _state.a_x = 0.0;
   _state.a_y = 0.0;
   _state.a_z = 0.0;
+
+  _last_cmd.drive.steering_angle = 0;
+  _last_cmd.drive.acceleration = -100;
+  _last_cmd.drive.speed = 0;
 }
 
 bool RaceCarModelPlugin::resetVehiclePosition(
@@ -577,8 +581,6 @@ void RaceCarModelPlugin::publishTf() {
   _tf_br->sendTransform(transform_stamped);
 }
 
-void RaceCarModelPlugin::Reset() { _last_sim_time = 0; }
-
 void RaceCarModelPlugin::update() {
   gazebo::common::Time curTime = _world->SimTime();
   double dt = (curTime - _last_sim_time).Double();
@@ -591,31 +593,31 @@ void RaceCarModelPlugin::update() {
 }
 
 void RaceCarModelPlugin::updateState(const double dt) {
-  if (!_command_Q.empty()) {
-    gazebo::common::Time cmd_time = _cmd_time_Q.front();
-    if ((_last_sim_time - cmd_time).Double() >= _control_delay) {
-      std::shared_ptr<ackermann_msgs::msg::AckermannDriveStamped> cmd = _command_Q.front();
-      _des_input.acc = cmd->drive.acceleration;
-      _des_input.vel = cmd->drive.speed;
-      _des_input.delta = cmd->drive.steering_angle * 3.1415 / 180 / (90/26); // scales from steering wheel 90* to front wheels 26*
-
-      _command_Q.pop();
-      _cmd_time_Q.pop();
-    }
-  }
+  _des_input.acc = _last_cmd.drive.acceleration;
+  _des_input.vel = _last_cmd.drive.speed;
+  _des_input.delta = _last_cmd.drive.steering_angle * 3.1415/180 / (90/26); // scales from steering wheel 90* to front wheels 26*
 
   if (_command_mode == velocity) {
     double current_speed = std::sqrt(std::pow(_state.v_x, 2) + std::pow(_state.v_y, 2));
-    _des_input.acc = (_des_input.vel - current_speed) / dt;
+    _act_input.acc = (_des_input.vel - current_speed) / dt;
   }
 
-  // If last command was more than 1s ago, then slow down car
-  _act_input.acc = (_last_sim_time - _last_cmd_time) < 10.0 ? _des_input.acc : -1.0;
-  // _act_input.acc = _des_input.acc;
   // Make sure steering rate is within limits
   _act_input.delta +=
       (_des_input.delta - _act_input.delta >= 0 ? 1 : -1) *
       std::min(_max_steering_rate * dt, std::abs(_des_input.delta - _act_input.delta));
+
+  if (!_state_machine->canDrive()) {
+    _act_input.acc = -1.0;
+    _act_input.vel = 0.0;
+    _act_input.delta = 0.0;
+  }
+
+  counter++;
+  if (counter == 100) {
+    RCLCPP_INFO(_rosnode->get_logger(), "AS ready: %i, time: %f, accel %f", _state_machine->canDrive(), (_last_sim_time - _last_cmd_time).Double(), _act_input.acc);
+    counter = 0;
+  }
 
   // Update z value from simulation
   // This allows the state to have the most up to date value of z. Without this
@@ -650,13 +652,10 @@ void RaceCarModelPlugin::updateState(const double dt) {
 
 void RaceCarModelPlugin::onCmd(const ackermann_msgs::msg::AckermannDriveStamped::SharedPtr msg) {
   // Override commands if we're not in canDrive state
-  if (!_state_machine->canDrive()) {
-    msg->drive.steering_angle = 0;
-    msg->drive.acceleration = -100;
-    msg->drive.speed = 0;
-  }
-  _command_Q.push(msg);
-  _cmd_time_Q.push(_world->SimTime());
+  _last_cmd.drive.acceleration = msg->drive.acceleration;
+  _last_cmd.drive.speed = msg->drive.speed;
+  _last_cmd.drive.steering_angle = msg->drive.steering_angle;
+  RCLCPP_INFO(_rosnode->get_logger(), "Last time: %f", (_world->SimTime() - _last_cmd_time).Double());
   _last_cmd_time = _world->SimTime();
 }
 

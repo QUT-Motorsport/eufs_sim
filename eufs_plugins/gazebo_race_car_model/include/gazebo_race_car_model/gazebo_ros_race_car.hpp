@@ -73,7 +73,6 @@ class RaceCarModelPlugin : public gazebo::ModelPlugin {
 
   ~RaceCarModelPlugin() override;
 
-  void Reset() override;
   void Load(gazebo::physics::ModelPtr model, sdf::ElementPtr sdf) override;
 
   eufs::models::State &getState() { return _state; }
@@ -169,11 +168,11 @@ class RaceCarModelPlugin : public gazebo::ModelPlugin {
   CommandMode _command_mode;
 
   // Command queue for control delays
-  std::queue<std::shared_ptr<ackermann_msgs::msg::AckermannDriveStamped>> _command_Q;
-  std::queue<gazebo::common::Time> _cmd_time_Q;
+  ackermann_msgs::msg::AckermannDriveStamped _last_cmd;
   double _control_delay;
   // Steering rate limit variables
   double _max_steering_rate, _steering_lock_time;
+  int counter = 0;
 };
 
 }  // namespace eufs_plugins
