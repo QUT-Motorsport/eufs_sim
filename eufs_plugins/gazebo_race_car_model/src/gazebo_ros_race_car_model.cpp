@@ -608,8 +608,8 @@ void RaceCarModelPlugin::updateState(const double dt) {
       std::min(_max_steering_rate * dt, std::abs(_des_input.delta - _act_input.delta));
 
   // Ensure vehicle can drive
-  if (!_state_machine->canDrive()) {
-    _act_input.acc = -1.0;
+  if (!_state_machine->canDrive() || (_world->SimTime() - _last_cmd_time).Double() > 0.5) {
+    _act_input.acc = -100.0;
     _act_input.vel = 0.0;
     _act_input.delta = 0.0;
   }
@@ -652,7 +652,7 @@ void RaceCarModelPlugin::updateState(const double dt) {
 }
 
 void RaceCarModelPlugin::onCmd(const ackermann_msgs::msg::AckermannDriveStamped::SharedPtr msg) {
-  RCLCPP_DEBUG(_rosnode->get_logger(), "Last time: %f", (_world->SimTime() - _last_cmd_time).Double());
+  RCLCPP_INFO(_rosnode->get_logger(), "Last time: %f", (_world->SimTime() - _last_cmd_time).Double());
   while ((_world->SimTime() - _last_cmd_time).Double() < _control_delay) {
     RCLCPP_DEBUG(_rosnode->get_logger(), "Waiting until control delay is over");
   }
