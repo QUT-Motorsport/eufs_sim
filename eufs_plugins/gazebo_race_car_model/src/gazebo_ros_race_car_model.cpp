@@ -595,7 +595,7 @@ void RaceCarModelPlugin::update() {
 void RaceCarModelPlugin::updateState(const double dt) {
   _des_input.acc = _last_cmd.drive.acceleration;
   _des_input.vel = _last_cmd.drive.speed;
-  _des_input.delta = _last_cmd.drive.steering_angle * 3.1415/180 / (90/26); // scales from steering wheel 90* to front wheels 26*
+  _des_input.delta = _last_cmd.drive.steering_angle * 3.1415/180 / (180/26); // scales from steering wheel 90* to front wheels 26*
 
   if (_command_mode == velocity) {
     double current_speed = std::sqrt(std::pow(_state.v_x, 2) + std::pow(_state.v_y, 2));
