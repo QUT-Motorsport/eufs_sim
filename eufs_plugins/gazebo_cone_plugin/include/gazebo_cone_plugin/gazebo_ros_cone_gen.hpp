@@ -69,11 +69,11 @@
 
 namespace gazebo_plugins {
 namespace eufs_plugins {
-class GazeboGroundTruthCones : public gazebo::ModelPlugin {
+class ConeGeneratorPlugin : public gazebo::ModelPlugin {
    public:
     enum ConeType { blue, yellow, orange, big_orange, unknown };
 
-    GazeboGroundTruthCones();
+    ConeGeneratorPlugin();
 
     // Gazebo plugin functions
     void Load(gazebo::physics::ModelPtr _parent, sdf::ElementPtr _sdf);
@@ -91,7 +91,7 @@ class GazeboGroundTruthCones : public gazebo::ModelPlugin {
     std::pair<std::vector<eufs_msgs::msg::ConeWithCovariance>, std::vector<eufs_msgs::msg::ConeWithCovariance>>
     fovCones(std::vector<eufs_msgs::msg::ConeWithCovariance> conesToCheck);
 
-    GazeboGroundTruthCones::ConeType getConeType(gazebo::physics::LinkPtr link);
+    ConeGeneratorPlugin::ConeType getConeType(gazebo::physics::LinkPtr link);
 
     // Storing initial Track
     eufs_msgs::msg::ConeArrayWithCovariance initial_track;

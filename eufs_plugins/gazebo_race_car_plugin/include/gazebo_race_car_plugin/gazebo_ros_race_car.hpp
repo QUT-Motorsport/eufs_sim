@@ -69,11 +69,11 @@
 namespace gazebo_plugins {
 namespace eufs_plugins {
 
-class RaceCarModelPlugin : public gazebo::ModelPlugin {
+class RaceCarPlugin : public gazebo::ModelPlugin {
    public:
-    RaceCarModelPlugin();
+    RaceCarPlugin();
 
-    ~RaceCarModelPlugin() override;
+    ~RaceCarPlugin() override;
 
     void Load(gazebo::physics::ModelPtr model, sdf::ElementPtr sdf) override;
 

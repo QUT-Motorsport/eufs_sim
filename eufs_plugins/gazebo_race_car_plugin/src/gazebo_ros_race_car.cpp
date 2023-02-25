@@ -34,14 +34,14 @@
 namespace gazebo_plugins {
 namespace eufs_plugins {
 
-RaceCarModelPlugin::RaceCarModelPlugin() {}
+RaceCarPlugin::RaceCarPlugin() {}
 
-RaceCarModelPlugin::~RaceCarModelPlugin() { _update_connection.reset(); }
+RaceCarPlugin::~RaceCarPlugin() { _update_connection.reset(); }
 
-void RaceCarModelPlugin::Load(gazebo::physics::ModelPtr model, sdf::ElementPtr sdf) {
+void RaceCarPlugin::Load(gazebo::physics::ModelPtr model, sdf::ElementPtr sdf) {
     _rosnode = gazebo_ros::Node::Get(sdf);
 
-    RCLCPP_DEBUG(_rosnode->get_logger(), "Loading RaceCarModelPlugin");
+    RCLCPP_DEBUG(_rosnode->get_logger(), "Loading RaceCarPlugin");
 
     _model = model;
     _world = _model->GetWorld();
@@ -77,17 +77,17 @@ void RaceCarModelPlugin::Load(gazebo::physics::ModelPtr model, sdf::ElementPtr s
     // ROS Services
     _reset_vehicle_pos_srv = _rosnode->create_service<std_srvs::srv::Trigger>(
         "/ros_can/reset_vehicle_pos",
-        std::bind(&RaceCarModelPlugin::resetVehiclePosition, this, std::placeholders::_1, std::placeholders::_2));
+        std::bind(&RaceCarPlugin::resetVehiclePosition, this, std::placeholders::_1, std::placeholders::_2));
     _command_mode_srv = _rosnode->create_service<std_srvs::srv::Trigger>(
         "/race_car_model/command_mode",
-        std::bind(&RaceCarModelPlugin::returnCommandMode, this, std::placeholders::_1, std::placeholders::_2));
+        std::bind(&RaceCarPlugin::returnCommandMode, this, std::placeholders::_1, std::placeholders::_2));
 
     // ROS Subscriptions
     _sub_cmd = _rosnode->create_subscription<ackermann_msgs::msg::AckermannDriveStamped>(
-        "/control/driving_command", 1, std::bind(&RaceCarModelPlugin::onCmd, this, std::placeholders::_1));
+        "/control/driving_command", 1, std::bind(&RaceCarPlugin::onCmd, this, std::placeholders::_1));
 
     // Connect to Gazebo
-    _update_connection = gazebo::event::Events::ConnectWorldUpdateBegin(std::bind(&RaceCarModelPlugin::update, this));
+    _update_connection = gazebo::event::Events::ConnectWorldUpdateBegin(std::bind(&RaceCarPlugin::update, this));
     _last_sim_time = _world->SimTime();
 
     _max_steering_rate = (_vehicle->getParam().input_ranges.delta.max - _vehicle->getParam().input_ranges.delta.min) /
@@ -96,10 +96,10 @@ void RaceCarModelPlugin::Load(gazebo::physics::ModelPtr model, sdf::ElementPtr s
     // Set offset
     setPositionFromWorld();
 
-    RCLCPP_INFO(_rosnode->get_logger(), "RaceCarModelPlugin Loaded");
+    RCLCPP_INFO(_rosnode->get_logger(), "RaceCarPlugin Loaded");
 }
 
-void RaceCarModelPlugin::initParams(const sdf::ElementPtr &sdf) {
+void RaceCarPlugin::initParams(const sdf::ElementPtr &sdf) {
     if (!sdf->HasElement("update_rate")) {
         _update_rate = 1000.0;
     } else {
@@ -217,7 +217,7 @@ void RaceCarModelPlugin::initParams(const sdf::ElementPtr &sdf) {
     }
 }
 
-void RaceCarModelPlugin::initVehicleModel(const sdf::ElementPtr &sdf) {
+void RaceCarPlugin::initVehicleModel(const sdf::ElementPtr &sdf) {
     // Get the vehicle model from the sdf
     std::string vehicle_model_ = "";
     if (!sdf->HasElement("vehicle_model")) {
@@ -234,7 +234,7 @@ void RaceCarModelPlugin::initVehicleModel(const sdf::ElementPtr &sdf) {
         yaml_name = sdf->GetElement("yaml_config")->Get<std::string>();
     }
 
-    RCLCPP_DEBUG(_rosnode->get_logger(), "RaceCarModelPlugin finished loading params");
+    RCLCPP_DEBUG(_rosnode->get_logger(), "RaceCarPlugin finished loading params");
 
     if (vehicle_model_ == "PointMass") {
         _vehicle = std::unique_ptr<eufs::models::VehicleModel>(new eufs::models::PointMass(yaml_name));
@@ -246,7 +246,7 @@ void RaceCarModelPlugin::initVehicleModel(const sdf::ElementPtr &sdf) {
     }
 }
 
-void RaceCarModelPlugin::initModel(const sdf::ElementPtr &sdf) {
+void RaceCarPlugin::initModel(const sdf::ElementPtr &sdf) {
     // Steering joints
     std::string leftSteeringJointName = _model->GetName() + "::" + sdf->Get<std::string>("front_left_wheel_steering");
     _left_steering_joint = _model->GetJoint(leftSteeringJointName);
@@ -254,7 +254,7 @@ void RaceCarModelPlugin::initModel(const sdf::ElementPtr &sdf) {
     _right_steering_joint = _model->GetJoint(rightSteeringJointName);
 }
 
-void RaceCarModelPlugin::initNoise(const sdf::ElementPtr &sdf) {
+void RaceCarPlugin::initNoise(const sdf::ElementPtr &sdf) {
     std::string yaml_name = "";
     if (!sdf->HasElement("noise_config")) {
         RCLCPP_FATAL(_rosnode->get_logger(), "gazebo_ros_race_car_model plugin missing <noise_config>, cannot proceed");
@@ -267,7 +267,7 @@ void RaceCarModelPlugin::initNoise(const sdf::ElementPtr &sdf) {
     _noise = std::make_unique<eufs::models::Noise>(yaml_name);
 }
 
-void RaceCarModelPlugin::setPositionFromWorld() {
+void RaceCarPlugin::setPositionFromWorld() {
     _offset = _model->WorldPose();
 
     RCLCPP_DEBUG(_rosnode->get_logger(), "Got starting offset %f %f %f", _offset.Pos()[0], _offset.Pos()[1],
@@ -292,7 +292,7 @@ void RaceCarModelPlugin::setPositionFromWorld() {
     _last_cmd.drive.speed = 0;
 }
 
-bool RaceCarModelPlugin::resetVehiclePosition(std::shared_ptr<std_srvs::srv::Trigger::Request>,
+bool RaceCarPlugin::resetVehiclePosition(std::shared_ptr<std_srvs::srv::Trigger::Request>,
                                               std::shared_ptr<std_srvs::srv::Trigger::Response> response) {
     _state.x = 0.0;
     _state.y = 0.0;
@@ -318,7 +318,7 @@ bool RaceCarModelPlugin::resetVehiclePosition(std::shared_ptr<std_srvs::srv::Tri
     return response->success;
 }
 
-void RaceCarModelPlugin::returnCommandMode(std::shared_ptr<std_srvs::srv::Trigger::Request>,
+void RaceCarPlugin::returnCommandMode(std::shared_ptr<std_srvs::srv::Trigger::Request>,
                                            std::shared_ptr<std_srvs::srv::Trigger::Response> response) {
     std::string command_mode_str;
     if (_command_mode == acceleration) {
@@ -331,7 +331,7 @@ void RaceCarModelPlugin::returnCommandMode(std::shared_ptr<std_srvs::srv::Trigge
     response->message = command_mode_str;
 }
 
-void RaceCarModelPlugin::setModelState() {
+void RaceCarPlugin::setModelState() {
     double yaw = _state.yaw + _offset.Rot().Yaw();
 
     double x = _offset.Pos().X() + _state.x * cos(_offset.Rot().Yaw()) - _state.y * sin(_offset.Rot().Yaw());
@@ -350,7 +350,7 @@ void RaceCarModelPlugin::setModelState() {
     _model->SetLinearVel(vel);
 }
 
-eufs_msgs::msg::CarState RaceCarModelPlugin::stateToCarStateMsg(const eufs::models::State &state) {
+eufs_msgs::msg::CarState RaceCarPlugin::stateToCarStateMsg(const eufs::models::State &state) {
     // Publish Car Info
     eufs_msgs::msg::CarState car_state;
 
@@ -391,7 +391,7 @@ eufs_msgs::msg::CarState RaceCarModelPlugin::stateToCarStateMsg(const eufs::mode
     return car_state;
 }
 
-void RaceCarModelPlugin::publishCarState() {
+void RaceCarPlugin::publishCarState() {
     eufs_msgs::msg::CarState car_state = stateToCarStateMsg(_state);
 
     // Publish the ground truth car state if it has subscribers and is allowed to publish
@@ -439,7 +439,7 @@ void RaceCarModelPlugin::publishCarState() {
     }
 }
 
-void RaceCarModelPlugin::publishWheelSpeeds() {
+void RaceCarPlugin::publishWheelSpeeds() {
     eufs_msgs::msg::WheelSpeedsStamped wheel_speeds_stamped;
     eufs_msgs::msg::WheelSpeeds wheel_speeds;
 
@@ -464,7 +464,7 @@ void RaceCarModelPlugin::publishWheelSpeeds() {
     }
 }
 
-void RaceCarModelPlugin::publishOdom() {
+void RaceCarPlugin::publishOdom() {
     nav_msgs::msg::Odometry odom;
 
     odom.header.stamp.sec = _last_sim_time.sec;
@@ -535,7 +535,7 @@ void RaceCarModelPlugin::publishOdom() {
     _pub_velocity->publish(ts);
 }
 
-void RaceCarModelPlugin::publishTf() {
+void RaceCarPlugin::publishTf() {
     eufs::models::State state_noisy = _noise->applyNoise(_state);
 
     // Position
@@ -559,7 +559,7 @@ void RaceCarModelPlugin::publishTf() {
     _tf_br->sendTransform(transform_stamped);
 }
 
-void RaceCarModelPlugin::update() {
+void RaceCarPlugin::update() {
     gazebo::common::Time curTime = _world->SimTime();
     double dt = (curTime - _last_sim_time).Double();
     if (dt < (1 / _update_rate)) {
@@ -570,7 +570,7 @@ void RaceCarModelPlugin::update() {
     updateState(dt);
 }
 
-void RaceCarModelPlugin::updateState(const double dt) {
+void RaceCarPlugin::updateState(const double dt) {
     _des_input.acc = _last_cmd.drive.acceleration;
     _des_input.vel = _last_cmd.drive.speed;
     _des_input.delta = _last_cmd.drive.steering_angle * 3.1415 / 180 /
@@ -629,7 +629,7 @@ void RaceCarModelPlugin::updateState(const double dt) {
     _state_machine->spinOnce(_last_sim_time);
 }
 
-void RaceCarModelPlugin::onCmd(const ackermann_msgs::msg::AckermannDriveStamped::SharedPtr msg) {
+void RaceCarPlugin::onCmd(const ackermann_msgs::msg::AckermannDriveStamped::SharedPtr msg) {
     RCLCPP_INFO(_rosnode->get_logger(), "Last time: %f", (_world->SimTime() - _last_cmd_time).Double());
     while ((_world->SimTime() - _last_cmd_time).Double() < _control_delay) {
         RCLCPP_DEBUG(_rosnode->get_logger(), "Waiting until control delay is over");
@@ -640,7 +640,7 @@ void RaceCarModelPlugin::onCmd(const ackermann_msgs::msg::AckermannDriveStamped:
     _last_cmd_time = _world->SimTime();
 }
 
-std::vector<double> RaceCarModelPlugin::ToQuaternion(std::vector<double> &euler) {
+std::vector<double> RaceCarPlugin::ToQuaternion(std::vector<double> &euler) {
     // Abbreviations for the various angular functions
     double cy = cos(euler[0] * 0.5);
     double sy = sin(euler[0] * 0.5);
@@ -659,7 +659,7 @@ std::vector<double> RaceCarModelPlugin::ToQuaternion(std::vector<double> &euler)
     return q;
 }
 
-GZ_REGISTER_MODEL_PLUGIN(RaceCarModelPlugin)
+GZ_REGISTER_MODEL_PLUGIN(RaceCarPlugin)
 
 }  // namespace eufs_plugins
 }  // namespace gazebo_plugins
