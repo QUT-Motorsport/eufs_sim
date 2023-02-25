@@ -41,8 +41,9 @@
 #include "geometry_msgs/msg/twist_with_covariance.hpp"
 #include "geometry_msgs/msg/vector3.hpp"
 #include "nav_msgs/msg/odometry.hpp"
-// include msg for vel
+// include msg for qutms stack
 #include "geometry_msgs/msg/twist_stamped.hpp"
+#include "sbg_driver/msg/sbg_ekf_euler.hpp"
 
 // ROS TF2
 #include <tf2/transform_datatypes.h>

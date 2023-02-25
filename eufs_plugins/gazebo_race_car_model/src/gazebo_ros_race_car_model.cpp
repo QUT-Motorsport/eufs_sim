@@ -453,7 +453,7 @@ void RaceCarModelPlugin::publishCarState() {
   }
 
   // QUTMS
-  if (_pub_qutms_pose->get_subscription_count() > 0) {
+  if (_pub_qutms_pose->get_subscription_count() > 0 && _pub_ground_truth) {
     geometry_msgs::msg::PoseWithCovarianceStamped pose_w_cov_msg;
     pose_w_cov_msg.header = car_state_noisy.header;
     pose_w_cov_msg.pose = car_state_noisy.pose;
