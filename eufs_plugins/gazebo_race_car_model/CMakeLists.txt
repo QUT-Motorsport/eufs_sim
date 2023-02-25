@@ -30,7 +30,9 @@ ament_target_dependencies(gazebo_race_car_model
   "tf2_geometry_msgs"
   "std_srvs"
   "std_msgs"
-  "eufs_models")
+  "eufs_models"
+  "sbg_driver"
+)
 
 target_include_directories(gazebo_race_car_model PUBLIC include)
 target_link_libraries(gazebo_race_car_model eufs_models::eufs_models)
