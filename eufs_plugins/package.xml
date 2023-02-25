@@ -3,10 +3,11 @@
 <package format="3">
   <name>eufs_plugins</name>
   <version>2.0.0</version>
-  <description>Gazebo plugins for eufs_sim.</description>
+  <description>Gazebo plugins for eufs_sim with QUTMS stack</description>
 
-  <maintainer email="cambobmat@icloud.com">Cameron Matthew</maintainer>
-  <maintainer email="siliconlad@protonmail.com">Angus Stewart</maintainer>
+  <author email="cambobmat@icloud.com">Cameron Matthew</author>
+  <author email="siliconlad@protonmail.com">Angus Stewart</author>
+  <maintainer email="team@qutmotorsport.com">Alastair Bradford</maintainer>
 
   <license>MIT</license>
 
@@ -29,9 +30,7 @@
 
   <depend>geometry_msgs</depend>
   <depend>nav_msgs</depend>
-  <depend>visualization_msgs</depend>
   <depend>std_msgs</depend>
-  <depend>image_geometry</depend>
 
   <depend>eufs_models</depend>
   <depend>eufs_msgs</depend>

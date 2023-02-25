@@ -22,24 +22,3 @@ install(TARGETS gazebo_ground_truth_cones
   ARCHIVE DESTINATION lib
   LIBRARY DESTINATION lib
   RUNTIME DESTINATION lib)
-
-# camera cones plugin
-add_library(gazebo_camera_cones SHARED
-        src/gazebo_camera_cones.cpp)
-
-ament_target_dependencies(gazebo_camera_cones
-        "gazebo_dev"
-        "gazebo_ros"
-        "rclcpp"
-        "eufs_msgs"
-        "ament_index_cpp"
-        "driverless_msgs")
-
-target_include_directories(gazebo_camera_cones PUBLIC include)
-
-ament_export_libraries(gazebo_camera_cones)
-
-install(TARGETS gazebo_camera_cones
-        ARCHIVE DESTINATION lib
-        LIBRARY DESTINATION lib
-        RUNTIME DESTINATION lib)
