@@ -16,6 +16,7 @@ find_package(tf2_ros REQUIRED)
 find_package(tf2_geometry_msgs REQUIRED)
 find_package(std_srvs REQUIRED)
 find_package(eufs_models REQUIRED)
+find_package(sbg_driver REQUIRED)
 
 ament_target_dependencies(gazebo_race_car_model
   "gazebo_dev"
