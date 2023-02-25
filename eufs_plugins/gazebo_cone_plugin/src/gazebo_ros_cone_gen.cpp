@@ -32,7 +32,7 @@
  *cones with noise.
  **/
 
-#include "gazebo_cone_plugins/gazebo_ground_truth_cones.hpp"
+#include "gazebo_cone_plugin/gazebo_ros_cone_gen.hpp"
 
 #include "eigen3/Eigen/Core"
 #include "eigen3/Eigen/Dense"

@@ -32,7 +32,7 @@
  * and controls and interfaces with the ADS-DV car for the FSUK competition
  */
 
-#include "gazebo_race_car_model/state_machine.hpp"
+#include "gazebo_race_car_plugin/state_machine.hpp"
 
 #include <string>
 #include <vector>

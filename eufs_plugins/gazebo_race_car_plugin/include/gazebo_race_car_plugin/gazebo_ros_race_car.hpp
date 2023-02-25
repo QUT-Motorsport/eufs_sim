@@ -22,8 +22,8 @@
  * SOFTWARE.
  */
 
-#ifndef EUFS_PLUGINS_GAZEBO_RACE_CAR_MODEL_INCLUDE_GAZEBO_RACE_CAR_MODEL_GAZEBO_ROS_RACE_CAR_HPP_
-#define EUFS_PLUGINS_GAZEBO_RACE_CAR_MODEL_INCLUDE_GAZEBO_RACE_CAR_MODEL_GAZEBO_ROS_RACE_CAR_HPP_
+#ifndef EUFS_PLUGINS_GAZEBO_RACE_CAR_PLUGIN_INCLUDE_GAZEBO_RACE_CAR_PLUGIN_GAZEBO_ROS_RACE_CAR_HPP_
+#define EUFS_PLUGINS_GAZEBO_RACE_CAR_PLUGIN_INCLUDE_GAZEBO_RACE_CAR_PLUGIN_GAZEBO_ROS_RACE_CAR_HPP_
 
 #include <memory>
 #include <queue>
@@ -63,7 +63,7 @@
 
 // EUFS includes
 #include "eufs_models/eufs_models.hpp"
-#include "gazebo_race_car_model/state_machine.hpp"
+#include "gazebo_race_car_plugin/state_machine.hpp"
 
 namespace gazebo_plugins {
 namespace eufs_plugins {
@@ -179,4 +179,4 @@ class RaceCarModelPlugin : public gazebo::ModelPlugin {
 }  // namespace eufs_plugins
 }  // namespace gazebo_plugins
 
-#endif  // EUFS_PLUGINS_GAZEBO_RACE_CAR_MODEL_INCLUDE_GAZEBO_RACE_CAR_MODEL_GAZEBO_ROS_RACE_CAR_HPP_
+#endif  // EUFS_PLUGINS_GAZEBO_RACE_CAR_PLUGIN_INCLUDE_GAZEBO_RACE_CAR_PLUGIN_GAZEBO_ROS_RACE_CAR_HPP_

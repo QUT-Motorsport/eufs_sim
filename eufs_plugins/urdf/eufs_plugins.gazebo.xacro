@@ -9,7 +9,7 @@
    It controls the car by setting its velocity and position
    and the steering angle of the wheels -->
   <gazebo>
-    <plugin name="race_car" filename="libgazebo_race_car_model.so">
+    <plugin name="race_car" filename="libgazebo_ros_race_car.so">
       <update_rate>1000.0</update_rate>
       <publish_rate>200.0</publish_rate>
       <front_left_wheel_steering>left_steering_hinge_joint</front_left_wheel_steering>
@@ -37,7 +37,7 @@
   </gazebo>
 
   <gazebo>
-    <plugin name="gz_ground_truth_cones" filename="libgazebo_ground_truth_cones.so">
+    <plugin name="cone_generation" filename="libgazebo_ros_cone_gen.so">
       <alwaysOn>true</alwaysOn>
       <updateRate>30.0</updateRate>
       <cameraViewDistance>10</cameraViewDistance>

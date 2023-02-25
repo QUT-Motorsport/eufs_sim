@@ -57,8 +57,8 @@ endif()
 
 install(DIRECTORY urdf DESTINATION share/${PROJECT_NAME})
 
-add_subdirectory(gazebo_cone_plugins)
-add_subdirectory(gazebo_race_car_model)
+add_subdirectory(gazebo_cone_plugin)
+add_subdirectory(gazebo_race_car_plugin)
 
 ament_export_libraries(gazebo_ros_template2)
 

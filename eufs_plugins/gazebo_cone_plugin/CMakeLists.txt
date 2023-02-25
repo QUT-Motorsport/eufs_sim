@@ -1,10 +1,10 @@
 install(DIRECTORY config DESTINATION share/${PROJECT_NAME} FILES_MATCHING PATTERN "*.yaml")
 
 # ground truth cones plugin
-add_library(gazebo_ground_truth_cones SHARED
-  src/gazebo_ground_truth_cones.cpp)
+add_library(gazebo_ros_cone_gen SHARED
+  src/gazebo_ros_cone_gen.cpp)
 
-ament_target_dependencies(gazebo_ground_truth_cones
+ament_target_dependencies(gazebo_ros_cone_gen
   "gazebo_dev"
   "gazebo_ros"
   "rclcpp"
@@ -14,11 +14,11 @@ ament_target_dependencies(gazebo_ground_truth_cones
   "ament_index_cpp"
   "driverless_msgs")
 
-target_include_directories(gazebo_ground_truth_cones PUBLIC include)
+target_include_directories(gazebo_ros_cone_gen PUBLIC include)
 
-ament_export_libraries(gazebo_ground_truth_cones)
+ament_export_libraries(gazebo_ros_cone_gen)
 
-install(TARGETS gazebo_ground_truth_cones
+install(TARGETS gazebo_ros_cone_gen
   ARCHIVE DESTINATION lib
   LIBRARY DESTINATION lib
   RUNTIME DESTINATION lib)
