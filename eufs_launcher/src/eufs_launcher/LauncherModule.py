@@ -1,24 +1,18 @@
-import yaml
 from collections import OrderedDict
 from os import listdir
-from os.path import join
-from os.path import isfile
+from os.path import isfile, join
 from subprocess import Popen
 
+import yaml
 from ament_index_python.packages import get_package_share_directory
 from python_qt_binding import loadUi
-from python_qt_binding.QtWidgets import QWidget
-from python_qt_binding.QtWidgets import QComboBox
-from python_qt_binding.QtWidgets import QPushButton
-from python_qt_binding.QtWidgets import QCheckBox
-from python_qt_binding.QtWidgets import QLabel
-from python_qt_binding.QtWidgets import QApplication
 from python_qt_binding.QtGui import QFont
+from python_qt_binding.QtWidgets import (QApplication, QCheckBox, QComboBox,
+                                         QLabel, QPushButton, QWidget)
 from qt_gui.plugin import Plugin
 
 
 class EUFSLauncher(Plugin):
-
     def __init__(self, context):
         """
         This function handles loading the launcher GUI
@@ -28,13 +22,13 @@ class EUFSLauncher(Plugin):
         super(EUFSLauncher, self).__init__(context)
 
         # Give QObjects reasonable names
-        self.setObjectName('EUFSLauncher')
+        self.setObjectName("EUFSLauncher")
 
         # State variables
         self.node = context.node
         self.logger = self.node.get_logger()
         self.LAUNCHER_SHARE = get_package_share_directory("eufs_launcher")
-        self.TRACKS_SHARE = get_package_share_directory('eufs_tracks')
+        self.TRACKS_SHARE = get_package_share_directory("eufs_tracks")
         self.popens = []  # Create array of popen processes
 
         # Declare Launcher Parameters
@@ -43,7 +37,7 @@ class EUFSLauncher(Plugin):
         use_gui = self.node.declare_parameter("gui", True).value
 
         # Load in eufs_launcher parameters
-        with open(yaml_path, 'r') as stream:
+        with open(yaml_path, "r") as stream:
             try:
                 self.default_config = yaml.safe_load(stream)
             except yaml.YAMLError as exc:
@@ -52,18 +46,18 @@ class EUFSLauncher(Plugin):
 
         # Create QWidget
         self._widget = QWidget()
-        self._widget.setObjectName('EUFSLauncherUI')
+        self._widget.setObjectName("EUFSLauncherUI")
         context.add_widget(self._widget)
 
         # Extend the widget with all attributes and children from UI file
-        self.main_ui_file = join(self.LAUNCHER_SHARE, 'resource', 'launcher.ui')
+        self.main_ui_file = join(self.LAUNCHER_SHARE, "resource", "launcher.ui")
         loadUi(self.main_ui_file, self._widget)
 
         # Show _widget.windowTitle on left-top of each plugin (when it's set in _widget). This is
         # useful when you open multiple plugins at once. Also if you open multiple instances of
         # your plugin at once, these lines add number to make it easy to tell from pane to pane.
         if context.serial_number() > 1:
-            the_title = (self._widget.windowTitle() + (' (%d)' % context.serial_number()))
+            the_title = self._widget.windowTitle() + (" (%d)" % context.serial_number())
             self._widget.setWindowTitle(the_title)
 
         # Give widget components permanent names
@@ -71,7 +65,9 @@ class EUFSLauncher(Plugin):
         self.LAUNCH_BUTTON = self._widget.findChild(QPushButton, "LaunchButton")
         self.GENERATOR_BUTTON = self._widget.findChild(QPushButton, "Trackgenerator")
         self.CONVERTER_BUTTON = self._widget.findChild(QPushButton, "Trackconverter")
-        self.REFRESH_TRACK_BUTTON = self._widget.findChild(QPushButton, "RefreshTrackButton")
+        self.REFRESH_TRACK_BUTTON = self._widget.findChild(
+            QPushButton, "RefreshTrackButton"
+        )
         self.VEHICLE_MODEL_MENU = self._widget.findChild(QComboBox, "WhichVehicleModel")
         self.COMMAND_MODE_MENU = self._widget.findChild(QComboBox, "WhichCommandMode")
         self.MODEL_PRESET_MENU = self._widget.findChild(QComboBox, "WhichModelPreset")
@@ -86,11 +82,15 @@ class EUFSLauncher(Plugin):
         self.GENERATOR_BUTTON.clicked.connect(self.generator_button_pressed)
         self.CONVERTER_BUTTON.clicked.connect(self.converter_button_pressed)
         # Setup Vehicle Models menu
-        models_filepath = join(get_package_share_directory('eufs_models'), 'models/models.txt')
+        models_filepath = join(
+            get_package_share_directory("eufs_models"), "models/models.txt"
+        )
         vehicle_models_ = open(models_filepath, "r")
         vehicle_models = [model.strip() for model in vehicle_models_]  # remove \n
         default_model = self.default_config["eufs_launcher"]["default_vehicle_model"]
-        EUFSLauncher.setup_q_combo_box(self.VEHICLE_MODEL_MENU, default_model, vehicle_models)
+        EUFSLauncher.setup_q_combo_box(
+            self.VEHICLE_MODEL_MENU, default_model, vehicle_models
+        )
 
         # Setup Command Modes menu
         default_mode = self.default_config["eufs_launcher"]["default_command_mode"]
@@ -101,15 +101,17 @@ class EUFSLauncher(Plugin):
         default_mode = self.default_config["eufs_launcher"]["default_vehicle_preset"]
         self.MODEL_CONFIGS = {
             "DryTrack": "configDry.yaml",
-            "WetTrack": "configWet.yaml"
+            "WetTrack": "configWet.yaml",
         }
-        EUFSLauncher.setup_q_combo_box(self.MODEL_PRESET_MENU,
-                                       default_mode,
-                                       self.MODEL_CONFIGS.keys())
+        EUFSLauncher.setup_q_combo_box(
+            self.MODEL_PRESET_MENU, default_mode, self.MODEL_CONFIGS.keys()
+        )
 
         # Setup Robot Name menu
         default_mode = self.default_config["eufs_launcher"]["default_robot_name"]
-        racecars_filepath = join(get_package_share_directory('eufs_racecar'), 'racecars')
+        racecars_filepath = join(
+            get_package_share_directory("eufs_racecar"), "racecars"
+        )
         modes = listdir(racecars_filepath)
         EUFSLauncher.setup_q_combo_box(self.ROBOT_NAME_MENU, default_mode, modes)
 
@@ -117,7 +119,7 @@ class EUFSLauncher(Plugin):
         checkboxes = OrderedDict(
             sorted(
                 self.default_config["eufs_launcher"]["checkboxes"].items(),
-                key=lambda x: x[1]["priority"]
+                key=lambda x: x[1]["priority"],
             )
         )
         self.checkbox_effect_mapping = []
@@ -150,26 +152,32 @@ class EUFSLauncher(Plugin):
                 # our contents with a lambda taking it as a parameter, then
                 # immediately passing it in.
                 # We do the same for all other changing variables.
-                self.checkbox_effect_mapping.append((
-                    cur_cbox,
-                    (lambda key, cur_cbox_args: (
-                        lambda: self.launch_with_args(
-                            checkboxes[key]["package"],
-                            checkboxes[key]["launch_file"],
-                            cur_cbox_args
-                        )
-                    ))(key, cur_cbox_args),
-                    (lambda key: lambda: None)(key)
-                ))
+                self.checkbox_effect_mapping.append(
+                    (
+                        cur_cbox,
+                        (
+                            lambda key, cur_cbox_args: (
+                                lambda: self.launch_with_args(
+                                    checkboxes[key]["package"],
+                                    checkboxes[key]["launch_file"],
+                                    cur_cbox_args,
+                                )
+                            )
+                        )(key, cur_cbox_args),
+                        (lambda key: lambda: None)(key),
+                    )
+                )
             if "parameter_triggering" in checkboxes[key]:
                 # This handles parameter details that will be passed to the
                 # `simulation.launch.py` backbone file depending on whether the
                 # checkbox is on or off
-                self.checkbox_parameter_mapping.append((
-                    cur_cbox,
-                    checkboxes[key]["parameter_triggering"]["if_on"].keys(),
-                    checkboxes[key]["parameter_triggering"]["if_off"].keys()
-                ))
+                self.checkbox_parameter_mapping.append(
+                    (
+                        cur_cbox,
+                        checkboxes[key]["parameter_triggering"]["if_on"].keys(),
+                        checkboxes[key]["parameter_triggering"]["if_off"].keys(),
+                    )
+                )
 
             setattr(self, checkboxes[key]["name"].upper(), cur_cbox)
             counter += 1
@@ -179,7 +187,7 @@ class EUFSLauncher(Plugin):
         rec = QApplication.desktop().screenGeometry()
         scalar_multiplier = rec.width() / 1700.0
         for widget in self._widget.children():
-            if hasattr(widget, 'geometry'):
+            if hasattr(widget, "geometry"):
                 geom = widget.geometry()
                 if not isinstance(widget, QLabel):
                     new_width = geom.width() * scalar_multiplier
@@ -189,7 +197,7 @@ class EUFSLauncher(Plugin):
                     int(geom.x() * scalar_multiplier),
                     int(geom.y() * scalar_multiplier),
                     int(new_width),
-                    int(geom.height() * (scalar_multiplier))
+                    int(geom.height() * (scalar_multiplier)),
                 )
 
         # If use_gui is false, we jump straight into launching the track
@@ -211,11 +219,13 @@ class EUFSLauncher(Plugin):
         # Clear the dropdowns
         self.TRACK_SELECTOR.clear()
         # Get tracks from eufs_tracks package
-        launch_dir_path = join(self.TRACKS_SHARE, 'launch')
-        launch_files = [f for f in listdir(launch_dir_path) if isfile(join(launch_dir_path, f))]
+        launch_dir_path = join(self.TRACKS_SHARE, "launch")
+        launch_files = [
+            f for f in listdir(launch_dir_path) if isfile(join(launch_dir_path, f))
+        ]
 
         # Remove "blacklisted" files (ones that don't define tracks)
-        blacklist_filepath = join(self.TRACKS_SHARE, 'launch/blacklist.txt')
+        blacklist_filepath = join(self.TRACKS_SHARE, "launch/blacklist.txt")
         with open(blacklist_filepath, "r") as f:
             blacklist = [f.strip() for f in f.readlines()]  # remove \n
             launch_files = [f for f in launch_files if f not in blacklist]
@@ -247,17 +257,21 @@ class EUFSLauncher(Plugin):
         model_config = self.MODEL_CONFIGS[self.MODEL_PRESET_MENU.currentText()]
         vehicle_model_config = f"vehicleModelConfig:={model_config}"
         robot_name = f"robot_name:={self.ROBOT_NAME_MENU.currentText()}"
-        parameters_to_pass = [track_layout,
-                              vehicle_model,
-                              command_mode,
-                              vehicle_model_config,
-                              robot_name]
+        parameters_to_pass = [
+            track_layout,
+            vehicle_model,
+            command_mode,
+            vehicle_model_config,
+            robot_name,
+        ]
 
         # Get vehicle model information
         self.logger.info(f"Vehicle model: {self.VEHICLE_MODEL_MENU.currentText()}")
         self.logger.info(f"Command mode: {self.COMMAND_MODE_MENU.currentText()}")
         self.logger.info(f"Preset: {model_config}")
-        self.logger.info(f"Robot description file: {self.ROBOT_NAME_MENU.currentText()}")
+        self.logger.info(
+            f"Robot description file: {self.ROBOT_NAME_MENU.currentText()}"
+        )
 
         # Get checkbox parameter information
         for checkbox, param_if_on, param_if_off in self.checkbox_parameter_mapping:
@@ -269,7 +283,9 @@ class EUFSLauncher(Plugin):
                 parameters_to_pass.extend(param_if_off)
 
         # Here we launch `simulation.launch.py`.
-        self.launch_with_args('eufs_launcher', 'simulation.launch.py', parameters_to_pass)
+        self.launch_with_args(
+            "eufs_launcher", "simulation.launch.py", parameters_to_pass
+        )
 
         # Trigger launch files hooked to checkboxes
         for checkbox, effect_on, effect_off in self.checkbox_effect_mapping:
@@ -279,15 +295,19 @@ class EUFSLauncher(Plugin):
                 effect_off()
 
         self.LAUNCH_BUTTON.setEnabled(False)
-    
+
     def generator_button_pressed(self):
-        self.launch_without_args('eufs_track_generator', 'install/eufs_tracks/lib/eufs_tracks/eufs_tracks_generator')
+        self.launch_without_args(
+            "eufs_track_generator",
+            "install/eufs_tracks/lib/eufs_tracks/eufs_tracks_generator",
+        )
+
     def converter_button_pressed(self):
-        self.launch_without_args('eufs_track_converter', 'install/eufs_tracks/lib/eufs_tracks/eufs_tracks_converter')
-    
-    
-    
-    
+        self.launch_without_args(
+            "eufs_track_converter",
+            "install/eufs_tracks/lib/eufs_tracks/eufs_tracks_converter",
+        )
+
     def launch_without_args(self, program_name, directory):
         """Launches a program from the specified directory."""
         command = [program_name]
@@ -295,7 +315,6 @@ class EUFSLauncher(Plugin):
         process = Popen(command, executable=directory)
         self.popens.append(process)
 
-    
     def launch_with_args(self, package, launch_file, args):
         """Launches ros node."""
         command = ["ros2", "launch", package, launch_file, "use_sim_time:=true"] + args

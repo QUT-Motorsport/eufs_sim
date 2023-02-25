@@ -1,60 +1,57 @@
-import random
-import math
 import cmath
-import numpy as np
+import math
+import random
 from os.path import exists
+
+import numpy as np
 
 
 class TrackGenerator:
     def __init__(self, config):
         default_cfg = {
-            'seed': random.random(),
-            'min_corner_radius': 3,
-            'max_frequency': 7,
-            'amplitude': 1 / 3,
-            'check_self_intersection': True,
-            'starting_amplitude': 0.4,
-            'rel_accuracy': 0.005,
-            'margin': 0,
-            'starting_straight_length': 6,
-            'starting_straight_downsample': 2,
-            'min_cone_spacing': 3 * math.pi / 16,
-            'max_cone_spacing': 5,
-            'track_width': 3,
-            'cone_spacing_bias': 0.5,
-            'starting_cone_spacing': 0.5
+            "seed": random.random(),
+            "min_corner_radius": 3,
+            "max_frequency": 7,
+            "amplitude": 1 / 3,
+            "check_self_intersection": True,
+            "starting_amplitude": 0.4,
+            "rel_accuracy": 0.005,
+            "margin": 0,
+            "starting_straight_length": 6,
+            "starting_straight_downsample": 2,
+            "min_cone_spacing": 3 * math.pi / 16,
+            "max_cone_spacing": 5,
+            "track_width": 3,
+            "cone_spacing_bias": 0.5,
+            "starting_cone_spacing": 0.5,
         }
         self.config = {**default_cfg, **config}
 
-        if 'resolution' not in self.config:
-            if 'length' in self.config:
-                length = self.config['length']
+        if "resolution" not in self.config:
+            if "length" in self.config:
+                length = self.config["length"]
             else:
                 # This formula for approximating the maximum length was derived experimentally
-                t = self.config['amplitude'] * self.config['max_frequency']
+                t = self.config["amplitude"] * self.config["max_frequency"]
                 length = ((0.6387 * t + 43.86) * t + 123.1) * t + 35.9
 
-            min_sep = self.config['min_cone_spacing']
-            max_sep = self.config['max_cone_spacing']
-            r = math.log2(length) / self.config['min_corner_radius']
-            self.config['resolution'] = int(4 * length * max(1 / min_sep, r / max_sep))
+            min_sep = self.config["min_cone_spacing"]
+            max_sep = self.config["max_cone_spacing"]
+            r = math.log2(length) / self.config["min_corner_radius"]
+            self.config["resolution"] = int(4 * length * max(1 / min_sep, r / max_sep))
 
-        self.rng = random.Random(self.config['seed'])
+        self.rng = random.Random(self.config["seed"])
 
     # Path Generation
 
     @staticmethod
     def _compute_corner_radii(dt, dPdt):
         ddPdt = np.append(np.diff(dPdt), dPdt[0] - dPdt[-1]) / dt
-        return abs(dPdt)**3 / (np.conj(dPdt) * ddPdt).imag
+        return abs(dPdt) ** 3 / (np.conj(dPdt) * ddPdt).imag
 
     @staticmethod
     def generate_path_w_params(
-        rng,
-        n_points,
-        min_corner_radius,
-        max_frequency,
-        amplitude=1 / 3
+        rng, n_points, min_corner_radius, max_frequency, amplitude=1 / 3
     ):
         """
         Generates a random racetrack. Consider using `generate_path_w_length()`
@@ -89,14 +86,18 @@ class TrackGenerator:
             # add new term
             phase = cmath.exp(2j * math.pi * rng.random())
             z_pow = z**frequency
-            waves += z * (z_pow / (phase * (frequency + 1)) + phase / (z_pow * (frequency - 1)))
+            waves += z * (
+                z_pow / (phase * (frequency + 1)) + phase / (z_pow * (frequency - 1))
+            )
             dwaves += z_pow / phase - phase / z_pow
 
         # generate points
         points = z + amplitude * waves
         dPdt = (1j * z) * (1 + amplitude * dwaves)
         normals = 1j * dPdt / abs(dPdt)
-        corner_radii = TrackGenerator._compute_corner_radii(2 * math.pi / n_points, dPdt)
+        corner_radii = TrackGenerator._compute_corner_radii(
+            2 * math.pi / n_points, dPdt
+        )
 
         # scale path so the sharpest corner has a corner radius of min_corner_radius
         scale = min_corner_radius / min(abs(corner_radii))
@@ -111,7 +112,7 @@ class TrackGenerator:
         margin,
         target_track_length,
         rel_accuracy=0.005,
-        starting_amplitude=0.4
+        starting_amplitude=0.4,
     ):
         """
         Generates a random racetrack
@@ -145,13 +146,18 @@ class TrackGenerator:
                 frequency += 1
                 phase = cmath.exp(2j * math.pi * rng.random())
                 z_pow = z**frequency
-                waves += z * (z_pow / (phase * (frequency + 1)) + phase / (z_pow * (frequency - 1)))
+                waves += z * (
+                    z_pow / (phase * (frequency + 1))
+                    + phase / (z_pow * (frequency - 1))
+                )
                 dwaves += z_pow / phase - phase / z_pow
 
                 # generate points
                 points = z + amplitude * waves
                 dPdt = (1j * z) * (1 + amplitude * dwaves)
-                corner_radii = TrackGenerator._compute_corner_radii(2 * math.pi / n_points, dPdt)
+                corner_radii = TrackGenerator._compute_corner_radii(
+                    2 * math.pi / n_points, dPdt
+                )
 
                 # scale path to achieve a minimum corner radius of min_corner_radius
                 scale = min_corner_radius / min(abs(corner_radii))
@@ -166,15 +172,21 @@ class TrackGenerator:
             upper_offset = track_length - target_track_length
             lower_offset = 2 * math.pi * min_corner_radius - target_track_length
 
-            while abs(track_length - target_track_length) / target_track_length > rel_accuracy:
+            while (
+                abs(track_length - target_track_length) / target_track_length
+                > rel_accuracy
+            ):
                 # linearly interpolate between the lower and upper bounds
-                amplitude = ((lower_offset * upper_amp - upper_offset * lower_amp)
-                             / (lower_offset - upper_offset))
+                amplitude = (lower_offset * upper_amp - upper_offset * lower_amp) / (
+                    lower_offset - upper_offset
+                )
 
                 # generate points
                 points = z + amplitude * waves
                 dPdt = (1j * z) * (1 + amplitude * dwaves)
-                corner_radii = TrackGenerator._compute_corner_radii(2 * math.pi / n_points, dPdt)
+                corner_radii = TrackGenerator._compute_corner_radii(
+                    2 * math.pi / n_points, dPdt
+                )
 
                 # scale path to achieve a minimum corner radius of min_corner_radius
                 scale = min_corner_radius / min(abs(corner_radii))
@@ -188,7 +200,9 @@ class TrackGenerator:
                     upper_offset = track_length - target_track_length
 
             normals = 1j * dPdt / abs(dPdt)
-            if not TrackGenerator.self_intersects(points[::2], normals[::2], margin / scale):
+            if not TrackGenerator.self_intersects(
+                points[::2], normals[::2], margin / scale
+            ):
                 break
 
         return scale * points, normals, scale * corner_radii
@@ -206,7 +220,10 @@ class TrackGenerator:
             return q.imag == 0 and q.real < 1 and q.real + dq.real > 0
         else:
             # check if transformed line segment Q intersects with line 0,0 -> 1,0
-            return q.imag * (q.imag + dq.imag) <= 0 and 0 < q.real - dq.real * q.imag / dq.imag < 1
+            return (
+                q.imag * (q.imag + dq.imag) <= 0
+                and 0 < q.real - dq.real * q.imag / dq.imag < 1
+            )
 
     @staticmethod
     def _slf_intrsct_brute(edges):
@@ -215,12 +232,14 @@ class TrackGenerator:
         pair of edges
         """
         for i, p_i in enumerate(edges):
-            for p_j in edges[i + 1:]:
+            for p_j in edges[i + 1 :]:
                 # skip if the edges are adjacent
                 if p_j[0] == p_i[1] or p_j[1] == p_i[0]:
                     continue
 
-                if TrackGenerator._intersects(p_i[0], p_i[1] - p_i[0], p_j[0], p_j[1] - p_j[0]):
+                if TrackGenerator._intersects(
+                    p_i[0], p_i[1] - p_i[0], p_j[0], p_j[1] - p_j[0]
+                ):
                     return True
 
         return False
@@ -252,9 +271,14 @@ class TrackGenerator:
             left = edges[side >= 0]
             right = edges[side <= 0]
 
-            if abs(len(left) / len(edges) - 1 / 2) + abs(len(right) / len(edges) - 1 / 2) < 1 / 8:
-                return (TrackGenerator._slf_intrsct_recurse(left)
-                        or TrackGenerator._slf_intrsct_recurse(right))
+            if (
+                abs(len(left) / len(edges) - 1 / 2)
+                + abs(len(right) / len(edges) - 1 / 2)
+                < 1 / 8
+            ):
+                return TrackGenerator._slf_intrsct_recurse(
+                    left
+                ) or TrackGenerator._slf_intrsct_recurse(right)
             pivot = random.choice(edges)[0]
 
         # if we can't find a suitable split, then just brute force it
@@ -271,8 +295,9 @@ class TrackGenerator:
         normals = 1j * slopes / abs(slopes)
         tmp1 = TrackGenerator._to_edges(points + margin * normals)
         tmp2 = TrackGenerator._to_edges(points - margin * normals)
-        return (TrackGenerator._slf_intrsct_recurse(tmp1)
-                or TrackGenerator._slf_intrsct_recurse(tmp2))
+        return TrackGenerator._slf_intrsct_recurse(
+            tmp1
+        ) or TrackGenerator._slf_intrsct_recurse(tmp2)
 
     # Starting Line Selection
 
@@ -300,9 +325,7 @@ class TrackGenerator:
 
     @staticmethod
     def pick_starting_point(
-        positions, normals, corner_radii,
-        starting_straight_length,
-        downsample=2
+        positions, normals, corner_radii, starting_straight_length, downsample=2
     ):
         """
         Picks a suitable starting position, moves it to the beginning of the
@@ -324,9 +347,17 @@ class TrackGenerator:
 
         curvature = abs(1 / corner_radii[::downsample])
         # only check points with low curvature
-        indices = np.argsort(curvature)[:len(curvature) // 8]
-        start_index = (downsample * indices[np.argmin(TrackGenerator._cyclic_smooth(
-            indices, positions, curvature, smooth_diameter))])
+        indices = np.argsort(curvature)[: len(curvature) // 8]
+        start_index = (
+            downsample
+            * indices[
+                np.argmin(
+                    TrackGenerator._cyclic_smooth(
+                        indices, positions, curvature, smooth_diameter
+                    )
+                )
+            ]
+        )
 
         positions = np.roll(positions, -start_index)
         normals = np.roll(normals, -start_index)
@@ -346,12 +377,16 @@ class TrackGenerator:
 
     @staticmethod
     def place_cones(
-        positions, normals, corner_radii, min_corner_radius,
-        min_cone_spacing, max_cone_spacing,
+        positions,
+        normals,
+        corner_radii,
+        min_corner_radius,
+        min_cone_spacing,
+        max_cone_spacing,
         track_width,
         cone_spacing_bias,
         start_offset,
-        starting_cone_spacing
+        starting_cone_spacing,
     ):
         """
         Generates starting, left and right cone locations from track path
@@ -375,10 +410,22 @@ class TrackGenerator:
         max_density = 1 / min_cone_spacing
         density_range = max_density - min_density
 
-        c1 = density_range / 2 * ((1 - cone_spacing_bias) * min_corner_radius
-                                  - (1 + cone_spacing_bias) * track_width / 2)
-        c2 = density_range / 2 * ((1 + cone_spacing_bias) * min_corner_radius
-                                  - (1 - cone_spacing_bias) * track_width / 2)
+        c1 = (
+            density_range
+            / 2
+            * (
+                (1 - cone_spacing_bias) * min_corner_radius
+                - (1 + cone_spacing_bias) * track_width / 2
+            )
+        )
+        c2 = (
+            density_range
+            / 2
+            * (
+                (1 + cone_spacing_bias) * min_corner_radius
+                - (1 - cone_spacing_bias) * track_width / 2
+            )
+        )
 
         def place(points, radii, side):
             distance_to_next = abs(np.append(np.diff(points), points[0] - points[-1]))
@@ -400,12 +447,18 @@ class TrackGenerator:
                     cones.append(points[i])
             return np.array(cones)
 
-        l_cones = place(positions + normals * track_width / 2, corner_radii - track_width / 2, 1)
-        r_cones = place(positions - normals * track_width / 2, corner_radii + track_width / 2, -1)
+        l_cones = place(
+            positions + normals * track_width / 2, corner_radii - track_width / 2, 1
+        )
+        r_cones = place(
+            positions - normals * track_width / 2, corner_radii + track_width / 2, -1
+        )
 
         start_cones = np.array([l_cones[0], r_cones[0]])
-        start_cones = np.append(start_cones + starting_cone_spacing / 2,
-                                start_cones - starting_cone_spacing / 2)
+        start_cones = np.append(
+            start_cones + starting_cone_spacing / 2,
+            start_cones - starting_cone_spacing / 2,
+        )
 
         # put car start_offset behind the starting line
         car_pos = 0
@@ -448,48 +501,51 @@ class TrackGenerator:
     def set(self, properties):
         self.config = {**self.config, **properties}
 
-        if 'seed' in properties:
-            self.rng = random.Random(self.config['seed'])
+        if "seed" in properties:
+            self.rng = random.Random(self.config["seed"])
 
     def __call__(self):
-        margin = self.config['track_width'] / 2 + self.config['margin']
-        if 'length' in self.config:
+        margin = self.config["track_width"] / 2 + self.config["margin"]
+        if "length" in self.config:
             path = TrackGenerator.generate_path_w_length(
                 rng=self.rng,
-                n_points=self.config['resolution'],
-                min_corner_radius=self.config['min_corner_radius'],
+                n_points=self.config["resolution"],
+                min_corner_radius=self.config["min_corner_radius"],
                 margin=margin,
-                target_track_length=self.config['length'],
-                rel_accuracy=self.config['rel_accuracy'],
-                starting_amplitude=self.config['starting_amplitude']
+                target_track_length=self.config["length"],
+                rel_accuracy=self.config["rel_accuracy"],
+                starting_amplitude=self.config["starting_amplitude"],
             )
-        elif 'max_frequency' in self.config:
+        elif "max_frequency" in self.config:
             while True:
                 path = TrackGenerator.generate_path_w_params(
                     rng=self.rng,
-                    n_points=self.config['resolution'],
-                    min_corner_radius=self.config['min_corner_radius'],
-                    max_frequency=self.config['max_frequency'],
-                    amplitude=self.config['amplitude']
+                    n_points=self.config["resolution"],
+                    min_corner_radius=self.config["min_corner_radius"],
+                    max_frequency=self.config["max_frequency"],
+                    amplitude=self.config["amplitude"],
                 )
-                if not (self.config['check_self_intersection']
-                        and TrackGenerator.self_intersects(*path[:2], margin)):
+                if not (
+                    self.config["check_self_intersection"]
+                    and TrackGenerator.self_intersects(*path[:2], margin)
+                ):
                     break
         else:
             raise KeyError("missing one of required properties length or max_frequency")
 
         path = TrackGenerator.pick_starting_point(
             *path,
-            starting_straight_length=self.config['starting_straight_length'],
-            downsample=self.config['starting_straight_downsample']
+            starting_straight_length=self.config["starting_straight_length"],
+            downsample=self.config["starting_straight_downsample"],
         )
 
         return TrackGenerator.place_cones(
-            *path, self.config['min_corner_radius'],
-            min_cone_spacing=self.config['min_cone_spacing'],
-            max_cone_spacing=self.config['max_cone_spacing'],
-            track_width=self.config['track_width'],
-            cone_spacing_bias=self.config['cone_spacing_bias'],
-            start_offset=self.config['starting_straight_length'],
-            starting_cone_spacing=self.config['starting_cone_spacing']
+            *path,
+            self.config["min_corner_radius"],
+            min_cone_spacing=self.config["min_cone_spacing"],
+            max_cone_spacing=self.config["max_cone_spacing"],
+            track_width=self.config["track_width"],
+            cone_spacing_bias=self.config["cone_spacing_bias"],
+            start_offset=self.config["starting_straight_length"],
+            starting_cone_spacing=self.config["starting_cone_spacing"],
         )

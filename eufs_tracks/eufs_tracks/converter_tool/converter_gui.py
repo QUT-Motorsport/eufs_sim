@@ -1,13 +1,12 @@
-from shutil import copyfile
 from os import listdir, mkdir
-from os.path import isfile, join, exists
+from os.path import exists, isfile, join
+from shutil import copyfile
 
 from ament_index_python.packages import get_package_share_directory
-
-from qt_gui.plugin import Plugin
 from python_qt_binding import loadUi
-from python_qt_binding.QtWidgets import QWidget, QComboBox, QPushButton
-from python_qt_binding.QtWidgets import QLabel, QLineEdit, QApplication
+from python_qt_binding.QtWidgets import (QApplication, QComboBox, QLabel,
+                                         QLineEdit, QPushButton, QWidget)
+from qt_gui.plugin import Plugin
 
 from eufs_tracks.converter_tool import Converter
 
@@ -17,20 +16,20 @@ class EUFSConverterGUI(Plugin):
         super(EUFSConverterGUI, self).__init__(context)
 
         # Give QObjects reasonable names
-        self.setObjectName('EUFSConverterGUI')
+        self.setObjectName("EUFSConverterGUI")
         self.node = context.node
         self.logger = self.node.get_logger()
 
         # Create QWidget
         self._widget = QWidget()
-        self._widget.setObjectName('EUFSConverterUI')
+        self._widget.setObjectName("EUFSConverterUI")
 
         # Store gazebo's path as it is used quite a lot:
-        self.TRACKS = get_package_share_directory('eufs_tracks')
+        self.TRACKS = get_package_share_directory("eufs_tracks")
 
         # Extend the widget with all attributes and children from UI file
         # UI file which should be in the "resource" folder of this package
-        main_ui_file = join(self.TRACKS, 'resource', 'conversion_tool.ui')
+        main_ui_file = join(self.TRACKS, "resource", "conversion_tool.ui")
         loadUi(main_ui_file, self._widget)
 
         # Show _widget.windowTitle on left-top of each plugin (when
@@ -39,7 +38,7 @@ class EUFSConverterGUI(Plugin):
         # plugin at once, these lines add number to make it easy to
         # tell from pane to pane.
         if context.serial_number() > 1:
-            the_title = (self._widget.windowTitle() + (' (%d)' % context.serial_number()))
+            the_title = self._widget.windowTitle() + (" (%d)" % context.serial_number())
             self._widget.setWindowTitle(the_title)
 
         # Give widget components permanent names
@@ -47,9 +46,13 @@ class EUFSConverterGUI(Plugin):
         self.RENAME_BUTTON = self._widget.findChild(QPushButton, "RenameButton")
         self.CONVERT_FROM_MENU = self._widget.findChild(QComboBox, "ConvertFrom")
         self.CONVERT_TO_MENU = self._widget.findChild(QComboBox, "ConvertTo")
-        self.RENAME_FILE_TEXTBOX = self._widget.findChild(QLineEdit, "RenameFileTextbox")
+        self.RENAME_FILE_TEXTBOX = self._widget.findChild(
+            QLineEdit, "RenameFileTextbox"
+        )
         self.RENAME_FILE_HEADER = self._widget.findChild(QLabel, "RenameFileHeader")
-        self.FILE_FOR_CONVERSION_BOX = self._widget.findChild(QComboBox, "FileForConversion")
+        self.FILE_FOR_CONVERSION_BOX = self._widget.findChild(
+            QComboBox, "FileForConversion"
+        )
 
         # Hook up buttons to onclick functions
         self.CONVERT_BUTTON.clicked.connect(self.convert_button_pressed)
@@ -62,7 +65,9 @@ class EUFSConverterGUI(Plugin):
             self.CONVERT_TO_MENU.addItem(f)
 
         self.update_converter_dropdown()
-        self.CONVERT_FROM_MENU.currentTextChanged.connect(self.update_converter_dropdown)
+        self.CONVERT_FROM_MENU.currentTextChanged.connect(
+            self.update_converter_dropdown
+        )
         self.FILE_FOR_CONVERSION_BOX.currentTextChanged.connect(self.update_copier)
 
         # Change label to show current selected file for the copier
@@ -81,18 +86,18 @@ class EUFSConverterGUI(Plugin):
         rec = QApplication.desktop().screenGeometry()
         scaler_multiplier = rec.width() / 1700.0
         for widget in self._widget.children():
-            if hasattr(widget, 'geometry'):
+            if hasattr(widget, "geometry"):
                 geom = widget.geometry()
                 new_width = (
-                    geom.width() * (scaler_multiplier) if not isinstance(
-                        widget, QLabel)
+                    geom.width() * (scaler_multiplier)
+                    if not isinstance(widget, QLabel)
                     else geom.width() * (scaler_multiplier) + 200
                 )
                 widget.setGeometry(
                     int(geom.x() * scaler_multiplier),
                     int(geom.y() * scaler_multiplier),
                     int(new_width),
-                    int(geom.height() * (scaler_multiplier))
+                    int(geom.height() * (scaler_multiplier)),
                 )
 
     ################
@@ -118,27 +123,27 @@ class EUFSConverterGUI(Plugin):
 
         # For launch files, we also need to move around the model folders
         if ending == "launch":
-            if not exists((model_path := join(self.TRACKS, 'models', raw_name_to))):
+            if not exists((model_path := join(self.TRACKS, "models", raw_name_to))):
                 mkdir(model_path)
 
             # Copy sdf files
-            path_from = join(self.TRACKS, 'models', raw_name_from, "model.sdf")
-            path_to = join(self.TRACKS, 'models', raw_name_to, "model.sdf")
+            path_from = join(self.TRACKS, "models", raw_name_from, "model.sdf")
+            path_to = join(self.TRACKS, "models", raw_name_to, "model.sdf")
             copyfile(path_from, path_to)
 
             # Copy config files
-            path_from = join(self.TRACKS, 'models', raw_name_from, "model.config")
-            path_to = join(self.TRACKS, 'models', raw_name_to, "model.config")
+            path_from = join(self.TRACKS, "models", raw_name_from, "model.config")
+            path_to = join(self.TRACKS, "models", raw_name_to, "model.config")
             copyfile(path_from, path_to)
 
             # Copy launch files
-            path_from = join(self.TRACKS, 'launch', file_to_copy_from)
-            path_to = join(self.TRACKS, 'launch', raw_name_to + "." + ending)
+            path_from = join(self.TRACKS, "launch", file_to_copy_from)
+            path_to = join(self.TRACKS, "launch", raw_name_to + "." + ending)
             copyfile(path_from, path_to)
 
         elif ending == "csv":
-            path_from = join(self.TRACKS, 'csv', file_to_copy_from)
-            path_to = join(self.TRACKS, 'csv', raw_name_to + "." + ending)
+            path_from = join(self.TRACKS, "csv", file_to_copy_from)
+            path_to = join(self.TRACKS, "csv", raw_name_to + "." + ending)
             copyfile(path_from, path_to)
 
         self.logger.info("Copy created Successfully!")
@@ -159,17 +164,21 @@ class EUFSConverterGUI(Plugin):
         from_type = self.CONVERT_FROM_MENU.currentText()
         to_type = self.CONVERT_TO_MENU.currentText()
         filename = self.FILE_FOR_CONVERSION_BOX.currentText()
-        self.logger.info("Converting from: " + from_type + " to: " + to_type + " for: " + filename)
+        self.logger.info(
+            "Converting from: " + from_type + " to: " + to_type + " for: " + filename
+        )
 
         # Calculate correct full filepath for file to convert
         if from_type == "launch":
-            filename = join(self.TRACKS, 'launch/' + filename)
+            filename = join(self.TRACKS, "launch/" + filename)
         elif from_type == "csv":
-            filename = join(self.TRACKS, 'csv/' + filename)
+            filename = join(self.TRACKS, "csv/" + filename)
 
         # Convert it
         Converter.convert(from_type, to_type, filename)
-        self.logger.info("Converted from: " + from_type + " to: " + to_type + " for: " + filename)
+        self.logger.info(
+            "Converted from: " + from_type + " to: " + to_type + " for: " + filename
+        )
 
     def update_converter_dropdown(self):
         """Keep the drop-down menus of ConversionTools in sync with the filesystem."""
@@ -178,18 +187,21 @@ class EUFSConverterGUI(Plugin):
 
         if from_type == "launch":
             # Get tracks from eufs_tracks package
-            relevant_path = join(self.TRACKS, 'launch')
-            launch_files = [f for f in listdir(relevant_path) if isfile(join(relevant_path, f))]
+            relevant_path = join(self.TRACKS, "launch")
+            launch_files = [
+                f for f in listdir(relevant_path) if isfile(join(relevant_path, f))
+            ]
 
             # Remove "blacklisted" files (ones that don't define tracks)
-            blacklist_filepath = join(self.TRACKS, 'launch/blacklist.txt')
+            blacklist_filepath = join(self.TRACKS, "launch/blacklist.txt")
             blacklist_ = open(blacklist_filepath, "r")
             blacklist = [f.strip() for f in blacklist_]
             all_files = [f for f in launch_files if f not in blacklist]
         elif from_type == "csv":
-            relevant_path = join(self.TRACKS, 'csv')
+            relevant_path = join(self.TRACKS, "csv")
             all_files = [
-                f for f in listdir(relevant_path)
+                f
+                for f in listdir(relevant_path)
                 if isfile(join(relevant_path, f)) and f[-3:] == "csv"
             ]
 

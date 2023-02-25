@@ -9,7 +9,7 @@ Responsible for controlling the racecar in simulation and publishing its kinemat
 
 A subset of the I/O of this plugin simulates the I/O of the EUFS [ros_can](https://gitlab.com/eufs/ros_can) interface node used for communicating with the FSUK-AI DDT vehicle.
 
-### Parameters 
+### Parameters
 
 NB: if a parameter has no default value, a value must be provided.
 
@@ -114,7 +114,7 @@ Simulates the state machine of the FSUK-AI DDT vehicle. A design outline can be 
 | `/ros_can/set_mission`      | [eufs_msgs/CanState](https://gitlab.com/eufs/eufs_msgs/-/blob/ros2/msg/CanState.msg) | Sets the AMI state of the simulated car. |
 |`/ros_can/mission_completed` | [std_msgs/Bool](http://docs.ros.org/en/noetic/api/std_msgs/html/msg/Bool.html)       | True when the current autonomous mission has been completed. |
 
-### ROS 2 Services 
+### ROS 2 Services
 
 | Service Name | Type | Purpose |
 | ------------ | ---- | ------- |

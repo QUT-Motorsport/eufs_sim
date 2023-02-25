@@ -1,8 +1,8 @@
 import os
-import numpy as np
-import pandas as pd
 import xml.etree.ElementTree as ET
 
+import numpy as np
+import pandas as pd
 from ament_index_python.packages import get_package_share_directory
 from rclpy.node import Node
 
@@ -110,60 +110,93 @@ class Track(Node):
             filename = filename + ".csv"
 
         df = pd.DataFrame(
-            columns=["tag", "x", "y", "direction", "x_variance", "y_variance", "xy_covariance"]
+            columns=[
+                "tag",
+                "x",
+                "y",
+                "direction",
+                "x_variance",
+                "y_variance",
+                "xy_covariance",
+            ]
         )
 
         # assuming there always are blue and yellow cones
         df["x"] = np.hstack((self.blue_cones[:, 0], self.yellow_cones[:, 0]))
         df["y"] = np.hstack((self.blue_cones[:, 1], self.yellow_cones[:, 1]))
         df["tag"].iloc[:] = "blue"
-        df["tag"].iloc[-self.yellow_cones.shape[0]:] = "yellow"
+        df["tag"].iloc[-self.yellow_cones.shape[0] :] = "yellow"
         df["direction"] = 0
         df["x_variance"] = np.hstack((self.blue_cones[:, 2], self.yellow_cones[:, 2]))
         df["y_variance"] = np.hstack((self.blue_cones[:, 3], self.yellow_cones[:, 3]))
-        df["xy_covariance"] = np.hstack((self.blue_cones[:, 4], self.yellow_cones[:, 4]))
+        df["xy_covariance"] = np.hstack(
+            (self.blue_cones[:, 4], self.yellow_cones[:, 4])
+        )
 
         if self.big_orange_cones is not None:
             empty = pd.DataFrame(
                 np.nan,
                 index=np.arange(self.big_orange_cones.shape[0]),
-                columns=["tag", "x", "y", "direction", "x_variance", "y_variance", "xy_covariance"]
+                columns=[
+                    "tag",
+                    "x",
+                    "y",
+                    "direction",
+                    "x_variance",
+                    "y_variance",
+                    "xy_covariance",
+                ],
             )
             df = df.append(empty)
             df["x"] = np.hstack((df["x"].dropna().values, self.big_orange_cones[:, 0]))
             df["y"] = np.hstack((df["y"].dropna().values, self.big_orange_cones[:, 1]))
-            df["tag"].iloc[-self.big_orange_cones.shape[0]:] = "big_orange"
-            df["direction"] = np.hstack((
-                df["direction"].dropna().values,
-                [0 for _ in self.big_orange_cones[:, 2]]))
+            df["tag"].iloc[-self.big_orange_cones.shape[0] :] = "big_orange"
+            df["direction"] = np.hstack(
+                (
+                    df["direction"].dropna().values,
+                    [0 for _ in self.big_orange_cones[:, 2]],
+                )
+            )
             df["x_variance"] = np.hstack(
-                (df["x_variance"].dropna().values, self.big_orange_cones[:, 2]))
-            df["y_variance"] = np.hstack((
-                df["y_variance"].dropna().values, self.big_orange_cones[:, 3]))
-            df["xy_covariance"] = np.hstack((
-                df["xy_covariance"].dropna().values,
-                self.big_orange_cones[:, 4]))
+                (df["x_variance"].dropna().values, self.big_orange_cones[:, 2])
+            )
+            df["y_variance"] = np.hstack(
+                (df["y_variance"].dropna().values, self.big_orange_cones[:, 3])
+            )
+            df["xy_covariance"] = np.hstack(
+                (df["xy_covariance"].dropna().values, self.big_orange_cones[:, 4])
+            )
 
         if self.orange_cones is not None:
             empty = pd.DataFrame(
                 np.nan,
                 index=np.arange(self.orange_cones.shape[0]),
-                columns=["tag", "x", "y", "direction", "x_variance", "y_variance", "xy_covariance"]
+                columns=[
+                    "tag",
+                    "x",
+                    "y",
+                    "direction",
+                    "x_variance",
+                    "y_variance",
+                    "xy_covariance",
+                ],
             )
             df = df.append(empty)
             df["x"] = np.hstack((df["x"].dropna().values, self.orange_cones[:, 0]))
             df["y"] = np.hstack((df["y"].dropna().values, self.orange_cones[:, 1]))
-            df["tag"].iloc[-self.orange_cones.shape[0]:] = "orange"
-            df["direction"] = np.hstack((
-                df["direction"].dropna().values,
-                [0 for _ in self.orange_cones[:, 2]]
-            ))
-            df["x_variance"] = np.hstack((
-                df["x_variance"].dropna().values, self.orange_cones[:, 2]))
-            df["y_variance"] = np.hstack((
-                df["y_variance"].dropna().values, self.orange_cones[:, 3]))
-            df["xy_covariance"] = np.hstack((
-                df["xy_covariance"].dropna().values, self.orange_cones[:, 4]))
+            df["tag"].iloc[-self.orange_cones.shape[0] :] = "orange"
+            df["direction"] = np.hstack(
+                (df["direction"].dropna().values, [0 for _ in self.orange_cones[:, 2]])
+            )
+            df["x_variance"] = np.hstack(
+                (df["x_variance"].dropna().values, self.orange_cones[:, 2])
+            )
+            df["y_variance"] = np.hstack(
+                (df["y_variance"].dropna().values, self.orange_cones[:, 3])
+            )
+            df["xy_covariance"] = np.hstack(
+                (df["xy_covariance"].dropna().values, self.orange_cones[:, 4])
+            )
 
         # Add car data (always ("car_start",0,0,0,0,0,0)
         # unless this file is called from ConversionTools))
@@ -176,8 +209,8 @@ class Track(Node):
                 "direction",
                 "x_variance",
                 "y_variance",
-                "xy_covariance"
-            ]
+                "xy_covariance",
+            ],
         )
         df = df.append(cardf)
 
@@ -191,15 +224,17 @@ class Track(Node):
                 "direction",
                 "x_variance",
                 "y_variance",
-                "xy_covariance"
-            ]
+                "xy_covariance",
+            ],
         )
         print("Succesfully saved to csv")
 
     @staticmethod
-    def sdf_to_csv(track_name,
-                   car_start_data=("car_start", 0.0, 0.0, 0.0, 0.0, 0.0, 0.0),
-                   override_name=None):
+    def sdf_to_csv(
+        track_name,
+        car_start_data=("car_start", 0.0, 0.0, 0.0, 0.0, 0.0, 0.0),
+        override_name=None,
+    ):
         """
         Creates a csv from the sdf passed in (through track_name)
 
@@ -212,12 +247,14 @@ class Track(Node):
                            information so that csvs can be converted back to .launches,
                            and is not necessary if you do not desire that functionality.
         """
-        TRACKS_SHARE = get_package_share_directory('eufs_tracks')
+        TRACKS_SHARE = get_package_share_directory("eufs_tracks")
         track_path = os.path.join(TRACKS_SHARE, "models", track_name, "model.sdf")
 
         # Check for existence
         assert os.path.isdir(TRACKS_SHARE), "Can't find eufs_tracks"
-        assert os.path.exists(track_path), f"Can't find {track_name} track in eufs_tracks/models/"
+        assert os.path.exists(
+            track_path
+        ), f"Can't find {track_name} track in eufs_tracks/models/"
 
         track = Track()
         track.car_start_data = car_start_data
@@ -257,13 +294,26 @@ class Converter(Node):
         """
         # file directories
         directory_share = get_package_share_directory("eufs_tracks")
-        directory_sim = os.path.join(os.path.dirname(__file__), '..', '..', '..', '..', '..', '..', '..', 'eufs_sim', 'eufs_tracks')
-        
+        directory_sim = os.path.join(
+            os.path.dirname(__file__),
+            "..",
+            "..",
+            "..",
+            "..",
+            "..",
+            "..",
+            "..",
+            "eufs_sim",
+            "eufs_tracks",
+        )
+
         if cfrom == "launch" and cto == "csv":
             return Converter.launch_to_csv(which_file, params)
 
         elif cfrom == "csv" and cto == "launch":
-            return Converter.csv_to_launch(which_file, directory_share, params), Converter.csv_to_launch(which_file, directory_sim, params)
+            return Converter.csv_to_launch(
+                which_file, directory_share, params
+            ), Converter.csv_to_launch(which_file, directory_sim, params)
         return None
 
     @staticmethod
@@ -277,13 +327,13 @@ class Converter(Node):
         filename = which_file.split("/")[-1].split(".")[0]
         with open(which_file) as car_data_reader:
             car_data = car_data_reader.read()
-        car_x = car_data.split("<arg name=\"x\" default=\"")[1].split("\"")[0]
-        car_y = car_data.split("<arg name=\"y\" default=\"")[1].split("\"")[0]
-        car_yaw = car_data.split("<arg name=\"yaw\" default=\"")[1].split("\"")[0]
+        car_x = car_data.split('<arg name="x" default="')[1].split('"')[0]
+        car_y = car_data.split('<arg name="y" default="')[1].split('"')[0]
+        car_yaw = car_data.split('<arg name="yaw" default="')[1].split('"')[0]
         Track.sdf_to_csv(
             filename,
             car_start_data=("car_start", car_x, car_y, car_yaw, 0.0, 0.0, 0.0),
-            override_name=params.get("override_name", None)
+            override_name=params.get("override_name", None),
         )
 
     @staticmethod
@@ -298,15 +348,17 @@ class Converter(Node):
         TRACKS_SHARE = which_directory
 
         # Use override name if provided
-        GENERATED_FILENAME = params.get("override_name", which_file.split("/")[-1].split(".")[0])
+        GENERATED_FILENAME = params.get(
+            "override_name", which_file.split("/")[-1].split(".")[0]
+        )
 
         # First, we read in the csv data into a dataframe
         df = pd.read_csv(which_file)
-        blue_cones = df[df['tag'] == "blue"]
-        yellow_cones = df[df['tag'] == "yellow"]
-        orange_cones = df[df['tag'] == "orange"]
-        big_orange_cones = df[df['tag'] == "big_orange"]
-        car_location = df[df['tag'] == "car_start"]
+        blue_cones = df[df["tag"] == "blue"]
+        yellow_cones = df[df["tag"] == "yellow"]
+        orange_cones = df[df["tag"] == "orange"]
+        big_orange_cones = df[df["tag"] == "big_orange"]
+        car_location = df[df["tag"] == "car_start"]
 
         # Here we parse the data and get a full list of all relevant info of
         # the cones and the car (type,x,y,yaw)
@@ -353,17 +405,21 @@ class Converter(Node):
             x_cov = bluecone[5]
             y_cov = bluecone[6]
             xy_cov = bluecone[7]
-            raw_big_orange.append(("big_orange", 1.0 * x, 1.0 * y, 0, x_cov, y_cov, xy_cov))
+            raw_big_orange.append(
+                ("big_orange", 1.0 * x, 1.0 * y, 0, x_cov, y_cov, xy_cov)
+            )
 
         # Car start
         for c in car_location.itertuples():
             raw_car_location = ("car", 1.0 * c[2], 1.0 * c[3], c[4], 0, 0, 0)
 
         # Combine
-        all_cones = (raw_blue + raw_yellow + raw_orange + raw_big_orange)
+        all_cones = raw_blue + raw_yellow + raw_orange + raw_big_orange
 
         # Create launch file
-        launch_template_file = os.path.join(TRACKS_SHARE, 'resource/randgen_launch_template')
+        launch_template_file = os.path.join(
+            TRACKS_SHARE, "resource/randgen_launch_template"
+        )
         with open(launch_template_file, "r") as launch_template:
             # .launches need to point to .worlds and model files of the same name,
             # so here we are pasting in copies of the relevant filename.
@@ -371,18 +427,27 @@ class Converter(Node):
             launch_merged = GENERATED_FILENAME.join(launch_merged.split("%FILLNAME%"))
 
             # Fill in the car's position
-            launch_merged = str(raw_car_location[1]).join(launch_merged.split('%PLACEX%'))
-            launch_merged = str(raw_car_location[2]).join(launch_merged.split('%PLACEY%'))
-            launch_merged = str(raw_car_location[3]).join(launch_merged.split('%PLACEROTATION%'))
+            launch_merged = str(raw_car_location[1]).join(
+                launch_merged.split("%PLACEX%")
+            )
+            launch_merged = str(raw_car_location[2]).join(
+                launch_merged.split("%PLACEY%")
+            )
+            launch_merged = str(raw_car_location[3]).join(
+                launch_merged.split("%PLACEROTATION%")
+            )
 
             # Write launch file.
             launch_out_filepath = os.path.join(
-                TRACKS_SHARE, 'launch', GENERATED_FILENAME + '.launch')
+                TRACKS_SHARE, "launch", GENERATED_FILENAME + ".launch"
+            )
             with open(launch_out_filepath, "w") as launch_out:
                 launch_out.write(launch_merged)
 
         # Create world file
-        world_template_filepath = os.path.join(TRACKS_SHARE, 'resource', 'randgen_world_template')
+        world_template_filepath = os.path.join(
+            TRACKS_SHARE, "resource", "randgen_world_template"
+        )
         with open(world_template_filepath, "r") as world_template:
             # The world file needs to point to the correct model folder,
             # which conveniently has the same name as the world file itself.
@@ -390,33 +455,37 @@ class Converter(Node):
             world_merged = GENERATED_FILENAME.join(world_merged.split("%FILLNAME%"))
 
             # Write world file
-            world_out_filepath = os.path.join(TRACKS_SHARE, 'worlds', GENERATED_FILENAME + ".world")
+            world_out_filepath = os.path.join(
+                TRACKS_SHARE, "worlds", GENERATED_FILENAME + ".world"
+            )
             with open(world_out_filepath, "w") as world_out:
                 world_out.write(world_merged)
 
         # Create model folder
-        MODEL_TEMPLATE_SHARE = os.path.join(TRACKS_SHARE, 'resource', 'randgen_model_template')
+        MODEL_TEMPLATE_SHARE = os.path.join(
+            TRACKS_SHARE, "resource", "randgen_model_template"
+        )
 
         # 1. Create the folder
         # If the folder does exist, it gets automatically overridden by the rest of this function
-        MODEL_FOLDER = os.path.join(TRACKS_SHARE, 'models', GENERATED_FILENAME)
+        MODEL_FOLDER = os.path.join(TRACKS_SHARE, "models", GENERATED_FILENAME)
         if not os.path.exists(MODEL_FOLDER):
             os.mkdir(MODEL_FOLDER)
 
         # 2. Config file
-        config_template_filepath = os.path.join(MODEL_TEMPLATE_SHARE, 'model.config')
+        config_template_filepath = os.path.join(MODEL_TEMPLATE_SHARE, "model.config")
         with open(config_template_filepath, "r") as config_template:
             # Let the config file know the name of the track it represents
             config_merged = "".join(config_template)
             config_merged = GENERATED_FILENAME.join(config_merged.split("%FILLNAME%"))
 
             # Write config file
-            config_out_filepath = os.path.join(MODEL_FOLDER, 'model.config')
+            config_out_filepath = os.path.join(MODEL_FOLDER, "model.config")
             with open(config_out_filepath, "w") as config_out:
                 config_out.write(config_merged)
 
         # 3. SDF file
-        sdf_template_filepath = os.path.join(MODEL_TEMPLATE_SHARE, 'model.sdf')
+        sdf_template_filepath = os.path.join(MODEL_TEMPLATE_SHARE, "model.sdf")
         with open(sdf_template_filepath, "r") as sdf_template:
             sdf_merged = "".join(sdf_template)
             sdf_split_again = sdf_merged.split("$===$")
@@ -439,7 +508,9 @@ class Converter(Node):
             # which store inactive (hidden) models.
             sdf_main = sdf_split_again[0]
             sdf_split_along_collisions = sdf_split_again[6].split("%FILLCOLLISION%")
-            sdf_model_with_collisions = sdf_split_again[2].join(sdf_split_along_collisions)
+            sdf_model_with_collisions = sdf_split_again[2].join(
+                sdf_split_along_collisions
+            )
 
             # Let the sdf file know which launch file it represents.
             sdf_main = GENERATED_FILENAME.join(sdf_main.split("%FILLNAME%"))
@@ -468,7 +539,9 @@ class Converter(Node):
                 output = str(xy).join(output.split("%XYCOV%"))
                 return output
 
-            def put_model_at_position(mod, x, y, modtype, x_cov=0.01, y_cov=0.01, xy_cov=0):
+            def put_model_at_position(
+                mod, x, y, modtype, x_cov=0.01, y_cov=0.01, xy_cov=0
+            ):
                 """
                 mod: model template to be placed
                 x,y: x and y positions for mod
@@ -480,19 +553,23 @@ class Converter(Node):
                 mod_filled = str(x).join(mod_filled.split("%PLACEX%"))
                 mod_filled = str(Converter.link_num).join(mod_filled.split("%LINKNUM%"))
                 mod_filled = modtype.join(mod_filled.split("%LINKTYPE%"))
-                mod_with_cov = setup_covariance(str(x_cov), str(y_cov), str(xy_cov)).join(
-                    mod_filled.split("%FILLCOVARIANCE%"))
+                mod_with_cov = setup_covariance(
+                    str(x_cov), str(y_cov), str(xy_cov)
+                ).join(mod_filled.split("%FILLCOVARIANCE%"))
                 return mod_with_cov
 
             sdf_allmodels = ""
 
-            def expand_allmodels(allmods, mod, modtype, x, y, x_cov=0.01,
-                                 y_cov=0.01, xy_cov=0):
+            def expand_allmodels(
+                allmods, mod, modtype, x, y, x_cov=0.01, y_cov=0.01, xy_cov=0
+            ):
                 """
                 Takes in a model and a pixel location, converts the pixel location to a raw
                 location, and places the model inside sdf_allmodels
                 """
-                mod_at_p = put_model_at_position(mod, x, y, modtype, x_cov, y_cov, xy_cov)
+                mod_at_p = put_model_at_position(
+                    mod, x, y, modtype, x_cov, y_cov, xy_cov
+                )
                 return allmods + "\n" + mod_at_p
 
             # Add all models into a template
@@ -500,7 +577,7 @@ class Converter(Node):
                 "yellow": sdf_yellow_cone_model,
                 "blue": sdf_blue_cone_model,
                 "orange": sdf_orange_cone_model,
-                "big_orange": sdf_big_orange_cone_model
+                "big_orange": sdf_big_orange_cone_model,
             }
             for cone in all_cones:
                 name, x, y, direction, x_cov, y_cov, xy_cov = cone
@@ -514,7 +591,7 @@ class Converter(Node):
                         y,
                         x_cov,
                         y_cov,
-                        xy_cov
+                        xy_cov,
                     )
 
             # Splice the sdf file back together.

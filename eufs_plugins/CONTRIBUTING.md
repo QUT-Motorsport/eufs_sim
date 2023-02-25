@@ -51,7 +51,7 @@ GazeboTestPlugin::GazeboTestPlugin() {
 
 // Gazebo plugin functions
 void GazeboTestPlugin::Load(gazebo::physics::ModelPtr _parent, sdf::ElementPtr _sdf) {
-  
+
   this->model = _parent;
 
   this->update_connection_ = gazebo::event::Events::ConnectWorldUpdateBegin(
@@ -111,7 +111,7 @@ class GazeboTestPlugin : public gazebo::ModelPlugin {
 #endif  // EUFS_PLUGINS_GAZEBO_TEST_PLUGIN_INCLUDE_GAZEBO_TEST_PLUGIN_GAZEBO_TEST_PLUGIN_HPP_
 ```
 
-That is it for the script! 
+That is it for the script!
 
 ### Editing your plugin's CMakeLists.txt
 
@@ -143,11 +143,11 @@ install(TARGETS gazebo_test_plugin
   LIBRARY DESTINATION lib
   RUNTIME DESTINATION lib)
 ```
-You should add the dependencies of your plugins here. For more info on this, you should refer to other plugins. 
+You should add the dependencies of your plugins here. For more info on this, you should refer to other plugins.
 
 ### Editing eufs_plugins/CMakeLists.txt
 
-Another important step is to include your subdirectory into eufs_plugin's `CMakelists.txt` 
+Another important step is to include your subdirectory into eufs_plugin's `CMakelists.txt`
 
 ```cmake
 .

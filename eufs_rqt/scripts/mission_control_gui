@@ -2,9 +2,10 @@
 
 import sys
 
-from eufs_rqt.MissionControlGUI import MissionControlGUI
 from rqt_gui.main import Main
 
-plugin = 'eufs_rqt.MissionControlGUI.MissionControlGUI'
+from eufs_rqt.MissionControlGUI import MissionControlGUI
+
+plugin = "eufs_rqt.MissionControlGUI.MissionControlGUI"
 main = Main(filename=plugin)
 sys.exit(main.main(standalone=plugin))

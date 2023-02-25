@@ -2,9 +2,10 @@
 
 import sys
 
-from eufs_rqt.EUFSRobotSteeringGUI import EUFSRobotSteeringGUI
 from rqt_gui.main import Main
 
-plugin = 'eufs_rqt.EUFSRobotSteeringGUI.EUFSRobotSteeringGUI'
+from eufs_rqt.EUFSRobotSteeringGUI import EUFSRobotSteeringGUI
+
+plugin = "eufs_rqt.EUFSRobotSteeringGUI.EUFSRobotSteeringGUI"
 main = Main(filename=plugin)
 sys.exit(main.main(standalone=plugin))

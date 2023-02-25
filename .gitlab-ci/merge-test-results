@@ -27,24 +27,22 @@ def cli(output, *reports):
     try:
         tree = ET.parse(output)
     except FileNotFoundError:
-        tree = ET.ElementTree(ET.Element('testsuites'))
+        tree = ET.ElementTree(ET.Element("testsuites"))
 
     testsuites = tree.getroot()
-    assert testsuites.tag == 'testsuites'
+    assert testsuites.tag == "testsuites"
 
     for path in reports:
         root = ET.parse(path).getroot()
-        if root.tag == 'testsuite':
+        if root.tag == "testsuite":
             testsuites.append(root)
-        elif root.tag == 'testsuites':
+        elif root.tag == "testsuites":
             for suite in root:
                 testsuites.append(suite)
-        print('Merged:', path)
+        print("Merged:", path)
 
     tree.write(output)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     cli(*sys.argv[1:])
-
-

@@ -70,5 +70,5 @@
     <arg name="pub_ground_truth" value="$(var pub_ground_truth)"/>
     <arg name="launch_group" value="$(var launch_group)"/>
   </include>
-  
+
 </launch>
