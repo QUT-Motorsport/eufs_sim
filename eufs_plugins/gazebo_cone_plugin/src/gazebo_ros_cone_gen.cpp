@@ -189,10 +189,10 @@ void ConeGeneratorPlugin::UpdateChild() {
     this->time_last_published = cur_time;
 
     // Check if there is a reason to publish the data
-    if (this->ground_truth_cone_pub_->get_subscription_count() == 0 &&
-        this->ground_truth_track_pub_->get_subscription_count() == 0 &&
-        this->perception_cone_pub_->get_subscription_count() == 0 &&
-        this->perception_track_pub_->get_subscription_count() == 0) {
+    if (this->ground_truth_cone_pub_ && this->ground_truth_cone_pub_->get_subscription_count() == 0 &&
+        this->ground_truth_track_pub_ && this->ground_truth_track_pub_->get_subscription_count() == 0 &&
+        this->perception_cone_pub_ && this->perception_cone_pub_->get_subscription_count() == 0 &&
+        this->perception_track_pub_ && this->perception_track_pub_->get_subscription_count() == 0) {
         RCLCPP_DEBUG(this->rosnode_->get_logger(), "Nobody is listening to cone_ground_truth. Doing nothing");
         return;
     }
@@ -201,7 +201,7 @@ void ConeGeneratorPlugin::UpdateChild() {
 
     // Get the track message
     eufs_msgs::msg::ConeArrayWithCovariance cone_arrays_message = getConeArraysMessage();
-
+    eufs_msgs::msg::ConeArrayWithCovariance ground_truth_cones_message = processCones(cone_arrays_message);
     eufs_msgs::msg::ConeArrayWithCovariance ground_truth_track_message;
     if (this->track_frame_ == "track") {
         ground_truth_track_message = translateMapFrame(cone_arrays_message);
@@ -215,51 +215,51 @@ void ConeGeneratorPlugin::UpdateChild() {
         return;
     }
 
-    // Cones from global view
-    if (this->ground_truth_track_pub_->get_subscription_count() > 0 && pub_ground_truth) {
-        this->ground_truth_track_pub_->publish(ground_truth_track_message);
-    }
+    if (this->pub_ground_truth) {
+        // Get the track message
+        // Cones from global view
+        if (this->ground_truth_track_pub_->get_subscription_count() > 0 && pub_ground_truth) {
+            this->ground_truth_track_pub_->publish(ground_truth_track_message);
+        }
 
-    // Publish QUTMS ground truth as cone detection stamped
-    driverless_msgs::msg::ConeDetectionStamped ground_truth_track_qutms_message =
-        cone_array_to_cone_detection(ground_truth_track_message);
-    ground_truth_track_qutms_message.header.frame_id = "track";
-    if (this->ground_truth_track_qutms_pub_->get_subscription_count() > 0 && pub_ground_truth) {
-        this->ground_truth_track_qutms_pub_->publish(ground_truth_track_qutms_message);
-    }
+        // Publish QUTMS ground truth as cone detection stamped
+        driverless_msgs::msg::ConeDetectionStamped ground_truth_track_qutms_message =
+            cone_array_to_cone_detection(ground_truth_track_message);
+        ground_truth_track_qutms_message.header.frame_id = "track";
+        if (this->ground_truth_track_qutms_pub_->get_subscription_count() > 0 && pub_ground_truth) {
+            this->ground_truth_track_qutms_pub_->publish(ground_truth_track_qutms_message);
+        }
 
-    // Cones from local view
-    eufs_msgs::msg::ConeArrayWithCovariance ground_truth_cones_message = processCones(cone_arrays_message);
-    if (this->ground_truth_cone_pub_->get_subscription_count() > 0 && pub_ground_truth) {
-        this->ground_truth_cone_pub_->publish(ground_truth_cones_message);
-    }
+        // Cones from local view
+        if (this->ground_truth_cone_pub_->get_subscription_count() > 0 && pub_ground_truth) {
+            this->ground_truth_cone_pub_->publish(ground_truth_cones_message);
+        }
 
-    // QUTMS
-    driverless_msgs::msg::ConeDetectionStamped ground_truth_cones_qutms_message =
-        cone_array_to_cone_detection(ground_truth_cones_message);
-    ground_truth_track_qutms_message.header.frame_id = "base_footprint";
-    if (this->ground_truth_cone_qutms_pub_->get_subscription_count() > 0 && pub_ground_truth) {
-        this->ground_truth_cone_qutms_pub_->publish(ground_truth_cones_qutms_message);
+        // QUTMS
+        driverless_msgs::msg::ConeDetectionStamped ground_truth_cones_qutms_message =
+                cone_array_to_cone_detection(ground_truth_cones_message);
+        ground_truth_track_qutms_message.header.frame_id = "base_footprint";
+        if (this->ground_truth_cone_qutms_pub_->get_subscription_count() > 0 && pub_ground_truth) {
+            this->ground_truth_cone_qutms_pub_->publish(ground_truth_cones_qutms_message);
+        }
     }
 
     // Publish the simulated perception cones if it has subscribers and is allowed
     if (this->simulate_perception_) {
         // Cones from global view
-        eufs_msgs::msg::ConeArrayWithCovariance perception_track_message;
-        perception_track_message = addNoisePerception(ground_truth_track_message, perception_lidar_noise_);
         // Only apply noise once, have we seen this track before?
         if (!this->perception_track_initialized) {
-            this->perception_track_data = perception_track_message;
+            this->perception_track_data = addNoisePerception(ground_truth_track_message, perception_lidar_noise_);
             this->perception_track_initialized = true;
         }
-        if (this->perception_track_pub_->get_subscription_count() > 0 && this->perception_track_initialized) {
-            this->perception_track_data.header = perception_track_message.header;
+        if (this->perception_track_initialized) {
+            this->perception_track_data.header = ground_truth_track_message.header;
             this->perception_track_pub_->publish(this->perception_track_data);
         }
 
         // QUTMS
         driverless_msgs::msg::ConeDetectionStamped perception_track_qutms_message =
-            cone_array_to_cone_detection(perception_track_message);
+            cone_array_to_cone_detection(this->perception_track_data);
         perception_track_qutms_message.header.frame_id = "track";
         // Only apply noise once, have we seen this track before?
         if (!this->perception_track_qutms_initialized) {
