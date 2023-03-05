@@ -39,7 +39,6 @@ find_package(ament_index_cpp REQUIRED)
 find_package(image_geometry REQUIRED)
 find_package(yaml_cpp_vendor REQUIRED)
 find_package(driverless_msgs REQUIRED)
-find_package(sbg_driver REQUIRED)
 
 link_directories(${gazebo_dev_LIBRARY_DIRS})
 
@@ -81,7 +80,6 @@ ament_export_dependencies(ackermann_msgs)
 ament_export_dependencies(ament_index_cpp)
 ament_export_dependencies(yaml_cpp_vendor)
 ament_export_dependencies(driverless_msgs)
-ament_export_dependencies(sbg_driver)
 
 if(NOT WIN32)
   if(NOT APPLE)
