@@ -650,11 +650,10 @@ std::vector<double> RaceCarPlugin::ToQuaternion(std::vector<double> &euler) {
     double sr = sin(euler[2] * 0.5);
 
     std::vector<double> q;
-    q.reserve(4);
-    q[0] = cy * cp * sr - sy * sp * cr;  // x
-    q[1] = sy * cp * sr + cy * sp * cr;  // y
-    q[2] = sy * cp * cr - cy * sp * sr;  // z
-    q[3] = cy * cp * cr + sy * sp * sr;  // w
+    q.push_back(cy * cp * sr - sy * sp * cr);  // x
+    q.push_back(sy * cp * sr + cy * sp * cr);  // y
+    q.push_back(sy * cp * cr - cy * sp * sr);  // z
+    q.push_back(cy * cp * cr + sy * sp * sr);  // w
 
     return q;
 }
