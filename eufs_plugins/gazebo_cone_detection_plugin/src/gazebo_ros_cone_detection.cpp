@@ -6,6 +6,7 @@
 #include "helpers_gazebo.hpp"
 #include "helpers_track.hpp"
 #include "helpers_ros.hpp"
+#include "helpers_detection.hpp"
 
 namespace gazebo_plugins {
 namespace eufs_plugins {
@@ -52,10 +53,31 @@ void ConeDetectionPlugin::UpdateChild() {
     }
     last_update = curr_time;
     
+    ignition::math::Pose3d car_pose;
     driverless_msgs::msg::ConeDetectionStamped ground_truth_track = get_ground_truth_track(track_model, curr_time, ros_node->get_logger());
 
     if (has_subscribers(ground_truth_pub)) {
         ground_truth_pub->publish(ground_truth_track);
+    }
+
+    if (has_subscribers(lidar_detection_pub)) {
+        driverless_msgs::msg::ConeDetectionStamped lidar_detection = get_lidar_detection(car_pose, ground_truth_track);
+        lidar_detection_pub->publish(lidar_detection);
+    }
+
+    if (has_subscribers(vision_detection_pub)) {
+        driverless_msgs::msg::ConeDetectionStamped vision_detection = get_vision_detection(car_pose, ground_truth_track);
+        vision_detection_pub->publish(vision_detection);
+    }
+    
+    if (has_subscribers(slam_global_pub)) {
+        driverless_msgs::msg::ConeDetectionStamped slam_global_map = get_slam_global_map(car_pose, ground_truth_track);
+        slam_global_pub->publish(slam_global_map);
+    }
+
+    if (has_subscribers(slam_local_pub)) {
+        driverless_msgs::msg::ConeDetectionStamped slam_local_map = get_slam_local_map(car_pose, ground_truth_track);
+        slam_local_pub->publish(slam_local_map);
     }
 }
 
