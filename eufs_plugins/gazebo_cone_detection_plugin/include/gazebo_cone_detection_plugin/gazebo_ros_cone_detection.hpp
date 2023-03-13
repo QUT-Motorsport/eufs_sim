@@ -36,6 +36,10 @@ class ConeDetectionPlugin : public gazebo::ModelPlugin {
     gazebo::common::Time last_update;
 
     rclcpp::Publisher<driverless_msgs::msg::ConeDetectionStamped>::SharedPtr ground_truth_pub;
+    rclcpp::Publisher<driverless_msgs::msg::ConeDetectionStamped>::SharedPtr lidar_detection_pub;
+    rclcpp::Publisher<driverless_msgs::msg::ConeDetectionStamped>::SharedPtr vision_detection_pub;
+    rclcpp::Publisher<driverless_msgs::msg::ConeDetectionStamped>::SharedPtr slam_global_pub;
+    rclcpp::Publisher<driverless_msgs::msg::ConeDetectionStamped>::SharedPtr slam_local_pub;
 };
 
 }  // namespace eufs_plugins

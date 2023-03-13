@@ -38,28 +38,24 @@
 
   <gazebo>
     <plugin name="cone_detection" filename="libgazebo_ros_cone_detection.so">
-      <alwaysOn>true</alwaysOn>
       <updateRate>30.0</updateRate>
-      <cameraViewDistance>10</cameraViewDistance>
-      <lidarViewDistance>100</lidarViewDistance>
+      <cameraMinViewDistance>0.5</cameraMinViewDistance>
+      <cameraMaxViewDistance>10</cameraMaxViewDistance>
+      <cameraFOV>1.91986</cameraFOV><!--110 degrees-->
+      <cameraXNoise>0.1</cameraXNoise>
+      <cameraYNoise>0.1</cameraYNoise>
+      <lidarMinViewDistance>1</lidarMinViewDistance>
+      <lidarMaxViewDistance>100</lidarMaxViewDistance>
       <lidarXViewDistance>15</lidarXViewDistance>
       <lidarYViewDistance>10</lidarYViewDistance>
-      <lidarMinViewDistance>1</lidarMinViewDistance>
-      <cameraFOV>1.91986</cameraFOV><!--110 degrees-->
-      <cameraMinViewDistance>0.5</cameraMinViewDistance>
-      <lidarFOV>3.141593</lidarFOV><!-- 180 degrees-->
-      <lidarOn>true</lidarOn><!--If false, we only simulate camera measurements-->
-      <trackFrame>track</trackFrame>
-      <groundTruthConesTopicName>/ground_truth/cones</groundTruthConesTopicName>
-      <groundTruthTrackTopicName>/ground_truth/track</groundTruthTrackTopicName>
-      <perceptionConesTopicName>/simulated_noise/cones</perceptionConesTopicName>
-      <perceptionTrackTopicName>/simulated_noise/track</perceptionTrackTopicName>
-      <perceptionCameraDepthNoiseParameterA>0.01</perceptionCameraDepthNoiseParameterA>
-      <perceptionCameraDepthNoiseParameterB>0.5</perceptionCameraDepthNoiseParameterB>
-      <perceptionLidarNoise>0.03 0.03 0.0</perceptionLidarNoise>
-      <pubGroundTruth>$(arg pub_ground_truth)</pubGroundTruth>
+      <lidarFOV>3.141593</lidarFOV><!-- 180 degrees-->     
+      <lidarXNoise>0.1</lidarXNoise>
+      <lidarYNoise>0.1</lidarYNoise>
+      <SLAMXNoise>0.1</SLAMXNoise>
+      <SLAMYNoise>0.1</SLAMYNoise>
+      <publishGroundTruth>$(arg pub_ground_truth)</publishGroundTruth>
       <simulatePerception>$(arg simulate_perception)</simulatePerception>
-      <recolor_config>$(arg recolor_config)</recolor_config>
+      <simulateSLAM>$(arg simulate_perception)</simulateSLAM>
     </plugin>
   </gazebo>
 </robot>
