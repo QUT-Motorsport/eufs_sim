@@ -37,7 +37,7 @@
   </gazebo>
 
   <gazebo>
-    <plugin name="cone_generation" filename="libgazebo_ros_cone_gen.so">
+    <plugin name="cone_detection" filename="libgazebo_ros_cone_detection.so">
       <alwaysOn>true</alwaysOn>
       <updateRate>30.0</updateRate>
       <cameraViewDistance>10</cameraViewDistance>
