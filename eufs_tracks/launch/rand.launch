@@ -2,10 +2,10 @@
 <launch>
 
   <!-- Gazebo arguments -->
-  <set_env name="GAZEBO_MODEL_PATH" value="$(find-pkg-share eufs_tracks)/models"/>
-  <set_env name="GAZEBO_RESOURCE_PATH" value="$(find-pkg-share eufs_sensors)/meshes:$(find-pkg-share eufs_tracks)/meshes:$(find-pkg-share eufs_tracks)/materials:$(find-pkg-share eufs_racecar)/meshes:$(find-pkg-share eufs_racecar)/materials:/usr/share/gazebo-11"/>
-  <set_env name="GAZEBO_PLUGIN_PATH" value="/opt/ros/$(env ROS_DISTRO)/lib/:$(env EUFS_MASTER)/install/eufs_plugins"/>
-
+  <set_env name="GAZEBO_MODEL_PATH" value="$(find-pkg-share eufs_tracks)/models:$(env GAZEBO_MODEL_PATH)"/>
+  <set_env name="GAZEBO_RESOURCE_PATH" value="$(find-pkg-share eufs_tracks)/meshes:$(find-pkg-share eufs_tracks)/materials:$(find-pkg-share eufs_racecar)/meshes:$(find-pkg-share eufs_racecar)/materials::$(env GAZEBO_RESOURCE_PATH)"/>
+  <set_env name="GAZEBO_PLUGIN_PATH" value="/opt/ros/$(env ROS_DISTRO)/lib/:$(env EUFS_MASTER)/install/eufs_plugins:$(env GAZEBO_PLUGIN_PATH)"/>
+  
   <!-- Verbose argument passed to Gazebo -->
   <arg name="verbose" default="false"/>
 
