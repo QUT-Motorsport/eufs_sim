@@ -60,3 +60,21 @@ bool get_bool_parameter(
         return sdf->GetElement(element)->Get<bool>();
     }
 }
+
+
+std::string get_string_parameter(
+    sdf::ElementPtr sdf,
+    std::string element,
+    std::string default_value,
+    std::string default_description,
+    std::optional<const rclcpp::Logger> logger = {}
+) {
+    if (!sdf->HasElement(element)) {
+        if (logger) {
+            RCLCPP_WARN(*logger, "Plugin missing parameter <%s>, defaults to %s.", element.c_str(), default_description.c_str());
+        }
+        return default_value;
+    } else {
+        return sdf->GetElement(element)->Get<std::string>();
+    }
+}

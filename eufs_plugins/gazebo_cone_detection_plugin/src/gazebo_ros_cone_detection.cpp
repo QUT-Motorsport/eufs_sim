@@ -1,12 +1,4 @@
-#include "gazebo_cone_detection_plugin/gazebo_ros_cone_detection.hpp"
-
-#include "eigen3/Eigen/Core"
-#include "eigen3/Eigen/Dense"
-
-#include "helpers_gazebo.hpp"
-#include "helpers_track.hpp"
-#include "helpers_ros.hpp"
-#include "helpers_detection.hpp"
+#include "gazebo_ros_cone_detection.hpp"
 
 namespace gazebo_plugins {
 namespace eufs_plugins {
@@ -28,13 +20,19 @@ void ConeDetectionPlugin::Load(gazebo::physics::ModelPtr parent, sdf::ElementPtr
     bool simulate_perception = get_bool_parameter(sdf, "simulatePerception", true, "true");
     bool simulate_SLAM = get_bool_parameter(sdf, "simulateSLAM", true, "true");
 
+    lidar_config = populate_sensor_config("lidar", sdf, ros_node->get_logger());
+    std::string lidar_topic = get_string_parameter(sdf, "lidarDetectionTopic", "", "", ros_node->get_logger());
+
+    camera_config = populate_sensor_config("camera", sdf, ros_node->get_logger());
+    std::string camera_topic = get_string_parameter(sdf, "cameraDetectionTopic", "", "", ros_node->get_logger());
+
     if (publish_ground_truth) {
         ground_truth_pub = ros_node->create_publisher<driverless_msgs::msg::ConeDetectionStamped>(("ground_truth/global_map"), 1);
     }
 
     if (simulate_perception) {
-        lidar_detection_pub = ros_node->create_publisher<driverless_msgs::msg::ConeDetectionStamped>(("lidar/cone_detection"), 1);
-        vision_detection_pub = ros_node->create_publisher<driverless_msgs::msg::ConeDetectionStamped>(("vision/cone_detection"), 1);
+        lidar_detection_pub = ros_node->create_publisher<driverless_msgs::msg::ConeDetectionStamped>((lidar_topic), 1);
+        vision_detection_pub = ros_node->create_publisher<driverless_msgs::msg::ConeDetectionStamped>((camera_topic), 1);
     }
 
     if (simulate_SLAM) {
@@ -61,12 +59,12 @@ void ConeDetectionPlugin::UpdateChild() {
     }
 
     if (has_subscribers(lidar_detection_pub)) {
-        driverless_msgs::msg::ConeDetectionStamped lidar_detection = get_lidar_detection(car_pose, ground_truth_track);
+        driverless_msgs::msg::ConeDetectionStamped lidar_detection = get_sensor_detection(lidar_config, car_pose, ground_truth_track);
         lidar_detection_pub->publish(lidar_detection);
     }
 
     if (has_subscribers(vision_detection_pub)) {
-        driverless_msgs::msg::ConeDetectionStamped vision_detection = get_vision_detection(car_pose, ground_truth_track);
+        driverless_msgs::msg::ConeDetectionStamped vision_detection = get_sensor_detection(camera_config, car_pose, ground_truth_track);
         vision_detection_pub->publish(vision_detection);
     }
     

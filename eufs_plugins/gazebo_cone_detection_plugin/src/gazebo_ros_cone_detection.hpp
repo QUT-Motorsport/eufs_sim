@@ -15,6 +15,11 @@
 #include <driverless_msgs/msg/cone.hpp>
 #include <driverless_msgs/msg/cone_detection_stamped.hpp>
 
+#include "helpers_gazebo.hpp"
+#include "helpers_track.hpp"
+#include "helpers_ros.hpp"
+#include "helpers_detection.hpp"
+
 namespace gazebo_plugins {
 namespace eufs_plugins {
 
@@ -40,6 +45,9 @@ class ConeDetectionPlugin : public gazebo::ModelPlugin {
     rclcpp::Publisher<driverless_msgs::msg::ConeDetectionStamped>::SharedPtr vision_detection_pub;
     rclcpp::Publisher<driverless_msgs::msg::ConeDetectionStamped>::SharedPtr slam_global_pub;
     rclcpp::Publisher<driverless_msgs::msg::ConeDetectionStamped>::SharedPtr slam_local_pub;
+
+    SensorConfig_t lidar_config;
+    SensorConfig_t camera_config;
 };
 
 }  // namespace eufs_plugins

@@ -13,8 +13,6 @@ ament_target_dependencies(gazebo_ros_cone_detection
   "ament_index_cpp"
   "driverless_msgs")
 
-target_include_directories(gazebo_ros_cone_detection PUBLIC include)
-
 ament_export_libraries(gazebo_ros_cone_detection)
 
 install(TARGETS gazebo_ros_cone_detection
