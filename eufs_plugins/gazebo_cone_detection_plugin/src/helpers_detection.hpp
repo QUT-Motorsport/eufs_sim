@@ -18,6 +18,7 @@ typedef struct SensorConfig {
     double fov;
     double range_noise;
     double bearing_noise;
+    bool detects_colour;
 } SensorConfig_t;
 
 
@@ -27,12 +28,13 @@ SensorConfig_t populate_sensor_config(
     std::optional<const rclcpp::Logger> logger = {}
 ) {
     return {
-        get_string_parameter(sdf, sensor_prefix + "frameId", "", ""),
-        get_double_parameter(sdf, sensor_prefix + "minViewDistance", 0, "0"),
-        get_double_parameter(sdf, sensor_prefix + "maxViewDistance", 0, "0"),
+        get_string_parameter(sdf, sensor_prefix + "FrameId", "", ""),
+        get_double_parameter(sdf, sensor_prefix + "MinViewDistance", 0, "0"),
+        get_double_parameter(sdf, sensor_prefix + "MaxViewDistance", 0, "0"),
         get_double_parameter(sdf, sensor_prefix + "FOV", 0, "0"),
         get_double_parameter(sdf, sensor_prefix + "RangeNoise", 0, "0"),
-        get_double_parameter(sdf, sensor_prefix + "BearingNoise", 0, "0")
+        get_double_parameter(sdf, sensor_prefix + "BearingNoise", 0, "0"),
+        get_bool_parameter(sdf, sensor_prefix + "DetectsColour", true, "true"),
     };
 }
 
@@ -40,7 +42,7 @@ driverless_msgs::msg::Cone convert_cone_to_car_frame(
     const ignition::math::Pose3d car_pose,
     const driverless_msgs::msg::Cone cone
 ) {
-    driverless_msgs::msg::Cone translated_cone;
+    driverless_msgs::msg::Cone translated_cone = cone;
     
     double x = cone.location.x - car_pose.Pos().X();
     double y = cone.location.y - car_pose.Pos().Y();
@@ -112,15 +114,19 @@ driverless_msgs::msg::ConeDetectionStamped get_sensor_detection(
     for (auto const &cone : ground_truth_track.cones_with_cov) {
         auto translated_cone = convert_cone_to_car_frame(car_pose, cone.cone);
 
-        // double dist = cone_dist(translated_cone);
-        // if (dist < sensor_config.min_view_distance || dist > sensor_config.max_view_distance) {
-        //     continue;
-        // }
+        double dist = cone_dist(translated_cone);
+        if (dist < sensor_config.min_view_distance || dist > sensor_config.max_view_distance) {
+            continue;
+        }
 
-        // double angle = cone_angle(translated_cone);
-        // if (abs(angle) > sensor_config.fov/2) {
-        //     continue;
-        // }
+        double angle = cone_angle(translated_cone);
+        if (abs(angle) > sensor_config.fov/2) {
+            continue;
+        }
+
+        if (!sensor_config.detects_colour) {
+            translated_cone.color = driverless_msgs::msg::Cone::UNKNOWN;
+        }
 
         sensor_detection.cones_with_cov.push_back(
             make_noisy_cone(
@@ -150,4 +156,21 @@ driverless_msgs::msg::ConeDetectionStamped get_slam_local_map(
 ) {
     // TODO
     return ground_truth_track;
+}
+
+
+driverless_msgs::msg::ConeDetectionStamped get_ground_truth_track_centered_on_car_inital_pose(
+    ignition::math::Pose3d car_inital_pose,
+    driverless_msgs::msg::ConeDetectionStamped ground_truth_track
+) {
+    driverless_msgs::msg::ConeDetectionStamped centered_ground_truth;
+    centered_ground_truth.header = ground_truth_track.header;
+
+    for (auto const &cone : ground_truth_track.cones_with_cov) {
+        auto translated_cone = cone;
+        translated_cone.cone = convert_cone_to_car_frame(car_inital_pose, cone.cone);
+        centered_ground_truth.cones_with_cov.push_back(translated_cone);
+    }
+
+    return centered_ground_truth;
 }

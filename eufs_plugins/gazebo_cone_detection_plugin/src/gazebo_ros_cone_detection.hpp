@@ -34,8 +34,11 @@ class ConeDetectionPlugin : public gazebo::ModelPlugin {
   private:
     gazebo::physics::WorldPtr world;
     gazebo_ros::Node::SharedPtr ros_node;
-    gazebo::physics::ModelPtr track_model;
     gazebo::event::ConnectionPtr update_connection;
+
+    gazebo::physics::ModelPtr track_model;
+    gazebo::physics::LinkPtr car_link;
+    ignition::math::Pose3d car_inital_pose;
 
     double update_rate;
     gazebo::common::Time last_update;
