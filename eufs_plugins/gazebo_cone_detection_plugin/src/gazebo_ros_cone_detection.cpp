@@ -10,8 +10,6 @@ ConeDetectionPlugin::ConeDetectionPlugin() { }
 void ConeDetectionPlugin::Load(gazebo::physics::ModelPtr parent, sdf::ElementPtr sdf) {
     ros_node = gazebo_ros::Node::Get(sdf);
 
-    RCLCPP_INFO(ros_node->get_logger(), "Initalising Cone Detection Plugin.");
-
     world = parent->GetWorld();
     track_model = get_model(world, "track", ros_node->get_logger());
 
@@ -30,6 +28,8 @@ void ConeDetectionPlugin::Load(gazebo::physics::ModelPtr parent, sdf::ElementPtr
     camera_config = populate_sensor_config("camera", sdf, ros_node->get_logger());
     std::string camera_topic = get_string_parameter(sdf, "cameraDetectionTopic", "", "", ros_node->get_logger());
 
+    slam_config = populate_slam_config(sdf, ros_node->get_logger());
+
     if (publish_ground_truth) {
         ground_truth_pub = ros_node->create_publisher<driverless_msgs::msg::ConeDetectionStamped>(("ground_truth/global_map"), 1);
     }
@@ -46,6 +46,8 @@ void ConeDetectionPlugin::Load(gazebo::physics::ModelPtr parent, sdf::ElementPtr
 
     last_update = world->SimTime();
     update_connection = gazebo::event::Events::ConnectWorldUpdateBegin(std::bind(&ConeDetectionPlugin::UpdateChild, this));
+
+    RCLCPP_INFO(ros_node->get_logger(), "ConeDetectionPlugin Loaded");
 }
 
 void ConeDetectionPlugin::UpdateChild() {
@@ -59,7 +61,7 @@ void ConeDetectionPlugin::UpdateChild() {
     driverless_msgs::msg::ConeDetectionStamped ground_truth_track = get_ground_truth_track(track_model, curr_time, ros_node->get_logger());
 
     if (has_subscribers(ground_truth_pub)) {
-        auto centered_ground_truth = get_ground_truth_track_centered_on_car_inital_pose(car_inital_pose, ground_truth_track);
+        auto centered_ground_truth = get_track_centered_on_car_inital_pose(car_inital_pose, ground_truth_track);
         ground_truth_pub->publish(centered_ground_truth);
     }
 
@@ -73,14 +75,18 @@ void ConeDetectionPlugin::UpdateChild() {
         vision_detection_pub->publish(vision_detection);
     }
     
-    if (has_subscribers(slam_global_pub)) {
-        auto slam_global_map = get_slam_global_map(car_pose, ground_truth_track);
-        slam_global_pub->publish(slam_global_map);
-    }
+    if (has_subscribers(slam_global_pub) || has_subscribers(slam_local_pub)) {
+        auto noisy_slam_ground_truth_track = get_noisy_slam_ground_truth_track(slam_config, ground_truth_track);
 
-    if (has_subscribers(slam_local_pub)) {
-        auto slam_local_map = get_slam_local_map(car_pose, ground_truth_track);
-        slam_local_pub->publish(slam_local_map);
+        if (has_subscribers(slam_global_pub)) {
+            auto slam_global_map = get_track_centered_on_car_inital_pose(car_inital_pose, noisy_slam_ground_truth_track);
+            slam_global_pub->publish(slam_global_map);
+        }
+
+        if (has_subscribers(slam_local_pub)) {
+            auto slam_local_map = get_slam_local_map(slam_config, car_pose, noisy_slam_ground_truth_track);
+            slam_local_pub->publish(slam_local_map);
+        }
     }
 }
 

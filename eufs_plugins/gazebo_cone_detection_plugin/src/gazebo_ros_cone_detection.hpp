@@ -51,6 +51,7 @@ class ConeDetectionPlugin : public gazebo::ModelPlugin {
 
     SensorConfig_t lidar_config;
     SensorConfig_t camera_config;
+    SLAMConfig_t slam_config;
 };
 
 }  // namespace eufs_plugins

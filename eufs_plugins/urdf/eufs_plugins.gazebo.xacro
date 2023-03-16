@@ -56,8 +56,12 @@
       <lidarRangeNoise>0.01</lidarRangeNoise>
       <lidarBearingNoise>0.001</lidarBearingNoise>
       <lidarDetectsColour>false</lidarDetectsColour>
+      <SLAMFrameId>track</SLAMFrameId>
       <SLAMXNoise>0.1</SLAMXNoise>
       <SLAMYNoise>0.1</SLAMYNoise>
+      <SLAMLocalFrameId>base_footprint</SLAMLocalFrameId>
+      <SLAMLocalRangeX>20</SLAMLocalRangeX>
+      <SLAMLocalRangeY>10</SLAMLocalRangeY>
       <publishGroundTruth>$(arg pub_ground_truth)</publishGroundTruth>
       <simulatePerception>$(arg simulate_perception)</simulatePerception>
       <simulateSLAM>$(arg simulate_perception)</simulateSLAM>

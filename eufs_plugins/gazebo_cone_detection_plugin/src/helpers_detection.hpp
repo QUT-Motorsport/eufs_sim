@@ -28,13 +28,13 @@ SensorConfig_t populate_sensor_config(
     std::optional<const rclcpp::Logger> logger = {}
 ) {
     return {
-        get_string_parameter(sdf, sensor_prefix + "FrameId", "", ""),
-        get_double_parameter(sdf, sensor_prefix + "MinViewDistance", 0, "0"),
-        get_double_parameter(sdf, sensor_prefix + "MaxViewDistance", 0, "0"),
-        get_double_parameter(sdf, sensor_prefix + "FOV", 0, "0"),
-        get_double_parameter(sdf, sensor_prefix + "RangeNoise", 0, "0"),
-        get_double_parameter(sdf, sensor_prefix + "BearingNoise", 0, "0"),
-        get_bool_parameter(sdf, sensor_prefix + "DetectsColour", true, "true"),
+        get_string_parameter(sdf, sensor_prefix + "FrameId", "", "", logger),
+        get_double_parameter(sdf, sensor_prefix + "MinViewDistance", 0, "0", logger),
+        get_double_parameter(sdf, sensor_prefix + "MaxViewDistance", 0, "0", logger),
+        get_double_parameter(sdf, sensor_prefix + "FOV", 0, "0", logger),
+        get_double_parameter(sdf, sensor_prefix + "RangeNoise", 0, "0", logger),
+        get_double_parameter(sdf, sensor_prefix + "BearingNoise", 0, "0", logger),
+        get_bool_parameter(sdf, sensor_prefix + "DetectsColour", true, "true", logger),
     };
 }
 
@@ -82,7 +82,7 @@ double GaussianKernel(double mu, double sigma) {
     return X;
 }
 
-driverless_msgs::msg::ConeWithCovariance make_noisy_cone(
+driverless_msgs::msg::ConeWithCovariance make_noisy_range_bearing_cone(
     driverless_msgs::msg::Cone cone,
     double range_noise,
     double bearing_noise
@@ -100,6 +100,21 @@ driverless_msgs::msg::ConeWithCovariance make_noisy_cone(
     noisy_cone.covariance = {range_noise*range_noise, 0, 0, bearing_noise*bearing_noise};
 
     return noisy_cone;   
+}
+
+
+driverless_msgs::msg::ConeWithCovariance make_noisy_x_y_cone(
+    driverless_msgs::msg::Cone cone,
+    double x_noise,
+    double y_noise
+) {
+    driverless_msgs::msg::ConeWithCovariance noisy_cone;
+    noisy_cone.cone = cone;
+    noisy_cone.cone.location.x += GaussianKernel(0, x_noise);
+    noisy_cone.cone.location.y += GaussianKernel(0, y_noise);
+    noisy_cone.covariance = {x_noise*x_noise, 0, 0, y_noise*y_noise};
+
+    return noisy_cone;
 }
 
 driverless_msgs::msg::ConeDetectionStamped get_sensor_detection(
@@ -129,7 +144,7 @@ driverless_msgs::msg::ConeDetectionStamped get_sensor_detection(
         }
 
         sensor_detection.cones_with_cov.push_back(
-            make_noisy_cone(
+            make_noisy_range_bearing_cone(
                 translated_cone,
                 sensor_config.range_noise,
                 sensor_config.bearing_noise
@@ -141,36 +156,86 @@ driverless_msgs::msg::ConeDetectionStamped get_sensor_detection(
 }
 
 
-driverless_msgs::msg::ConeDetectionStamped get_slam_global_map(
-    ignition::math::Pose3d car_pose,
+driverless_msgs::msg::ConeDetectionStamped get_track_centered_on_car_inital_pose(
+    ignition::math::Pose3d car_inital_pose,
+    driverless_msgs::msg::ConeDetectionStamped track
+) {
+    driverless_msgs::msg::ConeDetectionStamped centered_track;
+    centered_track.header = track.header;
+
+    for (auto const &cone : track.cones_with_cov) {
+        auto translated_cone = cone;
+        translated_cone.cone = convert_cone_to_car_frame(car_inital_pose, cone.cone);
+        centered_track.cones_with_cov.push_back(translated_cone);
+    }
+
+    return centered_track;
+}
+
+
+typedef struct SLAMConfig {
+    std::string frame_id;
+    double x_noise;
+    double y_noise;
+    std::string local_frame_id;
+    double local_range_x;
+    double local_range_y;
+} SLAMConfig_t;
+
+
+SLAMConfig_t populate_slam_config(
+    sdf::ElementPtr sdf,
+    std::optional<const rclcpp::Logger> logger = {}
+) {
+    return {
+        get_string_parameter(sdf,"SLAMFrameId", "", "", logger),
+        get_double_parameter(sdf,"SLAMXNoise", 0, "0", logger),
+        get_double_parameter(sdf,"SLAMYNoise", 0, "0", logger),
+        get_string_parameter(sdf,"SLAMLocalFrameId", "", "", logger),
+        get_double_parameter(sdf,"SLAMLocalRangeX", 0, "0", logger),
+        get_double_parameter(sdf,"SLAMLocalRangeY", 0, "0", logger),
+    };
+}
+
+
+driverless_msgs::msg::ConeDetectionStamped get_noisy_slam_ground_truth_track(
+    SLAMConfig_t slam_config,
     driverless_msgs::msg::ConeDetectionStamped ground_truth_track
 ) {
-    // TODO
-    return ground_truth_track;
+    driverless_msgs::msg::ConeDetectionStamped noisy_ground_truth;
+    noisy_ground_truth.header = ground_truth_track.header;
+    for (auto const &cone : ground_truth_track.cones_with_cov) {
+        noisy_ground_truth.cones_with_cov.push_back(
+            make_noisy_x_y_cone(
+                cone.cone,
+                slam_config.x_noise,
+                slam_config.y_noise
+            )
+        );
+    }
+
+    return noisy_ground_truth;
 }
 
 
 driverless_msgs::msg::ConeDetectionStamped get_slam_local_map(
+    SLAMConfig_t slam_config,
     ignition::math::Pose3d car_pose,
-    driverless_msgs::msg::ConeDetectionStamped ground_truth_track
+    driverless_msgs::msg::ConeDetectionStamped noisy_slam_ground_truth_track
 ) {
-    // TODO
-    return ground_truth_track;
-}
+    driverless_msgs::msg::ConeDetectionStamped slam_local_map;
+    slam_local_map.header = noisy_slam_ground_truth_track.header;
+    slam_local_map.header.frame_id = slam_config.local_frame_id;
 
-
-driverless_msgs::msg::ConeDetectionStamped get_ground_truth_track_centered_on_car_inital_pose(
-    ignition::math::Pose3d car_inital_pose,
-    driverless_msgs::msg::ConeDetectionStamped ground_truth_track
-) {
-    driverless_msgs::msg::ConeDetectionStamped centered_ground_truth;
-    centered_ground_truth.header = ground_truth_track.header;
-
-    for (auto const &cone : ground_truth_track.cones_with_cov) {
+    for (auto const &cone : noisy_slam_ground_truth_track.cones_with_cov) {
         auto translated_cone = cone;
-        translated_cone.cone = convert_cone_to_car_frame(car_inital_pose, cone.cone);
-        centered_ground_truth.cones_with_cov.push_back(translated_cone);
+        translated_cone.cone = convert_cone_to_car_frame(car_pose, cone.cone);
+        bool within_x_range = 0 < translated_cone.cone.location.x && translated_cone.cone.location.x < slam_config.local_range_x / 2;
+        bool within_y_range = abs(translated_cone.cone.location.y) < slam_config.local_range_y;
+        if (within_x_range && within_y_range) {
+            slam_local_map.cones_with_cov.push_back(translated_cone);
+        }
     }
-
-    return centered_ground_truth;
+    
+    return slam_local_map;
 }
