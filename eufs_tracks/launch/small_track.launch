@@ -4,6 +4,7 @@
   <!-- A robostack environment or not -->
   <arg name="robostack" default="false"/>
 
+  <!-- Gazebo arguments -->
   <set_env name="GAZEBO_MODEL_PATH" value="$(find-pkg-share eufs_tracks)/models:$(env GAZEBO_MODEL_PATH)" if="$(var robostack)"/>
   <set_env name="GAZEBO_MODEL_PATH" value="$(find-pkg-share eufs_tracks)/models" unless="$(var robostack)"/>
   <set_env name="GAZEBO_RESOURCE_PATH" value="$(find-pkg-share eufs_tracks)/meshes:$(find-pkg-share eufs_tracks)/materials:$(find-pkg-share eufs_racecar)/meshes:$(find-pkg-share eufs_racecar)/materials::$(env GAZEBO_RESOURCE_PATH)" if="$(var robostack)"/>
