@@ -71,6 +71,11 @@ def generate_launch_description():
                 default_value="default",
                 description="Condition to enable lidar",
             ),
+            DeclareLaunchArgument(
+                name="robostack",
+                default_value="false",
+                description="Condition to use robostack",
+            ),
             IncludeLaunchDescription(
                 FrontendLaunchDescriptionSource(
                     PathJoinSubstitution(
@@ -95,6 +100,7 @@ def generate_launch_description():
                     ("launch_group", LaunchConfiguration("launch_group")),
                     ("camera", LaunchConfiguration("camera")),
                     ("lidar", LaunchConfiguration("lidar")),
+                    ("robostack", LaunchConfiguration("robostack")),
                 ],
             ),
         ]

@@ -96,3 +96,12 @@ eufs_launcher:
       parameter_triggering:
         if_on: { "lidar:=false" }
         if_off: { "lidar:=true" }
+
+    robostack:
+      priority: 8
+      name: "Robostack_Checkbox"
+      label: "Robostack"
+      checked_on_default: No
+      parameter_triggering:
+        if_on: { "robostack:=true" }
+        if_off: { "robostack:=false" }
