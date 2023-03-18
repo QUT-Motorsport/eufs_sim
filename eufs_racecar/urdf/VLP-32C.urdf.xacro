@@ -59,7 +59,7 @@
     <xacro:unless value="${active}">
       <!-- Gazebo requires the velodyne_gazebo_plugins package -->
       <gazebo reference="${prefix}">
-        <sensor type="ray" name="${prefix}-VLP16">
+        <sensor type="ray" name="${prefix}-vlp32">
           <always_on>true</always_on>
           <pose>0 0 0 0 0 0</pose>
           <visualize>false</visualize>
@@ -99,7 +99,48 @@
             <radiation_type>infrared</radiation_type>
             <output_type>sensor_msgs/PointCloud2</output_type>
           </plugin>
+        </sensor>
 
+        <sensor type="ray" name="${prefix}-laserscan">
+          <always_on>true</always_on>
+          <pose>0 0 0 0 0 0</pose>
+          <visualize>false</visualize>
+          <update_rate>${hz}</update_rate>
+          <ray>
+            <scan>
+              <horizontal>
+                <samples>${samples}</samples>
+                <resolution>1.0</resolution>
+                <min_angle>${min_angle}</min_angle>
+                <max_angle>${max_angle}</max_angle>
+              </horizontal>
+              <vertical>
+                <samples>1</samples>
+                <resolution>1.0</resolution>
+                <min_angle>0.0</min_angle>
+                <max_angle>0.0</max_angle>
+              </vertical>
+            </scan>
+            <range>
+              <min>${min_range}</min>
+              <max>${max_range}</max>
+              <resolution>0.001</resolution>
+            </range>
+            <noise>
+              <type>gaussian</type>
+              <mean>0.0</mean>
+              <stddev>${noise}</stddev>
+            </noise>
+          </ray>
+
+          <plugin name="gazebo_ros_laserscan_controller" filename="libgazebo_ros_ray_sensor.so">
+            <ros>
+              <remapping>~/out:=/scan</remapping>
+            </ros>
+            <frame_name>${prefix}</frame_name>
+            <radiation_type>infrared</radiation_type>
+            <output_type>sensor_msgs/LaserScan</output_type>
+          </plugin>
         </sensor>
       </gazebo>
     </xacro:unless>
