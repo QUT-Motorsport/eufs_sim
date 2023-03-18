@@ -1,5 +1,0 @@
-[flake8]
-max-line-length = 100
-; allow star imports (F405, F403)
-; allow line break before binary operator as per flake8 best practices (W503)
-ignore = W503
