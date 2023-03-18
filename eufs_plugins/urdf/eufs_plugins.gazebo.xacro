@@ -38,9 +38,9 @@
 
   <gazebo>
     <plugin name="cone_detection" filename="libgazebo_ros_cone_detection.so">
-      <updateRate>30.0</updateRate>
+      <updateRate>20.0</updateRate>
       <cameraDetectionTopic>vision/cone_detection</cameraDetectionTopic>
-      <cameraFrameId>vision</cameraFrameId>
+      <cameraFrameId>zed2i_left_camera_optical_frame</cameraFrameId>
       <cameraMinViewDistance>0.5</cameraMinViewDistance>
       <cameraMaxViewDistance>10</cameraMaxViewDistance>
       <cameraFOV>1.91986</cameraFOV><!--110 degrees-->
@@ -48,7 +48,6 @@
       <cameraBearingNoise>0.01</cameraBearingNoise>
       <cameraDetectsColour>true</cameraDetectsColour>
       <lidarDetectionTopic>lidar/cone_detection</lidarDetectionTopic>
-      <lidarFrameId>velodyne</lidarFrameId>
       <lidarFrameId>velodyne</lidarFrameId>
       <lidarMinViewDistance>1</lidarMinViewDistance>
       <lidarMaxViewDistance>20</lidarMaxViewDistance>
