@@ -26,10 +26,24 @@ Panels:
     Experimental: false
     Name: Time
     SyncMode: 0
-    SyncSource: Velodyne Points
+    SyncSource: ""
 Visualization Manager:
   Class: ""
   Displays:
+    - Class: rviz_default_plugins/TF
+      Enabled: false
+      Frame Timeout: 15
+      Frames:
+        All Enabled: true
+      Marker Scale: 1
+      Name: TF
+      Show Arrows: true
+      Show Axes: true
+      Show Names: false
+      Tree:
+        {}
+      Update Interval: 0
+      Value: false
     - Alpha: 1
       Class: rviz_default_plugins/RobotModel
       Collision Enabled: false
@@ -169,18 +183,17 @@ Visualization Manager:
     - Class: eufs_rviz_plugins/ConeArrayWithCovariance
       Color: 200; 200; 200
       Color Display: Cone
-      Enabled: true
+      Enabled: false
       Name: Ground Truth Track
       Namespaces:
-        cone: true
-        covariance: true
+        {}
       Topic:
         Depth: 5
         Durability Policy: Volatile
         History Policy: Keep Last
         Reliability Policy: Reliable
         Value: /ground_truth/global_map
-      Value: true
+      Value: false
     - Class: eufs_rviz_plugins/ConeArrayWithCovariance
       Color: 200; 200; 200
       Color Display: Cone
@@ -195,6 +208,21 @@ Visualization Manager:
         Reliability Policy: Reliable
         Value: /slam/global_map
       Value: false
+    - Class: eufs_rviz_plugins/ConeArrayWithCovariance
+      Color: 200; 200; 200
+      Color Display: Cone
+      Enabled: true
+      Name: SLAM Local
+      Namespaces:
+        cone: true
+        covariance: true
+      Topic:
+        Depth: 5
+        Durability Policy: Volatile
+        History Policy: Keep Last
+        Reliability Policy: Reliable
+        Value: /slam/local_map
+      Value: true
     - Class: rviz_default_plugins/Marker
       Enabled: true
       Name: Path
@@ -351,10 +379,10 @@ Visualization Manager:
       Invert Z Axis: false
       Name: Current View
       Near Clip Distance: 0.009999999776482582
-      Pitch: 0.35039854049682617
+      Pitch: 0.8153985738754272
       Target Frame: <Fixed Frame>
       Value: ThirdPersonFollower (rviz_default_plugins)
-      Yaw: 3.0454025268554688
+      Yaw: 3.1554031372070312
     Saved:
       - Class: rviz_default_plugins/Orbit
         Distance: 8.5
@@ -392,7 +420,7 @@ Window Geometry:
   Views:
     collapsed: false
   Width: 1908
-  X: -32
-  Y: -32
+  X: 2272
+  Y: 64
   ZED2i RGB Image:
     collapsed: false
