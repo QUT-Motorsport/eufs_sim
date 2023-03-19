@@ -51,7 +51,7 @@
       <lidarFrameId>velodyne</lidarFrameId>
       <lidarMinViewDistance>1</lidarMinViewDistance>
       <lidarMaxViewDistance>20</lidarMaxViewDistance>
-      <lidarFOV>3.141593</lidarFOV><!-- 180 degrees-->     
+      <lidarFOV>3.141593</lidarFOV><!-- 180 degrees-->
       <lidarRangeNoise>0.01</lidarRangeNoise>
       <lidarBearingNoise>0.001</lidarBearingNoise>
       <lidarDetectsColour>false</lidarDetectsColour>

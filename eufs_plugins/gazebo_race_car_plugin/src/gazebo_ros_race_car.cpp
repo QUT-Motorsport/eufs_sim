@@ -293,7 +293,7 @@ void RaceCarPlugin::setPositionFromWorld() {
 }
 
 bool RaceCarPlugin::resetVehiclePosition(std::shared_ptr<std_srvs::srv::Trigger::Request>,
-                                              std::shared_ptr<std_srvs::srv::Trigger::Response> response) {
+                                         std::shared_ptr<std_srvs::srv::Trigger::Response> response) {
     _state.x = 0.0;
     _state.y = 0.0;
     _state.z = 0.0;
@@ -319,7 +319,7 @@ bool RaceCarPlugin::resetVehiclePosition(std::shared_ptr<std_srvs::srv::Trigger:
 }
 
 void RaceCarPlugin::returnCommandMode(std::shared_ptr<std_srvs::srv::Trigger::Request>,
-                                           std::shared_ptr<std_srvs::srv::Trigger::Response> response) {
+                                      std::shared_ptr<std_srvs::srv::Trigger::Response> response) {
     std::string command_mode_str;
     if (_command_mode == acceleration) {
         command_mode_str = "acceleration";

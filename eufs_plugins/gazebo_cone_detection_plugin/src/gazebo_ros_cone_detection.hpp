@@ -15,10 +15,10 @@
 #include <driverless_msgs/msg/cone.hpp>
 #include <driverless_msgs/msg/cone_detection_stamped.hpp>
 
-#include "helpers_gazebo.hpp"
-#include "helpers_track.hpp"
-#include "helpers_ros.hpp"
 #include "helpers_detection.hpp"
+#include "helpers_gazebo.hpp"
+#include "helpers_ros.hpp"
+#include "helpers_track.hpp"
 
 namespace gazebo_plugins {
 namespace eufs_plugins {
@@ -31,7 +31,7 @@ class ConeDetectionPlugin : public gazebo::ModelPlugin {
     void Load(gazebo::physics::ModelPtr parent, sdf::ElementPtr sdf);
     void UpdateChild();
 
-  private:
+   private:
     gazebo::physics::WorldPtr world;
     gazebo_ros::Node::SharedPtr ros_node;
     gazebo::event::ConnectionPtr update_connection;

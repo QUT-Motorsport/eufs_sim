@@ -5,7 +5,7 @@ namespace eufs_plugins {
 
 GZ_REGISTER_MODEL_PLUGIN(ConeDetectionPlugin)
 
-ConeDetectionPlugin::ConeDetectionPlugin() { }
+ConeDetectionPlugin::ConeDetectionPlugin() {}
 
 void ConeDetectionPlugin::Load(gazebo::physics::ModelPtr parent, sdf::ElementPtr sdf) {
     ros_node = gazebo_ros::Node::Get(sdf);
@@ -31,21 +31,25 @@ void ConeDetectionPlugin::Load(gazebo::physics::ModelPtr parent, sdf::ElementPtr
     slam_config = populate_slam_config(sdf, ros_node->get_logger());
 
     if (publish_ground_truth) {
-        ground_truth_pub = ros_node->create_publisher<driverless_msgs::msg::ConeDetectionStamped>(("ground_truth/global_map"), 1);
+        ground_truth_pub =
+            ros_node->create_publisher<driverless_msgs::msg::ConeDetectionStamped>(("ground_truth/global_map"), 1);
     }
 
     if (simulate_perception) {
         lidar_detection_pub = ros_node->create_publisher<driverless_msgs::msg::ConeDetectionStamped>((lidar_topic), 1);
-        vision_detection_pub = ros_node->create_publisher<driverless_msgs::msg::ConeDetectionStamped>((camera_topic), 1);
+        vision_detection_pub =
+            ros_node->create_publisher<driverless_msgs::msg::ConeDetectionStamped>((camera_topic), 1);
     }
 
     if (simulate_SLAM) {
-        slam_global_pub = ros_node->create_publisher<driverless_msgs::msg::ConeDetectionStamped>(("slam/global_map"), 1);
+        slam_global_pub =
+            ros_node->create_publisher<driverless_msgs::msg::ConeDetectionStamped>(("slam/global_map"), 1);
         slam_local_pub = ros_node->create_publisher<driverless_msgs::msg::ConeDetectionStamped>(("slam/local_map"), 1);
     }
 
     last_update = world->SimTime();
-    update_connection = gazebo::event::Events::ConnectWorldUpdateBegin(std::bind(&ConeDetectionPlugin::UpdateChild, this));
+    update_connection =
+        gazebo::event::Events::ConnectWorldUpdateBegin(std::bind(&ConeDetectionPlugin::UpdateChild, this));
 
     RCLCPP_INFO(ros_node->get_logger(), "ConeDetectionPlugin Loaded");
 }
@@ -56,9 +60,10 @@ void ConeDetectionPlugin::UpdateChild() {
         return;
     }
     last_update = curr_time;
-    
+
     ignition::math::Pose3d car_pose = car_link->WorldPose();
-    driverless_msgs::msg::ConeDetectionStamped ground_truth_track = get_ground_truth_track(track_model, curr_time, ros_node->get_logger());
+    driverless_msgs::msg::ConeDetectionStamped ground_truth_track =
+        get_ground_truth_track(track_model, curr_time, ros_node->get_logger());
 
     if (has_subscribers(ground_truth_pub)) {
         auto centered_ground_truth = get_track_centered_on_car_inital_pose(car_inital_pose, ground_truth_track);
@@ -74,12 +79,13 @@ void ConeDetectionPlugin::UpdateChild() {
         auto vision_detection = get_sensor_detection(camera_config, car_pose, ground_truth_track);
         vision_detection_pub->publish(vision_detection);
     }
-    
+
     if (has_subscribers(slam_global_pub) || has_subscribers(slam_local_pub)) {
         auto noisy_slam_ground_truth_track = get_noisy_slam_ground_truth_track(slam_config, ground_truth_track);
 
         if (has_subscribers(slam_global_pub)) {
-            auto slam_global_map = get_track_centered_on_car_inital_pose(car_inital_pose, noisy_slam_ground_truth_track);
+            auto slam_global_map =
+                get_track_centered_on_car_inital_pose(car_inital_pose, noisy_slam_ground_truth_track);
             slam_global_pub->publish(slam_global_map);
         }
 

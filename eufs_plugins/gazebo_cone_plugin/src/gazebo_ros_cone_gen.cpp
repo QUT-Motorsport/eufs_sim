@@ -237,7 +237,7 @@ void ConeGeneratorPlugin::UpdateChild() {
 
         // QUTMS
         driverless_msgs::msg::ConeDetectionStamped ground_truth_cones_qutms_message =
-                cone_array_to_cone_detection(ground_truth_cones_message);
+            cone_array_to_cone_detection(ground_truth_cones_message);
         ground_truth_track_qutms_message.header.frame_id = "base_footprint";
         if (this->ground_truth_cone_qutms_pub_->get_subscription_count() > 0 && pub_ground_truth) {
             this->ground_truth_cone_qutms_pub_->publish(ground_truth_cones_qutms_message);
@@ -344,7 +344,7 @@ eufs_msgs::msg::ConeArrayWithCovariance ConeGeneratorPlugin::getConeArraysMessag
 }
 
 void ConeGeneratorPlugin::addConeToConeArray(eufs_msgs::msg::ConeArrayWithCovariance &ground_truth_cone_array,
-                                                gazebo::physics::LinkPtr link) {
+                                             gazebo::physics::LinkPtr link) {
     geometry_msgs::msg::Point point;
     point.x = link->WorldPose().Pos().X();
     point.y = link->WorldPose().Pos().Y();
@@ -433,7 +433,7 @@ eufs_msgs::msg::ConeArrayWithCovariance ConeGeneratorPlugin::processCones(
 
 // Resets the position of cones to initial track model
 bool ConeGeneratorPlugin::resetConePosition(std::shared_ptr<std_srvs::srv::Trigger::Request> request,
-                                               std::shared_ptr<std_srvs::srv::Trigger::Response> response) {
+                                            std::shared_ptr<std_srvs::srv::Trigger::Response> response) {
     (void)request;   // suppress unused parameter warning
     (void)response;  // suppress unused parameter warning
 
@@ -627,7 +627,7 @@ eufs_msgs::msg::ConeArrayWithCovariance ConeGeneratorPlugin::addNoisePerception(
 }
 
 void ConeGeneratorPlugin::addNoiseToConeArray(std::vector<eufs_msgs::msg::ConeWithCovariance> &cone_array,
-                                                 ignition::math::Vector3d noise) {
+                                              ignition::math::Vector3d noise) {
     for (unsigned int i = 0; i < cone_array.size(); i++) {
         // Lidar noise
         auto lidar_x_noise = noise.X();
@@ -750,7 +750,7 @@ std::map<std::string, std::vector<eufs_msgs::msg::ConeWithCovariance>> ConeGener
 
 // Helper function for parameters
 bool ConeGeneratorPlugin::getBoolParameter(sdf::ElementPtr _sdf, const char *element, bool default_value,
-                                              const char *default_description) {
+                                           const char *default_description) {
     if (!_sdf->HasElement(element)) {
         RCLCPP_DEBUG(this->rosnode_->get_logger(), "cone_ground_truth plugin missing <%s>, defaults to %s", element,
                      default_description);
@@ -761,7 +761,7 @@ bool ConeGeneratorPlugin::getBoolParameter(sdf::ElementPtr _sdf, const char *ele
 }
 
 double ConeGeneratorPlugin::getDoubleParameter(sdf::ElementPtr _sdf, const char *element, double default_value,
-                                                  const char *default_description) {
+                                               const char *default_description) {
     if (!_sdf->HasElement(element)) {
         RCLCPP_DEBUG(this->rosnode_->get_logger(), "cone_ground_truth plugin missing <%s>, defaults to %s", element,
                      default_description);
@@ -772,7 +772,7 @@ double ConeGeneratorPlugin::getDoubleParameter(sdf::ElementPtr _sdf, const char 
 }
 
 std::string ConeGeneratorPlugin::getStringParameter(sdf::ElementPtr _sdf, const char *element,
-                                                       std::string default_value, const char *default_description) {
+                                                    std::string default_value, const char *default_description) {
     if (!_sdf->HasElement(element)) {
         RCLCPP_DEBUG(this->rosnode_->get_logger(), "cone_ground_truth plugin missing <%s>, defaults to %s", element,
                      default_description);
@@ -783,8 +783,8 @@ std::string ConeGeneratorPlugin::getStringParameter(sdf::ElementPtr _sdf, const 
 }
 
 ignition::math::Vector3d ConeGeneratorPlugin::getVector3dParameter(sdf::ElementPtr _sdf, const char *element,
-                                                                      ignition::math::Vector3d default_value,
-                                                                      const char *default_description) {
+                                                                   ignition::math::Vector3d default_value,
+                                                                   const char *default_description) {
     if (!_sdf->HasElement(element)) {
         RCLCPP_DEBUG(this->rosnode_->get_logger(), "cone_ground_truth plugin missing <%s>, defaults to %s", element,
                      default_description);
