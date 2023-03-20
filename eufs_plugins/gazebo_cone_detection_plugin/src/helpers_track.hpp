@@ -35,6 +35,7 @@ int get_cone_colour(gazebo::physics::LinkPtr cone_link, std::optional<const rclc
 
 driverless_msgs::msg::ConeWithCovariance get_cone_from_link(gazebo::physics::LinkPtr cone_link,
                                                             std::array<double, 4UL> covariance,
+                                                            uint8_t index,
                                                             std::optional<const rclcpp::Logger> logger = {}) {
     driverless_msgs::msg::ConeWithCovariance cone;
     cone.cone.location.x = cone_link->WorldPose().Pos().X();
@@ -42,6 +43,7 @@ driverless_msgs::msg::ConeWithCovariance get_cone_from_link(gazebo::physics::Lin
     cone.cone.location.z = 0;
     cone.cone.color = get_cone_colour(cone_link, logger);
     cone.covariance = covariance;
+    cone.cone.sim_cone_index = index;
 
     return cone;
 }
@@ -56,8 +58,9 @@ driverless_msgs::msg::ConeDetectionStamped get_ground_truth_track(gazebo::physic
     track.header.stamp.nanosec = now.nsec;
 
     gazebo::physics::Link_V links = track_model->GetLinks();
-    for (auto const &link : links) {
-        track.cones_with_cov.push_back(get_cone_from_link(link, {0, 0, 0, 0}, logger));
+    for (size_t idx = 0; idx < links.size(); idx++) {
+        // cone indexes are NOT allowed to start at zero, zero is the default "no index value"
+        track.cones_with_cov.push_back(get_cone_from_link(links[idx], {0, 0, 0, 0}, idx+1, logger));
     }
 
     return track;
