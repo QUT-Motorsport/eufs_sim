@@ -8,10 +8,10 @@
     <!--  Load the config file  -->
     <xacro:property name="config" value="${load_yaml('$(arg config_file)')}"/>
 
-    <!-- If the camera should be simulated or if sensors should be removed -->
-    <xacro:arg name="simulate_camera" default="true"/>
-    <!-- If the lidar should be simulated or if sensors should be removed -->
-    <xacro:arg name="simulate_lidar" default="false"/>
+    <!-- Simulate sensors or not? -->
+    <xacro:arg name="enable_camera" default="false"/>
+    <xacro:arg name="enable_lidar" default="false"/>
+    <xacro:arg name="enable_laserscan" default="false"/>
 
     <!-- ***************** -->
     <!-- Global parameters -->
@@ -79,11 +79,11 @@
         <origin xyz="1.220 0.0 0.530" rpy="0 0 0"/>
     </xacro:SBG_GPS_sensor>
 
-    <xacro:VLP-32C_LiDAR parent="chassis" prefix="velodyne" hz="10" active="$(arg simulate_lidar)">
+    <xacro:VLP-32C_LiDAR parent="chassis" prefix="velodyne" hz="10" lidar_active="$(arg enable_lidar)" scan_active="$(arg enable_laserscan)">
         <origin xyz="1.590 0.0 -0.15" rpy="0 0 0"/>
     </xacro:VLP-32C_LiDAR>
 
-    <xacro:ZED2i_camera parent="chassis" prefix="zed2i" active="$(arg simulate_camera)">
+    <xacro:ZED2i_camera parent="chassis" prefix="zed2i" active="$(arg enable_camera)">
         <origin xyz="-0.370 0.0 0.900" rpy="0 0 0"/>
     </xacro:ZED2i_camera>
 </robot>
