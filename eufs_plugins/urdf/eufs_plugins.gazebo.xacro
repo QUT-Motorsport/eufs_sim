@@ -1,7 +1,8 @@
 <?xml version="1.0"?>
 <robot xmlns:xacro="http://www.ros.org/wiki/xacro">
   <xacro:arg name="publish_tf" default="false"/>
-  <xacro:arg name="simulate_perception" default="false"/>
+  <xacro:arg name="sim_perception" default="true"/>
+  <xacro:arg name="sim_slam" default="true"/>
   <xacro:arg name="command_mode" default="velocity"/>
   <xacro:arg name="pub_ground_truth" default="true"/>
 
@@ -62,8 +63,8 @@
       <SLAMLocalRangeX>20</SLAMLocalRangeX>
       <SLAMLocalRangeY>10</SLAMLocalRangeY>
       <publishGroundTruth>$(arg pub_ground_truth)</publishGroundTruth>
-      <simulatePerception>$(arg simulate_perception)</simulatePerception>
-      <simulateSLAM>$(arg simulate_perception)</simulateSLAM>
+      <simulatePerception>$(arg sim_perception)</simulatePerception>
+      <simulateSLAM>$(arg sim_slam)</simulateSLAM>
     </plugin>
   </gazebo>
 </robot>

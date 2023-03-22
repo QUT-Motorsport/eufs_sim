@@ -12,7 +12,6 @@ from launch_ros.actions import Node
 
 def spawn_car(context, *args, **kwargs):
     # Get the values of the arguments
-    launch_group = get_argument(context, "launch_group")
     namespace = get_argument(context, "namespace")
     robot_name = get_argument(context, "robot_name")
     vehicle_model = get_argument(context, "vehicleModel")
@@ -26,13 +25,12 @@ def spawn_car(context, *args, **kwargs):
     roll = get_argument(context, "roll")
     pitch = get_argument(context, "pitch")
     yaw = get_argument(context, "yaw")
-    # Custome check boxes
-    camera = get_argument(context, "camera")
-    lidar = get_argument(context, "lidar")
-
-    simulate_perception = "true" if launch_group == "no_perception" else "false"
-    simulate_lidar = "true" if lidar == "true" else "false"
-    simulate_camera = "true" if camera == "true" else "false"
+    # Custom check boxes
+    enable_camera = get_argument(context, "enable_camera")
+    enable_lidar = get_argument(context, "enable_lidar")
+    enable_laserscan = get_argument(context, "enable_laserscan")
+    sim_perception = get_argument(context, "sim_perception")
+    sim_slam = get_argument(context, "sim_slam")
 
     config_file = join(
         get_package_share_directory("eufs_racecar"),
@@ -76,9 +74,11 @@ def spawn_car(context, *args, **kwargs):
             "noise_config": noise_file,
             "recolor_config": recolor_config,
             "publish_tf": publish_tf,
-            "simulate_perception": simulate_perception,
-            "simulate_lidar": simulate_lidar,
-            "simulate_camera": simulate_camera,
+            "sim_perception": sim_perception,
+            "sim_slam": sim_slam,
+            "enable_camera": enable_camera,
+            "enable_lidar": enable_lidar,
+            "enable_laserscan": enable_laserscan,
             "pub_ground_truth": pub_ground_truth,
             "bounding_box_settings": bounding_boxes_file,
         },
@@ -167,22 +167,6 @@ def generate_launch_description():
         [
             # Launch Arguments
             DeclareLaunchArgument(
-                "launch_group",
-                default_value="default",
-                description="The launch group (default or " "no_perception)",
-            ),
-            # Custome launch argumetns
-            DeclareLaunchArgument(
-                "camera",
-                default_value="default",
-                description="The camera state (true or " "false)",
-            ),
-            DeclareLaunchArgument(
-                "lidar",
-                default_value="default",
-                description="The camera state (true or " "false)",
-            ),
-            DeclareLaunchArgument(
                 "rviz", default_value="false", description="Launch RViz"
             ),
             DeclareLaunchArgument(
@@ -251,6 +235,32 @@ def generate_launch_description():
             ),
             DeclareLaunchArgument(
                 "yaw", default_value="0", description="Vehicle initial yaw"
+            ),
+            # Custom
+            DeclareLaunchArgument(
+                name="sim_perception",
+                default_value="true",
+                description="Condition to enable sim perception cones",
+            ),
+            DeclareLaunchArgument(
+                name="sim_slam",
+                default_value="true",
+                description="Condition to enable sim SLAM cones",
+            ),
+            DeclareLaunchArgument(
+                name="enable_camera",
+                default_value="false",
+                description="Condition to enable camera",
+            ),
+            DeclareLaunchArgument(
+                name="enable_lidar",
+                default_value="false",
+                description="Condition to enable lidar",
+            ),
+            DeclareLaunchArgument(
+                name="enable_laserscan",
+                default_value="false",
+                description="Condition to enable laserscan",
             ),
             Node(
                 name="rviz",

@@ -18,8 +18,14 @@
   <!-- Namespace of the gazebo robot  -->
   <arg name="namespace" default="eufs"/>
 
-  <!-- The launch group (default or no_perception) -->
-  <arg name="launch_group" default="default"/>
+  <!-- Simulate perception system -->
+  <arg name="sim_perception" default="true"/>
+  <arg name="sim_slam" default="true"/>
+
+  <!-- Enable sensors -->
+  <arg name="enable_lidar" default="false"/>
+  <arg name="enable_camera" default="false"/>
+  <arg name="enable_laserscan" default="false"/>
 
   <!-- Launch the Gazebo GUI -->
   <arg name="gazebo_gui" default="true"/>
@@ -74,7 +80,11 @@
     <arg name="rviz" value="$(var rviz)"/>
     <arg name="publish_gt_tf" value="$(var publish_gt_tf)"/>
     <arg name="pub_ground_truth" value="$(var pub_ground_truth)"/>
-    <arg name="launch_group" value="$(var launch_group)"/>
+    <arg name="enable_lidar" value="$(var enable_lidar)"/>
+    <arg name="enable_camera" value="$(var enable_camera)"/>
+    <arg name="enable_laserscan" value="$(var enable_laserscan)"/>
+    <arg name="sim_perception" value="$(var sim_perception)"/>
+    <arg name="sim_slam" value="$(var sim_slam)"/>
   </include>
 
 </launch>
