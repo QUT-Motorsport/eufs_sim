@@ -59,9 +59,9 @@ class EUFSConverterGUI(Plugin):
         self.RENAME_BUTTON.clicked.connect(self.copy_button_pressed)
 
         # Setup Conversion Tools dropdowns
-        for f in ["launch", "csv"]:
-            self.CONVERT_FROM_MENU.addItem(f)
         for f in ["csv", "launch"]:
+            self.CONVERT_FROM_MENU.addItem(f)
+        for f in ["launch", "csv"]:
             self.CONVERT_TO_MENU.addItem(f)
 
         self.update_converter_dropdown()
