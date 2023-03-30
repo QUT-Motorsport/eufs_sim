@@ -294,18 +294,8 @@ class Converter(Node):
         """
         # file directories
         directory_share = get_package_share_directory("eufs_tracks")
-        directory_sim = os.path.join(
-            os.path.dirname(__file__),
-            "..",
-            "..",
-            "..",
-            "..",
-            "..",
-            "..",
-            "..",
-            "eufs_sim",
-            "eufs_tracks",
-        )
+        EUFS_DIR = os.path.expanduser(os.environ.get("EUFS_MASTER"))
+        directory_sim = os.path.join(EUFS_DIR, "eufs_sim", "eufs_tracks")
 
         if cfrom == "launch" and cto == "csv":
             return Converter.launch_to_csv(which_file, params)
@@ -345,7 +335,7 @@ class Converter(Node):
         """
 
         # Save eufs_tracks directory
-        TRACKS_SHARE = which_directory
+        TRACKS_SHARE = get_package_share_directory("eufs_tracks")
 
         # Use override name if provided
         GENERATED_FILENAME = params.get(
@@ -418,7 +408,7 @@ class Converter(Node):
 
         # Create launch file
         launch_template_file = os.path.join(
-            TRACKS_SHARE, "resource/randgen_launch_template"
+            TRACKS_SHARE, "resource", "randgen_launch_template"
         )
         with open(launch_template_file, "r") as launch_template:
             # .launches need to point to .worlds and model files of the same name,
@@ -439,7 +429,7 @@ class Converter(Node):
 
             # Write launch file.
             launch_out_filepath = os.path.join(
-                TRACKS_SHARE, "launch", GENERATED_FILENAME + ".launch"
+                which_directory, "launch", GENERATED_FILENAME + ".launch"
             )
             with open(launch_out_filepath, "w") as launch_out:
                 launch_out.write(launch_merged)
@@ -456,7 +446,7 @@ class Converter(Node):
 
             # Write world file
             world_out_filepath = os.path.join(
-                TRACKS_SHARE, "worlds", GENERATED_FILENAME + ".world"
+                which_directory, "worlds", GENERATED_FILENAME + ".world"
             )
             with open(world_out_filepath, "w") as world_out:
                 world_out.write(world_merged)
@@ -468,7 +458,7 @@ class Converter(Node):
 
         # 1. Create the folder
         # If the folder does exist, it gets automatically overridden by the rest of this function
-        MODEL_FOLDER = os.path.join(TRACKS_SHARE, "models", GENERATED_FILENAME)
+        MODEL_FOLDER = os.path.join(which_directory, "models", GENERATED_FILENAME)
         if not os.path.exists(MODEL_FOLDER):
             os.mkdir(MODEL_FOLDER)
 
