@@ -284,7 +284,7 @@ class EUFSLauncher(Plugin):
 
         # Here we launch `simulation.launch.py`.
         self.launch_with_args(
-            "eufs_launcher", "simulation.launch.py", parameters_to_pass
+            "eufs_launcher", "simulation2.launch.py", parameters_to_pass
         )
 
         # Trigger launch files hooked to checkboxes
@@ -317,7 +317,7 @@ class EUFSLauncher(Plugin):
 
     def launch_with_args(self, package, launch_file, args):
         """Launches ros node."""
-        command = ["ros2", "launch", package, launch_file, "use_sim_time:=true"] + args
+        command = ["stdbuf", "-o", "L", "ros2", "launch", package, launch_file, "use_sim_time:=true", "log_level:=debug"] + args
         self.logger.info(f"Command: {' '.join(command)}")
         process = Popen(command)
         self.popens.append(process)

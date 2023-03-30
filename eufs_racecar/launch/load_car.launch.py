@@ -159,10 +159,6 @@ def generate_launch_description():
         get_package_share_directory("eufs_launcher"), "config", "default.rviz"
     )
 
-    default_user_config_file = join(os.path.expanduser("~"), ".rviz2", "default.rviz")
-    if os.path.isfile(default_user_config_file):
-        rviz_config_file = default_user_config_file
-
     return LaunchDescription(
         [
             # Launch Arguments
@@ -178,12 +174,12 @@ def generate_launch_description():
             ),
             DeclareLaunchArgument(
                 "namespace",
-                default_value="eufs",
+                default_value="qev3",
                 description="Namespace of the gazebo robot",
             ),
             DeclareLaunchArgument(
                 "robot_name",
-                default_value="eufs",
+                default_value="qev3",
                 description="The name of the robot (must be "
                 "directory in eufs_racecar/racecars "
                 "called "
