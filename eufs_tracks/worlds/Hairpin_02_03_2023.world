@@ -1,5 +1,5 @@
 <sdf version='1.6'>
-  <world name='its_a_mess'>
+  <world name='Hairpin_02_03_2023'>
     <gui fullscreen='0'>
       <camera name='user_camera'>
         <pose frame=''>-40 40 20 0 0.667643 -1</pose>
@@ -46,7 +46,7 @@
     </include>
 
     <include>
-      <uri>model://its_a_mess</uri>
+      <uri>model://Hairpin_02_03_2023</uri>
       <pose>0 0 0.5 0 0 0</pose>
     </include>
 
