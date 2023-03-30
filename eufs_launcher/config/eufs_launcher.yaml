@@ -103,7 +103,7 @@ eufs_launcher:
       parameter_triggering:
         if_on: { "enable_laserscan:=true" }
         if_off: { "enable_laserscan:=false" }
-  
+
     camera:
       priority: 9
       name: "Camera_Checkbox"
