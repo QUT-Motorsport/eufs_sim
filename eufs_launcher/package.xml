@@ -26,13 +26,8 @@
   <depend>ament_index_python</depend>
 
   <depend>eufs_tracks</depend>
-  <depend>eufs_msgs</depend>
-  <depend>eufs_models</depend>
-  <depend>eufs_rqt</depend>
   <depend>eufs_racecar</depend>
-  <depend>eufs_plugins</depend>
   <depend>eufs_rviz_plugins</depend>
-  <depend>driverless_msgs</depend>
 
   <export>
     <build_type>ament_python</build_type>
