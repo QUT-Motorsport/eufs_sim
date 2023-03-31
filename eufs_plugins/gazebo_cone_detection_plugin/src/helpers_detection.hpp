@@ -124,8 +124,9 @@ driverless_msgs::msg::ConeDetectionStamped get_sensor_detection(
             translated_cone.color = driverless_msgs::msg::Cone::UNKNOWN;
         }
 
-        sensor_detection.cones_with_cov.push_back(
-            make_noisy_range_bearing_cone(translated_cone, sensor_config.range_noise, sensor_config.bearing_noise));
+        driverless_msgs::msg::ConeWithCovariance noisy_cone = make_noisy_range_bearing_cone(translated_cone, sensor_config.range_noise, sensor_config.bearing_noise);
+        sensor_detection.cones_with_cov.push_back(noisy_cone);
+        sensor_detection.cones.push_back(noisy_cone.cone);
     }
 
     return sensor_detection;
