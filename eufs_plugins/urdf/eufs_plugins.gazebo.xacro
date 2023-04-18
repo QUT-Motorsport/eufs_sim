@@ -21,11 +21,6 @@
       <rear_right_wheel>rear_right_wheel_joint</rear_right_wheel>
       <referenceFrame>track</referenceFrame>
       <robotFrame>base_footprint</robotFrame>
-      <groundTruthCarStateTopic>/ground_truth/state</groundTruthCarStateTopic>
-      <localisationCarStateTopic>/odometry_integration/car_state</localisationCarStateTopic>
-      <wheelSpeedsTopicName>/ros_can/wheel_speeds</wheelSpeedsTopicName>
-      <groundTruthWheelSpeedsTopicName>/ground_truth/wheel_speeds</groundTruthWheelSpeedsTopicName>
-      <odometryTopicName>/ground_truth/odom</odometryTopicName>
       <controlDelay>0.035</controlDelay>
       <steeringLockTime>1.5</steeringLockTime>
       <pubGroundTruth>$(arg pub_ground_truth)</pubGroundTruth>
@@ -34,6 +29,7 @@
       <yaml_config>$(arg config_file)</yaml_config>
       <noise_config>$(arg noise_config)</noise_config>
       <vehicle_model>$(arg vehicle_model)</vehicle_model>
+      <simulateSLAM>$(arg sim_slam)</simulateSLAM>
     </plugin>
   </gazebo>
 

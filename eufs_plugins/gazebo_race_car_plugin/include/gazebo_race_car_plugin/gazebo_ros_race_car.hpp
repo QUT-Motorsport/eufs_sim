@@ -49,7 +49,7 @@
 #include <tf2/utils.h>
 #include <tf2_ros/transform_broadcaster.h>
 
-#include "tf2_geometry_msgs/tf2_geometry_msgs.h"
+#include "tf2_geometry_msgs/tf2_geometry_msgs.hpp"
 
 // ROS  srvs
 #include <std_srvs/srv/trigger.hpp>
@@ -95,16 +95,16 @@ class RaceCarPlugin : public gazebo::ModelPlugin {
     void initModel(const sdf::ElementPtr &sdf);
     void initNoise(const sdf::ElementPtr &sdf);
 
-    eufs_msgs::msg::CarState stateToCarStateMsg(const eufs::models::State &state);
+    geometry_msgs::msg::PoseWithCovarianceStamped stateToPoseMsg(const eufs::models::State &state);
+    nav_msgs::msg::Odometry getWheelOdometry(const eufs_msgs::msg::WheelSpeeds &wheel_speeds_noisy, const eufs::models::Input &input);
 
-    void publishCarState();
-    void publishWheelSpeeds();
+    void publishCarPose();
+    void publishWheelOdom();
     void publishOdom();
     void publishTf();
 
     void onCmd(const ackermann_msgs::msg::AckermannDriveStamped::SharedPtr msg);
 
-    /// @brief Converts an euler orientation to quaternion
     std::vector<double> ToQuaternion(std::vector<double> &euler);
 
     std::shared_ptr<rclcpp::Node> _rosnode;
@@ -137,19 +137,17 @@ class RaceCarPlugin : public gazebo::ModelPlugin {
     // ROS topic parameters
     std::string _ground_truth_car_state_topic;
     std::string _localisation_car_state_topic;
-    std::string _wheel_speeds_topic_name;
-    std::string _ground_truth_wheel_speeds_topic_name;
+    std::string _wheel_odom_topic_name;
+    std::string _ground_truth_wheel_odom_topic_name;
     std::string _odom_topic_name;
 
     // ROS Publishers
-    rclcpp::Publisher<eufs_msgs::msg::CarState>::SharedPtr _pub_ground_truth_car_state;
-    rclcpp::Publisher<eufs_msgs::msg::CarState>::SharedPtr _pub_localisation_car_state;
-    rclcpp::Publisher<eufs_msgs::msg::WheelSpeedsStamped>::SharedPtr _pub_wheel_speeds;
-    rclcpp::Publisher<eufs_msgs::msg::WheelSpeedsStamped>::SharedPtr _pub_ground_truth_wheel_speeds;
-    rclcpp::Publisher<nav_msgs::msg::Odometry>::SharedPtr _pub_odom;
-    // ROS publisher for QEV3 imu velocity
-    rclcpp::Publisher<geometry_msgs::msg::TwistStamped>::SharedPtr _pub_velocity;
-    rclcpp::Publisher<geometry_msgs::msg::PoseWithCovarianceStamped>::SharedPtr _pub_qutms_pose;
+    rclcpp::Publisher<nav_msgs::msg::Odometry>::SharedPtr _pub_wheel_odom;
+    rclcpp::Publisher<nav_msgs::msg::Odometry>::SharedPtr _pub_ground_truth_wheel_odom;
+    rclcpp::Publisher<nav_msgs::msg::Odometry>::SharedPtr _pub_ground_truth_odom;
+     rclcpp::Publisher<geometry_msgs::msg::TwistStamped>::SharedPtr _pub_velocity;
+    rclcpp::Publisher<geometry_msgs::msg::PoseWithCovarianceStamped>::SharedPtr _pub_pose;
+    rclcpp::Publisher<geometry_msgs::msg::PoseWithCovarianceStamped>::SharedPtr _pub_ground_truth_pose;
 
     // ROS Subscriptions
     rclcpp::Subscription<ackermann_msgs::msg::AckermannDriveStamped>::SharedPtr _sub_cmd;
@@ -162,8 +160,11 @@ class RaceCarPlugin : public gazebo::ModelPlugin {
     gazebo::physics::JointPtr _left_steering_joint;
     gazebo::physics::JointPtr _right_steering_joint;
 
-    // Stop Ground truth
+    // Ground truth
     bool _pub_ground_truth;
+
+    // SLAM Pose
+    bool _simulate_slam;
 
     enum CommandMode { acceleration, velocity };
     CommandMode _command_mode;

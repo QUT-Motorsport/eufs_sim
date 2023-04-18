@@ -62,17 +62,16 @@ void RaceCarPlugin::Load(gazebo::physics::ModelPtr model, sdf::ElementPtr sdf) {
     initNoise(sdf);
 
     // ROS Publishers
-    _pub_ground_truth_car_state =
-        _rosnode->create_publisher<eufs_msgs::msg::CarState>(_ground_truth_car_state_topic, 1);
-    _pub_localisation_car_state =
-        _rosnode->create_publisher<eufs_msgs::msg::CarState>(_localisation_car_state_topic, 1);
-    _pub_wheel_speeds = _rosnode->create_publisher<eufs_msgs::msg::WheelSpeedsStamped>(_wheel_speeds_topic_name, 1);
-    _pub_ground_truth_wheel_speeds =
-        _rosnode->create_publisher<eufs_msgs::msg::WheelSpeedsStamped>(_ground_truth_wheel_speeds_topic_name, 1);
-    _pub_odom = _rosnode->create_publisher<nav_msgs::msg::Odometry>(_odom_topic_name, 1);
-    // ROS publisher for QEV3 imu velocity
+    // Wheel odom
+    _pub_wheel_odom = _rosnode->create_publisher<nav_msgs::msg::Odometry>("/vehicle/wheel_odom", 1);
+    _pub_ground_truth_wheel_odom =
+        _rosnode->create_publisher<nav_msgs::msg::Odometry>("/ground_truth/wheel_odom", 1);
+    // Ground truth car odom
+    _pub_ground_truth_odom = _rosnode->create_publisher<nav_msgs::msg::Odometry>("/ground_truth/odom", 1);
     _pub_velocity = _rosnode->create_publisher<geometry_msgs::msg::TwistStamped>("imu/velocity", 1);
-    _pub_qutms_pose = _rosnode->create_publisher<geometry_msgs::msg::PoseWithCovarianceStamped>("slam/car_pose", 1);
+    // Pose
+    _pub_pose = _rosnode->create_publisher<geometry_msgs::msg::PoseWithCovarianceStamped>("slam/car_pose", 1);
+    _pub_ground_truth_pose = _rosnode->create_publisher<geometry_msgs::msg::PoseWithCovarianceStamped>("ground_truth/car_pose", 1);
 
     // ROS Services
     _reset_vehicle_pos_srv = _rosnode->create_service<std_srvs::srv::Trigger>(
@@ -136,47 +135,6 @@ void RaceCarPlugin::initParams(const sdf::ElementPtr &sdf) {
         _publish_tf = sdf->GetElement("publishTransform")->Get<bool>();
     }
 
-    if (!sdf->HasElement("wheelSpeedsTopicName")) {
-        RCLCPP_FATAL(_rosnode->get_logger(),
-                     "gazebo_ros_race_car_model plugin missing <wheelSpeedsTopicName>, cannot proceed");
-        return;
-    } else {
-        _wheel_speeds_topic_name = sdf->GetElement("wheelSpeedsTopicName")->Get<std::string>();
-    }
-
-    if (!sdf->HasElement("groundTruthWheelSpeedsTopicName")) {
-        RCLCPP_FATAL(_rosnode->get_logger(),
-                     "gazebo_ros_race_car_model plugin missing <groundTruthWheelSpeedsTopicName>, "
-                     "cannot proceed");
-        return;
-    } else {
-        _ground_truth_wheel_speeds_topic_name = sdf->GetElement("groundTruthWheelSpeedsTopicName")->Get<std::string>();
-    }
-
-    if (!sdf->HasElement("groundTruthCarStateTopic")) {
-        RCLCPP_FATAL(_rosnode->get_logger(),
-                     "gazebo_ros_race_car_model plugin missing <groundTruthCarStateTopic>, cannot proceed");
-        return;
-    } else {
-        _ground_truth_car_state_topic = sdf->GetElement("groundTruthCarStateTopic")->Get<std::string>();
-    }
-
-    if (!sdf->HasElement("localisationCarStateTopic")) {
-        RCLCPP_FATAL(_rosnode->get_logger(),
-                     "gazebo_ros_race_car_model plugin missing <localisationCarStateTopic>, cannot proceed");
-        return;
-    } else {
-        _localisation_car_state_topic = sdf->GetElement("localisationCarStateTopic")->Get<std::string>();
-    }
-
-    if (!sdf->HasElement("odometryTopicName")) {
-        RCLCPP_FATAL(_rosnode->get_logger(),
-                     "gazebo_ros_race_car_model plugin missing <odometryTopicName>, cannot proceed");
-        return;
-    } else {
-        _odom_topic_name = sdf->GetElement("odometryTopicName")->Get<std::string>();
-    }
-
     if (!sdf->HasElement("commandMode")) {
         RCLCPP_DEBUG(_rosnode->get_logger(),
                      "gazebo_ros_race_car_model plugin missing <commandMode>, defaults to acceleration");
@@ -214,6 +172,14 @@ void RaceCarPlugin::initParams(const sdf::ElementPtr &sdf) {
         return;
     } else {
         _pub_ground_truth = sdf->GetElement("pubGroundTruth")->Get<bool>();
+    }
+
+    if (!sdf->HasElement("simulateSLAM")) {
+        RCLCPP_FATAL(_rosnode->get_logger(),
+                     "gazebo_ros_race_car_model plugin missing <simulateSLAM>, cannot proceed");
+        return;
+    } else {
+        _simulate_slam = sdf->GetElement("simulateSLAM")->Get<bool>();
     }
 }
 
@@ -350,117 +316,96 @@ void RaceCarPlugin::setModelState() {
     _model->SetLinearVel(vel);
 }
 
-eufs_msgs::msg::CarState RaceCarPlugin::stateToCarStateMsg(const eufs::models::State &state) {
-    // Publish Car Info
-    eufs_msgs::msg::CarState car_state;
+geometry_msgs::msg::PoseWithCovarianceStamped RaceCarPlugin::stateToPoseMsg(const eufs::models::State &state) {
+    geometry_msgs::msg::PoseWithCovarianceStamped pose_msg;
 
-    car_state.header.stamp.sec = _last_sim_time.sec;
-    car_state.header.stamp.nanosec = _last_sim_time.nsec;
-    car_state.header.frame_id = _reference_frame;
-    car_state.child_frame_id = _robot_frame;
+    pose_msg.header.stamp.sec = _last_sim_time.sec;
+    pose_msg.header.stamp.nanosec = _last_sim_time.nsec;
+    pose_msg.header.frame_id = _reference_frame;
 
-    car_state.pose.pose.position.x = state.x;
-    car_state.pose.pose.position.y = state.y;
-    car_state.pose.pose.position.z = state.z;
+    pose_msg.pose.pose.position.x = state.x;
+    pose_msg.pose.pose.position.y = state.y;
+    pose_msg.pose.pose.position.z = state.z;
 
     std::vector<double> orientation = {state.yaw, 0.0, 0.0};
 
     orientation = ToQuaternion(orientation);
 
-    car_state.pose.pose.orientation.x = orientation[0];
-    car_state.pose.pose.orientation.y = orientation[1];
-    car_state.pose.pose.orientation.z = orientation[2];
-    car_state.pose.pose.orientation.w = orientation[3];
+    pose_msg.pose.pose.orientation.x = orientation[0];
+    pose_msg.pose.pose.orientation.y = orientation[1];
+    pose_msg.pose.pose.orientation.z = orientation[2];
+    pose_msg.pose.pose.orientation.w = orientation[3];
 
-    car_state.twist.twist.linear.x = state.v_x;
-    car_state.twist.twist.linear.y = state.v_y;
-    car_state.twist.twist.linear.z = state.v_z;
-
-    car_state.twist.twist.angular.x = state.r_x;
-    car_state.twist.twist.angular.y = state.r_y;
-    car_state.twist.twist.angular.z = state.r_z;
-
-    car_state.linear_acceleration.x = state.a_x;
-    car_state.linear_acceleration.y = state.a_y;
-    car_state.linear_acceleration.z = state.a_z;
-
-    car_state.slip_angle = _vehicle->getSlipAngle(_state, _act_input, true);
-
-    car_state.state_of_charge = 999;
-
-    return car_state;
+    return pose_msg;
 }
 
-void RaceCarPlugin::publishCarState() {
-    eufs_msgs::msg::CarState car_state = stateToCarStateMsg(_state);
-
-    // Publish the ground truth car state if it has subscribers and is allowed to publish
-    if (_pub_ground_truth_car_state->get_subscription_count() > 0 && _pub_ground_truth) {
-        _pub_ground_truth_car_state->publish(car_state);
-    }
+void RaceCarPlugin::publishCarPose() {
+    geometry_msgs::msg::PoseWithCovarianceStamped pose = stateToPoseMsg(_state);
 
     // Add noise
-    eufs::models::State state_noisy = _noise->applyNoise(_state);
-    eufs_msgs::msg::CarState car_state_noisy = stateToCarStateMsg(state_noisy);
+    geometry_msgs::msg::PoseWithCovarianceStamped pose_noisy = stateToPoseMsg(_noise->applyNoise(_state));
 
     // Fill in covariance matrix
     const eufs::models::NoiseParam &noise_param = _noise->getNoiseParam();
-    car_state_noisy.pose.covariance[0] = pow(noise_param.position[0], 2);
-    car_state_noisy.pose.covariance[7] = pow(noise_param.position[1], 2);
-    car_state_noisy.pose.covariance[14] = pow(noise_param.position[2], 2);
+    pose_noisy.pose.covariance[0] = pow(noise_param.position[0], 2);
+    pose_noisy.pose.covariance[7] = pow(noise_param.position[1], 2);
+    pose_noisy.pose.covariance[14] = pow(noise_param.position[2], 2);
 
-    car_state_noisy.pose.covariance[21] = pow(noise_param.orientation[0], 2);
-    car_state_noisy.pose.covariance[28] = pow(noise_param.orientation[1], 2);
-    car_state_noisy.pose.covariance[35] = pow(noise_param.orientation[2], 2);
+    pose_noisy.pose.covariance[21] = pow(noise_param.orientation[0], 2);
+    pose_noisy.pose.covariance[28] = pow(noise_param.orientation[1], 2);
+    pose_noisy.pose.covariance[35] = pow(noise_param.orientation[2], 2);
 
-    car_state_noisy.twist.covariance[0] = pow(noise_param.linear_velocity[0], 2);
-    car_state_noisy.twist.covariance[7] = pow(noise_param.linear_velocity[1], 2);
-    car_state_noisy.twist.covariance[14] = pow(noise_param.linear_velocity[2], 2);
-
-    car_state_noisy.twist.covariance[21] = pow(noise_param.angular_velocity[0], 2);
-    car_state_noisy.twist.covariance[28] = pow(noise_param.angular_velocity[1], 2);
-    car_state_noisy.twist.covariance[35] = pow(noise_param.angular_velocity[2], 2);
-
-    car_state_noisy.linear_acceleration_covariance[0] = pow(noise_param.linear_acceleration[0], 2);
-    car_state_noisy.linear_acceleration_covariance[4] = pow(noise_param.linear_acceleration[1], 2);
-    car_state_noisy.linear_acceleration_covariance[8] = pow(noise_param.linear_acceleration[2], 2);
-
-    // Publish with noise
-    if (_pub_localisation_car_state->get_subscription_count() > 0) {
-        _pub_localisation_car_state->publish(car_state_noisy);
+    if (_pub_ground_truth_pose->get_subscription_count() > 0 && _pub_ground_truth) {
+        _pub_ground_truth_pose->publish(pose);
     }
 
-    // QUTMS
-    if (_pub_qutms_pose->get_subscription_count() > 0 && _pub_ground_truth) {
-        geometry_msgs::msg::PoseWithCovarianceStamped pose_w_cov_msg;
-        pose_w_cov_msg.header = car_state_noisy.header;
-        pose_w_cov_msg.pose = car_state_noisy.pose;
-        _pub_qutms_pose->publish(pose_w_cov_msg);
+    if (_pub_pose->get_subscription_count() > 0 && _simulate_slam) {
+        _pub_pose->publish(pose_noisy);
     }
 }
 
-void RaceCarPlugin::publishWheelSpeeds() {
-    eufs_msgs::msg::WheelSpeedsStamped wheel_speeds_stamped;
+nav_msgs::msg::Odometry RaceCarPlugin::getWheelOdometry(const eufs_msgs::msg::WheelSpeeds &wheel_speeds_noisy,
+                                                        const eufs::models::Input &input) {
+    nav_msgs::msg::Odometry wheel_odom;
+
+    // Calculate avg wheel speeds
+    float rf = wheel_speeds_noisy.rf_speed;
+    float lf = wheel_speeds_noisy.lf_speed;
+    float rb = wheel_speeds_noisy.rb_speed;
+    float lb = wheel_speeds_noisy.lb_speed;
+    float avg_wheel_speed = (rf + lf + rb + lb) / 4.0;
+
+    // Calculate odom with wheel speed and steering angle
+    wheel_odom.twist.twist.linear.x = avg_wheel_speed;
+    wheel_odom.twist.twist.linear.y = 0.0;
+
+    wheel_odom.twist.twist.angular.z = avg_wheel_speed * tan(input.delta) / _vehicle->getParam().kinematic.axle_width;
+
+    return wheel_odom;
+}
+
+void RaceCarPlugin::publishWheelOdom() {
     eufs_msgs::msg::WheelSpeeds wheel_speeds;
 
-    wheel_speeds_stamped.header.stamp.sec = _last_sim_time.sec;
-    wheel_speeds_stamped.header.stamp.nanosec = _last_sim_time.nsec;
-    wheel_speeds_stamped.header.frame_id = _robot_frame;
+    // Calculate Wheel speeds
+    wheel_speeds.lf_speed = _state.v_x;
+    wheel_speeds.rf_speed = _state.v_x;
+    wheel_speeds.lb_speed = _state.v_x;
+    wheel_speeds.rb_speed = _state.v_x;
 
-    wheel_speeds = _vehicle->getWheelSpeeds(_state, _act_input);
-    wheel_speeds_stamped.speeds = wheel_speeds;
+    nav_msgs::msg::Odometry wheel_odom = getWheelOdometry(wheel_speeds, _act_input);
 
-    // Publish the ground truth wheel speeds if it has subscribers and is allowed to publish
-    if (_pub_ground_truth_wheel_speeds->get_subscription_count() > 0 && _pub_ground_truth) {
-        _pub_ground_truth_wheel_speeds->publish(wheel_speeds_stamped);
+    // Add noise
+    eufs_msgs::msg::WheelSpeeds wheel_speeds_noisy = _noise->applyNoiseToWheelSpeeds(wheel_speeds);
+    nav_msgs::msg::Odometry wheel_odom_noisy = getWheelOdometry(wheel_speeds_noisy, _act_input);
+
+    // Publish wheel odometry
+    if (_pub_ground_truth_wheel_odom->get_subscription_count() > 0 && _pub_ground_truth) {
+        _pub_ground_truth_wheel_odom->publish(wheel_odom);
     }
 
-    wheel_speeds = _noise->applyNoiseToWheelSpeeds(wheel_speeds);
-    wheel_speeds_stamped.speeds = wheel_speeds;
-
-    // Publish with Noise
-    if (_pub_wheel_speeds->get_subscription_count() > 0) {
-        _pub_wheel_speeds->publish(wheel_speeds_stamped);
+    if (_pub_wheel_odom->get_subscription_count() > 0) {
+        _pub_wheel_odom->publish(wheel_odom_noisy);
     }
 }
 
@@ -473,49 +418,32 @@ void RaceCarPlugin::publishOdom() {
     odom.header.frame_id = _reference_frame;
     odom.child_frame_id = _robot_frame;
 
-    eufs::models::State state_noisy = _noise->applyNoise(_state);
+    odom.pose.pose.position.x = _state.x;
+    odom.pose.pose.position.y = _state.y;
+    odom.pose.pose.position.z = _state.z;
 
-    odom.pose.pose.position.x = state_noisy.x;
-    odom.pose.pose.position.y = state_noisy.y;
-    odom.pose.pose.position.z = state_noisy.z;
-
-    std::vector<double> orientation = {state_noisy.yaw, 0.0, 0.0};
+    std::vector<double> orientation = {_state.yaw, 0.0, 0.0};
     orientation = ToQuaternion(orientation);
     odom.pose.pose.orientation.x = orientation[0];
     odom.pose.pose.orientation.y = orientation[1];
     odom.pose.pose.orientation.z = orientation[2];
     odom.pose.pose.orientation.w = orientation[3];
 
-    odom.twist.twist.linear.x = state_noisy.v_x;
-    odom.twist.twist.linear.y = state_noisy.v_y;
-    odom.twist.twist.linear.z = state_noisy.v_z;
+    odom.twist.twist.linear.x = _state.v_x;
+    odom.twist.twist.linear.y = _state.v_y;
+    odom.twist.twist.linear.z = _state.v_z;
 
-    odom.twist.twist.angular.x = state_noisy.r_x;
-    odom.twist.twist.angular.y = state_noisy.r_y;
-    odom.twist.twist.angular.z = state_noisy.r_z;
-
-    // fill in covariance matrix
-    const eufs::models::NoiseParam &noise_param = _noise->getNoiseParam();
-    odom.pose.covariance[0] = pow(noise_param.position[0], 2);
-    odom.pose.covariance[7] = pow(noise_param.position[1], 2);
-    odom.pose.covariance[14] = pow(noise_param.position[2], 2);
-
-    odom.pose.covariance[21] = pow(noise_param.orientation[0], 2);
-    odom.pose.covariance[28] = pow(noise_param.orientation[1], 2);
-    odom.pose.covariance[35] = pow(noise_param.orientation[2], 2);
-
-    odom.twist.covariance[0] = pow(noise_param.linear_velocity[0], 2);
-    odom.twist.covariance[7] = pow(noise_param.linear_velocity[1], 2);
-    odom.twist.covariance[14] = pow(noise_param.linear_velocity[2], 2);
-
-    odom.twist.covariance[21] = pow(noise_param.angular_velocity[0], 2);
-    odom.twist.covariance[28] = pow(noise_param.angular_velocity[1], 2);
-    odom.twist.covariance[35] = pow(noise_param.angular_velocity[2], 2);
+    odom.twist.twist.angular.x = _state.r_x;
+    odom.twist.twist.angular.y = _state.r_y;
+    odom.twist.twist.angular.z = _state.r_z;
 
     // Publish the ground truth odom if it has subscribers and is allowed to publish
-    if (_pub_odom->get_subscription_count() > 0 && _pub_ground_truth) {
-        _pub_odom->publish(odom);
+    if (_pub_ground_truth_odom->get_subscription_count() > 0 && _pub_ground_truth) {
+        _pub_ground_truth_odom->publish(odom);
     }
+
+    // Add noise to state
+    eufs::models::State state_noisy = _noise->applyNoise(_state);
 
     // Velocity for QEV3 imu velocity
     geometry_msgs::msg::TwistStamped ts;
@@ -618,8 +546,8 @@ void RaceCarPlugin::updateState(const double dt) {
     _time_last_published = _last_sim_time;
 
     // Publish Everything
-    publishCarState();
-    publishWheelSpeeds();
+    publishCarPose();
+    publishWheelOdom();
     publishOdom();
 
     if (_publish_tf) {

@@ -25,7 +25,6 @@ class VehicleModel {
     void validateInput(Input &input);
 
     double getSlipAngle(const State &x, const Input &u, bool is_front);
-    eufs_msgs::msg::WheelSpeeds getWheelSpeeds(const State &state, const Input &input);
 
    protected:
     Param _param;
