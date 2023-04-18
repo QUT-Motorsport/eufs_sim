@@ -381,6 +381,11 @@ nav_msgs::msg::Odometry RaceCarPlugin::getWheelOdometry(const eufs_msgs::msg::Wh
 
     wheel_odom.twist.twist.angular.z = avg_wheel_speed * tan(input.delta) / _vehicle->getParam().kinematic.axle_width;
 
+    wheel_odom.header.stamp.sec = _last_sim_time.sec;
+    wheel_odom.header.stamp.nanosec = _last_sim_time.nsec;
+    wheel_odom.header.frame_id = _reference_frame;
+    wheel_odom.child_frame_id = _robot_frame;
+
     return wheel_odom;
 }
 
@@ -395,14 +400,14 @@ void RaceCarPlugin::publishWheelOdom() {
 
     nav_msgs::msg::Odometry wheel_odom = getWheelOdometry(wheel_speeds, _act_input);
 
-    // Add noise
-    eufs_msgs::msg::WheelSpeeds wheel_speeds_noisy = _noise->applyNoiseToWheelSpeeds(wheel_speeds);
-    nav_msgs::msg::Odometry wheel_odom_noisy = getWheelOdometry(wheel_speeds_noisy, _act_input);
-
     // Publish wheel odometry
     if (_pub_ground_truth_wheel_odom->get_subscription_count() > 0 && _pub_ground_truth) {
         _pub_ground_truth_wheel_odom->publish(wheel_odom);
     }
+
+    // Add noise
+    eufs_msgs::msg::WheelSpeeds wheel_speeds_noisy = _noise->applyNoiseToWheelSpeeds(wheel_speeds);
+    nav_msgs::msg::Odometry wheel_odom_noisy = getWheelOdometry(wheel_speeds_noisy, _act_input);
 
     if (_pub_wheel_odom->get_subscription_count() > 0) {
         _pub_wheel_odom->publish(wheel_odom_noisy);

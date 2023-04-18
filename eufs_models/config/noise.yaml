@@ -6,10 +6,10 @@ noise:
   orientationNoise: [0.0, 0.0, 0.0]
 
   # X, Y, Z
-  linearVelocityNoise: [0.0, 0.0, 0.0]
+  linearVelocityNoise: [0.1, 0.1, 0.0]
 
   # X, Y, Z
-  angularVelocityNoise: [0.0, 0.0, 0.0]
+  angularVelocityNoise: [0.0, 0.0, 0.1]
 
   # X, Y, Z
   linearAccelerationNoise: [0.0, 0.0, 0.0]
