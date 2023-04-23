@@ -66,9 +66,6 @@ void RaceCarPlugin::Load(gazebo::physics::ModelPtr model, sdf::ElementPtr sdf) {
     _pub_wheel_odom = _rosnode->create_publisher<nav_msgs::msg::Odometry>("/vehicle/wheel_odom", 1);
     _pub_ground_truth_wheel_odom =
         _rosnode->create_publisher<nav_msgs::msg::Odometry>("/ground_truth/wheel_odom", 1);
-    // Ground truth car odom
-    _pub_ground_truth_odom = _rosnode->create_publisher<nav_msgs::msg::Odometry>("old/odom", 1);
-    _pub_velocity = _rosnode->create_publisher<geometry_msgs::msg::TwistStamped>("old/velocity", 1);
     // Pose
     _pub_pose = _rosnode->create_publisher<geometry_msgs::msg::PoseWithCovarianceStamped>("slam/car_pose", 1);
     _pub_ground_truth_pose = _rosnode->create_publisher<geometry_msgs::msg::PoseWithCovarianceStamped>("ground_truth/car_pose", 1);
@@ -414,60 +411,6 @@ void RaceCarPlugin::publishWheelOdom() {
     }
 }
 
-void RaceCarPlugin::publishOdom() {
-    nav_msgs::msg::Odometry odom;
-
-    odom.header.stamp.sec = _last_sim_time.sec;
-    odom.header.stamp.nanosec = _last_sim_time.nsec;
-
-    odom.header.frame_id = _reference_frame;
-    odom.child_frame_id = _robot_frame;
-
-    odom.pose.pose.position.x = _state.x;
-    odom.pose.pose.position.y = _state.y;
-    odom.pose.pose.position.z = _state.z;
-
-    std::vector<double> orientation = {_state.yaw, 0.0, 0.0};
-    orientation = ToQuaternion(orientation);
-    odom.pose.pose.orientation.x = orientation[0];
-    odom.pose.pose.orientation.y = orientation[1];
-    odom.pose.pose.orientation.z = orientation[2];
-    odom.pose.pose.orientation.w = orientation[3];
-
-    odom.twist.twist.linear.x = _state.v_x;
-    odom.twist.twist.linear.y = _state.v_y;
-    odom.twist.twist.linear.z = _state.v_z;
-
-    odom.twist.twist.angular.x = _state.r_x;
-    odom.twist.twist.angular.y = _state.r_y;
-    odom.twist.twist.angular.z = _state.r_z;
-
-    // Publish the ground truth odom if it has subscribers and is allowed to publish
-    if (_pub_ground_truth_odom->get_subscription_count() > 0 && _pub_ground_truth) {
-        _pub_ground_truth_odom->publish(odom);
-    }
-
-    // Add noise to state
-    eufs::models::State state_noisy = _noise->applyNoise(_state);
-
-    // Velocity for QEV3 imu velocity
-    geometry_msgs::msg::TwistStamped ts;
-
-    ts.twist.linear.x = state_noisy.v_x;
-    ts.twist.linear.y = state_noisy.v_y;
-    ts.twist.linear.z = state_noisy.v_z;
-
-    ts.twist.angular.x = state_noisy.r_x;
-    ts.twist.angular.y = state_noisy.r_y;
-    ts.twist.angular.z = state_noisy.r_z;
-
-    ts.header.stamp.sec = _last_sim_time.sec;
-    ts.header.stamp.nanosec = _last_sim_time.nsec;
-
-    // Publish velocity for imu on QEV3
-    _pub_velocity->publish(ts);
-}
-
 void RaceCarPlugin::publishTf() {
     eufs::models::State state_noisy = _noise->applyNoise(_state);
 
@@ -553,7 +496,6 @@ void RaceCarPlugin::updateState(const double dt) {
     // Publish Everything
     publishCarPose();
     publishWheelOdom();
-    publishOdom();
 
     if (_publish_tf) {
         publishTf();
