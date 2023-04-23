@@ -8,6 +8,8 @@
 #include "eufs_models/vehicle_state.hpp"
 #include "eufs_msgs/msg/wheel_speeds.hpp"
 #include "yaml-cpp/yaml.h"
+#include "geometry_msgs/msg/twist.hpp"
+#include "geometry_msgs/msg/vector3.hpp"
 
 namespace eufs {
 namespace models {
@@ -87,6 +89,33 @@ class Noise {
         return new_wheel_speeds;
     }
 
+    geometry_msgs::msg::Twist applyNoiseToTwist(const geometry_msgs::msg::Twist &twist) {
+        geometry_msgs::msg::Twist new_twist = twist;
+
+        // Add noise to linear velocity
+        new_twist.linear.x += _gaussianKernel(0, _noise_param.linear_velocity[0]);
+        new_twist.linear.y += _gaussianKernel(0, _noise_param.linear_velocity[1]);
+        new_twist.linear.z += _gaussianKernel(0, _noise_param.linear_velocity[2]);
+
+        // Add noise to angular velocity
+        new_twist.angular.x += _gaussianKernel(0, _noise_param.angular_velocity[0]);
+        new_twist.angular.y += _gaussianKernel(0, _noise_param.angular_velocity[1]);
+        new_twist.angular.z += _gaussianKernel(0, _noise_param.angular_velocity[2]);
+
+        return new_twist;
+    }
+
+    geometry_msgs::msg::Vector3 applyNoiseToVector(const geometry_msgs::msg::Vector3 &vector) {
+        geometry_msgs::msg::Vector3 new_vector = vector;
+
+        // Add noise to linear acceleration
+        new_vector.x += _gaussianKernel(0, _noise_param.orientation[0]);
+        new_vector.y += _gaussianKernel(0, _noise_param.orientation[1]);
+        new_vector.z += _gaussianKernel(0, _noise_param.orientation[2]);
+
+        return new_vector;
+    }
+    
     const NoiseParam &getNoiseParam() { return _noise_param; }
 
     std::string getString() { return _noise_param.to_str(); }

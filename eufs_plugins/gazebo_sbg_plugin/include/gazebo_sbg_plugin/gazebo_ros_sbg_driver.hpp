@@ -12,6 +12,8 @@
 
 // ROS msgs
 #include "geometry_msgs/msg/twist_stamped.hpp"
+#include "geometry_msgs/msg/twist.hpp"
+#include "geometry_msgs/msg/vector3.hpp"
 #include "nav_msgs/msg/odometry.hpp"
 #include "sensor_msgs/msg/imu.hpp"
 #include "sensor_msgs/msg/nav_sat_fix.hpp"
@@ -49,7 +51,7 @@ class SBGPlugin : public gazebo::ModelPlugin
     void publishVelocity();
     void publishEuler();
     // void publishGps();
-    void publishOdom();
+    void publishGTOdom();
     std::vector<double> ToQuaternion(std::vector<double> &euler);
 
     gazebo_ros::Node::SharedPtr _ros_node;

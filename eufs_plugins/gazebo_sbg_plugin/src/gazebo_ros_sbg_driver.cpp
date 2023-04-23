@@ -82,7 +82,7 @@ void SBGPlugin::update()
     publishVelocity();
     publishEuler();
     // publishGps();
-    publishOdom();
+    publishGTOdom();
 }
 
 
@@ -99,13 +99,16 @@ void SBGPlugin::publishVelocity()
     msg.header.stamp.nanosec = curr_time.nsec;
     msg.header.frame_id = _reference_frame;
 
-    msg.twist.linear.x = _vel.X();
-    msg.twist.linear.y = _vel.Y();
-    msg.twist.linear.z = _vel.Z();
+    geometry_msgs::msg::Twist twist_vals;
+    twist_vals.linear.x = _vel.X();
+    twist_vals.linear.y = _vel.Y();
+    twist_vals.linear.z = _vel.Z();
 
-    msg.twist.angular.x = _angular_vel.X();
-    msg.twist.angular.y = _angular_vel.Y();
-    msg.twist.angular.z = _angular_vel.Z();
+    twist_vals.angular.x = _angular_vel.X();
+    twist_vals.angular.y = _angular_vel.Y();
+    twist_vals.angular.z = _angular_vel.Z();
+
+    msg.twist = _noise->applyNoiseToTwist(twist_vals);
 
     _pub_velocity->publish(msg);
 }
@@ -123,9 +126,12 @@ void SBGPlugin::publishEuler()
     msg.header.stamp.nanosec = curr_time.nsec;
     msg.header.frame_id = _reference_frame;
 
-    msg.angle.x = _pose.Roll() - _offset.Roll();
-    msg.angle.y = _pose.Pitch() - _offset.Pitch();
-    msg.angle.z = _pose.Yaw() - _offset.Yaw();
+    geometry_msgs::msg::Vector3 euler_vals;
+    euler_vals.x = _pose.Roll() - _offset.Roll();
+    euler_vals.y = _pose.Pitch() - _offset.Pitch();
+    euler_vals.z = _pose.Yaw() - _offset.Yaw();
+
+    msg.angle = _noise->applyNoiseToVector(euler_vals);
 
     _pub_euler->publish(msg);
 }
@@ -150,7 +156,7 @@ void SBGPlugin::publishEuler()
 //     _pub_gps->publish(msg);
 // }
 
-void SBGPlugin::publishOdom()
+void SBGPlugin::publishGTOdom()
 {
     if (_pub_odom->get_subscription_count() == 0 || !_pub_gt) {
         return;
