@@ -67,8 +67,8 @@ void RaceCarPlugin::Load(gazebo::physics::ModelPtr model, sdf::ElementPtr sdf) {
     _pub_ground_truth_wheel_odom =
         _rosnode->create_publisher<nav_msgs::msg::Odometry>("/ground_truth/wheel_odom", 1);
     // Ground truth car odom
-    _pub_ground_truth_odom = _rosnode->create_publisher<nav_msgs::msg::Odometry>("/ground_truth/odom", 1);
-    _pub_velocity = _rosnode->create_publisher<geometry_msgs::msg::TwistStamped>("imu/velocity", 1);
+    _pub_ground_truth_odom = _rosnode->create_publisher<nav_msgs::msg::Odometry>("old/odom", 1);
+    _pub_velocity = _rosnode->create_publisher<geometry_msgs::msg::TwistStamped>("old/velocity", 1);
     // Pose
     _pub_pose = _rosnode->create_publisher<geometry_msgs::msg::PoseWithCovarianceStamped>("slam/car_pose", 1);
     _pub_ground_truth_pose = _rosnode->create_publisher<geometry_msgs::msg::PoseWithCovarianceStamped>("ground_truth/car_pose", 1);
