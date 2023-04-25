@@ -4,7 +4,7 @@
 eufs_launcher:
   # Default launch file to be selected in the launcher drop-down menu
   # Make sure to add the .launch suffix, i.e. "small_track.launch"
-  base_track: "small_track.launch"
+  base_track: "small_track.world"
 
   # Default vehicle model to be selected in the launcher drop-down menu
   default_vehicle_model: "DynamicBicycle"

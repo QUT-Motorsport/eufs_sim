@@ -219,22 +219,22 @@ class EUFSLauncher(Plugin):
         # Clear the dropdowns
         self.TRACK_SELECTOR.clear()
         # Get tracks from eufs_tracks package
-        launch_dir_path = join(self.TRACKS_SHARE, "launch")
-        launch_files = [
-            f for f in listdir(launch_dir_path) if isfile(join(launch_dir_path, f))
+        world_dir_path = join(self.TRACKS_SHARE, "worlds")
+        world_files = [
+            f for f in listdir(world_dir_path) if isfile(join(world_dir_path, f))
         ]
 
         # Remove "blacklisted" files (ones that don't define tracks)
-        blacklist_filepath = join(self.TRACKS_SHARE, "launch/blacklist.txt")
+        blacklist_filepath = join(self.TRACKS_SHARE, "worlds/blacklist.txt")
         with open(blacklist_filepath, "r") as f:
             blacklist = [f.strip() for f in f.readlines()]  # remove \n
-            launch_files = [f for f in launch_files if f not in blacklist]
+            world_files = [f for f in world_files if f not in blacklist]
 
         # Add Tracks to Track Selector
         base_track = self.default_config["eufs_launcher"]["base_track"]
-        if base_track in launch_files:
+        if base_track in world_files:
             self.TRACK_SELECTOR.addItem(base_track.split(".")[0])
-        for f in launch_files:
+        for f in world_files:
             if f != base_track:
                 self.TRACK_SELECTOR.addItem(f.split(".")[0])
 
@@ -307,6 +307,13 @@ class EUFSLauncher(Plugin):
             "eufs_track_converter",
             "install/eufs_tracks/lib/eufs_tracks/eufs_tracks_converter",
         )
+
+    def run_without_args(self, package, program_name):
+        """Runs ros node."""
+        command = ["stdbuf", "-o", "L", "ros2", "run", package, program_name]
+        self.logger.info(f"Command: {' '.join(command)}")
+        process = Popen(command)
+        self.popens.append(process)
 
     def launch_without_args(self, program_name, directory):
         """Launches a program from the specified directory."""
