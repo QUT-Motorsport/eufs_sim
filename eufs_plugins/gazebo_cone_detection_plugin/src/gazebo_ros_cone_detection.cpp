@@ -54,7 +54,7 @@ void ConeDetectionPlugin::Load(gazebo::physics::ModelPtr parent, sdf::ElementPtr
 
     last_update = world->SimTime();
     update_connection =
-        gazebo::event::Events::ConnectWorldUpdateBegin(std::bind(&ConeDetectionPlugin::UpdateChild, this));
+        gazebo::event::Events::ConnectWorldUpdateBegin(std::bind(&ConeDetectionPlugin::update, this));
 
     //  Store initial track
     initial_track = get_ground_truth_track(track_model, last_update, _ros_node->get_logger());
@@ -62,7 +62,7 @@ void ConeDetectionPlugin::Load(gazebo::physics::ModelPtr parent, sdf::ElementPtr
     RCLCPP_INFO(_ros_node->get_logger(), "ConeDetectionPlugin Loaded");
 }
 
-void ConeDetectionPlugin::UpdateChild() {
+void ConeDetectionPlugin::update() {
     auto curr_time = world->SimTime();
     if (calc_dt(last_update, curr_time) < (1.0 / update_rate)) {
         return;
