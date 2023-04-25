@@ -4,20 +4,6 @@ add_library(gazebo_ros_race_car SHARED
   src/gazebo_ros_race_car.cpp
   src/state_machine.cpp)
 
-find_package(gazebo_dev REQUIRED)
-find_package(gazebo_ros REQUIRED)
-find_package(rclcpp REQUIRED)
-find_package(eufs_msgs REQUIRED)
-find_package(nav_msgs REQUIRED)
-find_package(geometry_msgs REQUIRED)
-find_package(tf2 REQUIRED)
-find_package(ackermann_msgs REQUIRED)
-find_package(tf2_ros REQUIRED)
-find_package(tf2_geometry_msgs REQUIRED)
-find_package(std_srvs REQUIRED)
-find_package(std_msgs REQUIRED)
-find_package(eufs_models REQUIRED)
-
 ament_target_dependencies(gazebo_ros_race_car
   "gazebo_dev"
   "gazebo_ros"
