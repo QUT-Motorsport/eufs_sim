@@ -100,7 +100,6 @@ class RaceCarPlugin : public gazebo::ModelPlugin {
 
     void publishCarPose();
     void publishWheelOdom();
-    void publishOdom();
     void publishTf();
 
     void onCmd(const ackermann_msgs::msg::AckermannDriveStamped::SharedPtr msg);
@@ -134,18 +133,9 @@ class RaceCarPlugin : public gazebo::ModelPlugin {
     std::string _robot_frame;
     std::unique_ptr<tf2_ros::TransformBroadcaster> _tf_br;
 
-    // ROS topic parameters
-    std::string _ground_truth_car_state_topic;
-    std::string _localisation_car_state_topic;
-    std::string _wheel_odom_topic_name;
-    std::string _ground_truth_wheel_odom_topic_name;
-    std::string _odom_topic_name;
-
     // ROS Publishers
     rclcpp::Publisher<nav_msgs::msg::Odometry>::SharedPtr _pub_wheel_odom;
     rclcpp::Publisher<nav_msgs::msg::Odometry>::SharedPtr _pub_ground_truth_wheel_odom;
-    rclcpp::Publisher<nav_msgs::msg::Odometry>::SharedPtr _pub_ground_truth_odom;
-     rclcpp::Publisher<geometry_msgs::msg::TwistStamped>::SharedPtr _pub_velocity;
     rclcpp::Publisher<geometry_msgs::msg::PoseWithCovarianceStamped>::SharedPtr _pub_pose;
     rclcpp::Publisher<geometry_msgs::msg::PoseWithCovarianceStamped>::SharedPtr _pub_ground_truth_pose;
 

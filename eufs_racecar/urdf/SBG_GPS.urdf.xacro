@@ -55,13 +55,13 @@
                         <horizontal>
                             <noise type="gaussian">
                                 <mean>0.0</mean>
-                                <stddev>0.2</stddev>
+                                <stddev>0.001</stddev>
                             </noise>
                         </horizontal>
                         <vertical>
                             <noise type="gaussian">
                                 <mean>0.0</mean>
-                                <stddev>0.2</stddev>
+                                <stddev>0.001</stddev>
                             </noise>
                         </vertical>
                     </position_sensing>
@@ -69,13 +69,13 @@
                         <horizontal>
                             <noise type="gaussian">
                                 <mean>0.0</mean>
-                                <stddev>0.1</stddev>
+                                <stddev>0.01</stddev>
                             </noise>
                         </horizontal>
                         <vertical>
                             <noise type="gaussian">
                                 <mean>0.0</mean>
-                                <stddev>0.1</stddev>
+                                <stddev>0.01</stddev>
                             </noise>
                         </vertical>
                     </velocity_sensing>
