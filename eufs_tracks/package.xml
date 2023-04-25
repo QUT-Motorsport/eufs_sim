@@ -15,9 +15,6 @@
   <depend>rclpy</depend>
   <depend>rqt_gui</depend>
 
-  <depend>launch</depend>
-  <depend>launch_ros</depend>
-
   <depend>ament_index_python</depend>
 
   <exec_depend>python3-pil</exec_depend>
