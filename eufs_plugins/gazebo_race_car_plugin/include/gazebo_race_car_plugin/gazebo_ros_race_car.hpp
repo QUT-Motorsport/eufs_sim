@@ -37,6 +37,7 @@
 #include "geometry_msgs/msg/pose_with_covariance_stamped.hpp"
 #include "geometry_msgs/msg/vector3.hpp"
 #include "nav_msgs/msg/odometry.hpp"
+#include "std_msgs/msg/float32.hpp"
 
 // ROS TF2
 #include <tf2/transform_datatypes.h>
@@ -86,14 +87,12 @@ class RaceCarPlugin : public gazebo::ModelPlugin {
     void setModelState();
 
     void initParams(const sdf::ElementPtr &sdf);
-    void initModel(const sdf::ElementPtr &sdf);
-    void initNoise(const sdf::ElementPtr &sdf);
 
     geometry_msgs::msg::PoseWithCovarianceStamped stateToPoseMsg(const eufs::models::State &state);
-    nav_msgs::msg::Odometry getWheelOdometry(const eufs::models::State &state, const eufs::models::Input &input);
+    nav_msgs::msg::Odometry getWheelOdometry(const std::vector<double> &speeds, const double &input);
 
     void publishCarPose();
-    void publishWheelOdom();
+    void publishVehicleOdom();
     void publishTf();
 
     void onCmd(const ackermann_msgs::msg::AckermannDriveStamped::SharedPtr msg);
@@ -132,6 +131,8 @@ class RaceCarPlugin : public gazebo::ModelPlugin {
     rclcpp::Publisher<nav_msgs::msg::Odometry>::SharedPtr _pub_gt_wheel_odom;
     rclcpp::Publisher<geometry_msgs::msg::PoseWithCovarianceStamped>::SharedPtr _pub_pose;
     rclcpp::Publisher<geometry_msgs::msg::PoseWithCovarianceStamped>::SharedPtr _pub_gt_pose;
+    rclcpp::Publisher<std_msgs::msg::Float32>::SharedPtr _pub_steering_angle;
+    rclcpp::Publisher<std_msgs::msg::Float32>::SharedPtr _pub_gt_steering_angle;
 
     // ROS Subscriptions
     rclcpp::Subscription<ackermann_msgs::msg::AckermannDriveStamped>::SharedPtr _sub_cmd;

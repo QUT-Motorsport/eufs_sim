@@ -55,15 +55,17 @@ void RaceCarPlugin::Load(gazebo::physics::ModelPtr model, sdf::ElementPtr sdf) {
     // ROS Publishers
     // Wheel odom
     _pub_wheel_odom = _rosnode->create_publisher<nav_msgs::msg::Odometry>("/vehicle/wheel_odom", 1);
-    if (_pub_gt) {
-        _pub_gt_wheel_odom = _rosnode->create_publisher<nav_msgs::msg::Odometry>("/ground_truth/wheel_odom", 1);
-    }
-    // Pose
+    // Steering angle
+    _pub_steering_angle = _rosnode->create_publisher<std_msgs::msg::Float32>("/vehicle/steering_angle", 1);
+    // Pose (from slam output)
     if (_simulate_slam) {
         _pub_pose = _rosnode->create_publisher<geometry_msgs::msg::PoseWithCovarianceStamped>("slam/car_pose", 1);
     }
+    // Ground truth
     if (_pub_gt) {
+        _pub_gt_wheel_odom = _rosnode->create_publisher<nav_msgs::msg::Odometry>("/ground_truth/wheel_odom", 1);
         _pub_gt_pose = _rosnode->create_publisher<geometry_msgs::msg::PoseWithCovarianceStamped>("ground_truth/car_pose", 1);
+        _pub_gt_steering_angle = _rosnode->create_publisher<std_msgs::msg::Float32>("/ground_truth/steering_angle", 1);
     }
 
     // ROS Services
@@ -281,22 +283,22 @@ void RaceCarPlugin::publishCarPose() {
     }
 }
 
-nav_msgs::msg::Odometry RaceCarPlugin::getWheelOdometry(const eufs::models::State &state,
-                                                        const eufs::models::Input &input) {
+nav_msgs::msg::Odometry RaceCarPlugin::getWheelOdometry(const std::vector<double> &speeds,
+                                                        const double &input) {
     nav_msgs::msg::Odometry wheel_odom;
 
     // Calculate avg wheel speeds
-    float rf = state.v_x;
-    float lf = state.v_x;
-    float rb = state.v_x;
-    float lb = state.v_x;
-    float avg_wheel_speed = (rf + lf + rb + lb) / 4.0;
+    double rf = speeds[0];
+    double lf = speeds[1];
+    double rb = speeds[2];
+    double lb = speeds[3];
+    double avg_wheel_speed = (rf + lf + rb + lb) / 4.0;
 
     // Calculate odom with wheel speed and steering angle
     wheel_odom.twist.twist.linear.x = avg_wheel_speed;
     wheel_odom.twist.twist.linear.y = 0.0;
 
-    wheel_odom.twist.twist.angular.z = avg_wheel_speed * tan(input.delta) / _vehicle->getParam().kinematic.axle_width;
+    wheel_odom.twist.twist.angular.z = avg_wheel_speed * tan(input) / _vehicle->getParam().kinematic.axle_width;
 
     wheel_odom.header.stamp.sec = _last_sim_time.sec;
     wheel_odom.header.stamp.nanosec = _last_sim_time.nsec;
@@ -306,22 +308,39 @@ nav_msgs::msg::Odometry RaceCarPlugin::getWheelOdometry(const eufs::models::Stat
     return wheel_odom;
 }
 
-void RaceCarPlugin::publishWheelOdom() {
-    nav_msgs::msg::Odometry wheel_odom = getWheelOdometry(_state, _act_input);
+void RaceCarPlugin::publishVehicleOdom() {
+    // Publish steering angle
+    std_msgs::msg::Float32 steering_angle;
+    steering_angle.data = _act_input.delta;
+
+    if (has_subscribers(_pub_gt_steering_angle)) {
+        _pub_gt_steering_angle->publish(steering_angle);
+    }
 
     // Publish wheel odometry
+    std::vector<double> wheel_speeds = {_state.v_x, _state.v_x, _state.v_x, _state.v_x};
+    nav_msgs::msg::Odometry wheel_odom = getWheelOdometry(wheel_speeds, steering_angle.data);
+
     if (has_subscribers(_pub_gt_wheel_odom)) {
         _pub_gt_wheel_odom->publish(wheel_odom);
     }
 
     // Add noise
-    eufs::models::State state_noisy = _noise->applyNoise(_state);
-    nav_msgs::msg::Odometry wheel_odom_noisy = getWheelOdometry(state_noisy, _act_input);
+    std_msgs::msg::Float32 steering_angle_noisy;
+    steering_angle_noisy.data = _noise->applyNoiseToSteering(steering_angle.data);
+
+    if (has_subscribers(_pub_steering_angle)) {
+        _pub_steering_angle->publish(steering_angle_noisy);
+    }
+
+    std::vector<double> wheel_speeds_noisy = _noise->applyNoiseToWheels(wheel_speeds);
+    nav_msgs::msg::Odometry wheel_odom_noisy = getWheelOdometry(wheel_speeds_noisy, steering_angle_noisy.data);
 
     if (has_subscribers(_pub_wheel_odom)) {
         _pub_wheel_odom->publish(wheel_odom_noisy);
     }
 }
+
 
 void RaceCarPlugin::publishTf() {
     eufs::models::State state_noisy = _noise->applyNoise(_state);
@@ -405,7 +424,7 @@ void RaceCarPlugin::update() {
 
     // Publish Everything
     publishCarPose();
-    publishWheelOdom();
+    publishVehicleOdom();
 
     if (_publish_tf) {
         publishTf();

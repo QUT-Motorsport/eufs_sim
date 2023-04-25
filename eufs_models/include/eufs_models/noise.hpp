@@ -102,6 +102,27 @@ class Noise {
 
         return new_vector;
     }
+
+    double applyNoiseToSteering(const double &float_msg) {
+        double new_float_msg = float_msg;
+
+        // Add noise to linear acceleration
+        new_float_msg += _gaussianKernel(0, _noise_param.position[2]);
+        // hacky, using yaw to store steering angle noise
+
+        return new_float_msg;
+    }
+
+    std::vector<double> applyNoiseToWheels(const std::vector<double> &wheels) {
+        std::vector<double> new_wheels = wheels;
+
+        // Add noise to wheel speed
+        for (int i = 0; i < 4; i++) {
+            new_wheels[i] += _gaussianKernel(0, _noise_param.wheel_speed[i]);
+        }
+
+        return new_wheels;
+    }
     
     const NoiseParam &getNoiseParam() { return _noise_param; }
 

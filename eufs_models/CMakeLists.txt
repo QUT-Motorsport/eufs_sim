@@ -42,6 +42,7 @@ ament_export_targets(export_${PROJECT_NAME} HAS_LIBRARY_TARGET)
 
 ament_export_dependencies(ament_cmake)
 ament_export_dependencies(yaml-cpp)
+ament_export_dependencies(geometry_msgs)
 
 install(
   DIRECTORY include/
