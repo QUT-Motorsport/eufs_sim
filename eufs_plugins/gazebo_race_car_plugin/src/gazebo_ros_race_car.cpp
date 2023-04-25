@@ -281,15 +281,15 @@ void RaceCarPlugin::publishCarPose() {
     }
 }
 
-nav_msgs::msg::Odometry RaceCarPlugin::getWheelOdometry(const eufs_msgs::msg::WheelSpeeds &wheel_speeds_noisy,
+nav_msgs::msg::Odometry RaceCarPlugin::getWheelOdometry(const eufs::models::State &state,
                                                         const eufs::models::Input &input) {
     nav_msgs::msg::Odometry wheel_odom;
 
     // Calculate avg wheel speeds
-    float rf = wheel_speeds_noisy.rf_speed;
-    float lf = wheel_speeds_noisy.lf_speed;
-    float rb = wheel_speeds_noisy.rb_speed;
-    float lb = wheel_speeds_noisy.lb_speed;
+    float rf = state.v_x;
+    float lf = state.v_x;
+    float rb = state.v_x;
+    float lb = state.v_x;
     float avg_wheel_speed = (rf + lf + rb + lb) / 4.0;
 
     // Calculate odom with wheel speed and steering angle
@@ -307,15 +307,7 @@ nav_msgs::msg::Odometry RaceCarPlugin::getWheelOdometry(const eufs_msgs::msg::Wh
 }
 
 void RaceCarPlugin::publishWheelOdom() {
-    eufs_msgs::msg::WheelSpeeds wheel_speeds;
-
-    // Calculate Wheel speeds
-    wheel_speeds.lf_speed = _state.v_x;
-    wheel_speeds.rf_speed = _state.v_x;
-    wheel_speeds.lb_speed = _state.v_x;
-    wheel_speeds.rb_speed = _state.v_x;
-
-    nav_msgs::msg::Odometry wheel_odom = getWheelOdometry(wheel_speeds, _act_input);
+    nav_msgs::msg::Odometry wheel_odom = getWheelOdometry(_state, _act_input);
 
     // Publish wheel odometry
     if (has_subscribers(_pub_gt_wheel_odom)) {
@@ -323,8 +315,8 @@ void RaceCarPlugin::publishWheelOdom() {
     }
 
     // Add noise
-    eufs_msgs::msg::WheelSpeeds wheel_speeds_noisy = _noise->applyNoiseToWheelSpeeds(wheel_speeds);
-    nav_msgs::msg::Odometry wheel_odom_noisy = getWheelOdometry(wheel_speeds_noisy, _act_input);
+    eufs::models::State state_noisy = _noise->applyNoise(_state);
+    nav_msgs::msg::Odometry wheel_odom_noisy = getWheelOdometry(state_noisy, _act_input);
 
     if (has_subscribers(_pub_wheel_odom)) {
         _pub_wheel_odom->publish(wheel_odom_noisy);

@@ -34,8 +34,6 @@
 
 // ROS msgs
 #include "ackermann_msgs/msg/ackermann_drive_stamped.hpp"
-#include "eufs_msgs/msg/car_state.hpp"
-#include "eufs_msgs/msg/wheel_speeds_stamped.hpp"
 #include "geometry_msgs/msg/pose_with_covariance_stamped.hpp"
 #include "geometry_msgs/msg/vector3.hpp"
 #include "nav_msgs/msg/odometry.hpp"
@@ -92,7 +90,7 @@ class RaceCarPlugin : public gazebo::ModelPlugin {
     void initNoise(const sdf::ElementPtr &sdf);
 
     geometry_msgs::msg::PoseWithCovarianceStamped stateToPoseMsg(const eufs::models::State &state);
-    nav_msgs::msg::Odometry getWheelOdometry(const eufs_msgs::msg::WheelSpeeds &wheel_speeds_noisy, const eufs::models::Input &input);
+    nav_msgs::msg::Odometry getWheelOdometry(const eufs::models::State &state, const eufs::models::Input &input);
 
     void publishCarPose();
     void publishWheelOdom();
