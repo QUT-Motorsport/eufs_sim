@@ -5,8 +5,10 @@
   <version>2.0.0</version>
   <description>Configures and launches eufs_sim.</description>
 
-  <maintainer email="cambobmat@icloud.com">Cameron Matthew</maintainer>
-  <maintainer email="siliconlad@protonmail.com">Angus Stewart</maintainer>
+  <author email="cambobmat@icloud.com">Cameron Matthew</author>
+  <author email="siliconlad@protonmail.com">Angus Stewart</author>
+
+  <maintainer email="team@qutmotorsport.com">Alastair Bradford</author>
 
   <license>MIT</license>
 
