@@ -211,9 +211,9 @@ void RaceCarPlugin::initVehicleModel(const sdf::ElementPtr &sdf) {
 
 void RaceCarPlugin::initModel(const sdf::ElementPtr &sdf) {
     // Steering joints
-    std::string leftSteeringJointName = _model->GetName() + "::" + sdf->Get<std::string>("front_left_wheel_steering");
+    std::string leftSteeringJointName = _model->GetName() + "::left_steering_hinge_joint";
     _left_steering_joint = _model->GetJoint(leftSteeringJointName);
-    std::string rightSteeringJointName = _model->GetName() + "::" + sdf->Get<std::string>("front_right_wheel_steering");
+    std::string rightSteeringJointName = _model->GetName() + "::right_steering_hinge_joint";
     _right_steering_joint = _model->GetJoint(rightSteeringJointName);
 }
 
