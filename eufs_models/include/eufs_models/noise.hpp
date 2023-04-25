@@ -6,7 +6,6 @@
 #include <string>
 
 #include "eufs_models/vehicle_state.hpp"
-#include "eufs_msgs/msg/wheel_speeds.hpp"
 #include "yaml-cpp/yaml.h"
 #include "geometry_msgs/msg/twist.hpp"
 #include "geometry_msgs/msg/vector3.hpp"
@@ -75,18 +74,6 @@ class Noise {
         new_state.a_z += _gaussianKernel(0, _noise_param.linear_acceleration[2]);
 
         return new_state;
-    }
-
-    eufs_msgs::msg::WheelSpeeds applyNoiseToWheelSpeeds(const eufs_msgs::msg::WheelSpeeds &wheel_speeds) {
-        eufs_msgs::msg::WheelSpeeds new_wheel_speeds = wheel_speeds;
-
-        // Add noise to wheel speed
-        new_wheel_speeds.lf_speed += _gaussianKernel(0, _noise_param.wheel_speed[0]);
-        new_wheel_speeds.rf_speed += _gaussianKernel(0, _noise_param.wheel_speed[1]);
-        new_wheel_speeds.lb_speed += _gaussianKernel(0, _noise_param.wheel_speed[2]);
-        new_wheel_speeds.rb_speed += _gaussianKernel(0, _noise_param.wheel_speed[3]);
-
-        return new_wheel_speeds;
     }
 
     geometry_msgs::msg::Twist applyNoiseToTwist(const geometry_msgs::msg::Twist &twist) {

@@ -7,7 +7,6 @@
 #include "eufs_models/vehicle_input.hpp"
 #include "eufs_models/vehicle_param.hpp"
 #include "eufs_models/vehicle_state.hpp"
-#include "eufs_msgs/msg/wheel_speeds.hpp"
 
 namespace eufs {
 namespace models {

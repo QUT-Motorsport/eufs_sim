@@ -18,7 +18,6 @@ option(BUILD_SHARED_LIBS ON)
 # find dependencies
 find_package(ament_cmake REQUIRED)
 find_package(yaml-cpp REQUIRED)
-find_package(eufs_msgs REQUIRED)
 find_package(geometry_msgs REQUIRED)
 
 # build library
@@ -33,7 +32,6 @@ target_include_directories(${PROJECT_NAME} PUBLIC
 target_link_libraries(eufs_models
   ${YAML_CPP_LIBRARIES})
 ament_target_dependencies(eufs_models
-  "eufs_msgs"
   "yaml-cpp"
   "geometry_msgs")
 
@@ -44,7 +42,6 @@ ament_export_targets(export_${PROJECT_NAME} HAS_LIBRARY_TARGET)
 
 ament_export_dependencies(ament_cmake)
 ament_export_dependencies(yaml-cpp)
-ament_export_dependencies(eufs_msgs)
 
 install(
   DIRECTORY include/
