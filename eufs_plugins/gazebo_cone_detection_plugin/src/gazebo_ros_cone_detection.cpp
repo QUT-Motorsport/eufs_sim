@@ -23,11 +23,7 @@ void ConeDetectionPlugin::Load(gazebo::physics::ModelPtr parent, sdf::ElementPtr
     bool simulate_SLAM = get_bool_parameter(sdf, "simulateSLAM", true, "true");
 
     lidar_config = populate_sensor_config("lidar", sdf, _ros_node->get_logger());
-    std::string lidar_topic = get_string_parameter(sdf, "lidarDetectionTopic", "lidar", "lidar", _ros_node->get_logger());
-
     camera_config = populate_sensor_config("camera", sdf, _ros_node->get_logger());
-    std::string camera_topic = get_string_parameter(sdf, "cameraDetectionTopic", "camera", "camera", _ros_node->get_logger());
-
     slam_config = populate_slam_config(sdf, _ros_node->get_logger());
 
     if (publish_ground_truth) {
@@ -36,9 +32,9 @@ void ConeDetectionPlugin::Load(gazebo::physics::ModelPtr parent, sdf::ElementPtr
     }
 
     if (simulate_perception) {
-        lidar_detection_pub = _ros_node->create_publisher<driverless_msgs::msg::ConeDetectionStamped>((lidar_topic), 1);
+        lidar_detection_pub = _ros_node->create_publisher<driverless_msgs::msg::ConeDetectionStamped>(("lidar/cone_detection"), 1);
         vision_detection_pub =
-            _ros_node->create_publisher<driverless_msgs::msg::ConeDetectionStamped>((camera_topic), 1);
+            _ros_node->create_publisher<driverless_msgs::msg::ConeDetectionStamped>(("vision/cone_detection"), 1);
     }
 
     if (simulate_SLAM) {
