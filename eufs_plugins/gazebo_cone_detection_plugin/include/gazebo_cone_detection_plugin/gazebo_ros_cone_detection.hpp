@@ -43,9 +43,6 @@ class ConeDetectionPlugin : public gazebo::ModelPlugin {
     ignition::math::Pose3d car_inital_pose;
 
     double update_rate;
-    bool publish_ground_truth;
-    bool simulate_perception;
-    bool simulate_SLAM;
     gazebo::common::Time last_update;
     driverless_msgs::msg::ConeDetectionStamped initial_track;
 
