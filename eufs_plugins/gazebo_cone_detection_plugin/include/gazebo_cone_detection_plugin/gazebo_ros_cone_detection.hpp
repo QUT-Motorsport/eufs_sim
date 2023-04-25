@@ -29,11 +29,13 @@ class ConeDetectionPlugin : public gazebo::ModelPlugin {
 
     // Gazebo plugin functions
     void Load(gazebo::physics::ModelPtr parent, sdf::ElementPtr sdf);
-    void UpdateChild();
+    void update();
+    bool resetConePosition(std::shared_ptr<std_srvs::srv::Trigger::Request> request,
+                           std::shared_ptr<std_srvs::srv::Trigger::Response> response);
 
    private:
     gazebo::physics::WorldPtr world;
-    gazebo_ros::Node::SharedPtr ros_node;
+    gazebo_ros::Node::SharedPtr _ros_node;
     gazebo::event::ConnectionPtr update_connection;
 
     gazebo::physics::ModelPtr track_model;
@@ -41,13 +43,19 @@ class ConeDetectionPlugin : public gazebo::ModelPlugin {
     ignition::math::Pose3d car_inital_pose;
 
     double update_rate;
+    bool publish_ground_truth;
+    bool simulate_perception;
+    bool simulate_SLAM;
     gazebo::common::Time last_update;
+    driverless_msgs::msg::ConeDetectionStamped initial_track;
 
     rclcpp::Publisher<driverless_msgs::msg::ConeDetectionStamped>::SharedPtr ground_truth_pub;
     rclcpp::Publisher<driverless_msgs::msg::ConeDetectionStamped>::SharedPtr lidar_detection_pub;
     rclcpp::Publisher<driverless_msgs::msg::ConeDetectionStamped>::SharedPtr vision_detection_pub;
     rclcpp::Publisher<driverless_msgs::msg::ConeDetectionStamped>::SharedPtr slam_global_pub;
     rclcpp::Publisher<driverless_msgs::msg::ConeDetectionStamped>::SharedPtr slam_local_pub;
+    // ROS Service
+    rclcpp::Service<std_srvs::srv::Trigger>::SharedPtr reset_cone_pos_srv;
 
     SensorConfig_t lidar_config;
     SensorConfig_t camera_config;
