@@ -11,43 +11,6 @@ data_files = [
     ("share/ament_index/resource_index/packages", ["resource/" + package_name]),
     (join(share_directory, "csv"), glob("csv/*")),
     (join(share_directory, "image"), glob("image/*")),
-    (
-        join(share_directory, "launch"),
-        glob("launch/*.launch*") + ["launch/blacklist.txt"],
-    ),
-    (join(share_directory, "materials"), glob("materials/*")),
-    (join(share_directory, "meshes"), glob("meshes/*")),
-    (join(share_directory, "worlds"), glob("worlds/*")),
-    (
-        join(share_directory, "resource/randgen_model_template"),
-        glob("resource/randgen_model_template/model.*"),
-    ),
-    (
-        join(share_directory, "resource"),
-        [
-            "resource/noiseFiles.txt",
-            "resource/randgen_launch_template",
-            "resource/randgen_world_template",
-            "resource/conversion_tool.ui",
-        ],
-    ),
-]
-
-# Add all model sub-directories
-# This is required as setuptools doesn't currently support recursive glob
-for directory in glob("models/*"):
-    data_file = (join(share_directory, directory), glob(directory + "/*"))
-    data_files.append(data_file)
-
-data_files = [
-    (share_directory, ["package.xml", "plugin.xml"]),
-    ("share/ament_index/resource_index/packages", ["resource/" + package_name]),
-    (join(share_directory, "csv"), glob("csv/*")),
-    (join(share_directory, "image"), glob("image/*")),
-    (
-        join(share_directory, "launch"),
-        glob("launch/*.launch*") + ["launch/blacklist.txt"],
-    ),
     (join(share_directory, "materials"), glob("materials/*")),
     (join(share_directory, "meshes"), glob("meshes/*")),
     (join(share_directory, "worlds"), glob("worlds/*")),
@@ -79,8 +42,10 @@ setup(
     data_files=data_files,
     install_requires=["setuptools"],
     zip_safe=True,
-    maintainer="Cameron Matthew",
-    maintainer_email="cambobmat@icloud.com",
+    author="Cameron Matthew",
+    author_email="cambobmat@icloud.com",
+    maintainer="Alastair Bradford",
+    maintainer_email="albradford2468@gmail.com",
     description="Procedurally generates tracks and converts between file formats.",
     license="MIT",
     tests_require=["pytest"],
