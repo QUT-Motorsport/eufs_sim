@@ -87,7 +87,7 @@ class SBGPlugin : public gazebo::ModelPlugin
     rclcpp::Publisher<geometry_msgs::msg::TwistStamped>::SharedPtr _pub_velocity;
     rclcpp::Publisher<sbg_driver::msg::SbgEkfEuler>::SharedPtr _pub_euler;
     rclcpp::Publisher<sbg_driver::msg::SbgGpsPos>::SharedPtr _pub_gps;
-    rclcpp::Publisher<nav_msgs::msg::Odometry>::SharedPtr _pub_odom;
+    rclcpp::Publisher<nav_msgs::msg::Odometry>::SharedPtr _pub_gt_odom;
 
     // ROS Subscribers
     rclcpp::Subscription<sensor_msgs::msg::NavSatFix>::SharedPtr _sub_nav_sat_fix;

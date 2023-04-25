@@ -23,9 +23,9 @@ void SBGPlugin::Load(gazebo::physics::ModelPtr model, sdf::ElementPtr sdf)
     _model = model;
     _world = _model->GetWorld();
 
-    _ekf_update_rate = get_double_parameter(sdf, "ekfUpdateRate", 0, "0.0 (as fast as possible)", _ros_node->get_logger());
-    _vel_update_rate = get_double_parameter(sdf, "velUpdateRate", 0, "0.0 (as fast as possible)", _ros_node->get_logger());
-    _gps_update_rate = get_double_parameter(sdf, "gpsUpdateRate", 0, "0.0 (as fast as possible)", _ros_node->get_logger());
+    _ekf_update_rate = get_double_parameter(sdf, "ekfUpdateRate", 1.0, "1.0", _ros_node->get_logger());
+    _vel_update_rate = get_double_parameter(sdf, "velUpdateRate", 1.0, "1.0", _ros_node->get_logger());
+    _gps_update_rate = get_double_parameter(sdf, "gpsUpdateRate", 1.0, "1.0", _ros_node->get_logger());
     _pub_gt = get_bool_parameter(sdf, "publishGroundTruth", false, "false", _ros_node->get_logger());
 
     _reference_frame = get_string_parameter(sdf, "referenceFrame", "", "empty", _ros_node->get_logger());
@@ -39,7 +39,9 @@ void SBGPlugin::Load(gazebo::physics::ModelPtr model, sdf::ElementPtr sdf)
     _pub_velocity = _ros_node->create_publisher<geometry_msgs::msg::TwistStamped>("imu/velocity", 1);
     _pub_euler = _ros_node->create_publisher<sbg_driver::msg::SbgEkfEuler>("sbg/ekf_euler", 1);
     _pub_gps = _ros_node->create_publisher<sbg_driver::msg::SbgGpsPos>("sbg/gps_pos", 1);
-    _pub_odom = _ros_node->create_publisher<nav_msgs::msg::Odometry>("ground_truth/odom", 1);
+    if (_pub_gt) {
+        _pub_gt_odom = _ros_node->create_publisher<nav_msgs::msg::Odometry>("ground_truth/odom", 1);
+    }
 
     // ROS subscribers
     _sub_nav_sat_fix = _ros_node->create_subscription<sensor_msgs::msg::NavSatFix>(
@@ -158,10 +160,6 @@ void SBGPlugin::publishEuler()
 
 void SBGPlugin::publishGTOdom()
 {
-    if (_pub_odom->get_subscription_count() == 0 || !_pub_gt) {
-        return;
-    }
-
     auto curr_time = _world->SimTime();
     if (calc_dt(_last_odom_time, curr_time) < (1.0 / _ekf_update_rate)) {
         return;
@@ -194,7 +192,9 @@ void SBGPlugin::publishGTOdom()
     msg.twist.twist.angular.y = _angular_vel.Y();
     msg.twist.twist.angular.z = _angular_vel.Z();
 
-    _pub_odom->publish(msg);
+    if (has_subscribers(_pub_gt_odom)) {
+        _pub_gt_odom->publish(msg);
+    }
 }
 
 std::vector<double> SBGPlugin::ToQuaternion(std::vector<double> &euler) {
