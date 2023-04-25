@@ -17,7 +17,7 @@ tire:
   C: -1.38
   D: 1.60
   E: -0.58
-  radius: 0.2525
+  radius: 0.2032
 
 aero:
   C_Down: 3.22455 # F_Downforce = C_Downforce*v_x^2
