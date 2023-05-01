@@ -85,17 +85,17 @@ void ConeDetectionPlugin::update() {
     }
 
     if (has_subscribers(slam_global_pub) || has_subscribers(slam_local_pub)) {
-        auto noisy_slam_ground_truth_track = get_noisy_slam_ground_truth_track(slam_config, ground_truth_track);
+        auto noisy_global_map = get_noisy_global_map(slam_config, ground_truth_track);
 
         if (has_subscribers(slam_global_pub)) {
             auto slam_global_map =
-                get_track_centered_on_car_inital_pose(car_inital_pose, noisy_slam_ground_truth_track);
+                get_track_centered_on_car_inital_pose(car_inital_pose, noisy_global_map);
             slam_global_pub->publish(slam_global_map);
         }
 
         if (has_subscribers(slam_local_pub)) {
-            auto slam_local_map = get_slam_local_map(slam_config, car_pose, noisy_slam_ground_truth_track);
-            slam_local_pub->publish(slam_local_map);
+            auto noisy_local_map = get_noisy_local_map(slam_config, car_pose, noisy_global_map);
+            slam_local_pub->publish(noisy_local_map);
         }
     }
 }
