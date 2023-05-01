@@ -153,16 +153,9 @@ def generate_launch_description():
         get_package_share_directory("eufs_rqt"), "config", "eufs_sim.perspective"
     )
 
-    rviz_config_file = join(
-        get_package_share_directory("eufs_launcher"), "config", "default.rviz"
-    )
-
     return LaunchDescription(
         [
             # Launch Arguments
-            DeclareLaunchArgument(
-                "rviz", default_value="false", description="Launch RViz"
-            ),
             DeclareLaunchArgument(
                 "show_rqt_gui",
                 default_value="true",
@@ -255,13 +248,6 @@ def generate_launch_description():
                 name="enable_laserscan",
                 default_value="false",
                 description="Condition to enable laserscan",
-            ),
-            Node(
-                name="rviz",
-                package="rviz2",
-                executable="rviz2",
-                arguments=["-d", rviz_config_file],
-                condition=IfCondition(LaunchConfiguration("rviz")),
             ),
             Node(
                 name="eufs_sim_rqt",

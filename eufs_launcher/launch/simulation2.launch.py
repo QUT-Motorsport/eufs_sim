@@ -3,7 +3,8 @@ from launch import LaunchDescription
 from launch.actions import DeclareLaunchArgument, ExecuteProcess, IncludeLaunchDescription, SetEnvironmentVariable, OpaqueFunction
 from launch.launch_description_sources import PythonLaunchDescriptionSource
 from launch.substitutions import LaunchConfiguration, PathJoinSubstitution
-from launch_ros.actions import SetParameter
+from launch_ros.actions import SetParameter, Node
+from launch.conditions import IfCondition
 import os
 
 def get_argument(context, arg):
@@ -78,7 +79,6 @@ def spawn_car(context, *args, **kwargs):
                 ("vehicleModelConfig", LaunchConfiguration("vehicleModelConfig")),
                 ("commandMode", LaunchConfiguration("commandMode")),
                 ("robot_name", LaunchConfiguration("robot_name")),
-                ("rviz", LaunchConfiguration("rviz")),
                 ("publish_gt_tf", LaunchConfiguration("publish_gt_tf")),
                 ("pub_ground_truth", LaunchConfiguration("pub_ground_truth")),
                 ("sim_perception", LaunchConfiguration("sim_perception")),
@@ -98,6 +98,10 @@ def spawn_car(context, *args, **kwargs):
 
 
 def generate_launch_description():
+    rviz_config_file = os.path.join(
+        get_package_share_directory("eufs_launcher"), "config", "default.rviz"
+    )
+
     return LaunchDescription(
         [
             DeclareLaunchArgument(
@@ -174,6 +178,13 @@ def generate_launch_description():
                 name="enable_laserscan",
                 default_value="false",
                 description="Condition to enable laserscan",
+            ),
+            Node(
+                name="rviz",
+                package="rviz2",
+                executable="rviz2",
+                arguments=["-d", rviz_config_file],
+                condition=IfCondition(LaunchConfiguration("rviz")),
             ),
             # launch the gazebo world
             OpaqueFunction(function=gen_world),
