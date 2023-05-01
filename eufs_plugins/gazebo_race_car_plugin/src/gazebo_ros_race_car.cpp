@@ -106,8 +106,6 @@ void RaceCarPlugin::initParams(const sdf::ElementPtr &sdf) {
     _pub_gt = get_bool_parameter(sdf, "pubGroundTruth", false, "false", _rosnode->get_logger());
     _simulate_slam = get_bool_parameter(sdf, "simulateSLAM", false, "false", _rosnode->get_logger());
 
-    RCLCPP_INFO(_rosnode->get_logger(), "Params loaded: publish_tf: %d, pub_gt: %d, simulate_slam: %d", _publish_tf, _pub_gt, _simulate_slam);
-
     std::string command_str = get_string_parameter(sdf, "commandMode", "acceleration", "acceleration", _rosnode->get_logger());
 
     if (command_str.compare("acceleration") == 0) {
