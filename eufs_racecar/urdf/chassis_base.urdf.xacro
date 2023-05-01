@@ -2,7 +2,7 @@
 <robot name="chassis_base" xmlns:xacro="http://www.ros.org/wiki/xacro">
   <xacro:macro name="chassis_base" params="chassis_mesh">
 
-    <xacro:property name="wheel_diameter" value="0.505"/>
+    <xacro:property name="wheel_diameter" value="0.4064"/>
 
     <!-- BASE FOOTPRINT -->
     <link name="base_footprint"/>

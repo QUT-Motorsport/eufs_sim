@@ -131,7 +131,6 @@ def spawn_car(context, *args, **kwargs):
                 }
             ],
             arguments=[urdf_path],
-            remappings=[("/joint_states", "/eufs/joint_states")],
         ),
         Node(
             name="robot_state_publisher",
@@ -144,7 +143,6 @@ def spawn_car(context, *args, **kwargs):
                     "rate": 200,
                 }
             ],
-            remappings=[("/joint_states", "/eufs/joint_states")],
             arguments=["--ros-args", "--log-level", "warn"],
         ),
     ]

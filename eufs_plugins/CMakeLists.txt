@@ -11,16 +11,6 @@ if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -Wpedantic -Wno-inconsistent-missing-override")
 endif()
 
-if(WIN32)
-  add_compile_definitions(
-    # For math constants
-    _USE_MATH_DEFINES
-    # Minimize Windows namespace collision
-    NOMINMAX
-    WIN32_LEAN_AND_MEAN
-  )
-endif()
-
 find_package(ament_cmake REQUIRED)
 find_package(gazebo_dev REQUIRED)
 find_package(gazebo_ros REQUIRED)
@@ -83,17 +73,5 @@ ament_export_dependencies(ament_index_cpp)
 ament_export_dependencies(yaml_cpp_vendor)
 ament_export_dependencies(driverless_msgs)
 ament_export_dependencies(sbg_driver)
-
-if(NOT WIN32)
-  if(NOT APPLE)
-    set(
-      AMENT_CMAKE_ENVIRONMENT_HOOKS_DESC_gazebo_plugins
-      "prepend-non-duplicate;LD_LIBRARY_PATH;${GAZEBO_PLUGIN_PATH}")
-  else()
-    set(
-      AMENT_CMAKE_ENVIRONMENT_HOOKS_DESC_gazebo_plugins
-      "prepend-non-duplicate;DYLD_LIBRARY_PATH;${GAZEBO_PLUGIN_PATH}")
-  endif()
-endif()
 
 ament_package()

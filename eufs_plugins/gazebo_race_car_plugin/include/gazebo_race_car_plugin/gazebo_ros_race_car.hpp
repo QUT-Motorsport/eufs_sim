@@ -34,15 +34,10 @@
 
 // ROS msgs
 #include "ackermann_msgs/msg/ackermann_drive_stamped.hpp"
-#include "eufs_msgs/msg/car_state.hpp"
-#include "eufs_msgs/msg/wheel_speeds_stamped.hpp"
-#include "geometry_msgs/msg/pose_with_covariance.hpp"
 #include "geometry_msgs/msg/pose_with_covariance_stamped.hpp"
-#include "geometry_msgs/msg/twist_with_covariance.hpp"
 #include "geometry_msgs/msg/vector3.hpp"
 #include "nav_msgs/msg/odometry.hpp"
-// include msg for qutms stack
-#include "geometry_msgs/msg/twist_stamped.hpp"
+#include "std_msgs/msg/float32.hpp"
 
 // ROS TF2
 #include <tf2/transform_datatypes.h>
@@ -61,9 +56,11 @@
 #include <gazebo/transport/transport.hh>
 #include <gazebo_ros/node.hpp>
 
-// EUFS includes
+// Local includes
 #include "eufs_models/eufs_models.hpp"
 #include "gazebo_race_car_plugin/state_machine.hpp"
+#include "helpers_ros.hpp"
+#include "helpers_gazebo.hpp"
 
 namespace gazebo_plugins {
 namespace eufs_plugins {
@@ -81,7 +78,6 @@ class RaceCarPlugin : public gazebo::ModelPlugin {
 
    private:
     void update();
-    void updateState(double dt);
 
     void setPositionFromWorld();
     bool resetVehiclePosition(std::shared_ptr<std_srvs::srv::Trigger::Request> request,
@@ -90,16 +86,13 @@ class RaceCarPlugin : public gazebo::ModelPlugin {
                            std::shared_ptr<std_srvs::srv::Trigger::Response> response);
     void setModelState();
 
-    void initVehicleModel(const sdf::ElementPtr &sdf);
     void initParams(const sdf::ElementPtr &sdf);
-    void initModel(const sdf::ElementPtr &sdf);
-    void initNoise(const sdf::ElementPtr &sdf);
 
     geometry_msgs::msg::PoseWithCovarianceStamped stateToPoseMsg(const eufs::models::State &state);
-    nav_msgs::msg::Odometry getWheelOdometry(const eufs_msgs::msg::WheelSpeeds &wheel_speeds_noisy, const eufs::models::Input &input);
+    nav_msgs::msg::Odometry getWheelOdometry(const std::vector<double> &speeds, const double &input);
 
     void publishCarPose();
-    void publishWheelOdom();
+    void publishVehicleOdom();
     void publishTf();
 
     void onCmd(const ackermann_msgs::msg::AckermannDriveStamped::SharedPtr msg);
@@ -135,9 +128,11 @@ class RaceCarPlugin : public gazebo::ModelPlugin {
 
     // ROS Publishers
     rclcpp::Publisher<nav_msgs::msg::Odometry>::SharedPtr _pub_wheel_odom;
-    rclcpp::Publisher<nav_msgs::msg::Odometry>::SharedPtr _pub_ground_truth_wheel_odom;
+    rclcpp::Publisher<nav_msgs::msg::Odometry>::SharedPtr _pub_gt_wheel_odom;
     rclcpp::Publisher<geometry_msgs::msg::PoseWithCovarianceStamped>::SharedPtr _pub_pose;
-    rclcpp::Publisher<geometry_msgs::msg::PoseWithCovarianceStamped>::SharedPtr _pub_ground_truth_pose;
+    rclcpp::Publisher<geometry_msgs::msg::PoseWithCovarianceStamped>::SharedPtr _pub_gt_pose;
+    rclcpp::Publisher<std_msgs::msg::Float32>::SharedPtr _pub_steering_angle;
+    rclcpp::Publisher<std_msgs::msg::Float32>::SharedPtr _pub_gt_steering_angle;
 
     // ROS Subscriptions
     rclcpp::Subscription<ackermann_msgs::msg::AckermannDriveStamped>::SharedPtr _sub_cmd;
@@ -151,7 +146,7 @@ class RaceCarPlugin : public gazebo::ModelPlugin {
     gazebo::physics::JointPtr _right_steering_joint;
 
     // Ground truth
-    bool _pub_ground_truth;
+    bool _pub_gt;
 
     // SLAM Pose
     bool _simulate_slam;

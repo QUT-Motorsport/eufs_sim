@@ -6,7 +6,6 @@
 #include <string>
 
 #include "eufs_models/vehicle_state.hpp"
-#include "eufs_msgs/msg/wheel_speeds.hpp"
 #include "yaml-cpp/yaml.h"
 #include "geometry_msgs/msg/twist.hpp"
 #include "geometry_msgs/msg/vector3.hpp"
@@ -77,18 +76,6 @@ class Noise {
         return new_state;
     }
 
-    eufs_msgs::msg::WheelSpeeds applyNoiseToWheelSpeeds(const eufs_msgs::msg::WheelSpeeds &wheel_speeds) {
-        eufs_msgs::msg::WheelSpeeds new_wheel_speeds = wheel_speeds;
-
-        // Add noise to wheel speed
-        new_wheel_speeds.lf_speed += _gaussianKernel(0, _noise_param.wheel_speed[0]);
-        new_wheel_speeds.rf_speed += _gaussianKernel(0, _noise_param.wheel_speed[1]);
-        new_wheel_speeds.lb_speed += _gaussianKernel(0, _noise_param.wheel_speed[2]);
-        new_wheel_speeds.rb_speed += _gaussianKernel(0, _noise_param.wheel_speed[3]);
-
-        return new_wheel_speeds;
-    }
-
     geometry_msgs::msg::Twist applyNoiseToTwist(const geometry_msgs::msg::Twist &twist) {
         geometry_msgs::msg::Twist new_twist = twist;
 
@@ -114,6 +101,27 @@ class Noise {
         new_vector.z += _gaussianKernel(0, _noise_param.orientation[2]);
 
         return new_vector;
+    }
+
+    double applyNoiseToSteering(const double &float_msg) {
+        double new_float_msg = float_msg;
+
+        // Add noise to linear acceleration
+        new_float_msg += _gaussianKernel(0, _noise_param.position[2]);
+        // hacky, using yaw to store steering angle noise
+
+        return new_float_msg;
+    }
+
+    std::vector<double> applyNoiseToWheels(const std::vector<double> &wheels) {
+        std::vector<double> new_wheels = wheels;
+
+        // Add noise to wheel speed
+        for (int i = 0; i < 4; i++) {
+            new_wheels[i] += _gaussianKernel(0, _noise_param.wheel_speed[i]);
+        }
+
+        return new_wheels;
     }
     
     const NoiseParam &getNoiseParam() { return _noise_param; }

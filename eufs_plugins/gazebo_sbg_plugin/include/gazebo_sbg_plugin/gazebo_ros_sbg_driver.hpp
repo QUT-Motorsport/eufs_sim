@@ -15,7 +15,6 @@
 #include "geometry_msgs/msg/twist.hpp"
 #include "geometry_msgs/msg/vector3.hpp"
 #include "nav_msgs/msg/odometry.hpp"
-#include "sensor_msgs/msg/imu.hpp"
 #include "sensor_msgs/msg/nav_sat_fix.hpp"
 
 // SBG ROS msgs
@@ -87,7 +86,7 @@ class SBGPlugin : public gazebo::ModelPlugin
     rclcpp::Publisher<geometry_msgs::msg::TwistStamped>::SharedPtr _pub_velocity;
     rclcpp::Publisher<sbg_driver::msg::SbgEkfEuler>::SharedPtr _pub_euler;
     rclcpp::Publisher<sbg_driver::msg::SbgGpsPos>::SharedPtr _pub_gps;
-    rclcpp::Publisher<nav_msgs::msg::Odometry>::SharedPtr _pub_odom;
+    rclcpp::Publisher<nav_msgs::msg::Odometry>::SharedPtr _pub_gt_odom;
 
     // ROS Subscribers
     rclcpp::Subscription<sensor_msgs::msg::NavSatFix>::SharedPtr _sub_nav_sat_fix;
