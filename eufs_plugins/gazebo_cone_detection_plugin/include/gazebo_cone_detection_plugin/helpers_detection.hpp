@@ -17,6 +17,7 @@ typedef struct SensorConfig {
     double range_noise;
     double bearing_noise;
     bool detects_colour;
+    double offset_x;
 } SensorConfig_t;
 
 SensorConfig_t populate_sensor_config(std::string sensor_prefix, sdf::ElementPtr sdf,
@@ -29,11 +30,13 @@ SensorConfig_t populate_sensor_config(std::string sensor_prefix, sdf::ElementPtr
         get_double_parameter(sdf, sensor_prefix + "RangeNoise", 0, "0", logger),
         get_double_parameter(sdf, sensor_prefix + "BearingNoise", 0, "0", logger),
         get_bool_parameter(sdf, sensor_prefix + "DetectsColour", true, "true", logger),
+        get_double_parameter(sdf, sensor_prefix + "OffsetX", 0, "0", logger),
     };
 }
 
 driverless_msgs::msg::Cone convert_cone_to_car_frame(const ignition::math::Pose3d car_pose,
-                                                     const driverless_msgs::msg::Cone cone) {
+                                                     const driverless_msgs::msg::Cone cone,
+                                                     const double offset_x = 0) {
     driverless_msgs::msg::Cone translated_cone = cone;
 
     double x = cone.location.x - car_pose.Pos().X();
@@ -42,7 +45,7 @@ driverless_msgs::msg::Cone convert_cone_to_car_frame(const ignition::math::Pose3
 
     // Rotate the points using the yaw of the car (x and y are the other way around)
     translated_cone.location.y = (cos(yaw) * y) - (sin(yaw) * x);
-    translated_cone.location.x = (sin(yaw) * y) + (cos(yaw) * x);
+    translated_cone.location.x = (sin(yaw) * y) + (cos(yaw) * x) - offset_x;
 
     return translated_cone;
 }
@@ -108,7 +111,7 @@ driverless_msgs::msg::ConeDetectionStamped get_sensor_detection(
     sensor_detection.header.frame_id = sensor_config.frame_id;
 
     for (auto const &cone : ground_truth_track.cones_with_cov) {
-        auto translated_cone = convert_cone_to_car_frame(car_pose, cone.cone);
+        auto translated_cone = convert_cone_to_car_frame(car_pose, cone.cone, sensor_config.offset_x);
 
         double dist = cone_dist(translated_cone);
         if (dist < sensor_config.min_view_distance || dist > sensor_config.max_view_distance) {

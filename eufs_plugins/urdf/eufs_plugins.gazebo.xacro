@@ -40,6 +40,7 @@
       <cameraRangeNoise>0.01</cameraRangeNoise>
       <cameraBearingNoise>0.01</cameraBearingNoise>
       <cameraDetectsColour>true</cameraDetectsColour>
+      <cameraOffsetX>-0.37</cameraOffsetX>
       <lidarFrameId>velodyne</lidarFrameId>
       <lidarMinViewDistance>1</lidarMinViewDistance>
       <lidarMaxViewDistance>20</lidarMaxViewDistance>
@@ -47,6 +48,7 @@
       <lidarRangeNoise>0.01</lidarRangeNoise>
       <lidarBearingNoise>0.001</lidarBearingNoise>
       <lidarDetectsColour>false</lidarDetectsColour>
+      <lidarOffsetX>1.59</lidarOffsetX>
       <SLAMFrameId>track</SLAMFrameId>
       <SLAMXNoise>0.1</SLAMXNoise>
       <SLAMYNoise>0.1</SLAMYNoise>
