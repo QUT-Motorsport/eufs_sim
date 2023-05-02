@@ -29,7 +29,10 @@
 
   <gazebo>
     <plugin name="cone_detection" filename="libgazebo_ros_cone_detection.so">
-      <updateRate>20.0</updateRate>
+      <lidarUpdateRate>10.0</lidarUpdateRate>
+      <cameraUpdateRate>15.0</cameraUpdateRate>
+      <slamUpdateRate>20.0</slamUpdateRate>
+      <gtUpdateRate>50.0</gtUpdateRate>
       <cameraFrameId>zed2i_left_camera_optical_frame</cameraFrameId>
       <cameraMinViewDistance>0.5</cameraMinViewDistance>
       <cameraMaxViewDistance>10</cameraMaxViewDistance>
@@ -65,7 +68,6 @@
       <ekfUpdateRate>50.0</ekfUpdateRate>
       <gpsUpdateRate>5.0</gpsUpdateRate>
       <velUpdateRate>200.0</velUpdateRate>
-      <pubGroundTruth>$(arg pub_ground_truth)</pubGroundTruth>
     </plugin>
   </gazebo>
 </robot>

@@ -30,6 +30,10 @@ class ConeDetectionPlugin : public gazebo::ModelPlugin {
     // Gazebo plugin functions
     void Load(gazebo::physics::ModelPtr parent, sdf::ElementPtr sdf);
     void update();
+    void publishGTTrack();
+    void publishLiDARDetection();
+    void publishCameraDetection();
+    void publishSLAM();
     bool resetConePosition(std::shared_ptr<std_srvs::srv::Trigger::Request> request,
                            std::shared_ptr<std_srvs::srv::Trigger::Response> response);
 
@@ -42,8 +46,14 @@ class ConeDetectionPlugin : public gazebo::ModelPlugin {
     gazebo::physics::LinkPtr car_link;
     ignition::math::Pose3d car_inital_pose;
 
-    double update_rate;
-    gazebo::common::Time last_update;
+    double gt_update_rate;
+    double lidar_update_rate;
+    double camera_update_rate;
+    double slam_update_rate;
+    gazebo::common::Time last_gt_update;
+    gazebo::common::Time last_lidar_update;
+    gazebo::common::Time last_camera_update;
+    gazebo::common::Time last_slam_update;
     driverless_msgs::msg::ConeDetectionStamped initial_track;
 
     rclcpp::Publisher<driverless_msgs::msg::ConeDetectionStamped>::SharedPtr ground_truth_pub;
