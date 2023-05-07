@@ -95,24 +95,13 @@ void RaceCarPlugin::Load(gazebo::physics::ModelPtr model, sdf::ElementPtr sdf) {
 
 void RaceCarPlugin::initParams(const sdf::ElementPtr &sdf) {
     // Get ROS parameters
-    _rosnode->declare_parameter<double>("update_rate", 2.0);
-    _rosnode->get_parameter("update_rate", _update_rate);
-
-    _rosnode->declare_parameter<double>("publish_rate", 200.0);
-    _rosnode->get_parameter("publish_rate", _publish_rate);
-
-    _rosnode->declare_parameter<std::string>("reference_frame", _reference_frame);
-    _rosnode->get_parameter("reference_frame", _reference_frame);
-
-    _rosnode->declare_parameter<std::string>("robot_frame", _robot_frame);
-    _rosnode->get_parameter("robot_frame", _robot_frame);
-
-    _rosnode->declare_parameter<double>("control_delay", 0.5);
-    _rosnode->get_parameter("control_delay", _control_delay);
-
+    _update_rate = _rosnode->declare_parameter<double>("update_rate", 2.0);
+    _publish_rate = _rosnode->declare_parameter<double>("publish_rate", 200.0);
+    _reference_frame = _rosnode->declare_parameter<std::string>("reference_frame", "map");
+    _robot_frame = _rosnode->declare_parameter<std::string>("robot_frame", "base_link");
+    _control_delay = _rosnode->declare_parameter<double>("control_delay", 0.5);
     /// SHOULD BE IN VEHICLE PARAMS FILE 
-    _rosnode->declare_parameter<double>("steering_lock_time", 1.0);
-    _rosnode->get_parameter("steering_lock_time", _steering_lock_time);
+    _steering_lock_time = _rosnode->declare_parameter<double>("steering_lock_time", 1.0);
 
     // SDF Parameters
     _pub_tf = get_bool_parameter(sdf, "pubTransform", false, "false", _rosnode->get_logger());
