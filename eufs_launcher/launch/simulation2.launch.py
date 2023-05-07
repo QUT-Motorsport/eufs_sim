@@ -33,7 +33,7 @@ def gen_world(context, *args, **kwargs):
     world_path = os.path.join(tracks, "worlds", track)
     
     gazebo_launch = os.path.join(get_package_share_directory('gazebo_ros'), 'launch', 'gazebo.launch.py')
-    params_file = os.path.join(get_package_share_directory('config'), 'config', 'sim_params.yaml')
+    params_file = os.path.join(get_package_share_directory('config'), 'config', 'pluginParams.yaml')
 
     return [
         IncludeLaunchDescription(
@@ -100,7 +100,7 @@ def spawn_car(context, *args, **kwargs):
 
 def generate_launch_description():
     rviz_config_file = os.path.join(
-        get_package_share_directory("eufs_launcher"), "config", "default.rviz"
+        get_package_share_directory("config"), "rviz", "default.rviz"
     )
 
     return LaunchDescription(

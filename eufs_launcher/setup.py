@@ -13,7 +13,6 @@ setup(
     package_dir={"": "src"},
     data_files=[
         (share_directory, glob("launch/*.launch.py")),
-        (join(share_directory, "config"), glob("config/*")),
         (join(share_directory, "resource"), ["resource/launcher.ui"]),
         (share_directory, ["plugin.xml"]),
         (share_directory, ["package.xml"]),

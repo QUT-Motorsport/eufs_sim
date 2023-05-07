@@ -11,7 +11,6 @@ from launch_ros.actions import Node
 
 
 def spawn_car(context, *args, **kwargs):
-    # Get the values of the arguments
     robot_name = get_argument(context, "robot_name")
     vehicle_model = get_argument(context, "vehicle_model")
     command_mode = get_argument(context, "command_mode")
@@ -24,7 +23,6 @@ def spawn_car(context, *args, **kwargs):
     roll = get_argument(context, "roll")
     pitch = get_argument(context, "pitch")
     yaw = get_argument(context, "yaw")
-    # Custom check boxes
     enable_camera = get_argument(context, "enable_camera")
     enable_lidar = get_argument(context, "enable_lidar")
     enable_laserscan = get_argument(context, "enable_laserscan")
@@ -32,26 +30,23 @@ def spawn_car(context, *args, **kwargs):
     simulate_slam = get_argument(context, "simulate_slam")
 
     vehicle_config = join(
-        get_package_share_directory("eufs_racecar"),
-        "racecars",
-        robot_name,
+        get_package_share_directory("config"),
+        "config",
         vehicle_model_config,
     )
     noise_config = join(
-        get_package_share_directory("eufs_models"), 
+        get_package_share_directory("config"), 
         "config", 
-        "noise.yaml",
+        "motionNoise.yaml",
     )
     xacro_path = join(
         get_package_share_directory("eufs_racecar"),
-        "racecars",
-        robot_name,
+        "urdf",
         "robot.urdf.xacro",
     )
     urdf_path = join(
         get_package_share_directory("eufs_racecar"),
-        "racecars",
-        robot_name,
+        "urdf",
         "robot.urdf",
     )
 

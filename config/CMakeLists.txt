@@ -17,5 +17,6 @@ ament_package()
 
 install(
   DIRECTORY config
+  DIRECTORY rviz
   DESTINATION share/${PROJECT_NAME}
 )
