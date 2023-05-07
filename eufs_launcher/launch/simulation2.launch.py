@@ -22,17 +22,15 @@ def gen_world(context, *args, **kwargs):
     RESOURCES = os.environ.get('GAZEBO_RESOURCE_PATH')
     EUFS = os.path.expanduser(os.environ.get('EUFS_MASTER'))
     DISTRO = os.environ.get('ROS_DISTRO')
+    
     if use_robostack == "true":
-        os.environ['GAZEBO_MODEL_PATH'] = tracks + '/models:' + MODELS
-        os.environ['GAZEBO_RESOURCE_PATH'] = tracks + '/materials:' + tracks + '/meshes:' + racecar + '/materials:' + racecar + '/meshes:' + RESOURCES
         os.environ['GAZEBO_PLUGIN_PATH'] = EUFS + '/install/eufs_plugins:' + PLUGINS
     else:
-        os.environ['GAZEBO_MODEL_PATH'] = tracks + '/models'
-        os.environ['GAZEBO_RESOURCE_PATH'] = tracks + '/materials:' + tracks + '/meshes:' + racecar + '/materials:' + racecar + '/meshes'
         os.environ['GAZEBO_PLUGIN_PATH'] = EUFS + '/install/eufs_plugins:' + '/opt/ros/' + DISTRO
-    
+    os.environ['GAZEBO_MODEL_PATH'] = tracks + '/models:' + str(MODELS)
+    os.environ['GAZEBO_RESOURCE_PATH'] = tracks + '/materials:' + tracks + '/meshes:' + racecar + '/materials:' + racecar + '/meshes:' + str(RESOURCES)
+
     world_path = os.path.join(tracks, "worlds", track)
-    print(world_path)
     
     gazebo_launch = get_package_share_directory('gazebo_ros') + '/launch/gazebo.launch.py'
     return [
