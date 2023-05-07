@@ -1,14 +1,5 @@
 <?xml version="1.0"?>
 <robot xmlns:xacro="http://www.ros.org/wiki/xacro">
-  <xacro:arg name="publish_tf" default="false"/>
-  <xacro:arg name="sim_perception" default="true"/>
-  <xacro:arg name="sim_slam" default="true"/>
-  <xacro:arg name="command_mode" default="velocity"/>
-  <xacro:arg name="pub_ground_truth" default="true"/>
-
-  <!-- Custom plugin which controls the car using a given vehicle model.
-   It controls the car by setting its velocity and position
-   and the steering angle of the wheels -->
   <gazebo>
     <plugin name="race_car" filename="libgazebo_ros_race_car.so">
       <pubGroundTruth>$(arg pub_ground_truth)</pubGroundTruth>
@@ -23,32 +14,6 @@
 
   <gazebo>
     <plugin name="cone_detection" filename="libgazebo_ros_cone_detection.so">
-      <lidarUpdateRate>10.0</lidarUpdateRate>
-      <cameraUpdateRate>15.0</cameraUpdateRate>
-      <slamUpdateRate>20.0</slamUpdateRate>
-      <gtUpdateRate>50.0</gtUpdateRate>
-      <cameraFrameId>zed2i_left_camera_optical_frame</cameraFrameId>
-      <cameraMinViewDistance>0.5</cameraMinViewDistance>
-      <cameraMaxViewDistance>10</cameraMaxViewDistance>
-      <cameraFOV>1.91986</cameraFOV><!--110 degrees-->
-      <cameraRangeNoise>0.01</cameraRangeNoise>
-      <cameraBearingNoise>0.01</cameraBearingNoise>
-      <cameraDetectsColour>true</cameraDetectsColour>
-      <cameraOffsetX>-0.37</cameraOffsetX>
-      <lidarFrameId>velodyne</lidarFrameId>
-      <lidarMinViewDistance>1</lidarMinViewDistance>
-      <lidarMaxViewDistance>20</lidarMaxViewDistance>
-      <lidarFOV>3.141593</lidarFOV><!-- 180 degrees-->
-      <lidarRangeNoise>0.01</lidarRangeNoise>
-      <lidarBearingNoise>0.001</lidarBearingNoise>
-      <lidarDetectsColour>false</lidarDetectsColour>
-      <lidarOffsetX>1.59</lidarOffsetX>
-      <SLAMFrameId>track</SLAMFrameId>
-      <SLAMXNoise>0.1</SLAMXNoise>
-      <SLAMYNoise>0.1</SLAMYNoise>
-      <SLAMLocalFrameId>base_footprint</SLAMLocalFrameId>
-      <SLAMLocalRangeX>20</SLAMLocalRangeX>
-      <SLAMLocalRangeY>10</SLAMLocalRangeY>
       <publishGroundTruth>$(arg pub_ground_truth)</publishGroundTruth>
       <simulatePerception>$(arg sim_perception)</simulatePerception>
       <simulateSLAM>$(arg sim_slam)</simulateSLAM>

@@ -15,6 +15,33 @@ sbg_driver:
     gps_update_rate: 5.0
     vel_update_rate: 200.0
 
-# cone_detection:
-#   ros__parameters:
-    
+cone_detection:
+  ros__parameters:
+    reference_frame: "track"
+    robot_frame: "base_footprint"
+    gt_update_rate: 50.0
+    lidar_update_rate: 10.0
+    lidar_frame_id: "velodyne"
+    lidar_min_view_distance: 1.0
+    lidar_max_view_distance: 20.0
+    lidar_fov: 3.141593 # 180 degrees
+    lidar_range_noise: 0.01
+    lidar_bearing_noise: 0.001
+    lidar_detects_colour: false
+    lidar_offset_x: 1.59
+    camera_update_rate: 15.0
+    camera_frame_id: "zed2i_left_camera_optical_frame"
+    camera_min_view_distance: 0.5
+    camera_max_view_distance: 10.0
+    camera_fov: 1.91986 # 110 degrees
+    camera_range_noise: 0.01
+    camera_bearing_noise: 0.01
+    camera_detects_colour: true
+    camera_offset_x: -0.37
+    slam_update_rate: 20.0
+    slam_frame_id: "track"
+    slam_x_noise: 0.1
+    slam_y_noise: 0.1
+    slam_local_frame_id: "base_footprint"
+    slam_local_range_x: 20.0
+    slam_local_range_y: 10.0

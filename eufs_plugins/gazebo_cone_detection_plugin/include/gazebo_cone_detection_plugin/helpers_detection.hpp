@@ -20,18 +20,17 @@ typedef struct SensorConfig {
     double offset_x;
 } SensorConfig_t;
 
-SensorConfig_t populate_sensor_config(std::string sensor_prefix, sdf::ElementPtr sdf,
-                                      std::optional<const rclcpp::Logger> logger = {}) {
-    return {
-        get_string_parameter(sdf, sensor_prefix + "FrameId", "", "", logger),
-        get_double_parameter(sdf, sensor_prefix + "MinViewDistance", 0, "0", logger),
-        get_double_parameter(sdf, sensor_prefix + "MaxViewDistance", 0, "0", logger),
-        get_double_parameter(sdf, sensor_prefix + "FOV", 0, "0", logger),
-        get_double_parameter(sdf, sensor_prefix + "RangeNoise", 0, "0", logger),
-        get_double_parameter(sdf, sensor_prefix + "BearingNoise", 0, "0", logger),
-        get_bool_parameter(sdf, sensor_prefix + "DetectsColour", true, "true", logger),
-        get_double_parameter(sdf, sensor_prefix + "OffsetX", 0, "0", logger),
-    };
+SensorConfig_t populate_sensor_config(std::string sensor_prefix, gazebo_ros::Node::SharedPtr node) {
+    std::string frame_id = node->declare_parameter(sensor_prefix + "_frame_id", "sensor");
+    double min_view_distance = node->declare_parameter(sensor_prefix + "_min_view_distance", 0.0);
+    double max_view_distance = node->declare_parameter(sensor_prefix + "_max_view_distance", 0.0);
+    double fov = node->declare_parameter(sensor_prefix + "_fov", 0.0);
+    double range_noise = node->declare_parameter(sensor_prefix + "_range_noise", 0.0);
+    double bearing_noise = node->declare_parameter(sensor_prefix + "_bearing_noise", 0.0);
+    bool detects_colour = node->declare_parameter(sensor_prefix + "_detects_colour", true);
+    double offset_x = node->declare_parameter(sensor_prefix + "_offset_x", 0.0);
+
+    return {frame_id, min_view_distance, max_view_distance, fov, range_noise, bearing_noise, detects_colour, offset_x};
 }
 
 driverless_msgs::msg::Cone convert_cone_to_car_frame(const ignition::math::Pose3d car_pose,
@@ -158,15 +157,15 @@ typedef struct SLAMConfig {
     double local_range_y;
 } SLAMConfig_t;
 
-SLAMConfig_t populate_slam_config(sdf::ElementPtr sdf, std::optional<const rclcpp::Logger> logger = {}) {
-    return {
-        get_string_parameter(sdf, "SLAMFrameId", "", "", logger),
-        get_double_parameter(sdf, "SLAMXNoise", 0, "0", logger),
-        get_double_parameter(sdf, "SLAMYNoise", 0, "0", logger),
-        get_string_parameter(sdf, "SLAMLocalFrameId", "", "", logger),
-        get_double_parameter(sdf, "SLAMLocalRangeX", 0, "0", logger),
-        get_double_parameter(sdf, "SLAMLocalRangeY", 0, "0", logger),
-    };
+SLAMConfig_t populate_slam_config(gazebo_ros::Node::SharedPtr node) {
+    std::string frame_id = node->declare_parameter("slam_frame_id", "map");
+    double x_noise = node->declare_parameter("slam_x_noise", 0.0);
+    double y_noise = node->declare_parameter("slam_y_noise", 0.0);
+    std::string local_frame_id = node->declare_parameter("slam_local_frame_id", "base_link");
+    double local_range_x = node->declare_parameter("slam_local_range_x", 0.0);
+    double local_range_y = node->declare_parameter("slam_local_range_y", 0.0);
+
+    return {frame_id, x_noise, y_noise, local_frame_id, local_range_x, local_range_y};
 }
 
 driverless_msgs::msg::ConeDetectionStamped get_noisy_global_map(

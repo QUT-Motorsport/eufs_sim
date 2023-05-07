@@ -38,35 +38,38 @@ class ConeDetectionPlugin : public gazebo::ModelPlugin {
                            std::shared_ptr<std_srvs::srv::Trigger::Response> response);
 
    private:
-    gazebo::physics::WorldPtr world;
+    gazebo::physics::WorldPtr _world;
     gazebo_ros::Node::SharedPtr _ros_node;
-    gazebo::event::ConnectionPtr update_connection;
+    gazebo::event::ConnectionPtr _update_connection;
 
-    gazebo::physics::ModelPtr track_model;
-    gazebo::physics::LinkPtr car_link;
-    ignition::math::Pose3d car_inital_pose;
+    std::string _reference_frame;
+    std::string _robot_frame;
 
-    double gt_update_rate;
-    double lidar_update_rate;
-    double camera_update_rate;
-    double slam_update_rate;
-    gazebo::common::Time last_gt_update;
-    gazebo::common::Time last_lidar_update;
-    gazebo::common::Time last_camera_update;
-    gazebo::common::Time last_slam_update;
-    driverless_msgs::msg::ConeDetectionStamped initial_track;
+    gazebo::physics::ModelPtr _track_model;
+    gazebo::physics::LinkPtr _car_link;
+    ignition::math::Pose3d _car_inital_pose;
 
-    rclcpp::Publisher<driverless_msgs::msg::ConeDetectionStamped>::SharedPtr ground_truth_pub;
-    rclcpp::Publisher<driverless_msgs::msg::ConeDetectionStamped>::SharedPtr lidar_detection_pub;
-    rclcpp::Publisher<driverless_msgs::msg::ConeDetectionStamped>::SharedPtr vision_detection_pub;
-    rclcpp::Publisher<driverless_msgs::msg::ConeDetectionStamped>::SharedPtr slam_global_pub;
-    rclcpp::Publisher<driverless_msgs::msg::ConeDetectionStamped>::SharedPtr slam_local_pub;
+    double _gt_update_rate;
+    double _lidar_update_rate;
+    double _camera_update_rate;
+    double _slam_update_rate;
+    gazebo::common::Time _last_gt_update;
+    gazebo::common::Time _last_lidar_update;
+    gazebo::common::Time _last_camera_update;
+    gazebo::common::Time _last_slam_update;
+    driverless_msgs::msg::ConeDetectionStamped _initial_track;
+
+    rclcpp::Publisher<driverless_msgs::msg::ConeDetectionStamped>::SharedPtr _ground_truth_pub;
+    rclcpp::Publisher<driverless_msgs::msg::ConeDetectionStamped>::SharedPtr _lidar_detection_pub;
+    rclcpp::Publisher<driverless_msgs::msg::ConeDetectionStamped>::SharedPtr _vision_detection_pub;
+    rclcpp::Publisher<driverless_msgs::msg::ConeDetectionStamped>::SharedPtr _slam_global_pub;
+    rclcpp::Publisher<driverless_msgs::msg::ConeDetectionStamped>::SharedPtr _slam_local_pub;
     // ROS Service
     rclcpp::Service<std_srvs::srv::Trigger>::SharedPtr reset_cone_pos_srv;
 
-    SensorConfig_t lidar_config;
-    SensorConfig_t camera_config;
-    SLAMConfig_t slam_config;
+    SensorConfig_t _lidar_config;
+    SensorConfig_t _camera_config;
+    SLAMConfig_t _slam_config;
 };
 
 }  // namespace eufs_plugins
