@@ -64,12 +64,7 @@
   <gazebo>
     <plugin name="sbg_driver" filename="libgazebo_ros_sbg_driver.so">
       <noise_config>$(arg noise_config)</noise_config>
-      <publishGroundTruth>$(arg pub_ground_truth)</publishGroundTruth>
-      <referenceFrame>track</referenceFrame>
-      <robotFrame>base_footprint</robotFrame>
-      <ekfUpdateRate>50.0</ekfUpdateRate>
-      <gpsUpdateRate>5.0</gpsUpdateRate>
-      <velUpdateRate>200.0</velUpdateRate>
+      <pubGroundTruth>$(arg pub_ground_truth)</pubGroundTruth>
     </plugin>
   </gazebo>
 </robot>

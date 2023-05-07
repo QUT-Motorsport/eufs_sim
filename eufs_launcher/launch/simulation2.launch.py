@@ -32,7 +32,9 @@ def gen_world(context, *args, **kwargs):
 
     world_path = os.path.join(tracks, "worlds", track)
     
-    gazebo_launch = get_package_share_directory('gazebo_ros') + '/launch/gazebo.launch.py'
+    gazebo_launch = os.path.join(get_package_share_directory('gazebo_ros'), 'launch', 'gazebo.launch.py')
+    params_file = os.path.join(get_package_share_directory('config'), 'config', 'sim_params.yaml')
+
     return [
         IncludeLaunchDescription(
             launch_description_source=PythonLaunchDescriptionSource(
@@ -43,13 +45,14 @@ def gen_world(context, *args, **kwargs):
                 ("pause", "false"),
                 ("gui", gui),
                 ("world", world_path),
+                ("params_file", params_file),
             ],
         ),
     ]
 
 
 def spawn_car(context, *args, **kwargs):
-    car_launch = get_package_share_directory("eufs_racecar") + "/launch/load_car.launch.py"
+    car_launch = os.path.join(get_package_share_directory("eufs_racecar"), "launch", "load_car.launch.py")
 
     # get x,y,z,roll,pitch,yaw from track csv file
     tracks = get_package_share_directory("eufs_tracks")

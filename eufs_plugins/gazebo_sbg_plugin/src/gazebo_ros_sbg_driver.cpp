@@ -23,13 +23,13 @@ void SBGPlugin::Load(gazebo::physics::ModelPtr model, sdf::ElementPtr sdf)
     _model = model;
     _world = _model->GetWorld();
 
-    _ekf_update_rate = get_double_parameter(sdf, "ekfUpdateRate", 1.0, "1.0", _ros_node->get_logger());
-    _vel_update_rate = get_double_parameter(sdf, "velUpdateRate", 1.0, "1.0", _ros_node->get_logger());
-    _gps_update_rate = get_double_parameter(sdf, "gpsUpdateRate", 1.0, "1.0", _ros_node->get_logger());
-    _pub_gt = get_bool_parameter(sdf, "publishGroundTruth", false, "false", _ros_node->get_logger());
+    _pub_gt = get_bool_parameter(sdf, "pubGroundTruth", false, "false", _ros_node->get_logger());
 
-    _reference_frame = get_string_parameter(sdf, "referenceFrame", "", "empty", _ros_node->get_logger());
-    _robot_frame = get_string_parameter(sdf, "robotFrame", "", "empty", _ros_node->get_logger());
+    _ekf_update_rate = _ros_node->declare_parameter("ekf_update_rate", 1.0);
+    _vel_update_rate = _ros_node->declare_parameter("vel_update_rate", 1.0);
+    _gps_update_rate = _ros_node->declare_parameter("gps_update_rate", 1.0);
+    _reference_frame = _ros_node->declare_parameter("referenceFrame", "map");
+    _robot_frame = _ros_node->declare_parameter("robotFrame", "base_link");
 
     // Create noise object
     std::string yaml_name = get_string_parameter(sdf, "noise_config", "", "empty", _ros_node->get_logger());
@@ -72,7 +72,9 @@ void SBGPlugin::navSatFixCallback(const sensor_msgs::msg::NavSatFix::SharedPtr n
     msg.longitude = _last_nav_sat_msg.longitude;
     msg.altitude = _last_nav_sat_msg.altitude;
 
-    _pub_gps->publish(msg);
+    if (has_subscribers(_pub_gps)) {
+        _pub_gps->publish(msg);
+    }
 }
 
 void SBGPlugin::update()
@@ -112,7 +114,9 @@ void SBGPlugin::publishVelocity()
 
     msg.twist = _noise->applyNoiseToTwist(twist_vals);
 
-    _pub_velocity->publish(msg);
+    if (has_subscribers(_pub_velocity)) {
+        _pub_velocity->publish(msg);
+    }
 }
 
 void SBGPlugin::publishEuler()
@@ -135,7 +139,9 @@ void SBGPlugin::publishEuler()
 
     msg.angle = _noise->applyNoiseToVector(euler_vals);
 
-    _pub_euler->publish(msg);
+    if (has_subscribers(_pub_euler)) {
+        _pub_euler->publish(msg);
+    }
 }
 
 // void SBGPlugin::publishGps()
