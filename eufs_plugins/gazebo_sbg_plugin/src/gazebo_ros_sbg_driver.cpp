@@ -14,8 +14,7 @@ GZ_REGISTER_MODEL_PLUGIN(SBGPlugin)
 
 SBGPlugin::SBGPlugin() {}
 
-void SBGPlugin::Load(gazebo::physics::ModelPtr model, sdf::ElementPtr sdf)
-{
+void SBGPlugin::Load(gazebo::physics::ModelPtr model, sdf::ElementPtr sdf) {
     _ros_node = gazebo_ros::Node::Get(sdf);
 
     RCLCPP_DEBUG(_ros_node->get_logger(), "Loading SBGPlugin");
@@ -23,13 +22,13 @@ void SBGPlugin::Load(gazebo::physics::ModelPtr model, sdf::ElementPtr sdf)
     _model = model;
     _world = _model->GetWorld();
 
-    _pub_gt = get_bool_parameter(sdf, "pubGroundTruth", false, "false", _ros_node->get_logger());
-
     _ekf_update_rate = _ros_node->declare_parameter("ekf_update_rate", 1.0);
     _vel_update_rate = _ros_node->declare_parameter("vel_update_rate", 1.0);
     _gps_update_rate = _ros_node->declare_parameter("gps_update_rate", 1.0);
     _reference_frame = _ros_node->declare_parameter("referenceFrame", "map");
     _robot_frame = _ros_node->declare_parameter("robotFrame", "base_link");
+
+    _pub_gt = get_bool_parameter(sdf, "pubGroundTruth", false, "false", _ros_node->get_logger());
 
     // Create noise object
     std::string yaml_name = get_string_parameter(sdf, "noise_config", "", "empty", _ros_node->get_logger());
@@ -59,8 +58,7 @@ void SBGPlugin::Load(gazebo::physics::ModelPtr model, sdf::ElementPtr sdf)
     RCLCPP_INFO(_ros_node->get_logger(), "SBGPlugin Loaded");
 }
 
-void SBGPlugin::navSatFixCallback(const sensor_msgs::msg::NavSatFix::SharedPtr nav_sat_msg)
-{
+void SBGPlugin::navSatFixCallback(const sensor_msgs::msg::NavSatFix::SharedPtr nav_sat_msg) {
     _last_nav_sat_msg = *nav_sat_msg;
     
     sbg_driver::msg::SbgGpsPos msg;
@@ -77,8 +75,7 @@ void SBGPlugin::navSatFixCallback(const sensor_msgs::msg::NavSatFix::SharedPtr n
     }
 }
 
-void SBGPlugin::update()
-{
+void SBGPlugin::update() {
     _pose = _model->WorldPose();
     _vel = _model->WorldLinearVel();
     _angular_vel = _model->WorldAngularVel();
@@ -90,8 +87,7 @@ void SBGPlugin::update()
 }
 
 
-void SBGPlugin::publishVelocity()
-{
+void SBGPlugin::publishVelocity() {
     auto curr_time = _world->SimTime();
     if (calc_dt(_last_vel_time, curr_time) < (1.0 / _vel_update_rate)) {
         return;
@@ -119,8 +115,7 @@ void SBGPlugin::publishVelocity()
     }
 }
 
-void SBGPlugin::publishEuler()
-{
+void SBGPlugin::publishEuler() {
     auto curr_time = _world->SimTime();
     if (calc_dt(_last_ekf_time, curr_time) < (1.0 / _ekf_update_rate)) {
         return;
@@ -144,8 +139,7 @@ void SBGPlugin::publishEuler()
     }
 }
 
-// void SBGPlugin::publishGps()
-// {
+// void SBGPlugin::publishGps() {
 //     auto curr_time = _world->SimTime();
 //     if (calc_dt(_last_gps_time, curr_time) < (1.0 / _gps_update_rate)) {
 //         return;
@@ -164,8 +158,7 @@ void SBGPlugin::publishEuler()
 //     _pub_gps->publish(msg);
 // }
 
-void SBGPlugin::publishGTOdom()
-{
+void SBGPlugin::publishGTOdom() {
     auto curr_time = _world->SimTime();
     if (calc_dt(_last_odom_time, curr_time) < (1.0 / _ekf_update_rate)) {
         return;
