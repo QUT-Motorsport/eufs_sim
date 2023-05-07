@@ -297,15 +297,15 @@ class EUFSLauncher(Plugin):
         self.LAUNCH_BUTTON.setEnabled(False)
 
     def generator_button_pressed(self):
-        self.launch_without_args(
-            "eufs_track_generator",
-            "install/eufs_tracks/lib/eufs_tracks/eufs_tracks_generator",
+        self.run_without_args(
+            "eufs_tracks",
+            "eufs_tracks_generator",
         )
 
     def converter_button_pressed(self):
-        self.launch_without_args(
-            "eufs_track_converter",
-            "install/eufs_tracks/lib/eufs_tracks/eufs_tracks_converter",
+        self.run_without_args(
+            "eufs_tracks",
+            "eufs_tracks_converter",
         )
 
     def run_without_args(self, package, program_name):
