@@ -17,6 +17,7 @@ typedef struct SensorConfig {
     double range_noise;
     double bearing_noise;
     bool detects_colour;
+    double offset_x;
 } SensorConfig_t;
 
 SensorConfig_t populate_sensor_config(std::string sensor_prefix, sdf::ElementPtr sdf,
@@ -29,11 +30,13 @@ SensorConfig_t populate_sensor_config(std::string sensor_prefix, sdf::ElementPtr
         get_double_parameter(sdf, sensor_prefix + "RangeNoise", 0, "0", logger),
         get_double_parameter(sdf, sensor_prefix + "BearingNoise", 0, "0", logger),
         get_bool_parameter(sdf, sensor_prefix + "DetectsColour", true, "true", logger),
+        get_double_parameter(sdf, sensor_prefix + "OffsetX", 0, "0", logger),
     };
 }
 
 driverless_msgs::msg::Cone convert_cone_to_car_frame(const ignition::math::Pose3d car_pose,
-                                                     const driverless_msgs::msg::Cone cone) {
+                                                     const driverless_msgs::msg::Cone cone,
+                                                     const double offset_x = 0) {
     driverless_msgs::msg::Cone translated_cone = cone;
 
     double x = cone.location.x - car_pose.Pos().X();
@@ -42,7 +45,7 @@ driverless_msgs::msg::Cone convert_cone_to_car_frame(const ignition::math::Pose3
 
     // Rotate the points using the yaw of the car (x and y are the other way around)
     translated_cone.location.y = (cos(yaw) * y) - (sin(yaw) * x);
-    translated_cone.location.x = (sin(yaw) * y) + (cos(yaw) * x);
+    translated_cone.location.x = (sin(yaw) * y) + (cos(yaw) * x) - offset_x;
 
     return translated_cone;
 }
@@ -108,7 +111,7 @@ driverless_msgs::msg::ConeDetectionStamped get_sensor_detection(
     sensor_detection.header.frame_id = sensor_config.frame_id;
 
     for (auto const &cone : ground_truth_track.cones_with_cov) {
-        auto translated_cone = convert_cone_to_car_frame(car_pose, cone.cone);
+        auto translated_cone = convert_cone_to_car_frame(car_pose, cone.cone, sensor_config.offset_x);
 
         double dist = cone_dist(translated_cone);
         if (dist < sensor_config.min_view_distance || dist > sensor_config.max_view_distance) {
@@ -166,35 +169,38 @@ SLAMConfig_t populate_slam_config(sdf::ElementPtr sdf, std::optional<const rclcp
     };
 }
 
-driverless_msgs::msg::ConeDetectionStamped get_noisy_slam_ground_truth_track(
+driverless_msgs::msg::ConeDetectionStamped get_noisy_global_map(
     SLAMConfig_t slam_config, driverless_msgs::msg::ConeDetectionStamped ground_truth_track) {
-    driverless_msgs::msg::ConeDetectionStamped noisy_ground_truth;
-    noisy_ground_truth.header = ground_truth_track.header;
+    driverless_msgs::msg::ConeDetectionStamped noisy_global_map;
+    noisy_global_map.header = ground_truth_track.header;
     for (auto const &cone : ground_truth_track.cones_with_cov) {
-        noisy_ground_truth.cones_with_cov.push_back(
+        noisy_global_map.cones_with_cov.push_back(
             make_noisy_x_y_cone(cone.cone, slam_config.x_noise, slam_config.y_noise));
+        noisy_global_map.cones.push_back(
+            make_noisy_x_y_cone(cone.cone, slam_config.x_noise, slam_config.y_noise).cone);
     }
 
-    return noisy_ground_truth;
+    return noisy_global_map;
 }
 
-driverless_msgs::msg::ConeDetectionStamped get_slam_local_map(
+driverless_msgs::msg::ConeDetectionStamped get_noisy_local_map(
     SLAMConfig_t slam_config, ignition::math::Pose3d car_pose,
-    driverless_msgs::msg::ConeDetectionStamped noisy_slam_ground_truth_track) {
-    driverless_msgs::msg::ConeDetectionStamped slam_local_map;
-    slam_local_map.header = noisy_slam_ground_truth_track.header;
-    slam_local_map.header.frame_id = slam_config.local_frame_id;
+    driverless_msgs::msg::ConeDetectionStamped noisy_global_map) {
+    driverless_msgs::msg::ConeDetectionStamped noisy_local_map;
+    noisy_local_map.header = noisy_global_map.header;
+    noisy_local_map.header.frame_id = slam_config.local_frame_id;
 
-    for (auto const &cone : noisy_slam_ground_truth_track.cones_with_cov) {
+    for (auto const &cone : noisy_global_map.cones_with_cov) {
         auto translated_cone = cone;
         translated_cone.cone = convert_cone_to_car_frame(car_pose, cone.cone);
         bool within_x_range =
             0 < translated_cone.cone.location.x && translated_cone.cone.location.x < slam_config.local_range_x / 2;
         bool within_y_range = abs(translated_cone.cone.location.y) < slam_config.local_range_y;
         if (within_x_range && within_y_range) {
-            slam_local_map.cones_with_cov.push_back(translated_cone);
+            noisy_local_map.cones_with_cov.push_back(translated_cone);
+            noisy_local_map.cones.push_back(translated_cone.cone);
         }
     }
 
-    return slam_local_map;
+    return noisy_local_map;
 }
