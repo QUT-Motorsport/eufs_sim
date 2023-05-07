@@ -94,15 +94,28 @@ void RaceCarPlugin::Load(gazebo::physics::ModelPtr model, sdf::ElementPtr sdf) {
 }
 
 void RaceCarPlugin::initParams(const sdf::ElementPtr &sdf) {
-    // SDF Parameters
-    _update_rate = get_double_parameter(sdf, "updateRate", 1.0, "1.0", _rosnode->get_logger());
-    _publish_rate = get_double_parameter(sdf, "publishRate", 1.0, "1.0", _rosnode->get_logger());
-    _reference_frame = get_string_parameter(sdf, "referenceFrame", "map", "map", _rosnode->get_logger());
-    _robot_frame = get_string_parameter(sdf, "robotFrame", "base_link", "base_link", _rosnode->get_logger());
-    _control_delay = get_double_parameter(sdf, "controlDelay", 1.0, "1.0", _rosnode->get_logger());
-    _steering_lock_time = get_double_parameter(sdf, "steeringLockTime", 1.0, "1.0", _rosnode->get_logger());
+    // Get ROS parameters
+    _rosnode->declare_parameter<double>("update_rate", 2.0);
+    _rosnode->get_parameter("update_rate", _update_rate);
 
-    _publish_tf = get_bool_parameter(sdf, "publishTransform", false, "false", _rosnode->get_logger());
+    _rosnode->declare_parameter<double>("publish_rate", 200.0);
+    _rosnode->get_parameter("publish_rate", _publish_rate);
+
+    _rosnode->declare_parameter<std::string>("reference_frame", _reference_frame);
+    _rosnode->get_parameter("reference_frame", _reference_frame);
+
+    _rosnode->declare_parameter<std::string>("robot_frame", _robot_frame);
+    _rosnode->get_parameter("robot_frame", _robot_frame);
+
+    _rosnode->declare_parameter<double>("control_delay", 0.5);
+    _rosnode->get_parameter("control_delay", _control_delay);
+
+    /// SHOULD BE IN VEHICLE PARAMS FILE 
+    _rosnode->declare_parameter<double>("steering_lock_time", 1.0);
+    _rosnode->get_parameter("steering_lock_time", _steering_lock_time);
+
+    // SDF Parameters
+    _pub_tf = get_bool_parameter(sdf, "pubTransform", false, "false", _rosnode->get_logger());
     _pub_gt = get_bool_parameter(sdf, "pubGroundTruth", false, "false", _rosnode->get_logger());
     _simulate_slam = get_bool_parameter(sdf, "simulateSLAM", false, "false", _rosnode->get_logger());
 
@@ -424,7 +437,7 @@ void RaceCarPlugin::update() {
     publishCarPose();
     publishVehicleOdom();
 
-    if (_publish_tf) {
+    if (_pub_tf) {
         publishTf();
     }
 

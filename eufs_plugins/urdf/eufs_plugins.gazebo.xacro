@@ -11,14 +11,8 @@
    and the steering angle of the wheels -->
   <gazebo>
     <plugin name="race_car" filename="libgazebo_ros_race_car.so">
-      <updateRate>1000.0</updateRate>
-      <publishRate>200.0</publishRate>
-      <referenceFrame>track</referenceFrame>
-      <robotFrame>base_footprint</robotFrame>
-      <controlDelay>0.035</controlDelay>
-      <steeringLockTime>1.5</steeringLockTime>
       <pubGroundTruth>$(arg pub_ground_truth)</pubGroundTruth>
-      <publishTransform>$(arg publish_tf)</publishTransform>
+      <pubTransform>$(arg publish_tf)</pubTransform>
       <commandMode>$(arg command_mode)</commandMode>
       <yamlConfig>$(arg config_file)</yamlConfig>
       <noiseConfig>$(arg noise_config)</noiseConfig>
