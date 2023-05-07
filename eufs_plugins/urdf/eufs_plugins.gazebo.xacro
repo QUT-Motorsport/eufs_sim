@@ -2,28 +2,28 @@
 <robot xmlns:xacro="http://www.ros.org/wiki/xacro">
   <gazebo>
     <plugin name="race_car" filename="libgazebo_ros_race_car.so">
-      <pubGroundTruth>$(arg pub_ground_truth)</pubGroundTruth>
-      <pubTransform>$(arg publish_tf)</pubTransform>
+      <publishGroundTruth>$(arg publish_ground_truth)</publishGroundTruth>
+      <publishTransform>$(arg publish_transform)</publishTransform>
       <commandMode>$(arg command_mode)</commandMode>
-      <yamlConfig>$(arg config_file)</yamlConfig>
+      <vehicleConfig>$(arg vehicle_config)</vehicleConfig>
       <noiseConfig>$(arg noise_config)</noiseConfig>
       <vehicleModel>$(arg vehicle_model)</vehicleModel>
-      <simulateSLAM>$(arg sim_slam)</simulateSLAM>
+      <simulateSLAM>$(arg simulate_slam)</simulateSLAM>
     </plugin>
   </gazebo>
 
   <gazebo>
     <plugin name="cone_detection" filename="libgazebo_ros_cone_detection.so">
-      <publishGroundTruth>$(arg pub_ground_truth)</publishGroundTruth>
-      <simulatePerception>$(arg sim_perception)</simulatePerception>
-      <simulateSLAM>$(arg sim_slam)</simulateSLAM>
+      <publishGroundTruth>$(arg publish_ground_truth)</publishGroundTruth>
+      <simulatePerception>$(arg simulate_perception)</simulatePerception>
+      <simulateSLAM>$(arg simulate_slam)</simulateSLAM>
     </plugin>
   </gazebo>
 
   <gazebo>
     <plugin name="sbg_driver" filename="libgazebo_ros_sbg_driver.so">
-      <noise_config>$(arg noise_config)</noise_config>
-      <pubGroundTruth>$(arg pub_ground_truth)</pubGroundTruth>
+      <noiseConfig>$(arg noise_config)</noiseConfig>
+      <publishGroundTruth>$(arg publish_ground_truth)</publishGroundTruth>
     </plugin>
   </gazebo>
 </robot>

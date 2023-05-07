@@ -7,45 +7,29 @@ GZ_REGISTER_MODEL_PLUGIN(ConeDetectionPlugin)
 
 ConeDetectionPlugin::ConeDetectionPlugin() {}
 
-void ConeDetectionPlugin::Load(gazebo::physics::ModelPtr parent, sdf::ElementPtr sdf) {
+void ConeDetectionPlugin::Load(gazebo::physics::ModelPtr model, sdf::ElementPtr sdf) {
     _ros_node = gazebo_ros::Node::Get(sdf);
 
     RCLCPP_DEBUG(_ros_node->get_logger(), "Loading SBGPlugin");
-
-    _world = parent->GetWorld();
-
-    _reference_frame = _ros_node->declare_parameter("reference_frame", "map");
-    _robot_frame = _ros_node->declare_parameter("robot_frame", "base_link");
-
-    _track_model = get_model(_world, _reference_frame, _ros_node->get_logger());
-    _car_link = get_link(parent, _robot_frame, _ros_node->get_logger());
-    _car_inital_pose = _car_link->WorldPose();
-
-    _lidar_update_rate = _ros_node->declare_parameter("lidar_update_rate", 1.0);
-    _camera_update_rate = _ros_node->declare_parameter("camera_update_rate", 1.0);
-    _slam_update_rate = _ros_node->declare_parameter("slam_update_rate", 1.0);
-    _gt_update_rate = _ros_node->declare_parameter("gt_update_rate", 1.0);
     
-    bool publish_ground_truth = get_bool_parameter(sdf, "publishGroundTruth", true, "true");
-    bool simulate_perception = get_bool_parameter(sdf, "simulatePerception", true, "true");
-    bool simulate_SLAM = get_bool_parameter(sdf, "simulateSLAM", true, "true");
+    _model = model;
+    _world = _model->GetWorld();
 
-    _lidar_config = populate_sensor_config("lidar", _ros_node);
-    _camera_config = populate_sensor_config("camera", _ros_node);
-    _slam_config = populate_slam_config(_ros_node);
+    // Initialize parameters
+    initParams(sdf);
 
-    if (publish_ground_truth) {
+    if (_pub_gt) {
         _ground_truth_pub =
             _ros_node->create_publisher<driverless_msgs::msg::ConeDetectionStamped>(("ground_truth/global_map"), 1);
     }
 
-    if (simulate_perception) {
+    if (_simulate_perception) {
         _lidar_detection_pub = _ros_node->create_publisher<driverless_msgs::msg::ConeDetectionStamped>(("lidar/cone_detection"), 1);
         _vision_detection_pub =
             _ros_node->create_publisher<driverless_msgs::msg::ConeDetectionStamped>(("vision/cone_detection"), 1);
     }
 
-    if (simulate_SLAM) {
+    if (_simulate_slam) {
         _slam_global_pub =
             _ros_node->create_publisher<driverless_msgs::msg::ConeDetectionStamped>(("slam/global_map"), 1);
         _slam_local_pub = _ros_node->create_publisher<driverless_msgs::msg::ConeDetectionStamped>(("slam/local_map"), 1);
@@ -65,9 +49,31 @@ void ConeDetectionPlugin::Load(gazebo::physics::ModelPtr parent, sdf::ElementPtr
         gazebo::event::Events::ConnectWorldUpdateBegin(std::bind(&ConeDetectionPlugin::update, this));
 
     //  Store initial track
-    _initial_track = get_ground_truth_track(_track_model, _last_gt_update, _ros_node->get_logger());
+    _initial_track = get_ground_truth_track(_track_model, _last_gt_update, _reference_frame, _ros_node->get_logger());
 
     RCLCPP_INFO(_ros_node->get_logger(), "ConeDetectionPlugin Loaded");
+}
+
+void ConeDetectionPlugin::initParams(sdf::ElementPtr sdf) {
+    _reference_frame = _ros_node->declare_parameter("reference_frame", "map");
+    _robot_frame = _ros_node->declare_parameter("robot_frame", "base_link");
+
+    _track_model = get_model(_world, _reference_frame, _ros_node->get_logger());
+    _car_link = get_link(_model, _robot_frame, _ros_node->get_logger());
+    _car_inital_pose = _car_link->WorldPose();
+
+    _lidar_update_rate = _ros_node->declare_parameter("lidar_update_rate", 1.0);
+    _camera_update_rate = _ros_node->declare_parameter("camera_update_rate", 1.0);
+    _slam_update_rate = _ros_node->declare_parameter("slam_update_rate", 1.0);
+    _gt_update_rate = _ros_node->declare_parameter("gt_update_rate", 1.0);
+    
+    _pub_gt = get_bool_parameter(sdf, "publishGroundTruth", true, "true");
+    _simulate_perception = get_bool_parameter(sdf, "simulatePerception", true, "true");
+    _simulate_slam = get_bool_parameter(sdf, "simulateSLAM", true, "true");
+
+    _lidar_config = populate_sensor_config("lidar", _ros_node);
+    _camera_config = populate_sensor_config("camera", _ros_node);
+    _slam_config = populate_slam_config(_ros_node);
 }
 
 void ConeDetectionPlugin::update() {
@@ -84,7 +90,7 @@ void ConeDetectionPlugin::publishGTTrack() {
     }
     _last_gt_update = curr_time;
 
-    auto ground_truth_track = get_ground_truth_track(_track_model, curr_time, _ros_node->get_logger());
+    auto ground_truth_track = get_ground_truth_track(_track_model, curr_time, _reference_frame, _ros_node->get_logger());
 
     if (has_subscribers(_ground_truth_pub)) {
         auto centered_ground_truth = get_track_centered_on_car_inital_pose(_car_inital_pose, ground_truth_track);
@@ -99,7 +105,7 @@ void ConeDetectionPlugin::publishLiDARDetection() {
     }
     _last_lidar_update = curr_time;
 
-    auto ground_truth_track = get_ground_truth_track(_track_model, curr_time, _ros_node->get_logger());
+    auto ground_truth_track = get_ground_truth_track(_track_model, curr_time, _reference_frame, _ros_node->get_logger());
 
     if (has_subscribers(_lidar_detection_pub)) {
         auto lidar_detection = get_sensor_detection(_lidar_config, _car_link->WorldPose(), ground_truth_track);
@@ -114,7 +120,7 @@ void ConeDetectionPlugin::publishCameraDetection() {
     }
     _last_camera_update = curr_time;
 
-    auto ground_truth_track = get_ground_truth_track(_track_model, curr_time, _ros_node->get_logger());
+    auto ground_truth_track = get_ground_truth_track(_track_model, curr_time, _reference_frame, _ros_node->get_logger());
 
     if (has_subscribers(_vision_detection_pub)) {
         auto vision_detection = get_sensor_detection(_camera_config, _car_link->WorldPose(), ground_truth_track);
@@ -129,7 +135,7 @@ void ConeDetectionPlugin::publishSLAM() {
     }
     _last_slam_update = curr_time;
 
-    auto ground_truth_track = get_ground_truth_track(_track_model, curr_time, _ros_node->get_logger());
+    auto ground_truth_track = get_ground_truth_track(_track_model, curr_time, _reference_frame, _ros_node->get_logger());
 
     if (has_subscribers(_slam_global_pub) || has_subscribers(_slam_local_pub)) {
         auto noisy_global_map = get_noisy_global_map(_slam_config, ground_truth_track);

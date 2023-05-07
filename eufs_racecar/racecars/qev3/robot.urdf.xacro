@@ -6,7 +6,7 @@
     <!-- ***************** -->
 
     <!--  Load the config file  -->
-    <xacro:property name="config" value="${load_yaml('$(arg config_file)')}"/>
+    <xacro:property name="config" value="${load_yaml('$(arg vehicle_config)')}"/>
 
     <!-- Simulate sensors or not? -->
     <xacro:arg name="enable_camera" default="false"/>

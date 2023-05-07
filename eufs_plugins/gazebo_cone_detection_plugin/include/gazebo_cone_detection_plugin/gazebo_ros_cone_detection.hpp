@@ -30,6 +30,7 @@ class ConeDetectionPlugin : public gazebo::ModelPlugin {
     // Gazebo plugin functions
     void Load(gazebo::physics::ModelPtr parent, sdf::ElementPtr sdf);
     void update();
+    void initParams(sdf::ElementPtr sdf);
     void publishGTTrack();
     void publishLiDARDetection();
     void publishCameraDetection();
@@ -39,11 +40,16 @@ class ConeDetectionPlugin : public gazebo::ModelPlugin {
 
    private:
     gazebo::physics::WorldPtr _world;
+    gazebo::physics::ModelPtr _model;
     gazebo_ros::Node::SharedPtr _ros_node;
     gazebo::event::ConnectionPtr _update_connection;
 
     std::string _reference_frame;
     std::string _robot_frame;
+
+    bool _pub_gt;
+    bool _simulate_perception;
+    bool _simulate_slam;
 
     gazebo::physics::ModelPtr _track_model;
     gazebo::physics::LinkPtr _car_link;

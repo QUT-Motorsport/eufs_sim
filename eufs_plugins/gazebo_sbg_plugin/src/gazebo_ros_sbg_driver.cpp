@@ -22,17 +22,8 @@ void SBGPlugin::Load(gazebo::physics::ModelPtr model, sdf::ElementPtr sdf) {
     _model = model;
     _world = _model->GetWorld();
 
-    _ekf_update_rate = _ros_node->declare_parameter("ekf_update_rate", 1.0);
-    _vel_update_rate = _ros_node->declare_parameter("vel_update_rate", 1.0);
-    _gps_update_rate = _ros_node->declare_parameter("gps_update_rate", 1.0);
-    _reference_frame = _ros_node->declare_parameter("referenceFrame", "map");
-    _robot_frame = _ros_node->declare_parameter("robotFrame", "base_link");
-
-    _pub_gt = get_bool_parameter(sdf, "pubGroundTruth", false, "false", _ros_node->get_logger());
-
-    // Create noise object
-    std::string yaml_name = get_string_parameter(sdf, "noise_config", "", "empty", _ros_node->get_logger());
-    _noise = std::make_unique<eufs::models::Noise>(yaml_name);
+    // Initialize parameters
+    initParams(sdf);
 
     // ROS publishers
     _pub_velocity = _ros_node->create_publisher<geometry_msgs::msg::TwistStamped>("imu/velocity", 1);
@@ -56,6 +47,21 @@ void SBGPlugin::Load(gazebo::physics::ModelPtr model, sdf::ElementPtr sdf) {
     _offset = _model->WorldPose();
 
     RCLCPP_INFO(_ros_node->get_logger(), "SBGPlugin Loaded");
+}
+
+void SBGPlugin::initParams(sdf::ElementPtr sdf) {
+    // Get parameters
+    _ekf_update_rate = _ros_node->declare_parameter("ekf_update_rate", 1.0);
+    _vel_update_rate = _ros_node->declare_parameter("vel_update_rate", 1.0);
+    _gps_update_rate = _ros_node->declare_parameter("gps_update_rate", 1.0);
+    _reference_frame = _ros_node->declare_parameter("referenceFrame", "map");
+    _robot_frame = _ros_node->declare_parameter("robotFrame", "base_link");
+
+    _pub_gt = get_bool_parameter(sdf, "publishGroundTruth", false, "false", _ros_node->get_logger());
+    std::string yaml_name = get_string_parameter(sdf, "noiseConfig", "", "empty", _ros_node->get_logger());
+
+    // Create noise object
+    _noise = std::make_unique<eufs::models::Noise>(yaml_name);
 }
 
 void SBGPlugin::navSatFixCallback(const sensor_msgs::msg::NavSatFix::SharedPtr nav_sat_msg) {
