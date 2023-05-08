@@ -9,7 +9,7 @@ noise:
   linearVelocityNoise: [0.1, 0.1, 0.0]
 
   # X, Y, Z
-  angularVelocityNoise: [0.0, 0.0, 0.1]
+  angularVelocityNoise: [0.0, 0.0, 0.01]
 
   # X, Y, Z
   linearAccelerationNoise: [0.0, 0.0, 0.0]

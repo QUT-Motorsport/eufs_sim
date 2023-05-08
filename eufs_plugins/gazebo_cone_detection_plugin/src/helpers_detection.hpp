@@ -4,6 +4,7 @@
 #include <driverless_msgs/msg/cone_detection_stamped.hpp>
 #include <gazebo/gazebo.hh>
 #include <string>
+#include <stdio.h>
 
 #include "helpers_gazebo.hpp"
 
@@ -17,6 +18,8 @@ typedef struct SensorConfig {
     double range_noise;
     double bearing_noise;
     bool detects_colour;
+    bool gaussian_range_noise;
+    bool gaussian_bearing_noise;
 } SensorConfig_t;
 
 SensorConfig_t populate_sensor_config(std::string sensor_prefix, sdf::ElementPtr sdf,
@@ -29,6 +32,8 @@ SensorConfig_t populate_sensor_config(std::string sensor_prefix, sdf::ElementPtr
         get_double_parameter(sdf, sensor_prefix + "RangeNoise", 0, "0", logger),
         get_double_parameter(sdf, sensor_prefix + "BearingNoise", 0, "0", logger),
         get_bool_parameter(sdf, sensor_prefix + "DetectsColour", true, "true", logger),
+        get_bool_parameter(sdf, sensor_prefix + "GaussianRangeNoise", true, "true", logger),
+        get_bool_parameter(sdf, sensor_prefix + "GaussianBearingNoise", true, "true", logger),
     };
 }
 
@@ -69,15 +74,32 @@ double GaussianKernel(double mu, double sigma) {
     // there are 2 indep. vars, we'll just use X
     // scale to our mu and sigma
     X = sigma * X + mu;
+
     return X;
 }
 
+double UniformKernel(double range) {
+    // uniform random value from +range to - range
+    double x = (static_cast<double>(rand_r(&seed)) / static_cast<double>(RAND_MAX/2)) - 1.0;
+    return x * range;
+}
+
 driverless_msgs::msg::ConeWithCovariance make_noisy_range_bearing_cone(driverless_msgs::msg::Cone cone,
-                                                                       double range_noise, double bearing_noise) {
+                                                                       double range_noise, double bearing_noise, bool gaussian_range_noise, bool gaussian_bearing_noise) {
     driverless_msgs::msg::ConeWithCovariance noisy_cone;
 
-    double range = cone_dist(cone) + GaussianKernel(0, range_noise);
-    double bearing = cone_angle(cone) + GaussianKernel(0, bearing_noise);
+    double range = cone_dist(cone);
+    if (gaussian_range_noise) {
+        range += GaussianKernel(0, range_noise);
+    } else {
+        range += UniformKernel(range_noise);
+    }
+    double bearing = cone_angle(cone);
+    if (gaussian_bearing_noise) {
+        bearing += GaussianKernel(0, bearing_noise);
+    } else {
+        bearing += UniformKernel(bearing_noise);
+    }
 
     noisy_cone.cone = cone;
     noisy_cone.cone.location.x = range * cos(bearing);
@@ -124,7 +146,7 @@ driverless_msgs::msg::ConeDetectionStamped get_sensor_detection(
             translated_cone.color = driverless_msgs::msg::Cone::UNKNOWN;
         }
 
-        driverless_msgs::msg::ConeWithCovariance noisy_cone = make_noisy_range_bearing_cone(translated_cone, sensor_config.range_noise, sensor_config.bearing_noise);
+        driverless_msgs::msg::ConeWithCovariance noisy_cone = make_noisy_range_bearing_cone(translated_cone, sensor_config.range_noise, sensor_config.bearing_noise, sensor_config.gaussian_range_noise, sensor_config.gaussian_bearing_noise);
         sensor_detection.cones_with_cov.push_back(noisy_cone);
         sensor_detection.cones.push_back(noisy_cone.cone);
     }

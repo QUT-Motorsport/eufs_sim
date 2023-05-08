@@ -37,20 +37,24 @@
     <plugin name="cone_detection" filename="libgazebo_ros_cone_detection.so">
       <updateRate>20.0</updateRate>
       <cameraDetectionTopic>vision/cone_detection</cameraDetectionTopic>
-      <cameraFrameId>zed2i_left_camera_optical_frame</cameraFrameId>
-      <cameraMinViewDistance>0.5</cameraMinViewDistance>
+      <cameraFrameId>base_footprint</cameraFrameId>
+      <cameraMinViewDistance>1</cameraMinViewDistance>
       <cameraMaxViewDistance>10</cameraMaxViewDistance>
       <cameraFOV>1.91986</cameraFOV><!--110 degrees-->
       <cameraRangeNoise>0.01</cameraRangeNoise>
-      <cameraBearingNoise>0.01</cameraBearingNoise>
+      <cameraBearingNoise>0.00872665</cameraBearingNoise><!--0.5 degree-->
+      <cameraGaussianRangeNoise>false</cameraGaussianRangeNoise>
+      <cameraGaussianBearingNoise>true</cameraGaussianBearingNoise>
       <cameraDetectsColour>true</cameraDetectsColour>
       <lidarDetectionTopic>lidar/cone_detection</lidarDetectionTopic>
       <lidarFrameId>velodyne</lidarFrameId>
       <lidarMinViewDistance>1</lidarMinViewDistance>
-      <lidarMaxViewDistance>20</lidarMaxViewDistance>
+      <lidarMaxViewDistance>10</lidarMaxViewDistance>
       <lidarFOV>3.141593</lidarFOV><!-- 180 degrees-->
       <lidarRangeNoise>0.01</lidarRangeNoise>
-      <lidarBearingNoise>0.001</lidarBearingNoise>
+      <lidarBearingNoise>0.001</lidarBearingNoise><!--0.06 degree-->
+      <lidarGaussianRangeNoise>true</lidarGaussianRangeNoise>
+      <lidarGaussianBearingNoise>true</lidarGaussianBearingNoise>
       <lidarDetectsColour>false</lidarDetectsColour>
       <SLAMFrameId>track</SLAMFrameId>
       <SLAMXNoise>0.1</SLAMXNoise>
