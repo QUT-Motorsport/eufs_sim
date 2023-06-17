@@ -46,6 +46,7 @@ class SBGPlugin : public gazebo::ModelPlugin
    private:   
     // Gazebo functions
     void update();
+    void initParams(sdf::ElementPtr sdf);
     void navSatFixCallback(const sensor_msgs::msg::NavSatFix::SharedPtr msg);
     void publishVelocity();
     void publishEuler();

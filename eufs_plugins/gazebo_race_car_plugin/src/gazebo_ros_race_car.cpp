@@ -94,16 +94,18 @@ void RaceCarPlugin::Load(gazebo::physics::ModelPtr model, sdf::ElementPtr sdf) {
 }
 
 void RaceCarPlugin::initParams(const sdf::ElementPtr &sdf) {
-    // SDF Parameters
-    _update_rate = get_double_parameter(sdf, "updateRate", 1.0, "1.0", _rosnode->get_logger());
-    _publish_rate = get_double_parameter(sdf, "publishRate", 1.0, "1.0", _rosnode->get_logger());
-    _reference_frame = get_string_parameter(sdf, "referenceFrame", "map", "map", _rosnode->get_logger());
-    _robot_frame = get_string_parameter(sdf, "robotFrame", "base_link", "base_link", _rosnode->get_logger());
-    _control_delay = get_double_parameter(sdf, "controlDelay", 1.0, "1.0", _rosnode->get_logger());
-    _steering_lock_time = get_double_parameter(sdf, "steeringLockTime", 1.0, "1.0", _rosnode->get_logger());
+    // Get ROS parameters
+    _update_rate = _rosnode->declare_parameter("update_rate", 2.0);
+    _publish_rate = _rosnode->declare_parameter("publish_rate", 200.0);
+    _reference_frame = _rosnode->declare_parameter("reference_frame", "map");
+    _robot_frame = _rosnode->declare_parameter("robot_frame", "base_link");
+    _control_delay = _rosnode->declare_parameter("control_delay", 0.5);
+    /// SHOULD BE IN VEHICLE PARAMS FILE 
+    _steering_lock_time = _rosnode->declare_parameter("steering_lock_time", 1.0);
 
-    _publish_tf = get_bool_parameter(sdf, "publishTransform", false, "false", _rosnode->get_logger());
-    _pub_gt = get_bool_parameter(sdf, "pubGroundTruth", false, "false", _rosnode->get_logger());
+    // SDF Parameters
+    _pub_tf = get_bool_parameter(sdf, "publishTransform", false, "false", _rosnode->get_logger());
+    _pub_gt = get_bool_parameter(sdf, "publishGroundTruth", false, "false", _rosnode->get_logger());
     _simulate_slam = get_bool_parameter(sdf, "simulateSLAM", false, "false", _rosnode->get_logger());
 
     std::string command_str = get_string_parameter(sdf, "commandMode", "acceleration", "acceleration", _rosnode->get_logger());
@@ -119,7 +121,7 @@ void RaceCarPlugin::initParams(const sdf::ElementPtr &sdf) {
 
     // Vehicle model
     std::string vehicle_model_ = get_string_parameter(sdf, "vehicleModel", "DynamicBicycle", "DynamicBicycle", _rosnode->get_logger());
-    std::string vehicle_yaml_name = get_string_parameter(sdf, "yamlConfig", "vehicle.yaml", "null", _rosnode->get_logger());
+    std::string vehicle_yaml_name = get_string_parameter(sdf, "vehicleConfig", "vehicle.yaml", "null", _rosnode->get_logger());
 
     if (vehicle_yaml_name == "null") {
         RCLCPP_FATAL(_rosnode->get_logger(), "gazebo_ros_race_car plugin missing <yamlConfig>, cannot proceed");
@@ -339,17 +341,14 @@ void RaceCarPlugin::publishVehicleOdom() {
     }
 }
 
-
 void RaceCarPlugin::publishTf() {
-    eufs::models::State state_noisy = _noise->applyNoise(_state);
-
     // Position
     tf2::Transform transform;
-    transform.setOrigin(tf2::Vector3(state_noisy.x, state_noisy.y, 0.0));
+    transform.setOrigin(tf2::Vector3(_state.x, _state.y, 0.0));
 
     // Orientation
     tf2::Quaternion q;
-    q.setRPY(0.0, 0.0, state_noisy.yaw);
+    q.setRPY(0.0, 0.0, _state.yaw);
     transform.setRotation(q);
 
     // Send TF
@@ -424,7 +423,7 @@ void RaceCarPlugin::update() {
     publishCarPose();
     publishVehicleOdom();
 
-    if (_publish_tf) {
+    if (_pub_tf) {
         publishTf();
     }
 

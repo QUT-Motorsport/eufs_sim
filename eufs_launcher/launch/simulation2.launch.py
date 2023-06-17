@@ -32,7 +32,9 @@ def gen_world(context, *args, **kwargs):
 
     world_path = os.path.join(tracks, "worlds", track)
     
-    gazebo_launch = get_package_share_directory('gazebo_ros') + '/launch/gazebo.launch.py'
+    gazebo_launch = os.path.join(get_package_share_directory('gazebo_ros'), 'launch', 'gazebo.launch.py')
+    params_file = os.path.join(get_package_share_directory('config'), 'config', 'pluginParams.yaml')
+
     return [
         IncludeLaunchDescription(
             launch_description_source=PythonLaunchDescriptionSource(
@@ -43,13 +45,14 @@ def gen_world(context, *args, **kwargs):
                 ("pause", "false"),
                 ("gui", gui),
                 ("world", world_path),
+                ("params_file", params_file),
             ],
         ),
     ]
 
 
 def spawn_car(context, *args, **kwargs):
-    car_launch = get_package_share_directory("eufs_racecar") + "/launch/load_car.launch.py"
+    car_launch = os.path.join(get_package_share_directory("eufs_racecar"), "launch", "load_car.launch.py")
 
     # get x,y,z,roll,pitch,yaw from track csv file
     tracks = get_package_share_directory("eufs_tracks")
@@ -73,14 +76,14 @@ def spawn_car(context, *args, **kwargs):
                 car_launch
             ),
             launch_arguments=[
-                ("vehicleModel", LaunchConfiguration("vehicleModel")),
-                ("vehicleModelConfig", LaunchConfiguration("vehicleModelConfig")),
-                ("commandMode", LaunchConfiguration("commandMode")),
+                ("vehicle_model", LaunchConfiguration("vehicleModel")),
+                ("vehicle_model_config", LaunchConfiguration("vehicleModelConfig")),
+                ("command_mode", LaunchConfiguration("commandMode")),
                 ("robot_name", LaunchConfiguration("robot_name")),
-                ("publish_gt_tf", LaunchConfiguration("publish_gt_tf")),
-                ("pub_ground_truth", LaunchConfiguration("pub_ground_truth")),
-                ("sim_perception", LaunchConfiguration("sim_perception")),
-                ("sim_slam", LaunchConfiguration("sim_slam")),
+                ("publish_transform", LaunchConfiguration("publish_gt_tf")),
+                ("publish_ground_truth", LaunchConfiguration("pub_ground_truth")),
+                ("simulate_perception", LaunchConfiguration("sim_perception")),
+                ("simulate_slam", LaunchConfiguration("sim_slam")),
                 ("enable_camera", LaunchConfiguration("enable_camera")),
                 ("enable_lidar", LaunchConfiguration("enable_lidar")),
                 ("enable_laserscan", LaunchConfiguration("enable_laserscan")),
@@ -97,7 +100,7 @@ def spawn_car(context, *args, **kwargs):
 
 def generate_launch_description():
     rviz_config_file = os.path.join(
-        get_package_share_directory("eufs_launcher"), "config", "default.rviz"
+        get_package_share_directory("config"), "rviz", "default.rviz"
     )
 
     return LaunchDescription(

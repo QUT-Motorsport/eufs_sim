@@ -121,7 +121,7 @@ class RaceCarPlugin : public gazebo::ModelPlugin {
     gazebo::common::Time _time_last_published;
 
     // ROS TF
-    bool _publish_tf;
+    bool _pub_tf;
     std::string _reference_frame;
     std::string _robot_frame;
     std::unique_ptr<tf2_ros::TransformBroadcaster> _tf_br;

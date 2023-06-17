@@ -22,7 +22,6 @@ data_files = [
         join(share_directory, "resource"),
         [
             "resource/noiseFiles.txt",
-            "resource/randgen_launch_template",
             "resource/randgen_world_template",
             "resource/conversion_tool.ui",
         ],

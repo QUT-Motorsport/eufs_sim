@@ -29,15 +29,13 @@ class EUFSLauncher(Plugin):
         self.logger = self.node.get_logger()
         self.LAUNCHER_SHARE = get_package_share_directory("eufs_launcher")
         self.TRACKS_SHARE = get_package_share_directory("eufs_tracks")
+        self.CONFIG_SHARE = get_package_share_directory("config")
         self.popens = []  # Create array of popen processes
 
         # Declare Launcher Parameters
-        default_config_path = join(self.LAUNCHER_SHARE, "config", "eufs_launcher.yaml")
-        yaml_path = self.node.declare_parameter("config", default_config_path).value
-        use_gui = self.node.declare_parameter("gui", True).value
-
+        default_config_path = join(self.CONFIG_SHARE, "config", "launcherOptions.yaml")
         # Load in eufs_launcher parameters
-        with open(yaml_path, "r") as stream:
+        with open(default_config_path, "r") as stream:
             try:
                 self.default_config = yaml.safe_load(stream)
             except yaml.YAMLError as exc:
@@ -110,10 +108,11 @@ class EUFSLauncher(Plugin):
         # Setup Robot Name menu
         default_mode = self.default_config["eufs_launcher"]["default_robot_name"]
         racecars_filepath = join(
-            get_package_share_directory("eufs_racecar"), "racecars"
+            get_package_share_directory("eufs_racecar"), "racecars.txt"
         )
-        modes = listdir(racecars_filepath)
-        EUFSLauncher.setup_q_combo_box(self.ROBOT_NAME_MENU, default_mode, modes)
+        racecars_ = open(racecars_filepath, "r")
+        racecars = [racecar.strip() for racecar in racecars_]  # remove \n
+        EUFSLauncher.setup_q_combo_box(self.ROBOT_NAME_MENU, default_mode, racecars)
 
         # Add buttons from yaml file
         checkboxes = OrderedDict(
@@ -199,10 +198,6 @@ class EUFSLauncher(Plugin):
                     int(new_width),
                     int(geom.height() * (scalar_multiplier)),
                 )
-
-        # If use_gui is false, we jump straight into launching the track
-        if not use_gui:
-            self.launch_button_pressed()
 
     @staticmethod
     def setup_q_combo_box(q_combo_box, default_mode, modes):
@@ -297,15 +292,15 @@ class EUFSLauncher(Plugin):
         self.LAUNCH_BUTTON.setEnabled(False)
 
     def generator_button_pressed(self):
-        self.launch_without_args(
-            "eufs_track_generator",
-            "install/eufs_tracks/lib/eufs_tracks/eufs_tracks_generator",
+        self.run_without_args(
+            "eufs_tracks",
+            "eufs_tracks_generator",
         )
 
     def converter_button_pressed(self):
-        self.launch_without_args(
-            "eufs_track_converter",
-            "install/eufs_tracks/lib/eufs_tracks/eufs_tracks_converter",
+        self.run_without_args(
+            "eufs_tracks",
+            "eufs_tracks_converter",
         )
 
     def run_without_args(self, package, program_name):
