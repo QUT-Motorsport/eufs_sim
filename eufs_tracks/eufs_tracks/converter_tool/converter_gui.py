@@ -46,32 +46,23 @@ class EUFSConverterGUI(Plugin):
         self.RENAME_BUTTON = self._widget.findChild(QPushButton, "RenameButton")
         self.CONVERT_FROM_MENU = self._widget.findChild(QComboBox, "ConvertFrom")
         self.CONVERT_TO_MENU = self._widget.findChild(QComboBox, "ConvertTo")
-        self.RENAME_FILE_TEXTBOX = self._widget.findChild(
-            QLineEdit, "RenameFileTextbox"
-        )
-        self.RENAME_FILE_HEADER = self._widget.findChild(QLabel, "RenameFileHeader")
         self.FILE_FOR_CONVERSION_BOX = self._widget.findChild(
             QComboBox, "FileForConversion"
         )
 
         # Hook up buttons to onclick functions
         self.CONVERT_BUTTON.clicked.connect(self.convert_button_pressed)
-        self.RENAME_BUTTON.clicked.connect(self.copy_button_pressed)
 
         # Setup Conversion Tools dropdowns
-        for f in ["csv", "launch"]:
+        for f in ["csv"]:
             self.CONVERT_FROM_MENU.addItem(f)
-        for f in ["launch", "csv"]:
+        for f in ["world"]:
             self.CONVERT_TO_MENU.addItem(f)
 
         self.update_converter_dropdown()
         self.CONVERT_FROM_MENU.currentTextChanged.connect(
             self.update_converter_dropdown
         )
-        self.FILE_FOR_CONVERSION_BOX.currentTextChanged.connect(self.update_copier)
-
-        # Change label to show current selected file for the copier
-        self.update_copier()
 
         # Fix scaling issue
         self.fix_scaling()
@@ -100,59 +91,6 @@ class EUFSConverterGUI(Plugin):
                     int(geom.height() * (scaler_multiplier)),
                 )
 
-    ################
-    #    Copier    #
-    ################
-
-    def copy_button_pressed(self):
-        """When copy button is pressed, launch ConversionTools"""
-
-        # Copy the current file
-        file_to_copy_to = self.RENAME_FILE_TEXTBOX.text()
-        file_to_copy_from = self.FILE_FOR_CONVERSION_BOX.currentText()
-        raw_name_to = file_to_copy_to.split(".")[0]
-        raw_name_from = file_to_copy_from.split(".")[0]
-        ending = file_to_copy_from.split(".")[-1]
-
-        # Don't let them create null-named files
-        if len(file_to_copy_to) == 0:
-            self.logger.warn("Cannot create copy with no file name.")
-            return
-
-        self.logger.info("Copying...")
-
-        # For launch files, we also need to move around the model folders
-        if ending == "launch":
-            if not exists((model_path := join(self.TRACKS, "models", raw_name_to))):
-                mkdir(model_path)
-
-            # Copy sdf files
-            path_from = join(self.TRACKS, "models", raw_name_from, "model.sdf")
-            path_to = join(self.TRACKS, "models", raw_name_to, "model.sdf")
-            copyfile(path_from, path_to)
-
-            # Copy config files
-            path_from = join(self.TRACKS, "models", raw_name_from, "model.config")
-            path_to = join(self.TRACKS, "models", raw_name_to, "model.config")
-            copyfile(path_from, path_to)
-
-            # Copy launch files
-            path_from = join(self.TRACKS, "launch", file_to_copy_from)
-            path_to = join(self.TRACKS, "launch", raw_name_to + "." + ending)
-            copyfile(path_from, path_to)
-
-        elif ending == "csv":
-            path_from = join(self.TRACKS, "csv", file_to_copy_from)
-            path_to = join(self.TRACKS, "csv", raw_name_to + "." + ending)
-            copyfile(path_from, path_to)
-
-        self.logger.info("Copy created Successfully!")
-
-    def update_copier(self):
-        """Change label to show current selected file for the copier"""
-        copy_head = self.RENAME_FILE_HEADER
-        copy_head.setText("Copy: " + self.FILE_FOR_CONVERSION_BOX.currentText())
-
     ###################
     #    Converter    #
     ###################
@@ -169,9 +107,7 @@ class EUFSConverterGUI(Plugin):
         )
 
         # Calculate correct full filepath for file to convert
-        if from_type == "launch":
-            filename = join(self.TRACKS, "launch/" + filename)
-        elif from_type == "csv":
+        if from_type == "csv":
             filename = join(self.TRACKS, "csv/" + filename)
 
         # Convert it
@@ -185,19 +121,7 @@ class EUFSConverterGUI(Plugin):
         from_type = self.CONVERT_FROM_MENU.currentText()
         all_files = []
 
-        if from_type == "launch":
-            # Get tracks from eufs_tracks package
-            relevant_path = join(self.TRACKS, "launch")
-            launch_files = [
-                f for f in listdir(relevant_path) if isfile(join(relevant_path, f))
-            ]
-
-            # Remove "blacklisted" files (ones that don't define tracks)
-            blacklist_filepath = join(self.TRACKS, "launch/blacklist.txt")
-            blacklist_ = open(blacklist_filepath, "r")
-            blacklist = [f.strip() for f in blacklist_]
-            all_files = [f for f in launch_files if f not in blacklist]
-        elif from_type == "csv":
+        if from_type == "csv":
             relevant_path = join(self.TRACKS, "csv")
             all_files = [
                 f
@@ -212,5 +136,3 @@ class EUFSConverterGUI(Plugin):
         # Add files to selector
         for f in all_files:
             the_selector.addItem(f)
-
-        self.update_copier()

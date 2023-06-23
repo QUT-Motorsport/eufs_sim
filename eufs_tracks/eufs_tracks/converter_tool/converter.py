@@ -244,7 +244,7 @@ class Track(Node):
 
         car_start_data:    Information about the start location of the car, as it
                            cannot be gleaned from the sdf.  It is used to preserve
-                           information so that csvs can be converted back to .launches,
+                           information so that csvs can be converted back to .worldes,
                            and is not necessary if you do not desire that functionality.
         """
         TRACKS_SHARE = get_package_share_directory("eufs_tracks")
@@ -264,8 +264,8 @@ class Track(Node):
 
 
 # Here are all the track formats we care about:
-# - `launch` (well, we actually want the model data, not the .launch, but we'll treat it as wanting
-#             the .launch since the end user shouldn't have to care about the distinction)
+# - `world` (well, we actually want the model data, not the .world, but we'll treat it as wanting
+#             the .world since the end user shouldn't have to care about the distinction)
 # - `csv`
 class Converter(Node):
     def __init__(self):
@@ -283,8 +283,8 @@ class Converter(Node):
         """
         Will convert which_file of filetype cfrom to filetype cto with filename which_file
 
-        cfrom:      Type to convert from (launch, csv) [should be a string]
-        cto:        Type to convert to   (launch, csv) [should be a string]
+        cfrom:      Type to convert from (world, csv) [should be a string]
+        cto:        Type to convert to   (world, csv) [should be a string]
 
         which_file: The file to be converted - should be a full filepath.
 
@@ -297,39 +297,16 @@ class Converter(Node):
         EUFS_DIR = os.path.expanduser(os.environ.get("EUFS_MASTER"))
         directory_sim = os.path.join(EUFS_DIR, "eufs_sim", "eufs_tracks")
 
-        if cfrom == "launch" and cto == "csv":
-            return Converter.launch_to_csv(which_file, params)
-
-        elif cfrom == "csv" and cto == "launch":
-            return Converter.csv_to_launch(
+        if cfrom == "csv" and cto == "world":
+            return Converter.csv_to_world(
                 which_file, directory_share, params
-            ), Converter.csv_to_launch(which_file, directory_sim, params)
+            ), Converter.csv_to_world(which_file, directory_sim, params)
         return None
 
     @staticmethod
-    def launch_to_csv(which_file, params={}):
+    def csv_to_world(which_file, which_directory, params={}):
         """
-        Converts a .launch to a .csv
-
-        which_file: The name of the launch file to convert example: rand.launch
-        """
-
-        filename = which_file.split("/")[-1].split(".")[0]
-        with open(which_file) as car_data_reader:
-            car_data = car_data_reader.read()
-        car_x = car_data.split('<arg name="x" default="')[1].split('"')[0]
-        car_y = car_data.split('<arg name="y" default="')[1].split('"')[0]
-        car_yaw = car_data.split('<arg name="yaw" default="')[1].split('"')[0]
-        Track.sdf_to_csv(
-            filename,
-            car_start_data=("car_start", car_x, car_y, car_yaw, 0.0, 0.0, 0.0),
-            override_name=params.get("override_name", None),
-        )
-
-    @staticmethod
-    def csv_to_launch(which_file, which_directory, params={}):
-        """
-        Converts a .csv to a .launch
+        Converts a .csv to a .world
 
         which_file: The name of the csv file to convert example: rand.csv
         """
@@ -406,34 +383,6 @@ class Converter(Node):
         # Combine
         all_cones = raw_blue + raw_yellow + raw_orange + raw_big_orange
 
-        # Create launch file
-        launch_template_file = os.path.join(
-            TRACKS_SHARE, "resource", "randgen_launch_template"
-        )
-        with open(launch_template_file, "r") as launch_template:
-            # .launches need to point to .worlds and model files of the same name,
-            # so here we are pasting in copies of the relevant filename.
-            launch_merged = "".join(launch_template)
-            launch_merged = GENERATED_FILENAME.join(launch_merged.split("%FILLNAME%"))
-
-            # Fill in the car's position
-            launch_merged = str(raw_car_location[1]).join(
-                launch_merged.split("%PLACEX%")
-            )
-            launch_merged = str(raw_car_location[2]).join(
-                launch_merged.split("%PLACEY%")
-            )
-            launch_merged = str(raw_car_location[3]).join(
-                launch_merged.split("%PLACEROTATION%")
-            )
-
-            # Write launch file.
-            launch_out_filepath = os.path.join(
-                which_directory, "launch", GENERATED_FILENAME + ".launch"
-            )
-            with open(launch_out_filepath, "w") as launch_out:
-                launch_out.write(launch_merged)
-
         # Create world file
         world_template_filepath = os.path.join(
             TRACKS_SHARE, "resource", "randgen_world_template"
@@ -502,7 +451,7 @@ class Converter(Node):
                 sdf_split_along_collisions
             )
 
-            # Let the sdf file know which launch file it represents.
+            # Let the sdf file know which world file it represents.
             sdf_main = GENERATED_FILENAME.join(sdf_main.split("%FILLNAME%"))
 
             # Calculate model data for cones
