@@ -143,6 +143,7 @@ driverless_msgs::msg::ConeDetectionStamped get_track_centered_on_car_inital_pose
         auto translated_cone = cone;
         translated_cone.cone = convert_cone_to_car_frame(car_inital_pose, cone.cone);
         centered_track.cones_with_cov.push_back(translated_cone);
+        centered_track.cones.push_back(translated_cone.cone);
     }
 
     return centered_track;
