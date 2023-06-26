@@ -25,7 +25,6 @@
 
   <depend>eufs_tracks</depend>
   <depend>eufs_racecar</depend>
-  <depend>eufs_rviz_plugins</depend>
   <depend>config</depend>
 
   <export>
