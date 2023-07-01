@@ -6,7 +6,6 @@ Panels:
       Expanded:
         - /Global Options1
         - /RobotModel1/Description Topic1
-        - /SLAM Track1/Topic1
       Splitter Ratio: 0.5058823823928833
     Tree Height: 738
   - Class: rviz_common/Selection
@@ -152,92 +151,6 @@ Visualization Manager:
       Update Interval: 0
       Value: true
       Visual Enabled: true
-    - Class: eufs_rviz_plugins/ConeArrayWithCovariance
-      Color: 200; 200; 200
-      Color Display: Cone
-      Enabled: true
-      Name: LiDAR Cones
-      Namespaces:
-        cone: true
-        covariance: true
-      Topic:
-        Depth: 5
-        Durability Policy: Volatile
-        History Policy: Keep Last
-        Reliability Policy: Reliable
-        Value: /lidar/cone_detection
-      Value: true
-    - Class: eufs_rviz_plugins/ConeArrayWithCovariance
-      Color: 200; 200; 200
-      Color Display: Cone
-      Enabled: false
-      Name: Vision Cones
-      Namespaces:
-        {}
-      Topic:
-        Depth: 5
-        Durability Policy: Volatile
-        History Policy: Keep Last
-        Reliability Policy: Reliable
-        Value: /vision/cone_detection
-      Value: false
-    - Class: eufs_rviz_plugins/ConeArrayWithCovariance
-      Color: 200; 200; 200
-      Color Display: Cone
-      Enabled: true
-      Name: Ground Truth Track
-      Namespaces:
-        cone: true
-        covariance: true
-      Topic:
-        Depth: 5
-        Durability Policy: Volatile
-        History Policy: Keep Last
-        Reliability Policy: Reliable
-        Value: /ground_truth/global_map
-      Value: true
-    - Class: eufs_rviz_plugins/ConeArrayWithCovariance
-      Color: 200; 200; 200
-      Color Display: Cone
-      Enabled: false
-      Name: SLAM Track
-      Namespaces:
-        {}
-      Topic:
-        Depth: 5
-        Durability Policy: Volatile
-        History Policy: Keep Last
-        Reliability Policy: Reliable
-        Value: /slam/global_map
-      Value: false
-    - Class: eufs_rviz_plugins/ConeArrayWithCovariance
-      Color: 200; 200; 200
-      Color Display: Cone
-      Enabled: true
-      Name: SLAM Local
-      Namespaces:
-        cone: true
-        covariance: true
-      Topic:
-        Depth: 5
-        Durability Policy: Volatile
-        History Policy: Keep Last
-        Reliability Policy: Reliable
-        Value: /slam/local_map
-      Value: true
-    - Class: rviz_default_plugins/Marker
-      Enabled: true
-      Name: Path
-      Namespaces:
-        {}
-      Topic:
-        Depth: 5
-        Durability Policy: Volatile
-        Filter size: 10
-        History Policy: Keep Last
-        Reliability Policy: Reliable
-        Value: /markers/path_line
-      Value: true
     - Alpha: 1
       Autocompute Intensity Bounds: true
       Autocompute Value Bounds:
@@ -320,6 +233,109 @@ Visualization Manager:
         Reliability Policy: Reliable
         Value: /zed2i/zed_node/rgb/image_rect_color
       Value: false
+    - Class: rviz_marker_plugins/ConeDetectionStamped
+      Color: 200; 200; 200
+      Color Display: Cone
+      Enabled: true
+      Name: Ground truth track
+      Namespaces:
+        cone: true
+        covariance: true
+      Topic:
+        Depth: 5
+        Durability Policy: Volatile
+        History Policy: Keep Last
+        Reliability Policy: Reliable
+        Value: /ground_truth/global_map
+      Value: true
+    - Class: rviz_marker_plugins/ConeDetectionStamped
+      Color: 200; 200; 200
+      Color Display: Cone
+      Enabled: true
+      Name: SLAM track
+      Namespaces:
+        cone: true
+        covariance: true
+      Topic:
+        Depth: 5
+        Durability Policy: Volatile
+        History Policy: Keep Last
+        Reliability Policy: Reliable
+        Value: /slam/global_map
+      Value: true
+    - Class: rviz_marker_plugins/ConeDetectionStamped
+      Color: 200; 200; 200
+      Color Display: Cone
+      Enabled: true
+      Name: SLAM local
+      Namespaces:
+        cone: true
+        covariance: true
+      Topic:
+        Depth: 5
+        Durability Policy: Volatile
+        History Policy: Keep Last
+        Reliability Policy: Reliable
+        Value: /slam/local_map
+      Value: true
+    - Class: rviz_marker_plugins/ConeDetectionStamped
+      Color: 200; 200; 200
+      Color Display: Cone
+      Enabled: true
+      Name: Camera detection
+      Namespaces:
+        cone: true
+        covariance: true
+      Topic:
+        Depth: 5
+        Durability Policy: Volatile
+        History Policy: Keep Last
+        Reliability Policy: Reliable
+        Value: /vision/cone_detection
+      Value: true
+    - Class: rviz_marker_plugins/ConeDetectionStamped
+      Color: 200; 200; 200
+      Color Display: Cone
+      Enabled: true
+      Name: LiDAR detection
+      Namespaces:
+        cone: true
+        covariance: true
+      Topic:
+        Depth: 5
+        Durability Policy: Volatile
+        History Policy: Keep Last
+        Reliability Policy: Reliable
+        Value: /lidar/cone_detection
+      Value: true
+    - Alpha: 1
+      Buffer Length: 1
+      Class: rviz_default_plugins/Path
+      Color: 25; 255; 0
+      Enabled: true
+      Head Diameter: 0.30000001192092896
+      Head Length: 0.20000000298023224
+      Length: 0.30000001192092896
+      Line Style: Lines
+      Line Width: 0.029999999329447746
+      Name: Path
+      Offset:
+        X: 0
+        Y: 0
+        Z: 0
+      Pose Color: 255; 85; 255
+      Pose Style: None
+      Radius: 0.029999999329447746
+      Shaft Diameter: 0.10000000149011612
+      Shaft Length: 0.10000000149011612
+      Topic:
+        Depth: 5
+        Durability Policy: Volatile
+        Filter size: 10
+        History Policy: Keep Last
+        Reliability Policy: Reliable
+        Value: /planner/spline_path
+      Value: true
   Enabled: true
   Global Options:
     Background Color: 48; 48; 48
@@ -422,7 +438,7 @@ Window Geometry:
   Views:
     collapsed: false
   Width: 1708
-  X: 2156
-  Y: 97
+  X: 2298
+  Y: 35
   ZED2i RGB Image:
     collapsed: false
