@@ -1,0 +1,15 @@
+<library path="rqt_tutorial_cpp">
+  <class name="rqt_tutorial_cpp/RQTPlugin" type="rqt_tutorial_cpp::RQTPlugin" base_class_type="rqt_gui_cpp::Plugin">
+    <description>Rqt Tutorial CPP for robot control</description>
+    <qtgui>
+      <group>
+        <label>_Robot Control_</label>
+        <icon type="theme">folder</icon>
+        <statustip>Plugins related to robot control.</statustip>
+      </group>
+      <label>RQT Tutorial CPP</label>
+      <icon type="theme">image-x-generic</icon>
+      <statustip>An rqt tutorial cpp.</statustip>
+    </qtgui>
+  </class>
+</library>
