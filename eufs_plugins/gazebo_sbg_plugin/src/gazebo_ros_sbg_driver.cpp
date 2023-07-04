@@ -66,7 +66,7 @@ void SBGPlugin::initParams(sdf::ElementPtr sdf) {
 
 void SBGPlugin::navSatFixCallback(const sensor_msgs::msg::NavSatFix::SharedPtr nav_sat_msg) {
     _last_nav_sat_msg = *nav_sat_msg;
-    
+
     sbg_driver::msg::SbgGpsPos msg;
     msg.header.stamp.sec = _last_nav_sat_msg.header.stamp.sec;
     msg.header.stamp.nanosec = _last_nav_sat_msg.header.stamp.nanosec;
@@ -91,7 +91,6 @@ void SBGPlugin::update() {
     // publishGps();
     publishGTOdom();
 }
-
 
 void SBGPlugin::publishVelocity() {
     auto curr_time = _world->SimTime();
@@ -219,5 +218,5 @@ std::vector<double> SBGPlugin::ToQuaternion(std::vector<double> &euler) {
 
     return q;
 }
-}
-}
+}  // namespace eufs_plugins
+}  // namespace gazebo_plugins

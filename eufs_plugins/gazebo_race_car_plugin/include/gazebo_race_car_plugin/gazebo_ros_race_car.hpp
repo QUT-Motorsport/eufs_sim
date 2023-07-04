@@ -59,8 +59,8 @@
 // Local includes
 #include "eufs_models/eufs_models.hpp"
 #include "gazebo_race_car_plugin/state_machine.hpp"
-#include "helpers_ros.hpp"
 #include "helpers_gazebo.hpp"
+#include "helpers_ros.hpp"
 
 namespace gazebo_plugins {
 namespace eufs_plugins {

@@ -47,8 +47,7 @@ driverless_msgs::msg::ConeWithCovariance get_cone_from_link(gazebo::physics::Lin
 }
 
 driverless_msgs::msg::ConeDetectionStamped get_ground_truth_track(gazebo::physics::ModelPtr track_model,
-                                                                  gazebo::common::Time now,
-                                                                  std::string track_frame_id,
+                                                                  gazebo::common::Time now, std::string track_frame_id,
                                                                   std::optional<const rclcpp::Logger> logger = {}) {
     driverless_msgs::msg::ConeDetectionStamped track;
 

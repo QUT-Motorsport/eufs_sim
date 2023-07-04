@@ -1,45 +1,64 @@
+import os
+
 from ament_index_python.packages import get_package_share_directory
 from launch import LaunchDescription
-from launch.actions import DeclareLaunchArgument, ExecuteProcess, IncludeLaunchDescription, SetEnvironmentVariable, OpaqueFunction
+from launch.actions import (DeclareLaunchArgument, ExecuteProcess,
+                            IncludeLaunchDescription, OpaqueFunction,
+                            SetEnvironmentVariable)
+from launch.conditions import IfCondition
 from launch.launch_description_sources import PythonLaunchDescriptionSource
 from launch.substitutions import LaunchConfiguration, PathJoinSubstitution
-from launch_ros.actions import SetParameter, Node
-from launch.conditions import IfCondition
-import os
+from launch_ros.actions import Node, SetParameter
+
 
 def get_argument(context, arg):
     return LaunchConfiguration(arg).perform(context)
+
 
 def gen_world(context, *args, **kwargs):
     use_robostack = get_argument(context, "robostack")
     track = str(get_argument(context, "track") + ".world")
     gui = str(get_argument(context, "gazebo_gui"))
 
-    tracks = get_package_share_directory('eufs_tracks')
-    racecar = get_package_share_directory('eufs_racecar')
-    PLUGINS = os.environ.get('GAZEBO_PLUGIN_PATH')
-    MODELS = os.environ.get('GAZEBO_MODEL_PATH')
-    RESOURCES = os.environ.get('GAZEBO_RESOURCE_PATH')
-    EUFS = os.path.expanduser(os.environ.get('EUFS_MASTER'))
-    DISTRO = os.environ.get('ROS_DISTRO')
-    
+    tracks = get_package_share_directory("eufs_tracks")
+    racecar = get_package_share_directory("eufs_racecar")
+    PLUGINS = os.environ.get("GAZEBO_PLUGIN_PATH")
+    MODELS = os.environ.get("GAZEBO_MODEL_PATH")
+    RESOURCES = os.environ.get("GAZEBO_RESOURCE_PATH")
+    EUFS = os.path.expanduser(os.environ.get("EUFS_MASTER"))
+    DISTRO = os.environ.get("ROS_DISTRO")
+
     if use_robostack == "true":
-        os.environ['GAZEBO_PLUGIN_PATH'] = EUFS + '/install/eufs_plugins:' + PLUGINS
+        os.environ["GAZEBO_PLUGIN_PATH"] = EUFS + "/install/eufs_plugins:" + PLUGINS
     else:
-        os.environ['GAZEBO_PLUGIN_PATH'] = EUFS + '/install/eufs_plugins:' + '/opt/ros/' + DISTRO
-    os.environ['GAZEBO_MODEL_PATH'] = tracks + '/models:' + str(MODELS)
-    os.environ['GAZEBO_RESOURCE_PATH'] = tracks + '/materials:' + tracks + '/meshes:' + racecar + '/materials:' + racecar + '/meshes:' + str(RESOURCES)
+        os.environ["GAZEBO_PLUGIN_PATH"] = (
+            EUFS + "/install/eufs_plugins:" + "/opt/ros/" + DISTRO
+        )
+    os.environ["GAZEBO_MODEL_PATH"] = tracks + "/models:" + str(MODELS)
+    os.environ["GAZEBO_RESOURCE_PATH"] = (
+        tracks
+        + "/materials:"
+        + tracks
+        + "/meshes:"
+        + racecar
+        + "/materials:"
+        + racecar
+        + "/meshes:"
+        + str(RESOURCES)
+    )
 
     world_path = os.path.join(tracks, "worlds", track)
-    
-    gazebo_launch = os.path.join(get_package_share_directory('gazebo_ros'), 'launch', 'gazebo.launch.py')
-    params_file = os.path.join(get_package_share_directory('config'), 'config', 'pluginParams.yaml')
+
+    gazebo_launch = os.path.join(
+        get_package_share_directory("gazebo_ros"), "launch", "gazebo.launch.py"
+    )
+    params_file = os.path.join(
+        get_package_share_directory("config"), "config", "pluginParams.yaml"
+    )
 
     return [
         IncludeLaunchDescription(
-            launch_description_source=PythonLaunchDescriptionSource(
-                gazebo_launch
-            ),
+            launch_description_source=PythonLaunchDescriptionSource(gazebo_launch),
             launch_arguments=[
                 ("verbose", "false"),
                 ("pause", "false"),
@@ -52,7 +71,9 @@ def gen_world(context, *args, **kwargs):
 
 
 def spawn_car(context, *args, **kwargs):
-    car_launch = os.path.join(get_package_share_directory("eufs_racecar"), "launch", "load_car.launch.py")
+    car_launch = os.path.join(
+        get_package_share_directory("eufs_racecar"), "launch", "load_car.launch.py"
+    )
 
     # get x,y,z,roll,pitch,yaw from track csv file
     tracks = get_package_share_directory("eufs_tracks")
@@ -70,11 +91,9 @@ def spawn_car(context, *args, **kwargs):
         pitch = car_pos[5]
         yaw = car_pos[6]
 
-    return[
+    return [
         IncludeLaunchDescription(
-            launch_description_source=PythonLaunchDescriptionSource(
-                car_launch
-            ),
+            launch_description_source=PythonLaunchDescriptionSource(car_launch),
             launch_arguments=[
                 ("vehicle_model", LaunchConfiguration("vehicleModel")),
                 ("vehicle_model_config", LaunchConfiguration("vehicleModelConfig")),

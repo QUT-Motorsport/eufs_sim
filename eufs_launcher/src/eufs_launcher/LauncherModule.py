@@ -319,7 +319,17 @@ class EUFSLauncher(Plugin):
 
     def launch_with_args(self, package, launch_file, args):
         """Launches ros node."""
-        command = ["stdbuf", "-o", "L", "ros2", "launch", package, launch_file, "use_sim_time:=true", "log_level:=debug"] + args
+        command = [
+            "stdbuf",
+            "-o",
+            "L",
+            "ros2",
+            "launch",
+            package,
+            launch_file,
+            "use_sim_time:=true",
+            "log_level:=debug",
+        ] + args
         self.logger.info(f"Command: {' '.join(command)}")
         process = Popen(command)
         self.popens.append(process)

@@ -34,8 +34,7 @@ SensorConfig_t populate_sensor_config(std::string sensor_prefix, gazebo_ros::Nod
 }
 
 driverless_msgs::msg::Cone convert_cone_to_car_frame(const ignition::math::Pose3d car_pose,
-                                                     const driverless_msgs::msg::Cone cone,
-                                                     const double offset_x = 0) {
+                                                     const driverless_msgs::msg::Cone cone, const double offset_x = 0) {
     driverless_msgs::msg::Cone translated_cone = cone;
 
     double x = cone.location.x - car_pose.Pos().X();
@@ -126,7 +125,8 @@ driverless_msgs::msg::ConeDetectionStamped get_sensor_detection(
             translated_cone.color = driverless_msgs::msg::Cone::UNKNOWN;
         }
 
-        driverless_msgs::msg::ConeWithCovariance noisy_cone = make_noisy_range_bearing_cone(translated_cone, sensor_config.range_noise, sensor_config.bearing_noise);
+        driverless_msgs::msg::ConeWithCovariance noisy_cone =
+            make_noisy_range_bearing_cone(translated_cone, sensor_config.range_noise, sensor_config.bearing_noise);
         sensor_detection.cones_with_cov.push_back(noisy_cone);
         sensor_detection.cones.push_back(noisy_cone.cone);
     }
@@ -176,8 +176,7 @@ driverless_msgs::msg::ConeDetectionStamped get_noisy_global_map(
     for (auto const &cone : ground_truth_track.cones_with_cov) {
         noisy_global_map.cones_with_cov.push_back(
             make_noisy_x_y_cone(cone.cone, slam_config.x_noise, slam_config.y_noise));
-        noisy_global_map.cones.push_back(
-            make_noisy_x_y_cone(cone.cone, slam_config.x_noise, slam_config.y_noise).cone);
+        noisy_global_map.cones.push_back(make_noisy_x_y_cone(cone.cone, slam_config.x_noise, slam_config.y_noise).cone);
     }
 
     return noisy_global_map;

@@ -35,8 +35,8 @@ def spawn_car(context, *args, **kwargs):
         vehicle_model_config,
     )
     noise_config = join(
-        get_package_share_directory("config"), 
-        "config", 
+        get_package_share_directory("config"),
+        "config",
         "motionNoise.yaml",
     )
     xacro_path = join(
@@ -137,8 +137,8 @@ def spawn_car(context, *args, **kwargs):
 
 def generate_launch_description():
     rqt_perspective_file = join(
-        get_package_share_directory("eufs_rqt"), 
-        "config", 
+        get_package_share_directory("eufs_rqt"),
+        "config",
         "eufs_sim.perspective",
     )
 
@@ -165,33 +165,33 @@ def generate_launch_description():
                 description="Determines the file from which the vehicle model parameters are read",
             ),
             DeclareLaunchArgument(
-                "x", 
-                default_value="0", 
+                "x",
+                default_value="0",
                 description="Vehicle initial x position",
             ),
             DeclareLaunchArgument(
-                "y", 
-                default_value="0", 
+                "y",
+                default_value="0",
                 description="Vehicle initial y position",
             ),
             DeclareLaunchArgument(
-                "z", 
-                default_value="0", 
+                "z",
+                default_value="0",
                 description="Vehicle initial z position",
             ),
             DeclareLaunchArgument(
-                "roll", 
-                default_value="0", 
+                "roll",
+                default_value="0",
                 description="Vehicle initial roll",
             ),
             DeclareLaunchArgument(
-                "pitch", 
-                default_value="0", 
+                "pitch",
+                default_value="0",
                 description="Vehicle initial pitch",
             ),
             DeclareLaunchArgument(
-                "yaw", 
-                default_value="0", 
+                "yaw",
+                default_value="0",
                 description="Vehicle initial yaw",
             ),
             DeclareLaunchArgument(
@@ -202,7 +202,7 @@ def generate_launch_description():
             DeclareLaunchArgument(
                 "publish_ground_truth",
                 default_value="false",
-                description="Condition to publish ground truth vehicle and track data"
+                description="Condition to publish ground truth vehicle and track data",
             ),
             DeclareLaunchArgument(
                 name="simulate_perception",

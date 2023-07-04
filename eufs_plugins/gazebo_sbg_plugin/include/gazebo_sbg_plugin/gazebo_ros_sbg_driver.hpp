@@ -1,18 +1,18 @@
 #ifndef EUFS_PLUGINS_GAZEBO_SBG_PLUGIN_INCLUDE_GAZEBO_SBG_PLUGIN_GAZEBO_ROS_SBG_HPP_
 #define EUFS_PLUGINS_GAZEBO_SBG_PLUGIN_INCLUDE_GAZEBO_SBG_PLUGIN_GAZEBO_ROS_SBG_HPP_
 
+#include <map>
 #include <memory>
 #include <queue>
 #include <string>
-#include <vector>
-#include <map>
 #include <utility>
+#include <vector>
 // ROS Includes
 #include "rclcpp/rclcpp.hpp"
 
 // ROS msgs
-#include "geometry_msgs/msg/twist_stamped.hpp"
 #include "geometry_msgs/msg/twist.hpp"
+#include "geometry_msgs/msg/twist_stamped.hpp"
 #include "geometry_msgs/msg/vector3.hpp"
 #include "nav_msgs/msg/odometry.hpp"
 #include "sensor_msgs/msg/nav_sat_fix.hpp"
@@ -30,20 +30,19 @@
 
 // Local Includes
 #include "eufs_models/eufs_models.hpp"
-#include "helpers_ros.hpp"
 #include "helpers_gazebo.hpp"
+#include "helpers_ros.hpp"
 
 namespace gazebo_plugins {
 namespace eufs_plugins {
 
-class SBGPlugin : public gazebo::ModelPlugin
-{
+class SBGPlugin : public gazebo::ModelPlugin {
    public:
     SBGPlugin();
 
     void Load(gazebo::physics::ModelPtr model, sdf::ElementPtr sdf) override;
 
-   private:   
+   private:
     // Gazebo functions
     void update();
     void initParams(sdf::ElementPtr sdf);
@@ -91,7 +90,6 @@ class SBGPlugin : public gazebo::ModelPlugin
 
     // ROS Subscribers
     rclcpp::Subscription<sensor_msgs::msg::NavSatFix>::SharedPtr _sub_nav_sat_fix;
-
 };
 
 }  // namespace eufs_plugins

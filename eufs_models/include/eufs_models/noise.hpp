@@ -6,9 +6,9 @@
 #include <string>
 
 #include "eufs_models/vehicle_state.hpp"
-#include "yaml-cpp/yaml.h"
 #include "geometry_msgs/msg/twist.hpp"
 #include "geometry_msgs/msg/vector3.hpp"
+#include "yaml-cpp/yaml.h"
 
 namespace eufs {
 namespace models {
@@ -123,7 +123,7 @@ class Noise {
 
         return new_wheels;
     }
-    
+
     const NoiseParam &getNoiseParam() { return _noise_param; }
 
     std::string getString() { return _noise_param.to_str(); }
