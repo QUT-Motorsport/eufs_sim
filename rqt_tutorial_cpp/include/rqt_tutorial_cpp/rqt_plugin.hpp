@@ -17,49 +17,48 @@
 
 #include <rqt_gui_cpp/plugin.h>
 #include <ui_rqt_main_window.h>
-#include <QWidget>
+
 #include <QTimer>
+#include <QWidget>
+#include <QStringList>
+
 #include <memory>
 
 #include "rqt_tutorial_cpp/rqt_node.hpp"
 
-namespace rqt_tutorial_cpp
-{
-class RQTPlugin
-  : public rqt_gui_cpp::Plugin
-{
-  Q_OBJECT
+namespace rqt_tutorial_cpp {
+class RQTPlugin : public rqt_gui_cpp::Plugin {
+    Q_OBJECT
 
-public:
-  RQTPlugin();
+   public:
+    RQTPlugin();
 
-  virtual void initPlugin(qt_gui_cpp::PluginContext & context);
-  virtual void shutdownPlugin();
-  virtual void saveSettings(
-    qt_gui_cpp::Settings & plugin_settings,
-    qt_gui_cpp::Settings & instance_settings) const;
-  virtual void restoreSettings(
-    const qt_gui_cpp::Settings & plugin_settings,
-    const qt_gui_cpp::Settings & instance_settings);
+    virtual void initPlugin(qt_gui_cpp::PluginContext& context);
+    virtual void shutdownPlugin();
+    virtual void saveSettings(qt_gui_cpp::Settings& plugin_settings, qt_gui_cpp::Settings& instance_settings) const;
+    virtual void restoreSettings(const qt_gui_cpp::Settings& plugin_settings,
+                                 const qt_gui_cpp::Settings& instance_settings);
 
-private:
-  Ui::RqtMainWindowWidget ui_;
-  QWidget * widget_;
-  std::shared_ptr<rqt_tutorial_cpp::RQTNode> rqt_node_;
-  QTimer * ros_timer_;
-  QTimer * display_timer_;
+   private:
+    Ui::MainWindow ui_;
+    QMainWindow *window_;
+    std::shared_ptr<rqt_tutorial_cpp::RQTNode> rqt_node_;
+    QTimer* ros_timer_;
 
-  QString get_pub_onff();
-  QString get_sub_onff();
+   private slots:
+    void ros_timer_callback();
 
-private slots:
-  void ros_timer_callback();
-  void display_timer_callback();
+    void set_LV_key();
+    void set_TS_key();
+    void set_AS_key();
+    void set_SDC_btn();
+    void set_TS_btn();
+    void set_mission_btn();
+    void set_mission_dropdown();
+    void set_estop_btn();
+    void set_r2d_btn();
+    void set_switch_up();
 
-  void set_pub_on();
-  void set_pub_off();
-  void set_sub_on();
-  void set_sub_off();
 };
 }  // namespace rqt_tutorial_cpp
 #endif  // RQT_TUTORIAL_CPP__RQT_PLUGIN_HPP_

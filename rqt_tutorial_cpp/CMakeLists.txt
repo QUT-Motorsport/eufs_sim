@@ -18,13 +18,27 @@ find_package(ament_cmake REQUIRED)
 find_package(rclcpp REQUIRED)
 find_package(qt_gui_cpp REQUIRED)
 find_package(rqt_gui_cpp REQUIRED)
-find_package(std_msgs REQUIRED)
 find_package(Qt5Widgets REQUIRED)
 find_package(ament_cmake_python REQUIRED)
+find_package(driverless_msgs REQUIRED)
 
 # add
 include_directories(
   include
+)
+
+add_compile_definitions(QUTMS_CAN_VCU)
+add_compile_definitions(QUTMS_CAN_RES)
+add_compile_definitions(QUTMS_CAN_SW)
+include_directories(${CMAKE_SOURCE_DIR}/../../QUTMS_Driverless/src/hardware/QUTMS_Embedded_Common/Inc)
+include_directories(${CMAKE_SOURCE_DIR}/../../QUTMS_Driverless/src/hardware/CAN_Common/include/)
+
+set (SOURCES
+  ${CMAKE_SOURCE_DIR}/../../QUTMS_Driverless/src/hardware/QUTMS_Embedded_Common/Src/CAN_VCU.c
+  ${CMAKE_SOURCE_DIR}/../../QUTMS_Driverless/src/hardware/QUTMS_Embedded_Common/Src/CAN_RES.c
+  ${CMAKE_SOURCE_DIR}/../../QUTMS_Driverless/src/hardware/QUTMS_Embedded_Common/Src/CAN_SW.c
+  ${CMAKE_SOURCE_DIR}/../../QUTMS_Driverless/src/hardware/CAN_Common/src/canopen.cpp
+  ${CMAKE_SOURCE_DIR}/../../QUTMS_Driverless/src/hardware/CAN_Common/src/can_interface.cpp
 )
 
 set(src_files
@@ -47,8 +61,8 @@ set(dependencies
   rclcpp
   qt_gui_cpp
   rqt_gui_cpp
-  std_msgs
   Qt5Widgets
+  driverless_msgs
 )
 
 add_library(${PROJECT_NAME} SHARED
@@ -83,15 +97,11 @@ install(FILES plugin.xml
   DESTINATION share/${PROJECT_NAME}
 )
 
-# Test
-if(BUILD_TESTING)
-  find_package(ament_lint_auto REQUIRED)
-  ament_lint_auto_find_test_dependencies()
-endif()
+SET_SOURCE_FILES_PROPERTIES(${SOURCES} PROPERTIES LANGUAGE CXX )
 
 # Export
 ament_export_include_directories(include)
-ament_export_libraries(${PROJECT_NAME})
+ament_export_libraries(${PROJECT_NAME} ${SOURCES})
 pluginlib_export_plugin_description_file(rqt_gui "plugin.xml")
 ament_export_dependencies(${dependencies})
 ament_package()
