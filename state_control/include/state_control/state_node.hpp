@@ -1,5 +1,5 @@
-#ifndef RQT_TUTORIAL_CPP__RQT_NODE_HPP_
-#define RQT_TUTORIAL_CPP__RQT_NODE_HPP_
+#ifndef STATE_CONTROL__STATE_NODE_HPP_
+#define STATE_CONTROL__STATE_NODE_HPP_
 
 #include <QStringListModel>
 #include <string>
@@ -12,7 +12,6 @@
 #include "driverless_msgs/msg/can.hpp"
 #include "rclcpp/rclcpp.hpp"
 #include "std_msgs/msg/string.hpp"
-// #include "can_interface.hpp"
 
 enum AS_STATES {
     CAR_OFF = 0x00,
@@ -38,11 +37,11 @@ typedef struct {
     uint8_t TS_state;
 } Car_State_t;
 
-namespace rqt_tutorial_cpp {
-class RQTNode : public rclcpp::Node {
+namespace state_control {
+class StateNode : public rclcpp::Node {
    public:
-    RQTNode();
-    virtual ~RQTNode();
+    StateNode();
+    virtual ~StateNode();
 
     // Car boot sequence
     bool LV_key_on = false;
@@ -91,5 +90,5 @@ class RQTNode : public rclcpp::Node {
 
     void reset_states();
 };
-}  // namespace rqt_tutorial_cpp
-#endif  // RQT_TUTORIAL_CPP__RQT_NODE_HPP_
+}  // namespace state_control
+#endif  // STATE_CONTROL__STATE_NODE_HPP_

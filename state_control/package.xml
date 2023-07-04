@@ -1,13 +1,11 @@
 <?xml version="1.0"?>
 <?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
 <package format="3">
-  <name>rqt_tutorial_cpp</name>
+  <name>state_control</name>
   <version>0.0.0</version>
-  <description>ROS 2 packages for rqt_tutorial_cpp</description>
-  <maintainer email="jhshim@robotis.com">Jaehyun Shim</maintainer>
-  <license>Apache 2.0</license>
-  <url type="repository">https://github.com/JaehyunShim/ros2_tutorial_cpp</url>
-  <author email="jhshim@robotis.com">Jaehyun Shim</author>
+  <description>C++ state GUI for a simulated QEV-3</description>
+  <maintainer email="team@qutmotorsport.com">Alastair Bradford</maintainer>
+  <license>MIT</license>
 
   <buildtool_depend>ament_cmake</buildtool_depend>
   <depend>rclcpp</depend>

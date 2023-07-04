@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.5)
-project(rqt_tutorial_cpp)
+project(state_control)
 
 # Default to C++14
 if(NOT CMAKE_CXX_STANDARD)
@@ -42,16 +42,16 @@ set (SOURCES
 )
 
 set(src_files
-  src/rqt_node.cpp
-  src/rqt_plugin.cpp
+  src/state_node.cpp
+  src/control_gui.cpp
 )
 
 set(hd_files
-  include/${PROJECT_NAME}/rqt_plugin.hpp
+  include/${PROJECT_NAME}/control_gui.hpp
 )
 
 set(ui_files
-  ui/rqt_main_window.ui
+  ui/control_gui.ui
 )
 
 qt5_wrap_cpp(moc_files ${hd_files})
@@ -85,7 +85,7 @@ install(DIRECTORY include/
   DESTINATION include/
 )
 
-install(PROGRAMS scripts/rqt_node
+install(PROGRAMS scripts/state_node
   DESTINATION lib/${PROJECT_NAME}
 )
 

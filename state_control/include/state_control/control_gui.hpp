@@ -12,25 +12,25 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef RQT_TUTORIAL_CPP__RQT_PLUGIN_HPP_
-#define RQT_TUTORIAL_CPP__RQT_PLUGIN_HPP_
+#ifndef STATE_CONTROL__CONTROL_GUI_HPP_
+#define STATE_CONTROL__CONTROL_GUI_HPP_
 
 #include <rqt_gui_cpp/plugin.h>
-#include <ui_rqt_main_window.h>
+#include <ui_control_gui.h>
 
 #include <QStringList>
 #include <QTimer>
 #include <QWidget>
 #include <memory>
 
-#include "rqt_tutorial_cpp/rqt_node.hpp"
+#include "state_control/state_node.hpp"
 
-namespace rqt_tutorial_cpp {
-class RQTPlugin : public rqt_gui_cpp::Plugin {
+namespace state_control {
+class ControlGUIPlugin : public rqt_gui_cpp::Plugin {
     Q_OBJECT
 
    public:
-    RQTPlugin();
+    ControlGUIPlugin();
 
     virtual void initPlugin(qt_gui_cpp::PluginContext& context);
     virtual void shutdownPlugin();
@@ -41,7 +41,7 @@ class RQTPlugin : public rqt_gui_cpp::Plugin {
    private:
     Ui::MainWindow ui_;
     QMainWindow* window_;
-    std::shared_ptr<rqt_tutorial_cpp::RQTNode> rqt_node_;
+    std::shared_ptr<state_control::StateNode> state_node_;
     QTimer* ros_timer_;
 
    private slots:
@@ -58,5 +58,5 @@ class RQTPlugin : public rqt_gui_cpp::Plugin {
     void set_r2d_btn();
     void set_switch_up();
 };
-}  // namespace rqt_tutorial_cpp
-#endif  // RQT_TUTORIAL_CPP__RQT_PLUGIN_HPP_
+}  // namespace state_control
+#endif  // STATE_CONTROL__CONTROL_GUI_HPP_

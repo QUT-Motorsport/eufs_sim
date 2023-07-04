@@ -1,4 +1,4 @@
-#include "rqt_tutorial_cpp/rqt_node.hpp"
+#include "state_control/state_node.hpp"
 
 #include <memory>
 #include <sstream>
@@ -74,20 +74,20 @@ driverless_msgs::msg::Can _d_2_f(uint32_t id, bool is_extended, uint8_t *data, u
     return frame;
 }
 
-namespace rqt_tutorial_cpp {
-RQTNode::RQTNode() : Node("rqt_tutorial_cpp") {
+namespace state_control {
+StateNode::StateNode() : Node("state_control") {
     // Force flush of the stdout buffer
     setvbuf(stdout, NULL, _IONBF, BUFSIZ);
 
     can_pub_ = this->create_publisher<driverless_msgs::msg::Can>("/can/canbus_rosbound", 10);
     // VCU EBS heartbeat
-    vcu_ebs_timer_ = this->create_wall_timer(50ms, std::bind(&RQTNode::vcu_ebs_timer_callback, this));
+    vcu_ebs_timer_ = this->create_wall_timer(50ms, std::bind(&StateNode::vcu_ebs_timer_callback, this));
     // SW heartbeat
-    sw_timer_ = this->create_wall_timer(100ms, std::bind(&RQTNode::sw_timer_callback, this));
+    sw_timer_ = this->create_wall_timer(100ms, std::bind(&StateNode::sw_timer_callback, this));
     // RES
-    res_heartbeat_timer_ = this->create_wall_timer(30ms, std::bind(&RQTNode::res_heartbeat_timer_callback, this));
+    res_heartbeat_timer_ = this->create_wall_timer(30ms, std::bind(&StateNode::res_heartbeat_timer_callback, this));
     // State machine
-    state_machine_timer_ = this->create_wall_timer(20ms, std::bind(&RQTNode::state_machine_timer_callback, this));
+    state_machine_timer_ = this->create_wall_timer(20ms, std::bind(&StateNode::state_machine_timer_callback, this));
 
     car_state.AS_state = AS_STATES::CAR_OFF;
     car_state.TS_state = TS_STATES::TS_OFF;
@@ -95,37 +95,37 @@ RQTNode::RQTNode() : Node("rqt_tutorial_cpp") {
     RCLCPP_INFO(this->get_logger(), "---RQT node initialised---");
 }
 
-RQTNode::~RQTNode() { RCLCPP_INFO(this->get_logger(), "Terminated RQT node"); }
+StateNode::~StateNode() { RCLCPP_INFO(this->get_logger(), "Terminated RQT node"); }
 
-void RQTNode::vcu_ebs_timer_callback() {
+void StateNode::vcu_ebs_timer_callback() {
     // compose CAN frame then convert to ROS 2 message
     VCU_Heartbeat_t CAN_msg = Compose_VCU_Heartbeat(VCU_ID_EBS, &this->EBS_VCU_heartbeat);
     driverless_msgs::msg::Can ROS_CAN_msg = _d_2_f(CAN_msg.id, false, CAN_msg.data, sizeof(CAN_msg.data));
     this->can_pub_->publish(ROS_CAN_msg);
 }
 
-void RQTNode::sw_timer_callback() {
+void StateNode::sw_timer_callback() {
     // compose CAN frame then convert to ROS 2 message
     SW_Heartbeat_t CAN_msg = Compose_SW_Heartbeat(&this->SW_heartbeat);
     driverless_msgs::msg::Can ROS_CAN_msg = _d_2_f(CAN_msg.id, false, CAN_msg.data, sizeof(CAN_msg.data));
     this->can_pub_->publish(ROS_CAN_msg);
 }
 
-void RQTNode::res_heartbeat_timer_callback() {
+void StateNode::res_heartbeat_timer_callback() {
     // compose CAN frame then convert to ROS 2 message
     RES_Heartbeat_t CAN_msg = Compose_RES_Heartbeat(&this->RES_status);
     driverless_msgs::msg::Can ROS_CAN_msg = _d_2_f(CAN_msg.id, false, CAN_msg.data, sizeof(CAN_msg.data));
     this->can_pub_->publish(ROS_CAN_msg);
 }
 
-void RQTNode::res_boot_call() {
+void StateNode::res_boot_call() {
     // compose CAN frame then convert to ROS 2 message
     uint8_t p[8] = {0x01, RES_NODE_ID, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
     driverless_msgs::msg::Can ROS_CAN_msg = _d_2_f(0x700 + RES_NODE_ID, false, p, sizeof(p));
     this->can_pub_->publish(ROS_CAN_msg);
 }
 
-void RQTNode::state_machine_timer_callback() {
+void StateNode::state_machine_timer_callback() {
     // three keys must be turned on to start the car
     if (LV_key_on == false) {
         car_state.AS_state = AS_STATES::CAR_OFF;
@@ -237,7 +237,7 @@ void RQTNode::state_machine_timer_callback() {
     mission_pressed = false;
 }
 
-void RQTNode::reset_states() {
+void StateNode::reset_states() {
     // Car boot sequence
     LV_key_on = false;
     TS_key_on = false;
@@ -259,4 +259,4 @@ void RQTNode::reset_states() {
     this->SW_heartbeat.missionID = DRIVERLESS_MISSIONS::MISSION_NONE;
 }
 
-}  // namespace rqt_tutorial_cpp
+}  // namespace state_control
