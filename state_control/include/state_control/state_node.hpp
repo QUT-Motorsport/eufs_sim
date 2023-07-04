@@ -20,9 +20,10 @@ enum AS_STATES {
     AS_ON = 0x03,
     MISSION_SELECTED = 0x04,
     MISSION_CONFIRMED = 0x05,
-    SWITCH_UP = 0x06,
-    R2D_CHECKS = 0x07,
+    EBS_CHECKS = 0x06,
+    WAIT_R2D = 0x07,
     R2D = 0x08,
+    DRIVING = 0x09,
 };
 
 enum TS_STATES {
@@ -55,12 +56,14 @@ class StateNode : public rclcpp::Node {
     bool mission_pressed = false;
 
     // RES
+    bool res_booted = false;
     bool switch_up = false;
     bool r2d_pressed = false;
     bool estopped = true;
 
    private:
     Car_State_t car_state;
+    Car_State_t prev_car_state;
     int count = 0;
 
     rclcpp::Publisher<driverless_msgs::msg::Can>::SharedPtr can_pub_;
