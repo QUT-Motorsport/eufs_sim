@@ -4,14 +4,14 @@
 #include <QStringListModel>
 #include <string>
 
-#include "rclcpp/rclcpp.hpp"
-#include "std_msgs/msg/string.hpp"
-#include "driverless_msgs/msg/can.hpp"
 #include "CAN_DVL.h"
 #include "CAN_RES.h"
 #include "CAN_SW.h"
 #include "CAN_VCU.h"
 #include "QUTMS_can.h"
+#include "driverless_msgs/msg/can.hpp"
+#include "rclcpp/rclcpp.hpp"
+#include "std_msgs/msg/string.hpp"
 // #include "can_interface.hpp"
 
 enum AS_STATES {

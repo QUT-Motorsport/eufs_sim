@@ -28,7 +28,7 @@ RQTPlugin::RQTPlugin() : rqt_gui_cpp::Plugin(), window_(0), rqt_node_(std::make_
 void RQTPlugin::initPlugin(qt_gui_cpp::PluginContext& context) {
     // Access standalone command line arguments
     QStringList argv = context.argv();
-    // Create QWidget  
+    // Create QWidget
     window_ = new QMainWindow();
     // Extend the widget with all attributes and children from UI file
     ui_.setupUi(window_);
@@ -46,7 +46,7 @@ void RQTPlugin::initPlugin(qt_gui_cpp::PluginContext& context) {
     connect(ui_.TS_btn, SIGNAL(clicked(bool)), this, SLOT(set_TS_btn()));
     connect(ui_.mission_btn, SIGNAL(clicked(bool)), this, SLOT(set_mission_btn()));
     connect(ui_.mission_select, SIGNAL(currentIndexChanged(int)), this, SLOT(set_mission_dropdown()));
-    connect(ui_.estop_btn, SIGNAL(clicked(bool)), this, SLOT(set_estop_btn()));
+    connect(ui_.estop_btn, SIGNAL(toggled(bool)), this, SLOT(set_estop_btn()));
     connect(ui_.r2d_btn, SIGNAL(clicked(bool)), this, SLOT(set_r2d_btn()));
     connect(ui_.RES_safety, SIGNAL(valueChanged(int)), this, SLOT(set_switch_up()));
 
@@ -54,7 +54,6 @@ void RQTPlugin::initPlugin(qt_gui_cpp::PluginContext& context) {
     ros_timer_ = new QTimer(this);
     connect(ros_timer_, SIGNAL(timeout()), this, SLOT(ros_timer_callback()));
     ros_timer_->start(10);
-
 }
 
 void RQTPlugin::shutdownPlugin() {
@@ -114,7 +113,11 @@ void RQTPlugin::set_mission_dropdown() {
 }
 
 void RQTPlugin::set_estop_btn() {
-    rqt_node_->estopped = true;
+    if (ui_.estop_btn->isChecked()) {
+        rqt_node_->estopped = true;
+    } else {
+        rqt_node_->estopped = false;
+    }
     std::cout << "estop_btn_on: " << rqt_node_->estopped << std::endl;
 }
 

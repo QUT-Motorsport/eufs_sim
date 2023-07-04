@@ -18,10 +18,9 @@
 #include <rqt_gui_cpp/plugin.h>
 #include <ui_rqt_main_window.h>
 
+#include <QStringList>
 #include <QTimer>
 #include <QWidget>
-#include <QStringList>
-
 #include <memory>
 
 #include "rqt_tutorial_cpp/rqt_node.hpp"
@@ -41,7 +40,7 @@ class RQTPlugin : public rqt_gui_cpp::Plugin {
 
    private:
     Ui::MainWindow ui_;
-    QMainWindow *window_;
+    QMainWindow* window_;
     std::shared_ptr<rqt_tutorial_cpp::RQTNode> rqt_node_;
     QTimer* ros_timer_;
 
@@ -58,7 +57,6 @@ class RQTPlugin : public rqt_gui_cpp::Plugin {
     void set_estop_btn();
     void set_r2d_btn();
     void set_switch_up();
-
 };
 }  // namespace rqt_tutorial_cpp
 #endif  // RQT_TUTORIAL_CPP__RQT_PLUGIN_HPP_

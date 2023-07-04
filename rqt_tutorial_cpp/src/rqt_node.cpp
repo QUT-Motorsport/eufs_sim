@@ -74,9 +74,8 @@ driverless_msgs::msg::Can _d_2_f(uint32_t id, bool is_extended, uint8_t *data, u
     return frame;
 }
 
-
 namespace rqt_tutorial_cpp {
-RQTNode::RQTNode() : Node("rqt_tutorial_cpp"){
+RQTNode::RQTNode() : Node("rqt_tutorial_cpp") {
     // Force flush of the stdout buffer
     setvbuf(stdout, NULL, _IONBF, BUFSIZ);
 
@@ -89,7 +88,7 @@ RQTNode::RQTNode() : Node("rqt_tutorial_cpp"){
     res_heartbeat_timer_ = this->create_wall_timer(30ms, std::bind(&RQTNode::res_heartbeat_timer_callback, this));
     // State machine
     state_machine_timer_ = this->create_wall_timer(20ms, std::bind(&RQTNode::state_machine_timer_callback, this));
-    
+
     car_state.AS_state = AS_STATES::CAR_OFF;
     car_state.TS_state = TS_STATES::TS_OFF;
 
@@ -122,7 +121,7 @@ void RQTNode::res_heartbeat_timer_callback() {
 void RQTNode::res_boot_call() {
     // compose CAN frame then convert to ROS 2 message
     uint8_t p[8] = {0x01, RES_NODE_ID, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
-    driverless_msgs::msg::Can ROS_CAN_msg = _d_2_f(0x700+RES_NODE_ID, false, p, sizeof(p));
+    driverless_msgs::msg::Can ROS_CAN_msg = _d_2_f(0x700 + RES_NODE_ID, false, p, sizeof(p));
     this->can_pub_->publish(ROS_CAN_msg);
 }
 
@@ -206,9 +205,9 @@ void RQTNode::state_machine_timer_callback() {
         }
     }
     if (car_state.TS_state == TS_STATES::TS_ACTIVE) {
-        if (switch_up) {
+        if (switch_up && car_state.AS_state == AS_STATES::MISSION_CONFIRMED) {
             car_state.AS_state = AS_STATES::SWITCH_UP;
-            // res switch 
+            // res switch
             this->RES_status.sw_k2 = true;
         }
     }
@@ -235,6 +234,7 @@ void RQTNode::state_machine_timer_callback() {
     SDC_pressed = false;
     r2d_pressed = false;
     TS_pressed = false;
+    mission_pressed = false;
 }
 
 void RQTNode::reset_states() {
