@@ -49,6 +49,7 @@ void ControlGUIPlugin::initPlugin(qt_gui_cpp::PluginContext& context) {
     connect(ui_.estop_btn, SIGNAL(toggled(bool)), this, SLOT(set_estop_btn()));
     connect(ui_.r2d_btn, SIGNAL(clicked(bool)), this, SLOT(set_r2d_btn()));
     connect(ui_.RES_safety, SIGNAL(valueChanged(int)), this, SLOT(set_switch_up()));
+    connect(ui_.reset_btn, SIGNAL(clicked(bool)), this, SLOT(set_reset_btn()));
 
     // Run ros spin
     ros_timer_ = new QTimer(this);
@@ -57,20 +58,18 @@ void ControlGUIPlugin::initPlugin(qt_gui_cpp::PluginContext& context) {
 }
 
 void ControlGUIPlugin::shutdownPlugin() {
-    // TODO(my_username): unregister all publishers here
+    // Stop ros spin
+    ros_timer_->stop();
+    rclcpp::shutdown();
 }
 
 void ControlGUIPlugin::saveSettings(qt_gui_cpp::Settings& plugin_settings, qt_gui_cpp::Settings& instance_settings) const {
-    // TODO(my_username): save intrinsic configuration, usually using:
-    // instance_settings.setValue(k, v)
     (void)plugin_settings;
     (void)instance_settings;
 }
 
 void ControlGUIPlugin::restoreSettings(const qt_gui_cpp::Settings& plugin_settings,
                                 const qt_gui_cpp::Settings& instance_settings) {
-    // TODO(my_username): restore intrinsic configuration, usually using:
-    // v = instance_settings.value(k)
     (void)plugin_settings;
     (void)instance_settings;
 }
@@ -114,11 +113,11 @@ void ControlGUIPlugin::set_mission_dropdown() {
 
 void ControlGUIPlugin::set_estop_btn() {
     if (ui_.estop_btn->isChecked()) {
-        state_node_->estopped = true;
+        state_node_->estop_pressed = true;
     } else {
-        state_node_->estopped = false;
+        state_node_->estop_pressed = false;
     }
-    std::cout << "estop_btn_on: " << state_node_->estopped << std::endl;
+    std::cout << "estop_btn_on: " << state_node_->estop_pressed << std::endl;
 }
 
 void ControlGUIPlugin::set_r2d_btn() {
@@ -129,6 +128,39 @@ void ControlGUIPlugin::set_r2d_btn() {
 void ControlGUIPlugin::set_switch_up() {
     state_node_->switch_up = ui_.RES_safety->value();
     std::cout << "RES_safety: " << state_node_->switch_up << std::endl;
+}
+
+void ControlGUIPlugin::set_reset_btn() {
+    state_node_->reset_pressed = true;
+    std::cout << "reset_btn_on: " << state_node_->reset_pressed << std::endl;
+
+    // Reset gui
+    ui_.LV_key->setValue(0);
+    ui_.TS_key->setValue(0);
+    ui_.AS_key->setValue(0);
+    ui_.mission_select->setCurrentIndex(0);
+    ui_.estop_btn->setChecked(true);
+    ui_.RES_safety->setValue(0);
+
+    auto request_cones = std::make_shared<std_srvs::srv::Trigger::Request>();
+    auto result_cones = state_node_->reset_cones_srv_->async_send_request(request_cones);
+    // Wait for the result
+    if (rclcpp::spin_until_future_complete(state_node_, result_cones) == rclcpp::FutureReturnCode::SUCCESS)
+    {
+        RCLCPP_INFO(state_node_->get_logger(), "reset_cones_srv success: %d", result_cones.get()->success);
+    } else {
+        RCLCPP_ERROR(state_node_->get_logger(), "reset_cones_srv failed");
+    }
+
+    auto request_car = std::make_shared<std_srvs::srv::Trigger::Request>();
+    auto result_car = state_node_->reset_car_pos_srv_->async_send_request(request_car);
+    // Wait for the result
+    if (rclcpp::spin_until_future_complete(state_node_, result_car) == rclcpp::FutureReturnCode::SUCCESS)
+    {
+        RCLCPP_INFO(state_node_->get_logger(), "reset_car_pos_srv success: %d", result_car.get()->success);
+    } else {
+        RCLCPP_ERROR(state_node_->get_logger(), "reset_car_pos_srv failed");
+    }
 }
 }  // namespace state_control
 PLUGINLIB_EXPORT_CLASS(state_control::ControlGUIPlugin, rqt_gui_cpp::Plugin)

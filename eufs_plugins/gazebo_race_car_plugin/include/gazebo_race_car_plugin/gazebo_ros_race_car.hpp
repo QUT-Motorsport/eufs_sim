@@ -38,6 +38,7 @@
 #include "geometry_msgs/msg/vector3.hpp"
 #include "nav_msgs/msg/odometry.hpp"
 #include "std_msgs/msg/float32.hpp"
+#include "driverless_msgs/msg/state.hpp"
 
 // ROS TF2
 #include <tf2/transform_datatypes.h>
@@ -58,7 +59,6 @@
 
 // Local includes
 #include "eufs_models/eufs_models.hpp"
-#include "gazebo_race_car_plugin/state_machine.hpp"
 #include "helpers_gazebo.hpp"
 #include "helpers_ros.hpp"
 
@@ -77,8 +77,7 @@ class RaceCarPlugin : public gazebo::ModelPlugin {
     eufs::models::Input &getInput() { return _des_input; }
 
    private:
-    void update();
-
+    void initParams(const sdf::ElementPtr &sdf);
     void setPositionFromWorld();
     bool resetVehiclePosition(std::shared_ptr<std_srvs::srv::Trigger::Request> request,
                               std::shared_ptr<std_srvs::srv::Trigger::Response> response);
@@ -86,15 +85,16 @@ class RaceCarPlugin : public gazebo::ModelPlugin {
                            std::shared_ptr<std_srvs::srv::Trigger::Response> response);
     void setModelState();
 
-    void initParams(const sdf::ElementPtr &sdf);
-
+    void publishCarPose();
     geometry_msgs::msg::PoseWithCovarianceStamped stateToPoseMsg(const eufs::models::State &state);
+
+    void publishVehicleOdom();
     nav_msgs::msg::Odometry getWheelOdometry(const std::vector<double> &speeds, const double &input);
 
-    void publishCarPose();
-    void publishVehicleOdom();
     void publishTf();
+    void update();
 
+    void updateState(const driverless_msgs::msg::State::SharedPtr msg);
     void onCmd(const ackermann_msgs::msg::AckermannDriveStamped::SharedPtr msg);
 
     std::vector<double> ToQuaternion(std::vector<double> &euler);
@@ -103,7 +103,8 @@ class RaceCarPlugin : public gazebo::ModelPlugin {
     eufs::models::VehicleModelPtr _vehicle;
 
     // States
-    std::unique_ptr<StateMachine> _state_machine;
+    // std::unique_ptr<StateMachine> _state_machine;
+    driverless_msgs::msg::State _as_state;
     eufs::models::State _state;
     eufs::models::Input _des_input, _act_input;
     std::unique_ptr<eufs::models::Noise> _noise;
@@ -136,6 +137,7 @@ class RaceCarPlugin : public gazebo::ModelPlugin {
 
     // ROS Subscriptions
     rclcpp::Subscription<ackermann_msgs::msg::AckermannDriveStamped>::SharedPtr _sub_cmd;
+    rclcpp::Subscription<driverless_msgs::msg::State>::SharedPtr _sub_state;
 
     // ROS Services
     rclcpp::Service<std_srvs::srv::Trigger>::SharedPtr _reset_vehicle_pos_srv;

@@ -12,6 +12,7 @@
 #include "driverless_msgs/msg/can.hpp"
 #include "rclcpp/rclcpp.hpp"
 #include "std_msgs/msg/string.hpp"
+#include "std_srvs/srv/trigger.hpp"
 
 enum AS_STATES {
     CAR_OFF = 0x00,
@@ -59,13 +60,19 @@ class StateNode : public rclcpp::Node {
     bool res_booted = false;
     bool switch_up = false;
     bool r2d_pressed = false;
-    bool estopped = true;
+    bool estop_pressed = true;
+    bool reset_pressed = false;
+
+    // reset trigger clients
+    rclcpp::Client<std_srvs::srv::Trigger>::SharedPtr reset_car_pos_srv_;
+    rclcpp::Client<std_srvs::srv::Trigger>::SharedPtr reset_cones_srv_;
 
    private:
     Car_State_t car_state;
     Car_State_t prev_car_state;
     int count = 0;
-
+    
+    // CAN pub
     rclcpp::Publisher<driverless_msgs::msg::Can>::SharedPtr can_pub_;
 
     // state machine timer
@@ -91,7 +98,11 @@ class StateNode : public rclcpp::Node {
     void res_heartbeat_timer_callback();
     RES_Status_t RES_status;
 
+    // resets
     void reset_states();
+    void reset_car();
+    // void reset_car_pos();
+    // void reset_cones();
 };
 }  // namespace state_control
 #endif  // STATE_CONTROL__STATE_NODE_HPP_

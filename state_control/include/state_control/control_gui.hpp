@@ -57,6 +57,7 @@ class ControlGUIPlugin : public rqt_gui_cpp::Plugin {
     void set_estop_btn();
     void set_r2d_btn();
     void set_switch_up();
+    void set_reset_btn();
 };
 }  // namespace state_control
 #endif  // STATE_CONTROL__CONTROL_GUI_HPP_

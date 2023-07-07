@@ -21,6 +21,8 @@ find_package(rqt_gui_cpp REQUIRED)
 find_package(Qt5Widgets REQUIRED)
 find_package(ament_cmake_python REQUIRED)
 find_package(driverless_msgs REQUIRED)
+find_package(std_msgs REQUIRED)
+find_package(std_srvs REQUIRED)
 
 # add
 include_directories(
@@ -63,6 +65,8 @@ set(dependencies
   rqt_gui_cpp
   Qt5Widgets
   driverless_msgs
+  std_msgs
+  std_srvs
 )
 
 add_library(${PROJECT_NAME} SHARED

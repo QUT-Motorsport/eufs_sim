@@ -18,6 +18,7 @@ ament_target_dependencies(gazebo_ros_race_car
   "std_srvs"
   "std_msgs"
   "eufs_models"
+  "driverless_msgs"
 )
 
 target_include_directories(gazebo_ros_race_car PUBLIC include)

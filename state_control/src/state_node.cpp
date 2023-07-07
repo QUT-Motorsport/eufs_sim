@@ -79,7 +79,22 @@ StateNode::StateNode() : Node("state_control") {
     // Force flush of the stdout buffer
     setvbuf(stdout, NULL, _IONBF, BUFSIZ);
 
+    // CAN pub
     can_pub_ = this->create_publisher<driverless_msgs::msg::Can>("/can/canbus_rosbound", 10);
+
+    // reset trigger clients
+    reset_car_pos_srv_ = this->create_client<std_srvs::srv::Trigger>("/system/reset_car_pos");
+    while (!this->reset_car_pos_srv_->wait_for_service(1s))
+    {
+        RCLCPP_INFO(this->get_logger(), "Waiting for reset_car_pos service to be available...");
+    }
+
+    reset_cones_srv_ = this->create_client<std_srvs::srv::Trigger>("/system/reset_cones");
+    while (!this->reset_cones_srv_->wait_for_service(1s))
+    {
+        RCLCPP_INFO(this->get_logger(), "Waiting for reset_cones service to be available...");
+    }
+
     // VCU EBS heartbeat
     vcu_ebs_timer_ = this->create_wall_timer(50ms, std::bind(&StateNode::vcu_ebs_timer_callback, this));
     // SW heartbeat
@@ -89,9 +104,8 @@ StateNode::StateNode() : Node("state_control") {
     // State machine
     state_machine_timer_ = this->create_wall_timer(20ms, std::bind(&StateNode::state_machine_timer_callback, this));
 
-    car_state.AS_state = AS_STATES::CAR_OFF;
-    car_state.TS_state = TS_STATES::TS_OFF;
-    this->EBS_VCU_heartbeat.stateID = VCU_STATES::VCU_STATE_EBS_IDLE;
+    // set initial car structs
+    reset_car();
 
     RCLCPP_INFO(this->get_logger(), "---RQT node initialised---");
 }
@@ -141,40 +155,41 @@ void StateNode::res_boot_call() {
 }
 
 void StateNode::state_machine_timer_callback() {
+    if (reset_pressed) {
+        reset_states();
+    }
+
     // three keys must be turned on to start the car
     if (LV_key_on == false) {
-        car_state.AS_state = AS_STATES::CAR_OFF;
-        car_state.TS_state = TS_STATES::TS_OFF;
+        this->car_state.AS_state = AS_STATES::CAR_OFF;
+        this->car_state.TS_state = TS_STATES::TS_OFF;
         res_booted = false;
 
-        this->SW_heartbeat.missionID = DRIVERLESS_MISSIONS::MISSION_NONE;
-        this->SW_heartbeat.stateID = SW_STATES::SW_STATE_START;
-        this->EBS_VCU_heartbeat.otherFlags.ebs._VCU_Flags_EBS.CTRL_EBS = 0;
-        this->EBS_VCU_heartbeat.stateID = VCU_STATES::VCU_STATE_EBS_IDLE;
+        reset_car();
     }
     if (TS_key_on == false) {
-        car_state.TS_state = TS_STATES::TS_OFF;
+        this->car_state.TS_state = TS_STATES::TS_OFF;
         // car may be running processes
-        if (car_state.AS_state > AS_STATES::MISSION_SELECTED) {
-            car_state.AS_state = AS_STATES::MISSION_SELECTED;
+        if (this->car_state.AS_state > AS_STATES::MISSION_SELECTED) {
+            this->car_state.AS_state = AS_STATES::MISSION_SELECTED;
         }
     }
     if (AS_key_on == false) {
-        if (car_state.AS_state > AS_STATES::LV_ON) {
-            car_state.AS_state = AS_STATES::LV_ON;
+        if (this->car_state.AS_state > AS_STATES::LV_ON) {
+            this->car_state.AS_state = AS_STATES::LV_ON;
         }
         this->EBS_VCU_heartbeat.otherFlags.ebs._VCU_Flags_EBS.CTRL_EBS = 0;
         this->EBS_VCU_heartbeat.stateID = VCU_STATES::VCU_STATE_EBS_IDLE;
     }
     // big red button
-    if (estopped) {
+    if (estop_pressed) {
         // TS key may still be on
-        if (car_state.TS_state > TS_STATES::TS_ON) {
-            car_state.TS_state = TS_STATES::TS_ON;
+        if (this->car_state.TS_state > TS_STATES::TS_ON) {
+            this->car_state.TS_state = TS_STATES::TS_ON;
         }
         // if the car is off already
-        if (car_state.AS_state > AS_STATES::ESTOP) {
-            car_state.AS_state = AS_STATES::ESTOP;
+        if (this->car_state.AS_state > AS_STATES::ESTOP) {
+            this->car_state.AS_state = AS_STATES::ESTOP;
         }
 
         this->RES_status.estop = true;
@@ -190,82 +205,81 @@ void StateNode::state_machine_timer_callback() {
     }
 
     // state transitions
-    if (car_state.AS_state == AS_STATES::CAR_OFF) {
+    if (this->car_state.AS_state == AS_STATES::CAR_OFF) {
         if (LV_key_on) {
-            car_state.AS_state = AS_STATES::LV_ON;
+            this->car_state.AS_state = AS_STATES::LV_ON;
             // RES is powered on
             res_boot_call();
         }
     }
     // LV key allows TS and AS keys to be turned on
-    if (car_state.AS_state == AS_STATES::LV_ON) {
-        if (TS_key_on && car_state.TS_state == TS_STATES::TS_OFF) {
-            car_state.TS_state = TS_STATES::TS_ON;
+    if (this->car_state.AS_state == AS_STATES::LV_ON) {
+        if (TS_key_on && this->car_state.TS_state == TS_STATES::TS_OFF) {
+            this->car_state.TS_state = TS_STATES::TS_ON;
         }
         if (AS_key_on) {
-            car_state.AS_state = AS_STATES::AS_ON;
+            this->car_state.AS_state = AS_STATES::AS_ON;
         }
     }
-    if (car_state.TS_state == TS_ON) {
+    if (this->car_state.TS_state == TS_ON) {
         if (SDC_pressed) {
-            car_state.TS_state = TS_STATES::SDC_CLOSED;
+            this->car_state.TS_state = TS_STATES::SDC_CLOSED;
         }
     }
-    if (car_state.AS_state == AS_STATES::AS_ON) {
+    if (this->car_state.AS_state == AS_STATES::AS_ON) {
         if (selected_mission != DRIVERLESS_MISSIONS::MISSION_NONE) {
-            car_state.AS_state = AS_STATES::MISSION_SELECTED;
+            this->car_state.AS_state = AS_STATES::MISSION_SELECTED;
             // mission is selected
             this->SW_heartbeat.missionID = selected_mission;
             this->SW_heartbeat.stateID = SW_STATES::SW_STATE_SELECT_MISSION;
         }
     }
-    if (car_state.AS_state == AS_STATES::MISSION_SELECTED) {
+    if (this->car_state.AS_state == AS_STATES::MISSION_SELECTED) {
         if (mission_pressed) {
-            car_state.AS_state = AS_STATES::MISSION_CONFIRMED;
+            this->car_state.AS_state = AS_STATES::MISSION_CONFIRMED;
             // mission is confirmed
             this->SW_heartbeat.stateID = SW_STATES::SW_STATE_MISSION_ACK;
         }
     }
     // mission confirm button needs to be pressed before TS can be activated
-    if (car_state.TS_state == TS_STATES::SDC_CLOSED && car_state.AS_state == AS_STATES::MISSION_CONFIRMED) {
+    if (this->car_state.TS_state == TS_STATES::SDC_CLOSED && this->car_state.AS_state == AS_STATES::MISSION_CONFIRMED) {
         if (TS_pressed) {
-            car_state.TS_state = TS_STATES::TS_ACTIVE;
+            this->car_state.TS_state = TS_STATES::TS_ACTIVE;
         }
     }
-    if (car_state.TS_state == TS_STATES::TS_ACTIVE) {
-        if (switch_up && car_state.AS_state == AS_STATES::MISSION_CONFIRMED) {
-            car_state.AS_state = AS_STATES::EBS_CHECKS;
+    if (this->car_state.TS_state == TS_STATES::TS_ACTIVE) {
+        if (switch_up && this->car_state.AS_state == AS_STATES::MISSION_CONFIRMED) {
+            this->car_state.AS_state = AS_STATES::EBS_CHECKS;
         }
     }
-    if (car_state.AS_state == AS_STATES::EBS_CHECKS) {
+    if (this->car_state.AS_state == AS_STATES::EBS_CHECKS) {
         // ebs is ready for checks
         this->EBS_VCU_heartbeat.stateID = VCU_STATES::VCU_STATE_EBS_READY;
         // TODO: add checks
         // if (checks_pass)
-        car_state.AS_state = AS_STATES::WAIT_R2D;
+        this->car_state.AS_state = AS_STATES::WAIT_R2D;
     }
-    if (car_state.AS_state == AS_STATES::WAIT_R2D) {
+    if (this->car_state.AS_state == AS_STATES::WAIT_R2D) {
         if (r2d_pressed) {
-            car_state.AS_state = AS_STATES::R2D;
-
+            this->car_state.AS_state = AS_STATES::R2D;
             // res button
             this->RES_status.bt_k3 = true;
             // EBS is armed
             this->EBS_VCU_heartbeat.otherFlags.ebs._VCU_Flags_EBS.CTRL_EBS = 1;
         }
     }
-    if (car_state.AS_state == AS_STATES::R2D) {
+    if (this->car_state.AS_state == AS_STATES::R2D) {
         this->EBS_VCU_heartbeat.stateID = VCU_STATES::VCU_STATE_EBS_DRIVE;
-        car_state.AS_state = AS_STATES::DRIVING;
+        this->car_state.AS_state = AS_STATES::DRIVING;
     }
-    // if (car_state.AS_state == AS_STATES::DRIVING) {
+    // if (this->car_state.AS_state == AS_STATES::DRIVING) {
     // }
 
     // print if changes
-    if (prev_car_state.AS_state != car_state.AS_state || prev_car_state.TS_state != car_state.TS_state) {
-        RCLCPP_INFO(this->get_logger(), "AS_state: %d, TS_state: %d", car_state.AS_state, car_state.TS_state);
+    if (this->prev_car_state.AS_state != this->car_state.AS_state || this->prev_car_state.TS_state != this->car_state.TS_state) {
+        RCLCPP_INFO(this->get_logger(), "AS_state: %d, TS_state: %d", this->car_state.AS_state, this->car_state.TS_state);
     }
-    prev_car_state = car_state;
+    this->prev_car_state = this->car_state;
     // reset the one-time button presses
     SDC_pressed = false;
     r2d_pressed = false;
@@ -274,7 +288,7 @@ void StateNode::state_machine_timer_callback() {
 }
 
 void StateNode::reset_states() {
-    // Car boot sequence
+    // car boot sequence
     LV_key_on = false;
     TS_key_on = false;
     AS_key_on = false;
@@ -285,14 +299,45 @@ void StateNode::reset_states() {
 
     // RES
     switch_up = false;
-    estopped = true;
+    estop_pressed = true;
+    res_booted = false;
 
-    car_state.AS_state = AS_STATES::CAR_OFF;
-    car_state.TS_state = TS_STATES::TS_OFF;
+    // AS
+    this->car_state.AS_state = AS_STATES::CAR_OFF;
+    this->car_state.TS_state = TS_STATES::TS_OFF;
 
+    // car signals
+    reset_car();
+
+    // sim world
+    reset_pressed = false;
+
+    // reset_car_pos();
+    // reset_cones();
+}
+
+void StateNode::reset_car() {
     this->EBS_VCU_heartbeat.otherFlags.ebs._VCU_Flags_EBS.CTRL_EBS = 0;
+    this->EBS_VCU_heartbeat.stateID = VCU_STATES::VCU_STATE_EBS_IDLE;
     this->SW_heartbeat.stateID = SW_STATES::SW_STATE_START;
     this->SW_heartbeat.missionID = DRIVERLESS_MISSIONS::MISSION_NONE;
+    this->RES_status.estop = true;
+    this->RES_status.sw_k2 = false;
+    this->RES_status.bt_k3 = false;
 }
+
+// void StateNode::reset_car_pos() {
+//     // Reset car position
+//     auto request = std::make_shared<std_srvs::srv::Trigger::Request>();
+//     auto result = this->reset_car_pos_srv_->async_send_request(request);
+//     RCLCPP_INFO(this->get_logger(), "Vehicle position reset successful: %d", result.get()->success);
+// }
+
+// void StateNode::reset_cones() {
+//     // Reset cones
+//     auto request = std::make_shared<std_srvs::srv::Trigger::Request>();
+//     auto result = this->reset_cones_srv_->async_send_request(request);
+//     RCLCPP_INFO(this->get_logger(), "Cone position reset successful: %d", result.get()->success);
+// }
 
 }  // namespace state_control

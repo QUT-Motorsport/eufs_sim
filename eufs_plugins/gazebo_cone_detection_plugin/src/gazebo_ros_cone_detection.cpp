@@ -39,7 +39,7 @@ void ConeDetectionPlugin::Load(gazebo::physics::ModelPtr model, sdf::ElementPtr 
 
     // Cone position reset service
     reset_cone_pos_srv = _ros_node->create_service<std_srvs::srv::Trigger>(
-        "/ros_can/reset_cone_pos",
+        "/system/reset_cones",
         std::bind(&ConeDetectionPlugin::resetConePosition, this, std::placeholders::_1, std::placeholders::_2));
 
     _last_gt_update = _world->SimTime();
@@ -158,11 +158,8 @@ void ConeDetectionPlugin::publishSLAM() {
 }
 
 // Resets the position of cones to initial track model
-bool ConeDetectionPlugin::resetConePosition(std::shared_ptr<std_srvs::srv::Trigger::Request> request,
+bool ConeDetectionPlugin::resetConePosition(std::shared_ptr<std_srvs::srv::Trigger::Request>,
                                             std::shared_ptr<std_srvs::srv::Trigger::Response> response) {
-    (void)request;   // suppress unused parameter warning
-    (void)response;  // suppress unused parameter warning
-
     gazebo::physics::Link_V links = _track_model->GetLinks();
 
     // Loop through all cones
