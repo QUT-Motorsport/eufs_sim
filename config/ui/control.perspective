@@ -1,0 +1,109 @@
+{
+  "keys": {},
+  "groups": {
+    "mainwindow": {
+      "keys": {
+        "geometry": {
+          "repr(QByteArray.hex)": "QtCore.QByteArray(b'01d9d0cb0003000000000d0b000000df000010ac000002fb00000d310000011a00001086000002d500000000000000000a0000000d310000011a00001086000002d5')",
+          "type": "repr(QByteArray.hex)",
+          "pretty-print": "             1            1      "
+        },
+        "state": {
+          "repr(QByteArray.hex)": "QtCore.QByteArray(b'000000ff00000000fd00000001000000030000035600000192fc0100000002fb000000740065007500660073005f007200710074005f005f0065007500660073005f0072006f0062006f0074005f007300740065006500720069006e0067005f006700750069005f005f0031005f005f00450055004600530052006f0062006f0074005300740065006500720069006e00670047005500490100000000000001740000011100fffffffb0000005c00730074006100740065005f0063006f006e00740072006f006c005f005f0043006f006e00740072006f006c0047005500490050006c007500670069006e005f005f0031005f005f004d00610069006e00570069006e0064006f0077010000017a000001dc000000c400ffffff000003560000000000000004000000040000000800000008fc00000001000000030000000100000036004d0069006e0069006d0069007a006500640044006f0063006b00570069006400670065007400730054006f006f006c0062006100720000000000ffffffff0000000000000000')",
+          "type": "repr(QByteArray.hex)",
+          "pretty-print": "                 teufs_rqt__eufs_robot_steering_gui__1__EUFSRobotSteeringGUI          \\state_control__ControlGUIPlugin__1__MainWindow                            6MinimizedDockWidgetsToolbar        "
+        }
+      },
+      "groups": {
+        "toolbar_areas": {
+          "keys": {
+            "MinimizedDockWidgetsToolbar": {
+              "repr": "8",
+              "type": "repr"
+            }
+          },
+          "groups": {}
+        }
+      }
+    },
+    "pluginmanager": {
+      "keys": {
+        "running-plugins": {
+          "repr": "{'eufs_rqt/eufs_robot_steering_gui': [1], 'state_control/ControlGUIPlugin': [1]}",
+          "type": "repr"
+        }
+      },
+      "groups": {
+        "plugin__eufs_rqt__eufs_robot_steering_gui__1": {
+          "keys": {},
+          "groups": {
+            "dock_widget__EUFSRobotSteeringGUI": {
+              "keys": {
+                "dock_widget_title": {
+                  "repr": "'EUFS Robot Steering GUI '",
+                  "type": "repr"
+                },
+                "dockable": {
+                  "repr": "True",
+                  "type": "repr"
+                },
+                "parent": {
+                  "repr": "None",
+                  "type": "repr"
+                }
+              },
+              "groups": {}
+            },
+            "plugin": {
+              "keys": {
+                "ackermann_topic": {
+                  "repr": "'/control/driving_command'",
+                  "type": "repr"
+                },
+                "velx_max": {
+                  "repr": "5.0",
+                  "type": "repr"
+                },
+                "velx_min": {
+                  "repr": "-5.0",
+                  "type": "repr"
+                },
+                "w_max": {
+                  "repr": "90.0",
+                  "type": "repr"
+                },
+                "w_min": {
+                  "repr": "-90.0",
+                  "type": "repr"
+                }
+              },
+              "groups": {}
+            }
+          }
+        },
+        "plugin__state_control__ControlGUIPlugin__1": {
+          "keys": {},
+          "groups": {
+            "dock_widget__MainWindow": {
+              "keys": {
+                "dock_widget_title": {
+                  "repr": "'MainWindow'",
+                  "type": "repr"
+                },
+                "dockable": {
+                  "repr": "True",
+                  "type": "repr"
+                },
+                "parent": {
+                  "repr": "None",
+                  "type": "repr"
+                }
+              },
+              "groups": {}
+            }
+          }
+        }
+      }
+    }
+  }
+}
