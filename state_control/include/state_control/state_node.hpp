@@ -12,6 +12,7 @@
 #include "driverless_msgs/msg/can.hpp"
 #include "rclcpp/rclcpp.hpp"
 #include "std_msgs/msg/string.hpp"
+#include "std_msgs/msg/u_int8.hpp"
 #include "std_srvs/srv/trigger.hpp"
 
 enum AS_STATES {
@@ -74,6 +75,9 @@ class StateNode : public rclcpp::Node {
     
     // CAN pub
     rclcpp::Publisher<driverless_msgs::msg::Can>::SharedPtr can_pub_;
+
+    // lap count pub
+    rclcpp::Publisher<std_msgs::msg::UInt8>::SharedPtr lap_counter_pub_;
 
     // state machine timer
     rclcpp::TimerBase::SharedPtr state_machine_timer_;

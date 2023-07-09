@@ -82,6 +82,9 @@ StateNode::StateNode() : Node("state_control") {
     // CAN pub
     can_pub_ = this->create_publisher<driverless_msgs::msg::Can>("/can/canbus_rosbound", 10);
 
+    // lap counter pub
+    lap_counter_pub_ = this->create_publisher<std_msgs::msg::UInt8>("/system/laps_completed", 10);
+
     // reset trigger clients
     reset_car_pos_srv_ = this->create_client<std_srvs::srv::Trigger>("/system/reset_car_pos");
     while (!this->reset_car_pos_srv_->wait_for_service(1s))
@@ -308,6 +311,9 @@ void StateNode::reset_states() {
 
     // car signals
     reset_car();
+    std_msgs::msg::UInt8 lap_count_msg;
+    lap_count_msg.data = 0;
+    lap_counter_pub_->publish(lap_count_msg);
 
     // sim world
     reset_pressed = false;
