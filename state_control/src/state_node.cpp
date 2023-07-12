@@ -181,6 +181,9 @@ void StateNode::state_machine_timer_callback() {
         if (this->car_state.AS_state > AS_STATES::LV_ON) {
             this->car_state.AS_state = AS_STATES::LV_ON;
         }
+        if (this->car_state.TS_state > TS_STATES::SDC_CLOSED) {
+            this->car_state.TS_state = TS_STATES::SDC_CLOSED;
+        }
         this->EBS_VCU_heartbeat.otherFlags.ebs._VCU_Flags_EBS.CTRL_EBS = 0;
         this->EBS_VCU_heartbeat.stateID = VCU_STATES::VCU_STATE_EBS_IDLE;
     }
@@ -216,11 +219,11 @@ void StateNode::state_machine_timer_callback() {
         }
     }
     // LV key allows TS and AS keys to be turned on
-    if (this->car_state.AS_state == AS_STATES::LV_ON) {
+    if (this->car_state.AS_state >= AS_STATES::LV_ON) {
         if (TS_key_on && this->car_state.TS_state == TS_STATES::TS_OFF) {
             this->car_state.TS_state = TS_STATES::TS_ON;
         }
-        if (AS_key_on) {
+        if (AS_key_on && this->car_state.AS_state == AS_STATES::LV_ON) {
             this->car_state.AS_state = AS_STATES::AS_ON;
         }
     }
