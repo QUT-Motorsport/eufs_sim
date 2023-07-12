@@ -137,9 +137,9 @@ def spawn_car(context, *args, **kwargs):
 
 def generate_launch_description():
     rqt_perspective_file = join(
-        get_package_share_directory("eufs_rqt"),
-        "config",
-        "eufs_sim.perspective",
+        get_package_share_directory("config"),
+        "ui",
+        "control.perspective",
     )
 
     return LaunchDescription(
@@ -239,6 +239,10 @@ def generate_launch_description():
                     "--perspective-file",
                     str(rqt_perspective_file),
                 ],
+            ),
+            Node(
+                package="vehicle_supervisor",
+                executable="vehicle_supervisor_slim_node",        
             ),
             # Spawn the car!!!
             OpaqueFunction(function=spawn_car),

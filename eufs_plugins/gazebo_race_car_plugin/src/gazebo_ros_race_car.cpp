@@ -47,7 +47,6 @@ void RaceCarPlugin::Load(gazebo::physics::ModelPtr model, sdf::ElementPtr sdf) {
     _world = _model->GetWorld();
 
     _tf_br = std::make_unique<tf2_ros::TransformBroadcaster>(_rosnode);
-    _state_machine = std::make_unique<StateMachine>(_rosnode);
 
     // Initialize parameters
     initParams(sdf);
@@ -69,17 +68,21 @@ void RaceCarPlugin::Load(gazebo::physics::ModelPtr model, sdf::ElementPtr sdf) {
         _pub_gt_steering_angle = _rosnode->create_publisher<std_msgs::msg::Float32>("/ground_truth/steering_angle", 1);
     }
 
-    // ROS Services
-    _reset_vehicle_pos_srv = _rosnode->create_service<std_srvs::srv::Trigger>(
-        "/ros_can/reset_vehicle_pos",
-        std::bind(&RaceCarPlugin::resetVehiclePosition, this, std::placeholders::_1, std::placeholders::_2));
-    _command_mode_srv = _rosnode->create_service<std_srvs::srv::Trigger>(
-        "/race_car_model/command_mode",
-        std::bind(&RaceCarPlugin::returnCommandMode, this, std::placeholders::_1, std::placeholders::_2));
+    // Driverless state
+    _sub_state = _rosnode->create_subscription<driverless_msgs::msg::State>(
+        "/system/as_status", 1, std::bind(&RaceCarPlugin::updateState, this, std::placeholders::_1));
 
     // ROS Subscriptions
     _sub_cmd = _rosnode->create_subscription<ackermann_msgs::msg::AckermannDriveStamped>(
         "/control/driving_command", 1, std::bind(&RaceCarPlugin::onCmd, this, std::placeholders::_1));
+
+    // ROS Services
+    _reset_vehicle_pos_srv = _rosnode->create_service<std_srvs::srv::Trigger>(
+        "/system/reset_car_pos",
+        std::bind(&RaceCarPlugin::resetVehiclePosition, this, std::placeholders::_1, std::placeholders::_2));
+    _command_mode_srv = _rosnode->create_service<std_srvs::srv::Trigger>(
+        "/race_car_model/command_mode",
+        std::bind(&RaceCarPlugin::returnCommandMode, this, std::placeholders::_1, std::placeholders::_2));
 
     // Connect to Gazebo
     _update_connection = gazebo::event::Events::ConnectWorldUpdateBegin(std::bind(&RaceCarPlugin::update, this));
@@ -95,6 +98,10 @@ void RaceCarPlugin::Load(gazebo::physics::ModelPtr model, sdf::ElementPtr sdf) {
 }
 
 void RaceCarPlugin::initParams(const sdf::ElementPtr &sdf) {
+    // State
+    _as_state.state = driverless_msgs::msg::State::START;
+    _as_state.mission = driverless_msgs::msg::State::MISSION_NONE;
+
     // Get ROS parameters
     _update_rate = _rosnode->declare_parameter("update_rate", 2.0);
     _publish_rate = _rosnode->declare_parameter("publish_rate", 200.0);
@@ -392,7 +399,7 @@ void RaceCarPlugin::update() {
                         std::min(_max_steering_rate * dt, std::abs(_des_input.delta - _act_input.delta));
 
     // Ensure vehicle can drive
-    if (!_state_machine->canDrive() || (_world->SimTime() - _last_cmd_time).Double() > 0.5) {
+    if (_as_state.state != driverless_msgs::msg::State::DRIVING || (_world->SimTime() - _last_cmd_time).Double() > 0.5) {
         _act_input.acc = -100.0;
         _act_input.vel = 0.0;
         _act_input.delta = 0.0;
@@ -430,9 +437,9 @@ void RaceCarPlugin::update() {
     if (_pub_tf) {
         publishTf();
     }
-
-    _state_machine->spinOnce(_last_sim_time);
 }
+
+void RaceCarPlugin::updateState(const driverless_msgs::msg::State::SharedPtr msg) { _as_state = *msg; }
 
 void RaceCarPlugin::onCmd(const ackermann_msgs::msg::AckermannDriveStamped::SharedPtr msg) {
     RCLCPP_INFO(_rosnode->get_logger(), "Last time: %f", (_world->SimTime() - _last_cmd_time).Double());
