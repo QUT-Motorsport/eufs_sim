@@ -79,6 +79,10 @@ StateNode::StateNode() : Node("state_control") {
     // Force flush of the stdout buffer
     setvbuf(stdout, NULL, _IONBF, BUFSIZ);
 
+    // AS status subscriber
+    this->state_sub_ = this->create_subscription<driverless_msgs::msg::State>(
+        "/system/as_status", 1, std::bind(&StateNode::as_state_callback, this, _1));
+
     // CAN pub
     can_pub_ = this->create_publisher<driverless_msgs::msg::Can>("/can/canbus_rosbound", 10);
 
@@ -114,6 +118,14 @@ StateNode::StateNode() : Node("state_control") {
 }
 
 StateNode::~StateNode() { RCLCPP_INFO(this->get_logger(), "Terminated RQT node"); }
+
+Car_State_t StateNode::get_car_state() { return this->car_state; }
+
+driverless_msgs::msg::State StateNode::get_ros_state() { return this->state_msg; }
+
+void StateNode::as_state_callback(const driverless_msgs::msg::State::SharedPtr msg) {
+    state_msg = *msg;
+}
 
 void StateNode::vcu_ebs_timer_callback() {
     if (!LV_key_on) {
@@ -314,9 +326,7 @@ void StateNode::reset_states() {
 
     // car signals
     reset_car();
-    std_msgs::msg::UInt8 lap_count_msg;
-    lap_count_msg.data = 0;
-    lap_counter_pub_->publish(lap_count_msg);
+    pub_lap_count(0);
 
     // sim world
     reset_pressed = false;
@@ -333,6 +343,12 @@ void StateNode::reset_car() {
     this->RES_status.estop = true;
     this->RES_status.sw_k2 = false;
     this->RES_status.bt_k3 = false;
+}
+
+void StateNode::pub_lap_count(int lap_count) {
+    std_msgs::msg::UInt8 lap_count_msg;
+    lap_count_msg.data = lap_count;
+    lap_counter_pub_->publish(lap_count_msg);
 }
 
 // void StateNode::reset_car_pos() {

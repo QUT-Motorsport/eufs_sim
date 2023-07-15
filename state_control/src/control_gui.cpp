@@ -1,17 +1,3 @@
-// Copyright 2021 Jaehyun Shim
-//
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//     http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
-
 #include "state_control/control_gui.hpp"
 
 #include <memory>
@@ -50,6 +36,7 @@ void ControlGUIPlugin::initPlugin(qt_gui_cpp::PluginContext& context) {
     connect(ui_.r2d_btn, SIGNAL(clicked(bool)), this, SLOT(set_r2d_btn()));
     connect(ui_.RES_safety, SIGNAL(valueChanged(int)), this, SLOT(set_switch_up()));
     connect(ui_.reset_btn, SIGNAL(clicked(bool)), this, SLOT(set_reset_btn()));
+    connect(ui_.laps_box, SIGNAL(valueChanged(double)), this, SLOT(set_laps()));
 
     // Run ros spin
     ros_timer_ = new QTimer(this);
@@ -57,24 +44,65 @@ void ControlGUIPlugin::initPlugin(qt_gui_cpp::PluginContext& context) {
     ros_timer_->start(10);
 }
 
-void ControlGUIPlugin::shutdownPlugin() {
-    // Stop ros spin
-    ros_timer_->stop();
-    rclcpp::shutdown();
+void ControlGUIPlugin::ros_timer_callback() { 
+    rclcpp::spin_some(state_node_);
+    Car_State_t sim_car_state = state_node_->get_car_state();
+    driverless_msgs::msg::State supervisor_state = state_node_->get_ros_state();
+
+    // convert enum to string
+    std::string veh_state_str = AS_STATES_STR[sim_car_state.AS_state];
+    std::string TS_state_str = TS_STATES_STR[sim_car_state.TS_state];
+
+    // stringify driverless_msgs::msg::State enum
+    std::string supervisor_mission_str = ROS_MISSIONS_STR[supervisor_state.mission];
+    std::string supervisor_state_str = stringify_state(supervisor_state);
+
+    // update gui
+    ui_.VehStateDisplay->setText(QString::fromStdString(veh_state_str));
+    ui_.TSStateDisplay->setText(QString::fromStdString(TS_state_str));
+    ui_.MissionDisplay->setText(QString::fromStdString(supervisor_mission_str));
+    ui_.ASStateDisplay->setText(QString::fromStdString(supervisor_state_str));
+    ui_.LapDisplay->setText(QString::number(supervisor_state.lap_count));
 }
 
-void ControlGUIPlugin::saveSettings(qt_gui_cpp::Settings& plugin_settings, qt_gui_cpp::Settings& instance_settings) const {
-    (void)plugin_settings;
-    (void)instance_settings;
-}
+std::string ControlGUIPlugin::stringify_state(driverless_msgs::msg::State msg) {
+    std::string state_str = "";
 
-void ControlGUIPlugin::restoreSettings(const qt_gui_cpp::Settings& plugin_settings,
-                                const qt_gui_cpp::Settings& instance_settings) {
-    (void)plugin_settings;
-    (void)instance_settings;
-}
+    switch (msg.state) {
+        case driverless_msgs::msg::State::START:
+            state_str = "START";
+            break;
+        case driverless_msgs::msg::State::SELECT_MISSION:
+            state_str = "SELECT_MISSION";
+            break;
+        case driverless_msgs::msg::State::WAIT_FOR_MISSION:
+            state_str = "WAIT_FOR_MISSION";
+            break;
+        case driverless_msgs::msg::State::CHECK_EBS:
+            state_str = "CHECK_EBS";
+            break;
+        case driverless_msgs::msg::State::READY:
+            state_str = "READY";
+            break;
+        case driverless_msgs::msg::State::RELEASE_EBS:
+            state_str = "RELEASE_EBS";
+            break;
+        case driverless_msgs::msg::State::DRIVING:
+            state_str = "DRIVING";
+            break;
+        case driverless_msgs::msg::State::ACTIVATE_EBS:
+            state_str = "ACTIVATE_EBS";
+            break;
+        case driverless_msgs::msg::State::FINISHED:
+            state_str = "FINISHED";
+            break;
+        case driverless_msgs::msg::State::EMERGENCY:
+            state_str = "EMERGENCY";
+            break;
+    }
 
-void ControlGUIPlugin::ros_timer_callback() { rclcpp::spin_some(state_node_); }
+    return state_str;
+}
 
 void ControlGUIPlugin::set_LV_key() {
     state_node_->LV_key_on = ui_.LV_key->value();
@@ -141,6 +169,7 @@ void ControlGUIPlugin::set_reset_btn() {
     ui_.mission_select->setCurrentIndex(0);
     ui_.estop_btn->setChecked(true);
     ui_.RES_safety->setValue(0);
+    ui_.laps_box->setValue(0);
 
     auto request_cones = std::make_shared<std_srvs::srv::Trigger::Request>();
     auto result_cones = state_node_->reset_cones_srv_->async_send_request(request_cones);
@@ -161,6 +190,28 @@ void ControlGUIPlugin::set_reset_btn() {
     } else {
         RCLCPP_ERROR(state_node_->get_logger(), "reset_car_pos_srv failed");
     }
+}
+
+void ControlGUIPlugin::set_laps() {
+    std::cout << "laps entered: " << ui_.laps_box->value() << std::endl;
+    state_node_->pub_lap_count(ui_.laps_box->value());
+}
+
+void ControlGUIPlugin::shutdownPlugin() {
+    // Stop ros spin
+    ros_timer_->stop();
+    rclcpp::shutdown();
+}
+
+void ControlGUIPlugin::saveSettings(qt_gui_cpp::Settings& plugin_settings, qt_gui_cpp::Settings& instance_settings) const {
+    (void)plugin_settings;
+    (void)instance_settings;
+}
+
+void ControlGUIPlugin::restoreSettings(const qt_gui_cpp::Settings& plugin_settings,
+                                const qt_gui_cpp::Settings& instance_settings) {
+    (void)plugin_settings;
+    (void)instance_settings;
 }
 }  // namespace state_control
 PLUGINLIB_EXPORT_CLASS(state_control::ControlGUIPlugin, rqt_gui_cpp::Plugin)

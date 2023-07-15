@@ -10,6 +10,7 @@
 #include "CAN_VCU.h"
 #include "QUTMS_can.h"
 #include "driverless_msgs/msg/can.hpp"
+#include "driverless_msgs/msg/state.hpp"
 #include "rclcpp/rclcpp.hpp"
 #include "std_msgs/msg/string.hpp"
 #include "std_msgs/msg/u_int8.hpp"
@@ -46,6 +47,9 @@ class StateNode : public rclcpp::Node {
     StateNode();
     virtual ~StateNode();
 
+    Car_State_t get_car_state();
+    driverless_msgs::msg::State get_ros_state();
+
     // Car boot sequence
     bool LV_key_on = false;
     bool TS_key_on = false;
@@ -68,10 +72,19 @@ class StateNode : public rclcpp::Node {
     rclcpp::Client<std_srvs::srv::Trigger>::SharedPtr reset_car_pos_srv_;
     rclcpp::Client<std_srvs::srv::Trigger>::SharedPtr reset_cones_srv_;
 
+    // publish simulated laps
+    void pub_lap_count(int lap_count);
+
    private:
+    // states
     Car_State_t car_state;
     Car_State_t prev_car_state;
+    driverless_msgs::msg::State state_msg;
     int count = 0;
+
+    // state sub
+    rclcpp::Subscription<driverless_msgs::msg::State>::SharedPtr state_sub_;
+    void as_state_callback(const driverless_msgs::msg::State::SharedPtr msg);
     
     // CAN pub
     rclcpp::Publisher<driverless_msgs::msg::Can>::SharedPtr can_pub_;
