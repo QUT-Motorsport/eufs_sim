@@ -54,8 +54,8 @@ void SBGPlugin::initParams(sdf::ElementPtr sdf) {
     _ekf_update_rate = _ros_node->declare_parameter("ekf_update_rate", 1.0);
     _vel_update_rate = _ros_node->declare_parameter("vel_update_rate", 1.0);
     _gps_update_rate = _ros_node->declare_parameter("gps_update_rate", 1.0);
-    _reference_frame = _ros_node->declare_parameter("referenceFrame", "map");
-    _robot_frame = _ros_node->declare_parameter("robotFrame", "base_link");
+    _reference_frame = _ros_node->declare_parameter("reference_frame", "map");
+    _robot_frame = _ros_node->declare_parameter("robot_rame", "base_link");
 
     _pub_gt = get_bool_parameter(sdf, "publishGroundTruth", false, "false", _ros_node->get_logger());
     std::string yaml_name = get_string_parameter(sdf, "noiseConfig", "", "empty", _ros_node->get_logger());
