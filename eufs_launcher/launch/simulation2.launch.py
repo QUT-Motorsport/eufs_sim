@@ -95,10 +95,11 @@ def spawn_car(context, *args, **kwargs):
         IncludeLaunchDescription(
             launch_description_source=PythonLaunchDescriptionSource(car_launch),
             launch_arguments=[
+                ("use_sim_time", LaunchConfiguration("use_sim_time")),
+                ("robot_name", LaunchConfiguration("robot_name")),
                 ("vehicle_model", LaunchConfiguration("vehicleModel")),
                 ("vehicle_model_config", LaunchConfiguration("vehicleModelConfig")),
                 ("command_mode", LaunchConfiguration("commandMode")),
-                ("robot_name", LaunchConfiguration("robot_name")),
                 ("publish_transform", LaunchConfiguration("publish_gt_tf")),
                 ("publish_ground_truth", LaunchConfiguration("pub_ground_truth")),
                 ("simulate_perception", LaunchConfiguration("sim_perception")),
@@ -121,9 +122,15 @@ def generate_launch_description():
     rviz_config_file = os.path.join(
         get_package_share_directory("config"), "rviz", "default.rviz"
     )
+    # use_sim_time = LaunchConfiguration("use_sim_time", default="True")
 
     return LaunchDescription(
         [
+            DeclareLaunchArgument(
+                name="use_sim_time",
+                default_value="True",
+                description="Use simulation (Gazebo) clock if true",
+            ),
             DeclareLaunchArgument(
                 name="robostack",
                 default_value="false",
@@ -205,6 +212,7 @@ def generate_launch_description():
                 executable="rviz2",
                 arguments=["-d", rviz_config_file],
                 condition=IfCondition(LaunchConfiguration("rviz")),
+                parameters=[{"use_sim_time": LaunchConfiguration("use_sim_time")}],
             ),
             # launch the gazebo world
             OpaqueFunction(function=gen_world),

@@ -327,7 +327,7 @@ class EUFSLauncher(Plugin):
             "launch",
             package,
             launch_file,
-            "use_sim_time:=true",
+            "use_sim_time:=True",
             "log_level:=debug",
         ] + args
         self.logger.info(f"Command: {' '.join(command)}")

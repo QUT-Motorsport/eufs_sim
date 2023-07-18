@@ -17,17 +17,17 @@ def spawn_car(context, *args, **kwargs):
     vehicle_model_config = get_argument(context, "vehicle_model_config")
     publish_transform = get_argument(context, "publish_transform")
     publish_ground_truth = get_argument(context, "publish_ground_truth")
+    enable_camera = get_argument(context, "enable_camera")
+    enable_lidar = get_argument(context, "enable_lidar")
+    enable_laserscan = get_argument(context, "enable_laserscan")
+    simulate_perception = get_argument(context, "simulate_perception")
+    simulate_slam = get_argument(context, "simulate_slam")
     x = get_argument(context, "x")
     y = get_argument(context, "y")
     z = get_argument(context, "z")
     roll = get_argument(context, "roll")
     pitch = get_argument(context, "pitch")
     yaw = get_argument(context, "yaw")
-    enable_camera = get_argument(context, "enable_camera")
-    enable_lidar = get_argument(context, "enable_lidar")
-    enable_laserscan = get_argument(context, "enable_laserscan")
-    simulate_perception = get_argument(context, "simulate_perception")
-    simulate_slam = get_argument(context, "simulate_slam")
 
     vehicle_config = join(
         get_package_share_directory("config"),
@@ -115,6 +115,7 @@ def spawn_car(context, *args, **kwargs):
                 {
                     "robot_description": robot_description,
                     "rate": 200,
+                    "use_sim_time": LaunchConfiguration("use_sim_time"),
                 }
             ],
             arguments=[urdf_path],
@@ -128,6 +129,7 @@ def spawn_car(context, *args, **kwargs):
                 {
                     "robot_description": robot_description,
                     "rate": 200,
+                    "use_sim_time": LaunchConfiguration("use_sim_time"),
                 }
             ],
             arguments=["--ros-args", "--log-level", "warn"],
@@ -145,6 +147,11 @@ def generate_launch_description():
     return LaunchDescription(
         [
             DeclareLaunchArgument(
+                "use_sim_time",
+                default_value="False",
+                description="Use simulation (Gazebo) clock if true",
+            ),
+            DeclareLaunchArgument(
                 "robot_name",
                 default_value="qev3",
                 description="The name of the robot",
@@ -155,44 +162,14 @@ def generate_launch_description():
                 description="The vehicle model class to use on the robot",
             ),
             DeclareLaunchArgument(
-                "command_mode",
-                default_value="acceleration",
-                description="Determines whether to use acceleration or velocity to control the vehicle",
-            ),
-            DeclareLaunchArgument(
                 "vehicle_model_config",
                 default_value="configDry.yaml",
                 description="Determines the file from which the vehicle model parameters are read",
             ),
             DeclareLaunchArgument(
-                "x",
-                default_value="0",
-                description="Vehicle initial x position",
-            ),
-            DeclareLaunchArgument(
-                "y",
-                default_value="0",
-                description="Vehicle initial y position",
-            ),
-            DeclareLaunchArgument(
-                "z",
-                default_value="0",
-                description="Vehicle initial z position",
-            ),
-            DeclareLaunchArgument(
-                "roll",
-                default_value="0",
-                description="Vehicle initial roll",
-            ),
-            DeclareLaunchArgument(
-                "pitch",
-                default_value="0",
-                description="Vehicle initial pitch",
-            ),
-            DeclareLaunchArgument(
-                "yaw",
-                default_value="0",
-                description="Vehicle initial yaw",
+                "command_mode",
+                default_value="acceleration",
+                description="Determines whether to use acceleration or velocity to control the vehicle",
             ),
             DeclareLaunchArgument(
                 "publish_transform",
@@ -228,6 +205,36 @@ def generate_launch_description():
                 name="enable_laserscan",
                 default_value="false",
                 description="Condition to enable laserscan",
+            ),
+            DeclareLaunchArgument(
+                "x",
+                default_value="0",
+                description="Vehicle initial x position",
+            ),
+            DeclareLaunchArgument(
+                "y",
+                default_value="0",
+                description="Vehicle initial y position",
+            ),
+            DeclareLaunchArgument(
+                "z",
+                default_value="0",
+                description="Vehicle initial z position",
+            ),
+            DeclareLaunchArgument(
+                "roll",
+                default_value="0",
+                description="Vehicle initial roll",
+            ),
+            DeclareLaunchArgument(
+                "pitch",
+                default_value="0",
+                description="Vehicle initial pitch",
+            ),
+            DeclareLaunchArgument(
+                "yaw",
+                default_value="0",
+                description="Vehicle initial yaw",
             ),
             Node(
                 name="eufs_sim_rqt",
