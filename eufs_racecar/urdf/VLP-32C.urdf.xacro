@@ -90,7 +90,7 @@
             </noise>
           </ray>
 
-          <plugin name="ros_lidar_plugin" filename="libgazebo_ros_ray_sensor.so">
+          <plugin name="lidar_plugin" filename="libgazebo_ros_lidar.so">
             <ros>
               <remapping>~/out:=/velodyne_points</remapping>
             </ros>
@@ -135,7 +135,7 @@
             </noise>
           </ray>
 
-          <plugin name="ros_laserscan_plugin" filename="libgazebo_ros_ray_sensor.so">
+          <plugin name="laserscan_plugin" filename="libgazebo_ros_lidar.so">
             <ros>
               <remapping>~/out:=/scan</remapping>
             </ros>

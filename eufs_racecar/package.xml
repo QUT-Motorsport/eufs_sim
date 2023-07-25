@@ -25,9 +25,6 @@
   <depend>robot_state_publisher</depend>
   <depend>rviz2</depend>
 
-  <depend>gazebo_plugins</depend>
-  <depend>velodyne_gazebo_plugins</depend>
-
   <depend>eufs_plugins</depend>
   <depend>eufs_rqt</depend>
   <depend>state_control</depend>
