@@ -86,10 +86,7 @@ def spawn_car(context, *args, **kwargs):
         car_pos = line.split(",")
         x = car_pos[1]
         y = car_pos[2]
-        z = car_pos[3]
-        roll = car_pos[4]
-        pitch = car_pos[5]
-        yaw = car_pos[6]
+        yaw = car_pos[3]
 
     return [
         IncludeLaunchDescription(
@@ -97,21 +94,12 @@ def spawn_car(context, *args, **kwargs):
             launch_arguments=[
                 ("use_sim_time", LaunchConfiguration("use_sim_time")),
                 ("robot_name", LaunchConfiguration("robot_name")),
-                ("vehicle_model", LaunchConfiguration("vehicleModel")),
                 ("vehicle_model_config", LaunchConfiguration("vehicleModelConfig")),
-                ("command_mode", LaunchConfiguration("commandMode")),
-                ("publish_transform", LaunchConfiguration("publish_gt_tf")),
-                ("publish_ground_truth", LaunchConfiguration("pub_ground_truth")),
-                ("simulate_perception", LaunchConfiguration("sim_perception")),
-                ("simulate_slam", LaunchConfiguration("sim_slam")),
                 ("enable_camera", LaunchConfiguration("enable_camera")),
                 ("enable_lidar", LaunchConfiguration("enable_lidar")),
                 ("enable_laserscan", LaunchConfiguration("enable_laserscan")),
                 ("x", x),
                 ("y", y),
-                ("z", z),
-                ("roll", roll),
-                ("pitch", pitch),
                 ("yaw", yaw),
             ],
         ),
@@ -142,19 +130,9 @@ def generate_launch_description():
                 description="Determines which track is launched",
             ),
             DeclareLaunchArgument(
-                name="vehicleModel",
-                default_value="DynamicBicycle",
-                description="Determines which vehicle model is used",
-            ),
-            DeclareLaunchArgument(
-                name="vehicleModelConfig",
+                name="vehicle_model_config",
                 default_value="configDry.yaml",
                 description="Determines the file from which the vehicle model parameters are read",
-            ),
-            DeclareLaunchArgument(
-                name="commandMode",
-                default_value="acceleration",
-                description="Determines the vehicle control mode (acceleration or velocity)",
             ),
             DeclareLaunchArgument(
                 name="robot_name",
@@ -170,26 +148,6 @@ def generate_launch_description():
                 name="rviz",
                 default_value="true",
                 description="Condition to launch the Rviz GUI",
-            ),
-            DeclareLaunchArgument(
-                name="publish_gt_tf",
-                default_value="false",
-                description="Condition to use ground truth transform",
-            ),
-            DeclareLaunchArgument(
-                name="pub_ground_truth",
-                default_value="true",
-                description="Condition to publish ground truth",
-            ),
-            DeclareLaunchArgument(
-                name="sim_perception",
-                default_value="true",
-                description="Condition to enable sim perception cones",
-            ),
-            DeclareLaunchArgument(
-                name="sim_slam",
-                default_value="true",
-                description="Condition to enable sim SLAM cones",
             ),
             DeclareLaunchArgument(
                 name="enable_camera",

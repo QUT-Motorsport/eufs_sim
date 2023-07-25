@@ -77,7 +77,7 @@ class RaceCarPlugin : public gazebo::ModelPlugin {
     eufs::models::Input &getInput() { return _des_input; }
 
    private:
-    void initParams(const sdf::ElementPtr &sdf);
+    void initParams();
     void setPositionFromWorld();
     bool resetVehiclePosition(std::shared_ptr<std_srvs::srv::Trigger::Request> request,
                               std::shared_ptr<std_srvs::srv::Trigger::Response> response);

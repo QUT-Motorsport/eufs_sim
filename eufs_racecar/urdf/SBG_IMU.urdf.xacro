@@ -90,5 +90,9 @@
                 <pose>0 0 0 0 0 0</pose>
             </sensor>
         </gazebo>
+        <!-- Add custom SBG driver plugin for custom messages -->
+        <gazebo>
+            <plugin name="sbg_driver" filename="libgazebo_ros_sbg_driver.so"></plugin>
+        </gazebo>
     </xacro:macro>
 </robot>

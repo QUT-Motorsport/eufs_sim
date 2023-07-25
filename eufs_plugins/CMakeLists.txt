@@ -46,8 +46,6 @@ if(ENABLE_PROFILER)
   endif()
 endif()
 
-install(DIRECTORY urdf DESTINATION share/${PROJECT_NAME})
-
 add_subdirectory(gazebo_cone_detection_plugin)
 add_subdirectory(gazebo_race_car_plugin)
 add_subdirectory(gazebo_sbg_plugin)

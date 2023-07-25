@@ -1,6 +1,6 @@
 from collections import OrderedDict
-from os import listdir
-from os.path import isfile, join
+from os import listdir, environ
+from os.path import isfile, join, expanduser
 from subprocess import Popen
 
 import yaml
@@ -31,6 +31,10 @@ class EUFSLauncher(Plugin):
         self.TRACKS_SHARE = get_package_share_directory("eufs_tracks")
         self.CONFIG_SHARE = get_package_share_directory("config")
         self.popens = []  # Create array of popen processes
+        self.plugin_yaml = join(self.CONFIG_SHARE, "config", "pluginParams.yaml")
+
+        # Initialise plugin defaults that may have been changed by the user
+        self.init_plugin_config(self.plugin_yaml)
 
         # Declare Launcher Parameters
         default_config_path = join(self.CONFIG_SHARE, "config", "launcherOptions.yaml")
@@ -133,39 +137,6 @@ class EUFSLauncher(Plugin):
             cur_cbox.setChecked(checkboxes[key]["checked_on_default"])
             cur_cbox.setGeometry(cur_xpos, cur_ypos, 300, 30)
             cur_cbox.setFont(QFont("Sans Serif", 7))
-            if "package" in checkboxes[key] and "launch_file" in checkboxes[key]:
-                # This handles any launch files that the checkbox will launch
-                # if selected.
-                if "args" in checkboxes[key]:
-                    cur_cbox_args = checkboxes[key]["args"].keys()
-                else:
-                    cur_cbox_args = []
-                # The weird double-lambda thing is because python
-                # lambda-captures
-                # by reference, not value, and so consequently since the `key`
-                # variable is used every loop, at the end of the loops all of
-                # these lambda functions would actually be refering to the
-                # *last*
-                # loop's key, not each individual loop's key.
-                # To solve that, we force key into a local variable by wrapping
-                # our contents with a lambda taking it as a parameter, then
-                # immediately passing it in.
-                # We do the same for all other changing variables.
-                self.checkbox_effect_mapping.append(
-                    (
-                        cur_cbox,
-                        (
-                            lambda key, cur_cbox_args: (
-                                lambda: self.launch_with_args(
-                                    checkboxes[key]["package"],
-                                    checkboxes[key]["launch_file"],
-                                    cur_cbox_args,
-                                )
-                            )
-                        )(key, cur_cbox_args),
-                        (lambda key: lambda: None)(key),
-                    )
-                )
             if "parameter_triggering" in checkboxes[key]:
                 # This handles parameter details that will be passed to the
                 # `simulation.launch.py` backbone file depending on whether the
@@ -235,28 +206,22 @@ class EUFSLauncher(Plugin):
 
     def launch_button_pressed(self):
         """
-        Launches Gazebo.
-
-        Here is our pre-launch process:
-          1: Create csv from track_to_launch
-          2: Kill random noise tiles in accordance with the noise value
-          3: Shuffle cone positions slightly in accordance with cone noise value
-          4: Convert that to "LAST_LAUNCH.launch"
+        Launches Gazebo and spawns the car.
         """
         self.logger.info("Launching Nodes...")
 
         # Calculate parameters to pass
         track_layout = f"track:={self.TRACK_SELECTOR.currentText()}"
-        vehicle_model = f"vehicleModel:={self.VEHICLE_MODEL_MENU.currentText()}"
-        command_mode = f"commandMode:={self.COMMAND_MODE_MENU.currentText()}"
+        vehicle_model = f"vehicle_model:={self.VEHICLE_MODEL_MENU.currentText()}"
+        command_mode = f"command_mode:={self.COMMAND_MODE_MENU.currentText()}"
         model_config = self.MODEL_CONFIGS[self.MODEL_PRESET_MENU.currentText()]
-        vehicle_model_config = f"vehicleModelConfig:={model_config}"
+        vehicle_config = f"vehicle_config:={model_config}"
         robot_name = f"robot_name:={self.ROBOT_NAME_MENU.currentText()}"
         parameters_to_pass = [
             track_layout,
             vehicle_model,
             command_mode,
-            vehicle_model_config,
+            vehicle_config,
             robot_name,
         ]
 
@@ -277,6 +242,18 @@ class EUFSLauncher(Plugin):
                 self.logger.info(f"Checkbox disabled: {param_if_off}")
                 parameters_to_pass.extend(param_if_off)
 
+        self.logger.info(f"Parameters to pass: {parameters_to_pass}")
+
+        # Rewrite yaml file with new parameters
+        for parameter in parameters_to_pass:
+            self.rewrite_yaml_config(self.plugin_yaml, parameter)
+        noise_config = join(
+            get_package_share_directory("config"),
+            "config",
+            "motionNoise.yaml",
+        )
+        self.rewrite_yaml_config(noise_config, "noise:=noise_config")
+
         # Here we launch `simulation.launch.py`.
         self.launch_with_args(
             "eufs_launcher", "simulation2.launch.py", parameters_to_pass
@@ -290,6 +267,38 @@ class EUFSLauncher(Plugin):
                 effect_off()
 
         self.LAUNCH_BUTTON.setEnabled(False)
+    
+    def rewrite_yaml_config(self, yaml_file, parameter):
+        """Rewrites a yaml file with a new key-value pair."""
+        # extract key and value from parameter, form: key:=value
+        key, value = parameter.split(":=")
+        
+        with open(yaml_file, "r") as f:
+            data = yaml.safe_load(f)
+        
+        # check if key already exists
+        if key in data:
+            data[key] = value
+
+        with open(yaml_file, "w") as f:
+            yaml.safe_dump(data, f)
+
+    def init_plugin_config(self, yaml_file):
+        """Initializes a yaml file with default values."""
+        # copy default yaml file from config folder
+        # path is `~/QUTMS/eufs_sim/config/config/pluginParams.yaml`
+        ws_path = expanduser(environ["QUTMS_WS"])
+        default_yaml_file = join(
+            ws_path, 
+            "eufs_sim", 
+            "config", 
+            "config",
+            "pluginParams.yaml"
+        )
+        with open(default_yaml_file, "r") as f:
+            data = yaml.safe_load(f)
+        with open(yaml_file, "w") as f:
+            yaml.safe_dump(data, f)
 
     def generator_button_pressed(self):
         self.run_without_args(
@@ -308,13 +317,6 @@ class EUFSLauncher(Plugin):
         command = ["stdbuf", "-o", "L", "ros2", "run", package, program_name]
         self.logger.info(f"Command: {' '.join(command)}")
         process = Popen(command)
-        self.popens.append(process)
-
-    def launch_without_args(self, program_name, directory):
-        """Launches a program from the specified directory."""
-        command = [program_name]
-        self.logger.info(f"Command: {' '.join(command)}")
-        process = Popen(command, executable=directory)
         self.popens.append(process)
 
     def launch_with_args(self, package, launch_file, args):

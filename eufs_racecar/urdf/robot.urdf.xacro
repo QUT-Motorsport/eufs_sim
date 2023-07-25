@@ -1,5 +1,5 @@
 <?xml version="1.0"?>
-<robot name="qev3" xmlns:xacro="http://www.ros.org/wiki/xacro">
+<robot name="QEV-3D" xmlns:xacro="http://www.ros.org/wiki/xacro">
 
     <!-- ***************** -->
     <!-- Config parameters -->
@@ -23,27 +23,32 @@
     <!-- Imported elements -->
     <!-- ***************** -->
 
-    <!--  Import the wheels  -->
-    <xacro:include filename="$(find eufs_racecar)/urdf/wheels.urdf.xacro"/>
-
     <!-- Import EUFS base element with the chassis -->
     <xacro:include filename="$(find eufs_racecar)/urdf/chassis_base.urdf.xacro" />
+
+    <!--  Import the wheels  -->
+    <xacro:include filename="$(find eufs_racecar)/urdf/wheels.urdf.xacro"/>
 
     <!-- Import all available sensors -->
     <!-- GPS -->
     <xacro:include filename="$(find eufs_racecar)/urdf/SBG_GPS.urdf.xacro"/>
-
-    <!--IMU -->
+    <!-- IMU -->
     <xacro:include filename="$(find eufs_racecar)/urdf/SBG_IMU.urdf.xacro"/>
-
     <!-- Velodyne VLP-32C -->
     <xacro:include filename="$(find eufs_racecar)/urdf/VLP-32C.urdf.xacro"/>
-
     <!-- ZED Stereo camera -->
     <xacro:include filename="$(find eufs_racecar)/urdf/ZED2i.urdf.xacro"/>
 
     <!--  Include the plugins  -->
-    <xacro:include filename="$(find eufs_plugins)/urdf/eufs_plugins.gazebo.xacro" />
+    <!-- SBG plugin included in the SBG_IMU urdf -->
+    <gazebo>
+        <!-- also is ros node name -->
+        <plugin name="race_car" filename="libgazebo_ros_race_car.so"></plugin>
+    </gazebo>
+
+    <gazebo>
+        <plugin name="cone_detection" filename="libgazebo_ros_cone_detection.so"></plugin>
+    </gazebo>
 
     <!-- *************** -->
     <!-- Robots Elements -->

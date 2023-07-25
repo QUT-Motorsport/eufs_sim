@@ -49,7 +49,7 @@ void RaceCarPlugin::Load(gazebo::physics::ModelPtr model, sdf::ElementPtr sdf) {
     _tf_br = std::make_unique<tf2_ros::TransformBroadcaster>(_rosnode);
 
     // Initialize parameters
-    initParams(sdf);
+    initParams();
 
     // ROS Publishers
     // Wheel odom
@@ -97,7 +97,7 @@ void RaceCarPlugin::Load(gazebo::physics::ModelPtr model, sdf::ElementPtr sdf) {
     RCLCPP_INFO(_rosnode->get_logger(), "RaceCarPlugin Loaded");
 }
 
-void RaceCarPlugin::initParams(const sdf::ElementPtr &sdf) {
+void RaceCarPlugin::initParams() {
     // State
     _as_state.state = driverless_msgs::msg::State::START;
     _as_state.mission = driverless_msgs::msg::State::MISSION_NONE;
@@ -108,17 +108,13 @@ void RaceCarPlugin::initParams(const sdf::ElementPtr &sdf) {
     _reference_frame = _rosnode->declare_parameter("reference_frame", "map");
     _robot_frame = _rosnode->declare_parameter("robot_frame", "base_link");
     _control_delay = _rosnode->declare_parameter("control_delay", 0.5);
+    _pub_tf = _rosnode->declare_parameter("publish_transform", false);
+    _pub_gt = _rosnode->declare_parameter("publish_ground_truth", false);
+    _simulate_slam = _rosnode->declare_parameter("simulate_slam", false);
     /// SHOULD BE IN VEHICLE PARAMS FILE
     _steering_lock_time = _rosnode->declare_parameter("steering_lock_time", 1.0);
 
-    // SDF Parameters
-    _pub_tf = get_bool_parameter(sdf, "publishTransform", false, "false", _rosnode->get_logger());
-    _pub_gt = get_bool_parameter(sdf, "publishGroundTruth", false, "false", _rosnode->get_logger());
-    _simulate_slam = get_bool_parameter(sdf, "simulateSLAM", false, "false", _rosnode->get_logger());
-
-    std::string command_str =
-        get_string_parameter(sdf, "commandMode", "acceleration", "acceleration", _rosnode->get_logger());
-
+    std::string command_str = _rosnode->declare_parameter("command_mode", "acceleration");
     if (command_str.compare("acceleration") == 0) {
         _command_mode = acceleration;
     } else if (command_str.compare("velocity") == 0) {
@@ -129,11 +125,8 @@ void RaceCarPlugin::initParams(const sdf::ElementPtr &sdf) {
     }
 
     // Vehicle model
-    std::string vehicle_model_ =
-        get_string_parameter(sdf, "vehicleModel", "DynamicBicycle", "DynamicBicycle", _rosnode->get_logger());
-    std::string vehicle_yaml_name =
-        get_string_parameter(sdf, "vehicleConfig", "vehicle.yaml", "null", _rosnode->get_logger());
-
+    std::string vehicle_model_ = _rosnode->declare_parameter("vehicle_model", "DynamicBicycle");
+    std::string vehicle_yaml_name = _rosnode->declare_parameter("vehicle_config", "null");
     if (vehicle_yaml_name == "null") {
         RCLCPP_FATAL(_rosnode->get_logger(), "gazebo_ros_race_car plugin missing <yamlConfig>, cannot proceed");
         return;
@@ -155,8 +148,7 @@ void RaceCarPlugin::initParams(const sdf::ElementPtr &sdf) {
     _right_steering_joint = _model->GetJoint(rightSteeringJointName);
 
     // Noise
-    std::string noise_yaml_name =
-        get_string_parameter(sdf, "noiseConfig", "noise.yaml", "null", _rosnode->get_logger());
+    std::string noise_yaml_name = _rosnode->declare_parameter("noise_config", "null");
     if (noise_yaml_name == "null") {
         RCLCPP_FATAL(_rosnode->get_logger(), "gazebo_ros_race_car plugin missing <noise_config>, cannot proceed");
         return;

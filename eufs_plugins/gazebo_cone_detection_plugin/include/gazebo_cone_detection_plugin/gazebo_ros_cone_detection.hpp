@@ -30,7 +30,7 @@ class ConeDetectionPlugin : public gazebo::ModelPlugin {
     // Gazebo plugin functions
     void Load(gazebo::physics::ModelPtr parent, sdf::ElementPtr sdf);
     void update();
-    void initParams(sdf::ElementPtr sdf);
+    void initParams(f);
     void publishGTTrack();
     void publishLiDARDetection();
     void publishCameraDetection();

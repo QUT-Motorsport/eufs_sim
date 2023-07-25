@@ -23,7 +23,7 @@ void SBGPlugin::Load(gazebo::physics::ModelPtr model, sdf::ElementPtr sdf) {
     _world = _model->GetWorld();
 
     // Initialize parameters
-    initParams(sdf);
+    initParams();
 
     // ROS publishers
     _pub_velocity = _ros_node->create_publisher<geometry_msgs::msg::TwistStamped>("imu/velocity", 1);
@@ -49,19 +49,22 @@ void SBGPlugin::Load(gazebo::physics::ModelPtr model, sdf::ElementPtr sdf) {
     RCLCPP_INFO(_ros_node->get_logger(), "SBGPlugin Loaded");
 }
 
-void SBGPlugin::initParams(sdf::ElementPtr sdf) {
+void SBGPlugin::initParams() {
     // Get parameters
     _ekf_update_rate = _ros_node->declare_parameter("ekf_update_rate", 1.0);
     _vel_update_rate = _ros_node->declare_parameter("vel_update_rate", 1.0);
     _gps_update_rate = _ros_node->declare_parameter("gps_update_rate", 1.0);
     _reference_frame = _ros_node->declare_parameter("reference_frame", "map");
     _robot_frame = _ros_node->declare_parameter("robot_rame", "base_link");
+    _pub_gt = _ros_node->declare_parameter("publish_ground_truth", false);
 
-    _pub_gt = get_bool_parameter(sdf, "publishGroundTruth", false, "false", _ros_node->get_logger());
-    std::string yaml_name = get_string_parameter(sdf, "noiseConfig", "", "empty", _ros_node->get_logger());
-
-    // Create noise object
-    _noise = std::make_unique<eufs::models::Noise>(yaml_name);
+    // Noise
+    std::string noise_yaml_name = _ros_node->declare_parameter("noise_config", "null");
+    if (noise_yaml_name == "null") {
+        RCLCPP_FATAL(_ros_node->get_logger(), "gazebo_ros_race_car plugin missing <noise_config>, cannot proceed");
+        return;
+    }
+    _noise = std::make_unique<eufs::models::Noise>(noise_yaml_name);
 }
 
 void SBGPlugin::navSatFixCallback(const sensor_msgs::msg::NavSatFix::SharedPtr nav_sat_msg) {
