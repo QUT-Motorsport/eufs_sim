@@ -31,10 +31,13 @@ class EUFSLauncher(Plugin):
         self.TRACKS_SHARE = get_package_share_directory("eufs_tracks")
         self.CONFIG_SHARE = get_package_share_directory("config")
         self.popens = []  # Create array of popen processes
-        self.plugin_yaml = join(self.CONFIG_SHARE, "config", "pluginParams.yaml")
+
+        default_plugin_yaml = join(self.CONFIG_SHARE, "config", "pluginParams.yaml")
+        # copy of file
+        self.plugin_yaml = join(self.CONFIG_SHARE, "config", "pluginUserParams.yaml")
 
         # Initialise plugin defaults that may have been changed by the user
-        self.init_plugin_config(self.plugin_yaml)
+        self.init_plugin_config(default_plugin_yaml)
 
         # Declare Launcher Parameters
         default_config_path = join(self.CONFIG_SHARE, "config", "launcherOptions.yaml")
@@ -242,21 +245,27 @@ class EUFSLauncher(Plugin):
                 self.logger.info(f"Checkbox disabled: {param_if_off}")
                 parameters_to_pass.extend(param_if_off)
 
-        self.logger.info(f"Parameters to pass: {parameters_to_pass}")
-
         # Rewrite yaml file with new parameters
         for parameter in parameters_to_pass:
-            self.rewrite_yaml_config(self.plugin_yaml, parameter)
+            self.rewrite_yaml_config(parameter)
+
         noise_config = join(
             get_package_share_directory("config"),
             "config",
             "motionNoise.yaml",
         )
-        self.rewrite_yaml_config(noise_config, "noise:=noise_config")
+        self.rewrite_yaml_config(str("noise_config:="+noise_config))
+
+        vehicle_config = join(
+            get_package_share_directory("config"),
+            "config",
+            model_config,
+        )
+        self.rewrite_yaml_config(str("vehicle_config:="+vehicle_config))
 
         # Here we launch `simulation.launch.py`.
         self.launch_with_args(
-            "eufs_launcher", "simulation2.launch.py", parameters_to_pass
+            "eufs_launcher", "simulation.launch.py", parameters_to_pass
         )
 
         # Trigger launch files hooked to checkboxes
@@ -268,36 +277,37 @@ class EUFSLauncher(Plugin):
 
         self.LAUNCH_BUTTON.setEnabled(False)
     
-    def rewrite_yaml_config(self, yaml_file, parameter):
+    def rewrite_yaml_config(self, parameter):
         """Rewrites a yaml file with a new key-value pair."""
         # extract key and value from parameter, form: key:=value
         key, value = parameter.split(":=")
-        
-        with open(yaml_file, "r") as f:
+        with open(self.plugin_yaml, "r") as f:
             data = yaml.safe_load(f)
-        
-        # check if key already exists
-        if key in data:
-            data[key] = value
 
-        with open(yaml_file, "w") as f:
+        # iterate through the three nodes in the yaml file
+        for node in data:
+            # check if key already exists
+            if key in data[node]["ros__parameters"]:
+                self.logger.info(f"Overwriting {key} in {node} with {value}")
+                data[node]["ros__parameters"][key] = value
+                # check if boolean
+                if value == "true":
+                    data[node]["ros__parameters"][key] = True
+                elif value == "false":
+                    data[node]["ros__parameters"][key] = False
+                    
+
+        with open(self.plugin_yaml, "w") as f:
             yaml.safe_dump(data, f)
 
-    def init_plugin_config(self, yaml_file):
+    def init_plugin_config(self, default_yaml_file):
         """Initializes a yaml file with default values."""
-        # copy default yaml file from config folder
-        # path is `~/QUTMS/eufs_sim/config/config/pluginParams.yaml`
-        ws_path = expanduser(environ["QUTMS_WS"])
-        default_yaml_file = join(
-            ws_path, 
-            "eufs_sim", 
-            "config", 
-            "config",
-            "pluginParams.yaml"
-        )
+        # make a copy of the default yaml file from config folder
+        # so any user options can be updated without affecting the default
+        
         with open(default_yaml_file, "r") as f:
             data = yaml.safe_load(f)
-        with open(yaml_file, "w") as f:
+        with open(self.plugin_yaml, "w") as f:
             yaml.safe_dump(data, f)
 
     def generator_button_pressed(self):

@@ -56,8 +56,8 @@ eufs_launcher:
       label: "Ground Truth TF"
       checked_on_default: Yes
       parameter_triggering:
-        if_on: { "publish_gt_tf:=true" }
-        if_off: { "publish_gt_tf:=false" }
+        if_on: { "publish_transform:=true" }
+        if_off: { "publish_transform:=false" }
 
     pub_ground_truth:
       priority: 4
@@ -65,8 +65,8 @@ eufs_launcher:
       label: "Publish Ground Truth"
       checked_on_default: Yes
       parameter_triggering:
-        if_on: { "pub_ground_truth:=true" }
-        if_off: { "pub_ground_truth:=false" }
+        if_on: { "publish_ground_truth:=true" }
+        if_off: { "pub_lishground_truth:=false" }
 
     perception:
       priority: 5
@@ -74,8 +74,8 @@ eufs_launcher:
       label: "Simulated Perception"
       checked_on_default: Yes
       parameter_triggering:
-        if_on: { "sim_perception:=true" }
-        if_off: { "sim_perception:=false" }
+        if_on: { "simulate_perception:=true" }
+        if_off: { "simulate_perception:=false" }
 
     slam:
       priority: 6
@@ -83,8 +83,8 @@ eufs_launcher:
       label: "Simulated SLAM"
       checked_on_default: Yes
       parameter_triggering:
-        if_on: { "sim_slam:=true" }
-        if_off: { "sim_slam:=false" }
+        if_on: { "simulate_slam:=true" }
+        if_off: { "simulate_slam:=false" }
 
     lidar:
       priority: 7

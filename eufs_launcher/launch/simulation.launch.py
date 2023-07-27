@@ -53,7 +53,7 @@ def gen_world(context, *args, **kwargs):
         get_package_share_directory("gazebo_ros"), "launch", "gazebo.launch.py"
     )
     params_file = os.path.join(
-        get_package_share_directory("config"), "config", "pluginParams.yaml"
+        get_package_share_directory("config"), "config", "pluginUserParams.yaml"
     )
 
     return [
@@ -94,7 +94,7 @@ def spawn_car(context, *args, **kwargs):
             launch_arguments=[
                 ("use_sim_time", LaunchConfiguration("use_sim_time")),
                 ("robot_name", LaunchConfiguration("robot_name")),
-                ("vehicle_model_config", LaunchConfiguration("vehicleModelConfig")),
+                ("vehicle_model_config", LaunchConfiguration("vehicle_model_config")),
                 ("enable_camera", LaunchConfiguration("enable_camera")),
                 ("enable_lidar", LaunchConfiguration("enable_lidar")),
                 ("enable_laserscan", LaunchConfiguration("enable_laserscan")),
