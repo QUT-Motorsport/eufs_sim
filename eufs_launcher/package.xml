@@ -25,7 +25,7 @@
 
   <depend>eufs_tracks</depend>
   <depend>eufs_racecar</depend>
-  <depend>config</depend>
+  <depend>eufs_config</depend>
 
   <export>
     <build_type>ament_python</build_type>

@@ -29,7 +29,7 @@ class EUFSLauncher(Plugin):
         self.logger = self.node.get_logger()
         self.LAUNCHER_SHARE = get_package_share_directory("eufs_launcher")
         self.TRACKS_SHARE = get_package_share_directory("eufs_tracks")
-        self.CONFIG_SHARE = get_package_share_directory("config")
+        self.CONFIG_SHARE = get_package_share_directory("eufs_config")
         self.popens = []  # Create array of popen processes
 
         default_plugin_yaml = join(self.CONFIG_SHARE, "config", "pluginParams.yaml")
@@ -250,14 +250,14 @@ class EUFSLauncher(Plugin):
             self.rewrite_yaml_config(parameter)
 
         noise_config = join(
-            get_package_share_directory("config"),
+            get_package_share_directory("eufs_config"),
             "config",
             "motionNoise.yaml",
         )
         self.rewrite_yaml_config(str("noise_config:="+noise_config))
 
         vehicle_config = join(
-            get_package_share_directory("config"),
+            get_package_share_directory("eufs_config"),
             "config",
             model_config,
         )

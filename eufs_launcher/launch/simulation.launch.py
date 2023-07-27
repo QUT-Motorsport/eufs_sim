@@ -53,7 +53,7 @@ def gen_world(context, *args, **kwargs):
         get_package_share_directory("gazebo_ros"), "launch", "gazebo.launch.py"
     )
     params_file = os.path.join(
-        get_package_share_directory("config"), "config", "pluginUserParams.yaml"
+        get_package_share_directory("eufs_config"), "config", "pluginUserParams.yaml"
     )
 
     return [
@@ -108,7 +108,7 @@ def spawn_car(context, *args, **kwargs):
 
 def generate_launch_description():
     rviz_config_file = os.path.join(
-        get_package_share_directory("config"), "rviz", "default.rviz"
+        get_package_share_directory("eufs_config"), "rviz", "default.rviz"
     )
     # use_sim_time = LaunchConfiguration("use_sim_time", default="True")
 

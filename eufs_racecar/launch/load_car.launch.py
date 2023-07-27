@@ -24,7 +24,7 @@ def spawn_car(context, *args, **kwargs):
     yaw = get_argument(context, "yaw")
 
     vehicle_config = join(
-        get_package_share_directory("config"),
+        get_package_share_directory("eufs_config"),
         "config",
         vehicle_model_config,
     )
@@ -114,7 +114,7 @@ def spawn_car(context, *args, **kwargs):
 
 def generate_launch_description():
     rqt_perspective_file = join(
-        get_package_share_directory("config"),
+        get_package_share_directory("eufs_config"),
         "ui",
         "control.perspective",
     )
