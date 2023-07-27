@@ -133,8 +133,8 @@ class TrackGenerator:
         # sample around the unit circle
         z = np.array([cmath.exp(2j * math.pi * t / n_points) for t in range(n_points)])
 
-        waves = np.zeros(n_points, dtype=np.complex)
-        dwaves = np.zeros(n_points, dtype=np.complex)
+        waves = np.zeros(n_points, dtype=np.complexfloating)
+        dwaves = np.zeros(n_points, dtype=np.complexfloating)
 
         frequency = 1
         amplitude = starting_amplitude

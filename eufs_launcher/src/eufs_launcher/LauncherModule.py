@@ -55,7 +55,7 @@ class EUFSLauncher(Plugin):
         context.add_widget(self._widget)
 
         # Extend the widget with all attributes and children from UI file
-        self.main_ui_file = join(self.LAUNCHER_SHARE, "resource", "launcher.ui")
+        self.main_ui_file = join(self.LAUNCHER_SHARE, "ui", "launcher.ui")
         loadUi(self.main_ui_file, self._widget)
 
         # Show _widget.windowTitle on left-top of each plugin (when it's set in _widget). This is
