@@ -15,7 +15,6 @@ setup(
         (share_directory, ["package.xml"]),
         (join(share_directory, "meshes"), glob("meshes/*.dae")),
         (join(share_directory, "urdf"), glob("urdf/*.urdf.xacro")),
-        (join(share_directory, "launch"), glob("launch/*.launch.py")),
         (share_directory, ["racecars.txt"]),
     ],
     install_requires=["setuptools"],
