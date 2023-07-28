@@ -25,24 +25,87 @@ Panels:
     Experimental: false
     Name: Time
     SyncMode: 0
-    SyncSource: ""
+    SyncSource: Velodyne Scan
 Visualization Manager:
   Class: ""
   Displays:
     - Class: rviz_default_plugins/TF
-      Enabled: false
+      Enabled: true
       Frame Timeout: 15
       Frames:
         All Enabled: true
+        base_footprint:
+          Value: true
+        chassis:
+          Value: true
+        imu_base_link:
+          Value: true
+        left_front_wheel:
+          Value: true
+        left_rear_wheel:
+          Value: true
+        left_steering_hinge:
+          Value: true
+        right_front_wheel:
+          Value: true
+        right_rear_wheel:
+          Value: true
+        right_steering_hinge:
+          Value: true
+        sbg_base_link:
+          Value: true
+        velodyne:
+          Value: true
+        velodyne_base_link:
+          Value: true
+        zed2i_camera_center:
+          Value: true
+        zed2i_depth_camera_frame:
+          Value: true
+        zed2i_left_camera_frame:
+          Value: true
+        zed2i_left_camera_optical_frame:
+          Value: true
+        zed2i_right_camera_frame:
+          Value: true
+        zed2i_right_camera_optical_frame:
+          Value: true
       Marker Scale: 1
       Name: TF
       Show Arrows: true
       Show Axes: true
       Show Names: false
       Tree:
-        {}
+        base_footprint:
+          chassis:
+            imu_base_link:
+              {}
+            left_rear_wheel:
+              {}
+            left_steering_hinge:
+              left_front_wheel:
+                {}
+            right_rear_wheel:
+              {}
+            right_steering_hinge:
+              right_front_wheel:
+                {}
+            sbg_base_link:
+              {}
+            velodyne_base_link:
+              velodyne:
+                {}
+            zed2i_camera_center:
+              zed2i_depth_camera_frame:
+                {}
+              zed2i_left_camera_frame:
+                zed2i_left_camera_optical_frame:
+                  {}
+              zed2i_right_camera_frame:
+                zed2i_right_camera_optical_frame:
+                  {}
       Update Interval: 0
-      Value: false
+      Value: true
     - Alpha: 1
       Class: rviz_default_plugins/RobotModel
       Collision Enabled: false
@@ -197,7 +260,7 @@ Visualization Manager:
       Color: 255; 255; 255
       Color Transformer: Intensity
       Decay Time: 0
-      Enabled: false
+      Enabled: true
       Invert Rainbow: false
       Max Color: 255; 255; 255
       Max Intensity: 0
@@ -214,11 +277,11 @@ Visualization Manager:
         Durability Policy: Volatile
         Filter size: 10
         History Policy: Keep Last
-        Reliability Policy: Reliable
+        Reliability Policy: Best Effort
         Value: /scan
       Use Fixed Frame: true
       Use rainbow: true
-      Value: false
+      Value: true
     - Class: rviz_default_plugins/Image
       Enabled: false
       Max Value: 1
@@ -236,48 +299,45 @@ Visualization Manager:
     - Class: rviz_marker_plugins/ConeDetectionStamped
       Color: 200; 200; 200
       Color Display: Cone
-      Enabled: true
+      Enabled: false
       Name: Ground truth track
       Namespaces:
-        cone: true
-        covariance: true
+        {}
       Topic:
         Depth: 5
         Durability Policy: Volatile
         History Policy: Keep Last
         Reliability Policy: Reliable
         Value: /ground_truth/global_map
-      Value: true
+      Value: false
     - Class: rviz_marker_plugins/ConeDetectionStamped
       Color: 200; 200; 200
       Color Display: Cone
-      Enabled: true
+      Enabled: false
       Name: SLAM track
       Namespaces:
-        cone: true
-        covariance: true
+        {}
       Topic:
         Depth: 5
         Durability Policy: Volatile
         History Policy: Keep Last
         Reliability Policy: Reliable
         Value: /slam/global_map
-      Value: true
+      Value: false
     - Class: rviz_marker_plugins/ConeDetectionStamped
       Color: 200; 200; 200
       Color Display: Cone
-      Enabled: true
+      Enabled: false
       Name: SLAM local
       Namespaces:
-        cone: true
-        covariance: true
+        {}
       Topic:
         Depth: 5
         Durability Policy: Volatile
         History Policy: Keep Last
         Reliability Policy: Reliable
         Value: /slam/local_map
-      Value: true
+      Value: false
     - Class: rviz_marker_plugins/ConeDetectionStamped
       Color: 200; 200; 200
       Color Display: Cone
@@ -438,7 +498,7 @@ Window Geometry:
   Views:
     collapsed: false
   Width: 1708
-  X: 2298
-  Y: 35
+  X: 2266
+  Y: 3
   ZED2i RGB Image:
     collapsed: false
