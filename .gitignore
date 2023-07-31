@@ -18,10 +18,6 @@ msg/_*.py
 build_isolated/
 devel_isolated/
 
-# Externally cloned packages
-eufs_msgs/
-eufs_rviz_plugins/
-
 # Ignore randomly generated track outputs
 eufs_tracks/image/rand.png
 eufs_tracks/launch/rand.launch

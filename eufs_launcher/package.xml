@@ -24,6 +24,7 @@
   <depend>python3-qt5-bindings</depend>
   <depend>ament_index_python</depend>
 
+  <depend>eufs_rqt</depend>
   <depend>eufs_tracks</depend>
   <depend>eufs_racecar</depend>
   <depend>eufs_config</depend>
