@@ -384,9 +384,7 @@ class Converter(Node):
         all_cones = raw_blue + raw_yellow + raw_orange + raw_big_orange
 
         # Create world file
-        world_template_filepath = os.path.join(
-            TRACKS_SHARE, "resource", "randgen_world_template"
-        )
+        world_template_filepath = os.path.join(TRACKS_SHARE, "worlds", "TEMPLATE")
         with open(world_template_filepath, "r") as world_template:
             # The world file needs to point to the correct model folder,
             # which conveniently has the same name as the world file itself.
@@ -401,9 +399,7 @@ class Converter(Node):
                 world_out.write(world_merged)
 
         # Create model folder
-        MODEL_TEMPLATE_SHARE = os.path.join(
-            TRACKS_SHARE, "resource", "randgen_model_template"
-        )
+        MODEL_TEMPLATE_SHARE = os.path.join(TRACKS_SHARE, "models", "TEMPLATE")
 
         # 1. Create the folder
         # If the folder does exist, it gets automatically overridden by the rest of this function

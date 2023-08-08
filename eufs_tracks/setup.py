@@ -14,16 +14,6 @@ data_files = [
     (join(share_directory, "meshes"), glob("meshes/*")),
     (join(share_directory, "ui"), glob("ui/*")),
     (join(share_directory, "worlds"), glob("worlds/*")),
-    (
-        join(share_directory, "resource/randgen_model_template"),
-        glob("resource/randgen_model_template/model.*"),
-    ),
-    (
-        join(share_directory, "resource"),
-        [
-            "resource/randgen_world_template",
-        ],
-    ),
 ]
 
 # Add all model sub-directories
@@ -47,11 +37,4 @@ setup(
     license="MIT",
     tests_require=["pytest"],
     scripts=["scripts/eufs_tracks_converter", "scripts/eufs_tracks_generator"],
-    entry_points={
-        "eufscli.command": ["track = eufs_tracks.cli.main:EUFSTrackGenerator"],
-        "eufs_tracks.verb": [
-            "create = eufs_tracks.cli.create:EUFSTracksCreate",
-            "convert = eufs_tracks.cli.convert:EUFSTracksConvert",
-        ],
-    },
 )
