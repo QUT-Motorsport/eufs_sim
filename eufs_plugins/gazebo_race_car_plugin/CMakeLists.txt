@@ -1,14 +1,12 @@
 cmake_minimum_required(VERSION 3.5)
 
 add_library(gazebo_ros_race_car SHARED
-  src/gazebo_ros_race_car.cpp
-  src/state_machine.cpp)
+  src/gazebo_ros_race_car.cpp)
 
 ament_target_dependencies(gazebo_ros_race_car
   "gazebo_dev"
   "gazebo_ros"
   "rclcpp"
-  "eufs_msgs"
   "nav_msgs"
   "geometry_msgs"
   "tf2"
