@@ -1,6 +1,6 @@
 from collections import OrderedDict
-from os import listdir, environ
-from os.path import isfile, join, expanduser
+from os import environ, listdir
+from os.path import expanduser, isfile, join
 from subprocess import Popen
 
 import yaml
@@ -254,14 +254,14 @@ class EUFSLauncher(Plugin):
             "config",
             "motionNoise.yaml",
         )
-        self.rewrite_yaml_config(str("noise_config:="+noise_config))
+        self.rewrite_yaml_config(str("noise_config:=" + noise_config))
 
         vehicle_config = join(
             get_package_share_directory("eufs_config"),
             "config",
             model_config,
         )
-        self.rewrite_yaml_config(str("vehicle_config:="+vehicle_config))
+        self.rewrite_yaml_config(str("vehicle_config:=" + vehicle_config))
 
         # Here we launch `simulation.launch.py`.
         self.launch_with_args(
@@ -276,7 +276,7 @@ class EUFSLauncher(Plugin):
                 effect_off()
 
         self.LAUNCH_BUTTON.setEnabled(False)
-    
+
     def rewrite_yaml_config(self, parameter):
         """Rewrites a yaml file with a new key-value pair."""
         # extract key and value from parameter, form: key:=value
@@ -295,7 +295,6 @@ class EUFSLauncher(Plugin):
                     data[node]["ros__parameters"][key] = True
                 elif value == "false":
                     data[node]["ros__parameters"][key] = False
-                    
 
         with open(self.plugin_yaml, "w") as f:
             yaml.safe_dump(data, f)
@@ -304,7 +303,7 @@ class EUFSLauncher(Plugin):
         """Initializes a yaml file with default values."""
         # make a copy of the default yaml file from config folder
         # so any user options can be updated without affecting the default
-        
+
         with open(default_yaml_file, "r") as f:
             data = yaml.safe_load(f)
         with open(self.plugin_yaml, "w") as f:

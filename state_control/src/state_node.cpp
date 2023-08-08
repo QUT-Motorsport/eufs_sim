@@ -91,14 +91,12 @@ StateNode::StateNode() : Node("state_control") {
 
     // reset trigger clients
     reset_car_pos_srv_ = this->create_client<std_srvs::srv::Trigger>("/system/reset_car_pos");
-    while (!this->reset_car_pos_srv_->wait_for_service(1s))
-    {
+    while (!this->reset_car_pos_srv_->wait_for_service(1s)) {
         RCLCPP_INFO(this->get_logger(), "Waiting for reset_car_pos service to be available...");
     }
 
     reset_cones_srv_ = this->create_client<std_srvs::srv::Trigger>("/system/reset_cones");
-    while (!this->reset_cones_srv_->wait_for_service(1s))
-    {
+    while (!this->reset_cones_srv_->wait_for_service(1s)) {
         RCLCPP_INFO(this->get_logger(), "Waiting for reset_cones service to be available...");
     }
 
@@ -123,9 +121,7 @@ Car_State_t StateNode::get_car_state() { return this->car_state; }
 
 driverless_msgs::msg::State StateNode::get_ros_state() { return this->state_msg; }
 
-void StateNode::as_state_callback(const driverless_msgs::msg::State::SharedPtr msg) {
-    state_msg = *msg;
-}
+void StateNode::as_state_callback(const driverless_msgs::msg::State::SharedPtr msg) { state_msg = *msg; }
 
 void StateNode::vcu_ebs_timer_callback() {
     if (!LV_key_on) {
@@ -157,7 +153,7 @@ void StateNode::res_heartbeat_timer_callback() {
     RES_Heartbeat_t CAN_msg = Compose_RES_Heartbeat(&this->RES_status);
     driverless_msgs::msg::Can ROS_CAN_msg = _d_2_f(CAN_msg.id, false, CAN_msg.data, sizeof(CAN_msg.data));
     this->can_pub_->publish(ROS_CAN_msg);
-    
+
     this->RES_status.bt_k3 = false;
 }
 
@@ -294,8 +290,10 @@ void StateNode::state_machine_timer_callback() {
     // }
 
     // print if changes
-    if (this->prev_car_state.AS_state != this->car_state.AS_state || this->prev_car_state.TS_state != this->car_state.TS_state) {
-        RCLCPP_INFO(this->get_logger(), "AS_state: %d, TS_state: %d", this->car_state.AS_state, this->car_state.TS_state);
+    if (this->prev_car_state.AS_state != this->car_state.AS_state ||
+        this->prev_car_state.TS_state != this->car_state.TS_state) {
+        RCLCPP_INFO(this->get_logger(), "AS_state: %d, TS_state: %d", this->car_state.AS_state,
+                    this->car_state.TS_state);
     }
     this->prev_car_state = this->car_state;
     // reset the one-time button presses

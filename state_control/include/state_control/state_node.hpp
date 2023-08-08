@@ -85,7 +85,7 @@ class StateNode : public rclcpp::Node {
     // state sub
     rclcpp::Subscription<driverless_msgs::msg::State>::SharedPtr state_sub_;
     void as_state_callback(const driverless_msgs::msg::State::SharedPtr msg);
-    
+
     // CAN pub
     rclcpp::Publisher<driverless_msgs::msg::Can>::SharedPtr can_pub_;
 

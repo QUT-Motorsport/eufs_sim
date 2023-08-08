@@ -391,7 +391,8 @@ void RaceCarPlugin::update() {
                         std::min(_max_steering_rate * dt, std::abs(_des_input.delta - _act_input.delta));
 
     // Ensure vehicle can drive
-    if (_as_state.state != driverless_msgs::msg::State::DRIVING || (_world->SimTime() - _last_cmd_time).Double() > 0.5) {
+    if (_as_state.state != driverless_msgs::msg::State::DRIVING ||
+        (_world->SimTime() - _last_cmd_time).Double() > 0.5) {
         _act_input.acc = -100.0;
         _act_input.vel = 0.0;
         _act_input.delta = 0.0;

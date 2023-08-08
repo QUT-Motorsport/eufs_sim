@@ -28,8 +28,8 @@
 // use enum from driverless_msgs::msg::State
 const char ROS_MISSIONS_STR[5][20] = {"MISSION_NONE", "MANUAL_DRIVING", "INSPECTION", "EBS_TEST", "TRACKDRIVE"};
 
-const char AS_STATES_STR[10][20] = {"CAR_OFF", "ESTOP", "LV_ON", "AS_ON", "MISSION_SELECTED", "MISSION_CONFIRMED",
-                                    "EBS_CHECKS", "WAIT_R2D", "R2D", "DRIVING"};
+const char AS_STATES_STR[10][20] = {"CAR_OFF",           "ESTOP",      "LV_ON",    "AS_ON", "MISSION_SELECTED",
+                                    "MISSION_CONFIRMED", "EBS_CHECKS", "WAIT_R2D", "R2D",   "DRIVING"};
 
 const char TS_STATES_STR[4][20] = {"TS_OFF", "TS_ON", "SDC_CLOSED", "TS_ACTIVE"};
 

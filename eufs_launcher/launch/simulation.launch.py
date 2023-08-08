@@ -1,8 +1,7 @@
 import os
-from os.path import join, isfile
+from os.path import isfile, join
 
 import xacro
-
 from ament_index_python.packages import get_package_share_directory
 from launch import LaunchDescription
 from launch.actions import (DeclareLaunchArgument, ExecuteProcess,
@@ -266,7 +265,7 @@ def generate_launch_description():
             ),
             Node(
                 package="vehicle_supervisor",
-                executable="vehicle_supervisor_slim_node",        
+                executable="vehicle_supervisor_slim_node",
             ),
             # launch the gazebo world
             OpaqueFunction(function=gen_world),
