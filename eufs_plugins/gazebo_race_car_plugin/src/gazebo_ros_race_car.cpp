@@ -82,6 +82,9 @@ void RaceCarPlugin::Load(gazebo::physics::ModelPtr model, sdf::ElementPtr sdf) {
     _reset_vehicle_pos_srv = _rosnode->create_service<std_srvs::srv::Trigger>(
         "/system/reset_car_pos",
         std::bind(&RaceCarPlugin::resetVehiclePosition, this, std::placeholders::_1, std::placeholders::_2));
+    _command_mode_srv = _rosnode->create_service<std_srvs::srv::Trigger>(
+        "/race_car_model/command_mode",
+        std::bind(&RaceCarPlugin::returnCommandMode, this, std::placeholders::_1, std::placeholders::_2));
 
     // Connect to Gazebo
     _update_connection = gazebo::event::Events::ConnectWorldUpdateBegin(std::bind(&RaceCarPlugin::update, this));
@@ -204,6 +207,19 @@ bool RaceCarPlugin::resetVehiclePosition(std::shared_ptr<std_srvs::srv::Trigger:
     _model->SetLinearVel(vel);
 
     return response->success;
+}
+
+void RaceCarPlugin::returnCommandMode(std::shared_ptr<std_srvs::srv::Trigger::Request>,
+                                      std::shared_ptr<std_srvs::srv::Trigger::Response> response) {
+    std::string command_mode_str;
+    if (_command_mode == acceleration) {
+        command_mode_str = "acceleration";
+    } else {
+        command_mode_str = "velocity";
+    }
+
+    response->success = true;
+    response->message = command_mode_str;
 }
 
 void RaceCarPlugin::setModelState() {
@@ -386,7 +402,7 @@ void RaceCarPlugin::update() {
 
     counter++;
     if (counter == 100) {
-        RCLCPP_INFO(_rosnode->get_logger(), "steering %f", _act_input.delta);
+        RCLCPP_DEBUG(_rosnode->get_logger(), "steering %f", _act_input.delta);
         counter = 0;
     }
 
