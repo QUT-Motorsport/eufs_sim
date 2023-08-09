@@ -380,8 +380,9 @@ void RaceCarPlugin::update() {
 
     _des_input.acc = _last_cmd.drive.acceleration;
     _des_input.vel = _last_cmd.drive.speed;
-    _des_input.delta = _last_cmd.drive.steering_angle * 3.1415 / 180 /
-                       (16 * 3.1415 / 180);  // scales from steering wheel 90* to front wheels 16*
+    _des_input.delta = _last_cmd.drive.steering_angle * 3.1415 / 180;
+    // 90* (max steering angle) = 16* (max wheel angle)
+    _des_input.delta *= (16.0 / 90.0);  // maybe use params not hardcoded?
 
     if (_command_mode == velocity) {
         double current_speed = std::sqrt(std::pow(_state.v_x, 2) + std::pow(_state.v_y, 2));
@@ -402,7 +403,7 @@ void RaceCarPlugin::update() {
 
     counter++;
     if (counter == 100) {
-        RCLCPP_DEBUG(_rosnode->get_logger(), "steering %f", _act_input.delta);
+        RCLCPP_DEBUG(_rosnode->get_logger(), "steering desired: %.2f, desired: %.2f", _des_input.delta, _act_input.delta);
         counter = 0;
     }
 
