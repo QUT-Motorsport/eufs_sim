@@ -67,6 +67,8 @@ void RaceCarPlugin::Load(gazebo::physics::ModelPtr model, sdf::ElementPtr sdf) {
             _rosnode->create_publisher<geometry_msgs::msg::PoseWithCovarianceStamped>("ground_truth/car_pose", 1);
         _pub_gt_steering_angle = _rosnode->create_publisher<std_msgs::msg::Float32>("/ground_truth/steering_angle", 1);
     }
+    // RVIZ joint visuals
+    _pub_joint_state = _rosnode->create_publisher<sensor_msgs::msg::JointState>("/joint_states/steering", 1);
 
     // Driverless state
     _sub_state = _rosnode->create_subscription<driverless_msgs::msg::State>(
@@ -80,9 +82,6 @@ void RaceCarPlugin::Load(gazebo::physics::ModelPtr model, sdf::ElementPtr sdf) {
     _reset_vehicle_pos_srv = _rosnode->create_service<std_srvs::srv::Trigger>(
         "/system/reset_car_pos",
         std::bind(&RaceCarPlugin::resetVehiclePosition, this, std::placeholders::_1, std::placeholders::_2));
-    _command_mode_srv = _rosnode->create_service<std_srvs::srv::Trigger>(
-        "/race_car_model/command_mode",
-        std::bind(&RaceCarPlugin::returnCommandMode, this, std::placeholders::_1, std::placeholders::_2));
 
     // Connect to Gazebo
     _update_connection = gazebo::event::Events::ConnectWorldUpdateBegin(std::bind(&RaceCarPlugin::update, this));
@@ -205,19 +204,6 @@ bool RaceCarPlugin::resetVehiclePosition(std::shared_ptr<std_srvs::srv::Trigger:
     _model->SetLinearVel(vel);
 
     return response->success;
-}
-
-void RaceCarPlugin::returnCommandMode(std::shared_ptr<std_srvs::srv::Trigger::Request>,
-                                      std::shared_ptr<std_srvs::srv::Trigger::Response> response) {
-    std::string command_mode_str;
-    if (_command_mode == acceleration) {
-        command_mode_str = "acceleration";
-    } else {
-        command_mode_str = "velocity";
-    }
-
-    response->success = true;
-    response->message = command_mode_str;
 }
 
 void RaceCarPlugin::setModelState() {
@@ -379,7 +365,7 @@ void RaceCarPlugin::update() {
     _des_input.acc = _last_cmd.drive.acceleration;
     _des_input.vel = _last_cmd.drive.speed;
     _des_input.delta = _last_cmd.drive.steering_angle * 3.1415 / 180 /
-                       (180 / 26);  // scales from steering wheel 90* to front wheels 26*
+                       (16 * 3.1415 / 180);  // scales from steering wheel 90* to front wheels 16*
 
     if (_command_mode == velocity) {
         double current_speed = std::sqrt(std::pow(_state.v_x, 2) + std::pow(_state.v_y, 2));
@@ -400,7 +386,7 @@ void RaceCarPlugin::update() {
 
     counter++;
     if (counter == 100) {
-        RCLCPP_DEBUG(_rosnode->get_logger(), "steering %f", _act_input.delta);
+        RCLCPP_INFO(_rosnode->get_logger(), "steering %f", _act_input.delta);
         counter = 0;
     }
 
@@ -415,6 +401,17 @@ void RaceCarPlugin::update() {
 
     _left_steering_joint->SetPosition(0, _act_input.delta);
     _right_steering_joint->SetPosition(0, _act_input.delta);
+    // joint states
+    sensor_msgs::msg::JointState joint_state;
+    joint_state.header.stamp.sec = _last_sim_time.sec;
+    joint_state.header.stamp.nanosec = _last_sim_time.nsec;
+    joint_state.name.push_back(_left_steering_joint->GetName());
+    joint_state.name.push_back(_right_steering_joint->GetName());
+    joint_state.position.push_back(_left_steering_joint->Position());
+    joint_state.position.push_back(_right_steering_joint->Position());
+
+    _pub_joint_state->publish(joint_state);
+
     setModelState();
 
     double time_since_last_published = (_last_sim_time - _time_last_published).Double();
@@ -435,7 +432,7 @@ void RaceCarPlugin::update() {
 void RaceCarPlugin::updateState(const driverless_msgs::msg::State::SharedPtr msg) { _as_state = *msg; }
 
 void RaceCarPlugin::onCmd(const ackermann_msgs::msg::AckermannDriveStamped::SharedPtr msg) {
-    RCLCPP_INFO(_rosnode->get_logger(), "Last time: %f", (_world->SimTime() - _last_cmd_time).Double());
+    RCLCPP_DEBUG(_rosnode->get_logger(), "Last time: %f", (_world->SimTime() - _last_cmd_time).Double());
     while ((_world->SimTime() - _last_cmd_time).Double() < _control_delay) {
         RCLCPP_DEBUG(_rosnode->get_logger(), "Waiting until control delay is over");
     }

@@ -30,6 +30,7 @@
   <depend>eufs_config</depend>
   <depend>state_control</depend>
   <depend>vehicle_supervisor</depend>
+  <depend>rviz_marker_plugins</depend>
 
   <export>
     <build_type>ament_python</build_type>

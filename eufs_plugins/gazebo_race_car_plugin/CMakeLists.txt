@@ -15,6 +15,7 @@ ament_target_dependencies(gazebo_ros_race_car
   "tf2_geometry_msgs"
   "std_srvs"
   "std_msgs"
+  "sensor_msgs"
   "eufs_models"
   "driverless_msgs"
 )
