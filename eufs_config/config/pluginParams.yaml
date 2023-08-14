@@ -9,6 +9,12 @@
     simulate_perception: false
     simulate_slam: false
 
+gazebo:
+  ros__parameters:
+    # default is 10.0. we needed higher freq so the gazebo clock would update faster.
+    # this was responsible for calculating time deltas in other node processes.
+    publish_rate: 100.0
+
 race_car:
   ros__parameters:
     update_rate: 1000.0
