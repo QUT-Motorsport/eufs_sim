@@ -385,7 +385,11 @@ void RaceCarPlugin::update() {
     if (_command_mode == velocity) {
         double current_speed = std::sqrt(std::pow(_state.v_x, 2) + std::pow(_state.v_y, 2));
         _act_input.acc = (_des_input.vel - current_speed) / dt;
-    }
+    } 
+    // TODO: add acceleration control here - convert from matlab script
+    // else {
+    //     _act_input.acc = _des_input.acc;
+    // }
 
     // Make sure steering rate is within limits
     _act_input.delta += (_des_input.delta - _act_input.delta >= 0 ? 1 : -1) *
@@ -402,6 +406,7 @@ void RaceCarPlugin::update() {
     counter++;
     if (counter == 100) {
         RCLCPP_DEBUG(_rosnode->get_logger(), "steering %f", _act_input.delta);
+        RCLCPP_DEBUG(_rosnode->get_logger(), "accel %f", _act_input.acc);
         counter = 0;
     }
 
@@ -436,7 +441,7 @@ void RaceCarPlugin::update() {
 void RaceCarPlugin::updateState(const driverless_msgs::msg::State::SharedPtr msg) { _as_state = *msg; }
 
 void RaceCarPlugin::onCmd(const ackermann_msgs::msg::AckermannDriveStamped::SharedPtr msg) {
-    RCLCPP_INFO(_rosnode->get_logger(), "Last time: %f", (_world->SimTime() - _last_cmd_time).Double());
+    RCLCPP_DEBUG(_rosnode->get_logger(), "Last time: %f", (_world->SimTime() - _last_cmd_time).Double());
     while ((_world->SimTime() - _last_cmd_time).Double() < _control_delay) {
         RCLCPP_DEBUG(_rosnode->get_logger(), "Waiting until control delay is over");
     }
