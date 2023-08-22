@@ -34,11 +34,11 @@
 
 // ROS msgs
 #include "ackermann_msgs/msg/ackermann_drive_stamped.hpp"
+#include "driverless_msgs/msg/state.hpp"
 #include "geometry_msgs/msg/pose_with_covariance_stamped.hpp"
 #include "geometry_msgs/msg/vector3.hpp"
 #include "nav_msgs/msg/odometry.hpp"
 #include "std_msgs/msg/float32.hpp"
-#include "driverless_msgs/msg/state.hpp"
 
 // ROS TF2
 #include <tf2/transform_datatypes.h>
@@ -77,7 +77,7 @@ class RaceCarPlugin : public gazebo::ModelPlugin {
     eufs::models::Input &getInput() { return _des_input; }
 
    private:
-    void initParams(const sdf::ElementPtr &sdf);
+    void initParams();
     void setPositionFromWorld();
     bool resetVehiclePosition(std::shared_ptr<std_srvs::srv::Trigger::Request> request,
                               std::shared_ptr<std_srvs::srv::Trigger::Response> response);

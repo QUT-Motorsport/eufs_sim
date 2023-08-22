@@ -28,8 +28,8 @@ class EUFSConverterGUI(Plugin):
         self.TRACKS = get_package_share_directory("eufs_tracks")
 
         # Extend the widget with all attributes and children from UI file
-        # UI file which should be in the "resource" folder of this package
-        main_ui_file = join(self.TRACKS, "resource", "conversion_tool.ui")
+        # UI file which should be in the "ui" folder of this package
+        main_ui_file = join(self.TRACKS, "ui", "conversion_tool.ui")
         loadUi(main_ui_file, self._widget)
 
         # Show _widget.windowTitle on left-top of each plugin (when

@@ -59,7 +59,7 @@ class EUFSRobotSteeringGUI(Plugin):
         # Get path to UI file which is a sibling of this file
         ui_file = os.path.join(
             get_package_share_directory("eufs_rqt"),
-            "resource",
+            "ui",
             "EUFSRobotSteeringGUI.ui",
         )
         # Extend the widget with all attributes and children from UI file

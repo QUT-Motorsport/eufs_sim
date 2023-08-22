@@ -11,21 +11,9 @@ data_files = [
     ("share/ament_index/resource_index/packages", ["resource/" + package_name]),
     (join(share_directory, "csv"), glob("csv/*")),
     (join(share_directory, "image"), glob("image/*")),
-    (join(share_directory, "materials"), glob("materials/*")),
     (join(share_directory, "meshes"), glob("meshes/*")),
+    (join(share_directory, "ui"), glob("ui/*")),
     (join(share_directory, "worlds"), glob("worlds/*")),
-    (
-        join(share_directory, "resource/randgen_model_template"),
-        glob("resource/randgen_model_template/model.*"),
-    ),
-    (
-        join(share_directory, "resource"),
-        [
-            "resource/noiseFiles.txt",
-            "resource/randgen_world_template",
-            "resource/conversion_tool.ui",
-        ],
-    ),
 ]
 
 # Add all model sub-directories
@@ -49,11 +37,4 @@ setup(
     license="MIT",
     tests_require=["pytest"],
     scripts=["scripts/eufs_tracks_converter", "scripts/eufs_tracks_generator"],
-    entry_points={
-        "eufscli.command": ["track = eufs_tracks.cli.main:EUFSTrackGenerator"],
-        "eufs_tracks.verb": [
-            "create = eufs_tracks.cli.create:EUFSTracksCreate",
-            "convert = eufs_tracks.cli.convert:EUFSTracksConvert",
-        ],
-    },
 )

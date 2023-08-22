@@ -7,7 +7,8 @@
 #include "rclcpp/rclcpp.hpp"
 
 namespace state_control {
-ControlGUIPlugin::ControlGUIPlugin() : rqt_gui_cpp::Plugin(), window_(0), state_node_(std::make_shared<state_control::StateNode>()) {
+ControlGUIPlugin::ControlGUIPlugin()
+    : rqt_gui_cpp::Plugin(), window_(0), state_node_(std::make_shared<state_control::StateNode>()) {
     setObjectName("State Control GUI");
 }
 
@@ -44,7 +45,7 @@ void ControlGUIPlugin::initPlugin(qt_gui_cpp::PluginContext& context) {
     ros_timer_->start(10);
 }
 
-void ControlGUIPlugin::ros_timer_callback() { 
+void ControlGUIPlugin::ros_timer_callback() {
     rclcpp::spin_some(state_node_);
     Car_State_t sim_car_state = state_node_->get_car_state();
     driverless_msgs::msg::State supervisor_state = state_node_->get_ros_state();
@@ -174,8 +175,7 @@ void ControlGUIPlugin::set_reset_btn() {
     auto request_cones = std::make_shared<std_srvs::srv::Trigger::Request>();
     auto result_cones = state_node_->reset_cones_srv_->async_send_request(request_cones);
     // Wait for the result
-    if (rclcpp::spin_until_future_complete(state_node_, result_cones) == rclcpp::FutureReturnCode::SUCCESS)
-    {
+    if (rclcpp::spin_until_future_complete(state_node_, result_cones) == rclcpp::FutureReturnCode::SUCCESS) {
         RCLCPP_INFO(state_node_->get_logger(), "reset_cones_srv success: %d", result_cones.get()->success);
     } else {
         RCLCPP_ERROR(state_node_->get_logger(), "reset_cones_srv failed");
@@ -184,8 +184,7 @@ void ControlGUIPlugin::set_reset_btn() {
     auto request_car = std::make_shared<std_srvs::srv::Trigger::Request>();
     auto result_car = state_node_->reset_car_pos_srv_->async_send_request(request_car);
     // Wait for the result
-    if (rclcpp::spin_until_future_complete(state_node_, result_car) == rclcpp::FutureReturnCode::SUCCESS)
-    {
+    if (rclcpp::spin_until_future_complete(state_node_, result_car) == rclcpp::FutureReturnCode::SUCCESS) {
         RCLCPP_INFO(state_node_->get_logger(), "reset_car_pos_srv success: %d", result_car.get()->success);
     } else {
         RCLCPP_ERROR(state_node_->get_logger(), "reset_car_pos_srv failed");
@@ -203,13 +202,14 @@ void ControlGUIPlugin::shutdownPlugin() {
     rclcpp::shutdown();
 }
 
-void ControlGUIPlugin::saveSettings(qt_gui_cpp::Settings& plugin_settings, qt_gui_cpp::Settings& instance_settings) const {
+void ControlGUIPlugin::saveSettings(qt_gui_cpp::Settings& plugin_settings,
+                                    qt_gui_cpp::Settings& instance_settings) const {
     (void)plugin_settings;
     (void)instance_settings;
 }
 
 void ControlGUIPlugin::restoreSettings(const qt_gui_cpp::Settings& plugin_settings,
-                                const qt_gui_cpp::Settings& instance_settings) {
+                                       const qt_gui_cpp::Settings& instance_settings) {
     (void)plugin_settings;
     (void)instance_settings;
 }

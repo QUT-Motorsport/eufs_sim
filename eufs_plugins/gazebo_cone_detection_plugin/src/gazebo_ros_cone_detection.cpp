@@ -16,7 +16,7 @@ void ConeDetectionPlugin::Load(gazebo::physics::ModelPtr model, sdf::ElementPtr 
     _world = _model->GetWorld();
 
     // Initialize parameters
-    initParams(sdf);
+    initParams();
 
     if (_pub_gt) {
         _ground_truth_pub =
@@ -55,7 +55,7 @@ void ConeDetectionPlugin::Load(gazebo::physics::ModelPtr model, sdf::ElementPtr 
     RCLCPP_INFO(_ros_node->get_logger(), "ConeDetectionPlugin Loaded");
 }
 
-void ConeDetectionPlugin::initParams(sdf::ElementPtr sdf) {
+void ConeDetectionPlugin::initParams() {
     _reference_frame = _ros_node->declare_parameter("reference_frame", "map");
     _robot_frame = _ros_node->declare_parameter("robot_frame", "base_link");
 
@@ -68,9 +68,9 @@ void ConeDetectionPlugin::initParams(sdf::ElementPtr sdf) {
     _slam_update_rate = _ros_node->declare_parameter("slam_update_rate", 1.0);
     _gt_update_rate = _ros_node->declare_parameter("gt_update_rate", 1.0);
 
-    _pub_gt = get_bool_parameter(sdf, "publishGroundTruth", true, "true");
-    _simulate_perception = get_bool_parameter(sdf, "simulatePerception", true, "true");
-    _simulate_slam = get_bool_parameter(sdf, "simulateSLAM", true, "true");
+    _pub_gt = _ros_node->declare_parameter("publish_ground_truth", false);
+    _simulate_perception = _ros_node->declare_parameter("simulate_perception", false);
+    _simulate_slam = _ros_node->declare_parameter("simulate_slam", false);
 
     _lidar_config = populate_sensor_config("lidar", _ros_node);
     _camera_config = populate_sensor_config("camera", _ros_node);

@@ -16,11 +16,9 @@
 #define GAZEBO_PLUGINS__GAZEBO_ROS_LIDAR_HPP_
 
 #include <gazebo/common/Plugin.hh>
-
 #include <memory>
 
-namespace gazebo_plugins
-{
+namespace gazebo_plugins {
 
 class GazeboRosLidarPrivate;
 
@@ -69,20 +67,19 @@ class GazeboRosLidarPrivate;
     </plugin>
   \endcode
 */
-class GazeboRosLidar : public gazebo::SensorPlugin
-{
-public:
-  /// \brief Constructor
-  GazeboRosLidar();
+class GazeboRosLidar : public gazebo::SensorPlugin {
+   public:
+    /// \brief Constructor
+    GazeboRosLidar();
 
-  /// \brief Destructor
-  virtual ~GazeboRosLidar();
+    /// \brief Destructor
+    virtual ~GazeboRosLidar();
 
-  // Documentation Inherited
-  void Load(gazebo::sensors::SensorPtr _parent, sdf::ElementPtr _sdf);
+    // Documentation Inherited
+    void Load(gazebo::sensors::SensorPtr _parent, sdf::ElementPtr _sdf);
 
-private:
-  std::unique_ptr<GazeboRosLidarPrivate> impl_;
+   private:
+    std::unique_ptr<GazeboRosLidarPrivate> impl_;
 };
 
 }  // namespace gazebo_plugins

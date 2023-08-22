@@ -3,7 +3,7 @@
 <package format="3">
   <name>eufs_racecar</name>
   <version>2.0.0</version>
-  <description>Launch, URDF, mesh and material files for autonomous vehicles.</description>
+  <description>URDF, mesh and material files for autonomous vehicles.</description>
 
   <maintainer email="cambobmat@icloud.com">Cameron Matthew</maintainer>
   <maintainer email="siliconlad@protonmail.com">Angus Stewart</maintainer>
@@ -16,19 +16,9 @@
 
   <depend>ament_index_python</depend>
   <depend>xacro</depend>
-  <depend>rqt_gui</depend>
 
-  <depend>launch</depend>
-  <depend>launch_ros</depend>
-
-  <depend>joint_state_publisher</depend>
-  <depend>robot_state_publisher</depend>
-  <depend>rviz2</depend>
-
+  <depend>gazebo_plugins</depend>
   <depend>eufs_plugins</depend>
-  <depend>eufs_rqt</depend>
-  <depend>state_control</depend>
-  <depend>vehicle_supervisor</depend>
 
   <export>
     <build_type>ament_python</build_type>
