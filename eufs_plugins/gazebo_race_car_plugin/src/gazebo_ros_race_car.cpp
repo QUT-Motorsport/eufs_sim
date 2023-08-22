@@ -52,8 +52,9 @@ void RaceCarPlugin::Load(gazebo::physics::ModelPtr model, sdf::ElementPtr sdf) {
     initParams();
 
     // ROS Publishers
-    // Wheel odom
-    _pub_wheel_odom = _rosnode->create_publisher<nav_msgs::msg::Odometry>("/vehicle/wheel_odom", 1);
+    // Wheel speeds
+    _pub_wheel_twist = _rosnode->create_publisher<geometry_msgs::msg::TwistWithCovarianceStamped>(
+        "/vehicle/wheel_twist", 1);
     // Steering angle
     _pub_steering_angle = _rosnode->create_publisher<std_msgs::msg::Float32>("/vehicle/steering_angle", 1);
     // Pose (from slam output)
@@ -62,7 +63,8 @@ void RaceCarPlugin::Load(gazebo::physics::ModelPtr model, sdf::ElementPtr sdf) {
     }
     // Ground truth
     if (_pub_gt) {
-        _pub_gt_wheel_odom = _rosnode->create_publisher<nav_msgs::msg::Odometry>("/ground_truth/wheel_odom", 1);
+        _pub_gt_wheel_twist = _rosnode->create_publisher<geometry_msgs::msg::TwistWithCovarianceStamped>(
+            "/ground_truth/wheel_twist", 1);
         _pub_gt_pose =
             _rosnode->create_publisher<geometry_msgs::msg::PoseWithCovarianceStamped>("ground_truth/car_pose", 1);
         _pub_gt_steering_angle = _rosnode->create_publisher<std_msgs::msg::Float32>("/ground_truth/steering_angle", 1);
@@ -287,8 +289,8 @@ void RaceCarPlugin::publishCarPose() {
     }
 }
 
-nav_msgs::msg::Odometry RaceCarPlugin::getWheelOdometry(const std::vector<double> &speeds, const double &input) {
-    nav_msgs::msg::Odometry wheel_odom;
+geometry_msgs::msg::TwistWithCovarianceStamped RaceCarPlugin::getWheelTwist(const std::vector<double> &speeds, const double &input) {
+    geometry_msgs::msg::TwistWithCovarianceStamped wheel_twist;
 
     // Calculate avg wheel speeds
     double rf = speeds[0];
@@ -298,17 +300,16 @@ nav_msgs::msg::Odometry RaceCarPlugin::getWheelOdometry(const std::vector<double
     double avg_wheel_speed = (rf + lf + rb + lb) / 4.0;
 
     // Calculate odom with wheel speed and steering angle
-    wheel_odom.twist.twist.linear.x = avg_wheel_speed;
-    wheel_odom.twist.twist.linear.y = 0.0;
+    wheel_twist.twist.twist.linear.x = avg_wheel_speed;
+    wheel_twist.twist.twist.linear.y = 0.0;
 
-    wheel_odom.twist.twist.angular.z = avg_wheel_speed * tan(input) / _vehicle->getParam().kinematic.axle_width;
+    wheel_twist.twist.twist.angular.z = avg_wheel_speed * tan(input) / _vehicle->getParam().kinematic.axle_width;
 
-    wheel_odom.header.stamp.sec = _last_sim_time.sec;
-    wheel_odom.header.stamp.nanosec = _last_sim_time.nsec;
-    wheel_odom.header.frame_id = _reference_frame;
-    wheel_odom.child_frame_id = _robot_frame;
+    wheel_twist.header.stamp.sec = _last_sim_time.sec;
+    wheel_twist.header.stamp.nanosec = _last_sim_time.nsec;
+    wheel_twist.header.frame_id = _reference_frame;
 
-    return wheel_odom;
+    return wheel_twist;
 }
 
 void RaceCarPlugin::publishVehicleOdom() {
@@ -322,10 +323,10 @@ void RaceCarPlugin::publishVehicleOdom() {
 
     // Publish wheel odometry
     std::vector<double> wheel_speeds = {_state.v_x, _state.v_x, _state.v_x, _state.v_x};
-    nav_msgs::msg::Odometry wheel_odom = getWheelOdometry(wheel_speeds, steering_angle.data);
+    geometry_msgs::msg::TwistWithCovarianceStamped wheel_twist = getWheelTwist(wheel_speeds, steering_angle.data);
 
-    if (has_subscribers(_pub_gt_wheel_odom)) {
-        _pub_gt_wheel_odom->publish(wheel_odom);
+    if (has_subscribers(_pub_gt_wheel_twist)) {
+        _pub_gt_wheel_twist->publish(wheel_twist);
     }
 
     // Add noise
@@ -337,10 +338,10 @@ void RaceCarPlugin::publishVehicleOdom() {
     }
 
     std::vector<double> wheel_speeds_noisy = _noise->applyNoiseToWheels(wheel_speeds);
-    nav_msgs::msg::Odometry wheel_odom_noisy = getWheelOdometry(wheel_speeds_noisy, steering_angle_noisy.data);
+    geometry_msgs::msg::TwistWithCovarianceStamped wheel_twist_noisy = getWheelTwist(wheel_speeds_noisy, steering_angle_noisy.data);
 
-    if (has_subscribers(_pub_wheel_odom)) {
-        _pub_wheel_odom->publish(wheel_odom_noisy);
+    if (has_subscribers(_pub_wheel_twist)) {
+        _pub_wheel_twist->publish(wheel_twist_noisy);
     }
 }
 
