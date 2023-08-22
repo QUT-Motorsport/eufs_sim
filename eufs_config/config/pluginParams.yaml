@@ -5,7 +5,7 @@
     # params rewritten by launcher upon user selection:
     noise_config: "null"
     publish_ground_truth: false
-    publish_transform: false
+    simulate_transform: false
     simulate_perception: false
     simulate_slam: false
 

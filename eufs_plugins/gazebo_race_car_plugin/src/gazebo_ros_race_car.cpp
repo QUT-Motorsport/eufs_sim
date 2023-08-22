@@ -108,7 +108,7 @@ void RaceCarPlugin::initParams() {
     _reference_frame = _rosnode->declare_parameter("reference_frame", "map");
     _robot_frame = _rosnode->declare_parameter("robot_frame", "base_link");
     _control_delay = _rosnode->declare_parameter("control_delay", 0.5);
-    _pub_tf = _rosnode->declare_parameter("publish_transform", false);
+    _pub_tf = _rosnode->declare_parameter("simulate_transform", false);
     _pub_gt = _rosnode->declare_parameter("publish_ground_truth", false);
     _simulate_slam = _rosnode->declare_parameter("simulate_slam", false);
     /// SHOULD BE IN VEHICLE PARAMS FILE

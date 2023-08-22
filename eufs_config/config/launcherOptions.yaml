@@ -50,14 +50,14 @@ eufs_launcher:
         if_on: { "gazebo_gui:=true" }
         if_off: { "gazebo_gui:=false" }
 
-    ground_truth_transform:
+    simulate_transform:
       priority: 3
-      name: "Ground_Truth_Transform"
-      label: "Ground Truth TF"
+      name: "Simulate_Transform"
+      label: "Simulate Transform"
       checked_on_default: Yes
       parameter_triggering:
-        if_on: { "publish_transform:=true" }
-        if_off: { "publish_transform:=false" }
+        if_on: { "simulate_transform:=true" }
+        if_off: { "simulate_transform:=false" }
 
     pub_ground_truth:
       priority: 4
@@ -66,7 +66,7 @@ eufs_launcher:
       checked_on_default: Yes
       parameter_triggering:
         if_on: { "publish_ground_truth:=true" }
-        if_off: { "pub_lishground_truth:=false" }
+        if_off: { "publish_ground_truth:=false" }
 
     perception:
       priority: 5
