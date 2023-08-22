@@ -134,6 +134,8 @@ class RaceCarPlugin : public gazebo::ModelPlugin {
     rclcpp::Publisher<geometry_msgs::msg::PoseWithCovarianceStamped>::SharedPtr _pub_gt_pose;
     rclcpp::Publisher<std_msgs::msg::Float32>::SharedPtr _pub_steering_angle;
     rclcpp::Publisher<std_msgs::msg::Float32>::SharedPtr _pub_gt_steering_angle;
+    rclcpp::Publisher<std_msgs::msg::Float32>::SharedPtr _pub_velocity;
+    rclcpp::Publisher<std_msgs::msg::Float32>::SharedPtr _pub_gt_velocity;
 
     // ROS Subscriptions
     rclcpp::Subscription<ackermann_msgs::msg::AckermannDriveStamped>::SharedPtr _sub_cmd;

@@ -55,6 +55,8 @@ void RaceCarPlugin::Load(gazebo::physics::ModelPtr model, sdf::ElementPtr sdf) {
     // Wheel speeds
     _pub_wheel_twist = _rosnode->create_publisher<geometry_msgs::msg::TwistWithCovarianceStamped>(
         "/vehicle/wheel_twist", 1);
+    // Velocity
+    _pub_velocity = _rosnode->create_publisher<std_msgs::msg::Float32>("/vehicle/velocity", 1);
     // Steering angle
     _pub_steering_angle = _rosnode->create_publisher<std_msgs::msg::Float32>("/vehicle/steering_angle", 1);
     // Pose (from slam output)
@@ -68,6 +70,7 @@ void RaceCarPlugin::Load(gazebo::physics::ModelPtr model, sdf::ElementPtr sdf) {
         _pub_gt_pose =
             _rosnode->create_publisher<geometry_msgs::msg::PoseWithCovarianceStamped>("ground_truth/car_pose", 1);
         _pub_gt_steering_angle = _rosnode->create_publisher<std_msgs::msg::Float32>("/ground_truth/steering_angle", 1);
+        _pub_gt_velocity = _rosnode->create_publisher<std_msgs::msg::Float32>("/ground_truth/velocity", 1);
     }
 
     // Driverless state
@@ -342,6 +345,13 @@ void RaceCarPlugin::publishVehicleOdom() {
 
     if (has_subscribers(_pub_wheel_twist)) {
         _pub_wheel_twist->publish(wheel_twist_noisy);
+    }
+
+    std_msgs::msg::Float32 velocity_noisy;
+    velocity_noisy.data = wheel_twist_noisy.twist.twist.linear.x;
+
+    if (has_subscribers(_pub_velocity)) {
+        _pub_velocity->publish(velocity_noisy);
     }
 }
 
