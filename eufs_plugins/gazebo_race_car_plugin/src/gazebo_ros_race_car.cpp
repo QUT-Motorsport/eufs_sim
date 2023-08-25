@@ -57,6 +57,8 @@ void RaceCarPlugin::Load(gazebo::physics::ModelPtr model, sdf::ElementPtr sdf) {
         "/vehicle/wheel_twist", 1);
     // Steering angle
     _pub_steering_angle = _rosnode->create_publisher<std_msgs::msg::Float32>("/vehicle/steering_angle", 1);
+    // Visual odom
+    _pub_vis_odom = _rosnode->create_publisher<nav_msgs::msg::Odometry>("/zed2i/zed_node/odom", 1);
     // Pose (from slam output)
     if (_simulate_slam) {
         _pub_pose = _rosnode->create_publisher<geometry_msgs::msg::PoseWithCovarianceStamped>("slam/car_pose", 1);
@@ -245,10 +247,7 @@ void RaceCarPlugin::setModelState() {
 geometry_msgs::msg::PoseWithCovarianceStamped RaceCarPlugin::odomToPoseMsg(const nav_msgs::msg::Odometry &odom_msg) {
     geometry_msgs::msg::PoseWithCovarianceStamped pose_msg;
 
-    pose_msg.header.stamp.sec = _last_sim_time.sec;
-    pose_msg.header.stamp.nanosec = _last_sim_time.nsec;
-    pose_msg.header.frame_id = _reference_frame;
-
+    pose_msg.header = odom_msg.header;
     pose_msg.pose = odom_msg.pose;
 
     return pose_msg;
@@ -303,6 +302,15 @@ nav_msgs::msg::Odometry RaceCarPlugin::stateToOdom(const eufs::models::State &st
     return msg;
 }
 
+nav_msgs::msg::Odometry RaceCarPlugin::getVisualOdom(const nav_msgs::msg::Odometry &odom) {
+    nav_msgs::msg::Odometry msg;
+    msg.header = odom.header;
+    msg.pose = odom.pose;
+    msg.child_frame_id = _robot_frame;
+
+    return msg;
+}
+
 void RaceCarPlugin::publishVehicleMotion() {
     // Get odometry msg from state
     nav_msgs::msg::Odometry odom = stateToOdom(_state);
@@ -315,6 +323,12 @@ void RaceCarPlugin::publishVehicleMotion() {
     geometry_msgs::msg::PoseWithCovarianceStamped pose_noisy = odomToPoseMsg(odom_noisy);
     if (has_subscribers(_pub_pose)) {
         _pub_pose->publish(pose_noisy);
+    }
+
+    // Publish visual odom (THIS CAN BE IN A DIFFERENT PLUGIN)
+    nav_msgs::msg::Odometry visual_odom = getVisualOdom(odom_noisy);
+    if (has_subscribers(_pub_vis_odom)) {
+        _pub_vis_odom->publish(visual_odom);
     }
 
     // Publish steering angle

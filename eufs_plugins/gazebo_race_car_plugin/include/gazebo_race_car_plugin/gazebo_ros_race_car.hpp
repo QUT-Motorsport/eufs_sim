@@ -93,6 +93,7 @@ class RaceCarPlugin : public gazebo::ModelPlugin {
     void publishVehicleMotion();
     geometry_msgs::msg::TwistWithCovarianceStamped getWheelTwist(const std::vector<double> &speeds, const double &angle);
     nav_msgs::msg::Odometry stateToOdom(const eufs::models::State &state);
+    nav_msgs::msg::Odometry getVisualOdom(const nav_msgs::msg::Odometry &odom);
 
     void publishTf();
     void update();
@@ -130,6 +131,7 @@ class RaceCarPlugin : public gazebo::ModelPlugin {
 
     // ROS Publishers
     rclcpp::Publisher<nav_msgs::msg::Odometry>::SharedPtr _pub_gt_odom;
+    rclcpp::Publisher<nav_msgs::msg::Odometry>::SharedPtr _pub_vis_odom;
     rclcpp::Publisher<geometry_msgs::msg::TwistWithCovarianceStamped>::SharedPtr _pub_wheel_twist;
     rclcpp::Publisher<geometry_msgs::msg::TwistWithCovarianceStamped>::SharedPtr _pub_gt_wheel_twist;
     rclcpp::Publisher<geometry_msgs::msg::PoseWithCovarianceStamped>::SharedPtr _pub_pose;
