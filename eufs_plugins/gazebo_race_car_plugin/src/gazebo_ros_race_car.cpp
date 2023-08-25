@@ -254,7 +254,7 @@ geometry_msgs::msg::PoseWithCovarianceStamped RaceCarPlugin::stateToPoseMsg(cons
 
     std::vector<double> orientation = {state.yaw, 0.0, 0.0};
 
-    orientation = ToQuaternion(orientation);
+    orientation = to_quaternion(orientation);
 
     pose_msg.pose.pose.orientation.x = orientation[0];
     pose_msg.pose.pose.orientation.y = orientation[1];
@@ -457,24 +457,6 @@ void RaceCarPlugin::onCmd(const ackermann_msgs::msg::AckermannDriveStamped::Shar
     _last_cmd.drive.speed = msg->drive.speed;
     _last_cmd.drive.steering_angle = msg->drive.steering_angle;
     _last_cmd_time = _world->SimTime();
-}
-
-std::vector<double> RaceCarPlugin::ToQuaternion(std::vector<double> &euler) {
-    // Abbreviations for the various angular functions
-    double cy = cos(euler[0] * 0.5);
-    double sy = sin(euler[0] * 0.5);
-    double cp = cos(euler[1] * 0.5);
-    double sp = sin(euler[1] * 0.5);
-    double cr = cos(euler[2] * 0.5);
-    double sr = sin(euler[2] * 0.5);
-
-    std::vector<double> q;
-    q.push_back(cy * cp * sr - sy * sp * cr);  // x
-    q.push_back(sy * cp * sr + cy * sp * cr);  // y
-    q.push_back(sy * cp * cr - cy * sp * sr);  // z
-    q.push_back(cy * cp * cr + sy * sp * sr);  // w
-
-    return q;
 }
 
 GZ_REGISTER_MODEL_PLUGIN(RaceCarPlugin)

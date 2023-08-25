@@ -98,8 +98,6 @@ class RaceCarPlugin : public gazebo::ModelPlugin {
     void updateState(const driverless_msgs::msg::State::SharedPtr msg);
     void onCmd(const ackermann_msgs::msg::AckermannDriveStamped::SharedPtr msg);
 
-    std::vector<double> ToQuaternion(std::vector<double> &euler);
-
     std::shared_ptr<rclcpp::Node> _rosnode;
     eufs::models::VehicleModelPtr _vehicle;
 

@@ -1,6 +1,7 @@
 #pragma once
 
 #include <gazebo/gazebo.hh>
+#include <gazebo/physics/physics.hh>
 #include <string>
 
 #include "rclcpp/rclcpp.hpp"

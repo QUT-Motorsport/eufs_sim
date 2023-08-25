@@ -51,7 +51,6 @@ class SBGPlugin : public gazebo::ModelPlugin {
     void publishEuler();
     // void publishGps();
     void publishGTOdom();
-    std::vector<double> ToQuaternion(std::vector<double> &euler);
 
     gazebo_ros::Node::SharedPtr _ros_node;
 
