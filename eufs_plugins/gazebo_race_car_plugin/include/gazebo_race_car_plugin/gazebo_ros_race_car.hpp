@@ -122,6 +122,7 @@ class RaceCarPlugin : public gazebo::ModelPlugin {
     double _update_rate;
     double _publish_rate;
     gazebo::common::Time _time_last_published;
+    gazebo::common::Time _time_last_odom_published;
 
     // ROS TF
     bool _pub_tf;

@@ -328,7 +328,11 @@ void RaceCarPlugin::publishVehicleMotion() {
     // Publish visual odom (THIS CAN BE IN A DIFFERENT PLUGIN)
     nav_msgs::msg::Odometry visual_odom = getVisualOdom(odom_noisy);
     if (has_subscribers(_pub_vis_odom)) {
-        _pub_vis_odom->publish(visual_odom);
+        // Publish at 30Hz
+        if (_last_sim_time - _time_last_odom_published > (1/30)) {
+            _pub_vis_odom->publish(visual_odom);
+            _time_last_odom_published = _last_sim_time;
+        }
     }
 
     // Publish steering angle
