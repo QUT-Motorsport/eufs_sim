@@ -40,6 +40,7 @@
 #include "geometry_msgs/msg/twist_with_covariance_stamped.hpp"
 #include "std_msgs/msg/float32.hpp"
 #include "sensor_msgs/msg/joint_state.hpp"
+#include "nav_msgs/msg/odometry.hpp"
 
 // ROS TF2
 #include <tf2/transform_datatypes.h>
@@ -87,10 +88,11 @@ class RaceCarPlugin : public gazebo::ModelPlugin {
     void setModelState();
 
     void publishCarPose();
-    geometry_msgs::msg::PoseWithCovarianceStamped stateToPoseMsg(const eufs::models::State &state);
+    geometry_msgs::msg::PoseWithCovarianceStamped odomToPoseMsg(const nav_msgs::msg::Odometry &odom);
 
-    void publishVehicleOdom();
-    geometry_msgs::msg::TwistWithCovarianceStamped getWheelTwist(const std::vector<double> &speeds, const double &input);
+    void publishVehicleMotion();
+    geometry_msgs::msg::TwistWithCovarianceStamped getWheelTwist(const std::vector<double> &speeds, const double &angle);
+    nav_msgs::msg::Odometry stateToOdom(const eufs::models::State &state);
 
     void publishTf();
     void update();
@@ -127,10 +129,10 @@ class RaceCarPlugin : public gazebo::ModelPlugin {
     std::unique_ptr<tf2_ros::TransformBroadcaster> _tf_br;
 
     // ROS Publishers
+    rclcpp::Publisher<nav_msgs::msg::Odometry>::SharedPtr _pub_gt_odom;
     rclcpp::Publisher<geometry_msgs::msg::TwistWithCovarianceStamped>::SharedPtr _pub_wheel_twist;
     rclcpp::Publisher<geometry_msgs::msg::TwistWithCovarianceStamped>::SharedPtr _pub_gt_wheel_twist;
     rclcpp::Publisher<geometry_msgs::msg::PoseWithCovarianceStamped>::SharedPtr _pub_pose;
-    rclcpp::Publisher<geometry_msgs::msg::PoseWithCovarianceStamped>::SharedPtr _pub_gt_pose;
     rclcpp::Publisher<std_msgs::msg::Float32>::SharedPtr _pub_steering_angle;
     rclcpp::Publisher<std_msgs::msg::Float32>::SharedPtr _pub_gt_steering_angle;
     rclcpp::Publisher<sensor_msgs::msg::JointState>::SharedPtr _pub_joint_state;
