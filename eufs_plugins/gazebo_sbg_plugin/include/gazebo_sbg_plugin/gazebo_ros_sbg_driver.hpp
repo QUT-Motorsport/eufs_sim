@@ -65,8 +65,9 @@ class SBGPlugin : public gazebo::ModelPlugin {
     std::unique_ptr<eufs::models::Noise> _noise;
 
     // ROS variables
-    std::string _reference_frame;
-    std::string _robot_frame;
+    std::string _map_frame;
+    std::string _odom_frame;
+    std::string _base_frame;
     sensor_msgs::msg::NavSatFix _last_nav_sat_msg;
 
     // Rate to publish ros messages

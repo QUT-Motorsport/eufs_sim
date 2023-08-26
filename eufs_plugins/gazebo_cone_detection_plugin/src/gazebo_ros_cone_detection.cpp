@@ -50,17 +50,17 @@ void ConeDetectionPlugin::Load(gazebo::physics::ModelPtr model, sdf::ElementPtr 
     _update_connection = gazebo::event::Events::ConnectWorldUpdateBegin(std::bind(&ConeDetectionPlugin::update, this));
 
     //  Store initial track
-    _initial_track = get_ground_truth_track(_track_model, _last_gt_update, _reference_frame, _ros_node->get_logger());
+    _initial_track = get_ground_truth_track(_track_model, _last_gt_update, _map_frame, _ros_node->get_logger());
 
     RCLCPP_INFO(_ros_node->get_logger(), "ConeDetectionPlugin Loaded");
 }
 
 void ConeDetectionPlugin::initParams() {
-    _reference_frame = _ros_node->declare_parameter("reference_frame", "map");
-    _robot_frame = _ros_node->declare_parameter("robot_frame", "base_link");
+    _map_frame = _ros_node->declare_parameter("map_frame", "map");
+    _base_frame = _ros_node->declare_parameter("base_frame", "base_link");
 
     _track_model = get_model(_world, "track", _ros_node->get_logger());
-    _car_link = get_link(_model, _robot_frame, _ros_node->get_logger());
+    _car_link = get_link(_model, _base_frame, _ros_node->get_logger());
     _car_inital_pose = _car_link->WorldPose();
 
     _lidar_update_rate = _ros_node->declare_parameter("lidar_update_rate", 1.0);
@@ -92,7 +92,7 @@ void ConeDetectionPlugin::publishGTTrack() {
     _last_gt_update = curr_time;
 
     auto ground_truth_track =
-        get_ground_truth_track(_track_model, curr_time, _reference_frame, _ros_node->get_logger());
+        get_ground_truth_track(_track_model, curr_time, _map_frame, _ros_node->get_logger());
 
     if (has_subscribers(_ground_truth_pub)) {
         auto centered_ground_truth = get_track_centered_on_car_inital_pose(_car_inital_pose, ground_truth_track);
@@ -108,7 +108,7 @@ void ConeDetectionPlugin::publishLiDARDetection() {
     _last_lidar_update = curr_time;
 
     auto ground_truth_track =
-        get_ground_truth_track(_track_model, curr_time, _reference_frame, _ros_node->get_logger());
+        get_ground_truth_track(_track_model, curr_time, _map_frame, _ros_node->get_logger());
 
     if (has_subscribers(_lidar_detection_pub)) {
         auto lidar_detection = get_sensor_detection(_lidar_config, _car_link->WorldPose(), ground_truth_track);
@@ -124,7 +124,7 @@ void ConeDetectionPlugin::publishCameraDetection() {
     _last_camera_update = curr_time;
 
     auto ground_truth_track =
-        get_ground_truth_track(_track_model, curr_time, _reference_frame, _ros_node->get_logger());
+        get_ground_truth_track(_track_model, curr_time, _map_frame, _ros_node->get_logger());
 
     if (has_subscribers(_vision_detection_pub)) {
         auto vision_detection = get_sensor_detection(_camera_config, _car_link->WorldPose(), ground_truth_track);
@@ -140,7 +140,7 @@ void ConeDetectionPlugin::publishSLAM() {
     _last_slam_update = curr_time;
 
     auto ground_truth_track =
-        get_ground_truth_track(_track_model, curr_time, _reference_frame, _ros_node->get_logger());
+        get_ground_truth_track(_track_model, curr_time, _map_frame, _ros_node->get_logger());
 
     if (has_subscribers(_slam_global_pub) || has_subscribers(_slam_local_pub)) {
         if (_initial_slam.cones_with_cov.empty()) {

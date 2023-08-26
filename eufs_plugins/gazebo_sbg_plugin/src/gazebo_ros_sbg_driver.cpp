@@ -48,8 +48,9 @@ void SBGPlugin::initParams() {
     _ekf_update_rate = _ros_node->declare_parameter("ekf_update_rate", 1.0);
     _vel_update_rate = _ros_node->declare_parameter("vel_update_rate", 1.0);
     _gps_update_rate = _ros_node->declare_parameter("gps_update_rate", 1.0);
-    _reference_frame = _ros_node->declare_parameter("reference_frame", "map");
-    _robot_frame = _ros_node->declare_parameter("robot_rame", "base_link");
+    _map_frame = _ros_node->declare_parameter("map_frame", "map");
+    _odom_frame = _ros_node->declare_parameter("odom_frame", "odom");
+    _base_frame = _ros_node->declare_parameter("base_frame", "base_link");
 
     // Noise
     std::string noise_yaml_name = _ros_node->declare_parameter("noise_config", "null");
@@ -66,7 +67,7 @@ void SBGPlugin::navSatFixCallback(const sensor_msgs::msg::NavSatFix::SharedPtr n
     sbg_driver::msg::SbgGpsPos msg;
     msg.header.stamp.sec = _last_nav_sat_msg.header.stamp.sec;
     msg.header.stamp.nanosec = _last_nav_sat_msg.header.stamp.nanosec;
-    msg.header.frame_id = _reference_frame;
+    msg.header.frame_id = _odom_frame;
 
     msg.latitude = _last_nav_sat_msg.latitude;
     msg.longitude = _last_nav_sat_msg.longitude;
@@ -96,7 +97,7 @@ void SBGPlugin::publishVelocity() {
     geometry_msgs::msg::TwistStamped msg;
     msg.header.stamp.sec = curr_time.sec;
     msg.header.stamp.nanosec = curr_time.nsec;
-    msg.header.frame_id = _reference_frame;
+    msg.header.frame_id = _map_frame;
 
     geometry_msgs::msg::Twist twist_vals;
     twist_vals.linear.x = _vel.X();
@@ -124,7 +125,7 @@ void SBGPlugin::publishEuler() {
     sbg_driver::msg::SbgEkfEuler msg;
     msg.header.stamp.sec = curr_time.sec;
     msg.header.stamp.nanosec = curr_time.nsec;
-    msg.header.frame_id = _reference_frame;
+    msg.header.frame_id = _map_frame;
 
     geometry_msgs::msg::Vector3 euler_vals;
     euler_vals.x = _pose.Roll() - _offset.Roll();

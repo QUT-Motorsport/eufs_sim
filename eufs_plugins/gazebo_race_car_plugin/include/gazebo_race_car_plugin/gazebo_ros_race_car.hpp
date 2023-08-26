@@ -126,9 +126,9 @@ class RaceCarPlugin : public gazebo::ModelPlugin {
 
     // ROS TF
     bool _pub_tf;
-    std::string _reference_frame;
+    std::string _map_frame;
     std::string _odom_frame;
-    std::string _robot_frame;
+    std::string _base_frame;
     std::unique_ptr<tf2_ros::TransformBroadcaster> _tf_br;
 
     // ROS Publishers
