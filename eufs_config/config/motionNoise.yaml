@@ -1,9 +1,9 @@
 noise:
   # X, Y, Z
-  positionNoise: [0.01, 0.01, 0.1]  # steering angle uses z
+  positionNoise: [0.02, 0.02, 0.1]  # steering angle uses z
 
   # Yaw, Pitch, Roll
-  orientationNoise: [0.001, 0.0, 0.001]  # EKF euler angle uses roll
+  orientationNoise: [0.01, 0.0, 0.001]  # EKF euler angle uses roll
 
   # X, Y, Z
   linearVelocityNoise: [0.1, 0.1, 0.0]  # imu velocity uses

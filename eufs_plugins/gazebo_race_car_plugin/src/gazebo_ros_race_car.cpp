@@ -111,6 +111,7 @@ void RaceCarPlugin::initParams() {
     _update_rate = _rosnode->declare_parameter("update_rate", 2.0);
     _publish_rate = _rosnode->declare_parameter("publish_rate", 200.0);
     _reference_frame = _rosnode->declare_parameter("reference_frame", "map");
+    _odom_frame = _rosnode->declare_parameter("odom_frame", "odom");
     _robot_frame = _rosnode->declare_parameter("robot_frame", "base_link");
     _control_delay = _rosnode->declare_parameter("control_delay", 0.5);
     _pub_tf = _rosnode->declare_parameter("simulate_transform", false);
@@ -247,7 +248,8 @@ void RaceCarPlugin::setModelState() {
 geometry_msgs::msg::PoseWithCovarianceStamped RaceCarPlugin::odomToPoseMsg(const nav_msgs::msg::Odometry &odom_msg) {
     geometry_msgs::msg::PoseWithCovarianceStamped pose_msg;
 
-    pose_msg.header = odom_msg.header;
+    pose_msg.header.stamp = odom_msg.header.stamp;
+    pose_msg.header.frame_id = _reference_frame;
     pose_msg.pose = odom_msg.pose;
 
     return pose_msg;
@@ -270,7 +272,7 @@ geometry_msgs::msg::TwistWithCovarianceStamped RaceCarPlugin::getWheelTwist(cons
 
     wheel_twist.header.stamp.sec = _last_sim_time.sec;
     wheel_twist.header.stamp.nanosec = _last_sim_time.nsec;
-    wheel_twist.header.frame_id = _reference_frame;
+    wheel_twist.header.frame_id = _robot_frame;
 
     return wheel_twist;
 }
@@ -280,7 +282,7 @@ nav_msgs::msg::Odometry RaceCarPlugin::stateToOdom(const eufs::models::State &st
     nav_msgs::msg::Odometry msg;
     msg.header.stamp.sec = _last_sim_time.sec;
     msg.header.stamp.nanosec = _last_sim_time.nsec;
-    msg.header.frame_id = _reference_frame;
+    msg.header.frame_id = _odom_frame;
     msg.child_frame_id = _robot_frame;
 
     msg.pose.pose.position.x = state.x;
@@ -368,24 +370,44 @@ void RaceCarPlugin::publishVehicleMotion() {
 }
 
 void RaceCarPlugin::publishTf() {
+    // Base->Odom
     // Position
-    tf2::Transform transform;
-    transform.setOrigin(tf2::Vector3(_state.x, _state.y, 0.0));
+    tf2::Transform base_to_odom;
+    base_to_odom.setOrigin(tf2::Vector3(_state.x, _state.y, 0.0));
 
     // Orientation
-    tf2::Quaternion q;
-    q.setRPY(0.0, 0.0, _state.yaw);
-    transform.setRotation(q);
+    tf2::Quaternion base_odom_q;
+    base_odom_q.setRPY(0.0, 0.0, _state.yaw);
+    base_to_odom.setRotation(base_odom_q);
 
     // Send TF
     geometry_msgs::msg::TransformStamped transform_stamped;
 
     transform_stamped.header.stamp.sec = _last_sim_time.sec;
     transform_stamped.header.stamp.nanosec = _last_sim_time.nsec;
-    transform_stamped.header.frame_id = _reference_frame;
+    transform_stamped.header.frame_id = _odom_frame;
     transform_stamped.child_frame_id = _robot_frame;
-    tf2::convert(transform, transform_stamped.transform);
+    tf2::convert(base_to_odom, transform_stamped.transform);
 
+    _tf_br->sendTransform(transform_stamped);
+
+    // Odom->Map
+    // Position
+    tf2::Transform odom_to_map;
+    odom_to_map.setOrigin(tf2::Vector3(0.0, 0.0, 0.0));
+
+    // Orientation
+    tf2::Quaternion odom_map_q;
+    odom_map_q.setRPY(0.0, 0.0, 0.0);
+    odom_to_map.setRotation(odom_map_q);
+
+    // Send TF
+    transform_stamped.header.stamp.sec = _last_sim_time.sec;
+    transform_stamped.header.stamp.nanosec = _last_sim_time.nsec;
+    transform_stamped.header.frame_id = _reference_frame;
+    transform_stamped.child_frame_id = _odom_frame;
+    tf2::convert(odom_to_map, transform_stamped.transform);
+    
     _tf_br->sendTransform(transform_stamped);
 }
 

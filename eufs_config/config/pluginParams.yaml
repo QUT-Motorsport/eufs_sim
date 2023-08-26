@@ -1,6 +1,7 @@
 /**: # global parameters
   ros__parameters:
     reference_frame: "track"
+    odom_frame: "odom"
     robot_frame: "base_footprint"
     # params rewritten by launcher upon user selection:
     noise_config: "null"
