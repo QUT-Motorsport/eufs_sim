@@ -59,7 +59,7 @@ void ConeDetectionPlugin::initParams() {
     _reference_frame = _ros_node->declare_parameter("reference_frame", "map");
     _robot_frame = _ros_node->declare_parameter("robot_frame", "base_link");
 
-    _track_model = get_model(_world, _reference_frame, _ros_node->get_logger());
+    _track_model = get_model(_world, "track", _ros_node->get_logger());
     _car_link = get_link(_model, _robot_frame, _ros_node->get_logger());
     _car_inital_pose = _car_link->WorldPose();
 
@@ -143,15 +143,17 @@ void ConeDetectionPlugin::publishSLAM() {
         get_ground_truth_track(_track_model, curr_time, _reference_frame, _ros_node->get_logger());
 
     if (has_subscribers(_slam_global_pub) || has_subscribers(_slam_local_pub)) {
-        auto noisy_global_map = get_noisy_global_map(_slam_config, ground_truth_track);
+        if (_initial_slam.cones_with_cov.empty()) {
+            _initial_slam = get_noisy_global_map(_slam_config, ground_truth_track);
+        }
 
         if (has_subscribers(_slam_global_pub)) {
-            auto slam_global_map = get_track_centered_on_car_inital_pose(_car_inital_pose, noisy_global_map);
+            auto slam_global_map = get_track_centered_on_car_inital_pose(_car_inital_pose, _initial_slam);
             _slam_global_pub->publish(slam_global_map);
         }
 
         if (has_subscribers(_slam_local_pub)) {
-            auto noisy_local_map = get_noisy_local_map(_slam_config, _car_link->WorldPose(), noisy_global_map);
+            auto noisy_local_map = get_noisy_local_map(_slam_config, _car_link->WorldPose(), _initial_slam);
             _slam_local_pub->publish(noisy_local_map);
         }
     }
