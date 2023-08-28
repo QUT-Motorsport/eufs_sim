@@ -49,6 +49,11 @@ class EUFSLauncher(Plugin):
                 print(exc)
                 return
 
+        with open(self.plugin_yaml, "r") as f:
+            plugin_params = yaml.safe_load(f)
+        # get frame ros params
+        self.BASE_FRAME = plugin_params["/**"]["ros__parameters"]["base_frame"]
+
         # Create QWidget
         self._widget = QWidget()
         self._widget.setObjectName("EUFSLauncherUI")
@@ -220,12 +225,14 @@ class EUFSLauncher(Plugin):
         model_config = self.MODEL_CONFIGS[self.MODEL_PRESET_MENU.currentText()]
         vehicle_config = f"vehicle_config:={model_config}"
         robot_name = f"robot_name:={self.ROBOT_NAME_MENU.currentText()}"
+        base_frame = f"base_frame:={self.BASE_FRAME}"
         parameters_to_pass = [
             track_layout,
             vehicle_model,
             command_mode,
             vehicle_config,
             robot_name,
+            base_frame,
         ]
 
         # Get vehicle model information

@@ -8,6 +8,9 @@
     <!--  Load the config file  -->
     <xacro:property name="config" value="${load_yaml('$(arg vehicle_config)')}"/>
 
+    <!--  Get the parameters  -->
+    <xacro:arg name="base_frame" default="base_link"/>
+
     <!-- Simulate sensors or not? -->
     <xacro:arg name="enable_camera" default="false"/>
     <xacro:arg name="enable_lidar" default="false"/>
@@ -55,7 +58,7 @@
     <!-- *************** -->
 
     <!-- Chassis of the car -->
-    <xacro:chassis_base chassis_mesh="file://$(find eufs_racecar)/meshes/lando.dae"/>
+    <xacro:chassis_base chassis_mesh="file://$(find eufs_racecar)/meshes/lando.dae" base_frame="$(arg base_frame)"/>
 
     <!-- Wheels -->
     <xacro:wheels chassis_width="1.6" wheelbase="1.580"/>

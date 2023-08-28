@@ -86,6 +86,7 @@ def spawn_car(context, *args, **kwargs):
 
     robot_name = get_argument(context, "robot_name")
     vehicle_model_config = get_argument(context, "vehicle_model_config")
+    base_frame = get_argument(context, "base_frame")
     enable_camera = get_argument(context, "enable_camera")
     enable_lidar = get_argument(context, "enable_lidar")
     enable_laserscan = get_argument(context, "enable_laserscan")
@@ -113,6 +114,7 @@ def spawn_car(context, *args, **kwargs):
         xacro_path,
         mappings={
             "vehicle_config": vehicle_config,
+            "base_frame": base_frame,
             "enable_camera": enable_camera,
             "enable_lidar": enable_lidar,
             "enable_laserscan": enable_laserscan,
@@ -226,6 +228,11 @@ def generate_launch_description():
                 name="rviz",
                 default_value="true",
                 description="Condition to launch the Rviz GUI",
+            ),
+            DeclareLaunchArgument(
+                name="base_frame",
+                default_value="base_link",
+                description="ROS transform frame for the vehicle base",
             ),
             DeclareLaunchArgument(
                 name="enable_camera",
