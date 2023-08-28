@@ -53,8 +53,8 @@ void RaceCarPlugin::Load(gazebo::physics::ModelPtr model, sdf::ElementPtr sdf) {
 
     // ROS Publishers
     // Wheel speeds
-    _pub_wheel_twist = _rosnode->create_publisher<geometry_msgs::msg::TwistWithCovarianceStamped>(
-        "/vehicle/wheel_twist", 1);
+    _pub_wheel_twist =
+        _rosnode->create_publisher<geometry_msgs::msg::TwistWithCovarianceStamped>("/vehicle/wheel_twist", 1);
     // Steering angle
     _pub_steering_angle = _rosnode->create_publisher<std_msgs::msg::Float32>("/vehicle/steering_angle", 1);
     // Visual odom
@@ -65,8 +65,8 @@ void RaceCarPlugin::Load(gazebo::physics::ModelPtr model, sdf::ElementPtr sdf) {
     }
     // Ground truth
     if (_pub_gt) {
-        _pub_gt_wheel_twist = _rosnode->create_publisher<geometry_msgs::msg::TwistWithCovarianceStamped>(
-            "/ground_truth/wheel_twist", 1);
+        _pub_gt_wheel_twist =
+            _rosnode->create_publisher<geometry_msgs::msg::TwistWithCovarianceStamped>("/ground_truth/wheel_twist", 1);
         _pub_gt_odom = _rosnode->create_publisher<nav_msgs::msg::Odometry>("/ground_truth/odom", 1);
         _pub_gt_steering_angle = _rosnode->create_publisher<std_msgs::msg::Float32>("/ground_truth/steering_angle", 1);
     }
@@ -255,7 +255,8 @@ geometry_msgs::msg::PoseWithCovarianceStamped RaceCarPlugin::odomToPoseMsg(const
     return pose_msg;
 }
 
-geometry_msgs::msg::TwistWithCovarianceStamped RaceCarPlugin::getWheelTwist(const std::vector<double> &speeds, const double &angle) {
+geometry_msgs::msg::TwistWithCovarianceStamped RaceCarPlugin::getWheelTwist(const std::vector<double> &speeds,
+                                                                            const double &angle) {
     geometry_msgs::msg::TwistWithCovarianceStamped wheel_twist;
 
     // Calculate avg wheel speeds
@@ -331,7 +332,7 @@ void RaceCarPlugin::publishVehicleMotion() {
     nav_msgs::msg::Odometry visual_odom = getVisualOdom(odom_noisy);
     if (has_subscribers(_pub_vis_odom)) {
         // Publish at 30Hz
-        if (_last_sim_time - _time_last_odom_published > (1/30)) {
+        if (_last_sim_time - _time_last_odom_published > (1 / 30)) {
             _pub_vis_odom->publish(visual_odom);
             _time_last_odom_published = _last_sim_time;
         }
@@ -362,7 +363,8 @@ void RaceCarPlugin::publishVehicleMotion() {
     }
 
     std::vector<double> wheel_speeds_noisy = _noise->applyNoiseToWheels(wheel_speeds);
-    geometry_msgs::msg::TwistWithCovarianceStamped wheel_twist_noisy = getWheelTwist(wheel_speeds_noisy, steering_angle_noisy.data);
+    geometry_msgs::msg::TwistWithCovarianceStamped wheel_twist_noisy =
+        getWheelTwist(wheel_speeds_noisy, steering_angle_noisy.data);
 
     if (has_subscribers(_pub_wheel_twist)) {
         _pub_wheel_twist->publish(wheel_twist_noisy);
@@ -407,7 +409,7 @@ void RaceCarPlugin::publishTf() {
     transform_stamped.header.frame_id = _map_frame;
     transform_stamped.child_frame_id = _odom_frame;
     tf2::convert(odom_to_map, transform_stamped.transform);
-    
+
     _tf_br->sendTransform(transform_stamped);
 }
 
@@ -446,7 +448,8 @@ void RaceCarPlugin::update() {
 
     counter++;
     if (counter == 100) {
-        RCLCPP_DEBUG(_rosnode->get_logger(), "steering desired: %.2f, desired: %.2f", _des_input.delta, _act_input.delta);
+        RCLCPP_DEBUG(_rosnode->get_logger(), "steering desired: %.2f, desired: %.2f", _des_input.delta,
+                     _act_input.delta);
         counter = 0;
     }
 

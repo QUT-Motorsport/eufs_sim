@@ -91,8 +91,7 @@ void ConeDetectionPlugin::publishGTTrack() {
     }
     _last_gt_update = curr_time;
 
-    auto ground_truth_track =
-        get_ground_truth_track(_track_model, curr_time, _map_frame, _ros_node->get_logger());
+    auto ground_truth_track = get_ground_truth_track(_track_model, curr_time, _map_frame, _ros_node->get_logger());
 
     if (has_subscribers(_ground_truth_pub)) {
         auto centered_ground_truth = get_track_centered_on_car_inital_pose(_car_inital_pose, ground_truth_track);
@@ -107,8 +106,7 @@ void ConeDetectionPlugin::publishLiDARDetection() {
     }
     _last_lidar_update = curr_time;
 
-    auto ground_truth_track =
-        get_ground_truth_track(_track_model, curr_time, _map_frame, _ros_node->get_logger());
+    auto ground_truth_track = get_ground_truth_track(_track_model, curr_time, _map_frame, _ros_node->get_logger());
 
     if (has_subscribers(_lidar_detection_pub)) {
         auto lidar_detection = get_sensor_detection(_lidar_config, _car_link->WorldPose(), ground_truth_track);
@@ -123,8 +121,7 @@ void ConeDetectionPlugin::publishCameraDetection() {
     }
     _last_camera_update = curr_time;
 
-    auto ground_truth_track =
-        get_ground_truth_track(_track_model, curr_time, _map_frame, _ros_node->get_logger());
+    auto ground_truth_track = get_ground_truth_track(_track_model, curr_time, _map_frame, _ros_node->get_logger());
 
     if (has_subscribers(_vision_detection_pub)) {
         auto vision_detection = get_sensor_detection(_camera_config, _car_link->WorldPose(), ground_truth_track);
@@ -139,8 +136,7 @@ void ConeDetectionPlugin::publishSLAM() {
     }
     _last_slam_update = curr_time;
 
-    auto ground_truth_track =
-        get_ground_truth_track(_track_model, curr_time, _map_frame, _ros_node->get_logger());
+    auto ground_truth_track = get_ground_truth_track(_track_model, curr_time, _map_frame, _ros_node->get_logger());
 
     if (has_subscribers(_slam_global_pub) || has_subscribers(_slam_local_pub)) {
         if (_initial_slam.cones_with_cov.empty()) {

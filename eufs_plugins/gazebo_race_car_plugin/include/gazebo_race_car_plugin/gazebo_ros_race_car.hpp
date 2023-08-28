@@ -36,11 +36,11 @@
 #include "ackermann_msgs/msg/ackermann_drive_stamped.hpp"
 #include "driverless_msgs/msg/state.hpp"
 #include "geometry_msgs/msg/pose_with_covariance_stamped.hpp"
-#include "geometry_msgs/msg/vector3.hpp"
 #include "geometry_msgs/msg/twist_with_covariance_stamped.hpp"
-#include "std_msgs/msg/float32.hpp"
-#include "sensor_msgs/msg/joint_state.hpp"
+#include "geometry_msgs/msg/vector3.hpp"
 #include "nav_msgs/msg/odometry.hpp"
+#include "sensor_msgs/msg/joint_state.hpp"
+#include "std_msgs/msg/float32.hpp"
 
 // ROS TF2
 #include <tf2/transform_datatypes.h>
@@ -91,7 +91,8 @@ class RaceCarPlugin : public gazebo::ModelPlugin {
     geometry_msgs::msg::PoseWithCovarianceStamped odomToPoseMsg(const nav_msgs::msg::Odometry &odom);
 
     void publishVehicleMotion();
-    geometry_msgs::msg::TwistWithCovarianceStamped getWheelTwist(const std::vector<double> &speeds, const double &angle);
+    geometry_msgs::msg::TwistWithCovarianceStamped getWheelTwist(const std::vector<double> &speeds,
+                                                                 const double &angle);
     nav_msgs::msg::Odometry stateToOdom(const eufs::models::State &state);
     nav_msgs::msg::Odometry getVisualOdom(const nav_msgs::msg::Odometry &odom);
 
