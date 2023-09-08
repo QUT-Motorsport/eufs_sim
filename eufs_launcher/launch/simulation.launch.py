@@ -160,6 +160,7 @@ def spawn_car(context, *args, **kwargs):
                     "robot_description": robot_description,
                     "rate": 200,
                     "use_sim_time": LaunchConfiguration("use_sim_time"),
+                    "source_list": ["joint_states/steering"],
                 }
             ],
             arguments=[urdf_path],

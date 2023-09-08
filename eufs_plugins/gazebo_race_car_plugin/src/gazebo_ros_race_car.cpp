@@ -67,6 +67,8 @@ void RaceCarPlugin::Load(gazebo::physics::ModelPtr model, sdf::ElementPtr sdf) {
             _rosnode->create_publisher<geometry_msgs::msg::PoseWithCovarianceStamped>("ground_truth/car_pose", 1);
         _pub_gt_steering_angle = _rosnode->create_publisher<std_msgs::msg::Float32>("/ground_truth/steering_angle", 1);
     }
+    // RVIZ joint visuals
+    _pub_joint_state = _rosnode->create_publisher<sensor_msgs::msg::JointState>("/joint_states/steering", 1);
 
     // Driverless state
     _sub_state = _rosnode->create_subscription<driverless_msgs::msg::State>(
@@ -378,8 +380,9 @@ void RaceCarPlugin::update() {
 
     _des_input.acc = _last_cmd.drive.acceleration;
     _des_input.vel = _last_cmd.drive.speed;
-    _des_input.delta = _last_cmd.drive.steering_angle * 3.1415 / 180 /
-                       (180 / 26);  // scales from steering wheel 90* to front wheels 26*
+    _des_input.delta = _last_cmd.drive.steering_angle * 3.1415 / 180;
+    // 90* (max steering angle) = 16* (max wheel angle)
+    _des_input.delta *= (16.0 / 90.0);  // maybe use params not hardcoded?
 
     if (_command_mode == velocity) {
         double current_speed = std::sqrt(std::pow(_state.v_x, 2) + std::pow(_state.v_y, 2));
@@ -400,7 +403,7 @@ void RaceCarPlugin::update() {
 
     counter++;
     if (counter == 100) {
-        RCLCPP_DEBUG(_rosnode->get_logger(), "steering %f", _act_input.delta);
+        RCLCPP_DEBUG(_rosnode->get_logger(), "steering desired: %.2f, desired: %.2f", _des_input.delta, _act_input.delta);
         counter = 0;
     }
 
@@ -415,6 +418,17 @@ void RaceCarPlugin::update() {
 
     _left_steering_joint->SetPosition(0, _act_input.delta);
     _right_steering_joint->SetPosition(0, _act_input.delta);
+    // joint states
+    sensor_msgs::msg::JointState joint_state;
+    joint_state.header.stamp.sec = _last_sim_time.sec;
+    joint_state.header.stamp.nanosec = _last_sim_time.nsec;
+    joint_state.name.push_back(_left_steering_joint->GetName());
+    joint_state.name.push_back(_right_steering_joint->GetName());
+    joint_state.position.push_back(_left_steering_joint->Position());
+    joint_state.position.push_back(_right_steering_joint->Position());
+
+    _pub_joint_state->publish(joint_state);
+
     setModelState();
 
     double time_since_last_published = (_last_sim_time - _time_last_published).Double();
@@ -435,7 +449,7 @@ void RaceCarPlugin::update() {
 void RaceCarPlugin::updateState(const driverless_msgs::msg::State::SharedPtr msg) { _as_state = *msg; }
 
 void RaceCarPlugin::onCmd(const ackermann_msgs::msg::AckermannDriveStamped::SharedPtr msg) {
-    RCLCPP_INFO(_rosnode->get_logger(), "Last time: %f", (_world->SimTime() - _last_cmd_time).Double());
+    RCLCPP_DEBUG(_rosnode->get_logger(), "Last time: %f", (_world->SimTime() - _last_cmd_time).Double());
     while ((_world->SimTime() - _last_cmd_time).Double() < _control_delay) {
         RCLCPP_DEBUG(_rosnode->get_logger(), "Waiting until control delay is over");
     }

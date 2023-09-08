@@ -39,6 +39,7 @@
 #include "geometry_msgs/msg/vector3.hpp"
 #include "nav_msgs/msg/odometry.hpp"
 #include "std_msgs/msg/float32.hpp"
+#include "sensor_msgs/msg/joint_state.hpp"
 
 // ROS TF2
 #include <tf2/transform_datatypes.h>
@@ -134,6 +135,7 @@ class RaceCarPlugin : public gazebo::ModelPlugin {
     rclcpp::Publisher<geometry_msgs::msg::PoseWithCovarianceStamped>::SharedPtr _pub_gt_pose;
     rclcpp::Publisher<std_msgs::msg::Float32>::SharedPtr _pub_steering_angle;
     rclcpp::Publisher<std_msgs::msg::Float32>::SharedPtr _pub_gt_steering_angle;
+    rclcpp::Publisher<sensor_msgs::msg::JointState>::SharedPtr _pub_joint_state;
 
     // ROS Subscriptions
     rclcpp::Subscription<ackermann_msgs::msg::AckermannDriveStamped>::SharedPtr _sub_cmd;
