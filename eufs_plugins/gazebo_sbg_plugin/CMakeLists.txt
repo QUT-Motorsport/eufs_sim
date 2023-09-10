@@ -15,10 +15,14 @@ ament_target_dependencies(gazebo_ros_sbg_driver
 )
 
 target_include_directories(gazebo_ros_sbg_driver PUBLIC include)
+target_include_directories(gazebo_ros_sbg_driver PUBLIC ${PROJECT_SOURCE_DIR}/include)
 target_link_libraries(gazebo_ros_sbg_driver eufs_models::eufs_models)
 ament_export_libraries(gazebo_ros_sbg_driver)
+
+include_directories(${PROJECT_NAME}/include)
 
 install(TARGETS gazebo_ros_sbg_driver
   ARCHIVE DESTINATION lib
   LIBRARY DESTINATION lib
-  RUNTIME DESTINATION lib)
+  RUNTIME DESTINATION lib
+)

@@ -21,10 +21,12 @@ ament_target_dependencies(gazebo_ros_race_car
 )
 
 target_include_directories(gazebo_ros_race_car PUBLIC include)
+target_include_directories(gazebo_ros_race_car PUBLIC ${PROJECT_SOURCE_DIR}/include)
 target_link_libraries(gazebo_ros_race_car eufs_models::eufs_models)
 ament_export_libraries(gazebo_ros_race_car)
 
 install(TARGETS gazebo_ros_race_car
   ARCHIVE DESTINATION lib
   LIBRARY DESTINATION lib
-  RUNTIME DESTINATION lib)
+  RUNTIME DESTINATION lib
+)

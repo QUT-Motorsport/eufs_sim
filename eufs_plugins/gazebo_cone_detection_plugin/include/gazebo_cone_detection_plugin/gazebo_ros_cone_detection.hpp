@@ -64,6 +64,7 @@ class ConeDetectionPlugin : public gazebo::ModelPlugin {
     gazebo::common::Time _last_camera_update;
     gazebo::common::Time _last_slam_update;
     driverless_msgs::msg::ConeDetectionStamped _initial_track;
+    driverless_msgs::msg::ConeDetectionStamped _initial_slam;
 
     rclcpp::Publisher<driverless_msgs::msg::ConeDetectionStamped>::SharedPtr _ground_truth_pub;
     rclcpp::Publisher<driverless_msgs::msg::ConeDetectionStamped>::SharedPtr _lidar_detection_pub;

@@ -8,6 +8,7 @@
     simulate_transform: false
     simulate_perception: false
     simulate_slam: false
+    use_sim_time: true
 
 gazebo:
   ros__parameters:

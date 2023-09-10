@@ -10,8 +10,6 @@
 namespace gazebo_plugins {
 namespace eufs_plugins {
 
-GZ_REGISTER_MODEL_PLUGIN(SBGPlugin)
-
 SBGPlugin::SBGPlugin() {}
 
 void SBGPlugin::Load(gazebo::physics::ModelPtr model, sdf::ElementPtr sdf) {
@@ -184,7 +182,7 @@ void SBGPlugin::publishGTOdom() {
     msg.pose.pose.position.z = _pose.Pos().Z() - _offset.Pos().Z();
 
     std::vector<double> orientation = {_pose.Yaw() - _offset.Yaw(), 0.0, 0.0};
-    orientation = ToQuaternion(orientation);
+    orientation = to_quaternion(orientation);
 
     msg.pose.pose.orientation.x = orientation[0];
     msg.pose.pose.orientation.y = orientation[1];
@@ -204,22 +202,7 @@ void SBGPlugin::publishGTOdom() {
     }
 }
 
-std::vector<double> SBGPlugin::ToQuaternion(std::vector<double> &euler) {
-    // Abbreviations for the various angular functions
-    double cy = cos(euler[0] * 0.5);
-    double sy = sin(euler[0] * 0.5);
-    double cp = cos(euler[1] * 0.5);
-    double sp = sin(euler[1] * 0.5);
-    double cr = cos(euler[2] * 0.5);
-    double sr = sin(euler[2] * 0.5);
+GZ_REGISTER_MODEL_PLUGIN(SBGPlugin)
 
-    std::vector<double> q;
-    q.push_back(cy * cp * sr - sy * sp * cr);  // x
-    q.push_back(sy * cp * sr + cy * sp * cr);  // y
-    q.push_back(sy * cp * cr - cy * sp * sr);  // z
-    q.push_back(cy * cp * cr + sy * sp * sr);  // w
-
-    return q;
-}
 }  // namespace eufs_plugins
 }  // namespace gazebo_plugins

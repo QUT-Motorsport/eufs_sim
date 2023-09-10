@@ -14,9 +14,11 @@ ament_target_dependencies(gazebo_ros_cone_detection
   "driverless_msgs")
 
 target_include_directories(gazebo_ros_cone_detection PUBLIC include)
+target_include_directories(gazebo_ros_cone_detection PUBLIC ${PROJECT_SOURCE_DIR}/include)
 ament_export_libraries(gazebo_ros_cone_detection)
 
 install(TARGETS gazebo_ros_cone_detection
   ARCHIVE DESTINATION lib
   LIBRARY DESTINATION lib
-  RUNTIME DESTINATION lib)
+  RUNTIME DESTINATION lib
+)

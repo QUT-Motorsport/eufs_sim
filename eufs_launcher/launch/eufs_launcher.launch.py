@@ -8,7 +8,6 @@ from launch_ros.actions import Node
 
 
 def generate_launch_description():
-    launcher_share = get_package_share_directory("eufs_launcher")
     return LaunchDescription(
         [
             Node(
@@ -16,6 +15,7 @@ def generate_launch_description():
                 package="eufs_launcher",
                 executable="eufs_launcher",
                 output="both",
+                parameters=[{"use_sim_time": True}],
             ),
         ]
     )
