@@ -112,7 +112,7 @@ void GazeboRosLidar::Load(gazebo::sensors::SensorPtr _sensor, sdf::ElementPtr _s
     } else {
         std::string output_type_string = _sdf->Get<std::string>("output_type");
         if (output_type_string == "sensor_msgs/LaserScan") {
-            impl_->pub_ = impl_->ros_node_->create_publisher<sensor_msgs::msg::LaserScan>("~/out", pub_qos);
+            impl_->pub_ = impl_->ros_node_->create_publisher<sensor_msgs::msg::LaserScan>("~/out", 10);
         } else if (output_type_string == "sensor_msgs/PointCloud") {
             impl_->pub_ = impl_->ros_node_->create_publisher<sensor_msgs::msg::PointCloud>("~/out", pub_qos);
         } else if (output_type_string == "sensor_msgs/PointCloud2") {
