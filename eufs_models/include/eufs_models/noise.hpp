@@ -124,6 +124,20 @@ class Noise {
         return new_wheels;
     }
 
+    std::vector<double> noiseToCovariance(const std::vector<double> &covariance) {
+        std::vector<double> new_covariance = covariance;
+
+        new_covariance[0] = pow(_noise_param.position[0], 2);
+        new_covariance[7] = pow(_noise_param.position[1], 2);
+        new_covariance[14] = pow(_noise_param.position[2], 2);
+
+        new_covariance[21] = pow(_noise_param.orientation[0], 2);
+        new_covariance[28] = pow(_noise_param.orientation[1], 2);
+        new_covariance[35] = pow(_noise_param.orientation[2], 2);
+
+        return new_covariance;
+    }
+
     const NoiseParam &getNoiseParam() { return _noise_param; }
 
     std::string getString() { return _noise_param.to_str(); }

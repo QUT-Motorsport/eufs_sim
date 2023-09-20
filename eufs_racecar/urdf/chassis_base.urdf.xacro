@@ -1,14 +1,14 @@
 <?xml version="1.0"?>
 <robot name="chassis_base" xmlns:xacro="http://www.ros.org/wiki/xacro">
-  <xacro:macro name="chassis_base" params="chassis_mesh">
+  <xacro:macro name="chassis_base" params="chassis_mesh base_frame">
 
     <xacro:property name="wheel_diameter" value="0.4064"/>
 
     <!-- BASE FOOTPRINT -->
-    <link name="base_footprint"/>
+    <link name="${base_frame}"/>
 
     <joint name="chassis_joint" type="fixed">
-      <parent link="base_footprint"/>
+      <parent link="${base_frame}"/>
       <child link="chassis"/>
       <origin xyz="0 0 ${wheel_diameter/2}"
               rpy="0 0 0"/>

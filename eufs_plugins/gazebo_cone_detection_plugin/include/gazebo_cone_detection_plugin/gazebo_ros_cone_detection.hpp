@@ -44,8 +44,8 @@ class ConeDetectionPlugin : public gazebo::ModelPlugin {
     gazebo_ros::Node::SharedPtr _ros_node;
     gazebo::event::ConnectionPtr _update_connection;
 
-    std::string _reference_frame;
-    std::string _robot_frame;
+    std::string _map_frame;
+    std::string _base_frame;
 
     bool _pub_gt;
     bool _simulate_perception;

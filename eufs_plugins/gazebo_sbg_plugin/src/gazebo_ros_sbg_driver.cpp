@@ -27,9 +27,6 @@ void SBGPlugin::Load(gazebo::physics::ModelPtr model, sdf::ElementPtr sdf) {
     _pub_velocity = _ros_node->create_publisher<geometry_msgs::msg::TwistStamped>("imu/velocity", 1);
     _pub_euler = _ros_node->create_publisher<sbg_driver::msg::SbgEkfEuler>("sbg/ekf_euler", 1);
     _pub_gps = _ros_node->create_publisher<sbg_driver::msg::SbgGpsPos>("sbg/gps_pos", 1);
-    if (_pub_gt) {
-        _pub_gt_odom = _ros_node->create_publisher<nav_msgs::msg::Odometry>("ground_truth/odom", 1);
-    }
 
     // ROS subscribers
     _sub_nav_sat_fix = _ros_node->create_subscription<sensor_msgs::msg::NavSatFix>(
@@ -40,7 +37,6 @@ void SBGPlugin::Load(gazebo::physics::ModelPtr model, sdf::ElementPtr sdf) {
     _last_vel_time = _world->SimTime();
     _last_ekf_time = _world->SimTime();
     _last_gps_time = _world->SimTime();
-    _last_odom_time = _world->SimTime();
 
     _offset = _model->WorldPose();
 
@@ -52,9 +48,9 @@ void SBGPlugin::initParams() {
     _ekf_update_rate = _ros_node->declare_parameter("ekf_update_rate", 1.0);
     _vel_update_rate = _ros_node->declare_parameter("vel_update_rate", 1.0);
     _gps_update_rate = _ros_node->declare_parameter("gps_update_rate", 1.0);
-    _reference_frame = _ros_node->declare_parameter("reference_frame", "map");
-    _robot_frame = _ros_node->declare_parameter("robot_rame", "base_link");
-    _pub_gt = _ros_node->declare_parameter("publish_ground_truth", false);
+    _map_frame = _ros_node->declare_parameter("map_frame", "map");
+    _odom_frame = _ros_node->declare_parameter("odom_frame", "odom");
+    _base_frame = _ros_node->declare_parameter("base_frame", "base_link");
 
     // Noise
     std::string noise_yaml_name = _ros_node->declare_parameter("noise_config", "null");
@@ -71,7 +67,7 @@ void SBGPlugin::navSatFixCallback(const sensor_msgs::msg::NavSatFix::SharedPtr n
     sbg_driver::msg::SbgGpsPos msg;
     msg.header.stamp.sec = _last_nav_sat_msg.header.stamp.sec;
     msg.header.stamp.nanosec = _last_nav_sat_msg.header.stamp.nanosec;
-    msg.header.frame_id = _reference_frame;
+    msg.header.frame_id = _odom_frame;
 
     msg.latitude = _last_nav_sat_msg.latitude;
     msg.longitude = _last_nav_sat_msg.longitude;
@@ -89,8 +85,6 @@ void SBGPlugin::update() {
 
     publishVelocity();
     publishEuler();
-    // publishGps();
-    publishGTOdom();
 }
 
 void SBGPlugin::publishVelocity() {
@@ -103,7 +97,7 @@ void SBGPlugin::publishVelocity() {
     geometry_msgs::msg::TwistStamped msg;
     msg.header.stamp.sec = curr_time.sec;
     msg.header.stamp.nanosec = curr_time.nsec;
-    msg.header.frame_id = _reference_frame;
+    msg.header.frame_id = _map_frame;
 
     geometry_msgs::msg::Twist twist_vals;
     twist_vals.linear.x = _vel.X();
@@ -131,7 +125,7 @@ void SBGPlugin::publishEuler() {
     sbg_driver::msg::SbgEkfEuler msg;
     msg.header.stamp.sec = curr_time.sec;
     msg.header.stamp.nanosec = curr_time.nsec;
-    msg.header.frame_id = _reference_frame;
+    msg.header.frame_id = _map_frame;
 
     geometry_msgs::msg::Vector3 euler_vals;
     euler_vals.x = _pose.Roll() - _offset.Roll();
@@ -144,65 +138,5 @@ void SBGPlugin::publishEuler() {
         _pub_euler->publish(msg);
     }
 }
-
-// void SBGPlugin::publishGps() {
-//     auto curr_time = _world->SimTime();
-//     if (calc_dt(_last_gps_time, curr_time) < (1.0 / _gps_update_rate)) {
-//         return;
-//     }
-//     _last_gps_time = curr_time;
-
-//     sbg_driver::msg::SbgGpsPos msg;
-//     msg.header.stamp.sec = _last_nav_sat_msg.header.stamp.sec;
-//     msg.header.stamp.nanosec = _last_nav_sat_msg.header.stamp.nanosec;
-//     msg.header.frame_id = _reference_frame;
-
-//     msg.latitude = _last_nav_sat_msg.latitude;
-//     msg.longitude = _last_nav_sat_msg.longitude;
-//     msg.altitude = _last_nav_sat_msg.altitude;
-
-//     _pub_gps->publish(msg);
-// }
-
-void SBGPlugin::publishGTOdom() {
-    auto curr_time = _world->SimTime();
-    if (calc_dt(_last_odom_time, curr_time) < (1.0 / _ekf_update_rate)) {
-        return;
-    }
-    _last_odom_time = curr_time;
-
-    nav_msgs::msg::Odometry msg;
-    msg.header.stamp.sec = curr_time.sec;
-    msg.header.stamp.nanosec = curr_time.nsec;
-    msg.header.frame_id = _reference_frame;
-    msg.child_frame_id = _robot_frame;
-
-    msg.pose.pose.position.x = _pose.Pos().X() - _offset.Pos().X();
-    msg.pose.pose.position.y = _pose.Pos().Y() - _offset.Pos().Y();
-    msg.pose.pose.position.z = _pose.Pos().Z() - _offset.Pos().Z();
-
-    std::vector<double> orientation = {_pose.Yaw() - _offset.Yaw(), 0.0, 0.0};
-    orientation = to_quaternion(orientation);
-
-    msg.pose.pose.orientation.x = orientation[0];
-    msg.pose.pose.orientation.y = orientation[1];
-    msg.pose.pose.orientation.z = orientation[2];
-    msg.pose.pose.orientation.w = orientation[3];
-
-    msg.twist.twist.linear.x = _vel.X();
-    msg.twist.twist.linear.y = _vel.Y();
-    msg.twist.twist.linear.z = _vel.Z();
-
-    msg.twist.twist.angular.x = _angular_vel.X();
-    msg.twist.twist.angular.y = _angular_vel.Y();
-    msg.twist.twist.angular.z = _angular_vel.Z();
-
-    if (has_subscribers(_pub_gt_odom)) {
-        _pub_gt_odom->publish(msg);
-    }
-}
-
-GZ_REGISTER_MODEL_PLUGIN(SBGPlugin)
-
 }  // namespace eufs_plugins
 }  // namespace gazebo_plugins

@@ -80,7 +80,7 @@
                         </vertical>
                     </velocity_sensing>
                 </gps>
-                <plugin name="gps" filename="libgazebo_ros_gps_sensor.so">
+                <plugin name="${prefix}" filename="libgazebo_ros_gps_sensor.so">
                     <ros>
                         <remapping>~/out:=/imu/nav_sat_fix</remapping>
                         <remapping>~/vel:=/imu/gps_vel</remapping>

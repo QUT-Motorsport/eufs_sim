@@ -49,8 +49,6 @@ class SBGPlugin : public gazebo::ModelPlugin {
     void navSatFixCallback(const sensor_msgs::msg::NavSatFix::SharedPtr msg);
     void publishVelocity();
     void publishEuler();
-    // void publishGps();
-    void publishGTOdom();
 
     gazebo_ros::Node::SharedPtr _ros_node;
 
@@ -67,10 +65,10 @@ class SBGPlugin : public gazebo::ModelPlugin {
     std::unique_ptr<eufs::models::Noise> _noise;
 
     // ROS variables
-    std::string _reference_frame;
-    std::string _robot_frame;
+    std::string _map_frame;
+    std::string _odom_frame;
+    std::string _base_frame;
     sensor_msgs::msg::NavSatFix _last_nav_sat_msg;
-    bool _pub_gt;
 
     // Rate to publish ros messages
     double _vel_update_rate;
@@ -85,7 +83,6 @@ class SBGPlugin : public gazebo::ModelPlugin {
     rclcpp::Publisher<geometry_msgs::msg::TwistStamped>::SharedPtr _pub_velocity;
     rclcpp::Publisher<sbg_driver::msg::SbgEkfEuler>::SharedPtr _pub_euler;
     rclcpp::Publisher<sbg_driver::msg::SbgGpsPos>::SharedPtr _pub_gps;
-    rclcpp::Publisher<nav_msgs::msg::Odometry>::SharedPtr _pub_gt_odom;
 
     // ROS Subscribers
     rclcpp::Subscription<sensor_msgs::msg::NavSatFix>::SharedPtr _sub_nav_sat_fix;

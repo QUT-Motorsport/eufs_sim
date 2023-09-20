@@ -52,19 +52,22 @@ void RaceCarPlugin::Load(gazebo::physics::ModelPtr model, sdf::ElementPtr sdf) {
     initParams();
 
     // ROS Publishers
-    // Wheel odom
-    _pub_wheel_odom = _rosnode->create_publisher<nav_msgs::msg::Odometry>("/vehicle/wheel_odom", 1);
+    // Wheel speeds
+    _pub_wheel_twist =
+        _rosnode->create_publisher<geometry_msgs::msg::TwistWithCovarianceStamped>("/vehicle/wheel_twist", 1);
     // Steering angle
     _pub_steering_angle = _rosnode->create_publisher<std_msgs::msg::Float32>("/vehicle/steering_angle", 1);
+    // Visual odom
+    _pub_vis_odom = _rosnode->create_publisher<nav_msgs::msg::Odometry>("/zed2i/zed_node/odom", 1);
     // Pose (from slam output)
     if (_simulate_slam) {
         _pub_pose = _rosnode->create_publisher<geometry_msgs::msg::PoseWithCovarianceStamped>("slam/car_pose", 1);
     }
     // Ground truth
     if (_pub_gt) {
-        _pub_gt_wheel_odom = _rosnode->create_publisher<nav_msgs::msg::Odometry>("/ground_truth/wheel_odom", 1);
-        _pub_gt_pose =
-            _rosnode->create_publisher<geometry_msgs::msg::PoseWithCovarianceStamped>("ground_truth/car_pose", 1);
+        _pub_gt_wheel_twist =
+            _rosnode->create_publisher<geometry_msgs::msg::TwistWithCovarianceStamped>("/ground_truth/wheel_twist", 1);
+        _pub_gt_odom = _rosnode->create_publisher<nav_msgs::msg::Odometry>("/ground_truth/odom", 1);
         _pub_gt_steering_angle = _rosnode->create_publisher<std_msgs::msg::Float32>("/ground_truth/steering_angle", 1);
     }
     // RVIZ joint visuals
@@ -107,8 +110,9 @@ void RaceCarPlugin::initParams() {
     // Get ROS parameters
     _update_rate = _rosnode->declare_parameter("update_rate", 2.0);
     _publish_rate = _rosnode->declare_parameter("publish_rate", 200.0);
-    _reference_frame = _rosnode->declare_parameter("reference_frame", "map");
-    _robot_frame = _rosnode->declare_parameter("robot_frame", "base_link");
+    _map_frame = _rosnode->declare_parameter("map_frame", "map");
+    _odom_frame = _rosnode->declare_parameter("odom_frame", "odom");
+    _base_frame = _rosnode->declare_parameter("base_frame", "base_link");
     _control_delay = _rosnode->declare_parameter("control_delay", 0.5);
     _pub_tf = _rosnode->declare_parameter("simulate_transform", false);
     _pub_gt = _rosnode->declare_parameter("publish_ground_truth", false);
@@ -241,56 +245,19 @@ void RaceCarPlugin::setModelState() {
     _model->SetLinearVel(vel);
 }
 
-geometry_msgs::msg::PoseWithCovarianceStamped RaceCarPlugin::stateToPoseMsg(const eufs::models::State &state) {
+geometry_msgs::msg::PoseWithCovarianceStamped RaceCarPlugin::odomToPoseMsg(const nav_msgs::msg::Odometry &odom_msg) {
     geometry_msgs::msg::PoseWithCovarianceStamped pose_msg;
 
-    pose_msg.header.stamp.sec = _last_sim_time.sec;
-    pose_msg.header.stamp.nanosec = _last_sim_time.nsec;
-    pose_msg.header.frame_id = _reference_frame;
-
-    pose_msg.pose.pose.position.x = state.x;
-    pose_msg.pose.pose.position.y = state.y;
-    pose_msg.pose.pose.position.z = state.z;
-
-    std::vector<double> orientation = {state.yaw, 0.0, 0.0};
-
-    orientation = to_quaternion(orientation);
-
-    pose_msg.pose.pose.orientation.x = orientation[0];
-    pose_msg.pose.pose.orientation.y = orientation[1];
-    pose_msg.pose.pose.orientation.z = orientation[2];
-    pose_msg.pose.pose.orientation.w = orientation[3];
+    pose_msg.header.stamp = odom_msg.header.stamp;
+    pose_msg.header.frame_id = _map_frame;
+    pose_msg.pose = odom_msg.pose;
 
     return pose_msg;
 }
 
-void RaceCarPlugin::publishCarPose() {
-    geometry_msgs::msg::PoseWithCovarianceStamped pose = stateToPoseMsg(_state);
-
-    if (has_subscribers(_pub_gt_pose)) {
-        _pub_gt_pose->publish(pose);
-    }
-
-    // Add noise
-    geometry_msgs::msg::PoseWithCovarianceStamped pose_noisy = stateToPoseMsg(_noise->applyNoise(_state));
-
-    // Fill in covariance matrix
-    const eufs::models::NoiseParam &noise_param = _noise->getNoiseParam();
-    pose_noisy.pose.covariance[0] = pow(noise_param.position[0], 2);
-    pose_noisy.pose.covariance[7] = pow(noise_param.position[1], 2);
-    pose_noisy.pose.covariance[14] = pow(noise_param.position[2], 2);
-
-    pose_noisy.pose.covariance[21] = pow(noise_param.orientation[0], 2);
-    pose_noisy.pose.covariance[28] = pow(noise_param.orientation[1], 2);
-    pose_noisy.pose.covariance[35] = pow(noise_param.orientation[2], 2);
-
-    if (has_subscribers(_pub_pose)) {
-        _pub_pose->publish(pose_noisy);
-    }
-}
-
-nav_msgs::msg::Odometry RaceCarPlugin::getWheelOdometry(const std::vector<double> &speeds, const double &input) {
-    nav_msgs::msg::Odometry wheel_odom;
+geometry_msgs::msg::TwistWithCovarianceStamped RaceCarPlugin::getWheelTwist(const std::vector<double> &speeds,
+                                                                            const double &angle) {
+    geometry_msgs::msg::TwistWithCovarianceStamped wheel_twist;
 
     // Calculate avg wheel speeds
     double rf = speeds[0];
@@ -300,34 +267,83 @@ nav_msgs::msg::Odometry RaceCarPlugin::getWheelOdometry(const std::vector<double
     double avg_wheel_speed = (rf + lf + rb + lb) / 4.0;
 
     // Calculate odom with wheel speed and steering angle
-    wheel_odom.twist.twist.linear.x = avg_wheel_speed;
-    wheel_odom.twist.twist.linear.y = 0.0;
+    wheel_twist.twist.twist.linear.x = avg_wheel_speed;
 
-    wheel_odom.twist.twist.angular.z = avg_wheel_speed * tan(input) / _vehicle->getParam().kinematic.axle_width;
+    wheel_twist.twist.twist.angular.z = avg_wheel_speed * tan(angle) / _vehicle->getParam().kinematic.axle_width;
 
-    wheel_odom.header.stamp.sec = _last_sim_time.sec;
-    wheel_odom.header.stamp.nanosec = _last_sim_time.nsec;
-    wheel_odom.header.frame_id = _reference_frame;
-    wheel_odom.child_frame_id = _robot_frame;
+    wheel_twist.header.stamp.sec = _last_sim_time.sec;
+    wheel_twist.header.stamp.nanosec = _last_sim_time.nsec;
+    wheel_twist.header.frame_id = _base_frame;
 
-    return wheel_odom;
+    return wheel_twist;
 }
 
-void RaceCarPlugin::publishVehicleOdom() {
+nav_msgs::msg::Odometry RaceCarPlugin::stateToOdom(const eufs::models::State &state) {
+    // convert all state field into respective odometry fields
+    nav_msgs::msg::Odometry msg;
+    msg.header.stamp.sec = _last_sim_time.sec;
+    msg.header.stamp.nanosec = _last_sim_time.nsec;
+    msg.header.frame_id = _odom_frame;
+    msg.child_frame_id = _base_frame;
+
+    msg.pose.pose.position.x = state.x;
+    msg.pose.pose.position.y = state.y;
+
+    std::vector<double> orientation = {state.yaw, 0.0, 0.0};
+    orientation = to_quaternion(orientation);
+
+    msg.pose.pose.orientation.x = orientation[0];
+    msg.pose.pose.orientation.y = orientation[1];
+    msg.pose.pose.orientation.z = orientation[2];
+    msg.pose.pose.orientation.w = orientation[3];
+
+    msg.twist.twist.linear.x = state.v_x;
+    msg.twist.twist.linear.y = state.v_y;
+
+    msg.twist.twist.angular.z = state.yaw;
+
+    return msg;
+}
+
+nav_msgs::msg::Odometry RaceCarPlugin::getVisualOdom(const nav_msgs::msg::Odometry &odom) {
+    nav_msgs::msg::Odometry msg;
+    msg.header = odom.header;
+    msg.pose = odom.pose;
+    msg.child_frame_id = _base_frame;
+
+    return msg;
+}
+
+void RaceCarPlugin::publishVehicleMotion() {
+    // Get odometry msg from state
+    nav_msgs::msg::Odometry odom = stateToOdom(_state);
+    if (has_subscribers(_pub_gt_odom)) {
+        _pub_gt_odom->publish(odom);
+    }
+
+    // Publish pose
+    nav_msgs::msg::Odometry odom_noisy = stateToOdom(_noise->applyNoise(_state));
+    geometry_msgs::msg::PoseWithCovarianceStamped pose_noisy = odomToPoseMsg(odom_noisy);
+    if (has_subscribers(_pub_pose)) {
+        _pub_pose->publish(pose_noisy);
+    }
+
+    // Publish visual odom (THIS CAN BE IN A DIFFERENT PLUGIN)
+    nav_msgs::msg::Odometry visual_odom = getVisualOdom(odom_noisy);
+    if (has_subscribers(_pub_vis_odom)) {
+        // Publish at 30Hz
+        if (_last_sim_time - _time_last_odom_published > (1 / 30)) {
+            _pub_vis_odom->publish(visual_odom);
+            _time_last_odom_published = _last_sim_time;
+        }
+    }
+
     // Publish steering angle
     std_msgs::msg::Float32 steering_angle;
     steering_angle.data = _act_input.delta;
 
     if (has_subscribers(_pub_gt_steering_angle)) {
         _pub_gt_steering_angle->publish(steering_angle);
-    }
-
-    // Publish wheel odometry
-    std::vector<double> wheel_speeds = {_state.v_x, _state.v_x, _state.v_x, _state.v_x};
-    nav_msgs::msg::Odometry wheel_odom = getWheelOdometry(wheel_speeds, steering_angle.data);
-
-    if (has_subscribers(_pub_gt_wheel_odom)) {
-        _pub_gt_wheel_odom->publish(wheel_odom);
     }
 
     // Add noise
@@ -338,32 +354,61 @@ void RaceCarPlugin::publishVehicleOdom() {
         _pub_steering_angle->publish(steering_angle_noisy);
     }
 
-    std::vector<double> wheel_speeds_noisy = _noise->applyNoiseToWheels(wheel_speeds);
-    nav_msgs::msg::Odometry wheel_odom_noisy = getWheelOdometry(wheel_speeds_noisy, steering_angle_noisy.data);
+    // Publish wheel twist
+    std::vector<double> wheel_speeds = {_state.v_x, _state.v_x, _state.v_x, _state.v_x};
+    geometry_msgs::msg::TwistWithCovarianceStamped wheel_twist = getWheelTwist(wheel_speeds, steering_angle.data);
 
-    if (has_subscribers(_pub_wheel_odom)) {
-        _pub_wheel_odom->publish(wheel_odom_noisy);
+    if (has_subscribers(_pub_gt_wheel_twist)) {
+        _pub_gt_wheel_twist->publish(wheel_twist);
+    }
+
+    std::vector<double> wheel_speeds_noisy = _noise->applyNoiseToWheels(wheel_speeds);
+    geometry_msgs::msg::TwistWithCovarianceStamped wheel_twist_noisy =
+        getWheelTwist(wheel_speeds_noisy, steering_angle_noisy.data);
+
+    if (has_subscribers(_pub_wheel_twist)) {
+        _pub_wheel_twist->publish(wheel_twist_noisy);
     }
 }
 
 void RaceCarPlugin::publishTf() {
+    // Base->Odom
     // Position
-    tf2::Transform transform;
-    transform.setOrigin(tf2::Vector3(_state.x, _state.y, 0.0));
+    tf2::Transform base_to_odom;
+    base_to_odom.setOrigin(tf2::Vector3(_state.x, _state.y, 0.0));
 
     // Orientation
-    tf2::Quaternion q;
-    q.setRPY(0.0, 0.0, _state.yaw);
-    transform.setRotation(q);
+    tf2::Quaternion base_odom_q;
+    base_odom_q.setRPY(0.0, 0.0, _state.yaw);
+    base_to_odom.setRotation(base_odom_q);
 
     // Send TF
     geometry_msgs::msg::TransformStamped transform_stamped;
 
     transform_stamped.header.stamp.sec = _last_sim_time.sec;
     transform_stamped.header.stamp.nanosec = _last_sim_time.nsec;
-    transform_stamped.header.frame_id = _reference_frame;
-    transform_stamped.child_frame_id = _robot_frame;
-    tf2::convert(transform, transform_stamped.transform);
+    transform_stamped.header.frame_id = _odom_frame;
+    transform_stamped.child_frame_id = _base_frame;
+    tf2::convert(base_to_odom, transform_stamped.transform);
+
+    _tf_br->sendTransform(transform_stamped);
+
+    // Odom->Map
+    // Position
+    tf2::Transform odom_to_map;
+    odom_to_map.setOrigin(tf2::Vector3(0.0, 0.0, 0.0));
+
+    // Orientation
+    tf2::Quaternion odom_map_q;
+    odom_map_q.setRPY(0.0, 0.0, 0.0);
+    odom_to_map.setRotation(odom_map_q);
+
+    // Send TF
+    transform_stamped.header.stamp.sec = _last_sim_time.sec;
+    transform_stamped.header.stamp.nanosec = _last_sim_time.nsec;
+    transform_stamped.header.frame_id = _map_frame;
+    transform_stamped.child_frame_id = _odom_frame;
+    tf2::convert(odom_to_map, transform_stamped.transform);
 
     _tf_br->sendTransform(transform_stamped);
 }
@@ -403,7 +448,8 @@ void RaceCarPlugin::update() {
 
     counter++;
     if (counter == 100) {
-        RCLCPP_DEBUG(_rosnode->get_logger(), "steering desired: %.2f, desired: %.2f", _des_input.delta, _act_input.delta);
+        RCLCPP_DEBUG(_rosnode->get_logger(), "steering desired: %.2f, desired: %.2f", _des_input.delta,
+                     _act_input.delta);
         counter = 0;
     }
 
@@ -437,9 +483,8 @@ void RaceCarPlugin::update() {
     }
     _time_last_published = _last_sim_time;
 
-    // Publish Everything
-    publishCarPose();
-    publishVehicleOdom();
+    // Publish car states
+    publishVehicleMotion();
 
     if (_pub_tf) {
         publishTf();

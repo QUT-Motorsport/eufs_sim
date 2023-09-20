@@ -8,6 +8,9 @@
     <!--  Load the config file  -->
     <xacro:property name="config" value="${load_yaml('$(arg vehicle_config)')}"/>
 
+    <!--  Get the parameters  -->
+    <xacro:arg name="base_frame" default="base_link"/>
+
     <!-- Simulate sensors or not? -->
     <xacro:arg name="enable_camera" default="false"/>
     <xacro:arg name="enable_lidar" default="false"/>
@@ -55,7 +58,7 @@
     <!-- *************** -->
 
     <!-- Chassis of the car -->
-    <xacro:chassis_base chassis_mesh="file://$(find eufs_racecar)/meshes/lando.dae"/>
+    <xacro:chassis_base chassis_mesh="file://$(find eufs_racecar)/meshes/lando.dae" base_frame="$(arg base_frame)"/>
 
     <!-- Wheels -->
     <xacro:wheels chassis_width="1.6" wheelbase="1.580"/>
@@ -76,11 +79,11 @@
     LIDAR: 1.590 0.0 0.130
     STEREO CAM: -0.370 0.0 0.900 -->
 
-    <xacro:SBG_IMU_sensor parent="chassis" prefix="imu">
+    <xacro:SBG_IMU_sensor parent="chassis" prefix="sbg_imu">
         <origin xyz="0.0 0.0 0.0" rpy="0 0 0"/>
     </xacro:SBG_IMU_sensor>
 
-    <xacro:SBG_GPS_sensor parent="chassis" prefix="sbg">
+    <xacro:SBG_GPS_sensor parent="chassis" prefix="sbg_gps">
         <origin xyz="1.220 0.0 0.530" rpy="0 0 0"/>
     </xacro:SBG_GPS_sensor>
 
