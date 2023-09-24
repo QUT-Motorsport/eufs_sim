@@ -138,5 +138,8 @@ void SBGPlugin::publishEuler() {
         _pub_euler->publish(msg);
     }
 }
+
+GZ_REGISTER_MODEL_PLUGIN(SBGPlugin)
+
 }  // namespace eufs_plugins
 }  // namespace gazebo_plugins
