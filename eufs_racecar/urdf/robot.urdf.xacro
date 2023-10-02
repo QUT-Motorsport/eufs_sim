@@ -50,6 +50,10 @@
     </gazebo>
 
     <gazebo>
+        <plugin name="steering_motor" filename="libgazebo_ros_steering_motor.so"></plugin>
+    </gazebo>
+
+    <gazebo>
         <plugin name="cone_detection" filename="libgazebo_ros_cone_detection.so"></plugin>
     </gazebo>
 
