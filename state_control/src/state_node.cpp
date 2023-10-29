@@ -85,6 +85,7 @@ StateNode::StateNode() : Node("state_control") {
 
     // CAN pub
     can_pub_ = this->create_publisher<driverless_msgs::msg::Can>("/can/canbus_rosbound", 10);
+    canopen_pub_ = this->create_publisher<driverless_msgs::msg::Can>("/can/canopen_rosbound", 10);
 
     // lap counter pub
     lap_counter_pub_ = this->create_publisher<std_msgs::msg::UInt8>("/system/laps_completed", 10);
@@ -152,7 +153,7 @@ void StateNode::res_heartbeat_timer_callback() {
     this->RES_status.radio_quality = 255;
     RES_Heartbeat_t CAN_msg = Compose_RES_Heartbeat(&this->RES_status);
     driverless_msgs::msg::Can ROS_CAN_msg = _d_2_f(CAN_msg.id, false, CAN_msg.data, sizeof(CAN_msg.data));
-    this->can_pub_->publish(ROS_CAN_msg);
+    this->canopen_pub_->publish(ROS_CAN_msg);
 
     this->RES_status.bt_k3 = false;
 }
@@ -161,7 +162,7 @@ void StateNode::res_boot_call() {
     // compose CAN frame then convert to ROS 2 message
     uint8_t p[8] = {0x01, RES_NODE_ID, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
     driverless_msgs::msg::Can ROS_CAN_msg = _d_2_f(0x700 + RES_NODE_ID, false, p, sizeof(p));
-    this->can_pub_->publish(ROS_CAN_msg);
+    this->canopen_pub_->publish(ROS_CAN_msg);
     res_booted = true;
 }
 

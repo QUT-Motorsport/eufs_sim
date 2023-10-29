@@ -375,11 +375,12 @@ void RaceCarPlugin::publishTf() {
     // Base->Odom
     // Position
     tf2::Transform base_to_odom;
-    base_to_odom.setOrigin(tf2::Vector3(_state.x, _state.y, 0.0));
+    eufs::models::State noise_tf_state = _noise->applyNoise(_state);
+    base_to_odom.setOrigin(tf2::Vector3(noise_tf_state.x, noise_tf_state.y, 0.0));
 
     // Orientation
     tf2::Quaternion base_odom_q;
-    base_odom_q.setRPY(0.0, 0.0, _state.yaw);
+    base_odom_q.setRPY(0.0, 0.0, noise_tf_state.yaw);
     base_to_odom.setRotation(base_odom_q);
 
     // Send TF

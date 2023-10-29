@@ -88,6 +88,7 @@ class StateNode : public rclcpp::Node {
 
     // CAN pub
     rclcpp::Publisher<driverless_msgs::msg::Can>::SharedPtr can_pub_;
+    rclcpp::Publisher<driverless_msgs::msg::Can>::SharedPtr canopen_pub_;
 
     // lap count pub
     rclcpp::Publisher<std_msgs::msg::UInt8>::SharedPtr lap_counter_pub_;
