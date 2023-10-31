@@ -152,7 +152,7 @@ void SteeringMotorPlugin::update() {
     }
 
     // log state attributes every 1 second
-    RCLCPP_INFO_THROTTLE(_rosnode->get_logger(), *_rosnode->get_clock(), 1000, \
+    RCLCPP_INFO_THROTTLE(_rosnode->get_logger(), *_rosnode->get_clock(), 5000, \
         "Steering Motor State: \n \
         current_state: %s \n \
         desired_state: %s \n \
