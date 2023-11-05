@@ -1,0 +1,15 @@
+<library path="vehicle_emulation">
+  <class name="vehicle_emulation/ControlGUIPlugin" type="vehicle_emulation::ControlGUIPlugin" base_class_type="rqt_gui_cpp::Plugin">
+    <description>C++ state GUI for a simulated QEV-3</description>
+    <qtgui>
+      <group>
+        <label>EUFS</label>
+        <icon type="theme">folder</icon>
+        <statustip>Plugins related to EUFS</statustip>
+      </group>
+      <label>QEV-3 Vehicle Startup Emulation</label>
+      <icon type="theme">image-x-generic</icon>
+      <statustip>QEV-3 States</statustip>
+    </qtgui>
+  </class>
+</library>
