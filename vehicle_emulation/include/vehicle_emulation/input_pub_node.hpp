@@ -3,6 +3,10 @@
 
 #include <QStringListModel>
 #include <string>
+#include <memory>
+#include <sstream>
+#include <sys/ipc.h>
+#include <sys/shm.h>
 
 #include "rclcpp/rclcpp.hpp"
 #include "std_msgs/msg/string.hpp"
@@ -44,7 +48,7 @@ class InputProcessingNode : public rclcpp::Node {
     void as_key_callback(bool value);
     void sdc_callback(bool value);
     void ts_callback(bool value);
-    void mission_callback(int value);
+    void mission_callback(u_int8_t value);
     void mission_pressed_callback(bool value);
     void r2d_callback(bool value);
     void estop_callback(bool value);
@@ -72,9 +76,20 @@ class InputProcessingNode : public rclcpp::Node {
     // lap count pub
     rclcpp::Publisher<std_msgs::msg::UInt8>::SharedPtr lap_counter_pub_;
 
-    // resets
-    // void reset_car_pos();
-    // void reset_cones();
+    // // shm keys for each switch and key state
+    // key_t lv_key_shm_key_ = 1000;
+    // key_t ts_key_shm_key_ = 1001;
+    // key_t as_key_shm_key_ = 1002;
+    // key_t sdc_shm_key_ = 1003;
+    // key_t prechrg_shm_key_ = 1004;
+    // key_t mission_shm_key_ = 1005;
+    // key_t mission_pressed_shm_key_ = 1006;
+    // key_t r2d_shm_key_ = 1007;
+    // key_t estop_shm_key_ = 1008;
+    // key_t res_switch_shm_key_ = 1009;
+
+    // int shmFlags = IPC_CREAT | (S_IRUSR|S_IWUSR|S_IRGRP|S_IWGRP|S_IROTH|S_IWOTH);
+    // size_t shm_size_ = sizeof(uint8_t);
 };
 }  // namespace vehicle_emulation
-#endif  // vehicle_emulation__STATE_NODE_HPP_
+#endif  // VEHICLE_EMULATION__STATE_NODE_HPP_

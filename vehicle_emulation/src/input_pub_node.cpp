@@ -1,11 +1,5 @@
 #include "vehicle_emulation/input_pub_node.hpp"
 
-#include <memory>
-#include <sstream>
-#include <string>
-
-#include "rclcpp/rclcpp.hpp"
-
 using namespace std::placeholders;
 using namespace std::chrono_literals;
 
@@ -94,7 +88,7 @@ void InputProcessingNode::ts_callback(bool value) {
     TS_pressed = false;
 }
 
-void InputProcessingNode::mission_callback(int value) {
+void InputProcessingNode::mission_callback(u_int8_t value) {
     std::cout << "Mission select: " << value << std::endl;
     selected_mission = value;
 

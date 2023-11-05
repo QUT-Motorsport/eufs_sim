@@ -18,10 +18,13 @@
 #include <rqt_gui_cpp/plugin.h>
 #include <ui_input_control_gui.h>
 
+#include "pluginlib/class_list_macros.hpp"
+
 #include <QStringList>
 #include <QTimer>
 #include <QWidget>
 #include <memory>
+#include <thread>
 
 #include "vehicle_emulation/input_pub_node.hpp"
 

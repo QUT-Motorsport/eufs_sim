@@ -1,11 +1,5 @@
 #include "vehicle_emulation/input_control_gui.hpp"
 
-#include <memory>
-#include <thread>
-
-#include "pluginlib/class_list_macros.hpp"
-#include "rclcpp/rclcpp.hpp"
-
 namespace vehicle_emulation {
 ControlGUIPlugin::ControlGUIPlugin()
     : rqt_gui_cpp::Plugin(), window_(0), state_node_(std::make_shared<vehicle_emulation::InputProcessingNode>()) {
