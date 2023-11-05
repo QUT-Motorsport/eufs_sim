@@ -4,12 +4,13 @@ from os.path import isfile, join
 import xacro
 from ament_index_python.packages import get_package_share_directory
 from launch import LaunchDescription
-from launch.actions import (DeclareLaunchArgument, TimerAction,
-                            IncludeLaunchDescription, OpaqueFunction)
+from launch.actions import (DeclareLaunchArgument, IncludeLaunchDescription,
+                            OpaqueFunction, TimerAction)
 from launch.conditions import IfCondition
 from launch.launch_description_sources import PythonLaunchDescriptionSource
 from launch.substitutions import LaunchConfiguration
 from launch_ros.actions import Node
+
 
 def get_argument(context, arg):
     return LaunchConfiguration(arg).perform(context)
@@ -249,15 +250,20 @@ def generate_launch_description():
                 default_value="false",
                 description="Condition to enable laserscan",
             ),
-            TimerAction(period=5.0, actions=[
-                Node(
-                    package="rviz2",
-                    executable="rviz2",
-                    arguments=["-d", rviz_config_file],
-                    condition=IfCondition(LaunchConfiguration("rviz")),
-                    parameters=[{"use_sim_time": LaunchConfiguration("use_sim_time")}],
-                ),
-            ]),
+            TimerAction(
+                period=5.0,
+                actions=[
+                    Node(
+                        package="rviz2",
+                        executable="rviz2",
+                        arguments=["-d", rviz_config_file],
+                        condition=IfCondition(LaunchConfiguration("rviz")),
+                        parameters=[
+                            {"use_sim_time": LaunchConfiguration("use_sim_time")}
+                        ],
+                    ),
+                ],
+            ),
             # perspective launches the state controller and robot steering GUIs
             Node(
                 name="eufs_sim_rqt",
