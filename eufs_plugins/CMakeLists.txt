@@ -49,6 +49,7 @@ add_subdirectory(gazebo_cone_detection_plugin)
 add_subdirectory(gazebo_race_car_plugin)
 add_subdirectory(gazebo_sbg_plugin)
 add_subdirectory(gazebo_lidar_plugin)
+add_subdirectory(gazebo_embedded_plugins)
 
 ament_export_libraries(gazebo_ros_template2)
 

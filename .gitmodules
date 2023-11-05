@@ -1,0 +1,4 @@
+[submodule "eufs_plugins/include/QUTMS_Embedded_Common"]
+	path = eufs_plugins/include/QUTMS_Embedded_Common
+	url = https://github.com/QUT-Motorsport/QUTMS_Embedded_Common
+	branch = comp-22
