@@ -53,10 +53,10 @@ void RaceCarPlugin::Load(gazebo::physics::ModelPtr model, sdf::ElementPtr sdf) {
 
     // ROS Publishers
     // Wheel speeds
-    _pub_wheel_twist =
-        _rosnode->create_publisher<geometry_msgs::msg::TwistWithCovarianceStamped>("/vehicle/wheel_twist", 1);
+    // _pub_wheel_twist =
+    //     _rosnode->create_publisher<geometry_msgs::msg::TwistWithCovarianceStamped>("/vehicle/wheel_twist", 1);
     // Steering angle
-    _pub_steering_angle = _rosnode->create_publisher<std_msgs::msg::Float32>("/vehicle/steering_angle", 1);
+    // _pub_steering_angle = _rosnode->create_publisher<std_msgs::msg::Float32>("/vehicle/steering_angle", 1);
     // Visual odom
     _pub_vis_odom = _rosnode->create_publisher<nav_msgs::msg::Odometry>("/zed2i/zed_node/odom", 1);
     // Pose (from slam output)
@@ -70,6 +70,8 @@ void RaceCarPlugin::Load(gazebo::physics::ModelPtr model, sdf::ElementPtr sdf) {
         _pub_gt_odom = _rosnode->create_publisher<nav_msgs::msg::Odometry>("/ground_truth/odom", 1);
         _pub_gt_steering_angle = _rosnode->create_publisher<std_msgs::msg::Float32>("/ground_truth/steering_angle", 1);
     }
+    _pub_gt_odom = _rosnode->create_publisher<nav_msgs::msg::Odometry>("/odometry/sbg_ekf", 1);
+
     // RVIZ joint visuals
     _pub_joint_state = _rosnode->create_publisher<sensor_msgs::msg::JointState>("/joint_states/steering", 1);
 
@@ -82,12 +84,12 @@ void RaceCarPlugin::Load(gazebo::physics::ModelPtr model, sdf::ElementPtr sdf) {
         "/control/driving_command", 1, std::bind(&RaceCarPlugin::onCmd, this, std::placeholders::_1));
 
     // ROS Services
-    _reset_vehicle_pos_srv = _rosnode->create_service<std_srvs::srv::Trigger>(
-        "/system/reset_car_pos",
-        std::bind(&RaceCarPlugin::resetVehiclePosition, this, std::placeholders::_1, std::placeholders::_2));
-    _command_mode_srv = _rosnode->create_service<std_srvs::srv::Trigger>(
-        "/race_car_model/command_mode",
-        std::bind(&RaceCarPlugin::returnCommandMode, this, std::placeholders::_1, std::placeholders::_2));
+    // _reset_vehicle_pos_srv = _rosnode->create_service<std_srvs::srv::Trigger>(
+    //     "/system/reset_car_pos",
+    //     std::bind(&RaceCarPlugin::resetVehiclePosition, this, std::placeholders::_1, std::placeholders::_2));
+    // _command_mode_srv = _rosnode->create_service<std_srvs::srv::Trigger>(
+    //     "/race_car_model/command_mode",
+    //     std::bind(&RaceCarPlugin::returnCommandMode, this, std::placeholders::_1, std::placeholders::_2));
 
     // Connect to Gazebo
     _update_connection = gazebo::event::Events::ConnectWorldUpdateBegin(std::bind(&RaceCarPlugin::update, this));
