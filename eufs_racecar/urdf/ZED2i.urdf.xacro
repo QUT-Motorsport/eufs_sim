@@ -3,12 +3,12 @@
   xmlns:xacro="http://www.ros.org/wiki/xacro">
 
   <xacro:macro name="ZED2i_camera" params="prefix parent *origin active">
-
+    <link name="${prefix}" />
     <joint name="${prefix}_base_joint" type="fixed">
       <axis xyz="1 0 0"/>
       <xacro:insert_block name="origin"/>
       <parent link="${parent}"/>
-      <child link="${prefix}_camera_center"/>
+      <child link="${prefix}"/>
     </joint>
 
 
@@ -23,6 +23,12 @@
         </material>
       </visual>
     </link>
+  
+    <joint name="${prefix}_camera_center_joint" type="fixed">
+      <parent link="${prefix}"/>
+      <child link="${prefix}_camera_center"/>
+      <origin xyz="0 0 0.03" rpy="0 0 0" />
+    </joint>
 
 
     <!-- Left and right frames -->
@@ -78,8 +84,8 @@
           <camera>
             <horizontal_fov>1.91986</horizontal_fov>
             <image>
-              <width>640</width>
-              <height>320</height>
+              <width>1280</width>
+              <height>720</height>
               <format>B8G8R8</format>
             </image>
             <depth_camera>
