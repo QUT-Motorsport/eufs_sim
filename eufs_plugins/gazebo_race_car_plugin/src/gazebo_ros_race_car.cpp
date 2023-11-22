@@ -70,6 +70,8 @@ void RaceCarPlugin::Load(gazebo::physics::ModelPtr model, sdf::ElementPtr sdf) {
         _pub_gt_odom = _rosnode->create_publisher<nav_msgs::msg::Odometry>("/ground_truth/odom", 1);
         _pub_gt_steering_angle = _rosnode->create_publisher<std_msgs::msg::Float32>("/ground_truth/steering_angle", 1);
     }
+    _pub_gt_odom = _rosnode->create_publisher<nav_msgs::msg::Odometry>("/odometry/sbg_ekf", 1);
+
     // RVIZ joint visuals
     _pub_joint_state = _rosnode->create_publisher<sensor_msgs::msg::JointState>("/joint_states/steering", 1);
 
