@@ -70,7 +70,7 @@ void SteeringMotorPlugin::can_rx_callback(const driverless_msgs::msg::Can::Share
         for (size_t i = 0; i < size; i++) {
             data |= (msg->data[4 + i] & 0xFF) << i * 8;
         }
-        RCLCPP_INFO(_rosnode->get_logger(), "SDO Write: object_id: %x, data: %x", object_id, data);
+        RCLCPP_DEBUG(_rosnode->get_logger(), "SDO Write: object_id: %x, data: %x", object_id, data);
 
         // check if message is a write to the control word
         if (object_id == CONTROL_WORD) {
@@ -211,7 +211,7 @@ void SteeringMotorPlugin::update() {
         }
 
         if (_moving) {
-            RCLCPP_INFO(_rosnode->get_logger(), "Triggering new target position");
+            RCLCPP_DEBUG(_rosnode->get_logger(), "Triggering new target position");
             // move to target position
             _moving = false;
         }
