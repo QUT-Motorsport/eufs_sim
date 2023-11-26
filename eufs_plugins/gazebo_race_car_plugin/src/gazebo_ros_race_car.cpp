@@ -342,7 +342,10 @@ void RaceCarPlugin::publishVehicleMotion() {
 
     // Publish steering angle
     std_msgs::msg::Float32 steering_angle;
-    steering_angle.data = _act_input.delta;
+    // un-convert steering angle from radians to degrees and from linear to angular
+
+    steering_angle.data = _act_input.delta * 90.0 / 16.0;
+    steering_angle.data = steering_angle.data * 180.0 / 3.1415;
 
     if (has_subscribers(_pub_gt_steering_angle)) {
         _pub_gt_steering_angle->publish(steering_angle);
