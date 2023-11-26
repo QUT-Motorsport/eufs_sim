@@ -20,9 +20,9 @@
 #include <gazebo_ros/node.hpp>
 
 // Local includes
+#include "gazebo_steering_motor_plugin/helpers_steering.hpp"
 #include "helpers_gazebo.hpp"
 #include "helpers_ros.hpp"
-#include "gazebo_steering_motor_plugin/helpers_steering.hpp"
 
 namespace gazebo_plugins {
 namespace eufs_plugins {

@@ -152,8 +152,8 @@ void SteeringMotorPlugin::update() {
     }
 
     // log state attributes every 1 second
-    RCLCPP_INFO_THROTTLE(_rosnode->get_logger(), *_rosnode->get_clock(), 5000, \
-        "Steering Motor State: \n \
+    RCLCPP_INFO_THROTTLE(_rosnode->get_logger(), *_rosnode->get_clock(), 5000,
+                         "Steering Motor State: \n \
         current_state: %s \n \
         desired_state: %s \n \
         home_offset: %s \n \
@@ -165,13 +165,12 @@ void SteeringMotorPlugin::update() {
         quick_stop_deceleration: %s \n \
         max_acceleration: %s \n \
         max_deceleration: %s",
-        _current_state.name.c_str(), _desired_state.name.c_str(),
-        std::to_string(_home_offset).c_str(),
-        std::to_string(_motion_profile_type).c_str(), std::to_string(_profile_velocity).c_str(),
-        std::to_string(_end_velocity).c_str(), std::to_string(_profile_acceleration).c_str(),
-        std::to_string(_profile_deceleration).c_str(),
-        std::to_string(_quick_stop_deceleration).c_str(),
-        std::to_string(_max_acceleration).c_str(), std::to_string(_max_deceleration).c_str());
+                         _current_state.name.c_str(), _desired_state.name.c_str(), std::to_string(_home_offset).c_str(),
+                         std::to_string(_motion_profile_type).c_str(), std::to_string(_profile_velocity).c_str(),
+                         std::to_string(_end_velocity).c_str(), std::to_string(_profile_acceleration).c_str(),
+                         std::to_string(_profile_deceleration).c_str(),
+                         std::to_string(_quick_stop_deceleration).c_str(), std::to_string(_max_acceleration).c_str(),
+                         std::to_string(_max_deceleration).c_str());
 
     // get steering angle
     float steering_angle = _left_steering_joint->Position(0);
@@ -189,7 +188,7 @@ void SteeringMotorPlugin::update() {
 
     // update state with state machine, transition up to desired state
     // use state.step to transition to next state. only up one state at a time
-    if (_current_state.step == (_desired_state.step-1)) {
+    if (_current_state.step == (_desired_state.step - 1)) {
         update_state();
     } else if (_desired_state.step < _current_state.step) {
         // transition down as many states as needed
@@ -217,7 +216,7 @@ void SteeringMotorPlugin::update() {
             _moving = false;
         }
     }
-        
+
     // fault
     // if (_current_state == states[F]) {
     //     // will need to wait for a fault reset command
@@ -227,7 +226,7 @@ void SteeringMotorPlugin::update() {
     // }
 
     // publish status word and mode of op together
-    // status word is bit 1 and 0, mode of op is bit 2 
+    // status word is bit 1 and 0, mode of op is bit 2
     //             uint16_t status_word = (msg.data[1] << 8 | msg.data[0]);
     //             uint16_t mode_of_operation = msg.data[2];
     // pack data this way

@@ -1,8 +1,9 @@
 
 #include <stddef.h>
 #include <stdint.h>
-#include <string>
+
 #include <map>
+#include <string>
 
 #include "driverless_msgs/msg/can.hpp"
 
@@ -75,13 +76,13 @@ struct c5e_state {
 
 typedef enum c5e_state_id {
     NRTSO = 0b0000000000000000,  // Not ready to switch on
-    SOD =   0b0000000001000000,  // Switch on disabled
-    RTSO =  0b0000000000100001,  // Ready to switch on
-    SO =    0b0000000000100011,  // Switched on
-    OE =    0b0000000000100111,  // Operation enabled
-    QSA =   0b0000000000000111,  // Quick stop active
-    FRA =   0b0000000000001111,  // Fault reaction active
-    F =     0b0000000000001000   // Fault
+    SOD = 0b0000000001000000,    // Switch on disabled
+    RTSO = 0b0000000000100001,   // Ready to switch on
+    SO = 0b0000000000100011,     // Switched on
+    OE = 0b0000000000100111,     // Operation enabled
+    QSA = 0b0000000000000111,    // Quick stop active
+    FRA = 0b0000000000001111,    // Fault reaction active
+    F = 0b0000000000001000       // Fault
 } c5e_state_id_t;
 
 // State Map Definitions
@@ -117,12 +118,12 @@ driverless_msgs::msg::Can _d_2_f(uint32_t id, bool is_extended, uint8_t *data, u
     return frame;
 }
 
-void sdo_write(uint8_t node_id, uint16_t index, uint8_t cmd, uint8_t* data, size_t data_size,
-               uint32_t* can_packet_id, uint8_t* out) {
+void sdo_write(uint8_t node_id, uint16_t index, uint8_t cmd, uint8_t *data, size_t data_size, uint32_t *can_packet_id,
+               uint8_t *out) {
     *can_packet_id = 0x580 + node_id;
     uint8_t free = 4 - data_size;
     out[0] = cmd;
-    if (cmd != 0x60) {  // not an acknowledge
+    if (cmd != 0x60) {                           // not an acknowledge
         out[0] = out[0] | ((free << 2) & 0x1E);  // 4 byte data length (manual pg 119/120)
     }
     out[1] = index & 0xFF;
