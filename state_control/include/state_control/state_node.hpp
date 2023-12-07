@@ -14,6 +14,7 @@
 #include "rclcpp/rclcpp.hpp"
 #include "std_msgs/msg/string.hpp"
 #include "std_msgs/msg/u_int8.hpp"
+#include "std_msgs/msg/bool.hpp"
 #include "std_srvs/srv/trigger.hpp"
 
 enum AS_STATES {
@@ -92,6 +93,10 @@ class StateNode : public rclcpp::Node {
 
     // lap count pub
     rclcpp::Publisher<std_msgs::msg::UInt8>::SharedPtr lap_counter_pub_;
+
+    // steering ready 
+    rclcpp::Publisher<std_msgs::msg::Bool>::SharedPtr steering_ready_pub_;
+    bool steering_ready = false;
 
     // state machine timer
     rclcpp::TimerBase::SharedPtr state_machine_timer_;

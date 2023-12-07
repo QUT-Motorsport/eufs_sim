@@ -89,6 +89,7 @@ StateNode::StateNode() : Node("state_control") {
 
     // lap counter pub
     lap_counter_pub_ = this->create_publisher<std_msgs::msg::UInt8>("/system/laps_completed", 10);
+    steering_ready_pub_ = this->create_publisher<std_msgs::msg::Bool>("/system/steering_ready", 10);
 
     // reset trigger clients
     reset_car_pos_srv_ = this->create_client<std_srvs::srv::Trigger>("/system/reset_car_pos");
@@ -281,6 +282,10 @@ void StateNode::state_machine_timer_callback() {
             this->RES_status.bt_k3 = true;
             // EBS is armed
             this->EBS_VCU_heartbeat.otherFlags.ebs._VCU_Flags_EBS.CTRL_EBS = 1;
+            
+            std_msgs::msg::Bool steering_ready_msg;
+            steering_ready_msg.data = true;
+            steering_ready_pub_->publish(steering_ready_msg);
         }
     }
     if (this->car_state.AS_state == AS_STATES::R2D) {
@@ -318,6 +323,11 @@ void StateNode::reset_states() {
     switch_up = false;
     estop_pressed = true;
     res_booted = false;
+
+    this->steering_ready = false;
+    std_msgs::msg::Bool steering_ready_msg;
+    steering_ready_msg.data = false;
+    steering_ready_pub_->publish(steering_ready_msg);
 
     // AS
     this->car_state.AS_state = AS_STATES::CAR_OFF;
