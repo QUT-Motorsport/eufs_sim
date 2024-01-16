@@ -63,6 +63,18 @@ SW_Heartbeat_t Compose_SW_Heartbeat(SW_HeartbeatState_t *state) {
     return msg;
 }
 
+EBS_CTRL_Heartbeat_t Compose_EBS_CTRL_Heartbeat(EBS_CTRL_HeartbeatState_t *state)
+{
+    EBS_CTRL_Heartbeat_t msg;
+    msg.id = EBS_CTRL_Heartbeat_ID;
+
+    msg.data[0] = state->stateID;
+    msg.data[1] = (state->flags.rawMem & 0xFF);
+    msg.data[2] = ((state->flags.rawMem >> 8) & 0xFF);
+
+    return msg;
+}
+
 driverless_msgs::msg::Can _d_2_f(uint32_t id, bool is_extended, uint8_t *data, uint8_t dlc) {
     driverless_msgs::msg::Can frame;
     frame.id = id;
@@ -103,7 +115,7 @@ StateNode::StateNode() : Node("state_control") {
     }
 
     // VCU EBS heartbeat
-    vcu_ebs_timer_ = this->create_wall_timer(50ms, std::bind(&StateNode::vcu_ebs_timer_callback, this));
+    ebs_ctrl_timer_ = this->create_wall_timer(50ms, std::bind(&StateNode::ebs_timer_callback, this));
     // SW heartbeat
     sw_timer_ = this->create_wall_timer(100ms, std::bind(&StateNode::sw_timer_callback, this));
     // RES
@@ -125,12 +137,12 @@ driverless_msgs::msg::State StateNode::get_ros_state() { return this->state_msg;
 
 void StateNode::as_state_callback(const driverless_msgs::msg::State::SharedPtr msg) { state_msg = *msg; }
 
-void StateNode::vcu_ebs_timer_callback() {
+void StateNode::ebs_timer_callback() {
     if (!LV_key_on) {
         return;
     }
     // compose CAN frame then convert to ROS 2 message
-    VCU_Heartbeat_t CAN_msg = Compose_VCU_Heartbeat(VCU_ID_EBS, &this->EBS_VCU_heartbeat);
+    EBS_CTRL_Heartbeat_t CAN_msg = Compose_EBS_CTRL_Heartbeat(&this->EBS_CTRL_heartbeat);
     driverless_msgs::msg::Can ROS_CAN_msg = _d_2_f(CAN_msg.id, false, CAN_msg.data, sizeof(CAN_msg.data));
     this->can_pub_->publish(ROS_CAN_msg);
 }
@@ -194,8 +206,7 @@ void StateNode::state_machine_timer_callback() {
         if (this->car_state.TS_state > TS_STATES::SDC_CLOSED) {
             this->car_state.TS_state = TS_STATES::SDC_CLOSED;
         }
-        this->EBS_VCU_heartbeat.otherFlags.ebs._VCU_Flags_EBS.CTRL_EBS = 0;
-        this->EBS_VCU_heartbeat.stateID = VCU_STATES::VCU_STATE_EBS_IDLE;
+        this->EBS_CTRL_heartbeat.stateID = EBS_CTRL_STATE::EBS_CTRL_STATE_IDLE;
     }
     // big red button
     if (estop_pressed) {
@@ -209,7 +220,7 @@ void StateNode::state_machine_timer_callback() {
         }
 
         this->RES_status.estop = true;
-        this->EBS_VCU_heartbeat.stateID = VCU_STATES::VCU_STATE_SHUTDOWN;
+        this->EBS_CTRL_heartbeat.stateID = EBS_CTRL_STATE::EBS_CTRL_STATE_SHUTDOWN;
     } else {
         this->RES_status.estop = false;
     }
@@ -247,14 +258,14 @@ void StateNode::state_machine_timer_callback() {
             this->car_state.AS_state = AS_STATES::MISSION_SELECTED;
             // mission is selected
             this->SW_heartbeat.missionID = selected_mission;
-            this->SW_heartbeat.stateID = SW_STATES::SW_STATE_SELECT_MISSION;
+            this->SW_heartbeat.stateID = sw_state::SW_STATE_SELECT_MISSION;
         }
     }
     if (this->car_state.AS_state == AS_STATES::MISSION_SELECTED) {
         if (mission_pressed) {
             this->car_state.AS_state = AS_STATES::MISSION_CONFIRMED;
             // mission is confirmed
-            this->SW_heartbeat.stateID = SW_STATES::SW_STATE_MISSION_ACK;
+            this->SW_heartbeat.stateID = sw_state::SW_STATE_MISSION_ACK;
         }
     }
     // mission confirm button needs to be pressed before TS can be activated
@@ -270,7 +281,7 @@ void StateNode::state_machine_timer_callback() {
     }
     if (this->car_state.AS_state == AS_STATES::EBS_CHECKS) {
         // ebs is ready for checks
-        this->EBS_VCU_heartbeat.stateID = VCU_STATES::VCU_STATE_EBS_READY;
+        this->EBS_CTRL_heartbeat.stateID = EBS_CTRL_STATE::EBS_CTRL_STATE_READY;
         // TODO: add checks
         // if (checks_pass)
         this->car_state.AS_state = AS_STATES::WAIT_R2D;
@@ -281,7 +292,7 @@ void StateNode::state_machine_timer_callback() {
             // res button
             this->RES_status.bt_k3 = true;
             // EBS is armed
-            this->EBS_VCU_heartbeat.otherFlags.ebs._VCU_Flags_EBS.CTRL_EBS = 1;
+            this->EBS_CTRL_heartbeat.stateID = EBS_CTRL_STATE::EBS_CTRL_STATE_DRIVE;
             
             std_msgs::msg::Bool steering_ready_msg;
             steering_ready_msg.data = true;
@@ -289,7 +300,7 @@ void StateNode::state_machine_timer_callback() {
         }
     }
     if (this->car_state.AS_state == AS_STATES::R2D) {
-        this->EBS_VCU_heartbeat.stateID = VCU_STATES::VCU_STATE_EBS_DRIVE;
+        this->EBS_CTRL_heartbeat.stateID = EBS_CTRL_STATE::EBS_CTRL_STATE_DRIVE;
         this->car_state.AS_state = AS_STATES::DRIVING;
     }
     // if (this->car_state.AS_state == AS_STATES::DRIVING) {
@@ -345,9 +356,8 @@ void StateNode::reset_states() {
 }
 
 void StateNode::reset_car() {
-    this->EBS_VCU_heartbeat.otherFlags.ebs._VCU_Flags_EBS.CTRL_EBS = 0;
-    this->EBS_VCU_heartbeat.stateID = VCU_STATES::VCU_STATE_EBS_IDLE;
-    this->SW_heartbeat.stateID = SW_STATES::SW_STATE_START;
+    this->EBS_CTRL_heartbeat.stateID = EBS_CTRL_STATE::EBS_CTRL_STATE_START;
+    this->SW_heartbeat.stateID = sw_state::SW_STATE_START;
     this->SW_heartbeat.missionID = DRIVERLESS_MISSIONS::MISSION_NONE;
     this->RES_status.estop = true;
     this->RES_status.sw_k2 = false;

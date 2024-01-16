@@ -8,6 +8,7 @@
 #include "CAN_RES.h"
 #include "CAN_SW.h"
 #include "CAN_VCU.h"
+#include "CAN_EBS_CTRL.h"
 #include "QUTMS_can.h"
 #include "driverless_msgs/msg/can.hpp"
 #include "driverless_msgs/msg/state.hpp"
@@ -103,9 +104,9 @@ class StateNode : public rclcpp::Node {
     void state_machine_timer_callback();
 
     // VCU EBS heartbeat publisher
-    rclcpp::TimerBase::SharedPtr vcu_ebs_timer_;
-    void vcu_ebs_timer_callback();
-    VCU_HeartbeatState_t EBS_VCU_heartbeat;
+    rclcpp::TimerBase::SharedPtr ebs_ctrl_timer_;
+    void ebs_timer_callback();
+    EBS_CTRL_HeartbeatState_t EBS_CTRL_heartbeat;
 
     // SW heartbeat publisher
     rclcpp::TimerBase::SharedPtr sw_timer_;
