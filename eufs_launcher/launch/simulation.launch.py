@@ -151,35 +151,35 @@ def spawn_car(context, *args, **kwargs):
                 "warn",
             ],
         ),
-        Node(
-            name="joint_state_publisher",
-            package="joint_state_publisher",
-            executable="joint_state_publisher",
-            output="screen",
-            parameters=[
-                {
-                    "robot_description": robot_description,
-                    "rate": 200,
-                    "use_sim_time": LaunchConfiguration("use_sim_time"),
-                    "source_list": ["joint_states/steering"],
-                }
-            ],
-            arguments=[urdf_path],
-        ),
-        Node(
-            name="robot_state_publisher",
-            package="robot_state_publisher",
-            executable="robot_state_publisher",
-            output="screen",
-            parameters=[
-                {
-                    "robot_description": robot_description,
-                    "rate": 200,
-                    "use_sim_time": LaunchConfiguration("use_sim_time"),
-                }
-            ],
-            arguments=["--ros-args", "--log-level", "warn"],
-        ),
+        # Node(
+        #     name="joint_state_publisher",
+        #     package="joint_state_publisher",
+        #     executable="joint_state_publisher",
+        #     output="screen",
+        #     parameters=[
+        #         {
+        #             "robot_description": robot_description,
+        #             "rate": 200,
+        #             "use_sim_time": LaunchConfiguration("use_sim_time"),
+        #             "source_list": ["joint_states/steering"],
+        #         }
+        #     ],
+        #     arguments=[urdf_path],
+        # ),
+        # Node(
+        #     name="robot_state_publisher",
+        #     package="robot_state_publisher",
+        #     executable="robot_state_publisher",
+        #     output="screen",
+        #     parameters=[
+        #         {
+        #             "robot_description": robot_description,
+        #             "rate": 200,
+        #             "use_sim_time": LaunchConfiguration("use_sim_time"),
+        #         }
+        #     ],
+        #     arguments=["--ros-args", "--log-level", "warn"],
+        # ),
     ]
 
 
@@ -277,12 +277,12 @@ def generate_launch_description():
                 ],
                 parameters=[{"use_sim_time": LaunchConfiguration("use_sim_time")}],
             ),
-            Node(
-                package="vehicle_supervisor",
-                executable="vehicle_supervisor_slim_node",
-                output="screen",
-                parameters=[{"use_sim_time": LaunchConfiguration("use_sim_time")}],
-            ),
+            # Node(
+            #     package="vehicle_supervisor",
+            #     executable="vehicle_supervisor_slim_node",
+            #     output="screen",
+            #     parameters=[{"use_sim_time": LaunchConfiguration("use_sim_time")}],
+            # ),
             # launch the gazebo world
             OpaqueFunction(function=gen_world),
             # launch the car
