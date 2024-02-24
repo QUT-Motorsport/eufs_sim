@@ -54,9 +54,9 @@ void RaceCarPlugin::Load(gazebo::physics::ModelPtr model, sdf::ElementPtr sdf) {
     // ROS Publishers
     // Wheel speeds
     _pub_wheel_twist =
-        _rosnode->create_publisher<geometry_msgs::msg::TwistWithCovarianceStamped>("/vehicle/wheel_twist", 1);
+        _rosnode->create_publisher<geometry_msgs::msg::TwistWithCovarianceStamped>("/vehicle/wheel_twist_sim", 1);
     // Steering angle
-    _pub_steering_angle = _rosnode->create_publisher<std_msgs::msg::Float32>("/vehicle/steering_angle", 1);
+    _pub_steering_angle = _rosnode->create_publisher<std_msgs::msg::Float32>("/vehicle/steering_angle_sim", 1);
     // Visual odom
     _pub_vis_odom = _rosnode->create_publisher<nav_msgs::msg::Odometry>("/zed2i/zed_node/odom", 1);
     // Pose (from slam output)

@@ -6,8 +6,9 @@ Panels:
       Expanded:
         - /Global Options1
         - /RobotModel1/Description Topic1
+        - /Grid1/Status1
       Splitter Ratio: 0.5058823823928833
-    Tree Height: 532
+    Tree Height: 415
   - Class: rviz_common/Selection
     Name: Selection
   - Class: rviz_common/Tool Properties
@@ -52,10 +53,6 @@ Visualization Manager:
           Value: true
         right_steering_hinge:
           Value: true
-        sbg_gps_base_link:
-          Value: true
-        sbg_imu_base_link:
-          Value: true
         track:
           Value: true
         velodyne:
@@ -64,7 +61,7 @@ Visualization Manager:
           Value: true
         zed2i_camera_center:
           Value: true
-        zed2i_depth_camera_frame:
+        zed2i_camera_link:
           Value: true
         zed2i_left_camera_frame:
           Value: true
@@ -92,26 +89,20 @@ Visualization Manager:
             right_steering_hinge:
               right_front_wheel:
                 {}
-            sbg_gps_base_link:
-              {}
-            sbg_imu_base_link:
-              {}
             velodyne_base_link:
               velodyne:
                 {}
-            zed2i_camera_center:
-              zed2i_depth_camera_frame:
-                {}
-              zed2i_left_camera_frame:
-                zed2i_left_camera_optical_frame:
-                  {}
-              zed2i_right_camera_frame:
-                zed2i_right_camera_optical_frame:
-                  {}
-        odom:
-          {}
+            zed2i_camera_link:
+              zed2i_camera_center:
+                zed2i_left_camera_frame:
+                  zed2i_left_camera_optical_frame:
+                    {}
+                zed2i_right_camera_frame:
+                  zed2i_right_camera_optical_frame:
+                    {}
         track:
-          {}
+          odom:
+            {}
       Update Interval: 0
       Value: true
     - Alpha: 1
@@ -169,32 +160,20 @@ Visualization Manager:
           Alpha: 1
           Show Axes: false
           Show Trail: false
-        sbg_gps_base_link:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-          Value: true
-        sbg_imu_base_link:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-          Value: true
         velodyne:
           Alpha: 1
           Show Axes: false
           Show Trail: false
-          Value: true
         velodyne_base_link:
           Alpha: 1
           Show Axes: false
           Show Trail: false
-          Value: true
         zed2i_camera_center:
           Alpha: 1
           Show Axes: false
           Show Trail: false
           Value: true
-        zed2i_depth_camera_frame:
+        zed2i_camera_link:
           Alpha: 1
           Show Axes: false
           Show Trail: false
@@ -268,10 +247,10 @@ Visualization Manager:
       Color: 255; 255; 255
       Color Transformer: Intensity
       Decay Time: 0
-      Enabled: true
+      Enabled: false
       Invert Rainbow: false
       Max Color: 255; 255; 255
-      Max Intensity: 0
+      Max Intensity: 105
       Min Color: 0; 0; 0
       Min Intensity: 0
       Name: Velodyne Scan
@@ -289,7 +268,7 @@ Visualization Manager:
         Value: /scan
       Use Fixed Frame: true
       Use rainbow: true
-      Value: true
+      Value: false
     - Class: rviz_default_plugins/Image
       Enabled: true
       Max Value: 1
@@ -307,22 +286,8 @@ Visualization Manager:
     - Class: rviz_marker_plugins/ConeDetectionStamped
       Color: 200; 200; 200
       Color Display: Cone
-      Enabled: false
-      Name: Ground truth track
-      Namespaces:
-        {}
-      Topic:
-        Depth: 5
-        Durability Policy: Volatile
-        History Policy: Keep Last
-        Reliability Policy: Reliable
-        Value: /ground_truth/global_map
-      Value: false
-    - Class: rviz_marker_plugins/ConeDetectionStamped
-      Color: 200; 200; 200
-      Color Display: Cone
       Enabled: true
-      Name: SLAM track
+      Name: Ground truth track
       Namespaces:
         cone: true
         covariance: true
@@ -331,8 +296,22 @@ Visualization Manager:
         Durability Policy: Volatile
         History Policy: Keep Last
         Reliability Policy: Reliable
-        Value: /slam/global_map
+        Value: /ground_truth/global_map
       Value: true
+    - Class: rviz_marker_plugins/ConeDetectionStamped
+      Color: 200; 200; 200
+      Color Display: Cone
+      Enabled: false
+      Name: SLAM track
+      Namespaces:
+        {}
+      Topic:
+        Depth: 5
+        Durability Policy: Volatile
+        History Policy: Keep Last
+        Reliability Policy: Reliable
+        Value: /slam/global_map
+      Value: false
     - Class: rviz_marker_plugins/ConeDetectionStamped
       Color: 200; 200; 200
       Color Display: Cone
@@ -401,7 +380,7 @@ Visualization Manager:
         Filter size: 10
         History Policy: Keep Last
         Reliability Policy: Reliable
-        Value: /planner/spline_path
+        Value: /planning/midline_path
       Value: true
     - Alpha: 0.699999988079071
       Class: rviz_default_plugins/Map
@@ -424,10 +403,84 @@ Visualization Manager:
         Value: /slam/occupancy_grid_updates
       Use Timestamp: false
       Value: true
+    - Alpha: 1
+      Buffer Length: 1
+      Class: rviz_default_plugins/Path
+      Color: 53; 132; 228
+      Enabled: true
+      Head Diameter: 0.30000001192092896
+      Head Length: 0.20000000298023224
+      Length: 0.30000001192092896
+      Line Style: Lines
+      Line Width: 0.029999999329447746
+      Name: Path
+      Offset:
+        X: 0
+        Y: 0
+        Z: 0
+      Pose Color: 255; 85; 255
+      Pose Style: None
+      Radius: 0.029999999329447746
+      Shaft Diameter: 0.10000000149011612
+      Shaft Length: 0.10000000149011612
+      Topic:
+        Depth: 5
+        Durability Policy: Volatile
+        Filter size: 10
+        History Policy: Keep Last
+        Reliability Policy: Reliable
+        Value: /planning/blue_bounds
+      Value: true
+    - Alpha: 1
+      Buffer Length: 1
+      Class: rviz_default_plugins/Path
+      Color: 249; 240; 107
+      Enabled: true
+      Head Diameter: 0.30000001192092896
+      Head Length: 0.20000000298023224
+      Length: 0.30000001192092896
+      Line Style: Lines
+      Line Width: 0.029999999329447746
+      Name: Path
+      Offset:
+        X: 0
+        Y: 0
+        Z: 0
+      Pose Color: 255; 85; 255
+      Pose Style: None
+      Radius: 0.029999999329447746
+      Shaft Diameter: 0.10000000149011612
+      Shaft Length: 0.10000000149011612
+      Topic:
+        Depth: 5
+        Durability Policy: Volatile
+        Filter size: 10
+        History Policy: Keep Last
+        Reliability Policy: Reliable
+        Value: /planning/yellow_bounds
+      Value: true
+    - Alpha: 0.5
+      Cell Size: 3
+      Class: rviz_default_plugins/Grid
+      Color: 160; 160; 164
+      Enabled: true
+      Line Style:
+        Line Width: 0.029999999329447746
+        Value: Lines
+      Name: Grid
+      Normal Cell Count: 0
+      Offset:
+        X: 0
+        Y: 0
+        Z: 0
+      Plane: XY
+      Plane Cell Count: 100
+      Reference Frame: <Fixed Frame>
+      Value: true
   Enabled: true
   Global Options:
     Background Color: 48; 48; 48
-    Fixed Frame: base_footprint
+    Fixed Frame: track
     Frame Rate: 30
   Name: root
   Tools:
@@ -470,7 +523,7 @@ Visualization Manager:
   Views:
     Current:
       Class: rviz_default_plugins/ThirdPersonFollower
-      Distance: 17.425485610961914
+      Distance: 18.357418060302734
       Enable Stereo Rendering:
         Stereo Eye Separation: 0.05999999865889549
         Stereo Focal Distance: 1
@@ -485,10 +538,10 @@ Visualization Manager:
       Invert Z Axis: false
       Name: Current View
       Near Clip Distance: 0.009999999776482582
-      Pitch: 0.5303999185562134
-      Target Frame: <Fixed Frame>
+      Pitch: 0.540398359298706
+      Target Frame: base_footprint
       Value: ThirdPersonFollower (rviz_default_plugins)
-      Yaw: 3.1403884887695312
+      Yaw: 3.1153995990753174
     Saved:
       - Class: rviz_default_plugins/Orbit
         Distance: 8.5
@@ -513,10 +566,10 @@ Visualization Manager:
 Window Geometry:
   Displays:
     collapsed: false
-  Height: 1029
+  Height: 1043
   Hide Left Dock: false
   Hide Right Dock: false
-  QMainWindow State: 000000ff00000000fd0000000400000000000001720000036bfc0200000009fb0000001200530065006c0065006300740069006f006e00000001e10000009b0000005c00fffffffb0000001e0054006f006f006c002000500072006f007000650072007400690065007302000001ed000001df00000185000000a3fb000000120056006900650077007300200054006f006f02000001df000002110000018500000122fb000000200054006f006f006c002000500072006f0070006500720074006900650073003203000002880000011d000002210000017afb000000100044006900730070006c006100790073010000003b0000029d000000c700fffffffb0000002000730065006c0065006300740069006f006e00200062007500660066006500720200000138000000aa0000023a00000294fb00000014005700690064006500530074006500720065006f02000000e6000000d2000003ee0000030bfb0000000c004b0069006e0065006300740200000186000001060000030c00000261fb0000001e005a0045004400320069002000520047004200200049006d00610067006501000002de000000c80000002800ffffff000000010000012d0000036bfc0200000005fb0000001e0054006f006f006c002000500072006f00700065007200740069006500730100000041000000780000000000000000fb0000000a00560069006500770073010000003b0000036b000000a000fffffffb0000001e005a0045004400320069002000520047004200200049006d00610067006500000002bb000000cd0000000000000000fb0000000a0049006d00610067006501000002b8000000d00000000000000000fb0000001200530065006c0065006300740069006f006e010000025a000000b200000000000000000000000200000490000000a9fc0100000001fb0000000a00560069006500770073030000004e00000080000002e10000019700000003000006ac0000003efc0100000002fb0000000800540069006d00650100000000000006ac0000025300fffffffb0000000800540069006d00650100000000000004500000000000000000000004010000036b00000004000000040000000800000008fc0000000100000002000000010000000a0054006f006f006c00730100000000ffffffff0000000000000000
+  QMainWindow State: 000000ff00000000fd00000004000000000000017200000375fc0200000009fb0000001200530065006c0065006300740069006f006e00000001e10000009b0000005c00fffffffb0000001e0054006f006f006c002000500072006f007000650072007400690065007302000001ed000001df00000185000000a3fb000000120056006900650077007300200054006f006f02000001df000002110000018500000122fb000000200054006f006f006c002000500072006f0070006500720074006900650073003203000002880000011d000002210000017afb000000100044006900730070006c006100790073010000003d0000022a000000c900fffffffb0000002000730065006c0065006300740069006f006e00200062007500660066006500720200000138000000aa0000023a00000294fb00000014005700690064006500530074006500720065006f02000000e6000000d2000003ee0000030bfb0000000c004b0069006e0065006300740200000186000001060000030c00000261fb0000001e005a0045004400320069002000520047004200200049006d006100670065010000026d000001450000002800ffffff000000010000012d00000375fc0200000005fb0000001e0054006f006f006c002000500072006f00700065007200740069006500730100000041000000780000000000000000fb0000000a00560069006500770073010000003d00000375000000a400fffffffb0000001e005a0045004400320069002000520047004200200049006d00610067006500000002bb000000cd0000000000000000fb0000000a0049006d00610067006501000002b8000000d00000000000000000fb0000001200530065006c0065006300740069006f006e010000025a000000b200000000000000000000000200000490000000a9fc0100000001fb0000000a00560069006500770073030000004e00000080000002e10000019700000003000007800000003efc0100000002fb0000000800540069006d0065010000000000000780000002fb00fffffffb0000000800540069006d00650100000000000004500000000000000000000004d50000037500000004000000040000000800000008fc0000000100000002000000010000000a0054006f006f006c00730100000000ffffffff0000000000000000
   Selection:
     collapsed: false
   Time:
@@ -525,8 +578,8 @@ Window Geometry:
     collapsed: false
   Views:
     collapsed: false
-  Width: 1708
-  X: 7
-  Y: -46
+  Width: 1920
+  X: 1920
+  Y: 0
   ZED2i RGB Image:
     collapsed: false
