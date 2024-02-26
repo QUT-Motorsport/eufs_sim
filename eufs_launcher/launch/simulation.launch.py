@@ -279,9 +279,12 @@ def generate_launch_description():
             ),
             Node(
                 package="vehicle_supervisor",
-                executable="vehicle_supervisor_slim_node",
+                executable="supervisor_launch_node",
                 output="screen",
-                parameters=[{"use_sim_time": LaunchConfiguration("use_sim_time")}],
+                parameters=[
+                    {"use_sim_time": LaunchConfiguration("use_sim_time")},
+                    {"manual_override": False},
+                ],
             ),
             # launch the gazebo world
             OpaqueFunction(function=gen_world),
