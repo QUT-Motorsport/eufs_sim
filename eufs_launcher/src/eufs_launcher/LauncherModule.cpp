@@ -190,6 +190,12 @@ EUFSLauncher::RewriteYamlConfig(const std::string& aParameter)
     with open(self.plugin_yaml, "w") as f:
         yaml.safe_dump(data, f)
 
+    YAML::Node yamldata = YAML::LoadAllFromFile(mPluginYamlPath);
+
+    for (YAML::const_iterator it = yamldata.begin(); it != yamldata.end(); it++) {
+        it->first
+    }
+
 }
 
 void 
