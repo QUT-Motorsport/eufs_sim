@@ -1,5 +1,5 @@
 <library path="src">
-    <class name="EUFSLauncher" type="eufs_launcher.LauncherModule.EUFSLauncher" base_class_type="rqt_gui_py::Plugin">
+    <class name="EUFSLauncher" type="eufs_launcher.LauncherModule.EUFSLauncher" base_class_type="rqt_gui_cpp::Plugin">
         <description>
             A Python GUI plugin for launching the EUFS simulation
         </description>

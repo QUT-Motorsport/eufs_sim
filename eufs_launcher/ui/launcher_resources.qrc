@@ -1,0 +1,5 @@
+<RCC>
+  <qresource prefix="images">
+    <file>images/output-onlinepngtools.png</file>
+  </qresource>
+</RCC>
