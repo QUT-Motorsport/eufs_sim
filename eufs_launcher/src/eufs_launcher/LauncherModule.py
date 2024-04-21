@@ -24,6 +24,12 @@ class EUFSLauncher(Plugin):
         # Give QObjects reasonable names
         self.setObjectName("EUFSLauncher")
 
+        # Override the previous stylesheet
+        self.setStyleSheet("QWidget#EUFSLauncher {\n"
+                            "border-image: url(:/images/images/output-onlinepngtools.png);\n"
+                            "background-colour: transparent\n"
+                            "}")
+
         # State variables
         self.node = context.node
         self.logger = self.node.get_logger()
