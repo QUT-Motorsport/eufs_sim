@@ -56,7 +56,8 @@ void RaceCarPlugin::Load(gazebo::physics::ModelPtr model, sdf::ElementPtr sdf) {
     _pub_wheel_twist =
         _rosnode->create_publisher<geometry_msgs::msg::TwistWithCovarianceStamped>("/vehicle/wheel_twist", 1);
     // Steering angle
-    _pub_steering_angle = _rosnode->create_publisher<driverless_msgs::msg::Float32Stamped>("/vehicle/steering_angle", 1);
+    _pub_steering_angle =
+        _rosnode->create_publisher<driverless_msgs::msg::Float32Stamped>("/vehicle/steering_angle", 1);
     // Steering angle
     _pub_velocity = _rosnode->create_publisher<driverless_msgs::msg::Float32Stamped>("/vehicle/velocity", 1);
     // Visual odom
@@ -72,8 +73,10 @@ void RaceCarPlugin::Load(gazebo::physics::ModelPtr model, sdf::ElementPtr sdf) {
         _pub_gt_wheel_twist =
             _rosnode->create_publisher<geometry_msgs::msg::TwistWithCovarianceStamped>("/ground_truth/wheel_twist", 1);
         _pub_gt_odom = _rosnode->create_publisher<nav_msgs::msg::Odometry>("/ground_truth/odom", 1);
-        _pub_gt_steering_angle = _rosnode->create_publisher<driverless_msgs::msg::Float32Stamped>("/ground_truth/steering_angle", 1);
-        _pub_gt_velocity = _rosnode->create_publisher<driverless_msgs::msg::Float32Stamped>("/ground_truth/velocity", 1);
+        _pub_gt_steering_angle =
+            _rosnode->create_publisher<driverless_msgs::msg::Float32Stamped>("/ground_truth/steering_angle", 1);
+        _pub_gt_velocity =
+            _rosnode->create_publisher<driverless_msgs::msg::Float32Stamped>("/ground_truth/velocity", 1);
     }
 
     // RVIZ joint visuals
@@ -380,17 +383,17 @@ void RaceCarPlugin::publishVehicleMotion() {
     // Publish velocity
     driverless_msgs::msg::Float32Stamped velocity = header_msg;
     velocity.data = _state.v_x;
-    
+
     if (has_subscribers(_pub_gt_velocity)) {
         _pub_gt_velocity->publish(velocity);
     }
 
     // Add noise
     driverless_msgs::msg::Float32Stamped velocity_noisy = header_msg;
-    velocity_noisy.data = _noise->applyNoiseToSteering(velocity_noisy.data);
-    
+    velocity_noisy.data = _noise->applyNoiseToSteering(velocity.data);
+
     if (has_subscribers(_pub_velocity)) {
-        _pub_velocity->publish(velocity);
+        _pub_velocity->publish(velocity_noisy);
     }
 
     // Publish wheel twist

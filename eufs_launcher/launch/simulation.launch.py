@@ -279,7 +279,7 @@ def generate_launch_description():
             ),
             Node(
                 package="vehicle_supervisor",
-                executable="supervisor_launch_node",
+                executable="supervisor_node",
                 output="screen",
                 parameters=[
                     {"use_sim_time": LaunchConfiguration("use_sim_time")},
