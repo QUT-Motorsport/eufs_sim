@@ -33,8 +33,8 @@ add_compile_definitions(QUTMS_CAN_VCU)
 add_compile_definitions(QUTMS_CAN_RES)
 add_compile_definitions(QUTMS_CAN_SW)
 add_compile_definitions(QUTMS_CAN_EBS)
-include_directories(${CMAKE_SOURCE_DIR}/../../QUTMS_Driverless/src/hardware/QUTMS_Embedded_Common/Inc)
-include_directories(${CMAKE_SOURCE_DIR}/../../QUTMS_Driverless/src/hardware/CAN_Common/include/)
+include_directories(${CMAKE_SOURCE_DIR}/../../QUTMS_Driverless/src/common/QUTMS_Embedded_Common/QUTMS_Embedded_Common/Inc)
+include_directories(${CMAKE_SOURCE_DIR}/../../QUTMS_Driverless/src/common/QUTMS_Embedded_Common/include/)
 
 set(src_files
   src/state_node.cpp

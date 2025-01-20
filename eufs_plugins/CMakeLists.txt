@@ -29,7 +29,6 @@ find_package(ament_index_cpp REQUIRED)
 find_package(image_geometry REQUIRED)
 find_package(yaml_cpp_vendor REQUIRED)
 find_package(driverless_msgs REQUIRED)
-find_package(sbg_driver REQUIRED)
 
 link_directories(${gazebo_dev_LIBRARY_DIRS})
 
@@ -47,7 +46,6 @@ endif()
 
 add_subdirectory(gazebo_cone_detection_plugin)
 add_subdirectory(gazebo_race_car_plugin)
-add_subdirectory(gazebo_sbg_plugin)
 add_subdirectory(gazebo_lidar_plugin)
 
 ament_export_libraries(gazebo_ros_template2)
