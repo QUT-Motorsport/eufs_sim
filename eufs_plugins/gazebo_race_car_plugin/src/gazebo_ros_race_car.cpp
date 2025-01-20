@@ -56,9 +56,14 @@ void RaceCarPlugin::Load(gazebo::physics::ModelPtr model, sdf::ElementPtr sdf) {
     _pub_wheel_twist =
         _rosnode->create_publisher<geometry_msgs::msg::TwistWithCovarianceStamped>("/vehicle/wheel_twist", 1);
     // Steering angle
-    _pub_steering_angle = _rosnode->create_publisher<std_msgs::msg::Float32>("/vehicle/steering_angle", 1);
+    _pub_steering_angle =
+        _rosnode->create_publisher<std_msgs::msg::Float32>("/vehicle/steering_angle", 1);
+    // Steering angle
+    _pub_velocity = _rosnode->create_publisher<std_msgs::msg::Float32>("/vehicle/velocity", 1);
     // Visual odom
     _pub_vis_odom = _rosnode->create_publisher<nav_msgs::msg::Odometry>("/zed2i/zed_node/odom", 1);
+    // SBG odometry
+    _pub_odom = _rosnode->create_publisher<nav_msgs::msg::Odometry>("/odometry/sbg_ekf", 1);
     // Pose (from slam output)
     if (_simulate_slam) {
         _pub_pose = _rosnode->create_publisher<geometry_msgs::msg::PoseWithCovarianceStamped>("slam/car_pose", 1);
@@ -68,9 +73,11 @@ void RaceCarPlugin::Load(gazebo::physics::ModelPtr model, sdf::ElementPtr sdf) {
         _pub_gt_wheel_twist =
             _rosnode->create_publisher<geometry_msgs::msg::TwistWithCovarianceStamped>("/ground_truth/wheel_twist", 1);
         _pub_gt_odom = _rosnode->create_publisher<nav_msgs::msg::Odometry>("/ground_truth/odom", 1);
-        _pub_gt_steering_angle = _rosnode->create_publisher<std_msgs::msg::Float32>("/ground_truth/steering_angle", 1);
+        _pub_gt_steering_angle =
+            _rosnode->create_publisher<std_msgs::msg::Float32>("/ground_truth/steering_angle", 1);
+        _pub_gt_velocity =
+            _rosnode->create_publisher<std_msgs::msg::Float32>("/ground_truth/velocity", 1);
     }
-    _pub_gt_odom = _rosnode->create_publisher<nav_msgs::msg::Odometry>("/odometry/sbg_ekf", 1);
 
     // RVIZ joint visuals
     _pub_joint_state = _rosnode->create_publisher<sensor_msgs::msg::JointState>("/joint_states/steering", 1);
@@ -334,15 +341,26 @@ void RaceCarPlugin::publishVehicleMotion() {
     nav_msgs::msg::Odometry visual_odom = getVisualOdom(odom_noisy);
     if (has_subscribers(_pub_vis_odom)) {
         // Publish at 30Hz
-        if (_last_sim_time - _time_last_odom_published > (1 / 30)) {
+        if (_last_sim_time - _time_last_vis_odom_published > (1 / 30)) {
             _pub_vis_odom->publish(visual_odom);
-            _time_last_odom_published = _last_sim_time;
+            _time_last_vis_odom_published = _last_sim_time;
+        }
+    }
+
+    odom_noisy = stateToOdom(_noise->applyNoise(_state));
+    if (has_subscribers(_pub_odom)) {
+        // Publish at 50Hz
+        if (_last_sim_time - _time_last_sbg_odom_published > (1 / 50)) {
+            _pub_odom->publish(odom_noisy);
+            _time_last_sbg_odom_published = _last_sim_time;
         }
     }
 
     // Publish steering angle
     std_msgs::msg::Float32 steering_angle;
-    steering_angle.data = _act_input.delta;
+    // un-convert steering angle from radians to degrees and from linear to angular
+    steering_angle.data = _act_input.delta * 90.0 / 16.0;
+    steering_angle.data = steering_angle.data * 180.0 / 3.1415;
 
     if (has_subscribers(_pub_gt_steering_angle)) {
         _pub_gt_steering_angle->publish(steering_angle);
@@ -354,6 +372,22 @@ void RaceCarPlugin::publishVehicleMotion() {
 
     if (has_subscribers(_pub_steering_angle)) {
         _pub_steering_angle->publish(steering_angle_noisy);
+    }
+
+    // Publish velocity
+    std_msgs::msg::Float32 velocity;
+    velocity.data = _state.v_x;
+
+    if (has_subscribers(_pub_gt_velocity)) {
+        _pub_gt_velocity->publish(velocity);
+    }
+
+    // Add noise
+    std_msgs::msg::Float32 velocity_noisy;
+    velocity_noisy.data = _noise->applyNoiseToSteering(velocity.data);
+
+    if (has_subscribers(_pub_velocity)) {
+        _pub_velocity->publish(velocity_noisy);
     }
 
     // Publish wheel twist

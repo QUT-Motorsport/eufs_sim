@@ -29,7 +29,7 @@
   <depend>eufs_racecar</depend>
   <depend>eufs_config</depend>
   <depend>state_control</depend>
-  <depend>vehicle_supervisor</depend>
+  <!-- <depend>vehicle_supervisor</depend> -->
   <depend>rviz_marker_plugins</depend>
 
   <export>

@@ -63,8 +63,7 @@ SW_Heartbeat_t Compose_SW_Heartbeat(SW_HeartbeatState_t *state) {
     return msg;
 }
 
-EBS_CTRL_Heartbeat_t Compose_EBS_CTRL_Heartbeat(EBS_CTRL_HeartbeatState_t *state)
-{
+EBS_CTRL_Heartbeat_t Compose_EBS_CTRL_Heartbeat(EBS_CTRL_HeartbeatState_t *state) {
     EBS_CTRL_Heartbeat_t msg;
     msg.id = EBS_CTRL_Heartbeat_ID;
 
@@ -293,7 +292,7 @@ void StateNode::state_machine_timer_callback() {
             this->RES_status.bt_k3 = true;
             // EBS is armed
             this->EBS_CTRL_heartbeat.stateID = EBS_CTRL_STATE::EBS_CTRL_STATE_DRIVE;
-            
+
             std_msgs::msg::Bool steering_ready_msg;
             steering_ready_msg.data = true;
             steering_ready_pub_->publish(steering_ready_msg);

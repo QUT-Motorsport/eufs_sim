@@ -277,12 +277,15 @@ def generate_launch_description():
                 ],
                 parameters=[{"use_sim_time": LaunchConfiguration("use_sim_time")}],
             ),
-            Node(
-                package="vehicle_supervisor",
-                executable="vehicle_supervisor_slim_node",
-                output="screen",
-                parameters=[{"use_sim_time": LaunchConfiguration("use_sim_time")}],
-            ),
+            # Node(
+            #     package="vehicle_supervisor",
+            #     executable="supervisor_node",
+            #     output="screen",
+            #     parameters=[
+            #         {"use_sim_time": LaunchConfiguration("use_sim_time")},
+            #         {"manual_override": False},
+            #     ],
+            # ),
             # launch the gazebo world
             OpaqueFunction(function=gen_world),
             # launch the car

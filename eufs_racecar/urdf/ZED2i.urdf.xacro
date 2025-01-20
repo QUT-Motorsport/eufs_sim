@@ -23,7 +23,7 @@
         </material>
       </visual>
     </link>
-  
+
     <joint name="${prefix}_camera_center_joint" type="fixed">
       <parent link="${prefix}"/>
       <child link="${prefix}_camera_center"/>

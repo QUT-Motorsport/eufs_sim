@@ -34,13 +34,13 @@
 
 // ROS msgs
 #include "ackermann_msgs/msg/ackermann_drive_stamped.hpp"
+#include "std_msgs/msg/float32.hpp"
 #include "driverless_msgs/msg/state.hpp"
 #include "geometry_msgs/msg/pose_with_covariance_stamped.hpp"
 #include "geometry_msgs/msg/twist_with_covariance_stamped.hpp"
 #include "geometry_msgs/msg/vector3.hpp"
 #include "nav_msgs/msg/odometry.hpp"
 #include "sensor_msgs/msg/joint_state.hpp"
-#include "std_msgs/msg/float32.hpp"
 
 // ROS TF2
 #include <tf2/transform_datatypes.h>
@@ -123,7 +123,8 @@ class RaceCarPlugin : public gazebo::ModelPlugin {
     double _update_rate;
     double _publish_rate;
     gazebo::common::Time _time_last_published;
-    gazebo::common::Time _time_last_odom_published;
+    gazebo::common::Time _time_last_vis_odom_published;
+    gazebo::common::Time _time_last_sbg_odom_published;
 
     // ROS TF
     bool _pub_tf;
@@ -135,11 +136,14 @@ class RaceCarPlugin : public gazebo::ModelPlugin {
     // ROS Publishers
     rclcpp::Publisher<nav_msgs::msg::Odometry>::SharedPtr _pub_gt_odom;
     rclcpp::Publisher<nav_msgs::msg::Odometry>::SharedPtr _pub_vis_odom;
+    rclcpp::Publisher<nav_msgs::msg::Odometry>::SharedPtr _pub_odom;
     rclcpp::Publisher<geometry_msgs::msg::TwistWithCovarianceStamped>::SharedPtr _pub_wheel_twist;
     rclcpp::Publisher<geometry_msgs::msg::TwistWithCovarianceStamped>::SharedPtr _pub_gt_wheel_twist;
     rclcpp::Publisher<geometry_msgs::msg::PoseWithCovarianceStamped>::SharedPtr _pub_pose;
     rclcpp::Publisher<std_msgs::msg::Float32>::SharedPtr _pub_steering_angle;
     rclcpp::Publisher<std_msgs::msg::Float32>::SharedPtr _pub_gt_steering_angle;
+    rclcpp::Publisher<std_msgs::msg::Float32>::SharedPtr _pub_velocity;
+    rclcpp::Publisher<std_msgs::msg::Float32>::SharedPtr _pub_gt_velocity;
     rclcpp::Publisher<sensor_msgs::msg::JointState>::SharedPtr _pub_joint_state;
 
     // ROS Subscriptions
