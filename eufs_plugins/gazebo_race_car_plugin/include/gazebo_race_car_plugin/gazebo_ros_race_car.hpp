@@ -107,7 +107,7 @@ class RaceCarPlugin : public gazebo::ModelPlugin {
 
     // States
     // std::unique_ptr<StateMachine> _state_machine;
-    driverless_msgs::msg::State _as_state;
+    // driverless_msgs::msg::State _as_state;
     eufs::models::State _state;
     eufs::models::Input _des_input, _act_input;
     std::unique_ptr<eufs::models::Noise> _noise;
@@ -148,7 +148,7 @@ class RaceCarPlugin : public gazebo::ModelPlugin {
 
     // ROS Subscriptions
     rclcpp::Subscription<ackermann_msgs::msg::AckermannDriveStamped>::SharedPtr _sub_cmd;
-    rclcpp::Subscription<driverless_msgs::msg::State>::SharedPtr _sub_state;
+    // rclcpp::Subscription<driverless_msgs::msg::State>::SharedPtr _sub_state;
 
     // ROS Services
     rclcpp::Service<std_srvs::srv::Trigger>::SharedPtr _reset_vehicle_pos_srv;

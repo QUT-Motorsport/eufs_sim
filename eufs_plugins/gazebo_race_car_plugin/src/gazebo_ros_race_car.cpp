@@ -83,8 +83,8 @@ void RaceCarPlugin::Load(gazebo::physics::ModelPtr model, sdf::ElementPtr sdf) {
     _pub_joint_state = _rosnode->create_publisher<sensor_msgs::msg::JointState>("/joint_states/steering", 1);
 
     // Driverless state
-    _sub_state = _rosnode->create_subscription<driverless_msgs::msg::State>(
-        "/system/as_status", 1, std::bind(&RaceCarPlugin::updateState, this, std::placeholders::_1));
+    // _sub_state = _rosnode->create_subscription<driverless_msgs::msg::State>(
+    //     "/system/as_status", 1, std::bind(&RaceCarPlugin::updateState, this, std::placeholders::_1));
 
     // ROS Subscriptions
     _sub_cmd = _rosnode->create_subscription<ackermann_msgs::msg::AckermannDriveStamped>(
@@ -113,8 +113,8 @@ void RaceCarPlugin::Load(gazebo::physics::ModelPtr model, sdf::ElementPtr sdf) {
 
 void RaceCarPlugin::initParams() {
     // State
-    _as_state.state = driverless_msgs::msg::State::START;
-    _as_state.mission = driverless_msgs::msg::State::MISSION_NONE;
+    // _as_state.state = driverless_msgs::msg::State::START;
+    // _as_state.mission = driverless_msgs::msg::State::MISSION_NONE;
 
     // Get ROS parameters
     _update_rate = _rosnode->declare_parameter("update_rate", 2.0);
@@ -476,12 +476,12 @@ void RaceCarPlugin::update() {
                         std::min(_max_steering_rate * dt, std::abs(_des_input.delta - _act_input.delta));
 
     // Ensure vehicle can drive
-    if (_as_state.state != driverless_msgs::msg::State::DRIVING ||
-        (_world->SimTime() - _last_cmd_time).Double() > 0.5) {
-        _act_input.acc = -100.0;
-        _act_input.vel = 0.0;
-        _act_input.delta = 0.0;
-    }
+    // if (_as_state.state != driverless_msgs::msg::State::DRIVING ||
+    //     (_world->SimTime() - _last_cmd_time).Double() > 0.5) {
+    //     _act_input.acc = -100.0;
+    //     _act_input.vel = 0.0;
+    //     _act_input.delta = 0.0;
+    // }
 
     counter++;
     if (counter == 100) {
@@ -528,7 +528,7 @@ void RaceCarPlugin::update() {
     }
 }
 
-void RaceCarPlugin::updateState(const driverless_msgs::msg::State::SharedPtr msg) { _as_state = *msg; }
+// void RaceCarPlugin::updateState(const driverless_msgs::msg::State::SharedPtr msg) { _as_state = *msg; }
 
 void RaceCarPlugin::onCmd(const ackermann_msgs::msg::AckermannDriveStamped::SharedPtr msg) {
     RCLCPP_DEBUG(_rosnode->get_logger(), "Last time: %f", (_world->SimTime() - _last_cmd_time).Double());
