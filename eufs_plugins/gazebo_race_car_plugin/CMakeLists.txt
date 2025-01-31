@@ -4,8 +4,8 @@ add_library(gazebo_ros_race_car SHARED
   src/gazebo_ros_race_car.cpp)
 
 ament_target_dependencies(gazebo_ros_race_car
-  "gazebo_dev"
-  "gazebo_ros"
+  # "gazebo_dev"
+  "ros_gz"
   "rclcpp"
   "nav_msgs"
   "geometry_msgs"
@@ -18,6 +18,10 @@ ament_target_dependencies(gazebo_ros_race_car
   "sensor_msgs"
   "eufs_models"
   "driverless_msgs"
+
+  "gz-physics7"
+  "gz-transport13"
+  "gz-plugin2"
 )
 
 target_include_directories(gazebo_ros_race_car PUBLIC include)

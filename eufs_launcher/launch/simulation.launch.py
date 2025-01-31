@@ -17,6 +17,8 @@ def get_argument(context, arg):
 
 
 def gen_world(context, *args, **kwargs):
+    print("Generating World... ")
+
     use_robostack = get_argument(context, "robostack")
     track = str(get_argument(context, "track") + ".world")
     gui = str(get_argument(context, "gazebo_gui"))
@@ -51,7 +53,7 @@ def gen_world(context, *args, **kwargs):
     world_path = join(tracks, "worlds", track)
 
     gazebo_launch = join(
-        get_package_share_directory("gazebo_ros"), "launch", "gazebo.launch.py"
+        get_package_share_directory("ros_gz_sim"), "launch", "gz_sim.launch.py"
     )
     params_file = join(
         get_package_share_directory("eufs_config"), "config", "pluginUserParams.yaml"
@@ -289,6 +291,6 @@ def generate_launch_description():
             # launch the gazebo world
             OpaqueFunction(function=gen_world),
             # launch the car
-            OpaqueFunction(function=spawn_car),
+            # OpaqueFunction(function=spawn_car),
         ]
     )

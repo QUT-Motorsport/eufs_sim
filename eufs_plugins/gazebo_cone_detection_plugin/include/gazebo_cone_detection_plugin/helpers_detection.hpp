@@ -2,7 +2,7 @@
 
 #include <driverless_msgs/msg/cone.hpp>
 #include <driverless_msgs/msg/cone_detection_stamped.hpp>
-#include <gazebo/gazebo.hh>
+// #include <gazebo/gazebo.hh>
 #include <string>
 
 #include "helpers_gazebo.hpp"

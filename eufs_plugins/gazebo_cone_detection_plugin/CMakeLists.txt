@@ -5,8 +5,8 @@ add_library(gazebo_ros_cone_detection SHARED
   src/gazebo_ros_cone_detection.cpp)
 
 ament_target_dependencies(gazebo_ros_cone_detection
-  "gazebo_dev"
-  "gazebo_ros"
+  # "gazebo_dev"
+  "ros_gz"
   "rclcpp"
   "std_srvs"
   "geometry_msgs"

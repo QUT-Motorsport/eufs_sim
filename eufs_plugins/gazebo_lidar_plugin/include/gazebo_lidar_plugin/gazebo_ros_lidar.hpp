@@ -15,7 +15,9 @@
 #ifndef GAZEBO_PLUGINS__GAZEBO_ROS_LIDAR_HPP_
 #define GAZEBO_PLUGINS__GAZEBO_ROS_LIDAR_HPP_
 
-#include <gazebo/common/Plugin.hh>
+// #include <gazebo/common/Plugin.hh>
+#include <gz/common5/gz/common.hh>
+#include <gz/sim8/gz/sim.hh>
 #include <memory>
 
 namespace gazebo_plugins {

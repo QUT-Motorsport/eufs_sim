@@ -15,22 +15,26 @@
 #include <algorithm>
 #include <boost/make_shared.hpp>
 #include <boost/variant.hpp>
-#include <gazebo/transport/transport.hh>
+#include <gz/transport13/gz/transport.hh>
 #include <gazebo_lidar_plugin/gazebo_ros_lidar.hpp>
-#include <gazebo_ros/conversions/sensor_msgs.hpp>
-#include <gazebo_ros/node.hpp>
-#include <gazebo_ros/utils.hpp>
+// #include <gazebo_ros/conversions/sensor_msgs.hpp>
+// #include <gazebo_ros/node.hpp>
+// #include <gazebo_ros/utils.hpp>
 #include <limits>
 #include <memory>
 #include <rclcpp/rclcpp.hpp>
 #include <string>
+#include <gz/transport13/gz/transport.hh>
+#include <gz/sensors8/gz/sensors.hh>
+
 
 namespace gazebo_plugins {
 
 class GazeboRosLidarPrivate {
    public:
+
     /// Node for ROS communication.
-    gazebo_ros::Node::SharedPtr ros_node_;
+    gz::transport::Node ros_node_;
 
     // Aliases
     using LaserScan = sensor_msgs::msg::LaserScan;
@@ -74,10 +78,10 @@ class GazeboRosLidarPrivate {
     uint8_t range_radiation_type_;
 
     /// Gazebo node used to subscribe to laser scan
-    gazebo::transport::NodePtr gazebo_node_;
+    gz::transport::Node gazebo_node_;
 
     /// Gazebo subscribe to parent sensor's laser scan
-    gazebo::transport::SubscriberPtr laser_scan_sub_;
+    gz::transport::Publisher laser_scan_sub_;
 };
 
 GazeboRosLidar::GazeboRosLidar() : impl_(std::make_unique<GazeboRosLidarPrivate>()) {}
@@ -93,7 +97,7 @@ GazeboRosLidar::~GazeboRosLidar() {
 
 void GazeboRosLidar::Load(gazebo::sensors::SensorPtr _sensor, sdf::ElementPtr _sdf) {
     // Create ros_node configured from sdf
-    impl_->ros_node_ = gazebo_ros::Node::Get(_sdf);
+    impl_->ros_node_ =  gazebo_ros::Node::Get(_sdf);
 
     // Get QoS profiles
     // const gazebo_ros::QoS& qos = impl_->ros_node_->get_qos();

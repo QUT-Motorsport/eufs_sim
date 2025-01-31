@@ -4,10 +4,14 @@ add_library(gazebo_ros_lidar SHARED
   src/gazebo_ros_lidar.cpp)
 
 ament_target_dependencies(gazebo_ros_lidar
-  "gazebo_dev"
-  "gazebo_ros"
+  # "gazebo_dev"
+  "ros_gz"
   "rclcpp"
   "sensor_msgs"
+
+  "gz-transport13"
+  "gz-common5"
+  
 )
 
 target_include_directories(gazebo_ros_lidar PUBLIC include)

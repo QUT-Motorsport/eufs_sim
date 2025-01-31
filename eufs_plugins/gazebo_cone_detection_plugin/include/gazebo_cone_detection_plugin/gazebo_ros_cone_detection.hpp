@@ -1,12 +1,13 @@
 #pragma once
 
-#include <gazebo/common/Plugin.hh>
-#include <gazebo/common/Time.hh>
-#include <gazebo/gazebo.hh>
-#include <gazebo/physics/Link.hh>
-#include <gazebo/physics/Model.hh>
-#include <gazebo/physics/World.hh>
-#include <gazebo_ros/node.hpp>
+// #include <gz/common/Plugin.hh>
+// #include <gazebo/common/Time.hh>
+// #include <gazebo/gazebo.hh>
+// #include <gazebo/physics/Link.hh>
+// #include <gazebo/physics/Model.hh>
+// #include <gazebo/physics/World.hh>
+// #include <gazebo_ros/node.hpp>
+
 
 // ROS  srvs
 #include <std_srvs/srv/trigger.hpp>

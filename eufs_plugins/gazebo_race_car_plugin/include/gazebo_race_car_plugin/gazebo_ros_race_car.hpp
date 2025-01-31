@@ -53,27 +53,31 @@
 #include <std_srvs/srv/trigger.hpp>
 
 // Gazebo Includes
-#include <gazebo/common/Plugin.hh>
-#include <gazebo/common/Time.hh>
-#include <gazebo/physics/physics.hh>
-#include <gazebo/transport/transport.hh>
-#include <gazebo_ros/node.hpp>
+// #include <gazebo/common/Plugin.hh>
+// #include <gazebo/common/Time.hh>
+// #include <gazebo/physics/physics.hh>
+// #include <gazebo/transport/transport.hh>
+// #include <gazebo_ros/node.hpp>
+
+#include <gz/plugin2/gz/plugin.hh>
+#include <gz/physics7/gz/physics.hh>
 
 // Local includes
 #include "eufs_models/eufs_models.hpp"
 #include "helpers_gazebo.hpp"
 #include "helpers_ros.hpp"
 
+
 namespace gazebo_plugins {
 namespace eufs_plugins {
 
-class RaceCarPlugin : public gazebo::ModelPlugin {
+class RaceCarPlugin {
    public:
     RaceCarPlugin();
 
-    ~RaceCarPlugin() override;
+    ~RaceCarPlugin();
 
-    void Load(gazebo::physics::ModelPtr model, sdf::ElementPtr sdf) override;
+    void Load(gazebo::physics::ModelPtr model, sdf::ElementPtr sdf);
 
     eufs::models::State &getState() { return _state; }
     eufs::models::Input &getInput() { return _des_input; }
