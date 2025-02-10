@@ -4,6 +4,7 @@ from os.path import expanduser, isfile, join
 from subprocess import Popen
 
 import yaml
+import cv2
 from ament_index_python.packages import get_package_share_directory
 from python_qt_binding import loadUi
 from python_qt_binding.QtGui import QFont

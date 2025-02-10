@@ -1,4 +1,5 @@
 import os
+import cv2
 from os.path import isfile, join
 
 import xacro
@@ -25,18 +26,18 @@ def gen_world(context, *args, **kwargs):
 
     tracks = get_package_share_directory("eufs_tracks")
     racecar = get_package_share_directory("eufs_racecar")
-    PLUGINS = os.environ.get("GAZEBO_PLUGIN_PATH")
+    # PLUGINS = os.environ.get("GAZEBO_PLUGIN_PATH")
     MODELS = os.environ.get("GAZEBO_MODEL_PATH")
     RESOURCES = os.environ.get("GAZEBO_RESOURCE_PATH")
-    EUFS = os.path.expanduser(os.environ.get("EUFS_MASTER"))
-    DISTRO = os.environ.get("ROS_DISTRO")
+    # EUFS = os.path.expanduser(os.environ.get("EUFS_MASTER"))
+    # DISTRO = os.environ.get("ROS_DISTRO")
 
-    if use_robostack == "true":
-        os.environ["GAZEBO_PLUGIN_PATH"] = EUFS + "/install/eufs_plugins:" + PLUGINS
-    else:
-        os.environ["GAZEBO_PLUGIN_PATH"] = (
-            EUFS + "/install/eufs_plugins:" + "/opt/ros/" + DISTRO
-        )
+    # if use_robostack == "true":
+    #     os.environ["GAZEBO_PLUGIN_PATH"] = EUFS + "/install/eufs_plugins:" + PLUGINS
+    # else:
+    #     os.environ["GAZEBO_PLUGIN_PATH"] = (
+    #         EUFS + "/install/eufs_plugins:" + "/opt/ros/" + DISTRO
+    #     )
     os.environ["GAZEBO_MODEL_PATH"] = tracks + "/models:" + str(MODELS)
     os.environ["GAZEBO_RESOURCE_PATH"] = (
         tracks
@@ -55,9 +56,9 @@ def gen_world(context, *args, **kwargs):
     gazebo_launch = join(
         get_package_share_directory("ros_gz_sim"), "launch", "gz_sim.launch.py"
     )
-    params_file = join(
-        get_package_share_directory("eufs_config"), "config", "pluginUserParams.yaml"
-    )
+    # params_file = join(
+    #     get_package_share_directory("eufs_config"), "config", "pluginUserParams.yaml"
+    # )
 
     return [
         IncludeLaunchDescription(
@@ -67,7 +68,7 @@ def gen_world(context, *args, **kwargs):
                 ("pause", "false"),
                 ("gui", gui),
                 ("world", world_path),
-                ("params_file", params_file),
+                # ("params_file", params_file),
             ],
         ),
     ]
@@ -186,13 +187,16 @@ def spawn_car(context, *args, **kwargs):
 
 
 def generate_launch_description():
+    config_package = get_package_share_directory("eufs_config")
+
     rviz_config_file = join(
-        get_package_share_directory("eufs_config"), "rviz", "default.rviz"
+        config_package, "rviz", "default.rviz"
     )
     rqt_perspective_file = join(
-        get_package_share_directory("eufs_config"),
-        "ui",
-        "control.perspective",
+        config_package, "ui", "control.perspective",
+    )
+    bridge_params_file = join(
+        config_package, "config", "bridge_params.yaml"
     )
 
     return LaunchDescription(
@@ -278,6 +282,19 @@ def generate_launch_description():
                     str(rqt_perspective_file),
                 ],
                 parameters=[{"use_sim_time": LaunchConfiguration("use_sim_time")}],
+            ),
+            Node(
+                package="ros_gz_bridge",
+                executable="parameter_bridge",
+                name="gz_bridge",
+                output="screen",
+                parameters=[bridge_params_file],   # Load YAML
+                remappings=[
+                    # Remap topics cause it looks nice
+                    ("/gazebo/lidar_scan",         "/ros2/lidar_scan"),
+                    ("/gazebo/cmd_vel",            "/ros2/cmd_vel"),
+                    ("/gazebo/ground_truth_map",   "/ros2/ground_truth_map")
+                ],
             ),
             # Node(
             #     package="vehicle_supervisor",
