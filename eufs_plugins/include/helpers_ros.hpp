@@ -1,3 +1,6 @@
+#ifndef HELPERS_ROS_HPP_
+#define HELPERS_ROS_HPP_
+
 #include "rclcpp/rclcpp.hpp"
 
 bool is_initalised(rclcpp::PublisherBase::SharedPtr publisher) { return (bool)publisher; }
@@ -23,3 +26,4 @@ std::vector<double> to_quaternion(std::vector<double> &euler) {
 
     return q;
 }
+#endif // HELPERS_ROS_HPP_

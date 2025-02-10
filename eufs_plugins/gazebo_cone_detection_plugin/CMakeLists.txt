@@ -11,7 +11,8 @@ ament_target_dependencies(gazebo_ros_cone_detection
   "std_srvs"
   "geometry_msgs"
   "ament_index_cpp"
-  "driverless_msgs")
+  "driverless_msgs"
+  "gz-common5")
 
 target_include_directories(gazebo_ros_cone_detection PUBLIC include)
 target_include_directories(gazebo_ros_cone_detection PUBLIC ${PROJECT_SOURCE_DIR}/include)

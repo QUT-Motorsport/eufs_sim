@@ -3,13 +3,15 @@
 #include <driverless_msgs/msg/cone.hpp>
 #include <driverless_msgs/msg/cone_detection_stamped.hpp>
 // #include <gazebo/gazebo.hh>
+#include <gz/math/Pose3.hh>  // Replaces ignition::math::Pose3d
 #include <string>
+#include <rclcpp/rclcpp.hpp>
 
 #include "helpers_gazebo.hpp"
 
 unsigned int seed = 0;
 
-typedef struct SensorConfig {
+struct SensorConfig {
     std::string frame_id;
     double min_view_distance;
     double max_view_distance;
@@ -18,9 +20,11 @@ typedef struct SensorConfig {
     double bearing_noise;
     bool detects_colour;
     double offset_x;
-} SensorConfig_t;
+};
 
-SensorConfig_t populate_sensor_config(std::string sensor_prefix, gazebo_ros::Node::SharedPtr node) {
+using SensorConfig_t = SensorConfig;
+
+SensorConfig_t populate_sensor_config(std::string sensor_prefix, rclcpp::Node::SharedPtr node) {
     std::string frame_id = node->declare_parameter(sensor_prefix + "_frame_id", "sensor");
     double min_view_distance = node->declare_parameter(sensor_prefix + "_min_view_distance", 0.0);
     double max_view_distance = node->declare_parameter(sensor_prefix + "_max_view_distance", 0.0);
@@ -33,8 +37,9 @@ SensorConfig_t populate_sensor_config(std::string sensor_prefix, gazebo_ros::Nod
     return {frame_id, min_view_distance, max_view_distance, fov, range_noise, bearing_noise, detects_colour, offset_x};
 }
 
-driverless_msgs::msg::Cone convert_cone_to_car_frame(const ignition::math::Pose3d car_pose,
-                                                     const driverless_msgs::msg::Cone cone, const double offset_x = 0) {
+driverless_msgs::msg::Cone convert_cone_to_car_frame(const gz::math::Pose3d &car_pose,
+                                                     const driverless_msgs::msg::Cone &cone,
+                                                     double offset_x = 0) {
     driverless_msgs::msg::Cone translated_cone = cone;
 
     double x = cone.location.x - car_pose.Pos().X();
@@ -48,11 +53,13 @@ driverless_msgs::msg::Cone convert_cone_to_car_frame(const ignition::math::Pose3
     return translated_cone;
 }
 
-double cone_dist(driverless_msgs::msg::Cone cone) {
+double cone_dist(driverless_msgs::msg::Cone &cone) {
     return sqrt(cone.location.x * cone.location.x + cone.location.y * cone.location.y);
 }
 
-double cone_angle(driverless_msgs::msg::Cone cone) { return atan2(cone.location.y, cone.location.x); }
+double cone_angle(driverless_msgs::msg::Cone &cone) { 
+    return atan2(cone.location.y, cone.location.x); 
+}
 
 double GaussianKernel(double mu, double sigma) {
     // using Box-Muller transform to generate two independent standard
@@ -69,8 +76,7 @@ double GaussianKernel(double mu, double sigma) {
 
     // there are 2 indep. vars, we'll just use X
     // scale to our mu and sigma
-    X = sigma * X + mu;
-    return X;
+    return sigma * X + mu;
 }
 
 driverless_msgs::msg::ConeWithCovariance make_noisy_range_bearing_cone(driverless_msgs::msg::Cone cone,
@@ -102,7 +108,7 @@ driverless_msgs::msg::ConeWithCovariance make_noisy_x_y_cone(driverless_msgs::ms
 }
 
 driverless_msgs::msg::ConeDetectionStamped get_sensor_detection(
-    SensorConfig_t sensor_config, ignition::math::Pose3d car_pose,
+    SensorConfig_t sensor_config, gz::math::Pose3d car_pose,
     driverless_msgs::msg::ConeDetectionStamped ground_truth_track) {
     driverless_msgs::msg::ConeDetectionStamped sensor_detection;
     sensor_detection.header = ground_truth_track.header;
@@ -135,7 +141,7 @@ driverless_msgs::msg::ConeDetectionStamped get_sensor_detection(
 }
 
 driverless_msgs::msg::ConeDetectionStamped get_track_centered_on_car_inital_pose(
-    ignition::math::Pose3d car_inital_pose, driverless_msgs::msg::ConeDetectionStamped track) {
+    gz::math::Pose3d car_inital_pose, driverless_msgs::msg::ConeDetectionStamped track) {
     driverless_msgs::msg::ConeDetectionStamped centered_track;
     centered_track.header = track.header;
 
@@ -158,7 +164,7 @@ typedef struct SLAMConfig {
     double local_range_y;
 } SLAMConfig_t;
 
-SLAMConfig_t populate_slam_config(gazebo_ros::Node::SharedPtr node) {
+SLAMConfig_t populate_slam_config(rclcpp::Node::SharedPtr node) {
     std::string frame_id = node->declare_parameter("slam_frame_id", "map");
     double x_noise = node->declare_parameter("slam_x_noise", 0.0);
     double y_noise = node->declare_parameter("slam_y_noise", 0.0);
@@ -183,7 +189,7 @@ driverless_msgs::msg::ConeDetectionStamped get_noisy_global_map(
 }
 
 driverless_msgs::msg::ConeDetectionStamped get_noisy_local_map(
-    SLAMConfig_t slam_config, ignition::math::Pose3d car_pose,
+    SLAMConfig_t slam_config, gz::math::Pose3d car_pose,
     driverless_msgs::msg::ConeDetectionStamped noisy_global_map) {
     driverless_msgs::msg::ConeDetectionStamped noisy_local_map;
     noisy_local_map.header = noisy_global_map.header;

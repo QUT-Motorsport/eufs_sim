@@ -13,7 +13,8 @@ endif()
 
 find_package(gz-physics7 REQUIRED)
 find_package(gz-transport13 REQUIRED)
-
+find_package(gz-sensors8 REQUIRED)
+find_package(gz-plugin2 REQUIRED)
 find_package(ament_cmake REQUIRED)
 # find_package(gazebo_dev REQUIRED)
 find_package(ros_gz REQUIRED)
@@ -35,6 +36,19 @@ find_package(driverless_msgs REQUIRED)
 
 link_directories(${gazebo_dev_LIBRARY_DIRS})
 
+include_directories(/usr/include/gz/sim8/)
+include_directories(/usr/include/gz/plugin2/)
+include_directories(/usr/include/gz/sensors8/)
+include_directories(/usr/include/gz/rendering8/)
+include_directories(/usr/include/gz/common5/)
+include_directories(/usr/include/gz/sdformat14/)
+include_directories(/usr/include/gz/msgs10/)
+include_directories(/usr/include/gz/math7/)
+include_directories(/usr/include/gz/transport13/)
+include_directories(/usr/include/gz/sim8/gz/sim/components/)
+
+include_directories(include)
+
 option(ENABLE_PROFILER "Enable Ignition Profiler" FALSE)
 if(ENABLE_PROFILER)
   find_package(ignition-common3 QUIET COMPONENTS profiler)
@@ -47,9 +61,9 @@ if(ENABLE_PROFILER)
   endif()
 endif()
 
-# add_subdirectory(gazebo_cone_detection_plugin)
-# add_subdirectory(gazebo_race_car_plugin)
-# add_subdirectory(gazebo_lidar_plugin)
+add_subdirectory(gazebo_cone_detection_plugin)
+add_subdirectory(gazebo_race_car_plugin)
+add_subdirectory(gazebo_lidar_plugin)
 
 ament_export_libraries(gazebo_ros_template2)
 

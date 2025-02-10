@@ -1,34 +1,62 @@
 #pragma once
 
-// #include <gazebo/gazebo.hh>
-#include <gz/physics7/gz/physics.hh>
 #include <string>
+#include <optional>
+#include <stdexcept>
 
-#include "rclcpp/rclcpp.hpp"
+#include <gz/sim/World.hh>
+#include <gz/sim/Model.hh>
+#include <gz/sim/Link.hh>
+// #include <gz/math/Duration.hh>
+#include <chrono>
+#include <rclcpp/rclcpp.hpp>
 
-double calc_dt(gazebo::common::Time start, gazebo::common::Time end) { return (end - start).Double(); }
+namespace gazebo_plugins {
+namespace eufs_plugins {
 
-gazebo::physics::ModelPtr get_model(gazebo::physics::WorldPtr world, std::string name,
-                                    std::optional<const rclcpp::Logger> logger = {}) {
-    gazebo::physics::ModelPtr model = world->ModelByName(name);
-    if (model == nullptr) {
-        if (logger) {
-            RCLCPP_FATAL(*logger, "Could not find required model <%s>. Exiting.", name.c_str());
-        }
-        exit(1);
-    }
-    return model;
+// double calc_dt(gazebo::common::Time start, gazebo::common::Time end) { return (end - start).Double(); }
+inline double calc_dt(const std::chrono::steady_clock::time_point &start,
+                      const std::chrono::steady_clock::time_point &end)
+{
+    return std::chrono::duration<double>(end - start).count();
 }
 
-gazebo::physics::LinkPtr get_link(gazebo::physics::ModelPtr model, std::string name,
-                                  std::optional<const rclcpp::Logger> logger = {}) {
-    gazebo::physics::LinkPtr link = model->GetLink(name);
-    if (link == nullptr) {
-        if (logger) {
-            RCLCPP_FATAL(*logger, "Could not find required link <%s> on model <%s>. Exiting.", name.c_str(),
-                         model->GetName().c_str());
+inline gz::sim::Model getModel(gz::sim::World &world, 
+                        gz::sim::EntityComponentManager &ecm,
+                        std::string name,
+                        std::optional<const rclcpp::Logger> logger = std::nullopt) 
+    {
+        auto modelEntity = world.ModelByName(ecm, name);
+        gz::sim::Model model(modelEntity);
+        if (!model.Valid(ecm)) 
+        {
+            if (logger) 
+            {
+                RCLCPP_FATAL(*logger, "Could not find required model <%s>. Exiting.", name.c_str());
+            }
+            throw std::runtime_error("Model not found: " + name);
         }
-        exit(1);
+        return model;
+    }
+
+inline gz::sim::Link get_link(gz::sim::Model &model, 
+                       gz::sim::EntityComponentManager &ecm,
+                       std::string &name,
+                       std::optional<const rclcpp::Logger> logger = std::nullopt) {
+    auto linkEntity = model.LinkByName(ecm, name);
+    gz::sim::Link link(linkEntity);
+    
+    if (!link.Valid(ecm)) 
+    {
+        if (logger) 
+        {
+            RCLCPP_FATAL(*logger, "Could not find required link <%s> on model <%s>. Exiting.", 
+            name.c_str(), model.Name(ecm).c_str());
+        }
+        throw std::runtime_error("Model not found: " + name);
     }
     return link;
 }
+
+}  // namespace eufs_plugins
+}  // namespace gazebo_plugins
