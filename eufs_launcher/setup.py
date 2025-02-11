@@ -18,6 +18,11 @@ setup(
         (share_directory, ["package.xml"]),
         ("share/ament_index/resource_index/packages", ["resource/" + package_name]),
     ],
+    entry_points={
+        'console_scripts': [
+            'cone_detection_converter = eufs_launcher.cone_detection_converter:main'
+        ],
+    },
     install_requires=["setuptools"],
     zip_safe=True,
     maintainer="Cameron Matthew",

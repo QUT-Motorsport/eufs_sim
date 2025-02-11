@@ -16,6 +16,7 @@
 #include <gz/sim/EntityComponentManager.hh>
 #include <gz/sim/components/Pose.hh>
 #include <gz/sim/components/Link.hh>
+#include <gz/transport/Node.hh>
 // #include <gz/sim/UpdateInfo.hh>
 #include <gz/sim/EventManager.hh>
 

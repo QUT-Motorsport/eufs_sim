@@ -8,7 +8,7 @@
       <uri>model://blue_cone</uri>
       <name>blue_cone_0</name>
 
-      <covariance x="0.01" y="0.01" xy="0.0"/>
+      <!-- <covariance x="0.01" y="0.01" xy="0.0"/> -->
 
     </include>
 
@@ -18,7 +18,7 @@
       <uri>model://blue_cone</uri>
       <name>blue_cone_1</name>
 
-      <covariance x="0.01" y="0.01" xy="0.0"/>
+      // <!-- <covariance x="0.01" y="0.01" xy="0.0"/> -->
 
     </include>
 
@@ -28,7 +28,7 @@
       <uri>model://blue_cone</uri>
       <name>blue_cone_2</name>
 
-      <covariance x="0.01" y="0.01" xy="0.0"/>
+      <!-- <covariance x="0.01" y="0.01" xy="0.0"/> -->
 
     </include>
 
@@ -38,7 +38,7 @@
       <uri>model://blue_cone</uri>
       <name>blue_cone_3</name>
 
-      <covariance x="0.01" y="0.01" xy="0.0"/>
+      <!-- <covariance x="0.01" y="0.01" xy="0.0"/> -->
 
     </include>
 
@@ -48,7 +48,7 @@
       <uri>model://blue_cone</uri>
       <name>blue_cone_4</name>
 
-      <covariance x="0.01" y="0.01" xy="0.0"/>
+      <!-- <covariance x="0.01" y="0.01" xy="0.0"/> -->
 
     </include>
 
@@ -58,7 +58,7 @@
       <uri>model://blue_cone</uri>
       <name>blue_cone_5</name>
 
-      <covariance x="0.01" y="0.01" xy="0.0"/>
+      <!-- <covariance x="0.01" y="0.01" xy="0.0"/> -->
 
     </include>
 
@@ -68,7 +68,7 @@
       <uri>model://blue_cone</uri>
       <name>blue_cone_6</name>
 
-      <covariance x="0.01" y="0.01" xy="0.0"/>
+      <!-- <covariance x="0.01" y="0.01" xy="0.0"/> -->
 
     </include>
 
@@ -78,7 +78,7 @@
       <uri>model://blue_cone</uri>
       <name>blue_cone_7</name>
 
-      <covariance x="0.01" y="0.01" xy="0.0"/>
+      <!-- <covariance x="0.01" y="0.01" xy="0.0"/> -->
 
     </include>
 
@@ -88,7 +88,7 @@
       <uri>model://blue_cone</uri>
       <name>blue_cone_8</name>
 
-      <covariance x="0.01" y="0.01" xy="0.0"/>
+      <!-- <covariance x="0.01" y="0.01" xy="0.0"/> -->
 
     </include>
 
@@ -98,7 +98,7 @@
       <uri>model://blue_cone</uri>
       <name>blue_cone_9</name>
 
-      <covariance x="0.01" y="0.01" xy="0.0"/>
+      <!-- <covariance x="0.01" y="0.01" xy="0.0"/> -->
 
     </include>
 
@@ -108,7 +108,7 @@
       <uri>model://blue_cone</uri>
       <name>blue_cone_10</name>
 
-      <covariance x="0.01" y="0.01" xy="0.0"/>
+      <!-- <covariance x="0.01" y="0.01" xy="0.0"/> -->
 
     </include>
 
@@ -118,7 +118,7 @@
       <uri>model://blue_cone</uri>
       <name>blue_cone_11</name>
 
-      <covariance x="0.01" y="0.01" xy="0.0"/>
+      <!-- <covariance x="0.01" y="0.01" xy="0.0"/> -->
 
     </include>
 
@@ -128,7 +128,7 @@
       <uri>model://blue_cone</uri>
       <name>blue_cone_12</name>
 
-      <covariance x="0.01" y="0.01" xy="0.0"/>
+      <!-- <covariance x="0.01" y="0.01" xy="0.0"/> -->
 
     </include>
 
@@ -138,7 +138,7 @@
       <uri>model://blue_cone</uri>
       <name>blue_cone_13</name>
 
-      <covariance x="0.01" y="0.01" xy="0.0"/>
+      <!-- <covariance x="0.01" y="0.01" xy="0.0"/> -->
 
     </include>
 
@@ -148,7 +148,7 @@
       <uri>model://blue_cone</uri>
       <name>blue_cone_14</name>
 
-      <covariance x="0.01" y="0.01" xy="0.0"/>
+      <!-- <covariance x="0.01" y="0.01" xy="0.0"/> -->
 
     </include>
 
@@ -158,7 +158,7 @@
       <uri>model://blue_cone</uri>
       <name>blue_cone_15</name>
 
-      <covariance x="0.01" y="0.01" xy="0.0"/>
+      <!-- <covariance x="0.01" y="0.01" xy="0.0"/> -->
 
     </include>
 
@@ -168,7 +168,7 @@
       <uri>model://blue_cone</uri>
       <name>blue_cone_16</name>
 
-      <covariance x="0.01" y="0.01" xy="0.0"/>
+      <!-- <covariance x="0.01" y="0.01" xy="0.0"/> -->
 
     </include>
 
@@ -178,7 +178,7 @@
       <uri>model://blue_cone</uri>
       <name>blue_cone_17</name>
 
-      <covariance x="0.01" y="0.01" xy="0.0"/>
+      <!-- <covariance x="0.01" y="0.01" xy="0.0"/> -->
 
     </include>
 
@@ -188,7 +188,7 @@
       <uri>model://blue_cone</uri>
       <name>blue_cone_18</name>
 
-      <covariance x="0.01" y="0.01" xy="0.0"/>
+      <!-- <covariance x="0.01" y="0.01" xy="0.0"/> -->
 
     </include>
 
@@ -198,7 +198,7 @@
       <uri>model://blue_cone</uri>
       <name>blue_cone_19</name>
 
-      <covariance x="0.01" y="0.01" xy="0.0"/>
+      <!-- <covariance x="0.01" y="0.01" xy="0.0"/> -->
 
     </include>
 
@@ -208,7 +208,7 @@
       <uri>model://blue_cone</uri>
       <name>blue_cone_20</name>
 
-      <covariance x="0.01" y="0.01" xy="0.0"/>
+      <!-- <covariance x="0.01" y="0.01" xy="0.0"/> -->
 
     </include>
 
@@ -218,7 +218,7 @@
       <uri>model://blue_cone</uri>
       <name>blue_cone_21</name>
 
-      <covariance x="0.01" y="0.01" xy="0.0"/>
+      <!-- <covariance x="0.01" y="0.01" xy="0.0"/> -->
 
     </include>
 
@@ -228,7 +228,7 @@
       <uri>model://blue_cone</uri>
       <name>blue_cone_22</name>
 
-      <covariance x="0.01" y="0.01" xy="0.0"/>
+      <!-- <covariance x="0.01" y="0.01" xy="0.0"/> -->
 
     </include>
 
@@ -238,7 +238,7 @@
       <uri>model://blue_cone</uri>
       <name>blue_cone_23</name>
 
-      <covariance x="0.01" y="0.01" xy="0.0"/>
+      <!-- <covariance x="0.01" y="0.01" xy="0.0"/> -->
 
     </include>
 
@@ -248,7 +248,7 @@
       <uri>model://blue_cone</uri>
       <name>blue_cone_24</name>
 
-      <covariance x="0.01" y="0.01" xy="0.0"/>
+      <!-- <covariance x="0.01" y="0.01" xy="0.0"/> -->
 
     </include>
 
@@ -258,7 +258,7 @@
       <uri>model://blue_cone</uri>
       <name>blue_cone_25</name>
 
-      <covariance x="0.01" y="0.01" xy="0.0"/>
+      <!-- <covariance x="0.01" y="0.01" xy="0.0"/> -->
 
     </include>
 
@@ -268,7 +268,7 @@
       <uri>model://blue_cone</uri>
       <name>blue_cone_26</name>
 
-      <covariance x="0.01" y="0.01" xy="0.0"/>
+      <!-- <covariance x="0.01" y="0.01" xy="0.0"/> -->
 
     </include>
 
@@ -278,7 +278,7 @@
       <uri>model://blue_cone</uri>
       <name>blue_cone_27</name>
 
-      <covariance x="0.01" y="0.01" xy="0.0"/>
+      <!-- <covariance x="0.01" y="0.01" xy="0.0"/> -->
 
     </include>
 
@@ -288,7 +288,7 @@
       <uri>model://blue_cone</uri>
       <name>blue_cone_28</name>
 
-      <covariance x="0.01" y="0.01" xy="0.0"/>
+      <!-- <covariance x="0.01" y="0.01" xy="0.0"/> -->
 
     </include>
 
@@ -298,7 +298,7 @@
       <uri>model://blue_cone</uri>
       <name>blue_cone_29</name>
 
-      <covariance x="0.01" y="0.01" xy="0.0"/>
+      <!-- <covariance x="0.01" y="0.01" xy="0.0"/> -->
 
     </include>
 
@@ -308,7 +308,7 @@
       <uri>model://blue_cone</uri>
       <name>blue_cone_30</name>
 
-      <covariance x="0.01" y="0.01" xy="0.0"/>
+      <!-- <covariance x="0.01" y="0.01" xy="0.0"/> -->
 
     </include>
 
@@ -318,7 +318,7 @@
       <uri>model://blue_cone</uri>
       <name>blue_cone_31</name>
 
-      <covariance x="0.01" y="0.01" xy="0.0"/>
+      <!-- <covariance x="0.01" y="0.01" xy="0.0"/> -->
 
     </include>
 
@@ -328,7 +328,7 @@
       <uri>model://blue_cone</uri>
       <name>blue_cone_32</name>
 
-      <covariance x="0.01" y="0.01" xy="0.0"/>
+      <!-- <covariance x="0.01" y="0.01" xy="0.0"/> -->
 
     </include>
 
@@ -338,7 +338,7 @@
       <uri>model://blue_cone</uri>
       <name>blue_cone_33</name>
 
-      <covariance x="0.01" y="0.01" xy="0.0"/>
+      <!-- <covariance x="0.01" y="0.01" xy="0.0"/> -->
 
     </include>
 
@@ -348,7 +348,7 @@
       <uri>model://blue_cone</uri>
       <name>blue_cone_34</name>
 
-      <covariance x="0.01" y="0.01" xy="0.0"/>
+      <!-- <covariance x="0.01" y="0.01" xy="0.0"/> -->
 
     </include>
 
@@ -358,7 +358,7 @@
       <uri>model://yellow_cone</uri>
       <name>yellow_cone_35</name>
 
-      <covariance x="0.01" y="0.01" xy="0.0"/>
+      <!-- <covariance x="0.01" y="0.01" xy="0.0"/> -->
 
     </include>
 
@@ -368,7 +368,7 @@
       <uri>model://yellow_cone</uri>
       <name>yellow_cone_36</name>
 
-      <covariance x="0.01" y="0.01" xy="0.0"/>
+      <!-- <covariance x="0.01" y="0.01" xy="0.0"/> -->
 
     </include>
 
@@ -378,7 +378,7 @@
       <uri>model://yellow_cone</uri>
       <name>yellow_cone_37</name>
 
-      <covariance x="0.01" y="0.01" xy="0.0"/>
+      <!-- <covariance x="0.01" y="0.01" xy="0.0"/> -->
 
     </include>
 
@@ -388,7 +388,7 @@
       <uri>model://yellow_cone</uri>
       <name>yellow_cone_38</name>
 
-      <covariance x="0.01" y="0.01" xy="0.0"/>
+      <!-- <covariance x="0.01" y="0.01" xy="0.0"/> -->
 
     </include>
 
@@ -398,7 +398,7 @@
       <uri>model://yellow_cone</uri>
       <name>yellow_cone_39</name>
 
-      <covariance x="0.01" y="0.01" xy="0.0"/>
+      <!-- <covariance x="0.01" y="0.01" xy="0.0"/> -->
 
     </include>
 
@@ -408,7 +408,7 @@
       <uri>model://yellow_cone</uri>
       <name>yellow_cone_40</name>
 
-      <covariance x="0.01" y="0.01" xy="0.0"/>
+      <!-- <covariance x="0.01" y="0.01" xy="0.0"/> -->
 
     </include>
 
@@ -418,7 +418,7 @@
       <uri>model://yellow_cone</uri>
       <name>yellow_cone_41</name>
 
-      <covariance x="0.01" y="0.01" xy="0.0"/>
+      <!-- <covariance x="0.01" y="0.01" xy="0.0"/> -->
 
     </include>
 
@@ -428,7 +428,7 @@
       <uri>model://yellow_cone</uri>
       <name>yellow_cone_42</name>
 
-      <covariance x="0.01" y="0.01" xy="0.0"/>
+      <!-- <covariance x="0.01" y="0.01" xy="0.0"/> -->
 
     </include>
 
@@ -438,7 +438,7 @@
       <uri>model://yellow_cone</uri>
       <name>yellow_cone_43</name>
 
-      <covariance x="0.01" y="0.01" xy="0.0"/>
+      <!-- <covariance x="0.01" y="0.01" xy="0.0"/> -->
 
     </include>
 
@@ -448,7 +448,7 @@
       <uri>model://yellow_cone</uri>
       <name>yellow_cone_44</name>
 
-      <covariance x="0.01" y="0.01" xy="0.0"/>
+      <!-- <covariance x="0.01" y="0.01" xy="0.0"/> -->
 
     </include>
 
@@ -458,7 +458,7 @@
       <uri>model://yellow_cone</uri>
       <name>yellow_cone_45</name>
 
-      <covariance x="0.01" y="0.01" xy="0.0"/>
+      <!-- <covariance x="0.01" y="0.01" xy="0.0"/> -->
 
     </include>
 
@@ -468,7 +468,7 @@
       <uri>model://yellow_cone</uri>
       <name>yellow_cone_46</name>
 
-      <covariance x="0.01" y="0.01" xy="0.0"/>
+      <!-- <covariance x="0.01" y="0.01" xy="0.0"/> -->
 
     </include>
 
@@ -478,7 +478,7 @@
       <uri>model://yellow_cone</uri>
       <name>yellow_cone_47</name>
 
-      <covariance x="0.01" y="0.01" xy="0.0"/>
+      <!-- <covariance x="0.01" y="0.01" xy="0.0"/> -->
 
     </include>
 
@@ -488,7 +488,7 @@
       <uri>model://yellow_cone</uri>
       <name>yellow_cone_48</name>
 
-      <covariance x="0.01" y="0.01" xy="0.0"/>
+      <!-- <covariance x="0.01" y="0.01" xy="0.0"/> -->
 
     </include>
 
@@ -498,7 +498,7 @@
       <uri>model://yellow_cone</uri>
       <name>yellow_cone_49</name>
 
-      <covariance x="0.01" y="0.01" xy="0.0"/>
+      <!-- <covariance x="0.01" y="0.01" xy="0.0"/> -->
 
     </include>
 
@@ -508,7 +508,7 @@
       <uri>model://yellow_cone</uri>
       <name>yellow_cone_50</name>
 
-      <covariance x="0.01" y="0.01" xy="0.0"/>
+      <!-- <covariance x="0.01" y="0.01" xy="0.0"/> -->
 
     </include>
 
@@ -518,7 +518,7 @@
       <uri>model://yellow_cone</uri>
       <name>yellow_cone_51</name>
 
-      <covariance x="0.01" y="0.01" xy="0.0"/>
+      <!-- <covariance x="0.01" y="0.01" xy="0.0"/> -->
 
     </include>
 
@@ -528,7 +528,7 @@
       <uri>model://yellow_cone</uri>
       <name>yellow_cone_52</name>
 
-      <covariance x="0.01" y="0.01" xy="0.0"/>
+      <!-- <covariance x="0.01" y="0.01" xy="0.0"/> -->
 
     </include>
 
@@ -538,7 +538,7 @@
       <uri>model://yellow_cone</uri>
       <name>yellow_cone_53</name>
 
-      <covariance x="0.01" y="0.01" xy="0.0"/>
+      <!-- <covariance x="0.01" y="0.01" xy="0.0"/> -->
 
     </include>
 
@@ -548,7 +548,7 @@
       <uri>model://yellow_cone</uri>
       <name>yellow_cone_54</name>
 
-      <covariance x="0.01" y="0.01" xy="0.0"/>
+      <!-- <covariance x="0.01" y="0.01" xy="0.0"/> -->
 
     </include>
 
@@ -558,7 +558,7 @@
       <uri>model://yellow_cone</uri>
       <name>yellow_cone_55</name>
 
-      <covariance x="0.01" y="0.01" xy="0.0"/>
+      <!-- <covariance x="0.01" y="0.01" xy="0.0"/> -->
 
     </include>
 
@@ -568,7 +568,7 @@
       <uri>model://yellow_cone</uri>
       <name>yellow_cone_56</name>
 
-      <covariance x="0.01" y="0.01" xy="0.0"/>
+      <!-- <covariance x="0.01" y="0.01" xy="0.0"/> -->
 
     </include>
 
@@ -578,7 +578,7 @@
       <uri>model://yellow_cone</uri>
       <name>yellow_cone_57</name>
 
-      <covariance x="0.01" y="0.01" xy="0.0"/>
+      <!-- <covariance x="0.01" y="0.01" xy="0.0"/> -->
 
     </include>
 
@@ -588,7 +588,7 @@
       <uri>model://yellow_cone</uri>
       <name>yellow_cone_58</name>
 
-      <covariance x="0.01" y="0.01" xy="0.0"/>
+      <!-- <covariance x="0.01" y="0.01" xy="0.0"/> -->
 
     </include>
 
@@ -598,7 +598,7 @@
       <uri>model://yellow_cone</uri>
       <name>yellow_cone_59</name>
 
-      <covariance x="0.01" y="0.01" xy="0.0"/>
+      <!-- <covariance x="0.01" y="0.01" xy="0.0"/> -->
 
     </include>
 
@@ -608,7 +608,7 @@
       <uri>model://yellow_cone</uri>
       <name>yellow_cone_60</name>
 
-      <covariance x="0.01" y="0.01" xy="0.0"/>
+      <!-- <covariance x="0.01" y="0.01" xy="0.0"/> -->
 
     </include>
 
@@ -618,7 +618,7 @@
       <uri>model://yellow_cone</uri>
       <name>yellow_cone_61</name>
 
-      <covariance x="0.01" y="0.01" xy="0.0"/>
+      <!-- <covariance x="0.01" y="0.01" xy="0.0"/> -->
 
     </include>
 
@@ -628,7 +628,7 @@
       <uri>model://yellow_cone</uri>
       <name>yellow_cone_62</name>
 
-      <covariance x="0.01" y="0.01" xy="0.0"/>
+      <!-- <covariance x="0.01" y="0.01" xy="0.0"/> -->
 
     </include>
 
@@ -638,7 +638,7 @@
       <uri>model://yellow_cone</uri>
       <name>yellow_cone_63</name>
 
-      <covariance x="0.01" y="0.01" xy="0.0"/>
+      <!-- <covariance x="0.01" y="0.01" xy="0.0"/> -->
 
     </include>
 
@@ -648,7 +648,7 @@
       <uri>model://yellow_cone</uri>
       <name>yellow_cone_64</name>
 
-      <covariance x="0.01" y="0.01" xy="0.0"/>
+      <!-- <covariance x="0.01" y="0.01" xy="0.0"/> -->
 
     </include>
 
@@ -658,7 +658,7 @@
       <uri>model://yellow_cone</uri>
       <name>yellow_cone_65</name>
 
-      <covariance x="0.01" y="0.01" xy="0.0"/>
+      <!-- <covariance x="0.01" y="0.01" xy="0.0"/> -->
 
     </include>
 
@@ -668,7 +668,7 @@
       <uri>model://yellow_cone</uri>
       <name>yellow_cone_66</name>
 
-      <covariance x="0.01" y="0.01" xy="0.0"/>
+      <!-- <covariance x="0.01" y="0.01" xy="0.0"/> -->
 
     </include>
 
@@ -678,7 +678,7 @@
       <uri>model://yellow_cone</uri>
       <name>yellow_cone_67</name>
 
-      <covariance x="0.01" y="0.01" xy="0.0"/>
+      <!-- <covariance x="0.01" y="0.01" xy="0.0"/> -->
 
     </include>
 
@@ -688,7 +688,7 @@
       <uri>model://yellow_cone</uri>
       <name>yellow_cone_68</name>
 
-      <covariance x="0.01" y="0.01" xy="0.0"/>
+      <!-- <covariance x="0.01" y="0.01" xy="0.0"/> -->
 
     </include>
 
@@ -698,7 +698,7 @@
       <uri>model://yellow_cone</uri>
       <name>yellow_cone_69</name>
 
-      <covariance x="0.01" y="0.01" xy="0.0"/>
+      <!-- <covariance x="0.01" y="0.01" xy="0.0"/> -->
 
     </include>
 
@@ -708,7 +708,7 @@
       <uri>model://yellow_cone</uri>
       <name>yellow_cone_70</name>
 
-      <covariance x="0.01" y="0.01" xy="0.0"/>
+      <!-- <covariance x="0.01" y="0.01" xy="0.0"/> -->
 
     </include>
 
@@ -718,7 +718,7 @@
       <uri>model://yellow_cone</uri>
       <name>yellow_cone_71</name>
 
-      <covariance x="0.01" y="0.01" xy="0.0"/>
+      <!-- <covariance x="0.01" y="0.01" xy="0.0"/> -->
 
     </include>
 
@@ -728,7 +728,7 @@
       <uri>model://yellow_cone</uri>
       <name>yellow_cone_72</name>
 
-      <covariance x="0.01" y="0.01" xy="0.0"/>
+      <!-- <covariance x="0.01" y="0.01" xy="0.0"/> -->
 
     </include>
 
@@ -738,7 +738,7 @@
       <uri>model://big_cone</uri>
       <name>big_cone_73</name>
 
-      <covariance x="0.01" y="0.01" xy="0.0"/>
+      <!-- <covariance x="0.01" y="0.01" xy="0.0"/> -->
 
     </include>
 
@@ -748,7 +748,7 @@
       <uri>model://big_cone</uri>
       <name>big_cone_74</name>
 
-      <covariance x="0.01" y="0.01" xy="0.0"/>
+      <!-- <covariance x="0.01" y="0.01" xy="0.0"/> -->
 
     </include>
 
@@ -758,7 +758,7 @@
       <uri>model://big_cone</uri>
       <name>big_cone_75</name>
 
-      <covariance x="0.01" y="0.01" xy="0.0"/>
+      <!-- <covariance x="0.01" y="0.01" xy="0.0"/> -->
 
     </include>
 
@@ -768,7 +768,7 @@
       <uri>model://big_cone</uri>
       <name>big_cone_76</name>
 
-      <covariance x="0.01" y="0.01" xy="0.0"/>
+      <!-- <covariance x="0.01" y="0.01" xy="0.0"/> -->
 
     </include>
 

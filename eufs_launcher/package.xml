@@ -38,6 +38,8 @@
   <depend>ros_gz_bridge</depend>
   <depend>ros_gz_image</depend>
   <depend>ros_gz_sim</depend>
+  <depend>vehicle_urdf</depend>
+  <depend>qev3d_ros2_control</depend>
   <depend>sensor_msgs</depend>
   <depend>tf2</depend>
 

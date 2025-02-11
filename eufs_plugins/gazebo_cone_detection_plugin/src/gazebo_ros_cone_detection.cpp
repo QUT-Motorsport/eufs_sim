@@ -32,6 +32,10 @@ void ConeDetectionPlugin::Configure(const gz::sim::Entity &entity,
 
     //IMPORTANT: DO NOT MODIFY
     _ros_node = std::make_shared<rclcpp::Node>("cone_detection_plugin");
+    // Somewhere in your plugin (e.g., in Configure):
+
+    // _gz_pub = std::make_shared<gz::transport::Node>()->Advertise<gz::msgs::ConeDetectionStamped>("~/ground_truth_map");
+
     RCLCPP_DEBUG(_ros_node->get_logger(), "Loading SVCheats");
     RCLCPP_DEBUG(_ros_node->get_logger(), ".noclip");
     // Gmodders are obviously not bound to the laws of Physics. Along with their shapeshifting capabilities, they are able to control their density and weight. They are able to make the gaps between their electrons so wide to the point that they go through solid objects, and they can make themselves so light where they are able to fly through the air. 

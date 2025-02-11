@@ -11,6 +11,7 @@ from launch.conditions import IfCondition
 from launch.launch_description_sources import PythonLaunchDescriptionSource
 from launch.substitutions import LaunchConfiguration
 from launch_ros.actions import Node
+import time
 
 
 def get_argument(context, arg):
@@ -26,18 +27,18 @@ def gen_world(context, *args, **kwargs):
 
     tracks = get_package_share_directory("eufs_tracks")
     racecar = get_package_share_directory("eufs_racecar")
-    # PLUGINS = os.environ.get("GAZEBO_PLUGIN_PATH")
+    PLUGINS = os.environ.get("GAZEBO_PLUGIN_PATH")
     MODELS = os.environ.get("GAZEBO_MODEL_PATH")
     RESOURCES = os.environ.get("GAZEBO_RESOURCE_PATH")
-    # EUFS = os.path.expanduser(os.environ.get("EUFS_MASTER"))
-    # DISTRO = os.environ.get("ROS_DISTRO")
+    EUFS = os.path.expanduser(os.environ.get("EUFS_MASTER"))
+    DISTRO = os.environ.get("ROS_DISTRO")
 
-    # if use_robostack == "true":
-    #     os.environ["GAZEBO_PLUGIN_PATH"] = EUFS + "/install/eufs_plugins:" + PLUGINS
-    # else:
-    #     os.environ["GAZEBO_PLUGIN_PATH"] = (
-    #         EUFS + "/install/eufs_plugins:" + "/opt/ros/" + DISTRO
-    #     )
+    if use_robostack == "true":
+        os.environ["GAZEBO_PLUGIN_PATH"] = EUFS + "/install/eufs_plugins:" + PLUGINS
+    else:
+        os.environ["GAZEBO_PLUGIN_PATH"] = (
+            EUFS + "/install/eufs_plugins:" + "/opt/ros/" + DISTRO
+        )
     os.environ["GAZEBO_MODEL_PATH"] = tracks + "/models:" + str(MODELS)
     os.environ["GAZEBO_RESOURCE_PATH"] = (
         tracks
@@ -59,7 +60,7 @@ def gen_world(context, *args, **kwargs):
     # params_file = join(
     #     get_package_share_directory("eufs_config"), "config", "pluginUserParams.yaml"
     # )
-
+    print("Sigma Online")
     return [
         IncludeLaunchDescription(
             launch_description_source=PythonLaunchDescriptionSource(gazebo_launch),
@@ -67,7 +68,10 @@ def gen_world(context, *args, **kwargs):
                 ("verbose", "false"),
                 ("pause", "false"),
                 ("gui", gui),
-                ("world", world_path),
+                ("gz_args", "/home/liam/QUTMS/eufs_sim/eufs_tracks/worlds/small_track.world"),
+                ("urdf_model", "qev-3d.urdf.xacro"),
+                ("base_frame", "base_link"),
+                ("display_car", "true"),
                 # ("params_file", params_file),
             ],
         ),
@@ -78,6 +82,9 @@ def spawn_car(context, *args, **kwargs):
     # get x,y,z,roll,pitch,yaw from track csv file
     tracks = get_package_share_directory("eufs_tracks")
     track = get_argument(context, "track")
+    urdf_model = get_argument(context, "urdf_model")
+    base_frame = get_argument(context, "base_frame")
+    display_car = get_argument(context, "display_car")
 
     with open(join(tracks, "csv", track + ".csv"), "r") as f:
         # car position is last line of csv file
@@ -89,66 +96,76 @@ def spawn_car(context, *args, **kwargs):
         yaw = car_pos[3]
 
     robot_name = get_argument(context, "robot_name")
-    vehicle_model_config = get_argument(context, "vehicle_model_config")
-    base_frame = get_argument(context, "base_frame")
-    enable_camera = get_argument(context, "enable_camera")
-    enable_lidar = get_argument(context, "enable_lidar")
-    enable_laserscan = get_argument(context, "enable_laserscan")
-
-    vehicle_config = join(
-        get_package_share_directory("eufs_config"),
-        "config",
-        vehicle_model_config,
-    )
+    # vehicle_model_config = get_argument(context, "vehicle_model_config")
+    # vehicle_config = join(
+    #     get_package_share_directory("eufs_config"),
+    #     "config",
+    #     vehicle_model_config,
+    # )
     xacro_path = join(
-        get_package_share_directory("eufs_racecar"),
+        get_package_share_directory("vehicle_urdf"),
         "urdf",
-        "robot.urdf.xacro",
+        urdf_model,
     )
     urdf_path = join(
-        get_package_share_directory("eufs_racecar"),
+        get_package_share_directory("vehicle_urdf"),
         "urdf",
-        "robot.urdf",
+        "processed.urdf",
     )
-
-    if not isfile(urdf_path):
-        os.mknod(urdf_path)
 
     doc = xacro.process_file(
         xacro_path,
         mappings={
-            "vehicle_config": vehicle_config,
             "base_frame": base_frame,
-            "enable_camera": enable_camera,
-            "enable_lidar": enable_lidar,
-            "enable_laserscan": enable_laserscan,
+            "display_car": display_car,
         },
     )
-    out = xacro.open_output(urdf_path)
-    out.write(doc.toprettyxml(indent="  "))
+    # out = xacro.open_output(urdf_path)
+    urdf_xml = doc.toprettyxml(indent="  ")
+
+    with open(urdf_path, "w") as f:
+        f.write(urdf_xml)
 
     with open(urdf_path, "r") as urdf_file:
         robot_description = urdf_file.read()
+    
+    # very important, trust
+    time.sleep(1)
 
     return [
         Node(
+            package='tf2_ros',
+            executable='static_transform_publisher',
+            name='track_to_chassis_broadcaster',
+            output='screen',
+            arguments=[
+                 x,   y,  '0',    # xyz
+                '0', '0', yaw,    # roll, pitch, yaw
+                'track', 'chassis'
+            ]
+        ),
+        Node(
+            package="tf2_ros",
+            executable="static_transform_publisher",
+            name="track_to_base_broadcaster",
+            arguments=[
+                "0", "0", "0",      # x y z
+                "0", "0", "0",      # roll pitch yaw
+                "track", "base_link"
+            ]
+        ),
+        Node(
             name="spawn_robot",
-            package="gazebo_ros",
-            executable="spawn_entity.py",
+            package="ros_gz_sim",
+            executable="create",
             output="screen",
             arguments=[
-                "-entity",
-                robot_name,
-                "-file",
-                urdf_path,
-                "-x",
-                x,
-                "-y",
-                y,
-                "-Y",
-                yaw,
-                "-spawn_service_timeout",
-                "60.0",
+                "-entity", robot_name,
+                "-file", urdf_path,
+                "-x", x,
+                "-y", y,
+                "-Y", yaw,
+                "-spawn_service_timeout", "60.0",
                 "--ros-args",
                 "--log-level",
                 "warn",
@@ -163,7 +180,7 @@ def spawn_car(context, *args, **kwargs):
                 {
                     "robot_description": robot_description,
                     "rate": 200,
-                    "use_sim_time": LaunchConfiguration("use_sim_time"),
+                    # "use_sim_time": LaunchConfiguration("use_sim_time"),
                     "source_list": ["joint_states/steering"],
                 }
             ],
@@ -178,7 +195,7 @@ def spawn_car(context, *args, **kwargs):
                 {
                     "robot_description": robot_description,
                     "rate": 200,
-                    "use_sim_time": LaunchConfiguration("use_sim_time"),
+                    # "use_sim_time": LaunchConfiguration("use_sim_time"),
                 }
             ],
             arguments=["--ros-args", "--log-level", "warn"],
@@ -196,7 +213,7 @@ def generate_launch_description():
         config_package, "ui", "control.perspective",
     )
     bridge_params_file = join(
-        config_package, "config", "bridge_params.yaml"
+        config_package, "config", "bridgeParams.yaml"
     )
 
     return LaunchDescription(
@@ -308,6 +325,6 @@ def generate_launch_description():
             # launch the gazebo world
             OpaqueFunction(function=gen_world),
             # launch the car
-            # OpaqueFunction(function=spawn_car),
+            OpaqueFunction(function=spawn_car),
         ]
     )
