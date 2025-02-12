@@ -67,16 +67,19 @@ void RaceCarPlugin::Configure(
     // Currently unused
     (void)sdf;
     (void)eventMgr;
-    
-    RCLCPP_DEBUG(_rosnode->get_logger(), "Loading RaceCarPlugin");  
 
     // Storage for later
     this->_entity = entity;
     this->_model = gz::sim::Model(entity);
     // error checking
     if (!this->_model.Valid(ecm)) {
-    RCLCPP_ERROR(rclcpp::get_logger("race_car_plugin"), "Invalid model entity. Plugin won't run.");
+        RCLCPP_ERROR(rclcpp::get_logger("race_car_plugin"), "Invalid model entity. Plugin won't run.");
         return;
+    }
+
+    // Ensure that ROS2 is initialized; if not, initialize it.
+    if (!rclcpp::ok()) {
+        rclcpp::init(0, nullptr);
     }
 
     this->_rosnode = std::make_shared<rclcpp::Node>("race_car_plugin_node");
@@ -241,7 +244,7 @@ void RaceCarPlugin::initParams() {
 
     // Vehicle model
     std::string vehicle_model_    = _rosnode->declare_parameter("vehicle_model", "DynamicBicycle");
-    std::string vehicle_yaml_name = _rosnode->declare_parameter("vehicle_config", "null");
+    std::string vehicle_yaml_name = _rosnode->declare_parameter("vehicle_config", "/home/liam/QUTMS/install/eufs_config/share/eufs_config/config/configDry.yaml");
     if (vehicle_yaml_name == "null") {
         RCLCPP_FATAL(_rosnode->get_logger(), "gazebo_ros_race_car plugin missing <yamlConfig>, cannot proceed");
         return;
@@ -263,7 +266,7 @@ void RaceCarPlugin::initParams() {
     // _right_steering_joint = _model->GetJoint(rightSteeringJointName);
 
     // Noise
-    std::string noise_yaml_name = _rosnode->declare_parameter("noise_config", "null");
+    std::string noise_yaml_name = _rosnode->declare_parameter("noise_config", "/home/liam/QUTMS/install/eufs_config/share/eufs_config/config/motionNoise.yaml");
     if (noise_yaml_name == "null") {
         RCLCPP_FATAL(_rosnode->get_logger(), "gazebo_ros_race_car plugin missing <noise_config>, cannot proceed");
         return;

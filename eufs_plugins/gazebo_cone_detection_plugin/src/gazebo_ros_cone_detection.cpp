@@ -84,6 +84,7 @@ void ConeDetectionPlugin::Configure(const gz::sim::Entity &entity,
 void ConeDetectionPlugin::initParams(gz::sim::EntityComponentManager &ecm) {
     _map_frame = _ros_node->declare_parameter("map_frame", "map");
     _base_frame = _ros_node->declare_parameter("base_frame", "base_link");
+    std::string track_model_name = _ros_node->declare_parameter("track_model", "track");
 
     _track_model = eufs_plugins::getModel(_world, *_ecm, "track", _ros_node->get_logger());
     _car_link = eufs_plugins::get_link(_model, *_ecm, _base_frame, _ros_node->get_logger());

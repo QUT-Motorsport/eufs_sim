@@ -28,14 +28,14 @@ inline gz::sim::Model getModel(gz::sim::World &world,
     {
         auto modelEntity = world.ModelByName(ecm, name);
         gz::sim::Model model(modelEntity);
-        if (!model.Valid(ecm)) 
-        {
-            if (logger) 
-            {
-                RCLCPP_FATAL(*logger, "Could not find required model <%s>. Exiting.", name.c_str());
-            }
-            throw std::runtime_error("Model not found: " + name);
-        }
+        // if (model == nullptr) 
+        // {
+        //     if (logger) 
+        //     {
+        //         RCLCPP_FATAL(*logger, "Could not find required model <%s>. Exiting.", name.c_str());
+        //     }
+        //     throw std::runtime_error("Model not found: " + name);
+        // }
         return model;
     }
 

@@ -3,6 +3,10 @@ cmake_minimum_required(VERSION 3.5)
 add_library(gazebo_ros_race_car SHARED
   src/gazebo_ros_race_car.cpp)
 
+ament_export_include_directories(
+  include
+)
+
 ament_target_dependencies(gazebo_ros_race_car
   # "gazebo_dev"
   "ros_gz"
@@ -29,7 +33,9 @@ target_include_directories(gazebo_ros_race_car PUBLIC ${PROJECT_SOURCE_DIR}/incl
 target_link_libraries(gazebo_ros_race_car eufs_models::eufs_models)
 ament_export_libraries(gazebo_ros_race_car)
 
+
 install(TARGETS gazebo_ros_race_car
+  DESTINATION include
   ARCHIVE DESTINATION lib
   LIBRARY DESTINATION lib
   RUNTIME DESTINATION lib

@@ -57,9 +57,9 @@ def gen_world(context, *args, **kwargs):
     gazebo_launch = join(
         get_package_share_directory("ros_gz_sim"), "launch", "gz_sim.launch.py"
     )
-    # params_file = join(
-    #     get_package_share_directory("eufs_config"), "config", "pluginUserParams.yaml"
-    # )
+    params_file = join(
+        get_package_share_directory("eufs_config"), "config", "pluginUserParams.yaml"
+    )
     print("Sigma Online")
     return [
         IncludeLaunchDescription(
@@ -68,11 +68,11 @@ def gen_world(context, *args, **kwargs):
                 ("verbose", "false"),
                 ("pause", "false"),
                 ("gui", gui),
-                ("gz_args", "/home/liam/QUTMS/eufs_sim/eufs_tracks/worlds/small_track.world"),
+                ("gz_args", track),
                 ("urdf_model", "qev-3d.urdf.xacro"),
                 ("base_frame", "base_link"),
                 ("display_car", "true"),
-                # ("params_file", params_file),
+                ("params_file", params_file),
             ],
         ),
     ]
@@ -96,12 +96,12 @@ def spawn_car(context, *args, **kwargs):
         yaw = car_pos[3]
 
     robot_name = get_argument(context, "robot_name")
-    # vehicle_model_config = get_argument(context, "vehicle_model_config")
-    # vehicle_config = join(
-    #     get_package_share_directory("eufs_config"),
-    #     "config",
-    #     vehicle_model_config,
-    # )
+    vehicle_model_config = get_argument(context, "vehicle_model_config")
+    vehicle_config = join(
+        get_package_share_directory("eufs_config"),
+        "config",
+        vehicle_model_config,
+    )  
     xacro_path = join(
         get_package_share_directory("vehicle_urdf"),
         "urdf",
