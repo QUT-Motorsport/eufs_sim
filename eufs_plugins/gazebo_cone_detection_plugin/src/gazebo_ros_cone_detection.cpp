@@ -1,5 +1,3 @@
-#pragma once
-
 #include "gazebo_cone_detection_plugin/gazebo_ros_cone_detection.hpp"
 #include <gz/plugin/Register.hh>
 

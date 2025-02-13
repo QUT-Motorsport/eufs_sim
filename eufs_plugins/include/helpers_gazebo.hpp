@@ -24,6 +24,7 @@ inline gz::sim::Model getModel(gz::sim::World &world,
                         std::string name,
                         std::optional<const rclcpp::Logger> logger = std::nullopt) 
     {
+        (void)logger;
         auto modelEntity = world.ModelByName(ecm, name);
         gz::sim::Model model(modelEntity);
         // this needs to be updated.
