@@ -16,11 +16,8 @@
 #define GAZEBO_PLUGINS__GAZEBO_ROS_LIDAR_HPP_
 
 // Gazebo Includes
-// #include <gazebo/common/Plugin.hh>
-// #include <gz/plugin/Register.hh>
 #include <gz/sensors/Lidar.hh>
 #include <sdf/Sensor.hh>
-// #include <gz/sensors/SensorPlugin.hh>
 
 // C++ includes
 #include <memory>

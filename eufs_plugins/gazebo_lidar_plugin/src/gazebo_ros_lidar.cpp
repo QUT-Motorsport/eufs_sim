@@ -12,6 +12,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+// This file was a copy of the ROS lidar with tiny modifactions.
+// It has been update for the new version where we import the sensor
+// and you can make modifications to the sensor in this file.
+// At present, this file only renames the sensor with all the old
+// code commented out.
+
 // Header
 #include <gazebo_lidar_plugin/gazebo_ros_lidar.hpp>
 
@@ -22,18 +28,11 @@
 #include <gz/sensors/Sensor.hh>
 #include <gz/sim/System.hh>
 #include <gz/common/Console.hh>
-// #include <gazebo_ros/conversions/sensor_msgs.hpp>
-// #include <gazebo_ros/node.hpp>
-// #include <gazebo_ros/utils.hpp>
 
 //ROS2 plugins
-// #include <rclcpp/rclcpp.hpp>
 
 //C++ Includes
-// #include <algorithm>
-// #include <limits>
 #include <memory>
-// #include <string>
 #include <iostream>
 
 namespace gazebo_plugins {

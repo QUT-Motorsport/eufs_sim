@@ -34,7 +34,6 @@
 #include "rclcpp/rclcpp.hpp"
 #include "ackermann_msgs/msg/ackermann_drive_stamped.hpp"
 #include "std_msgs/msg/float32.hpp"
-// #include "driverless_msgs/msg/state.hpp"
 #include "geometry_msgs/msg/pose_with_covariance_stamped.hpp"
 #include "geometry_msgs/msg/twist_with_covariance_stamped.hpp"
 #include "geometry_msgs/msg/vector3.hpp"
@@ -42,18 +41,8 @@
 #include "sensor_msgs/msg/joint_state.hpp"
 #include <tf2_ros/transform_broadcaster.h>
 #include <std_srvs/srv/trigger.hpp>
-// #include <tf2/transform_datatypes.h>
-// #include <tf2/utils.h>
-// #include "tf2_geometry_msgs/tf2_geometry_msgs.hpp"
 
 // Gazebo Includes
-// #include <gazebo/common/Plugin.hh>
-// #include <gazebo/common/Time.hh>
-// #include <gazebo/physics/physics.hh>
-// #include <gazebo/transport/transport.hh>
-// #include <gazebo_ros/node.hpp>
-// #include <gz/plugin2/gz/plugin.hh>
-// #include <gz/physics7/gz/physics.hh>
 #include <gz/plugin/Register.hh>
 #include <gz/sim/System.hh>
 #include <gz/sim/Model.hh>
@@ -66,7 +55,6 @@
 
 // Local includes
 #include "eufs_models/eufs_models.hpp"
-// #include "helpers_gazebo.hpp"
 #include "helpers_ros.hpp"
 
 
@@ -170,14 +158,10 @@ private:
     /// Plugin entity references
     gz::sim::Entity _entity{gz::sim::kNullEntity};
     gz::sim::Model  _model{gz::sim::kNullEntity};
-    // gz::sim::Entity _model;
-    // gz::sim::Entity _world; 
 
     /// Joints for steering
     gz::sim::Entity _left_steering_joint{gz::sim::kNullEntity};
     gz::sim::Entity _right_steering_joint{gz::sim::kNullEntity};
-    // gz::sim::Entity _left_steering_joint;
-    // gz::sim::Entity _right_steering_joint;
 
     /// Drive wheel joints
     gz::sim::Entity _left_rear_wheel_joint{gz::sim::kNullEntity};
@@ -192,14 +176,11 @@ private:
     /// eufs vehicle model + noise models
     std::unique_ptr<eufs::models::VehicleModel> _vehicle;
     std::unique_ptr<eufs::models::Noise> _noise;
-    // eufs::models::VehicleModelPtr _vehicle;
 
     /// Internal state, offsets, etc.
     eufs::models::State _state;
     eufs::models::Input _des_input, _act_input;
     gz::math::Pose3d _offset; ///< Pose offset from SDF or zero
-    // std::unique_ptr<StateMachine> _state_machine;
-    // driverless_msgs::msg::State _as_state;
     
     // Former references
     // gz::transport::Node _transport_node;
@@ -216,8 +197,6 @@ private:
     /// Steering rate limit, etc.
     double _steering_lock_time{1.0};
     double _max_steering_rate{0.0};
-    // double _max_steering_rate, _steering_lock_time;
-    // int counter = 0;
 
     /// Command mode for the plugin
     enum CommandMode { acceleration, velocity };
@@ -237,7 +216,6 @@ private:
 
     /// Time-based control delay
     double _control_delay{0.5};
-    // double _control_delay;
 
     /// Last command message
     ackermann_msgs::msg::AckermannDriveStamped _last_cmd;

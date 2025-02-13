@@ -9,6 +9,7 @@ bool has_subscribers(rclcpp::PublisherBase::SharedPtr publisher) {
     return is_initalised(publisher) && publisher->get_subscription_count() > 0;
 }
 
+// I'm not sure what this does and it didn't need updating.
 std::vector<double> to_quaternion(std::vector<double> &euler) {
     // Abbreviations for the various angular functions
     double cy = cos(euler[0] * 0.5);

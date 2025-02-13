@@ -84,9 +84,6 @@ void RaceCarPlugin::Configure(
 
     this->_rosnode = std::make_shared<rclcpp::Node>("race_car_plugin_node");
     RCLCPP_INFO(this->_rosnode->get_logger(), "Created ROS node inside RaceCarPlugin.");
-    
-    // _world = _model->GetWorld();
-    // _tf_br = std::make_unique<tf2_ros::TransformBroadcaster>(_rosnode);
 
     // Initialize parameters
     this->initParams();
@@ -141,10 +138,6 @@ void RaceCarPlugin::Configure(
     this->_pub_joint_state =
       this->_rosnode->create_publisher<sensor_msgs::msg::JointState>("/joint_states/steering", 1);
 
-    // Driverless state
-    // _sub_state = _rosnode->create_subscription<driverless_msgs::msg::State>(
-    //     "/system/as_status", 1, std::bind(&RaceCarPlugin::updateState, this, std::placeholders::_1));
-
     // ROS Subscriptions
     _sub_cmd = _rosnode->create_subscription<ackermann_msgs::msg::AckermannDriveStamped>(
         "/control/driving_command", 1, std::bind(&RaceCarPlugin::onCmd, this, std::placeholders::_1));
@@ -159,13 +152,6 @@ void RaceCarPlugin::Configure(
 
     // Create a TF broadcaster if needed
     this->_tf_br = std::make_unique<tf2_ros::TransformBroadcaster>(this->_rosnode);
-
-    // Connect to Gazebo
-    // _update_connection = gazebo::event::Events::ConnectWorldUpdateBegin(std::bind(&RaceCarPlugin::update, this));
-    // _last_sim_time = _world->SimTime();
-
-    // _max_steering_rate = (_vehicle->getParam().input_ranges.delta.max - _vehicle->getParam().input_ranges.delta.min) /
-    //                      _steering_lock_time;
 
     // locate steering joints
     auto leftJointName  = this->_model.Name(ecm) + "::left_steering_hinge_joint";
@@ -259,12 +245,6 @@ void RaceCarPlugin::initParams() {
         return;
     }
 
-    // Steering joints
-    // std::string leftSteeringJointName = _model->GetName() + "::left_steering_hinge_joint";
-    // _left_steering_joint = _model->GetJoint(leftSteeringJointName);
-    // std::string rightSteeringJointName = _model->GetName() + "::right_steering_hinge_joint";
-    // _right_steering_joint = _model->GetJoint(rightSteeringJointName);
-
     // Noise
     std::string noise_yaml_name = _rosnode->declare_parameter("noise_config", "/home/liam/QUTMS/install/eufs_config/share/eufs_config/config/motionNoise.yaml");
     if (noise_yaml_name == "null") {
@@ -279,14 +259,6 @@ void RaceCarPlugin::initParams() {
 }
 
 void RaceCarPlugin::setPositionFromWorld() {
-    // _offset = _model->WorldPose();
-    // You can't call _model->WorldPose() directly in gz-sim the way you used to.
-    // to get the initial SDF <pose>, you can read from:
-    //   ecm.Component<gz::sim::components::Pose>(this->_entity)
-
-    // RCLCPP_DEBUG(_rosnode->get_logger(), "Got starting offset %f %f %f", _offset.Pos()[0], _offset.Pos()[1],
-    //              _offset.Pos()[2]);
-
     // will probably need to change this.
     _offset = gz::math::Pose3d(0,0,0, 0,0,0);
 
@@ -311,26 +283,6 @@ void RaceCarPlugin::setPositionFromWorld() {
 
 bool RaceCarPlugin::resetVehiclePosition(std::shared_ptr<std_srvs::srv::Trigger::Request>,
                                          std::shared_ptr<std_srvs::srv::Trigger::Response> response) {
-    // _state.x = 0.0;
-    // _state.y = 0.0;
-    // _state.z = 0.0;
-    // _state.yaw = 0.0;
-    // _state.v_x = 0.0;
-    // _state.v_y = 0.0;
-    // _state.v_z = 0.0;
-    // _state.r_x = 0.0;
-    // _state.r_y = 0.0;
-    // _state.r_z = 0.0;
-    // _state.a_x = 0.0;
-    // _state.a_y = 0.0;
-    // _state.a_z = 0.0;
-
-    // const ignition::math::Vector3d vel(0.0, 0.0, 0.0);
-    // const ignition::math::Vector3d angular(0.0, 0.0, 0.0);
-
-    // _model->SetWorldPose(_offset);
-    // _model->SetAngularVel(angular);
-    // _model->SetLinearVel(vel);
 
     // Reset internal state
     _state = eufs::models::State();
@@ -339,12 +291,6 @@ bool RaceCarPlugin::resetVehiclePosition(std::shared_ptr<std_srvs::srv::Trigger:
 
 void RaceCarPlugin::returnCommandMode(std::shared_ptr<std_srvs::srv::Trigger::Request>,
                                       std::shared_ptr<std_srvs::srv::Trigger::Response> response) {
-    // std::string command_mode_str;
-    // if (_command_mode == acceleration) {
-    //     command_mode_str = "acceleration";
-    // } else {
-    //     command_mode_str = "velocity";
-    // }    
     std::string command_mode_str = (_command_mode == acceleration) ? "acceleration" : "velocity";
 
     response->success = true;
@@ -352,23 +298,6 @@ void RaceCarPlugin::returnCommandMode(std::shared_ptr<std_srvs::srv::Trigger::Re
 }
 
 void RaceCarPlugin::setModelState(gz::sim::EntityComponentManager &ecm) {
-    
-    // double yaw = _offset.Rot().Yaw() + _state.yaw;
-    // double x   = _offset.Pos().X()   + _state.x * cos(_offset.Rot().Yaw()) - _state.y * sin(_offset.Rot().Yaw());
-    // double y   = _offset.Pos().Y()   + _state.x * sin(_offset.Rot().Yaw()) + _state.y * cos(_offset.Rot().Yaw());
-    // double z   = _state.z;
-
-    // gz::math::Pose3d pose(x, y, z, 0.0, 0.0, yaw);
-
-    // // linear velocity
-    // double vx = _state.v_x * cos(yaw) - _state.v_y * sin(yaw);
-    // double vy = _state.v_x * sin(yaw) + _state.v_y * cos(yaw);
-
-    // std::vector<double> linVel(vx, vy);
-    // gz::math::Vector3d angVel(0.0, 0.0, _state.r_z);
-
-    // gz::sim::Joint* leftJoint = (gz::sim::Joint*)this->_left_steering_joint;
-    // leftJoint->SetVelocity(ecm, linVel);
     //===============================================================================
     double mass = 150; // Hard code, store variables in car information and read here
     double wheelRadius = 0.2032;                    
@@ -414,10 +343,6 @@ RaceCarPlugin::getWheelTwist(const std::vector<double> &speeds, const double &an
     wheel_twist.twist.twist.linear.x  = avg_wheel_speed;
     wheel_twist.twist.twist.angular.z =
       avg_wheel_speed * std::tan(angle) / _vehicle->getParam().kinematic.axle_width;
-
-    // wheel_twist.header.stamp.sec = _last_sim_time.sec;
-    // wheel_twist.header.stamp.nanosec = _last_sim_time.nsec;
-    // wheel_twist.header.frame_id = _base_frame;
 
     wheel_twist.header.stamp = this->_rosnode->now();
     wheel_twist.header.frame_id = _base_frame;
@@ -562,16 +487,7 @@ void RaceCarPlugin::publishVehicleMotion() {
 }
 
 void RaceCarPlugin::publishTf() {
-    // Base->Odom
-    // Position
-    // tf2::Transform base_to_odom;
     eufs::models::State noise_tf_state = _noise->applyNoise(_state);
-    // base_to_odom.setOrigin(tf2::Vector3(noise_tf_state.x, noise_tf_state.y, 0.0));
-
-    // Orientation
-    // tf2::Quaternion base_odom_q;
-    // base_odom_q.setRPY(0.0, 0.0, noise_tf_state.yaw);
-    // base_to_odom.setRotation(base_odom_q);
 
     // Send TF
     geometry_msgs::msg::TransformStamped transform_stamped;
@@ -589,24 +505,10 @@ void RaceCarPlugin::publishTf() {
 
     this->_tf_br->sendTransform(transform_stamped);
 
-    // Odom->Map
-    // Position
-    // tf2::Transform odom_to_map;
-    // odom_to_map.setOrigin(tf2::Vector3(0.0, 0.0, 0.0));
-
-    // Orientation
-    // tf2::Quaternion odom_map_q;
-    // odom_map_q.setRPY(0.0, 0.0, 0.0);
-    // odom_to_map.setRotation(odom_map_q);
-
-    // Send TF
-    // transform_stamped.header.stamp.sec = _last_sim_time.sec;
-    // transform_stamped.header.stamp.nanosec = _last_sim_time.nsec;
     geometry_msgs::msg::TransformStamped map_to_odom;
     map_to_odom.header.stamp    = this->_rosnode->now();
     map_to_odom.header.frame_id = _map_frame;
     map_to_odom.child_frame_id  = _odom_frame;
-    // tf2::convert(odom_to_map, transform_stamped.transform);
 
     // Identity: zero translation, zero rotation
     map_to_odom.transform.translation.x = 0.0;
@@ -625,15 +527,6 @@ void RaceCarPlugin::update(gz::sim::EntityComponentManager &ecm,
                            const gz::sim::UpdateInfo &info,
                            double dt)
 {
-    // Check against update rate
-    // gazebo::common::Time curTime = _world->SimTime();
-    // double dt = calc_dt(_last_sim_time, curTime);
-    // if (dt < (1 / _update_rate)) {
-    //     return;
-    // }
-
-    // _last_sim_time = curTime;
-
     _des_input.acc   = this->_last_cmd.drive.acceleration;
     _des_input.vel   = this->_last_cmd.drive.speed;
     _des_input.delta = this->_last_cmd.drive.steering_angle * M_PI / 180;
@@ -648,29 +541,12 @@ void RaceCarPlugin::update(gz::sim::EntityComponentManager &ecm,
     }
 
     // Make sure steering rate is within limits
-    // _act_input.delta += (_des_input.delta - _act_input.delta >= 0 ? 1 : -1) *
-    //                     std::min(_max_steering_rate * dt, std::abs(_des_input.delta - _act_input.delta));
-    // Ensure vehicle can drive
-    // if (_as_state.state != driverless_msgs::msg::State::DRIVING ||
-    //     (_world->SimTime() - _last_cmd_time).Double() > 0.5) {
-    //     _act_input.acc = -100.0;
-    //     _act_input.vel = 0.0;
-    //     _act_input.delta = 0.0;
-    // }
-
     double desired = this->_des_input.delta;
     double actual  = this->_act_input.delta;
     double diff    = desired - actual;
     double sign    = (diff >= 0.0) ? 1.0 : -1.0;
     double step    = std::min(_max_steering_rate * dt, std::abs(diff));
     this->_act_input.delta = actual + sign * step;
-
-    // counter++;
-    // if (counter == 100) {
-    //     RCLCPP_DEBUG(_rosnode->get_logger(), "steering desired: %.2f, desired: %.2f", _des_input.delta,
-    //                  _act_input.delta);
-    //     counter = 0;
-    // }
 
     // Update z value from simulation
     // This allows the state to have the most up to date value of z. Without this
@@ -686,18 +562,6 @@ void RaceCarPlugin::update(gz::sim::EntityComponentManager &ecm,
     // Now apply the new pose, velocities to the actual gz-sim model
     this->setModelState(ecm);
 
-    // _left_steering_joint->SetPosition(0, _act_input.delta);
-    // _right_steering_joint->SetPosition(0, _act_input.delta);
-    // joint states o7
-    // sensor_msgs::msg::JointState joint_state;
-    // joint_state.header.stamp.sec = _last_sim_time.sec;
-    // joint_state.header.stamp.nanosec = _last_sim_time.nsec;
-    // joint_state.name.push_back(_left_steering_joint->GetName());
-    // joint_state.name.push_back(_right_steering_joint->GetName());
-    // joint_state.position.push_back(_left_steering_joint->Position());
-    // joint_state.position.push_back(_right_steering_joint->Position());
-    // _pub_joint_state->publish(joint_state);
-
     // Publish occasionally
     double currentSimTimeSec = std::chrono::duration<double>(info.simTime).count();
     double timeSinceLastPub = currentSimTimeSec - this->_time_last_published;
@@ -712,8 +576,6 @@ void RaceCarPlugin::update(gz::sim::EntityComponentManager &ecm,
 
     this->applySteeringJointPositions(ecm);
 }
-
-// void RaceCarPlugin::updateState(const driverless_msgs::msg::State::SharedPtr msg) { _as_state = *msg; }
 
 void RaceCarPlugin::applySteeringJointPositions(gz::sim::EntityComponentManager &ecm)
 {
@@ -744,25 +606,12 @@ void RaceCarPlugin::applySteeringJointPositions(gz::sim::EntityComponentManager 
   this->_pub_joint_state->publish(joint_state);
 }
 
-
-// void RaceCarPlugin::onCmd(const ackermann_msgs::msg::AckermannDriveStamped::SharedPtr msg) {
-//     RCLCPP_DEBUG(_rosnode->get_logger(), "Last time: %f", (_world->SimTime() - _last_cmd_time).Double());
-//     while ((_world->SimTime() - _last_cmd_time).Double() < _control_delay) {
-//         RCLCPP_DEBUG(_rosnode->get_logger(), "Waiting until control delay is over");
-//     }
-//     _last_cmd.drive.acceleration = msg->drive.acceleration;
-//     _last_cmd.drive.speed = msg->drive.speed;
-//     _last_cmd.drive.steering_angle = msg->drive.steering_angle;
-//     _last_cmd_time = _world->SimTime();
-// }
 void RaceCarPlugin::onCmd(const ackermann_msgs::msg::AckermannDriveStamped::SharedPtr msg) {
     // We store the command, so that next PostUpdate uses it
     _last_cmd = *msg;
-    // Remember the time
+    // Remember the time, try not to forget.
     _last_cmd_time = this->_last_sim_time;
 }
-
-// GZ_REGISTER_MODEL_PLUGIN(RaceCarPlugin)  
 
 }  // namespace eufs_plugins
 }  // namespace gazebo_plugins
@@ -775,7 +624,5 @@ GZ_ADD_PLUGIN(
   gazebo_plugins::eufs_plugins::RaceCarPlugin::ISystemConfigure,
   gazebo_plugins::eufs_plugins::RaceCarPlugin::ISystemPreUpdate
 )
-
-// GZ_PLUGIN_ALIAS("RaceCarPlugin")
 
 //=============================================================================

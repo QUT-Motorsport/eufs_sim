@@ -7,14 +7,12 @@
 #include <gz/sim/World.hh>
 #include <gz/sim/Model.hh>
 #include <gz/sim/Link.hh>
-// #include <gz/math/Duration.hh>
 #include <chrono>
 #include <rclcpp/rclcpp.hpp>
 
 namespace gazebo_plugins {
 namespace eufs_plugins {
 
-// double calc_dt(gazebo::common::Time start, gazebo::common::Time end) { return (end - start).Double(); }
 inline double calc_dt(const std::chrono::steady_clock::time_point &start,
                       const std::chrono::steady_clock::time_point &end)
 {
@@ -28,6 +26,7 @@ inline gz::sim::Model getModel(gz::sim::World &world,
     {
         auto modelEntity = world.ModelByName(ecm, name);
         gz::sim::Model model(modelEntity);
+        // this needs to be updated.
         // if (model == nullptr) 
         // {
         //     if (logger) 
