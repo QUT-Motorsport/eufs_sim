@@ -16,7 +16,7 @@ import time
 
 def get_argument(context, arg):
     return LaunchConfiguration(arg).perform(context)
-
+    
 
 def gen_world(context, *args, **kwargs):
     print("Generating World... ")

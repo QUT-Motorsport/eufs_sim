@@ -59,7 +59,7 @@ void ConeDetectionPlugin::Configure(const gz::sim::Entity &entity,
             _ros_node->create_publisher<driverless_msgs::msg::ConeDetectionStamped>(("vision/cone_detection"), 1);
     }
 
-    if (_simulate_slam) {
+    if (true) { //fix later
         _slam_global_pub =
             _ros_node->create_publisher<driverless_msgs::msg::ConeDetectionStamped>(("slam/global_map"), 1);
         _slam_local_pub =
@@ -97,7 +97,7 @@ void ConeDetectionPlugin::initParams(gz::sim::EntityComponentManager &ecm) {
     // Plugin behaviour flags.
     _pub_gt = _ros_node->declare_parameter("publish_ground_truth", false);
     _simulate_perception = _ros_node->declare_parameter("simulate_perception", false);
-    _simulate_slam = _ros_node->declare_parameter("simulate_slam", false);
+    _simulate_slam = _ros_node->declare_parameter("simulate_slam", true);
 
     // Does what it says it does based on information in the ros node
     _lidar_config = populate_sensor_config("lidar", _ros_node);
@@ -182,14 +182,14 @@ void ConeDetectionPlugin::publishCameraDetection(gz::sim::EntityComponentManager
  */
 void ConeDetectionPlugin::publishSLAM(gz::sim::EntityComponentManager &ecm) {
     auto curr_time = std::chrono::steady_clock::now();
-    if (std::chrono::duration<double>(curr_time - _last_slam_update).count() < (1.0 / _slam_update_rate)) {
-        return;
-    }
+    // if (std::chrono::duration<double>(curr_time - _last_slam_update).count() < (1.0 / _slam_update_rate)) {
+    //     return;
+    // } fix later
     _last_slam_update = curr_time;
 
     auto ground_truth_track = get_ground_truth_track(_track_model, ecm, _map_frame, _ros_node->get_logger());
 
-    if (has_subscribers(_slam_global_pub) || has_subscribers(_slam_local_pub)) {
+    if (1) { //fix later has_subscribers(_slam_global_pub) || has_subscribers(_slam_local_pub)
         if (_initial_slam.cones_with_cov.empty()) {
             _initial_slam = get_noisy_global_map(_slam_config, ground_truth_track);
         }
@@ -203,6 +203,7 @@ void ConeDetectionPlugin::publishSLAM(gz::sim::EntityComponentManager &ecm) {
             auto noisy_local_map = get_noisy_local_map(_slam_config, _car_link.WorldPose(ecm).value(), _initial_slam);
             _slam_local_pub->publish(noisy_local_map);
         }
+        RCLCPP_INFO(_ros_node->get_logger(), "a"); //fix later
     }
 }
 
