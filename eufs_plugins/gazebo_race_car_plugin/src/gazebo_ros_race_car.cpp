@@ -229,6 +229,7 @@ void RaceCarPlugin::initParams() {
     }
 
     // Vehicle model
+    // fix later
     std::string vehicle_model_    = _rosnode->declare_parameter("vehicle_model", "DynamicBicycle");
     std::string vehicle_yaml_name = _rosnode->declare_parameter("vehicle_config", "/home/liam/QUTMS/install/eufs_config/share/eufs_config/config/configDry.yaml");
     if (vehicle_yaml_name == "null") {
@@ -246,6 +247,7 @@ void RaceCarPlugin::initParams() {
     }
 
     // Noise
+    // fix later
     std::string noise_yaml_name = _rosnode->declare_parameter("noise_config", "/home/liam/QUTMS/install/eufs_config/share/eufs_config/config/motionNoise.yaml");
     if (noise_yaml_name == "null") {
         RCLCPP_FATAL(_rosnode->get_logger(), "gazebo_ros_race_car plugin missing <noise_config>, cannot proceed");

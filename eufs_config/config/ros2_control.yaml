@@ -1,0 +1,16 @@
+controller_manager:
+  ros__parameters:
+    update_rate: 100.0
+
+    joint_state_controller:
+      type: joint_state_controller/JointStateController
+      publish_rate: 50
+
+    diff_drive_controller:
+      type: diff_drive_controller/DiffDriveController
+      left_wheel_names: ["left_front_wheel", "left_rear_wheel"]
+      right_wheel_names: ["right_front_wheel", "right_rear_wheel"]
+      publish_rate: 50
+      cmd_vel_timeout: 0.5
+      # additional parameters as required by your drive setup
+  

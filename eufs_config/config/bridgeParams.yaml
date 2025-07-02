@@ -1,0 +1,6 @@
+ros_gz_bridge:
+  ros__parameters:
+    topics:
+      - "/gazebo/lidar_scan@sensor_msgs/msg/LaserScan@ignition.msgs.LaserScan"
+      - "/gazebo/cmd_vel@geometry_msgs/msg/Twist@ignition.msgs.Twist"
+      - "/gazebo/ground_truth_map@visualization_msgs/msg/MarkerArray@ignition.msgs.Marker"
