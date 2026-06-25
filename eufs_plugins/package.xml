@@ -32,6 +32,14 @@
   <depend>std_srvs</depend>
   <depend>sensor_msgs</depend>
   <depend>ackermann_msgs</depend>
+  <depend>gz_sim_vendor</depend>
+  <depend>gz_physics_vendor</depend>
+  <depend>gz_transport_vendor</depend>
+  <depend>gz_plugin_vendor</depend>
+  <depend>gz_rendering_vendor</depend>
+  <depend>gz_sensors_vendor</depend>
+  <depend>gz_common_vendor</depend>
+  
 
   <depend>eufs_models</depend>
   <depend>driverless_msgs</depend>

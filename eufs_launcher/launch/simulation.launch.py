@@ -3,7 +3,7 @@ import cv2
 from os.path import isfile, join
 
 import xacro
-from ament_index_python.packages import get_package_share_directory
+from ament_index_python.packages import get_package_share_directory, get_package_prefix
 from launch import LaunchDescription
 from launch.actions import (DeclareLaunchArgument, IncludeLaunchDescription,
                             OpaqueFunction, TimerAction)
@@ -22,45 +22,126 @@ def gen_world(context, *args, **kwargs):
     print("Generating World... ")
 
     use_robostack = get_argument(context, "robostack")
-    track = str(get_argument(context, "track") + ".world")
+    track_name = get_argument(context, "track")
+    track_file = track_name + ".world"
     gui = str(get_argument(context, "gazebo_gui"))
 
-    tracks = get_package_share_directory("eufs_tracks")
-    racecar = get_package_share_directory("eufs_racecar")
-    PLUGINS = os.environ.get("GAZEBO_PLUGIN_PATH")
-    MODELS = os.environ.get("GAZEBO_MODEL_PATH")
-    RESOURCES = os.environ.get("GAZEBO_RESOURCE_PATH")
-    EUFS = os.path.expanduser(os.environ.get("EUFS_MASTER"))
-    DISTRO = os.environ.get("ROS_DISTRO")
+    tracks_share = get_package_share_directory("eufs_tracks")
+    racecar_share = get_package_share_directory("eufs_racecar")
+    eufs_models_share = get_package_share_directory("eufs_models")
+    eufs_plugins_prefix = get_package_prefix("eufs_plugins")
+
+    EUFS = os.path.expanduser(os.environ.get("EUFS_MASTER", "/home/liam/QUTMS"))
+    DISTRO = os.environ.get("ROS_DISTRO", "jazzy")
+
+    # Absolute world path. Gazebo Sim should receive this, not just "small_track.world".
+    world_path = join(tracks_share, "worlds", track_file)
+
+    # -------------------------------------------------------------------------
+    # Gazebo Sim / Harmonic paths
+    # -------------------------------------------------------------------------
+    gz_plugin_paths = [
+        join(eufs_plugins_prefix, "lib"),
+        join(EUFS, "install", "eufs_plugins", "lib"),
+    ]
+
+    # Temporary development fallback: useful until cone/lidar install is fixed.
+    # Remove later once all plugins install correctly into install/eufs_plugins/lib.
+    gz_plugin_paths += [
+        join(EUFS, "build", "eufs_plugins", "gazebo_race_car_plugin"),
+        join(EUFS, "build", "eufs_plugins", "gazebo_cone_detection_plugin"),
+        join(EUFS, "build", "eufs_plugins", "gazebo_lidar_plugin"),
+    ]
+
+    old_gz_plugin_path = os.environ.get("GZ_SIM_SYSTEM_PLUGIN_PATH", "")
+    if old_gz_plugin_path:
+        gz_plugin_paths.append(old_gz_plugin_path)
+
+    os.environ["GZ_SIM_SYSTEM_PLUGIN_PATH"] = os.pathsep.join(
+        [p for p in gz_plugin_paths if p]
+    )
+
+    gz_resource_paths = [
+        join(tracks_share, "models"),
+        join(tracks_share, "worlds"),
+        join(tracks_share, "materials"),
+        join(tracks_share, "meshes"),
+
+        join(racecar_share, "models"),
+        join(racecar_share, "materials"),
+        join(racecar_share, "meshes"),
+
+        join(eufs_models_share, "models"),
+        join(eufs_models_share, "meshes"),
+        join(eufs_models_share, "materials"),
+    ]
+
+    old_gz_resource_path = os.environ.get("GZ_SIM_RESOURCE_PATH", "")
+    if old_gz_resource_path:
+        gz_resource_paths.append(old_gz_resource_path)
+
+    os.environ["GZ_SIM_RESOURCE_PATH"] = os.pathsep.join(
+        [p for p in gz_resource_paths if p]
+    )
+
+    # -------------------------------------------------------------------------
+    # Legacy Gazebo Classic paths kept for compatibility with older EUFS code.
+    # These are not the main paths used by Gazebo Sim / Harmonic.
+    # -------------------------------------------------------------------------
+    old_classic_plugin_path = os.environ.get("GAZEBO_PLUGIN_PATH", "")
+    old_classic_model_path = os.environ.get("GAZEBO_MODEL_PATH", "")
+    old_classic_resource_path = os.environ.get("GAZEBO_RESOURCE_PATH", "")
 
     if use_robostack == "true":
-        os.environ["GAZEBO_PLUGIN_PATH"] = EUFS + "/install/eufs_plugins:" + PLUGINS
+        classic_plugin_paths = [
+            join(EUFS, "install", "eufs_plugins"),
+            old_classic_plugin_path,
+        ]
     else:
-        os.environ["GAZEBO_PLUGIN_PATH"] = (
-            EUFS + "/install/eufs_plugins:" + "/opt/ros/" + DISTRO
-        )
-    os.environ["GAZEBO_MODEL_PATH"] = tracks + "/models:" + str(MODELS)
-    os.environ["GAZEBO_RESOURCE_PATH"] = (
-        tracks
-        + "/materials:"
-        + tracks
-        + "/meshes:"
-        + racecar
-        + "/materials:"
-        + racecar
-        + "/meshes:"
-        + str(RESOURCES)
+        classic_plugin_paths = [
+            join(EUFS, "install", "eufs_plugins"),
+            "/opt/ros/" + DISTRO,
+            old_classic_plugin_path,
+        ]
+
+    os.environ["GAZEBO_PLUGIN_PATH"] = os.pathsep.join(
+        [p for p in classic_plugin_paths if p]
     )
 
-    world_path = join(tracks, "worlds", track)
+    os.environ["GAZEBO_MODEL_PATH"] = os.pathsep.join(
+        [
+            join(tracks_share, "models"),
+            old_classic_model_path,
+        ]
+    )
+
+    os.environ["GAZEBO_RESOURCE_PATH"] = os.pathsep.join(
+        [
+            join(tracks_share, "materials"),
+            join(tracks_share, "meshes"),
+            join(racecar_share, "materials"),
+            join(racecar_share, "meshes"),
+            old_classic_resource_path,
+        ]
+    )
 
     gazebo_launch = join(
-        get_package_share_directory("ros_gz_sim"), "launch", "gz_sim.launch.py"
+        get_package_share_directory("ros_gz_sim"),
+        "launch",
+        "gz_sim.launch.py",
     )
+
     params_file = join(
-        get_package_share_directory("eufs_config"), "config", "pluginUserParams.yaml"
+        get_package_share_directory("eufs_config"),
+        "config",
+        "pluginUserParams.yaml",
     )
+
     print("Sigma Online")
+    print(f"World path: {world_path}")
+    print(f"GZ_SIM_SYSTEM_PLUGIN_PATH: {os.environ['GZ_SIM_SYSTEM_PLUGIN_PATH']}")
+    print(f"GZ_SIM_RESOURCE_PATH: {os.environ['GZ_SIM_RESOURCE_PATH']}")
+
     return [
         IncludeLaunchDescription(
             launch_description_source=PythonLaunchDescriptionSource(gazebo_launch),
@@ -68,7 +149,10 @@ def gen_world(context, *args, **kwargs):
                 ("verbose", "false"),
                 ("pause", "false"),
                 ("gui", gui),
-                ("gz_args", track),
+
+                # Important: pass the absolute world path.
+                ("gz_args", f"-r {world_path}"),
+
                 ("urdf_model", "qev-3d.urdf.xacro"),
                 ("base_frame", "base_link"),
                 ("display_car", "true"),
@@ -305,12 +389,11 @@ def generate_launch_description():
                 executable="parameter_bridge",
                 name="gz_bridge",
                 output="screen",
-                parameters=[bridge_params_file],   # Load YAML
-                remappings=[
-                    # Remap topics cause it looks nice
-                    ("/gazebo/lidar_scan",         "/ros2/lidar_scan"),
-                    ("/gazebo/cmd_vel",            "/ros2/cmd_vel"),
-                    ("/gazebo/ground_truth_map",   "/ros2/ground_truth_map")
+                parameters=[
+                    {
+                        "config_file": bridge_params_file,
+                        "use_sim_time": LaunchConfiguration("use_sim_time"),
+                    }
                 ],
             ),
             # Node(
