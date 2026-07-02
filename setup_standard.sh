@@ -42,7 +42,7 @@ echo ""
 echo "---Installing driverless package requirements---"
 echo ""
 sleep 3
-pip install -r ~/QUTMS/QUTMS_Driverless/installation/requirements.txt
+pip install -r cantools colour colorama pycurl requests simplejpeg tornado
 
 ## Create an alias for ease
 echo "alias a='source install/setup.bash'" >> ~/.bashrc
@@ -99,8 +99,7 @@ export GAZEBO_RESOURCE_PATH=$QUTMS_WS/eufs_sim/eufs_tracks:$QUTMS_WS/eufs_sim/eu
 export GAZEBO_MODEL_PATH=$QUTMS_WS 
 export EUFS_MASTER=$QUTMS_WS
 
-source /opt/ros/jazzy/setup.bash 
-.install/setup.bash
+source /opt/ros/jazzy/setup.bash
 
 sudo apt install -y python3-pip pre-commit cmake software-properties-common curl mesa-utils
 sudo add-apt-repository universe
@@ -111,6 +110,5 @@ sudo apt install -y ros-jazzy-desktop ros-dev-tools
 sudo apt install ros-jazzy-ros-gz
 ## launch 
 colcon build --packages-up-to eufs_launcher 
-.install/setup.bash 
 source /opt/ros/jazzy/setup.bash 
 ros2 launch eufs_launcher eufs_launcher.launch.py
