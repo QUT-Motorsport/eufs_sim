@@ -109,6 +109,6 @@ sudo apt update
 sudo apt install -y ros-jazzy-desktop ros-dev-tools
 sudo apt install ros-jazzy-ros-gz
 ## launch 
-colcon build --packages-up-to eufs_launcher 
+# colcon build --packages-up-to eufs_launcher 
 source /opt/ros/jazzy/setup.bash 
 ros2 launch eufs_launcher eufs_launcher.launch.py
