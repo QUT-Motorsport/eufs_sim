@@ -64,7 +64,7 @@ rosdep install --from-paths ~/QUTMS --ignore-src -r -y
 source ~/QUTMS/QUTMS_Driverless/installation/install_scripts/install_pre-commit.sh
 
 echo ""
-echo "---Building packages---"
+echo "[---Building packages---]"
 echo ""
 sleep 3
 cd ~/QUTMS
@@ -108,7 +108,13 @@ echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/ros-a
 sudo apt update
 sudo apt install -y ros-jazzy-desktop ros-dev-tools
 sudo apt install ros-jazzy-ros-gz
-## launch 
-# colcon build --packages-up-to eufs_launcher 
+
+## final build
+colcon build --packages-up-to eufs_launcher 
 source /opt/ros/jazzy/setup.bash 
-ros2 launch eufs_launcher eufs_launcher.launch.py
+
+echo ""
+echo "---Setup Completed---"
+ech0 "Please restart WSL"
+echo ""
+sleep 3

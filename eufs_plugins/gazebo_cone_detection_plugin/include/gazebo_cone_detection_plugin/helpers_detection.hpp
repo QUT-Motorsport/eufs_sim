@@ -30,9 +30,9 @@ using SensorConfig_t = SensorConfig;
 // Populate sensor configuration parameters from ROS parameters
 SensorConfig_t populate_sensor_config(std::string sensor_prefix, rclcpp::Node::SharedPtr node) {
     std::string frame_id = node->declare_parameter(sensor_prefix + "_frame_id", "sensor");
-    double min_view_distance = node->declare_parameter(sensor_prefix + "_min_view_distance", 0.0);
-    double max_view_distance = node->declare_parameter(sensor_prefix + "_max_view_distance", 0.0);
-    double fov = node->declare_parameter(sensor_prefix + "_fov", 0.0);
+    double min_view_distance = node->declare_parameter(sensor_prefix + "_min_view_distance", 0.1);
+    double max_view_distance = node->declare_parameter(sensor_prefix + "_max_view_distance", 30.0);
+    double fov = node->declare_parameter(sensor_prefix + "_fov", 2.09439510239);
     double range_noise = node->declare_parameter(sensor_prefix + "_range_noise", 0.0);
     double bearing_noise = node->declare_parameter(sensor_prefix + "_bearing_noise", 0.0);
     bool detects_colour = node->declare_parameter(sensor_prefix + "_detects_colour", true);
@@ -180,8 +180,8 @@ SLAMConfig_t populate_slam_config(rclcpp::Node::SharedPtr node) {
     double x_noise = node->declare_parameter("slam_x_noise", 0.0);
     double y_noise = node->declare_parameter("slam_y_noise", 0.0);
     std::string local_frame_id = node->declare_parameter("slam_local_frame_id", "base_link");
-    double local_range_x = node->declare_parameter("slam_local_range_x", 0.0);
-    double local_range_y = node->declare_parameter("slam_local_range_y", 0.0);
+    double local_range_x = node->declare_parameter("slam_local_range_x", 30.0);
+    double local_range_y = node->declare_parameter("slam_local_range_y", 20.0);
 
     return {frame_id, x_noise, y_noise, local_frame_id, local_range_x, local_range_y};
 }

@@ -202,6 +202,9 @@ def spawn_car(context, *args, **kwargs):
         mappings={
             "base_frame": base_frame,
             "display_car": display_car,
+            "enable_lidar": get_argument(context, "enable_lidar"),
+            "enable_laserscan": get_argument(context, "enable_laserscan"),
+            "enable_camera": get_argument(context, "enable_camera"),
         },
     )
     # out = xacro.open_output(urdf_path)

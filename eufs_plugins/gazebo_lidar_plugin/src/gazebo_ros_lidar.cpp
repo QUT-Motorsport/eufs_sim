@@ -151,47 +151,6 @@ bool GazeboRosLidar::Load(const sdf::Sensor &sdfSensor) {
     return true;
 }
 
-// void GazeboRosLidarPrivate::SubscribeGazeboLaserScan() {
-//     if (pub_.type() == typeid(LaserScanPub)) {
-//         laser_scan_sub_ = gazebo_node_->Subscribe(sensor_topic_, &GazeboRosLidarPrivate::PublishLaserScan, this);
-//     } else if (pub_.type() == typeid(PointCloudPub)) {
-//         laser_scan_sub_ = gazebo_node_->Subscribe(sensor_topic_, &GazeboRosLidarPrivate::PublishPointCloud, this);
-//     } else if (pub_.type() == typeid(PointCloud2Pub)) {
-//         laser_scan_sub_ = gazebo_node_->Subscribe(sensor_topic_, &GazeboRosLidarPrivate::PublishPointCloud2, this);
-//     } else if (pub_.type() == typeid(RangePub)) {
-//         laser_scan_sub_ = gazebo_node_->Subscribe(sensor_topic_, &GazeboRosLidarPrivate::PublishRange, this);
-//     } else {
-//         RCLCPP_ERROR(ros_node_->get_logger(), "Publisher is an invalid type. This is an internal bug.");
-//     }
-// }
-
-// void GazeboRosLidarPrivate::PublishLaserScan(ConstLaserScanStampedPtr& _msg) {
-//     // Convert Laser scan to ROS LaserScan
-//     auto ls = gazebo_ros::Convert<sensor_msgs::msg::LaserScan>(*_msg);
-//     // Set tf frame
-//     ls.header.frame_id = frame_name_;
-//     // Publish output
-//     boost::get<LaserScanPub>(pub_)->publish(ls);
-// }
-
-// void GazeboRosLidarPrivate::PublishPointCloud(ConstLaserScanStampedPtr& _msg) {
-//     // Convert Laser scan to PointCloud
-//     auto pc = g s::Convert<sensor_msgs::msg::PointCloud>(*_msg, min_intensity_);
-//     // Set tf frame
-//     pc.header.frame_id = frame_name_;
-//     // Publish output
-//     boost::get<PointCloudPub>(pub_)->publish(pc);
-// }
-
-// void GazeboRosLidarPrivate::PublishPointCloud2(ConstLaserScanStampedPtr& _msg) {
-//     // Convert Laser scan to PointCloud2
-//     auto pc2 = gazebo_ros::Convert<sensor_msgs::msg::PointCloud2>(*_msg, min_intensity_);
-//     // Set tf frame
-//     pc2.header.frame_id = frame_name_;
-//     // Publish output
-//     boost::get<PointCloud2Pub>(pub_)->publish(pc2);
-// }
-
 // void GazeboRosLidarPrivate::PublishRange(ConstLaserScanStampedPtr& _msg) {
 //     // Convert Laser scan to range
 //     auto range_msg = gazebo_ros::Convert<sensor_msgs::msg::Range>(*_msg);

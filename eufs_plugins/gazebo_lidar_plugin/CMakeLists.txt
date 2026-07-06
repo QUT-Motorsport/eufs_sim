@@ -1,7 +1,10 @@
 find_package(gz-sim8 REQUIRED)
 find_package(gz-plugin2 REQUIRED)
 find_package(gz-rendering8 REQUIRED)
+find_package(rclcpp REQUIRED)
+find_package(sensor_msgs REQUIRED)
 find_package(gz-transport13 REQUIRED)
+find_package(gz-msgs10 REQUIRED)
 find_package(gz-sensors8 REQUIRED COMPONENTS lidar)
 
 add_library(gazebo_ros_lidar SHARED
@@ -33,4 +36,22 @@ install(TARGETS gazebo_ros_lidar
   ARCHIVE DESTINATION lib
   LIBRARY DESTINATION lib
   RUNTIME DESTINATION bin
+)
+
+add_executable(gz_lidar_ros_bridge
+  src/gz_lidar_ros_bridge.cpp
+)
+
+ament_target_dependencies(gz_lidar_ros_bridge
+  rclcpp
+  sensor_msgs
+)
+
+target_link_libraries(gz_lidar_ros_bridge
+  gz-transport13::gz-transport13
+  gz-msgs10::gz-msgs10
+)
+
+install(TARGETS gz_lidar_ros_bridge
+  DESTINATION lib/${PROJECT_NAME}
 )

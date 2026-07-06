@@ -81,10 +81,28 @@ void ConeDetectionPlugin::Configure(const gz::sim::Entity &entity,
 void ConeDetectionPlugin::initParams(gz::sim::EntityComponentManager &ecm) {
     _map_frame = _ros_node->declare_parameter("map_frame", "map");
     _base_frame = _ros_node->declare_parameter("base_frame", "base_link");
-    std::string track_model_name = _ros_node->declare_parameter("track_model", "track");
+    std::string track_model_name = _ros_node->declare_parameter("track_model", "small_track");
 
-    // Get track from world model
-    _track_model = eufs_plugins::getModel(_world, *_ecm, "track", _ros_node->get_logger());
+    auto track_entity = ecm.EntityByComponents(
+        gz::sim::components::Model(),
+        gz::sim::components::Name(track_model_name));
+
+    if (track_entity == gz::sim::kNullEntity) {
+        RCLCPP_WARN(
+            _ros_node->get_logger(),
+            "Could not find track model [%s]. Trying fallback [track].",
+            track_model_name.c_str());
+
+        track_entity = ecm.EntityByComponents(
+            gz::sim::components::Model(),
+            gz::sim::components::Name("track"));
+    }
+
+    _track_model = gz::sim::Model(track_entity);
+
+    if (!_track_model.Valid(ecm)) {
+        RCLCPP_ERROR(_ros_node->get_logger(), "ConeDetectionPlugin could not find a valid track model.");
+    }
     _car_link = eufs_plugins::get_link(_model, *_ecm, _base_frame, _ros_node->get_logger());
     _car_inital_pose = gz::sim::worldPose(_entity, ecm);
 
@@ -95,8 +113,8 @@ void ConeDetectionPlugin::initParams(gz::sim::EntityComponentManager &ecm) {
     _gt_update_rate = _ros_node->declare_parameter("gt_update_rate", 1.0);
 
     // Plugin behaviour flags.
-    _pub_gt = _ros_node->declare_parameter("publish_ground_truth", false);
-    _simulate_perception = _ros_node->declare_parameter("simulate_perception", false);
+    _pub_gt = _ros_node->declare_parameter("publish_ground_truth", true);
+    _simulate_perception = _ros_node->declare_parameter("simulate_perception", true);
     _simulate_slam = _ros_node->declare_parameter("simulate_slam", true);
 
     // Does what it says it does based on information in the ros node
@@ -154,7 +172,8 @@ void ConeDetectionPlugin::publishLiDARDetection(gz::sim::EntityComponentManager 
     auto ground_truth_track = get_ground_truth_track(_track_model, ecm, _map_frame, _ros_node->get_logger());
 
     if (has_subscribers(_lidar_detection_pub)) {
-        auto lidar_detection = get_sensor_detection(_lidar_config, _car_link.WorldPose(ecm).value(), ground_truth_track);
+        auto car_pose = gz::sim::worldPose(_entity, ecm);
+        auto lidar_detection = get_sensor_detection(_lidar_config, car_pose, ground_truth_track);
         _lidar_detection_pub->publish(lidar_detection);
     }
 }
@@ -172,7 +191,8 @@ void ConeDetectionPlugin::publishCameraDetection(gz::sim::EntityComponentManager
     auto ground_truth_track = get_ground_truth_track(_track_model, ecm, _map_frame, _ros_node->get_logger());
 
     if (has_subscribers(_vision_detection_pub)) {
-        auto vision_detection = get_sensor_detection(_camera_config, _car_link.WorldPose(ecm).value(), ground_truth_track);
+        auto car_pose = gz::sim::worldPose(_entity, ecm);
+        auto vision_detection = get_sensor_detection(_camera_config, car_pose, ground_truth_track);
         _vision_detection_pub->publish(vision_detection);
     }
 }
@@ -199,11 +219,8 @@ void ConeDetectionPlugin::publishSLAM(gz::sim::EntityComponentManager &ecm) {
             _slam_global_pub->publish(slam_global_map);
         }
 
-        if (has_subscribers(_slam_local_pub)) {
-            auto noisy_local_map = get_noisy_local_map(_slam_config, _car_link.WorldPose(ecm).value(), _initial_slam);
-            _slam_local_pub->publish(noisy_local_map);
-        }
-        RCLCPP_INFO(_ros_node->get_logger(), "a"); //fix later
+        auto centered_ground_truth = get_track_centered_on_car_inital_pose(_car_inital_pose, ground_truth_track);
+        _ground_truth_pub->publish(centered_ground_truth);
     }
 }
 

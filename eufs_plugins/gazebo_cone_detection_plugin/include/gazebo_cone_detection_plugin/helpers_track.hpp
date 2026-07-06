@@ -10,6 +10,8 @@
 #include <gz/sim/Model.hh>
 #include <gz/sim/Entity.hh> 
 #include <gz/sim/Util.hh>
+#include <gz/sim/components/Model.hh>
+#include <gz/sim/components/Name.hh>
 #include <gz/math/Pose3.hh>
 #include <gz/math/Vector3.hh>
 
@@ -70,31 +72,53 @@ driverless_msgs::msg::ConeWithCovariance get_cone_from_entity(const gz::sim::Ent
 }
 
 driverless_msgs::msg::ConeDetectionStamped get_ground_truth_track(
-                                            gz::sim::Model track_model,
-                                            gz::sim::EntityComponentManager &ecm,
-                                            const std::string &track_frame_id,
-                                            std::optional<const rclcpp::Logger> logger = {}) {
-
-    // Create an empty ConeDetectionStamped message.
+    gz::sim::Model track_model,
+    gz::sim::EntityComponentManager &ecm,
+    const std::string &track_frame_id,
+    std::optional<const rclcpp::Logger> logger = {})
+{
     driverless_msgs::msg::ConeDetectionStamped track;
-    // Set header frame ID and current timestamp.
     track.header.frame_id = track_frame_id;
     track.header.stamp = rclcpp::Clock().now();
 
-    // Iterate through all descendant entities of the track model.
-    for (auto child : ecm.Descendants(track_model.Entity()))
-    {
-        // Continue only if the entity has a Link component.
-        if (!ecm.Component<gz::sim::components::Link>(child))
-            continue;
-        // Retrieve the track model's name (could be used for identification).
-        std::string name = track_model.Name(ecm);
-        // Extract cone data from the entity (using a default covariance of {0,0,0,0})
-        // and add it to the cones_with_cov vector.
-        track.cones_with_cov.push_back(
-            get_cone_from_entity(child, ecm, name, {0, 0, 0, 0}, logger));
+    ecm.Each<gz::sim::components::Model,
+             gz::sim::components::Name,
+             gz::sim::components::Pose>(
+        [&](const gz::sim::Entity &entity,
+            const gz::sim::components::Model *,
+            const gz::sim::components::Name *name_comp,
+            const gz::sim::components::Pose *) -> bool
+        {
+            const std::string name = name_comp->Data();
+
+            const int colour = get_cone_colour(name, logger);
+            if (colour == driverless_msgs::msg::Cone::UNKNOWN) {
+                return true;
+            }
+
+            const auto pose = gz::sim::worldPose(entity, ecm);
+
+            driverless_msgs::msg::ConeWithCovariance cone;
+            cone.cone.location.x = pose.Pos().X();
+            cone.cone.location.y = pose.Pos().Y();
+            cone.cone.location.z = 0.0;
+            cone.cone.color = colour;
+            cone.covariance = {0, 0, 0, 0};
+
+            track.cones_with_cov.push_back(cone);
+            track.cones.push_back(cone.cone);
+
+            return true;
+        });
+
+    if (logger) {
+        RCLCPP_INFO_THROTTLE(
+            *logger,
+            *rclcpp::Clock::make_shared(),
+            2000,
+            "Ground truth track contains %zu cones",
+            track.cones_with_cov.size());
     }
 
-    // Return the assembled ground truth track message.
     return track;
 }
