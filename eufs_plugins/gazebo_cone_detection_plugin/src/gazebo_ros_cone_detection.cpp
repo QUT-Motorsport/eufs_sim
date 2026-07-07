@@ -79,7 +79,7 @@ void ConeDetectionPlugin::Configure(const gz::sim::Entity &entity,
  * @brief Initialize plugin parameters from ROS.
  */
 void ConeDetectionPlugin::initParams(gz::sim::EntityComponentManager &ecm) {
-    _map_frame = _ros_node->declare_parameter("map_frame", "map");
+    _map_frame = _ros_node->declare_parameter("map_frame", "track");
     _base_frame = _ros_node->declare_parameter("base_frame", "base_link");
     std::string track_model_name = _ros_node->declare_parameter("track_model", "small_track");
 

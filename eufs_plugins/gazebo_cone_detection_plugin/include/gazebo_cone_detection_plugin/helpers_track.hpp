@@ -77,9 +77,13 @@ driverless_msgs::msg::ConeDetectionStamped get_ground_truth_track(
     const std::string &track_frame_id,
     std::optional<const rclcpp::Logger> logger = {})
 {
+    (void)track_model;
+
     driverless_msgs::msg::ConeDetectionStamped track;
     track.header.frame_id = track_frame_id;
     track.header.stamp = rclcpp::Clock().now();
+
+    int sim_index = 0;
 
     ecm.Each<gz::sim::components::Model,
              gz::sim::components::Name,
@@ -103,7 +107,12 @@ driverless_msgs::msg::ConeDetectionStamped get_ground_truth_track(
             cone.cone.location.y = pose.Pos().Y();
             cone.cone.location.z = 0.0;
             cone.cone.color = colour;
-            cone.covariance = {0, 0, 0, 0};
+            cone.cone.sim_cone_index = sim_index++;
+
+            cone.covariance = {
+                0.05, 0.0,
+                0.0,  0.05
+            };
 
             track.cones_with_cov.push_back(cone);
             track.cones.push_back(cone.cone);
